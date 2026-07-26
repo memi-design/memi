@@ -71,6 +71,50 @@ describe("memi diagnose", () => {
     }
   });
 
+  it("emits read-only file-anchored SwiftUI findings without a nominal web score", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-diagnose-swiftui-"));
+    try {
+      await mkdir(join(root, "Sources"), { recursive: true });
+      await writeFile(join(root, "Sources", "MotionView.swift"), `import SwiftUI
+struct MotionView: View {
+    var body: some View {
+        Text("Motion")
+            .phaseAnimator([false, true]) { view, active in
+                view.opacity(active ? 1 : 0)
+            }
+    }
+}
+`, "utf-8");
+      const logs = captureLogs();
+      const program = new Command();
+      registerDiagnoseCommand(program, { config: { projectRoot: root } } as never);
+
+      await program.parseAsync(["diagnose", "--json", "--no-write", "--fail-on", "none"], { from: "user" });
+      const payload = JSON.parse(lastLog(logs));
+      const finding = payload.issues.find((issue: { id: string }) => issue.id === "swiftui.reduced-motion-missing");
+
+      expect(payload.summary).toMatchObject({
+        scannedFiles: 1,
+        score: 0,
+        verdict: "unassessed — SwiftUI coverage is partial",
+      });
+      expect(payload.assessedDimensions).toEqual([]);
+      expect(payload.sourceCoverage.swiftui.analysis).toBe("partial");
+      expect(finding).toMatchObject({
+        normalizedId: "swiftui.reduced-motion-missing",
+        affectedFiles: ["Sources/MotionView.swift"],
+      });
+      expect(finding.evidenceLocations[0]).toMatchObject({
+        file: "Sources/MotionView.swift",
+        line: 5,
+      });
+      expect(process.exitCode ?? 0).toBe(0);
+      await expect(access(join(root, ".memoire"))).rejects.toThrow();
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("gates: exits non-zero on high-severity issues by default, including in --json mode", async () => {
     const root = await makeDebtRepo();
     try {

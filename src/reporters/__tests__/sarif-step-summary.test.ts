@@ -106,6 +106,23 @@ describe("renderStepSummary", () => {
     expect(markdown).not.toContain("over budget");
   });
 
+  it("does not celebrate a finding-free gate when dimensions remain unassessed", () => {
+    const markdown = renderStepSummary({
+      score: 0,
+      verdict: "unassessed — SwiftUI coverage is partial",
+      failOn: "none",
+      failed: false,
+      gatingIssues: [],
+      suppressedByBaseline: 0,
+      unassessedDimensions: ["accessibility", "color", "components"],
+    });
+
+    expect(markdown).toContain("No gating findings from assessed checks");
+    expect(markdown).toContain("Unassessed dimensions remain unverified");
+    expect(markdown).toContain("accessibility, color, components");
+    expect(markdown).not.toContain("🎉");
+  });
+
   it("truncates gating findings past 15 with an explicit count", () => {
     const markdown = renderStepSummary({
       score: 40,
@@ -117,5 +134,28 @@ describe("renderStepSummary", () => {
     });
     expect(markdown).toContain("Gating findings (18)");
     expect(markdown).toContain("…and 3 more");
+  });
+
+  it("neutralizes repository-controlled Markdown and control characters in paths", () => {
+    const markdown = renderStepSummary({
+      score: 20,
+      verdict: "needs attention",
+      failOn: "medium",
+      failed: true,
+      gatingIssues: [makeIssue({
+        affectedFiles: ["src/`spoof`\n## Fake pass\u001b[2J\u202eftiwS.swift"],
+        evidenceLocations: [{
+          file: "src/`spoof`\n## Fake pass\u001b[2J\u202eftiwS.swift",
+          line: 7,
+        }],
+      })],
+      suppressedByBaseline: 0,
+    });
+
+    expect(markdown).not.toContain("\n## Fake pass");
+    expect(markdown).not.toContain("\u001b");
+    expect(markdown).not.toContain("\u202e");
+    expect(markdown).toContain("\\n## Fake pass");
+    expect(markdown).toContain("\\u202e");
   });
 });
