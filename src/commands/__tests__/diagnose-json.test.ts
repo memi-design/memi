@@ -98,7 +98,13 @@ struct MotionView: View {
         score: 0,
         verdict: "unassessed — SwiftUI coverage is partial",
       });
-      expect(payload.assessedDimensions).toEqual([]);
+      expect(payload.assessedDimensions).toEqual([
+        "swiftui.gesture-accessibility-action",
+        "swiftui.reduced-motion",
+      ]);
+      expect(payload.unassessedDimensions).toContain("swiftui:whole-category-analysis");
+      expect(payload.unassessedDimensions).toContain("swiftui:rendered-quality");
+      expect(payload.unassessedDimensions).toContain("swiftui:runtime-accessibility");
       expect(payload.sourceCoverage.swiftui.analysis).toBe("partial");
       expect(finding).toMatchObject({
         normalizedId: "swiftui.reduced-motion-missing",

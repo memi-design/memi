@@ -53,4 +53,32 @@ export default function Page() {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("does not render a clean-pass message when mixed-repo native dimensions are unassessed", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-report-html-mixed-"));
+    try {
+      await mkdir(join(root, "src", "app"), { recursive: true });
+      await writeFile(join(root, "src", "app", "page.tsx"), `
+export default function Page() {
+  return <main className="p-4 text-base"><button type="button">Save</button></main>;
+}
+`, "utf-8");
+      await writeFile(join(root, "Package.swift"), `// swift-tools-version: 6.0
+import PackageDescription
+let package = Package(name: "WebCompanion", targets: [])
+`, "utf-8");
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: true });
+      const report = await composeReport({ projectRoot: root });
+
+      expect(diagnosis.summary.score).toBe(100);
+      expect(diagnosis.unassessedDimensions).toContain("swift:source-analysis");
+      expect(report.markdown).toContain("swift:source-analysis");
+      expect(report.markdown).toContain("Unassessed dimensions remain unverified");
+      expect(report.html).toContain("swift:source-analysis");
+      expect(report.html).not.toContain('<p class="ok">No issues detected by the static scan.</p>');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });

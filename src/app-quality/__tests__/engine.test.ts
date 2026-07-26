@@ -168,7 +168,10 @@ struct RippleView: View {
       expect(diagnosis.appGraph?.components).toBe(1);
       expect(diagnosis.summary.score).toBe(0);
       expect(diagnosis.summary.verdict).toBe("unassessed — SwiftUI coverage is partial");
-      expect(diagnosis.assessedDimensions).toEqual([]);
+      expect(diagnosis.assessedDimensions).toEqual([
+        "swiftui.gesture-accessibility-action",
+        "swiftui.reduced-motion",
+      ]);
       expect(diagnosis.unassessedDimensions).toEqual([
         "accessibility",
         "color",
@@ -176,6 +179,9 @@ struct RippleView: View {
         "maintainability",
         "responsive",
         "spacing",
+        "swiftui:rendered-quality",
+        "swiftui:runtime-accessibility",
+        "swiftui:whole-category-analysis",
         "typography",
         "visual-system",
       ]);
@@ -279,6 +285,9 @@ using namespace metal;
         assessedChecks: [],
       });
       expect(diagnosis.assessedDimensions).toEqual([]);
+      expect(diagnosis.unassessedDimensions).toContain("metal:shader-semantics");
+      expect(diagnosis.unassessedDimensions).toContain("metal:gpu-performance");
+      expect(diagnosis.unassessedDimensions).toContain("metal:color-correctness");
       expect(diagnosis.issues).toEqual([]);
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -321,10 +330,16 @@ struct MotionView: View {
         "maintainability",
         "responsive",
         "spacing",
+        "swiftui.gesture-accessibility-action",
+        "swiftui.reduced-motion",
         "typography",
         "visual-system",
       ]);
-      expect(diagnosis.unassessedDimensions).toEqual([]);
+      expect(diagnosis.unassessedDimensions).toEqual([
+        "swiftui:rendered-quality",
+        "swiftui:runtime-accessibility",
+        "swiftui:whole-category-analysis",
+      ]);
       expect(diagnosis.issues.map((issue) => issue.id)).toContain("swiftui.reduced-motion-missing");
       expect(diagnosis.directions.map((direction) => direction.id)).toContain("premium-saas");
     } finally {
@@ -367,6 +382,7 @@ let package = Package(
         "typography",
         "visual-system",
       ]);
+      expect(diagnosis.unassessedDimensions).toEqual(["swift:source-analysis"]);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
