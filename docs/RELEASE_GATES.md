@@ -2,6 +2,27 @@
 
 Use these checks before announcing, tagging, or publishing a public release.
 
+## Canonical Release Manifest
+
+`release-manifest.json` is the machine-readable source for the public engine,
+npm package, GitHub release, GitHub Action, MCP server, Studio, and website
+release groups. Do not start a release by editing downstream version copies.
+
+```bash
+# After reviewing release-manifest.json:
+npm run sync:release-manifest
+npm run check:release-manifest
+npm run check:release
+```
+
+The sync command writes
+`release-artifacts/memoire-web.release.json`. Copy that file byte-for-byte to
+`src/data/memi-release.generated.json` in `sarveshsea/memoire-web`; the website
+derives CLI and Studio metadata from it and verifies its SHA-256 provenance
+offline with `npm run check:release-manifest`. Because the repositories publish
+independently, both pull requests must merge before the public-site gate can
+prove the new release end to end.
+
 ## Local Publish-Ready Gate
 
 `npm run publish:ready` verifies the local package is safe to publish before npm mutates anything:
