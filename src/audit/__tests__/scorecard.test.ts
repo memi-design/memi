@@ -27,8 +27,8 @@ function scorecard(overrides: Partial<AuditScorecard> = {}): AuditScorecard {
         status: "passed",
         capturedAt: "2026-07-25T12:00:00.000Z",
         artifact: { location: "artifacts/core-proof.json", sha256: SHA },
-        producer: "implementation-agent",
-        verifier: "independent-reviewer",
+        producer: "agent:implementation",
+        verifier: "agent:independent-reviewer",
         environment: "macOS 15.5, Node 22.17.0",
       },
     ],
@@ -101,6 +101,30 @@ describe("AuditScorecardSchema", () => {
     expect(parsed.error?.issues.some((issue) => issue.message.includes("Duplicate evidence id"))).toBe(true);
     expect(parsed.error?.issues.some((issue) => issue.message.includes("Duplicate criterion id"))).toBe(true);
   });
+
+  it("rejects a derived audit link when its evidence id is missing", () => {
+    const input = scorecard({
+      derivedFromAudit: {
+        candidateAuditEvidenceId: "missing-audit",
+      },
+    });
+
+    const parsed = AuditScorecardSchema.safeParse(input);
+
+    expect(parsed.success).toBe(false);
+    expect(parsed.error?.issues.some((issue) => issue.message.includes("Derived audit evidence id"))).toBe(true);
+  });
+
+  it("rejects ambiguous or non-canonical reviewer identities", () => {
+    const input = scorecard();
+    input.evidence[0]!.producer = "agent:reviewer";
+    input.evidence[0]!.verifier = "Agent:Reviewer ";
+
+    const parsed = AuditScorecardSchema.safeParse(input);
+
+    expect(parsed.success).toBe(false);
+    expect(parsed.error?.issues.some((issue) => issue.message.includes("canonical reviewer identity"))).toBe(true);
+  });
 });
 
 describe("evaluateAuditScorecard", () => {
@@ -139,6 +163,13 @@ describe("evaluateAuditScorecard", () => {
         label: "self-verified",
         mutate: (input: AuditScorecard) => {
           input.evidence[0]!.verifier = input.evidence[0]!.producer;
+        },
+      },
+      {
+        label: "normalized-self-verified",
+        mutate: (input: AuditScorecard) => {
+          input.evidence[0]!.producer = "Independent Reviewer";
+          input.evidence[0]!.verifier = "  independent   reviewer ";
         },
       },
     ];
@@ -202,8 +233,8 @@ describe("evaluateAuditScorecard", () => {
           status: "passed",
           capturedAt: "2026-07-24T12:00:00.000Z",
           artifact: { location: "artifacts/release-proof.json", sha256: SHA },
-          producer: "release-agent",
-          verifier: "independent-reviewer",
+          producer: "agent:release",
+          verifier: "agent:independent-reviewer",
           environment: "GitHub and npm public APIs",
         },
       ],
@@ -239,8 +270,8 @@ describe("evaluateAuditScorecard", () => {
           status: "passed",
           capturedAt: "2026-07-26T08:00:00.000Z",
           artifact: { location: "artifacts/release-proof.json", sha256: SHA },
-          producer: "release-agent",
-          verifier: "independent-reviewer",
+          producer: "agent:release",
+          verifier: "agent:independent-reviewer",
           environment: "GitHub and npm public APIs",
         },
       ],
