@@ -16,11 +16,21 @@ import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
+import { list as listTar } from "tar";
 import type { MemoireEngine } from "../engine/core.js";
 import { packageRoot } from "../utils/asset-path.js";
 import { isStandaloneBinary } from "../utils/runtime.js";
 
 const REPO = "sarveshsea/memi";
+const MAX_RELEASE_ARCHIVE_ENTRIES = 4_096;
+const MAX_RELEASE_ARCHIVE_FILE_BYTES = 100 * 1024 * 1024;
+const MAX_RELEASE_ARCHIVE_UNCOMPRESSED_BYTES = 500 * 1024 * 1024;
+
+export interface ReleaseArchiveEntry {
+  path: string;
+  type: string;
+  size: number;
+}
 
 function detectTarget(): { target: string; ext: string; archive: "tar.gz" | "zip" } | null {
   const platform = process.platform;
@@ -58,6 +68,52 @@ function extract(archivePath: string, destDir: string, archive: "tar.gz" | "zip"
     ? spawnSync("unzip", ["-o", archivePath, "-d", destDir], { stdio: "inherit" })
     : spawnSync("tar", ["-xzf", archivePath, "-C", destDir], { stdio: "inherit" });
   if (result.status !== 0) throw new Error(`extract failed for ${archivePath}`);
+}
+
+export function assertSafeReleaseArchiveEntries(entries: ReleaseArchiveEntry[], expectedRoot: string): void {
+  if (entries.length === 0) throw new Error("Release archive is empty");
+  if (entries.length > MAX_RELEASE_ARCHIVE_ENTRIES) {
+    throw new Error(`Release archive exceeds entry limit of ${MAX_RELEASE_ARCHIVE_ENTRIES}`);
+  }
+  let totalBytes = 0;
+  for (const entry of entries) {
+    const path = entry.path.trim().replace(/\/+$/, "");
+    if (!path) continue;
+    if (path.startsWith("/") || /^[A-Za-z]:[\\/]/.test(path)) {
+      throw new Error(`Release archive contains an absolute path: ${entry.path}`);
+    }
+    if (path.includes("\\") || path.split("/").includes("..")) {
+      throw new Error(`Release archive contains a path traversal entry: ${entry.path}`);
+    }
+    if (entry.type === "SymbolicLink" || entry.type === "Link") {
+      throw new Error(`Release archive contains a link entry: ${entry.path}`);
+    }
+    if (entry.type !== "File" && entry.type !== "Directory") {
+      throw new Error(`Release archive contains unsupported entry type ${entry.type}: ${entry.path}`);
+    }
+    if (path !== expectedRoot && !path.startsWith(`${expectedRoot}/`)) {
+      throw new Error(`Release archive contains an unexpected top-level path: ${entry.path}`);
+    }
+    if (entry.size > MAX_RELEASE_ARCHIVE_FILE_BYTES) {
+      throw new Error(`Release archive entry exceeds size limit: ${entry.path}`);
+    }
+    totalBytes += entry.size;
+    if (totalBytes > MAX_RELEASE_ARCHIVE_UNCOMPRESSED_BYTES) {
+      throw new Error("Release archive exceeds uncompressed size limit");
+    }
+  }
+}
+
+async function validateReleaseTarball(archivePath: string, expectedRoot: string): Promise<void> {
+  const entries: ReleaseArchiveEntry[] = [];
+  await listTar({
+    file: archivePath,
+    strict: true,
+    onentry: (entry) => {
+      entries.push({ path: entry.path, type: entry.type, size: entry.size });
+    },
+  });
+  assertSafeReleaseArchiveEntries(entries, expectedRoot);
 }
 
 export async function verifyArchiveChecksum(options: {
@@ -169,6 +225,9 @@ export function registerUpgradeCommand(program: Command, _engine: MemoireEngine)
         }
 
         console.log(`▸ Extracting to ${root}`);
+        if (plat.archive === "tar.gz") {
+          await validateReleaseTarball(archivePath, `memi-${plat.target}`);
+        }
         extract(archivePath, stagingDir, plat.archive);
 
         const extractedRoot = join(stagingDir, `memi-${plat.target}`);

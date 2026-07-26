@@ -8,6 +8,8 @@ import type { ComponentSpec } from "../specs/types.js";
 import { exportShadcnRegistry, doctorShadcnRegistryOutput } from "../shadcn/exporter.js";
 import { getMemoirePackageVersion } from "../utils/package-version.js";
 
+export const SHADCN_SERVER_HOST = "127.0.0.1";
+
 export function registerShadcnCommand(program: Command, engine: MemoireEngine): void {
   const shadcn = program
     .command("shadcn")
@@ -115,7 +117,7 @@ export function registerShadcnCommand(program: Command, engine: MemoireEngine): 
         }
       });
 
-      server.listen(port, () => {
+      server.listen(port, SHADCN_SERVER_HOST, () => {
         console.log();
         console.log(`  Serving shadcn registry from ${outDir}`);
         console.log(`  Registry: http://localhost:${port}/registry.json`);

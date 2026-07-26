@@ -112,6 +112,35 @@ fi
 
 echo "-> Extracting to ${INSTALL_DIR}"
 mkdir -p "${INSTALL_DIR}"
+archive_root="memi-${target}"
+entries_file="${tmp}/archive.entries"
+tar -tzf "${tmp}/${archive}" > "${entries_file}"
+if [ ! -s "${entries_file}" ]; then
+  echo "error: unsafe archive entry: archive is empty" >&2
+  exit 1
+fi
+if ! awk -v root="${archive_root}" '
+  BEGIN { bad = 0 }
+  {
+    entry = $0
+    trimmed = entry
+    sub(/\/+$/, "", trimmed)
+    if (entry ~ /^\// || entry ~ /\\/ || entry ~ /(^|\/)\.\.(\/|$)/) {
+      print "error: unsafe archive entry: " entry > "/dev/stderr"
+      bad = 1
+    } else if (trimmed != root && index(trimmed, root "/") != 1) {
+      print "error: unexpected archive root: " entry > "/dev/stderr"
+      bad = 1
+    }
+  }
+  END { exit bad }
+' "${entries_file}"; then
+  exit 1
+fi
+if tar -tvzf "${tmp}/${archive}" | awk 'substr($1, 1, 1) ~ /[lh]/ { found = 1 } END { exit !found }'; then
+  echo "error: unsafe archive entry: links are not allowed" >&2
+  exit 1
+fi
 tar -xzf "${tmp}/${archive}" -C "${tmp}"
 rm -rf "${INSTALL_DIR}/app"
 mv "${tmp}/memi-${target}" "${INSTALL_DIR}/app"
