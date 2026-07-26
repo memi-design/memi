@@ -6,7 +6,7 @@ The action does not accept API keys, Figma credentials, model credentials, or a 
 
 ## Recommended workflow
 
-Pin the action release, check out full history for PR merge-base discovery, and grant only the permissions needed by the selected outputs.
+Pin the action commit, check out full history for PR merge-base discovery, and grant only the permissions needed by the selected outputs.
 
 ```yaml
 name: design
@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
 
       - id: memi
-        uses: sarveshsea/memi@v2.6.2
+        uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
 
       - name: Show evidence locations
         if: ${{ always() }}
@@ -80,7 +80,7 @@ Artifacts are inspected and uploaded with `if: always()`, so a policy failure st
 SARIF upload requires `security-events: write`. The action automatically skips code-scanning upload for pull requests from forks, while still running the gate and uploading the report artifact. For repositories where code scanning is unavailable or permissions are intentionally read-only, disable only that integration:
 
 ```yaml
-- uses: sarveshsea/memi@v2.6.2
+- uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
   with:
     upload-sarif: "false"
 ```
@@ -91,7 +91,7 @@ No secret is needed for the report artifact. GitHub's maintained upload actions 
 
 ```yaml
 - id: memi
-  uses: sarveshsea/memi@v2.6.2
+  uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
   with:
     fail-on: high
     base: origin/main

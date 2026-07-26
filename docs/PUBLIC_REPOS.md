@@ -146,7 +146,7 @@ pnpm verify
 | Hermes/OpenClaw | `agent-kits/mirror` | Mirror-ready skill packages. |
 | Design sandbox | `.agents/skills`, `.mcp.json`, `memoire.agent.yaml` | Public repo that proves integration. |
 | Community Notes | `notes/<note-name>/note.json` | Reviewed downloadable Notes catalog at `/notes/community/catalog.v1.json`. |
-| GitHub Action | `sarveshsea/memi@v2` | Floating v2 action with immutable third-party pins, SARIF, and design-health artifacts. |
+| GitHub Action | `sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354` | Immutable action commit for v2.6.2 with pinned third-party actions, SARIF, and design-health artifacts. |
 | shadcn registry | `https://memoire.cv/r/design-ci.json` | Installs the workflow and recommended policy with `npx shadcn add`. |
 
 ## Live interoperability proposals

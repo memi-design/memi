@@ -20,9 +20,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0        # memi ci needs the merge-base with the base branch
-      - uses: sarveshsea/memi@v2
+      - uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
         with:
-          version: "2.6.2"      # pinned on purpose — gate behavior must not drift under you
+          version: "2.6.2"      # CLI pin stays explicit even when the action commit is immutable
           # fail-on: high       # override memoire.policy.json if needed
           # report: "true"      # design-health.html artifact (default on)
           # upload-sarif: "false"  # set false on forks (no security-events permission)

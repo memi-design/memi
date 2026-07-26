@@ -174,10 +174,10 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: sarveshsea/memi@v2
+      - uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
         with:
           version: "2.6.2"
 ```
@@ -313,7 +313,7 @@ memi studio web --port 1422
 | `plugins/memoire/` | Codex plugin bundle |
 | `notes/` | Built-in research, agent, and design notes |
 | `docs/` | Interface understanding, CI, growth, release gates |
-| `action.yml` | GitHub Action for design CI (`sarveshsea/memi@v2`) |
+| `action.yml` | GitHub Action for design CI (`sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354`) |
 
 ---
 

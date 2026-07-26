@@ -47,6 +47,7 @@ const expectedDocRefs = [
   "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
   "github/codeql-action/upload-sarif@1b168cd39490f61582a9beae412bb7057a6b2c4e",
+  "sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354",
 ] as const;
 
 describe("public documentation release truth", () => {
@@ -129,6 +130,9 @@ describe("public documentation release truth", () => {
       expect(source, `${path} contains a mutable GitHub-maintained action ref`).not.toMatch(
         /uses:\s+(?:actions\/[^@\s]+|github\/codeql-action\/[^@\s]+)@v\d+/,
       );
+      expect(source, `${path} contains a mutable Memi action ref`).not.toMatch(
+        /uses:\s+sarveshsea\/memi@v(?:\d+(?:\.\d+){0,2})\b/,
+      );
     }
 
     const ciRecipes = await readFile(join(root, "docs/CI_RECIPES.md"), "utf8");
@@ -138,8 +142,14 @@ describe("public documentation release truth", () => {
 
     const actionMarketplace = await readFile(join(root, "docs/GITHUB_ACTION_MARKETPLACE.md"), "utf8");
     expect(actionMarketplace).toContain(expectedDocRefs[0]);
+    expect(actionMarketplace).toContain(expectedDocRefs[3]);
 
     const teamRollout = await readFile(join(root, "docs/TEAM_ROLLOUT.md"), "utf8");
     expect(teamRollout).toContain(expectedDocRefs[0]);
+    expect(teamRollout).toContain(expectedDocRefs[3]);
+
+    const readme = await readFile(join(root, "README.md"), "utf8");
+    expect(readme).toContain(expectedDocRefs[0]);
+    expect(readme).toContain(expectedDocRefs[3]);
   });
 });
