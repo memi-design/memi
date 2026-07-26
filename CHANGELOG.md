@@ -56,6 +56,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `522d5f07` fix: fail closed on partial SwiftUI audit coverage
 - `abb67e53` test: expose mixed native audit gaps
 - `f804ba6b` fix: report native audit gaps in mixed repos
+- `fcdf4a11` test: pin workflow action refs
+- `3b0557d5` fix: pin workflow action refs
 
 #### Architectural decisions
 
@@ -73,6 +75,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Require every passed criterion and cleared cap to reference known evidence, reject permanently unverified passes, and run the full scorecard gate in every tagged binary build.
 - Keep native static analysis file-anchored and conservative: web scores stay explicitly scoped when SwiftUI or Metal evidence is incomplete, history trends compare only like-for-like coverage, and clean partial scans must not claim either whole-product proof or zero analysis.
 - Preserve a comparable web score in mixed repositories while exposing every native limitation as a machine-readable unassessed dimension, preventing CI and reports from turning partial coverage into clean-pass copy.
+- Pin every third-party GitHub Actions workflow dependency to an audited upstream release commit SHA, and test the exact refs so release, publish, scanner, and runtime trust does not drift silently.
 
 ### Design Skills migration — `3009cf63`
 
