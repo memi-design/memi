@@ -4,7 +4,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 
 ## Primary search phrase
 
-`Interface understanding for AI coding agents`
+`Memi is the read-only design engineering audit and skill layer for coding agents.`
 
 ## Secondary search phrases
 
@@ -27,24 +27,24 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 
 ## Title tags
 
-- Homepage: `memi - Interface understanding for AI coding agents`
+- Homepage: `memi - Read-only design engineering audits for coding agents`
 - npm/docs: `memi docs - Design-system memory for AI coding agents`
 - Components: `shadcn registry marketplace - memi`
 - Codex plugin: `memi Codex plugin - Design-system memory before frontend edits`
-- Launch page: `memi v2 - Interface understanding for AI coding agents`
+- Launch page: `memi - Read-only design engineering audit and skill layer`
 
 ## Meta descriptions
 
-- Homepage: `memi gives AI coding agents interface understanding before frontend work: UX audits, Tailwind tokens, shadcn registries, MCP tools, Agent Skills, research-backed specs, and Figma/FigJam handoff.`
+- Homepage: `Memi is the read-only design engineering audit and skill layer for coding agents: file-anchored UI findings, design-system memory, focused skills, MCP tools, and deterministic CI gates.`
 - Docs: `Install memi, run diagnose and UX audits, extract Tailwind tokens, export shadcn registries, and install agent kits for Codex, Claude Code, Cursor, Hermes, OpenClaw, OpenCode, and Agent Skills.`
 - Components: `Explore installable shadcn/Tailwind design systems for SaaS, docs, dashboards, landing pages, auth, AI chat, ecommerce, and tweakcn-inspired themes.`
 - Codex plugin: `Install memi in Codex to audit UI quality, inspect Tailwind tokens, use shadcn registry context, and ground frontend edits in design-system evidence.`
-- Launch page: `memi v2 is an interface-understanding stack for AI coding agents working on product UI.`
+- Launch page: `Memi audits product UI before coding agents edit it, then routes the work through focused design-engineering skills.`
 - Design sandbox: `Clone a memi-ready Next.js, Tailwind, shadcn, MCP, and Agent Skills sandbox for design-to-code exploration.`
 
 ## OpenGraph
 
-- `og:title`: `memi - Interface understanding for AI coding agents`
+- `og:title`: `memi - Read-only design engineering audits for coding agents`
 - `og:description`: `Run UX audits, extract Tailwind tokens, export shadcn registries, and give Codex, Claude Code, Cursor, Hermes, OpenClaw, OpenCode, and MCP clients design-system memory.`
 - `og:url`: `https://www.npmjs.com/package/@memi-design/cli`
 - `og:type`: `website`
@@ -53,7 +53,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 ## Twitter Card
 
 - `twitter:card`: `summary_large_image`
-- `twitter:title`: `memi - Interface understanding for AI coding agents`
+- `twitter:title`: `memi - Read-only design engineering audits for coding agents`
 - `twitter:description`: `Design-system memory, UX audit evidence, Tailwind tokens, shadcn registries, MCP tools, Agent Skills, and research-backed specs before agents edit UI.`
 - `twitter:image`: `https://raw.githubusercontent.com/sarveshsea/memi/main/assets/theme-workflow-demo.svg`
 
@@ -66,7 +66,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
   "name": "memi",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS, Linux, Windows",
-  "description": "Interface understanding and design-system memory for AI coding agents: UX audits, Tailwind token extraction, shadcn registry generation, MCP tools, Agent Skills, research-backed specs, and Figma/FigJam handoff.",
+  "description": "Memi is the read-only design engineering audit and skill layer for coding agents: file-anchored UI findings, design-system memory, MCP tools, and deterministic CI gates.",
   "softwareVersion": "2.6.2",
   "url": "https://www.npmjs.com/package/@memi-design/cli",
   "codeRepository": "https://github.com/sarveshsea/memi",
@@ -97,7 +97,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 
 ## Website acceptance criteria
 
-- The first screen says `Interface understanding for AI coding agents`.
+- The first screen says `Memi is the read-only design engineering audit and skill layer for coding agents.`
 - The primary command block starts with `npm i -g @memi-design/cli`.
 - The first proof path works without Figma: `memi diagnose`, `memi ux audit --json`, `memi craft audit --json`, `memi tokens --from ./src --report`, `memi shadcn export --out public/r`.
 - Agent setup links include `npx skills add sarveshsea/memi --skill memoire-design-tooling`.

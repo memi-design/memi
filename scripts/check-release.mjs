@@ -92,7 +92,7 @@ const readme = await readFile(join(root, "README.md"), "utf-8");
 const readmeTopFold = readme.slice(0, 3000);
 const skillsPackageInstallCommand = "npx skills add sarveshsea/memi --skill audit-frontend-design";
 const requiredReadmeTerms = [
-  "Design QA skills for coding agents",
+  "read-only design engineering audit and skill layer for coding agents",
   "remember-design-system",
   "enforce-design-ci",
   "No account, API key, Figma file, global install, or daemon is required",

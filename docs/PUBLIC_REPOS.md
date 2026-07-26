@@ -6,7 +6,7 @@ memi v2 needs public proof repos, not only package claims. Use this file to keep
 
 | Repo | Role | Public promise |
 | --- | --- | --- |
-| [`sarveshsea/memi`](https://github.com/sarveshsea/memi) | Engine, CLI, MCP server, Agent Skills, Codex plugin, examples, release gates | Interface understanding for AI coding agents. |
+| [`sarveshsea/memi`](https://github.com/sarveshsea/memi) | Engine, CLI, MCP server, Agent Skills, Codex plugin, examples, release gates | Memi is the read-only design engineering audit and skill layer for coding agents. |
 | [`sarveshsea/design-sandbox`](https://github.com/sarveshsea/design-sandbox) | Proof workspace | memi-ready Next.js, Tailwind, shadcn, MCP, and Agent Skills sandbox for design-to-code exploration. |
 | [`sarveshsea/memi-studio`](https://github.com/sarveshsea/memi-studio) | macOS workbench | Supervised Codex and Claude Code runs with project memory, receipts, artifacts, and Figma/FigJam handoff. |
 | [`sarveshsea/memoire-agent-skills`](https://github.com/sarveshsea/memoire-agent-skills) | Skill mirror | Mirror-ready Hermes/OpenClaw skill packages generated from the npm engine. |
@@ -21,7 +21,7 @@ memi v2 needs public proof repos, not only package claims. Use this file to keep
 `sarveshsea/memi`:
 
 ```text
-Interface understanding and design-system memory for AI coding agents.
+Memi is the read-only design engineering audit and skill layer for coding agents.
 ```
 
 `sarveshsea/design-sandbox`:

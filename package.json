@@ -2,7 +2,7 @@
   "name": "@memi-design/cli",
   "version": "2.6.2",
   "mcpName": "io.github.sarveshsea/memi",
-  "description": "Interface understanding and design-system memory for AI coding agents: UX audits, Tailwind tokens, shadcn registries, MCP, and Agent Skills.",
+  "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

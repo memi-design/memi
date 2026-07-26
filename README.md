@@ -5,7 +5,7 @@
 <h1 align="center">memi</h1>
 
 <p align="center">
-  <strong>Design QA skills for coding agents.</strong><br/>
+  <strong>Read-only design engineering audits for coding agents.</strong><br/>
   Audit real interfaces, remember their design systems, and stop UI regressions before merge.
 </p>
 
@@ -17,6 +17,8 @@
 </p>
 
 **Package:** [@memi-design/cli](https://www.npmjs.com/package/@memi-design/cli) · **Homepage:** [memoire.cv](https://memoire.cv) · **MCP Registry:** `io.github.sarveshsea/memi` · **Release truth:** [current versions](docs/CURRENT_RELEASE.md)
+
+Memi is the **read-only design engineering audit and skill layer for coding agents**. Studio is a companion, not the primary activation path.
 
 memi turns a real product codebase into **evidence agents can trust** before they edit UI: tokens, components, routes, screenshots, UX risks, interface craft scores, shadcn registries, research specs, and deterministic CI gates. Works with **Grok Build (Grok 4.5)**, Codex, Claude Code, Cursor, Hermes, OpenCode, OpenClaw, and any MCP client.
 

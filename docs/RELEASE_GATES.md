@@ -4,6 +4,8 @@ The generated [current release truth](./CURRENT_RELEASE.md) defines the active
 engine, Studio, and website release groups. Do not infer parity from a single
 package version.
 
+The primary public story is: `Memi is the read-only design engineering audit and skill layer for coding agents.` Studio is a companion.
+
 Use these checks before announcing, tagging, or publishing a public release.
 
 ## Canonical Release Manifest
@@ -63,7 +65,7 @@ npm publish --dry-run --access public --ignore-scripts --json
 `npm run check:public-release` verifies the live npm surface after publish:
 
 - npm `dist-tags.latest` matches `package.json`.
-- npm README includes `Design-system memory for coding agents`.
+- npm README includes `read-only design engineering audit and skill layer for coding agents`.
 - npm README includes `npm i -g @memi-design/cli`.
 - Website homepage still links to the npm package and does not contain stale Studio 1.0.4 copy.
 - Website docs mention the current CLI version and do not contain the old `Current npm target: 0.14.1` line.
@@ -85,12 +87,12 @@ For the current public engine line, npm must report the current `package.json` v
 Before any public distribution push, verify every external surface points to the same current release story:
 
 - npm latest: current `package.json` version, currently `2.6.2`
-- npm README phrase: `Design QA skills for coding agents`
+- npm README phrase: `read-only design engineering audit and skill layer for coding agents`
 - npm install command: `npm i -g @memi-design/cli`
 - MCP name: `io.github.sarveshsea/memi`
 - Agent Skills command: `npx skills add sarveshsea/memi --skill memoire-design-tooling`
 - Codex marketplace command: `codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`
-- GitHub description: `Interface understanding and design-system memory for AI coding agents.`
+- GitHub description: `Memi is the read-only design engineering audit and skill layer for coding agents.`
 - GitHub topics: `interface-understanding`, `design-system`, `shadcn-registry`, `tailwind-audit`, `ux-audit`, `mcp-server`, `agent-skills`, `codex-plugin`, `design-tokens`, `figma-to-code`
 - Website hero or first-fold proof line: the current read-only audit story and current release metadata
 - Website `/components`: non-empty registry catalog with npm install commands and shadcn item URLs

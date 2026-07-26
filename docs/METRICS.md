@@ -11,8 +11,8 @@ Use this every Friday during the current public-growth window. Record the value,
 - Trend context: the previous seven-day bucket had 1,524 downloads because release and verification activity produced several one-day spikes; the seven days before that had 152. The current 354 is down from the spike but 133% above the pre-spike bucket.
 - 10x target from the 2026-07-08 baseline: 7,830 weekly downloads and 13,060 monthly downloads.
 - Primary CTA: `https://www.npmjs.com/package/@memi-design/cli`
-- Primary phrase: `Interface understanding for AI coding agents`
-- Secondary phrase: `Design-system memory for coding agents`
+- Primary story: `Memi is the read-only design engineering audit and skill layer for coding agents.`
+- Secondary phrase: `File-anchored design QA evidence before coding agents edit UI`
 - Core proof: `memi diagnose`, `memi ux audit --json`, `memi craft audit --json`, `memi tokens --from ./src --report`, `memi shadcn export --out public/r`
 - Agent proof: `npx skills add sarveshsea/memi --skill memoire-design-tooling`
 - MCP proof: `memi mcp start --no-figma`
@@ -57,7 +57,7 @@ npm run check:public-release
 ## Weekly review questions
 
 - Did npm latest match the repo release?
-- Did the first README screen still say `Interface understanding for AI coding agents`?
+- Did the first README screen still say `read-only design engineering audit and skill layer for coding agents`?
 - Did the first code block still prove value without Figma?
 - Did Agent Skills install and MCP startup still work?
 - Which post, directory, agent stack, example, or tutorial created the most clicks?

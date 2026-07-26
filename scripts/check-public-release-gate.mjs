@@ -9,7 +9,9 @@ const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url
 
 const packageName = process.env.PACKAGE_NAME || pkg.name;
 const expectedVersion = process.env.EXPECTED_VERSION || pkg.version;
-const expectedPhrase = process.env.EXPECTED_README_PHRASE || "Design QA skills for coding agents";
+const expectedPhrase =
+  process.env.EXPECTED_README_PHRASE
+  || "read-only design engineering audit and skill layer for coding agents";
 const expectedInstall = process.env.EXPECTED_INSTALL_COMMAND || `npm i -g ${packageName}`;
 const expectedSiteUrl = trimTrailingSlash(process.env.EXPECTED_SITE_URL || "https://www.memoire.cv");
 const expectedStudioVersion = process.env.EXPECTED_STUDIO_VERSION || "";
