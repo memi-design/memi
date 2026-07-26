@@ -255,6 +255,9 @@ function verifyCurrentValidity(
   if (current.invalidEvidenceIds.length > 0) {
     throw new Error(`Evidence is invalid at release time: ${current.invalidEvidenceIds.join(", ")}`);
   }
+  if (current.unverifiedCriteria.length > 0) {
+    throw new Error(`Passed criteria remain unverified: ${current.unverifiedCriteria.join(", ")}`);
+  }
   if (
     baseline.rawScore !== current.rawScore
     || baseline.score !== current.score

@@ -113,6 +113,7 @@ export const AuditScorecardSchema = z.object({
   addDuplicateIssues(scorecard.dimensions.map((entry) => entry.id), "Duplicate dimension id", ["dimensions"], context);
   addDuplicateIssues(scorecard.caps.map((entry) => entry.id), "Duplicate score cap id", ["caps"], context);
 
+  const knownEvidenceIds = new Set(scorecard.evidence.map((entry) => entry.id));
   const criterionIds: string[] = [];
   for (const [dimensionIndex, dimension] of scorecard.dimensions.entries()) {
     const allocated = dimension.criteria.reduce((sum, criterion) => sum + criterion.points, 0);
@@ -122,6 +123,17 @@ export const AuditScorecardSchema = z.object({
         message: `Dimension criterion points total ${allocated}, expected maximum ${dimension.maximum}.`,
         path: ["dimensions", dimensionIndex, "criteria"],
       });
+    }
+    for (const [criterionIndex, criterion] of dimension.criteria.entries()) {
+      for (const evidenceId of criterion.evidenceIds) {
+        if (!knownEvidenceIds.has(evidenceId)) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Unknown evidence id ${evidenceId} referenced by criterion ${dimension.id}/${criterion.id}.`,
+            path: ["dimensions", dimensionIndex, "criteria", criterionIndex, "evidenceIds"],
+          });
+        }
+      }
     }
     criterionIds.push(...dimension.criteria.map((criterion) => `${dimension.id}/${criterion.id}`));
   }
@@ -142,6 +154,15 @@ export const AuditScorecardSchema = z.object({
         message: `Score cap maximum ${cap.maximum} exceeds scorecard maximum ${maximum}.`,
         path: ["caps", capIndex, "maximum"],
       });
+    }
+    for (const evidenceId of cap.clearingEvidenceIds) {
+      if (!knownEvidenceIds.has(evidenceId)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Unknown evidence id ${evidenceId} referenced by score cap ${cap.id}.`,
+          path: ["caps", capIndex, "clearingEvidenceIds"],
+        });
+      }
     }
   }
 

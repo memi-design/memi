@@ -180,9 +180,8 @@ describe("evaluateAuditScorecard", () => {
     expect(result.unverifiedCriteria).toEqual(["core-activation/read-only-result"]);
   });
 
-  it("awards zero for missing, failed, contradicted, or self-verified evidence", () => {
+  it("awards zero for failed, contradicted, or self-verified evidence", () => {
     const states = [
-      { label: "missing", mutate: (input: AuditScorecard) => { input.evidence = []; } },
       { label: "failed", mutate: (input: AuditScorecard) => { input.evidence[0]!.status = "failed"; } },
       { label: "contradicted", mutate: (input: AuditScorecard) => { input.evidence[0]!.status = "contradicted"; } },
       {

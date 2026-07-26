@@ -78,8 +78,6 @@ jobs:
           npm install --no-save --package-lock=false --ignore-scripts "@esbuild/${{ matrix.esbuildPackage }}@${ESBUILD_VERSION}"
 
       - name: Check release metadata
-        env:
-          SKIP_AUDIT_GATE: "1"
         run: npm run check:release
 
       - name: Typecheck and build tsc output
