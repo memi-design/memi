@@ -22,7 +22,7 @@
     ]
   },
   "implementationCandidate": {
-    "score": 82,
+    "score": 75,
     "maximum": 100,
     "verdict": "launchable-with-caveats",
     "confidence": 0.9,
@@ -57,7 +57,7 @@
       "candidate": 13,
       "evidence": [
         "Memi had broad design-system and audit machinery but limited rendered proof.",
-        "The candidate adds artifact-backed website proof, a WebGL2 lab, and a SwiftUI simulator evaluation."
+        "The candidate adds artifact-backed website proof and a SwiftUI simulator evaluation, but no shipped local shader proof is verified in this checkout."
       ]
     },
     {
@@ -74,10 +74,10 @@
       "id": "shader-and-dither",
       "maximum": 10,
       "baseline": 1,
-      "candidate": 8,
+      "candidate": 1,
       "evidence": [
         "No canonical shader or dither workflow existed.",
-        "The candidate adds two 100/100 canonical skills plus an original deterministic WebGL2 proof with Bayer and seeded-noise dithering, fallbacks, and evidence export."
+        "The reference policy is explicit, but no shipped shader-focused skills or local browser proof are verified in this checkout."
       ]
     },
     {
@@ -253,10 +253,10 @@
     "sustainedNonReleaseBaselineIncrease": 0.25
   },
   "remainingEvidenceGaps": [
-    "Merge, publish, and deploy the candidate branches before using 82/100 as a public claim.",
+    "Merge, publish, and deploy the candidate branches before using 75/100 as a public claim.",
     "Memi 2.6.2 scans zero SwiftUI files and must not claim SwiftUI design-quality coverage.",
-    "The shader lab measures main-thread submission time, not GPU frame time, power, or wide-gamut accuracy.",
-    "The named-host shader timing was observed locally but is not a checked-in durable benchmark artifact, so it is not scored as verified GPU performance.",
+    "This checkout still lacks shipped shader-focused skills and local browser proof for creative-rendering capability.",
+    "Any future creative-rendering score must be backed by durable local browser evidence, not external branch notes.",
     "The website hosted CI did not start because of the GitHub account billing/spending gate; local tests and the Vercel preview passed, but hosted runner proof remains outstanding.",
     "The public-release gate exits on live docs and changelog parity before installSmoke, so the public aggregate result cannot claim that stage passed.",
     "Growth targets require eight weeks of public or explicitly opted-in evidence.",
