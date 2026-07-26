@@ -115,6 +115,14 @@ describe("release manifest", () => {
         { cwd: shallowRoot, encoding: "utf8" },
       );
       expect(result.status, result.stderr || result.stdout).toBe(0);
+
+      const writeResult = spawnSync(
+        process.execPath,
+        [join(shallowRoot, "scripts", "sync-release-manifest.mjs")],
+        { cwd: shallowRoot, encoding: "utf8" },
+      );
+      expect(writeResult.status).not.toBe(0);
+      expect(writeResult.stderr).toContain("full Git history");
     } finally {
       await rm(shallowRoot, { recursive: true, force: true });
     }
