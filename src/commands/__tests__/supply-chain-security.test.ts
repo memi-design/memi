@@ -1,8 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { SHADCN_SERVER_HOST } from "../shadcn.js";
 
 describe("public package supply-chain defaults", () => {
+  it("binds the shadcn registry server to loopback", () => {
+    expect(SHADCN_SERVER_HOST).toBe("127.0.0.1");
+  });
+
   it("does not ship npm install lifecycle scripts", async () => {
     const root = process.cwd();
     const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
@@ -55,5 +60,14 @@ describe("public package supply-chain defaults", () => {
     expect(lock.packages["node_modules/hono"]?.version).toBe("4.12.32");
     expect(lock.packages["node_modules/body-parser"]?.version).toBe("2.3.0");
     expect(lock.packages["node_modules/@hono/node-server"]?.version).toBe("2.0.12");
+  });
+
+  it("validates standalone installer archive entries before extraction", async () => {
+    const installer = await readFile(join(process.cwd(), "scripts", "install.sh"), "utf-8");
+
+    expect(installer).toContain("tar -tzf");
+    expect(installer).toContain("unsafe archive entry");
+    expect(installer).toContain("unexpected archive root");
+    expect(installer.indexOf("tar -tzf")).toBeLessThan(installer.indexOf("tar -xzf"));
   });
 });

@@ -3,7 +3,11 @@ import { createHash } from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { checksumUrlsForArchive, verifyArchiveChecksum } from "../upgrade.js";
+import {
+  assertSafeReleaseArchiveEntries,
+  checksumUrlsForArchive,
+  verifyArchiveChecksum,
+} from "../upgrade.js";
 
 let root: string;
 
@@ -62,6 +66,23 @@ describe("verifyArchiveChecksum", () => {
       sumsPath,
       allowUnverified: true,
     })).rejects.toThrow(/SHA256 mismatch/);
+  });
+});
+
+describe("assertSafeReleaseArchiveEntries", () => {
+  it("rejects traversal, links, and unexpected top-level paths", () => {
+    expect(() => assertSafeReleaseArchiveEntries(
+      [{ path: "../escape", type: "File", size: 1 }],
+      "memi-darwin-arm64",
+    )).toThrow(/path traversal/i);
+    expect(() => assertSafeReleaseArchiveEntries(
+      [{ path: "memi-darwin-arm64/link", type: "SymbolicLink", size: 0 }],
+      "memi-darwin-arm64",
+    )).toThrow(/link/i);
+    expect(() => assertSafeReleaseArchiveEntries(
+      [{ path: "different-root/memi", type: "File", size: 1 }],
+      "memi-darwin-arm64",
+    )).toThrow(/top-level/i);
   });
 });
 
