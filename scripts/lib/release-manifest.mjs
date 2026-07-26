@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -48,20 +49,63 @@ export function validateReleaseManifest(manifest) {
     }
   }
 
+  const engineVersion = groups.engine?.version;
+  const githubRelease = manifest?.surfaces?.githubRelease;
+  const expectedGithubReleaseUrl =
+    `https://github.com/${githubRelease?.repository}/releases/tag/${githubRelease?.tagPrefix}${engineVersion}`;
+  if (githubRelease?.url !== expectedGithubReleaseUrl) {
+    failures.push(`release-manifest.json GitHub release URL must be ${expectedGithubReleaseUrl}`);
+  }
+  const engineMajor = engineVersion?.split(".")[0];
+  if (manifest?.surfaces?.githubAction?.majorTag !== `v${engineMajor}`) {
+    failures.push(`release-manifest.json GitHub Action majorTag must be v${engineMajor}`);
+  }
+  for (const field of ["arm64Asset", "x64Asset"]) {
+    if (!manifest?.surfaces?.studio?.[field]?.includes("{version}")) {
+      failures.push(`release-manifest.json Studio ${field} must include {version}`);
+    }
+  }
+  if (!manifest?.surfaces?.studio?.checksumAsset) {
+    failures.push("release-manifest.json Studio checksumAsset is required");
+  }
+
   return failures;
 }
 
-export function buildWebReleaseArtifact(manifest) {
+export function buildWebReleaseArtifact(manifest, sourceCommit) {
   const canonical = serializeJson(manifest);
   return {
     schemaVersion: 1,
     provenance: {
       repository: "https://github.com/sarveshsea/memi",
       path: "release-manifest.json",
+      sourceCommit,
+      sourceUrl:
+        `https://raw.githubusercontent.com/sarveshsea/memi/${sourceCommit}/release-manifest.json`,
       manifestSha256: createHash("sha256").update(canonical).digest("hex"),
     },
     release: manifest,
   };
+}
+
+export function resolveManifestSourceCommit(root, manifest) {
+  const sourceCommit = execFileSync(
+    "git",
+    ["log", "-1", "--format=%H", "--", "release-manifest.json"],
+    { cwd: root, encoding: "utf8" },
+  ).trim();
+  if (!COMMIT_SHA.test(sourceCommit)) {
+    throw new Error("release-manifest.json must be committed before generating its website artifact");
+  }
+  const committed = execFileSync(
+    "git",
+    ["show", `${sourceCommit}:release-manifest.json`],
+    { cwd: root, encoding: "utf8" },
+  );
+  if (serializeJson(JSON.parse(committed)) !== serializeJson(manifest)) {
+    throw new Error("release-manifest.json changed after its source commit; commit it before generating artifacts");
+  }
+  return sourceCommit;
 }
 
 export async function verifyCoreReleaseSurfaces(root, manifest) {
@@ -114,7 +158,8 @@ export async function verifyCoreReleaseSurfaces(root, manifest) {
   }
 
   const artifactPath = join(root, "release-artifacts", "memoire-web.release.json");
-  const expectedArtifact = serializeJson(buildWebReleaseArtifact(manifest));
+  const sourceCommit = resolveManifestSourceCommit(root, manifest);
+  const expectedArtifact = serializeJson(buildWebReleaseArtifact(manifest, sourceCommit));
   const actualArtifact = await readFile(artifactPath, "utf8").catch(() => "");
   if (actualArtifact !== expectedArtifact) {
     failures.push("release-artifacts/memoire-web.release.json is stale; run npm run sync:release-manifest");

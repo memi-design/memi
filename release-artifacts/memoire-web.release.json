@@ -3,6 +3,8 @@
   "provenance": {
     "repository": "https://github.com/sarveshsea/memi",
     "path": "release-manifest.json",
+    "sourceCommit": "29a620569723565597837415d5947bc36a042c20",
+    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/29a620569723565597837415d5947bc36a042c20/release-manifest.json",
     "manifestSha256": "419caf82b60ab2a6f8bbd1de0b0e3baab6d7f9e7776fb9d7fe2604585a4b10e1"
   },
   "release": {

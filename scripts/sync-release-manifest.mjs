@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   buildWebReleaseArtifact,
   loadReleaseManifest,
+  resolveManifestSourceCommit,
   serializeJson,
   verifyCoreReleaseSurfaces,
 } from "./lib/release-manifest.mjs";
@@ -14,11 +15,16 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const checkOnly = process.argv.includes("--check");
 const manifest = await loadReleaseManifest(root);
+const sourceCommit = resolveManifestSourceCommit(root, manifest);
 const artifactPath = join(root, "release-artifacts", "memoire-web.release.json");
 
 if (!checkOnly) {
   await mkdir(dirname(artifactPath), { recursive: true });
-  await writeFile(artifactPath, serializeJson(buildWebReleaseArtifact(manifest)), "utf8");
+  await writeFile(
+    artifactPath,
+    serializeJson(buildWebReleaseArtifact(manifest, sourceCommit)),
+    "utf8",
+  );
 }
 
 const failures = await verifyCoreReleaseSurfaces(root, manifest);

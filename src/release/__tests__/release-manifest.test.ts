@@ -33,13 +33,7 @@ describe("release manifest", () => {
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
-        studio: {
-          releaseGroup: "studio",
-          repository: "sarveshsea/memi-studio",
-          homebrewCask: "sarveshsea/memi/memi-studio",
-          homebrewCaskUrl:
-            "https://raw.githubusercontent.com/sarveshsea/homebrew-memi/main/Casks/memi-studio.rb",
-        },
+        studio: { releaseGroup: "studio", repository: "sarveshsea/memi-studio" },
         website: { releaseGroup: "site", repository: "sarveshsea/memoire-web" },
       },
     });
