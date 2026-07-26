@@ -3,10 +3,20 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
+import { list as listTar } from "tar";
 
 const NPM_REGISTRY_URL = "https://registry.npmjs.org";
 const FETCH_TIMEOUT_MS = 15000;
 const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const MAX_ARCHIVE_ENTRIES = 4_096;
+const MAX_ARCHIVE_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_ARCHIVE_UNCOMPRESSED_BYTES = 200 * 1024 * 1024;
+
+export interface NpmArchiveEntry {
+  path: string;
+  type: string;
+  size: number;
+}
 
 export interface NpmPackageDist {
   tarball: string;
@@ -154,7 +164,52 @@ async function verifyTarball(tarballPath: string, dist: NpmPackageDist): Promise
 }
 
 async function extractTarball(tarballPath: string, outDir: string): Promise<void> {
+  const entries: NpmArchiveEntry[] = [];
+  await listTar({
+    file: tarballPath,
+    strict: true,
+    onentry: (entry) => {
+      entries.push({ path: entry.path, type: entry.type, size: entry.size });
+    },
+  });
+  assertSafeNpmArchiveEntries(entries);
   await run("tar", ["-xzf", tarballPath, "-C", outDir]);
+}
+
+export function assertSafeNpmArchiveEntries(entries: NpmArchiveEntry[]): void {
+  if (entries.length === 0) throw new Error("npm archive is empty");
+  if (entries.length > MAX_ARCHIVE_ENTRIES) {
+    throw new Error(`npm archive exceeds entry limit of ${MAX_ARCHIVE_ENTRIES}`);
+  }
+
+  let totalBytes = 0;
+  for (const entry of entries) {
+    const path = entry.path.trim();
+    if (!path) throw new Error("npm archive contains an empty path");
+    if (path.startsWith("/") || /^[A-Za-z]:[\\/]/.test(path)) {
+      throw new Error(`npm archive contains an absolute path: ${entry.path}`);
+    }
+    if (path.includes("\\")) {
+      throw new Error(`npm archive contains an unsupported path separator: ${entry.path}`);
+    }
+    const segments = path.split("/");
+    if (segments.includes("..")) {
+      throw new Error(`npm archive contains a path traversal entry: ${entry.path}`);
+    }
+    if (entry.type === "SymbolicLink" || entry.type === "Link") {
+      throw new Error(`npm archive contains a link entry: ${entry.path}`);
+    }
+    if (entry.type !== "File" && entry.type !== "Directory") {
+      throw new Error(`npm archive contains an unsupported entry type ${entry.type}: ${entry.path}`);
+    }
+    if (entry.size > MAX_ARCHIVE_FILE_BYTES) {
+      throw new Error(`npm archive entry exceeds size limit of ${MAX_ARCHIVE_FILE_BYTES} bytes: ${entry.path}`);
+    }
+    totalBytes += entry.size;
+    if (totalBytes > MAX_ARCHIVE_UNCOMPRESSED_BYTES) {
+      throw new Error(`npm archive exceeds uncompressed size limit of ${MAX_ARCHIVE_UNCOMPRESSED_BYTES} bytes`);
+    }
+  }
 }
 
 async function run(command: string, args: string[]): Promise<void> {

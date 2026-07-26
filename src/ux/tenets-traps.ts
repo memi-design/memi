@@ -1,6 +1,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AppQualityIssue, AppQualitySeverity } from "../app-quality/engine.js";
+import {
+  buildAuditEvidenceMetadata,
+  normalizeAuditFindingId,
+  type AuditEvidenceMetadata,
+} from "../audit/evidence.js";
 
 export type UxTenetId =
   | "clarity"
@@ -52,6 +57,7 @@ export type UxFindingProvenance = "static-scan" | "rendered-probe" | "vision" | 
 
 export interface UxAuditFinding {
   id: string;
+  normalizedId: string;
   title: string;
   severity: AppQualitySeverity;
   tenetIds: UxTenetId[];
@@ -105,6 +111,11 @@ export interface UxAuditReport {
     issueCount?: number;
     appQualityScore?: number;
   };
+  confidence: AuditEvidenceMetadata["confidence"];
+  assessedDimensions: AuditEvidenceMetadata["assessedDimensions"];
+  unassessedDimensions: AuditEvidenceMetadata["unassessedDimensions"];
+  evidenceProvenance: AuditEvidenceMetadata["evidenceProvenance"];
+  appliedScoreCaps: AuditEvidenceMetadata["appliedScoreCaps"];
 }
 
 export interface BuildUxAuditReportInput {
@@ -355,6 +366,7 @@ export function mapAppQualityIssueToUxFinding(issue: AppQualityIssue): UxAuditFi
   const mapping = ISSUE_MAPPINGS[issue.id] ?? CATEGORY_MAPPINGS[issue.category];
   return {
     id: `ux.${issue.id}`,
+    normalizedId: normalizeAuditFindingId(issue.normalizedId ?? issue.id),
     title: issue.title,
     severity: issue.severity,
     tenetIds: mapping.tenetIds,
@@ -380,16 +392,51 @@ export function buildUxAuditReport(input: BuildUxAuditReportInput): UxAuditRepor
   const findings = (input.issues ?? [])
     .map(mapAppQualityIssueToUxFinding)
     .sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
-  const score = scoreUx(findings, input.appQualityScore);
+  const tenetCoverage = buildTenetCoverage(findings);
+  const trapRisks = buildTrapRisks(findings);
+  const hasAnalyzedEvidence = input.appQualityScore !== undefined || findings.length > 0;
+  const noEvidenceCap = hasAnalyzedEvidence ? [] : [{
+    id: "no-analyzed-evidence",
+    maximum: 0,
+    reason: "The supplied artifact was recorded but not analyzed.",
+  }];
+  const score = noEvidenceCap.length > 0 ? 0 : scoreUx(findings, input.appQualityScore);
   const generatedAt = input.generatedAt ?? new Date().toISOString();
+  const dimensionStatuses = [
+    ...tenetCoverage.map((entry) => ({
+      id: `tenet:${entry.tenetId}`,
+      unassessed: entry.status === "unknown" || entry.status === "not-assessed",
+    })),
+    ...trapRisks.map((entry) => ({
+      id: `trap:${entry.trapId}`,
+      unassessed: entry.status === "not-assessed",
+    })),
+  ];
+  const auditEvidence = buildAuditEvidenceMetadata({
+    dimensions: dimensionStatuses.map((entry) => entry.id),
+    unassessedDimensions: dimensionStatuses
+      .filter((entry) => !hasAnalyzedEvidence || entry.unassessed)
+      .map((entry) => entry.id),
+    evidenceProvenance: [
+      ...(hasAnalyzedEvidence ? [{ kind: "static-scan" as const, analyzed: true, target }] : []),
+      ...(input.artifactPath ? [{
+        kind: "screenshot" as const,
+        analyzed: false,
+        target,
+        artifactPath: input.artifactPath,
+      }] : []),
+    ],
+    findingConfidences: findings.map((finding) => finding.confidence),
+    appliedScoreCaps: noEvidenceCap,
+  });
 
   return {
     schemaVersion: 2,
     target,
     generatedAt,
     score,
-    tenetCoverage: buildTenetCoverage(findings),
-    trapRisks: buildTrapRisks(findings),
+    tenetCoverage,
+    trapRisks,
     findings,
     recommendedTweaks: recommendedTweaks(findings),
     artifactPath: input.artifactPath ?? undefined,
@@ -400,6 +447,7 @@ export function buildUxAuditReport(input: BuildUxAuditReportInput): UxAuditRepor
       issueCount: input.issues?.length ?? 0,
       appQualityScore: input.appQualityScore,
     },
+    ...auditEvidence,
   };
 }
 

@@ -1,5 +1,9 @@
 name: Publish to MCP Registry
 
+env:
+  MCP_PUBLISHER_VERSION: v1.8.0
+  MCP_PUBLISHER_LINUX_AMD64_SHA256: 1370446bbe74d562608e8005a6ccce02d146a661fbd78674e11cc70b9618d6cf
+
 on:
   workflow_dispatch:
 
@@ -29,7 +33,12 @@ jobs:
 
       - name: Install mcp-publisher
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          ARCHIVE="mcp-publisher_linux_amd64.tar.gz"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/${ARCHIVE}" \
+            --output "${ARCHIVE}"
+          echo "${MCP_PUBLISHER_LINUX_AMD64_SHA256}  ${ARCHIVE}" | sha256sum --check --strict
+          tar -xzf "${ARCHIVE}" mcp-publisher
           ./mcp-publisher --help
 
       - name: Validate server.json

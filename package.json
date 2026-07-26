@@ -120,7 +120,7 @@
     "pino-pretty": "^13.0.0",
     "react": "^18.3.1",
     "ssf": "^0.11.2",
-    "tar": "7.5.20",
+    "tar": "7.5.22",
     "ws": "^8.18.0",
     "xlsx-populate": "^1.21.0",
     "zod": "^3.25.0"
@@ -144,6 +144,10 @@
     "playwright": "^1.59.1"
   },
   "overrides": {
+    "@hono/node-server": "2.0.12",
+    "body-parser": "2.3.0",
+    "fast-uri": "3.1.4",
+    "hono": "4.12.32",
     "tsx": {
       "esbuild": "0.28.1"
     }

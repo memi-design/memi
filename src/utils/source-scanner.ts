@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir, readFile, realpath, stat } from "node:fs/promises";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export interface ScannedSourceFile {
@@ -48,12 +48,16 @@ export async function scanSources(options: SourceScanOptions): Promise<ScannedSo
   const target = options.target ?? options.projectRoot;
   const maxFiles = Math.max(1, options.maxFiles ?? DEFAULT_MAX_FILES);
   if (isHttpUrl(target)) {
+    assertSafePublicHttpUrl(target);
     return scanUrl(target, options, maxFiles);
   }
 
   const root = resolve(options.projectRoot);
-  const resolvedTarget = isAbsolute(target) ? target : resolve(root, target);
+  const resolvedTarget = resolve(isAbsolute(target) ? target : resolve(root, target));
+  assertPathWithinRoot(root, resolvedTarget);
   const targetStat = await stat(resolvedTarget);
+  const [realRoot, realTarget] = await Promise.all([realpath(root), realpath(resolvedTarget)]);
+  assertPathWithinRoot(realRoot, realTarget);
   const extensions = normalizeExtensions(options.extensions);
 
   if (targetStat.isFile()) {
@@ -191,6 +195,7 @@ function urlSource(id: string, content: string, extension: string): ScannedSourc
 }
 
 async function fetchText(url: string, timeoutMs: number, userAgent: string): Promise<string> {
+  assertSafePublicHttpUrl(url);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -200,6 +205,7 @@ async function fetchText(url: string, timeoutMs: number, userAgent: string): Pro
         "Accept": "text/html,text/css,*/*",
         "User-Agent": userAgent,
       },
+      redirect: "error",
     });
     if (!response.ok) throw new Error(`Could not fetch ${url}: ${response.status}`);
     return await response.text();
@@ -229,7 +235,9 @@ function extractStylesheetUrls(html: string, baseUrl: string): string[] {
       const href = match[1];
       if (!href) continue;
       try {
-        urls.add(new URL(href, baseUrl).href);
+        const resolved = new URL(href, baseUrl).href;
+        assertSafePublicHttpUrl(resolved);
+        urls.add(resolved);
       } catch {
         continue;
       }
@@ -274,6 +282,53 @@ function isHttpUrl(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+function assertPathWithinRoot(root: string, candidate: string): void {
+  const relativePath = relative(resolve(root), resolve(candidate));
+  if (relativePath === "" || (!relativePath.startsWith(`..${sep}`) && relativePath !== ".." && !isAbsolute(relativePath))) {
+    return;
+  }
+  throw new Error(`Source target is outside the project root: ${candidate}`);
+}
+
+function assertSafePublicHttpUrl(value: string): void {
+  const parsed = new URL(value);
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error(`Source URL must use a public http(s) address: ${value}`);
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error(`Source URL must use a public http(s) address without credentials: ${value}`);
+  }
+  const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (
+    hostname === "localhost"
+    || hostname.endsWith(".localhost")
+    || hostname === "::"
+    || hostname === "::1"
+    || hostname.startsWith("fe80:")
+    || hostname.startsWith("fc")
+    || hostname.startsWith("fd")
+    || isPrivateIpv4(hostname)
+  ) {
+    throw new Error(`Source URL must use a public http(s) address: ${value}`);
+  }
+}
+
+function isPrivateIpv4(hostname: string): boolean {
+  const octets = hostname.split(".").map(Number);
+  if (octets.length !== 4 || octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) {
+    return false;
+  }
+  const [a, b] = octets;
+  return a === 0
+    || a === 10
+    || a === 127
+    || (a === 100 && b >= 64 && b <= 127)
+    || (a === 169 && b === 254)
+    || (a === 172 && b >= 16 && b <= 31)
+    || (a === 192 && b === 168)
+    || a >= 224;
 }
 
 function normalizePath(path: string): string {

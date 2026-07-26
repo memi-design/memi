@@ -1,6 +1,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AppQualityIssue, AppQualitySeverity } from "../app-quality/engine.js";
+import {
+  buildAuditEvidenceMetadata,
+  normalizeAuditFindingId,
+  type AuditEvidenceMetadata,
+} from "../audit/evidence.js";
 
 export type InterfaceCraftDimensionId =
   | "focusing-mechanism"
@@ -35,6 +40,7 @@ export interface InterfaceCraftDimensionDefinition {
 
 export interface InterfaceCraftFinding {
   id: string;
+  normalizedId: string;
   title: string;
   severity: AppQualitySeverity;
   lens: InterfaceCraftLens;
@@ -88,6 +94,11 @@ export interface InterfaceCraftReport {
     issueCount?: number;
     appQualityScore?: number;
   };
+  confidence: AuditEvidenceMetadata["confidence"];
+  assessedDimensions: AuditEvidenceMetadata["assessedDimensions"];
+  unassessedDimensions: AuditEvidenceMetadata["unassessedDimensions"];
+  evidenceProvenance: AuditEvidenceMetadata["evidenceProvenance"];
+  appliedScoreCaps: AuditEvidenceMetadata["appliedScoreCaps"];
 }
 
 export interface BuildInterfaceCraftReportInput {
@@ -305,6 +316,7 @@ export function mapAppQualityIssueToInterfaceCraftFinding(issue: AppQualityIssue
   const mapping = ISSUE_MAPPINGS[issue.id] ?? CATEGORY_MAPPINGS[issue.category];
   return {
     id: `craft.${issue.id}`,
+    normalizedId: normalizeAuditFindingId(issue.normalizedId ?? issue.id),
     title: issue.title,
     severity: issue.severity,
     lens: mapping.lens,
@@ -331,13 +343,37 @@ export function buildInterfaceCraftReport(input: BuildInterfaceCraftReportInput)
     .map(mapAppQualityIssueToInterfaceCraftFinding)
     .sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
   const generatedAt = input.generatedAt ?? new Date().toISOString();
+  const dimensions = buildDimensionAssessments(findings);
+  const hasAnalyzedEvidence = input.appQualityScore !== undefined || findings.length > 0;
+  const noEvidenceCap = hasAnalyzedEvidence ? [] : [{
+    id: "no-analyzed-evidence",
+    maximum: 0,
+    reason: "The supplied artifact was recorded but not analyzed.",
+  }];
+  const auditEvidence = buildAuditEvidenceMetadata({
+    dimensions: dimensions.map((dimension) => dimension.dimensionId),
+    unassessedDimensions: dimensions
+      .filter((dimension) => dimension.status === "unknown" || dimension.status === "not-assessed")
+      .map((dimension) => dimension.dimensionId),
+    evidenceProvenance: [
+      ...(hasAnalyzedEvidence ? [{ kind: "static-scan" as const, analyzed: true, target }] : []),
+      ...(input.artifactPath ? [{
+        kind: "screenshot" as const,
+        analyzed: false,
+        target,
+        artifactPath: input.artifactPath,
+      }] : []),
+    ],
+    findingConfidences: findings.map((finding) => finding.confidence),
+    appliedScoreCaps: noEvidenceCap,
+  });
 
   return {
     schemaVersion: 2,
     target,
     generatedAt,
-    score: scoreInterfaceCraft(findings, input.appQualityScore),
-    dimensions: buildDimensionAssessments(findings),
+    score: noEvidenceCap.length > 0 ? 0 : scoreInterfaceCraft(findings, input.appQualityScore),
+    dimensions,
     critique: buildCritique(findings, input.appQualityScore),
     findings,
     topOpportunities: buildTopOpportunities(findings),
@@ -349,6 +385,7 @@ export function buildInterfaceCraftReport(input: BuildInterfaceCraftReportInput)
       issueCount: input.issues?.length ?? 0,
       appQualityScore: input.appQualityScore,
     },
+    ...auditEvidence,
   };
 }
 

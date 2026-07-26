@@ -28,6 +28,7 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 const MAX_PORT_RETRIES = 10;
+export const PREVIEW_BIND_HOST = "127.0.0.1";
 
 function createPortBindError(port: number, err: NodeJS.ErrnoException): Error & { code?: string; port?: number } {
   const wrapped = new Error(`Failed to bind preview port ${port}: ${err.message}`) as Error & {
@@ -446,13 +447,13 @@ export class PreviewApiServer {
             return;
           }
           this.port++;
-          this.server?.listen(this.port);
+          this.server?.listen(this.port, PREVIEW_BIND_HOST);
         } else {
           reject(createPortBindError(this.port, err));
         }
       });
 
-      this.server.listen(this.port);
+      this.server.listen(this.port, PREVIEW_BIND_HOST);
     });
   }
 

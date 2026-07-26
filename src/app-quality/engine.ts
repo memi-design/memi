@@ -6,6 +6,12 @@ import { buildAppGraph, type AppGraph } from "./app-graph.js";
 import { buildUxAuditReport, type UxAuditReport } from "../ux/tenets-traps.js";
 import { checkSkillCompliance, type ComplianceReport } from "../ux/skill-compliance.js";
 import { defaultPolicy, applyPolicyToIssues, type ResolvedPolicy, type PolicyThresholds } from "./policy.js";
+import {
+  AUDIT_SCHEMA_VERSION,
+  buildAuditEvidenceMetadata,
+  normalizeAuditFindingId,
+  type AuditEvidenceMetadata,
+} from "../audit/evidence.js";
 
 export type AppQualitySeverity = "critical" | "high" | "medium" | "low";
 export type AppQualityCategory =
@@ -20,6 +26,7 @@ export type AppQualityCategory =
 
 export interface AppQualityIssue {
   id: string;
+  normalizedId: string;
   category: AppQualityCategory;
   severity: AppQualitySeverity;
   title: string;
@@ -53,6 +60,7 @@ export interface AppQualityFileSignal {
 
 export interface AppQualityDiagnosis {
   version: 1;
+  schemaVersion: typeof AUDIT_SCHEMA_VERSION;
   target: string;
   generatedAt: string;
   summary: {
@@ -104,6 +112,11 @@ export interface AppQualityDiagnosis {
     emittedIssues: number;
     filteredOutIssues: number;
   };
+  confidence: AuditEvidenceMetadata["confidence"];
+  assessedDimensions: AuditEvidenceMetadata["assessedDimensions"];
+  unassessedDimensions: AuditEvidenceMetadata["unassessedDimensions"];
+  evidenceProvenance: AuditEvidenceMetadata["evidenceProvenance"];
+  appliedScoreCaps: AuditEvidenceMetadata["appliedScoreCaps"];
 }
 
 interface ScanOptions {
@@ -217,9 +230,15 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   const analysisMs = performance.now() - startedAt;
   const ux = buildUxAuditReport({ target, issues, appQualityScore: score });
   const compliance = checkSkillCompliance(files, { target });
+  const auditEvidence = buildAuditEvidenceMetadata({
+    dimensions: Object.keys(CATEGORY_BASE),
+    evidenceProvenance: [{ kind: "static-scan", analyzed: true, target }],
+    findingConfidences: issues.map((issue) => issue.confidence),
+  });
 
   const diagnosis: AppQualityDiagnosis = {
     version: 1,
+    schemaVersion: AUDIT_SCHEMA_VERSION,
     target,
     generatedAt: new Date().toISOString(),
     summary: {
@@ -262,6 +281,7 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
       preset: policy.preset,
     },
     scope: scopeMetadata,
+    ...auditEvidence,
   };
 
   if (options.write !== false) {
@@ -476,7 +496,16 @@ function issue(
   evidence: string[],
   recommendation: string,
 ): AppQualityIssue {
-  return { id, category, severity, title, detail, evidence, recommendation };
+  return {
+    id,
+    normalizedId: normalizeAuditFindingId(id),
+    category,
+    severity,
+    title,
+    detail,
+    evidence,
+    recommendation,
+  };
 }
 
 function enrichIssues(issues: AppQualityIssue[], graph: AppGraph, files: RawFile[]): AppQualityIssue[] {

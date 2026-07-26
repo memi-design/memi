@@ -103,7 +103,7 @@ describe("scanSources", () => {
       projectRoot: await makeRoot(),
       target,
       extensions: [".html"],
-    })).rejects.toThrow(/public http\\(s\\) address/i);
+    })).rejects.toThrow(/public http\(s\) address/i);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

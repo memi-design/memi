@@ -10,7 +10,7 @@
  */
 
 import { access, readFile } from "fs/promises";
-import { join, isAbsolute, resolve } from "path";
+import { isAbsolute, join, relative, resolve, sep } from "path";
 import {
   parseRegistry,
   type Registry,
@@ -198,10 +198,17 @@ export async function readRegistryFile(resolved: ResolvedRegistry, href: string)
   const { baseUrl } = resolved;
   // Strip leading ./
   const cleanHref = href.startsWith("./") ? href.slice(2) : href;
+  if (!cleanHref || cleanHref.includes("\\")) {
+    throw new Error(`Registry file reference is invalid: ${href}`);
+  }
 
   if (/^https?:\/\//.test(baseUrl)) {
-    const url = `${baseUrl}/${cleanHref}`;
-    assertSafePublicUrl(url);
+    const normalizedBase = new URL(baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`);
+    const url = new URL(cleanHref, normalizedBase);
+    assertSafePublicUrl(url.href);
+    if (url.origin !== normalizedBase.origin || !url.pathname.startsWith(normalizedBase.pathname)) {
+      throw new Error(`Registry file reference escapes the registry root: ${href}`);
+    }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     try {
@@ -214,7 +221,12 @@ export async function readRegistryFile(resolved: ResolvedRegistry, href: string)
   }
 
   // Local path
-  const fullPath = join(baseUrl, cleanHref);
+  const root = resolve(baseUrl);
+  const fullPath = resolve(root, cleanHref);
+  const relativePath = relative(root, fullPath);
+  if (relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath)) {
+    throw new Error(`Registry file reference escapes the registry root: ${href}`);
+  }
   return readFile(fullPath, "utf-8");
 }
 
