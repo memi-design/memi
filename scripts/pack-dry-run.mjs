@@ -7,7 +7,9 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const maxSizeBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_BYTES || "1275000", 10);
+// Security and evidence-contract code is intentionally shipped in the CLI.
+// Keep a tight ceiling while allowing the audited 2.6.x package to grow by <1%.
+const maxSizeBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_BYTES || "1285000", 10);
 const npmCommand = "npm";
 const tempRoot = await mkdtemp(join(tmpdir(), "memoire-pack-"));
 
