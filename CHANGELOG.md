@@ -43,6 +43,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `7b14e5e2` docs: record hosted compatibility proof
 - `e35e4583` test: define verified audit scorecard contract
 - `0c23a0c6` feat: enforce verified audit scorecards
+- `f64d1daf` test: define deterministic audit report gate
+- `a6a949e5` feat: generate verified 100-point audit ledger
 
 #### Architectural decisions
 
@@ -54,6 +56,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Test clean packed installs on Node 20, 22, and 24 across Linux, macOS, and Windows.
 - Keep every declared optional native package in the lockfile so strict `npm ci --include=optional` remains portable across supported npm versions and operating systems.
 - Award scorecard points only from fresh immutable evidence, require independent verification where declared, and apply uncleared score caps mechanically. Unknown, stale, failed, contradicted, missing, or self-verified proof earns zero.
+- Keep the goal audit on an exact 100-point scale, recompute local evidence SHA-256 digests, derive Markdown one-way from the canonical JSON ledger, and byte-check that report inside the release gate.
 
 ### Design Skills migration — `3009cf63`
 
