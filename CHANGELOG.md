@@ -51,6 +51,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `ec55e6b3` fix: harden audit scorecard trust gates
 - `60f0a5e8` test: close scorecard release fail-open paths
 - `fea0e567` fix: fail closed across scorecard release paths
+- `90d0067d` test: require full binary release gate
 
 #### Architectural decisions
 
