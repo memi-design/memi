@@ -4,10 +4,43 @@ Evidence baseline: 2026-07-26
 
 Current verified score: 69/100
 
+Raw passed points before caps: 82/100
+
+Engineering-only ceiling before the time-bound adoption criterion: 95/100
+
+Absolute earliest possible adoption close if a valid eight-week window began on
+2026-07-26: 2026-09-20. The real close date is eight weeks after Phase 1 clears
+and the fixed measurement definitions are live, so it may be later.
+
 Current caps:
 
 - `public-version-drift` caps the score at 69.
 - `hosted-ci-incomplete` caps the score at 84.
+
+## Current execution ledger
+
+| Workstream | Repository / PR | Current immutable head | Status | Blocking exit |
+|---|---|---|---|---|
+| Engine, CLI, MCP, package, Action | `sarveshsea/memi` PR 73 | `0018113dfbbe7886a332ce76726874e9e2a06715` | Candidate CI, clean-install matrix, and plugin scanner are green | Review, merge, publish a verified successor to immutable npm 2.6.2 |
+| Public website | `sarveshsea/memoire-web` PR 20 | `ed746daedfdde52b7d8cdb326c9db29560fdbaa6` | Local unit/build/size/Chromium proof and Vercel preview pass | GitHub-hosted job is blocked before startup by account billing or spending limits; then review, merge, and deploy |
+| Canonical shader skills | `sarveshsea/design-skills` PR 5 | `8a5f29f6b3ab5336b103386e225d21dd523e3bec` | Checks pass; canonical skills and routing gate exist | Review, merge, publish/install proof, then record immutable release evidence |
+| WebGL2 shader lab | `sarveshsea/design-sandbox` PR 2 | `65bd7efdd20af4d38474b3de80703e364df2d580` | Checks pass; isolated lab and blocking proof workflow exist | Review, merge, deploy, and capture durable cross-browser/rendering evidence |
+
+Hosted engine evidence:
+
+- CI: <https://github.com/sarveshsea/memi/actions/runs/30225637493>
+- Clean install compatibility: <https://github.com/sarveshsea/memi/actions/runs/30225637505>
+- HOL Plugin Scanner: <https://github.com/sarveshsea/memi/actions/runs/30225637521>
+
+Website blocker evidence:
+
+- Failed-before-start workflow:
+  <https://github.com/sarveshsea/memoire-web/actions/runs/30225897481>
+- GitHub annotation: “The job was not started because recent account payments
+  have failed or your spending limit needs to be increased.”
+
+The engine runs prove the engine candidate. They do not clear the separate
+website hosted-CI cap.
 
 Current unassessed criteria:
 
@@ -61,6 +94,10 @@ Exit evidence:
 
 Why first: `public-version-drift` cannot clear while the repo itself still contains contradictory public guidance.
 
+Current state: source-side truth repair is implemented on the engine and website
+candidate branches. The phase remains open until those changes are reviewed,
+merged, published, deployed, and verified against live URLs.
+
 ### Phase 1: Clear the active score caps
 
 Goal: move from capped 69 to uncapped technical scoring.
@@ -93,6 +130,10 @@ Exit evidence:
 - Hosted workflow run URL with terminal success.
 - Check annotations show no blocked startup state.
 - Scorecard cap state changes from `active` to `cleared` with clearing evidence IDs.
+
+Current state: engine hosted CI is green. Website run `30225897481` failed before
+executing steps with the same billing/spending annotation, so this cap remains
+active and is not a code failure.
 
 Why second: until both caps clear, no rescore can exceed 84 regardless of technical quality.
 
@@ -267,6 +308,16 @@ Weekly operating loop:
 
 This phase has a calendar dependency. It should start immediately after Phase 1 clears public truth and hosted CI so traffic and audit evidence are not collected against stale public copy.
 
+Measurement lock:
+
+- Publish a timestamped kickoff ledger before counting any event.
+- Freeze the definitions of qualified visit, successful first audit, external
+  integration, repeat audit, release week, and non-release week for the window.
+- Count public evidence or explicit opt-in evidence only.
+- Deduplicate repository and actor evidence without storing private source.
+- Record exclusions and corrections append-only.
+- Do not backfill pre-kickoff activity into the eight-week result.
+
 ### Phase 4: Final rescore and independent closeout
 
 Goal: prove 100/100 rather than merely stop finding gaps.
@@ -294,6 +345,32 @@ Final acceptance rule:
    - SwiftUI rendered rerun
    - zero routing gaps
    - durable rendering evidence
+
+## Critical path and stop rules
+
+1. Review and merge the four candidate PRs only after their repository-specific
+   required checks pass. A green Vercel preview is not a substitute for the
+   blocked website GitHub workflow.
+2. Cut the next engine version from the reviewed merge commit. Never move or
+   rewrite the historical `v2.6.2` tag or npm artifact.
+3. Publish npm, GitHub release, Action metadata, MCP metadata, and the generated
+   website release artifact from that same release manifest.
+4. Deploy the website and shader lab, then run public parity and clean-room
+   install gates from fresh directories.
+5. Close the seven technical unknowns with independently reviewed artifacts.
+6. Start the eight-week adoption clock only after public parity is green.
+7. Perform a fresh final audit from public state, not from a feature branch.
+
+Stop immediately and keep the applicable criterion unassessed when:
+
+- an evidence artifact cannot be tied to a commit and environment;
+- a clean-room test uses an unpublished local package by accident;
+- a rendered proof has zero scanned source files or only fixture evidence;
+- a workflow did not start;
+- a public surface differs from the release manifest;
+- a result relies on covert telemetry, private repository contents, or an
+  unverified self-report;
+- an independent reviewer cannot reproduce the claimed result.
 
 ## Fastest possible honest timeline
 

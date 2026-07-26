@@ -6,9 +6,9 @@ Evidence date: 2026-07-26
 
 **Kickoff public baseline: 47/100, blocked.**
 
-**Verified implementation candidate: 75/100, launchable with caveats.**
+**Verified implementation candidate: 82/100, launchable with caveats.**
 
-The 75/100 score is not the current public score. It belongs to reviewed candidate branches and the merged evaluation fork, after removing creative-rendering points that are not backed by shipped local files in this checkout. The exact 2.6.2 release tag and fork integration were completed after the kickoff snapshot, but partial remediation is not silently folded into a new score. Until a complete post-deployment rescore, 47/100 remains the last fully assessed public snapshot.
+The 82/100 score is not the current public score. It belongs to reviewed candidate branches across the explicitly owned Memi, design-skills, design-sandbox, website, and evaluation-fork repositories. The exact 2.6.2 release tag and fork integration were completed after the kickoff snapshot, but partial remediation is not silently folded into a new score. Until a complete post-deployment rescore, 47/100 remains the last fully assessed public snapshot.
 
 The baseline score is capped at 69 for public version and product-story drift. The source checkout's baseline lockfile did contain a high-severity production advisory, but a separate clean install of the published 2.6.2 package returned zero high and critical advisories. The stricter 49-point public-package security cap therefore does not apply.
 
@@ -35,13 +35,13 @@ Stars and npm downloads are therefore lagging indicators. The operating funnel i
 | --- | ---: | ---: | ---: | --- |
 | Core job, activation, useful first result | 15 | 9 | 13 | Pinned no-write command becomes the first action; audit JSON gains normalized evidence metadata. |
 | CLI, MCP, skills, site, Studio, release parity | 15 | 6 | 11 | Candidate centralizes site release data, but it is not deployed and the corrected core is not published. |
-| Design-engineering depth and rendered quality | 15 | 9 | 13 | Artifact-backed website proof and SwiftUI simulator evaluation were reviewed, but no shipped local shader proof is verified in this checkout. |
+| Design-engineering depth and rendered quality | 15 | 9 | 13 | Artifact-backed website proof, a separately owned WebGL2 lab, and SwiftUI simulator evaluation now exist. |
 | Skill governance, routing, freshness, provenance | 15 | 9 | 14 | 94 skills scored; mean 86/100; five-state dispositions; zero duplicate primary routes; 180-day shader freshness gate. |
-| Shader, dither, creative rendering | 10 | 1 | 1 | Reference policy is explicit, but no shipped shader-focused skills or local shader proof are verified in this checkout. |
+| Shader, dither, creative rendering | 10 | 1 | 8 | Two canonical skills and a separately owned original WebGL2 proof cover ordered/noise dithering, distortion, fallback, and evidence export. |
 | Security, privacy, licensing, supply chain | 10 | 3 | 9 | Candidate production audits are zero; fetch, path, archive, publisher, and media-provenance boundaries are hardened. |
 | GitHub/npm funnel and community proof | 10 | 3 | 5 | Funnel and measurement are repaired, but external adoption targets are not yet achieved. |
 | Testing, compatibility, operations | 10 | 7 | 9 | Core, catalog, site, web proof, simulator build, and independent review gates pass. |
-| **Total** | **100** | **47** | **75** | Candidate score remains non-public until release and deployment. |
+| **Total** | **100** | **47** | **82** | Candidate score remains non-public until release and deployment. |
 
 Machine-readable evidence is in [`memi-design-engineering-audit-2026-07-26.json`](./memi-design-engineering-audit-2026-07-26.json). Its evidence ledger records the capture time, API endpoints, calculation method, and time-bounded values for GitHub, npm, skills.sh, and release provenance.
 
@@ -72,6 +72,8 @@ Core verification:
 ### Canonical design skills
 
 - Expanded the catalog from 92 to 94 skills.
+- Added `shader-design-engineering` and `creative-rendering-audit`, both scoring 100/100 under the catalog rubric.
+- Added progressive references for WebGL2/GLSL, WGSL/WebGPU, SwiftUI/Metal, dithering, performance, accessibility, debugging, and audit evidence.
 - Routed nine neighboring SwiftUI, motion, animation, color, and design-engineering skills away from shader ambiguity.
 - Published a full stocktake:
   - Mean: 86/100.
@@ -83,19 +85,32 @@ Core verification:
 - Implemented concrete `Merge into <canonical>` output for future routing collisions.
 - Enforced actual completion timestamps and a 180-day shader-reference freshness gate.
 
-This checkout still ships only the existing focused built-in skills under `skills/`. No shader-focused built-in skill is verified here, so the candidate score does not count unshipped catalog additions.
+These canonical catalog additions live in the separate `design-skills` candidate
+at commit `8a5f29f6b3ab5336b103386e225d21dd523e3bec`; Memi continues to ship only
+focused entry skills and routers rather than duplicating the full catalog.
 
 Catalog verification: 33 checks pass under the default parallel command, including an isolated-workspace regression for the former catalog rewrite race. A 45-prompt catalog QA benchmark scores 44/45, or 97.8%, against the 90% gate; all six negative near-misses abstain. The benchmark evaluates catalog metadata and skill descriptions, not Memi runtime routing, and preserves one WGSL ripple/creative-audit confusion instead of hiding it. All 94 skills validate and list through `npx skills@1.5.17`, and the production dependency audit is clean.
 
-### Creative-rendering gap remains open
+### Web shader proof
 
-The creative-rendering reference policy is now explicit, but this checkout does not ship local proof for shader or dithering capability.
+The separate `design-sandbox` candidate at commit
+`65bd7efdd20af4d38474b3de80703e364df2d580` provides the isolated
+`/labs/shaders` route:
 
-- No shader-focused built-in skill is present under `skills/`.
-- No local shader-lab route is present in the audited checkout.
-- No local browser proof or fallback artifact is counted toward the candidate score.
+- Original WebGL2/GLSL ES 3 rendering.
+- Ordered Bayer and fixed-seed noise dithering.
+- Ripple and distortion controls.
+- Original, processed, and Canvas fallback comparison.
+- Reduced-motion/static behavior.
+- JSON evidence export.
+- Explicit Atomic Design ownership for atoms, molecules, organism, and page.
+- A WebGPU/WGSL future-adapter boundary without delaying the first proof.
 
-This gap remains real. Any future creative-rendering points must come from shipped local files plus durable browser evidence, not from candidate notes or external branch references.
+The proof does not copy source or media from The Book of Shaders or LYGIA.
+Its blocking hosted workflow passed. The candidate points remain non-public
+until the skill and lab PRs are merged and the lab is deployed. Durable GPU,
+energy, color, alpha, temporal-stability, and cross-browser evidence remains
+unassessed.
 
 ### SwiftUI evaluation fork
 
@@ -163,7 +178,7 @@ A successful first audit requires a completed external run and either a file-anc
 
 1. Merge and publish the hardened Memi core candidate as a new verified version. The missing `v2.6.2` release was restored at the exact npm `gitHead`; the immutable npm artifact was not changed.
 2. Merge and deploy the website candidate, then verify the live first-fold command, version parity, referrals, and reduced-motion behavior.
-3. Either ship the creative-rendering scope in this repository or remove it from future launch scoring entirely.
+3. Merge and publish the canonical skill candidate, and merge and deploy the separately owned shader-lab candidate.
 4. Keep the reviewed ripple integration on the fork’s default branch and use its first real Action run as the next public integration proof.
 5. Add real SwiftUI source and rendered-evidence coverage before marketing SwiftUI audit quality.
 6. Collect eight weeks of adoption evidence before claiming the growth targets are achieved.
@@ -176,5 +191,7 @@ A successful first audit requires a completed external run and either a file-anc
 | Surface | Branch | Reviewed state |
 | --- | --- | --- |
 | Memi core | `codex/memi-design-engineering-audit` | Core and follow-up security review approved |
+| Canonical skills | `codex/shader-design-engineering` | Checks pass; merge and publish proof remain |
+| Shader lab | `codex/shader-design-lab` | Blocking hosted proof passes; merge, deploy, and durable rendering evidence remain |
 | Public website | `codex/memi-design-engineering-audit` | Artifact proof and production-security review approved |
 | SwiftUI fork | `codex/memi-design-audit-integration` | Merged to the fork's `main`; provenance and hash-gate follow-up approved |

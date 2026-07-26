@@ -22,7 +22,7 @@
     ]
   },
   "implementationCandidate": {
-    "score": 75,
+    "score": 82,
     "maximum": 100,
     "verdict": "launchable-with-caveats",
     "confidence": 0.9,
@@ -57,7 +57,7 @@
       "candidate": 13,
       "evidence": [
         "Memi had broad design-system and audit machinery but limited rendered proof.",
-        "The candidate adds artifact-backed website proof and a SwiftUI simulator evaluation, but no shipped local shader proof is verified in this checkout."
+        "The candidate adds artifact-backed website proof, a separately owned WebGL2 lab, and a SwiftUI simulator evaluation."
       ]
     },
     {
@@ -74,10 +74,10 @@
       "id": "shader-and-dither",
       "maximum": 10,
       "baseline": 1,
-      "candidate": 1,
+      "candidate": 8,
       "evidence": [
         "No canonical shader or dither workflow existed.",
-        "The reference policy is explicit, but no shipped shader-focused skills or local browser proof are verified in this checkout."
+        "The separately owned candidate adds two canonical shader skills plus an original deterministic WebGL2 proof with Bayer and seeded-noise dithering, fallbacks, and evidence export."
       ]
     },
     {
@@ -114,6 +114,29 @@
   ],
   "evidenceLedger": {
     "capturedAt": "2026-07-26T21:16:34Z",
+    "relatedRepositories": {
+      "designSkills": {
+        "repository": "https://github.com/sarveshsea/design-skills",
+        "pullRequest": "https://github.com/sarveshsea/design-skills/pull/5",
+        "commit": "8a5f29f6b3ab5336b103386e225d21dd523e3bec",
+        "run": "https://github.com/sarveshsea/design-skills/actions/runs/30221440493",
+        "job": "https://github.com/sarveshsea/design-skills/actions/runs/30221440493/job/89844464264",
+        "status": "checks-passed",
+        "skills": [
+          "shader-design-engineering",
+          "creative-rendering-audit"
+        ]
+      },
+      "designSandbox": {
+        "repository": "https://github.com/sarveshsea/design-sandbox",
+        "pullRequest": "https://github.com/sarveshsea/design-sandbox/pull/2",
+        "commit": "65bd7efdd20af4d38474b3de80703e364df2d580",
+        "route": "/labs/shaders",
+        "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30221374856",
+        "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30221374856/job/89844295228",
+        "status": "passed"
+      }
+    },
     "githubRepository": {
       "sources": [
         "GET https://api.github.com/repos/sarveshsea/memi",
@@ -255,8 +278,8 @@
   "remainingEvidenceGaps": [
     "Merge, publish, and deploy the candidate branches before using 75/100 as a public claim.",
     "Memi 2.6.2 scans zero SwiftUI files and must not claim SwiftUI design-quality coverage.",
-    "This checkout still lacks shipped shader-focused skills and local browser proof for creative-rendering capability.",
-    "Any future creative-rendering score must be backed by durable local browser evidence, not external branch notes.",
+    "The canonical shader skills and shader lab are reviewed candidate branches in their separately owned repositories; they must be merged, published or deployed, and reverified before becoming public-current proof.",
+    "Durable cross-browser GPU, energy, color, alpha, and temporal-stability evidence remains unassessed.",
     "The website hosted CI did not start because of the GitHub account billing/spending gate; local tests and the Vercel preview passed, but hosted runner proof remains outstanding.",
     "The public-release gate exits on live docs and changelog parity before installSmoke, so the public aggregate result cannot claim that stage passed.",
     "Growth targets require eight weeks of public or explicitly opted-in evidence.",

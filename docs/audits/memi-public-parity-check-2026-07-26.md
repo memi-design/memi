@@ -120,3 +120,45 @@ The website-hosted CI blocker may also still be active, but this check did not i
 5. Ensure the changelog page includes the new CLI release.
 6. Re-run `npm run check:public-release`.
 7. Capture the successful hosted website CI run and add it to the scorecard evidence ledger.
+
+## Website source status after the parity repair pass
+
+The separate `memoire-web` source checkout was updated and pushed at commit
+`ed746daedfdde52b7d8cdb326c9db29560fdbaa6` after this public check. It now
+reflects the current release truth in the source tree:
+
+- docs import the central release constants and show the current CLI version
+- docs now surface the read-only first-audit command
+- OG API taglines now use the read-only design-engineering story
+- the Design CI registry JSON and its tests stay pinned to the current CLI line
+- the Product Hunt update page no longer repeats the older primary slogan in its
+  launch-copy block
+
+Local verification completed in the website source checkout:
+
+```bash
+npm test
+npm run build
+npm run check:size
+npx playwright test --project chromium
+```
+
+Observed result:
+
+- 31 unit-test files and 208 tests passed
+- full Astro production build completed successfully
+- all deterministic bundle budgets passed
+- 76 Chromium E2E tests passed and 4 were intentionally skipped
+- Vercel preview deployment completed successfully
+- the public Design CI recipe pins both checkout and Memi to audited immutable
+  commit SHAs
+
+This improves source readiness, but it does **not** clear the public-version
+drift cap. The deployed site and published npm package must still be updated and
+re-verified independently.
+
+The website hosted-CI cap also remains active. Run
+<https://github.com/sarveshsea/memoire-web/actions/runs/30225897481> failed before
+executing any workflow step. GitHub reported that recent account payments failed
+or the spending limit must be increased. This is an external account blocker,
+not a passing or failing execution of the candidate.

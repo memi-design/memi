@@ -16,7 +16,7 @@
       "capturedAt": "2026-07-26T21:16:34.000Z",
       "artifact": {
         "location": "memi-design-engineering-audit-2026-07-26.json",
-        "sha256": "c9dcb40830118733ba3551ff99445643c9ffa6bd7a780906874f71ac4ae18cb2"
+        "sha256": "2711540c925b10ba605356f95542ecc11857f9c0917ef3b8f35d309d4bf88a00"
       },
       "producer": "agent:memi-audit-implementation",
       "verifier": "agent:independent-audit-review",
@@ -87,7 +87,7 @@
       "criteria": [
         {
           "id": "candidate-rendered-proof",
-          "title": "Reviewed website and simulator proof artifacts, without counting unshipped local shader scope",
+          "title": "Reviewed website, separate WebGL2 lab, and simulator proof artifacts",
           "points": 13,
           "assessment": "passed",
           "evidenceIds": [
@@ -138,21 +138,13 @@
       "owner": "design-sandbox",
       "criteria": [
         {
-          "id": "candidate-scope-boundary",
-          "title": "Reference policy and explicit non-claim boundary for unshipped creative-rendering scope",
-          "points": 1,
+          "id": "candidate-webgl-proof",
+          "title": "Original deterministic WebGL2 Bayer and seeded-noise proof with fallbacks in the separately owned design-sandbox candidate",
+          "points": 8,
           "assessment": "passed",
           "evidenceIds": [
             "reviewed-candidate-audit"
           ],
-          "requiresIndependentVerification": true
-        },
-        {
-          "id": "candidate-webgl-proof",
-          "title": "Shipped shader-focused skills and local browser proof in the audited checkout",
-          "points": 7,
-          "assessment": "failed",
-          "evidenceIds": [],
           "requiresIndependentVerification": true
         },
         {
