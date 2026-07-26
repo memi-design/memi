@@ -95,6 +95,9 @@ describe("scanSources", () => {
     "http://127.0.0.1/app",
     "http://169.254.169.254/latest/meta-data",
     "http://[::1]/app",
+    "http://[::ffff:127.0.0.1]/app",
+    "http://[::ffff:169.254.169.254]/latest/meta-data",
+    "http://[::ffff:10.0.0.1]/app",
   ])("rejects private and loopback URL targets: %s", async (target) => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);

@@ -3,7 +3,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { mkdtemp, rm, writeFile, mkdir } from "fs/promises";
+import { mkdtemp, rm, writeFile, mkdir, symlink } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
 import { resolveRegistry, readRegistryFile, findComponentRef } from "../resolver.js";
@@ -52,6 +52,14 @@ describe("Registry resolver", () => {
   it("blocks private IPv4 ranges", async () => {
     await expect(resolveRegistry("http://192.168.1.1/r.json")).rejects.toThrow(/private\/loopback/);
     await expect(resolveRegistry("http://10.0.0.1/r.json")).rejects.toThrow(/private\/loopback/);
+  });
+
+  it.each([
+    "http://[::ffff:127.0.0.1]/registry.json",
+    "http://[::ffff:169.254.169.254]/registry.json",
+    "http://[::ffff:10.0.0.1]/registry.json",
+  ])("blocks IPv4-mapped IPv6 private URLs: %s", async (url) => {
+    await expect(resolveRegistry(url)).rejects.toThrow(/private\/loopback/);
   });
 
   it("rejects non-http(s) protocols", async () => {
@@ -105,6 +113,22 @@ describe("Registry resolver", () => {
       await expect(readRegistryFile(resolved, "/etc/passwd")).rejects.toThrow(/escapes the registry root/i);
     } finally {
       await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("rejects local registry symlinks that escape the registry root", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "memoire-resolver-"));
+    const outside = await mkdtemp(join(tmpdir(), "memoire-resolver-secret-"));
+    try {
+      await writeFile(join(dir, "registry.json"), JSON.stringify(validRegistry));
+      await writeFile(join(outside, "secret.json"), "{\"secret\":true}");
+      await symlink(join(outside, "secret.json"), join(dir, "linked.json"));
+      const resolved = await resolveRegistry(dir);
+
+      await expect(readRegistryFile(resolved, "./linked.json")).rejects.toThrow(/escapes the registry root/i);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+      await rm(outside, { recursive: true, force: true });
     }
   });
 

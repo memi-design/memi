@@ -8,6 +8,14 @@ import type { AnySpec } from "../../specs/types.js";
 import { installShadcnRegistryItem, resolveShadcnRegistryItem } from "../installer.js";
 
 describe("shadcn registry installer", () => {
+  it.each([
+    "http://[::ffff:127.0.0.1]/registry.json",
+    "http://[::ffff:169.254.169.254]/registry.json",
+    "http://[::ffff:10.0.0.1]/registry.json",
+  ])("rejects IPv4-mapped IPv6 private registry URLs: %s", async (url) => {
+    await expect(resolveShadcnRegistryItem(url, "Button", process.cwd())).rejects.toThrow(/unsafe/i);
+  });
+
   it("installs item content to file targets and records a spec", async () => {
     const projectRoot = await mkdtemp(join(tmpdir(), "memoire-shadcn-install-"));
     try {
