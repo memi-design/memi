@@ -62,7 +62,7 @@ Machine-readable evidence is in [`memi-design-engineering-audit-2026-07-26.json`
 
 Core verification:
 
-- 1,762 tests across 233 files.
+- 1,763 tests across 233 files.
 - Strict typecheck, lint, build, release consistency, Codex plugin smoke, local packed-install smoke, isolated public 2.6.2 install smoke, and `npm audit` pass. The MCP smoke observed 50 tools; its enforced regression floor remains 20 tools plus six named tools.
 - Package size: 1,281,175 of the 1,285,000-byte gate.
 - Independent security review reproduced the original SSRF, symlink, and ZIP failures, then verified them fail closed after correction.

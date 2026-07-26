@@ -108,7 +108,7 @@
       "candidate": 9,
       "evidence": [
         "The baseline built, but the source release gate failed on dependency and public-surface parity checks.",
-        "The candidate passes 1,762 Memi tests across 233 files, 33 parallel-safe design-skills checks, a 44/45 catalog-routing benchmark, 206 site tests, blocking shader unit/browser CI, iOS simulator build, production audits, and independent review. An isolated public 2.6.2 install smoke passed; the aggregate public-release gate still exits on live docs and changelog drift before its installSmoke stage."
+        "The candidate passes 1,763 Memi tests across 233 files, 33 parallel-safe design-skills checks, a 44/45 catalog-routing benchmark, 206 site tests, blocking shader unit/browser CI, iOS simulator build, production audits, and independent review. An isolated public 2.6.2 install smoke passed; the aggregate public-release gate still exits on live docs and changelog drift before its installSmoke stage."
       ]
     }
   ],
