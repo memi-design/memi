@@ -31,6 +31,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `88212761` docs: publish design engineering audit
 - `dc947d37` test: reproduce shallow release manifest drift
 - `2374d6be` fix: validate release artifacts in shallow clones
+- `022427bb` fix: complete optional canvas lock metadata
 
 #### Architectural decisions
 
@@ -40,6 +41,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Use one canonical release manifest for engine, npm, GitHub release, Action, MCP, Studio, and site release groups. Cross-repository exports carry immutable source-commit and SHA-256 provenance.
 - Separate offline manifest validation from live release proof, and require the engine PR to publish its immutable source before website CI verifies the derived artifact.
 - Test clean packed installs on Node 20, 22, and 24 across Linux, macOS, and Windows.
+- Keep every declared optional native package in the lockfile so strict `npm ci --include=optional` remains portable across supported npm versions and operating systems.
 
 ### Design Skills migration — `3009cf63`
 
