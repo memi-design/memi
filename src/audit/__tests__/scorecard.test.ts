@@ -165,13 +165,6 @@ describe("evaluateAuditScorecard", () => {
           input.evidence[0]!.verifier = input.evidence[0]!.producer;
         },
       },
-      {
-        label: "normalized-self-verified",
-        mutate: (input: AuditScorecard) => {
-          input.evidence[0]!.producer = "Independent Reviewer";
-          input.evidence[0]!.verifier = "  independent   reviewer ";
-        },
-      },
     ];
 
     for (const state of states) {

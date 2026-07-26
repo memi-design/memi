@@ -1,6 +1,6 @@
 # Memi 100-point end-to-end scorecard
 
-Evidence evaluated: 2026-07-26T22:30:00.000Z
+Evidence evaluated: 2026-07-26T21:16:34.000Z
 
 **Verified score: 69/100**
 
@@ -28,4 +28,4 @@ Evidence evaluated: 2026-07-26T22:30:00.000Z
 - Applied cap: `public-version-drift` at 69
 - Applied cap: `hosted-ci-incomplete` at 84
 
-Generated from `docs/audits/memi-100-scorecard.json` · Ledger SHA-256: `001f931e6b9e10c2506cf5df90a085426b584f5fb958f5611ce652a9da7b0b7b`
+Generated from `docs/audits/memi-100-scorecard.json` · Ledger SHA-256: `4d38242ef22c7b172df80630a7de60aa7ce940983a4bd6af2a3b7ec88cba53a8`

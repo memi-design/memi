@@ -3,7 +3,7 @@
   "auditId": "memi-100",
   "title": "Memi 100-point end-to-end scorecard",
   "targetScore": 100,
-  "assessedAt": "2026-07-26T22:30:00.000Z",
+  "assessedAt": "2026-07-26T21:16:34.000Z",
   "subject": {
     "repository": "https://github.com/sarveshsea/memi",
     "commit": "2a557274eeec278e9439d8ba2fd54680c1ca2302"
@@ -18,11 +18,14 @@
         "location": "memi-design-engineering-audit-2026-07-26.json",
         "sha256": "787d0a92b2859c038a96f07b3f84c5adbf05242d1ecd32d5cbeb234f69d4a741"
       },
-      "producer": "memi-audit-implementation",
-      "verifier": "independent-audit-review",
+      "producer": "agent:memi-audit-implementation",
+      "verifier": "agent:independent-audit-review",
       "environment": "Cross-repository audit ledger with GitHub, npm, skills.sh, Vercel, simulator, and clean-install evidence"
     }
   ],
+  "derivedFromAudit": {
+    "candidateAuditEvidenceId": "reviewed-candidate-audit"
+  },
   "dimensions": [
     {
       "id": "core-activation",

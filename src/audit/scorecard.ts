@@ -5,6 +5,13 @@ export const AUDIT_SCORECARD_SCHEMA_VERSION = 1 as const;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SHA256 = /^[a-f0-9]{64}$/;
 const IDENTIFIER = /^[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?$/;
+const REVIEWER_IDENTITY = /^(agent|ci|github|human):[a-z0-9](?:[a-z0-9._/-]*[a-z0-9])?$/;
+const ReviewerIdentitySchema = z.string()
+  .max(160)
+  .regex(
+    REVIEWER_IDENTITY,
+    "Use a canonical reviewer identity such as agent:name, ci:workflow, github:user, or human:name.",
+  );
 
 export const EVIDENCE_TTL_DAYS = {
   "live-release": 1,
@@ -35,8 +42,8 @@ const AuditEvidenceSchema = z.object({
     location: z.string().min(1),
     sha256: z.string().regex(SHA256, "Artifact sha256 must be 64 lowercase hexadecimal characters."),
   }),
-  producer: z.string().min(1),
-  verifier: z.string().min(1),
+  producer: ReviewerIdentitySchema,
+  verifier: ReviewerIdentitySchema,
   environment: z.string().min(1),
   ttlDays: z.number().int().positive().max(3650).optional(),
 });
@@ -83,6 +90,10 @@ const AuditScoreCapSchema = z.object({
   }
 });
 
+const AuditDerivationSchema = z.object({
+  candidateAuditEvidenceId: z.string().regex(IDENTIFIER),
+});
+
 export const AuditScorecardSchema = z.object({
   schemaVersion: z.literal(AUDIT_SCORECARD_SCHEMA_VERSION),
   auditId: z.string().regex(IDENTIFIER),
@@ -96,6 +107,7 @@ export const AuditScorecardSchema = z.object({
   evidence: z.array(AuditEvidenceSchema),
   dimensions: z.array(AuditDimensionSchema).min(1),
   caps: z.array(AuditScoreCapSchema),
+  derivedFromAudit: AuditDerivationSchema.optional(),
 }).superRefine((scorecard, context) => {
   addDuplicateIssues(scorecard.evidence.map((entry) => entry.id), "Duplicate evidence id", ["evidence"], context);
   addDuplicateIssues(scorecard.dimensions.map((entry) => entry.id), "Duplicate dimension id", ["dimensions"], context);
@@ -131,6 +143,18 @@ export const AuditScorecardSchema = z.object({
         path: ["caps", capIndex, "maximum"],
       });
     }
+  }
+
+  const derivedFromAudit = scorecard.derivedFromAudit;
+  if (
+    derivedFromAudit
+    && !scorecard.evidence.some((entry) => entry.id === derivedFromAudit.candidateAuditEvidenceId)
+  ) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Derived audit evidence id ${derivedFromAudit.candidateAuditEvidenceId} is missing from evidence.`,
+      path: ["derivedFromAudit", "candidateAuditEvidenceId"],
+    });
   }
 });
 
@@ -316,7 +340,10 @@ function createEvidenceState(asOf: Date, evidenceById: Map<string, AuditEvidence
       contradicted.add(id);
       return false;
     }
-    if (requiresIndependentVerification && evidence.producer === evidence.verifier) {
+    if (
+      requiresIndependentVerification
+      && normalizeVerifierIdentity(evidence.producer) === normalizeVerifierIdentity(evidence.verifier)
+    ) {
       selfVerified.add(id);
       return false;
     }
@@ -351,4 +378,8 @@ function parseInstant(value: string, label: string): Date {
 
 function sorted(values: Iterable<string>): string[] {
   return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
+}
+
+function normalizeVerifierIdentity(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
 }
