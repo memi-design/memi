@@ -58,6 +58,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `f804ba6b` fix: report native audit gaps in mixed repos
 - `fcdf4a11` test: pin workflow action refs
 - `3b0557d5` fix: pin workflow action refs
+- `2d0d9428` test: require read-only workflow defaults
+- `db0219d2` fix: scope workflow write permissions
 
 #### Architectural decisions
 
@@ -76,6 +78,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Keep native static analysis file-anchored and conservative: web scores stay explicitly scoped when SwiftUI or Metal evidence is incomplete, history trends compare only like-for-like coverage, and clean partial scans must not claim either whole-product proof or zero analysis.
 - Preserve a comparable web score in mixed repositories while exposing every native limitation as a machine-readable unassessed dimension, preventing CI and reports from turning partial coverage into clean-pass copy.
 - Pin every third-party GitHub Actions workflow dependency to an audited upstream release commit SHA, and test the exact refs so release, publish, scanner, and runtime trust does not drift silently.
+- Default every GitHub workflow to read-only repository contents and grant write scopes only at the specific job that uploads SARIF, publishes through OIDC, or mutates release assets, so permission drift fails closed.
 
 ### Design Skills migration — `3009cf63`
 
