@@ -53,6 +53,23 @@ describe("growth status script contract", () => {
     });
   });
 
+  it("does not call a partial recovery growing while it remains below the prior baseline", () => {
+    const downloads = [
+      ...Array(7).fill(100),
+      ...Array(7).fill(70),
+      ...Array(7).fill(90),
+    ].map((count, index) => ({ day: `2026-07-${String(index + 1).padStart(2, "0")}`, downloads: count }));
+
+    expect(summarizeDownloadRange({ downloads })).toMatchObject({
+      latest7: 630,
+      previous7: 490,
+      prior7: 700,
+      latestVsPrevious: 0.2857142857142857,
+      latestVsPrior: -0.1,
+      classification: "stable",
+    });
+  });
+
   it("surfaces an npm range API failure instead of calling it insufficient data", () => {
     expect(summarizeDownloadRange({
       ok: false,
@@ -142,6 +159,27 @@ describe("growth status script contract", () => {
       current: 128,
       gap: 7_702,
       achieved: false,
+    });
+    expect(status.growth.adoptionTargets).toEqual({
+      telemetryRequired: false,
+      evidenceMode: "privacy_safe_verified_aggregate",
+      externalIntegrations: {
+        target: 10,
+        unit: "integrations",
+      },
+      successfulFirstAudits: {
+        target: 100,
+        unit: "audits",
+      },
+      repeatAudits: {
+        target: 25,
+        unit: "repeat_audits",
+      },
+      sustainedNonReleaseBaselineGrowth: {
+        target: 0.25,
+        unit: "ratio",
+        releasePeriodsExcluded: true,
+      },
     });
     expect(status.downloads.legacyAliases[0].weekly.downloads).toBe(979);
     expect(status.studio.latestRelease).toMatchObject({ tag: "v1.0.0", totalDownloads: 3 });
