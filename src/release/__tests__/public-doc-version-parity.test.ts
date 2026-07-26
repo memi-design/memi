@@ -15,6 +15,7 @@ const manifest = JSON.parse(
 
 const engineVersion = manifest.releaseGroups.engine.version;
 const studioVersion = manifest.releaseGroups.studio.version;
+const primaryStory = "read-only design engineering audit and skill layer for coding agents";
 
 const engineDocs = [
   "docs/RELEASE_GATES.md",
@@ -64,6 +65,45 @@ describe("public documentation release truth", () => {
 
     const readme = await readFile(join(root, "README.md"), "utf8");
     expect(readme).toContain("[current versions](docs/CURRENT_RELEASE.md)");
+  });
+
+  it("keeps the primary product story aligned across current public guidance", async () => {
+    for (const path of [
+      "README.md",
+      "docs/CURRENT_RELEASE.md",
+      "docs/METRICS.md",
+      "docs/PUBLIC_REPOS.md",
+      "docs/RELEASE_GATES.md",
+      "docs/SEO.md",
+      "docs/V2_PACKAGE_POSITIONING.md",
+    ]) {
+      const source = (await readFile(join(root, path), "utf8")).toLowerCase();
+      expect(source, `${path} should contain the primary public story`).toContain(primaryStory);
+    }
+
+    for (const path of [
+      "scripts/check-release.mjs",
+      "scripts/check-public-release-gate.mjs",
+    ]) {
+      const source = (await readFile(join(root, path), "utf8")).toLowerCase();
+      expect(source, `${path} should enforce the primary public story`).toContain(primaryStory);
+    }
+
+    for (const path of [
+      "package.json",
+      "server.json",
+      "mcpb/manifest.json",
+      "plugins/memoire/.codex-plugin/plugin.json",
+      "plugins/memi-claude/.claude-plugin/plugin.json",
+    ]) {
+      const metadata = JSON.parse(await readFile(join(root, path), "utf8")) as {
+        description?: string;
+      };
+      expect(
+        metadata.description?.toLowerCase(),
+        `${path} should carry the primary public story`,
+      ).toContain(primaryStory);
+    }
   });
 
   it("marks every retained launch snapshot as historical before its old guidance", async () => {
