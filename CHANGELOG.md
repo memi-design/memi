@@ -35,10 +35,12 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `efb3ed34` test: require full history for release exports
 - `e0da86b1` fix: refuse shallow release artifact generation
 - `a9be8860` fix: isolate release manifest CI fixtures
+- `25474e40` docs: record detached CI fixture fix
 - `426ba5fb` docs: record full-history export guard
 - `022427bb` fix: complete optional canvas lock metadata
 - `96ada33c` docs: record npm lock portability decision
 - `13c9d6a5` docs: refresh final audit verification count
+- `7b14e5e2` docs: record hosted compatibility proof
 
 #### Architectural decisions
 
