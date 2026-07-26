@@ -49,6 +49,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `039fd823` fix: enforce package size headroom
 - `b4509197` test: close scorecard trust bypasses
 - `ec55e6b3` fix: harden audit scorecard trust gates
+- `60f0a5e8` test: close scorecard release fail-open paths
+- `fea0e567` fix: fail closed across scorecard release paths
 
 #### Architectural decisions
 
@@ -63,6 +65,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Keep the goal audit on an exact 100-point scale, recompute local evidence SHA-256 digests, derive Markdown one-way from the canonical JSON ledger, and byte-check that report inside the release gate.
 - Replace the near-zero npm tarball margin with a 1.5 MB hard budget and a 90% utilization gate, preserving at least 10% operational headroom.
 - Fail scorecard generation on stale release-time evidence, symlink escapes, oversized ledgers or artifacts, non-canonical reviewer identities, and candidate-point drift from the reviewed source audit.
+- Require every passed criterion and cleared cap to reference known evidence, reject permanently unverified passes, and run the full scorecard gate in every tagged binary build.
 
 ### Design Skills migration — `3009cf63`
 
