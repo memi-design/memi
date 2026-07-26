@@ -29,6 +29,7 @@
     "growth:status": "node scripts/growth-status.mjs",
     "sync:release-manifest": "node scripts/sync-release-manifest.mjs",
     "check:release-manifest": "node scripts/sync-release-manifest.mjs --check",
+    "smoke:clean-install": "node scripts/smoke-clean-install.mjs",
     "smoke:mcp": "node scripts/smoke-mcp-stdio.mjs",
     "smoke:codex-plugin": "node scripts/smoke-codex-plugin-marketplace.mjs",
     "pack:dry-run": "node scripts/pack-dry-run.mjs",
