@@ -7,6 +7,7 @@ import { ComponentSpecSchema } from "../specs/types.js";
 import { resolveMarketplaceAlias } from "../marketplace/catalog-loader.js";
 import { fetchNpmPackageToCache } from "../registry/npm-fetch.js";
 import { packagePath } from "../utils/asset-path.js";
+import { isPrivateOrLocalHostname } from "../security/network-address.js";
 import {
   type ShadcnRegistry,
   type ShadcnRegistryFile,
@@ -277,9 +278,7 @@ async function fetchText(url: string): Promise<string> {
 
 function assertSafePublicUrl(url: string): void {
   const parsed = new URL(url);
-  const host = parsed.hostname.toLowerCase();
-  const privateIpv4 = /^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0)/;
-  if (!["http:", "https:"].includes(parsed.protocol) || host === "localhost" || host === "::1" || privateIpv4.test(host)) {
+  if (!["http:", "https:"].includes(parsed.protocol) || isPrivateOrLocalHostname(parsed.hostname)) {
     throw new Error(`Unsafe shadcn registry URL: ${url}`);
   }
 }

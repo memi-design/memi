@@ -1,5 +1,6 @@
 import { readdir, readFile, realpath, stat } from "node:fs/promises";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { isPrivateOrLocalHostname } from "../security/network-address.js";
 
 export interface ScannedSourceFile {
   id: string;
@@ -300,35 +301,9 @@ function assertSafePublicHttpUrl(value: string): void {
   if (parsed.username || parsed.password) {
     throw new Error(`Source URL must use a public http(s) address without credentials: ${value}`);
   }
-  const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  if (
-    hostname === "localhost"
-    || hostname.endsWith(".localhost")
-    || hostname === "::"
-    || hostname === "::1"
-    || hostname.startsWith("fe80:")
-    || hostname.startsWith("fc")
-    || hostname.startsWith("fd")
-    || isPrivateIpv4(hostname)
-  ) {
+  if (isPrivateOrLocalHostname(parsed.hostname)) {
     throw new Error(`Source URL must use a public http(s) address: ${value}`);
   }
-}
-
-function isPrivateIpv4(hostname: string): boolean {
-  const octets = hostname.split(".").map(Number);
-  if (octets.length !== 4 || octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) {
-    return false;
-  }
-  const [a, b] = octets;
-  return a === 0
-    || a === 10
-    || a === 127
-    || (a === 100 && b >= 64 && b <= 127)
-    || (a === 169 && b === 254)
-    || (a === 172 && b >= 16 && b <= 31)
-    || (a === 192 && b === 168)
-    || a >= 224;
 }
 
 function normalizePath(path: string): string {

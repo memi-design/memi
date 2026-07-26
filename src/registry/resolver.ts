@@ -9,7 +9,7 @@
  *   - Local path:             "./path/to/registry" or "/abs/path"
  */
 
-import { access, readFile } from "fs/promises";
+import { access, readFile, realpath } from "fs/promises";
 import { isAbsolute, join, relative, resolve, sep } from "path";
 import {
   parseRegistry,
@@ -20,6 +20,7 @@ import {
 import { resolveMarketplaceAlias } from "../marketplace/catalog-loader.js";
 import { fetchNpmPackageToCache } from "./npm-fetch.js";
 import { packagePath } from "../utils/asset-path.js";
+import { isPrivateOrLocalHostname } from "../security/network-address.js";
 
 export interface ResolvedRegistry {
   /** The parsed registry document */
@@ -49,9 +50,7 @@ function assertSafePublicUrl(url: string): void {
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     throw new Error(`URL must be http(s): ${url}`);
   }
-  const host = parsed.hostname.toLowerCase();
-  const PRIVATE_IPV4 = /^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0)/;
-  if (host === "localhost" || host === "::1" || PRIVATE_IPV4.test(host)) {
+  if (isPrivateOrLocalHostname(parsed.hostname)) {
     throw new Error(`Registry URL cannot point to a private/loopback address: ${url}`);
   }
 }
@@ -223,11 +222,17 @@ export async function readRegistryFile(resolved: ResolvedRegistry, href: string)
   // Local path
   const root = resolve(baseUrl);
   const fullPath = resolve(root, cleanHref);
-  const relativePath = relative(root, fullPath);
+  assertRegistryPathContained(root, fullPath, href);
+  const [realRoot, realFile] = await Promise.all([realpath(root), realpath(fullPath)]);
+  assertRegistryPathContained(realRoot, realFile, href);
+  return readFile(realFile, "utf-8");
+}
+
+function assertRegistryPathContained(root: string, candidate: string, href: string): void {
+  const relativePath = relative(root, candidate);
   if (relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath)) {
     throw new Error(`Registry file reference escapes the registry root: ${href}`);
   }
-  return readFile(fullPath, "utf-8");
 }
 
 /**
