@@ -88,6 +88,37 @@ export function buildWebReleaseArtifact(manifest, sourceCommit) {
   };
 }
 
+export function validateWebReleaseArtifact(manifest, artifact) {
+  const failures = [];
+  const provenance = artifact?.provenance;
+  const canonical = serializeJson(manifest);
+  const expectedDigest = createHash("sha256").update(canonical).digest("hex");
+
+  if (artifact?.schemaVersion !== 1) {
+    failures.push("release-artifacts/memoire-web.release.json schemaVersion must be 1");
+  }
+  if (serializeJson(artifact?.release) !== canonical) {
+    failures.push("release-artifacts/memoire-web.release.json payload does not match release-manifest.json");
+  }
+  if (provenance?.repository !== "https://github.com/sarveshsea/memi"
+    || provenance?.path !== "release-manifest.json") {
+    failures.push("website release artifact provenance must identify the canonical Memi manifest");
+  }
+  if (!COMMIT_SHA.test(provenance?.sourceCommit ?? "")) {
+    failures.push("website release artifact provenance must include an exact source commit");
+  }
+  const expectedSourceUrl =
+    `https://raw.githubusercontent.com/sarveshsea/memi/${provenance?.sourceCommit}/release-manifest.json`;
+  if (provenance?.sourceUrl !== expectedSourceUrl) {
+    failures.push(`website release artifact source URL must be ${expectedSourceUrl}`);
+  }
+  if (provenance?.manifestSha256 !== expectedDigest) {
+    failures.push("website release artifact SHA-256 does not match release-manifest.json");
+  }
+
+  return failures;
+}
+
 export function resolveManifestSourceCommit(root, manifest) {
   const sourceCommit = execFileSync(
     "git",
@@ -158,12 +189,10 @@ export async function verifyCoreReleaseSurfaces(root, manifest) {
   }
 
   const artifactPath = join(root, "release-artifacts", "memoire-web.release.json");
-  const sourceCommit = resolveManifestSourceCommit(root, manifest);
-  const expectedArtifact = serializeJson(buildWebReleaseArtifact(manifest, sourceCommit));
-  const actualArtifact = await readFile(artifactPath, "utf8").catch(() => "");
-  if (actualArtifact !== expectedArtifact) {
-    failures.push("release-artifacts/memoire-web.release.json is stale; run npm run sync:release-manifest");
-  }
+  const artifact = await readFile(artifactPath, "utf8")
+    .then((content) => JSON.parse(content))
+    .catch(() => null);
+  failures.push(...validateWebReleaseArtifact(manifest, artifact));
 
   return failures;
 }

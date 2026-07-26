@@ -15,10 +15,10 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const checkOnly = process.argv.includes("--check");
 const manifest = await loadReleaseManifest(root);
-const sourceCommit = resolveManifestSourceCommit(root, manifest);
 const artifactPath = join(root, "release-artifacts", "memoire-web.release.json");
 
 if (!checkOnly) {
+  const sourceCommit = resolveManifestSourceCommit(root, manifest);
   await mkdir(dirname(artifactPath), { recursive: true });
   await writeFile(
     artifactPath,

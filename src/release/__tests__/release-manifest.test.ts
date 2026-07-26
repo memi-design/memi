@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import { mkdtemp, rm } from "node:fs/promises";
+import { copyFile, mkdtemp, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
@@ -101,6 +100,14 @@ describe("release manifest", () => {
         { encoding: "utf8" },
       );
       expect(clone.status, clone.stderr).toBe(0);
+      await copyFile(
+        join(root, "scripts", "lib", "release-manifest.mjs"),
+        join(shallowRoot, "scripts", "lib", "release-manifest.mjs"),
+      );
+      await copyFile(
+        join(root, "scripts", "sync-release-manifest.mjs"),
+        join(shallowRoot, "scripts", "sync-release-manifest.mjs"),
+      );
 
       const result = spawnSync(
         process.execPath,
