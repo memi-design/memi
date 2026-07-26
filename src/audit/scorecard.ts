@@ -87,6 +87,7 @@ export const AuditScorecardSchema = z.object({
   schemaVersion: z.literal(AUDIT_SCORECARD_SCHEMA_VERSION),
   auditId: z.string().regex(IDENTIFIER),
   title: z.string().min(1),
+  targetScore: z.literal(100),
   assessedAt: z.string().datetime({ offset: true }),
   subject: z.object({
     repository: z.string().url(),
@@ -115,6 +116,13 @@ export const AuditScorecardSchema = z.object({
   addDuplicateIssues(criterionIds, "Duplicate criterion id", ["dimensions"], context);
 
   const maximum = scorecard.dimensions.reduce((sum, dimension) => sum + dimension.maximum, 0);
+  if (maximum !== scorecard.targetScore) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Dimension maximums total ${maximum}, expected target score ${scorecard.targetScore}.`,
+      path: ["dimensions"],
+    });
+  }
   for (const [capIndex, cap] of scorecard.caps.entries()) {
     if (cap.maximum > maximum) {
       context.addIssue({

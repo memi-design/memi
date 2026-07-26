@@ -14,6 +14,7 @@ function scorecard(overrides: Partial<AuditScorecard> = {}): AuditScorecard {
     schemaVersion: 1,
     auditId: "memi-100",
     title: "Memi 100-point audit",
+    targetScore: 100,
     assessedAt: AS_OF,
     subject: {
       repository: "https://github.com/sarveshsea/memi",
@@ -35,13 +36,13 @@ function scorecard(overrides: Partial<AuditScorecard> = {}): AuditScorecard {
       {
         id: "core-activation",
         title: "Core activation",
-        maximum: 2,
+        maximum: 100,
         owner: "memi-core",
         criteria: [
           {
             id: "read-only-result",
             title: "Read-only audit produces a useful result",
-            points: 2,
+            points: 100,
             assessment: "passed",
             evidenceIds: ["core-proof"],
             requiresIndependentVerification: true,
@@ -57,12 +58,23 @@ function scorecard(overrides: Partial<AuditScorecard> = {}): AuditScorecard {
 describe("AuditScorecardSchema", () => {
   it("rejects dimensions whose criterion points do not account for the full maximum", () => {
     const input = scorecard();
-    input.dimensions[0]!.maximum = 3;
+    input.dimensions[0]!.maximum = 101;
 
     const parsed = AuditScorecardSchema.safeParse(input);
 
     expect(parsed.success).toBe(false);
     expect(parsed.error?.issues.some((issue) => issue.message.includes("criterion points"))).toBe(true);
+  });
+
+  it("rejects a scorecard whose dimension maximums do not total 100", () => {
+    const input = scorecard();
+    input.dimensions[0]!.maximum = 99;
+    input.dimensions[0]!.criteria[0]!.points = 99;
+
+    const parsed = AuditScorecardSchema.safeParse(input);
+
+    expect(parsed.success).toBe(false);
+    expect(parsed.error?.issues.some((issue) => issue.message.includes("target score 100"))).toBe(true);
   });
 
   it("rejects duplicate evidence and criterion identifiers", () => {
@@ -74,7 +86,7 @@ describe("AuditScorecardSchema", () => {
       dimensions: [
         {
           ...scorecard().dimensions[0]!,
-          maximum: 4,
+          maximum: 200,
           criteria: [
             ...scorecard().dimensions[0]!.criteria,
             { ...scorecard().dimensions[0]!.criteria[0]! },
@@ -95,9 +107,9 @@ describe("evaluateAuditScorecard", () => {
   it("awards points only to fresh passing evidence with an independent verifier", () => {
     const result = evaluateAuditScorecard(scorecard(), { asOf: AS_OF });
 
-    expect(result.rawScore).toBe(2);
-    expect(result.score).toBe(2);
-    expect(result.maximum).toBe(2);
+    expect(result.rawScore).toBe(100);
+    expect(result.score).toBe(100);
+    expect(result.maximum).toBe(100);
     expect(result.confidence).toBe(1);
     expect(result.unassessedCriteria).toEqual([]);
     expect(result.unverifiedCriteria).toEqual([]);
@@ -154,7 +166,7 @@ describe("evaluateAuditScorecard", () => {
         {
           id: "unsupported-language",
           title: "Unsupported language is reported honestly",
-          points: 1,
+          points: 99,
           assessment: "unassessed",
           evidenceIds: [],
           requiresIndependentVerification: false,
@@ -199,7 +211,7 @@ describe("evaluateAuditScorecard", () => {
 
     const result = evaluateAuditScorecard(input, { asOf: AS_OF });
 
-    expect(result.rawScore).toBe(2);
+    expect(result.rawScore).toBe(100);
     expect(result.score).toBe(1);
     expect(result.appliedCaps).toEqual([
       expect.objectContaining({ id: "release-drift", maximum: 1 }),
@@ -236,7 +248,7 @@ describe("evaluateAuditScorecard", () => {
 
     const result = evaluateAuditScorecard(input, { asOf: AS_OF });
 
-    expect(result.score).toBe(2);
+    expect(result.score).toBe(100);
     expect(result.appliedCaps).toEqual([]);
   });
 });
@@ -250,9 +262,9 @@ describe("renderAuditScorecardMarkdown", () => {
     const markdown = renderAuditScorecardMarkdown(input, { asOf: AS_OF });
 
     expect(markdown).toContain("# Memi 100-point audit");
-    expect(markdown).toContain("**Verified score: 0/2**");
-    expect(markdown).toContain("| Core activation | 0 | 2 |");
+    expect(markdown).toContain("**Verified score: 0/100**");
+    expect(markdown).toContain("| Core activation | 0 | 100 |");
     expect(markdown).toContain("core-activation/read-only-result");
-    expect(markdown).not.toContain("2/2");
+    expect(markdown).not.toContain("100/100");
   });
 });

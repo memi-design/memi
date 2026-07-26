@@ -27,6 +27,8 @@
     "build:mcpb": "mkdir -p .dist && npx -y @anthropic-ai/mcpb@latest validate mcpb/manifest.json && npx -y @anthropic-ai/mcpb@latest pack mcpb .dist/memi-2.6.2.mcpb",
     "bench:cli": "node scripts/bench-cli.mjs",
     "growth:status": "node scripts/growth-status.mjs",
+    "audit:render-scorecard": "tsx scripts/render-audit-scorecard.ts",
+    "check:audit-scorecard": "tsx scripts/render-audit-scorecard.ts --check",
     "sync:release-manifest": "node scripts/sync-release-manifest.mjs",
     "check:release-manifest": "node scripts/sync-release-manifest.mjs --check",
     "smoke:clean-install": "node scripts/smoke-clean-install.mjs",

@@ -1,4 +1,5 @@
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -18,10 +19,14 @@ async function fixtureRoot(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "memi-scorecard-"));
   temporaryRoots.push(root);
   await mkdir(join(root, "docs", "audits"), { recursive: true });
+  const proof = `${JSON.stringify({ status: "passed" })}\n`;
+  const proofHash = createHash("sha256").update(proof).digest("hex");
+  await writeFile(join(root, "docs", "audits", "proof.json"), proof, "utf8");
   const ledger: AuditScorecard = {
     schemaVersion: 1,
     auditId: "fixture-audit",
     title: "Fixture audit",
+    targetScore: 100,
     assessedAt: "2026-07-26T12:00:00.000Z",
     subject: {
       repository: "https://github.com/sarveshsea/memi",
@@ -33,7 +38,7 @@ async function fixtureRoot(): Promise<string> {
         kind: "implementation",
         status: "passed",
         capturedAt: "2026-07-26T10:00:00.000Z",
-        artifact: { location: "proof.json", sha256: "b".repeat(64) },
+        artifact: { location: "proof.json", sha256: proofHash },
         producer: "builder",
         verifier: "reviewer",
         environment: "fixture",
@@ -43,13 +48,13 @@ async function fixtureRoot(): Promise<string> {
       {
         id: "activation",
         title: "Activation",
-        maximum: 1,
+        maximum: 100,
         owner: "core",
         criteria: [
           {
             id: "proof",
             title: "Proof",
-            points: 1,
+            points: 100,
             assessment: "passed",
             evidenceIds: ["verified-proof"],
             requiresIndependentVerification: true,
@@ -96,7 +101,7 @@ describe("render-audit-scorecard", () => {
     expect(first.status, first.stderr).toBe(0);
     expect(second.status, second.stderr).toBe(0);
     expect(secondReport).toBe(firstReport);
-    expect(firstReport).toContain("**Verified score: 1/1**");
+    expect(firstReport).toContain("**Verified score: 100/100**");
     expect(firstReport).toMatch(/Ledger SHA-256: `[a-f0-9]{64}`/);
     expect(firstReport).not.toContain("Report SHA-256");
   });
@@ -132,5 +137,16 @@ describe("render-audit-scorecard", () => {
 
     expect(escaped.status).toBe(1);
     expect(escaped.stderr).toContain("must stay inside docs/audits");
+  });
+
+  it("recomputes evidence digests and fails closed when an artifact changes", async () => {
+    const root = await fixtureRoot();
+    expect(run(root).status).toBe(0);
+    await writeFile(join(root, "docs", "audits", "proof.json"), "tampered\n", "utf8");
+
+    const tampered = run(root, "--check");
+
+    expect(tampered.status).toBe(1);
+    expect(tampered.stderr).toContain("Artifact digest mismatch for verified-proof");
   });
 });

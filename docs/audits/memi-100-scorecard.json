@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "auditId": "memi-100",
+  "title": "Memi 100-point end-to-end scorecard",
+  "targetScore": 100,
+  "assessedAt": "2026-07-26T22:30:00.000Z",
+  "subject": {
+    "repository": "https://github.com/sarveshsea/memi",
+    "commit": "2a557274eeec278e9439d8ba2fd54680c1ca2302"
+  },
+  "evidence": [
+    {
+      "id": "reviewed-candidate-audit",
+      "kind": "implementation",
+      "status": "passed",
+      "capturedAt": "2026-07-26T21:16:34.000Z",
+      "artifact": {
+        "location": "memi-design-engineering-audit-2026-07-26.json",
+        "sha256": "787d0a92b2859c038a96f07b3f84c5adbf05242d1ecd32d5cbeb234f69d4a741"
+      },
+      "producer": "memi-audit-implementation",
+      "verifier": "independent-audit-review",
+      "environment": "Cross-repository audit ledger with GitHub, npm, skills.sh, Vercel, simulator, and clean-install evidence"
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "core-activation",
+      "title": "Core job, activation, and useful first result",
+      "maximum": 15,
+      "owner": "memi-core",
+      "criteria": [
+        {
+          "id": "candidate-activation",
+          "title": "Pinned read-only command and normalized file-anchored evidence",
+          "points": 13,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "external-clean-repositories",
+          "title": "Three external clean repositories prove no mutation, useful results, and honest unsupported states",
+          "points": 2,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "surface-parity",
+      "title": "CLI, MCP, skills, site, Studio, and release consistency",
+      "maximum": 15,
+      "owner": "release-engineering",
+      "criteria": [
+        {
+          "id": "candidate-release-manifest",
+          "title": "Candidate release manifest and immutable cross-repository artifact",
+          "points": 11,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "public-release-parity",
+          "title": "Merged, published, and deployed public surfaces match one verified release manifest",
+          "points": 4,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "design-engineering-depth",
+      "title": "Design-engineering depth and rendered quality",
+      "maximum": 15,
+      "owner": "design-engineering",
+      "criteria": [
+        {
+          "id": "candidate-rendered-proof",
+          "title": "Reviewed website, WebGL2, and simulator proof artifacts",
+          "points": 13,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "swiftui-rendered-rerun",
+          "title": "Real SwiftUI source audit, correction, analyzed rendering, and verified rerun",
+          "points": 2,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "skill-governance",
+      "title": "Skill governance, routing, freshness, and provenance",
+      "maximum": 15,
+      "owner": "design-skills",
+      "criteria": [
+        {
+          "id": "candidate-catalog",
+          "title": "Ninety-four scored skills, governed ownership, freshness, and 97.8 percent routing benchmark",
+          "points": 14,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "zero-routing-gaps",
+          "title": "All dispositions resolved with zero known held-out routing confusion",
+          "points": 1,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "shader-and-dither",
+      "title": "Shader, dither, and creative-rendering capability",
+      "maximum": 10,
+      "owner": "design-sandbox",
+      "criteria": [
+        {
+          "id": "candidate-webgl-proof",
+          "title": "Original deterministic WebGL2 Bayer and seeded-noise proof with fallbacks",
+          "points": 8,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "durable-rendering-evidence",
+          "title": "Durable GPU, energy, color, alpha, temporal-stability, and cross-browser evidence",
+          "points": 2,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "security-privacy-licensing",
+      "title": "Security, privacy, licensing, and supply chain",
+      "maximum": 10,
+      "owner": "security-review",
+      "criteria": [
+        {
+          "id": "candidate-hardening",
+          "title": "Reviewed network, path, archive, publisher, dependency, and licensing hardening",
+          "points": 9,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "complete-supply-chain-proof",
+          "title": "SBOM, provenance, advisory policy, fuzzing, least privilege, and independent signoff",
+          "points": 1,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "growth-and-community-proof",
+      "title": "GitHub, npm, and community proof",
+      "maximum": 10,
+      "owner": "growth-evidence",
+      "criteria": [
+        {
+          "id": "measured-funnel",
+          "title": "Privacy-safe funnel, preregistered definitions, and public baseline",
+          "points": 5,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "eight-week-adoption",
+          "title": "Ten integrations, one hundred first audits, twenty-five repeats, and four qualifying npm weeks",
+          "points": 5,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "testing-and-operations",
+      "title": "Testing, compatibility, and operations",
+      "maximum": 10,
+      "owner": "release-engineering",
+      "criteria": [
+        {
+          "id": "candidate-verification",
+          "title": "Core, catalog, site, shader, simulator, and clean-install candidate gates",
+          "points": 9,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "aggregate-clean-room-release",
+          "title": "Aggregate public-release, rollback, package-headroom, and independent clean-room gates",
+          "points": 1,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    }
+  ],
+  "caps": [
+    {
+      "id": "public-version-drift",
+      "maximum": 69,
+      "reason": "The reviewed candidate branches are not merged, published, and deployed across every public surface.",
+      "state": "active",
+      "clearingEvidenceIds": [],
+      "requiresIndependentVerification": true
+    },
+    {
+      "id": "hosted-ci-incomplete",
+      "maximum": 84,
+      "reason": "Website hosted CI has not run successfully because the repository account billing gate prevented runner startup.",
+      "state": "active",
+      "clearingEvidenceIds": [],
+      "requiresIndependentVerification": true
+    }
+  ]
+}

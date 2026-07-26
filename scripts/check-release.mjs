@@ -454,6 +454,19 @@ if (process.env.SKIP_PACK_GATE !== "1") {
 }
 
 if (process.env.SKIP_AUDIT_GATE !== "1") {
+  const scorecard = spawnSync(process.execPath, [
+    join(root, "node_modules", "tsx", "dist", "cli.mjs"),
+    join(root, "scripts", "render-audit-scorecard.ts"),
+    "--check",
+  ], {
+    cwd: root,
+    encoding: "utf-8",
+    maxBuffer: 1024 * 1024 * 5,
+  });
+  if (scorecard.status !== 0) {
+    fail(`audit scorecard gate failed: ${spawnFailureMessage(scorecard, "failed")}`);
+  }
+
   const audit = spawnSync("npm", ["audit", "--omit=dev", "--audit-level=high", "--json"], {
     cwd: root,
     encoding: "utf-8",
