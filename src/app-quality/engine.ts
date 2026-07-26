@@ -223,6 +223,7 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   const nativeSourceDetected = sourceCoverage.swiftui.scannedFiles > 0
     || sourceCoverage.swift.scannedFiles > 0
     || sourceCoverage.metal.scannedFiles > 0;
+  const nativeEvidenceDimensions = buildNativeEvidenceDimensions(sourceCoverage);
   const assessedCategories = webAnalysisAvailable ? Object.keys(CATEGORY_BASE) as AppQualityCategory[] : [];
   const unassessedCategories = webAnalysisAvailable ? [] : Object.keys(CATEGORY_BASE) as AppQualityCategory[];
   const graphStartedAt = performance.now();
@@ -290,8 +291,15 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
         : "Detected source has no supported whole-category analyzer.",
   }];
   const auditEvidence = buildAuditEvidenceMetadata({
-    dimensions: Object.keys(CATEGORY_BASE),
-    unassessedDimensions: unassessedCategories,
+    dimensions: [
+      ...Object.keys(CATEGORY_BASE),
+      ...nativeEvidenceDimensions.assessed,
+      ...nativeEvidenceDimensions.unassessed,
+    ],
+    unassessedDimensions: [
+      ...unassessedCategories,
+      ...nativeEvidenceDimensions.unassessed,
+    ],
     evidenceProvenance: [{
       kind: "static-scan",
       analyzed: webAnalysisAvailable || swiftUiAnalysis.assessedChecks.length > 0,
@@ -475,6 +483,28 @@ function buildSourceCoverage(
     ),
     metal: entry(metalFiles, metalFiles > 0 ? "unassessed" : "not-detected"),
   };
+}
+
+function buildNativeEvidenceDimensions(
+  coverage: AppQualitySourceCoverage,
+): { assessed: string[]; unassessed: string[] } {
+  const assessed = coverage.swiftui.scannedFiles > 0
+    ? [...coverage.swiftui.assessedChecks]
+    : [];
+  const unassessed = [
+    ...(coverage.swiftui.scannedFiles > 0 ? [
+      "swiftui:whole-category-analysis",
+      "swiftui:rendered-quality",
+      "swiftui:runtime-accessibility",
+    ] : []),
+    ...(coverage.swift.scannedFiles > 0 ? ["swift:source-analysis"] : []),
+    ...(coverage.metal.scannedFiles > 0 ? [
+      "metal:shader-semantics",
+      "metal:gpu-performance",
+      "metal:color-correctness",
+    ] : []),
+  ];
+  return { assessed, unassessed };
 }
 
 function extractClassTokens(content: string): string[] {
