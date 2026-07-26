@@ -29,6 +29,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `ceaf85a4` fix: anchor release exports to committed source
 - `71967748` docs: require immutable release proof ordering
 - `88212761` docs: publish design engineering audit
+- `dc947d37` test: reproduce shallow release manifest drift
+- `2374d6be` fix: validate release artifacts in shallow clones
 
 #### Architectural decisions
 
