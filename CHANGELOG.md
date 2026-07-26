@@ -64,6 +64,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `f180defe` fix: generate canonical public release truth
 - `a13b79f9` test: enforce public audit story parity
 - `03dc20a1` fix: align public product story
+- `435e4858` test: align plugin positioning contract
 
 #### Architectural decisions
 
