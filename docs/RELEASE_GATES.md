@@ -9,7 +9,7 @@ npm package, GitHub release, GitHub Action, MCP server, Studio, and website
 release groups. Do not start a release by editing downstream version copies.
 
 ```bash
-# After reviewing release-manifest.json:
+# After reviewing and committing release-manifest.json:
 npm run sync:release-manifest
 npm run check:release-manifest
 npm run check:release
@@ -19,9 +19,14 @@ The sync command writes
 `release-artifacts/memoire-web.release.json`. Copy that file byte-for-byte to
 `src/data/memi-release.generated.json` in `sarveshsea/memoire-web`; the website
 derives CLI and Studio metadata from it and verifies its SHA-256 provenance
-offline with `npm run check:release-manifest`. Because the repositories publish
-independently, both pull requests must merge before the public-site gate can
-prove the new release end to end.
+offline with `npm run check:release-manifest`. The export records the exact
+Memi commit that contains the canonical manifest. Push that commit before
+opening or refreshing the website pull request, then run the website's
+`npm run check:public-release-manifest` network gate. That gate fetches the
+immutable source manifest and verifies the tagged Memi release plus the exact
+Studio arm64, x64, and checksum assets. Because the repositories publish
+independently, the Memi source commit must be reachable before website CI runs,
+and both pull requests must merge before the public-site gate is complete.
 
 ## Local Publish-Ready Gate
 
