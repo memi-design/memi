@@ -62,6 +62,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `db0219d2` fix: scope workflow write permissions
 - `72c61bb0` test: enforce public release documentation truth
 - `f180defe` fix: generate canonical public release truth
+- `a13b79f9` test: enforce public audit story parity
+- `03dc20a1` fix: align public product story
 
 #### Architectural decisions
 
@@ -82,6 +84,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Pin every third-party GitHub Actions workflow dependency to an audited upstream release commit SHA, and test the exact refs so release, publish, scanner, and runtime trust does not drift silently.
 - Default every GitHub workflow to read-only repository contents and grant write scopes only at the specific job that uploads SARIF, publishes through OIDC, or mutates release assets, so permission drift fails closed.
 - Generate one human-readable release-truth document from `release-manifest.json`, enforce it in the release gate, and mark retained launch snapshots as historical before any obsolete instructions.
+- Treat the read-only design-engineering audit and skill layer as the one primary public story across README, package, MCP, plugin, release-gate, growth, and SEO metadata; public parity fails until npm and the website carry that same story.
 
 ### Design Skills migration — `3009cf63`
 
