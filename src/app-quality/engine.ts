@@ -214,18 +214,16 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   const files = sources.map(sourceToRawFile);
   const webSources = sources.filter((source) => WEB_SOURCE_EXTENSIONS.has(source.extension));
   const webFiles = webSources.map(sourceToRawFile);
+  const webSourceDetected = webSources.length > 0;
   const swiftSources = sources
     .filter((source) => source.extension === ".swift")
     .map((source) => ({ path: source.projectPath, content: source.content }));
   const swiftUiAnalysis = analyzeSwiftUiSources(swiftSources);
-  const webAnalysisAvailable = webSources.length > 0;
   const sourceCoverage = buildSourceCoverage(sources, swiftUiAnalysis.swiftUiFiles.length, swiftUiAnalysis.assessedChecks);
   const nativeSourceDetected = sourceCoverage.swiftui.scannedFiles > 0
     || sourceCoverage.swift.scannedFiles > 0
     || sourceCoverage.metal.scannedFiles > 0;
   const nativeEvidenceDimensions = buildNativeEvidenceDimensions(sourceCoverage);
-  const assessedCategories = webAnalysisAvailable ? Object.keys(CATEGORY_BASE) as AppQualityCategory[] : [];
-  const unassessedCategories = webAnalysisAvailable ? [] : Object.keys(CATEGORY_BASE) as AppQualityCategory[];
   const graphStartedAt = performance.now();
   const appGraph = await buildAppGraph({
     projectRoot: options.projectRoot,
@@ -238,10 +236,13 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   const fileSignals = files.map(analyzeFile);
   const webFileSignals = webFiles.map(analyzeFile);
   const aggregate = aggregateSignals(webFiles, webFileSignals);
+  const webAnalysisAvailable = aggregate.classTokens.length > 0;
+  const assessedCategories = webAnalysisAvailable ? Object.keys(CATEGORY_BASE) as AppQualityCategory[] : [];
+  const unassessedCategories = webAnalysisAvailable ? [] : Object.keys(CATEGORY_BASE) as AppQualityCategory[];
   // Policy overrides apply BEFORE enrichment/scoring so severities, scores,
   // and downstream UX reports all reflect the team's policy, not the defaults.
   const policyAdjusted = applyPolicyToIssues(
-    webAnalysisAvailable ? buildIssues(aggregate, policy.thresholds) : [],
+    webSourceDetected ? buildIssues(aggregate, policy.thresholds) : [],
     policy,
   );
   const webIssues = enrichIssues(policyAdjusted, appGraph, webFiles);
@@ -288,7 +289,9 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
     maximum: 0,
     reason: sourceCoverage.swiftui.scannedFiles > 0
         ? "SwiftUI static checks are partial and do not justify a whole-category score."
-        : "Detected source has no supported whole-category analyzer.",
+        : webSourceDetected
+          ? "Detected web source has no UI class signal for whole-category analysis."
+          : "Detected source has no supported whole-category analyzer.",
   }];
   const auditEvidence = buildAuditEvidenceMetadata({
     dimensions: [
@@ -317,7 +320,7 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
     summary: {
       score,
       scoreScope: webAnalysisAvailable ? "web" : "none",
-      verdict: verdictForScore(score, sourceCoverage),
+      verdict: verdictForScore(score, sourceCoverage, webAnalysisAvailable),
       scannedFiles: files.length,
       routes: fileSignals.filter((file) => file.kind === "route").length,
       components: fileSignals.filter((file) => file.kind === "component").length,
@@ -348,11 +351,16 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
           "Resolve file-anchored SwiftUI findings, then add rendered simulator evidence before making a repo-wide quality claim.",
           "Keep Metal shader semantics, GPU performance, and color correctness unassessed until dedicated native checks exist.",
         ]
-      : [
-        "Resolve file-anchored SwiftUI findings, then rerun the same read-only audit.",
-        "Use simulator and accessibility evidence before treating native rendered quality as verified.",
-        "Treat Metal shader semantics, GPU performance, and color correctness as unassessed until dedicated evidence exists.",
-      ],
+      : nativeSourceDetected
+        ? [
+          "Resolve file-anchored SwiftUI findings, then rerun the same read-only audit.",
+          "Use simulator and accessibility evidence before treating native rendered quality as verified.",
+          "Treat Metal shader semantics, GPU performance, and color correctness as unassessed until dedicated evidence exists.",
+        ]
+        : [
+          "Run the audit against a route, app directory, or built HTML page with visible UI.",
+          "Confirm the target contains supported web or SwiftUI source before treating design quality as assessed.",
+        ],
     appGraph: {
       routes: appGraph.summary.routes,
       components: appGraph.summary.components,
@@ -769,12 +777,17 @@ function severityRank(severity: AppQualitySeverity): number {
   return severity === "critical" ? 4 : severity === "high" ? 3 : severity === "medium" ? 2 : 1;
 }
 
-function verdictForScore(score: number, coverage: AppQualitySourceCoverage): string {
-  if (coverage.web.scannedFiles === 0) {
+function verdictForScore(
+  score: number,
+  coverage: AppQualitySourceCoverage,
+  webAnalysisAvailable: boolean,
+): string {
+  if (!webAnalysisAvailable) {
     if (coverage.swiftui.scannedFiles > 0) return "unassessed — SwiftUI coverage is partial";
     if (coverage.swift.scannedFiles > 0 || coverage.metal.scannedFiles > 0) {
       return "unassessed — detected source has no supported analyzer";
     }
+    if (coverage.web.scannedFiles > 0) return "unassessed — no UI class signal found";
     return "unassessed — no supported source files detected";
   }
   const webVerdict = score >= 90 ? "strong"

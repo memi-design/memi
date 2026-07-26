@@ -5,6 +5,42 @@ import { join } from "node:path";
 import { diagnoseAppQuality } from "../engine.js";
 
 describe("diagnoseAppQuality", () => {
+  it("returns an explicit unassessed result for source repositories with no UI signal", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-non-ui-"));
+    try {
+      await mkdir(join(root, "lib"), { recursive: true });
+      await writeFile(
+        join(root, "lib", "server.js"),
+        "export function handle(request, response) { response.end('ok'); }\n",
+        "utf-8",
+      );
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+
+      expect(diagnosis.summary.scannedFiles).toBe(1);
+      expect(diagnosis.summary.score).toBe(0);
+      expect(diagnosis.summary.scoreScope).toBe("none");
+      expect(diagnosis.summary.verdict).toBe("unassessed — no UI class signal found");
+      expect(diagnosis.assessedDimensions).toEqual([]);
+      expect(diagnosis.unassessedDimensions).toEqual([
+        "accessibility",
+        "color",
+        "components",
+        "maintainability",
+        "responsive",
+        "spacing",
+        "typography",
+        "visual-system",
+      ]);
+      expect(diagnosis.issues.map((issue) => issue.id)).toEqual(["scan.empty"]);
+      expect(diagnosis.nextActions).toContain(
+        "Run the audit against a route, app directory, or built HTML page with visible UI.",
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("detects code-native design debt and writes reports", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-"));
     try {
