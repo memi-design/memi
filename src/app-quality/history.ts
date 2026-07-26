@@ -19,6 +19,7 @@ export interface HistoryEntry {
   branch?: string;
   scope: "full" | "scoped";
   policyHash?: string;
+  coverageFingerprint?: string;
   score: number;
   categoryScores: Record<string, number>;
   severityCounts: { critical: number; high: number; medium: number; low: number };
@@ -54,6 +55,7 @@ export function entryFromDiagnosis(diagnosis: AppQualityDiagnosis): HistoryEntry
     at: diagnosis.generatedAt,
     scope: diagnosis.scope ? "scoped" : "full",
     policyHash: diagnosis.policy?.hash,
+    coverageFingerprint: sourceCoverageFingerprint(diagnosis),
     score: diagnosis.summary.score,
     categoryScores: diagnosis.scores,
     severityCounts,
@@ -111,9 +113,14 @@ export function checkRegression(
   }
   const previous = [...history]
     .reverse()
-    .find((entry) => entry.scope === "full" && entry.policyHash === current.policyHash && entry.at !== current.at);
+    .find((entry) =>
+      entry.scope === "full"
+      && entry.policyHash === current.policyHash
+      && entry.coverageFingerprint === current.coverageFingerprint
+      && entry.at !== current.at,
+    );
   if (!previous) {
-    return { comparable: false, reason: "no prior full-scan entry with the same policy hash" };
+    return { comparable: false, reason: "no prior full-scan entry with the same policy hash and source coverage" };
   }
   const delta = current.score - previous.score;
   return {
@@ -125,12 +132,31 @@ export function checkRegression(
 }
 
 /** Render a compact trend line for terminal display (oldest → newest, comparable entries only). */
-export function renderTrend(history: HistoryEntry[], policyHash: string | undefined, limit = 10): string[] {
-  const comparable = history.filter((entry) => entry.scope === "full" && entry.policyHash === policyHash);
+export function renderTrend(
+  history: HistoryEntry[],
+  policyHash: string | undefined,
+  coverageFingerprint?: string,
+  limit = 10,
+): string[] {
+  const comparable = history.filter((entry) =>
+    entry.scope === "full"
+    && entry.policyHash === policyHash
+    && (coverageFingerprint === undefined || entry.coverageFingerprint === coverageFingerprint),
+  );
   const window = comparable.slice(-limit);
   return window.map((entry) => {
     const sha = entry.sha ? ` ${entry.sha}` : "";
     const branch = entry.branch ? ` (${entry.branch})` : "";
     return `${entry.at.slice(0, 10)}${sha}${branch}: ${entry.score}/100 — ${entry.severityCounts.critical}c/${entry.severityCounts.high}h/${entry.severityCounts.medium}m/${entry.severityCounts.low}l`;
   });
+}
+
+function sourceCoverageFingerprint(diagnosis: AppQualityDiagnosis): string {
+  if (!diagnosis.sourceCoverage) return "legacy:unknown";
+  const entries = Object.entries(diagnosis.sourceCoverage).map(([platform, coverage]) => {
+    const dimensions = [...coverage.assessedDimensions].sort().join(",");
+    const checks = [...coverage.assessedChecks].sort().join(",");
+    return `${platform}:${coverage.analysis}:dimensions=${dimensions}:checks=${checks}`;
+  });
+  return entries.sort().join("|");
 }

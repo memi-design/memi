@@ -2,7 +2,9 @@ import { access, mkdir, writeFile } from "node:fs/promises";
 import { isAbsolute, join, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { scanSources, type ScannedSourceFile } from "../utils/source-scanner.js";
+import { markdownCodeSpan } from "../utils/output-sanitization.js";
 import { buildAppGraph, type AppGraph } from "./app-graph.js";
+import { analyzeSwiftUiSources } from "./swiftui-static.js";
 import { buildUxAuditReport, type UxAuditReport } from "../ux/tenets-traps.js";
 import { checkSkillCompliance, type ComplianceReport } from "../ux/skill-compliance.js";
 import { defaultPolicy, applyPolicyToIssues, type ResolvedPolicy, type PolicyThresholds } from "./policy.js";
@@ -58,6 +60,20 @@ export interface AppQualityFileSignal {
   cssVariables: string[];
 }
 
+export interface AppQualitySourceCoverageEntry {
+  scannedFiles: number;
+  analysis: "ruleset" | "partial" | "unassessed" | "not-detected";
+  assessedDimensions: AppQualityCategory[];
+  assessedChecks: string[];
+}
+
+export interface AppQualitySourceCoverage {
+  web: AppQualitySourceCoverageEntry;
+  swiftui: AppQualitySourceCoverageEntry;
+  swift: AppQualitySourceCoverageEntry;
+  metal: AppQualitySourceCoverageEntry;
+}
+
 export interface AppQualityDiagnosis {
   version: 1;
   schemaVersion: typeof AUDIT_SCHEMA_VERSION;
@@ -65,6 +81,7 @@ export interface AppQualityDiagnosis {
   generatedAt: string;
   summary: {
     score: number;
+    scoreScope?: "web" | "none";
     verdict: string;
     scannedFiles: number;
     routes: number;
@@ -80,6 +97,7 @@ export interface AppQualityDiagnosis {
   };
   scores: Record<AppQualityCategory, number>;
   files: AppQualityFileSignal[];
+  sourceCoverage: AppQualitySourceCoverage;
   issues: AppQualityIssue[];
   ux: UxAuditReport;
   directions: AppQualityDirection[];
@@ -148,7 +166,8 @@ interface RawFile {
 
 const DEFAULT_MAX_FILES = 500;
 const FETCH_TIMEOUT_MS = 15000;
-const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".html", ".css", ".mdx"]);
+const WEB_SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".html", ".css", ".mdx"]);
+const SOURCE_EXTENSIONS = new Set([...WEB_SOURCE_EXTENSIONS, ".swift", ".metal"]);
 const MAX_BYTES_PER_FILE = 750_000;
 const IGNORE_DIRS = new Set([
   ".git",
@@ -156,8 +175,11 @@ const IGNORE_DIRS = new Set([
   ".next",
   ".turbo",
   ".vite",
+  ".build",
   "agent-kits",
+  "Carthage",
   "coverage",
+  "DerivedData",
   "dist",
   "dist-runtime-resources",
   "examples",
@@ -168,6 +190,8 @@ const IGNORE_DIRS = new Set([
   "build",
   "node_modules",
   "out",
+  "Pods",
+  "Preview Content",
   "target",
 ]);
 
@@ -188,6 +212,19 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   const sources = await scanTargetSources(options.projectRoot, target, options.maxFiles ?? DEFAULT_MAX_FILES);
   const scanMs = performance.now() - startedAt;
   const files = sources.map(sourceToRawFile);
+  const webSources = sources.filter((source) => WEB_SOURCE_EXTENSIONS.has(source.extension));
+  const webFiles = webSources.map(sourceToRawFile);
+  const swiftSources = sources
+    .filter((source) => source.extension === ".swift")
+    .map((source) => ({ path: source.projectPath, content: source.content }));
+  const swiftUiAnalysis = analyzeSwiftUiSources(swiftSources);
+  const webAnalysisAvailable = webSources.length > 0;
+  const sourceCoverage = buildSourceCoverage(sources, swiftUiAnalysis.swiftUiFiles.length, swiftUiAnalysis.assessedChecks);
+  const nativeSourceDetected = sourceCoverage.swiftui.scannedFiles > 0
+    || sourceCoverage.swift.scannedFiles > 0
+    || sourceCoverage.metal.scannedFiles > 0;
+  const assessedCategories = webAnalysisAvailable ? Object.keys(CATEGORY_BASE) as AppQualityCategory[] : [];
+  const unassessedCategories = webAnalysisAvailable ? [] : Object.keys(CATEGORY_BASE) as AppQualityCategory[];
   const graphStartedAt = performance.now();
   const appGraph = await buildAppGraph({
     projectRoot: options.projectRoot,
@@ -198,14 +235,22 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   const graphMs = performance.now() - graphStartedAt;
   const policy = options.policy ?? defaultPolicy();
   const fileSignals = files.map(analyzeFile);
-  const aggregate = aggregateSignals(files, fileSignals);
+  const webFileSignals = webFiles.map(analyzeFile);
+  const aggregate = aggregateSignals(webFiles, webFileSignals);
   // Policy overrides apply BEFORE enrichment/scoring so severities, scores,
   // and downstream UX reports all reflect the team's policy, not the defaults.
-  const policyAdjusted = applyPolicyToIssues(buildIssues(aggregate, policy.thresholds), policy);
-  const allIssues = enrichIssues(policyAdjusted, appGraph, files);
+  const policyAdjusted = applyPolicyToIssues(
+    webAnalysisAvailable ? buildIssues(aggregate, policy.thresholds) : [],
+    policy,
+  );
+  const webIssues = enrichIssues(policyAdjusted, appGraph, webFiles);
+  const allIssues = [
+    ...webIssues,
+    ...swiftUiAnalysis.issues,
+  ].sort((left, right) => severityRank(right.severity) - severityRank(left.severity));
   // Whole-tree scores stay valid regardless of scope — scope only filters
   // which issues are EMITTED (noise reduction), never the statistics.
-  const scores = scoreCategories(allIssues);
+  const scores = scoreCategories(webIssues, assessedCategories);
 
   let issues = allIssues;
   let scopeMetadata: AppQualityDiagnosis["scope"];
@@ -228,12 +273,32 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   }
   const score = Math.round(Object.values(scores).reduce((sum, value) => sum + value, 0) / Object.values(scores).length);
   const analysisMs = performance.now() - startedAt;
-  const ux = buildUxAuditReport({ target, issues, appQualityScore: score });
-  const compliance = checkSkillCompliance(files, { target });
+  const ux = buildUxAuditReport({
+    target,
+    issues,
+    appQualityScore: score,
+    assessedCategories,
+    analysisPerformed: webAnalysisAvailable || swiftUiAnalysis.assessedChecks.length > 0,
+    partialAnalysis: nativeSourceDetected,
+  });
+  const compliance = checkSkillCompliance(webFiles, { target });
+  const partialAnalysisCaps = webAnalysisAvailable ? [] : [{
+    id: "partial-source-analysis",
+    maximum: 0,
+    reason: sourceCoverage.swiftui.scannedFiles > 0
+        ? "SwiftUI static checks are partial and do not justify a whole-category score."
+        : "Detected source has no supported whole-category analyzer.",
+  }];
   const auditEvidence = buildAuditEvidenceMetadata({
     dimensions: Object.keys(CATEGORY_BASE),
-    evidenceProvenance: [{ kind: "static-scan", analyzed: true, target }],
+    unassessedDimensions: unassessedCategories,
+    evidenceProvenance: [{
+      kind: "static-scan",
+      analyzed: webAnalysisAvailable || swiftUiAnalysis.assessedChecks.length > 0,
+      target,
+    }],
     findingConfidences: issues.map((issue) => issue.confidence),
+    appliedScoreCaps: partialAnalysisCaps,
   });
 
   const diagnosis: AppQualityDiagnosis = {
@@ -243,7 +308,8 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
     generatedAt: new Date().toISOString(),
     summary: {
       score,
-      verdict: verdictForScore(score),
+      scoreScope: webAnalysisAvailable ? "web" : "none",
+      verdict: verdictForScore(score, sourceCoverage),
       scannedFiles: files.length,
       routes: fileSignals.filter((file) => file.kind === "route").length,
       components: fileSignals.filter((file) => file.kind === "component").length,
@@ -258,14 +324,27 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
     },
     scores,
     files: fileSignals,
+    sourceCoverage,
     issues,
     ux,
-    directions: buildDirections(aggregate, issues),
-    nextActions: [
-      "Run `memi diagnose --json` in CI to track design debt over time.",
-      "Start with the highest-severity issue before applying visual directions.",
-      "Use `memi theme import` or `memi publish` after the improved system is stable.",
-    ],
+    directions: webAnalysisAvailable ? buildDirections(aggregate, webIssues) : [],
+    nextActions: webAnalysisAvailable && !nativeSourceDetected
+      ? [
+        "Run `memi diagnose --json` in CI to track design debt over time.",
+        "Start with the highest-severity issue before applying visual directions.",
+        "Use `memi theme import` or `memi publish` after the improved system is stable.",
+      ]
+      : webAnalysisAvailable
+        ? [
+          "Treat the numeric score as web-only: detected native source is not covered by a whole-category analyzer.",
+          "Resolve file-anchored SwiftUI findings, then add rendered simulator evidence before making a repo-wide quality claim.",
+          "Keep Metal shader semantics, GPU performance, and color correctness unassessed until dedicated native checks exist.",
+        ]
+      : [
+        "Resolve file-anchored SwiftUI findings, then rerun the same read-only audit.",
+        "Use simulator and accessibility evidence before treating native rendered quality as verified.",
+        "Treat Metal shader semantics, GPU performance, and color correctness as unassessed until dedicated evidence exists.",
+      ],
     appGraph: {
       routes: appGraph.summary.routes,
       components: appGraph.summary.components,
@@ -319,7 +398,9 @@ function shouldApplyDefaultNoiseFilters(projectRoot: string, target: string): bo
 
 function isDefaultNoisePath(path: string): boolean {
   const normalized = path.replace(/\\/g, "/");
-  return normalized.startsWith(".superpowers/")
+  return /(^|\/)(?:__tests__|tests?|fixtures?|generated)(\/|$)/i.test(normalized)
+    || /\.(?:test|spec)\.(?:[cm]?[jt]sx?|swift)$/i.test(normalized)
+    || normalized.startsWith(".superpowers/")
     || normalized.startsWith("docs/audits/artifacts/")
     || normalized.startsWith("examples/site-bundle/")
     || normalized.includes("/src-tauri/resources/memoire-runtime/");
@@ -342,7 +423,7 @@ function analyzeFile(file: RawFile): AppQualityFileSignal {
 
   return {
     path: file.path,
-    kind: classifyFile(file.path),
+    kind: classifyFile(file.path, file.content),
     classCount: classTokens.length,
     shadcnImports: [...new Set(shadcnImports)],
     hexColors: [...new Set(hexColors)],
@@ -350,13 +431,50 @@ function analyzeFile(file: RawFile): AppQualityFileSignal {
   };
 }
 
-function classifyFile(path: string): AppQualityFileSignal["kind"] {
+function classifyFile(path: string, content: string): AppQualityFileSignal["kind"] {
   if (/\.(test|spec)\.(tsx?|jsx?)$/.test(path) || path.includes("/__tests__/")) return "config";
+  if (/\.swift$/.test(path)) {
+    if (/\bstruct\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*App\b/.test(content)) return "route";
+    if (/\b(?:struct|extension)\s+[A-Za-z_][A-Za-z0-9_]*[\s\S]{0,120}:\s*(?:View|ViewModifier)\b/.test(content)) return "component";
+    return "config";
+  }
   if (/(\.css|tailwind\.config|components\.json)$/.test(path)) return "style";
   if (/(^|\/)(app|pages|routes)\//.test(path) || /page\.(tsx|jsx|ts|js|html)$/.test(path)) return "route";
   if (/(^|\/)components\//.test(path)) return "component";
   if (/\.html$/.test(path)) return "markup";
   return "config";
+}
+
+function buildSourceCoverage(
+  sources: ScannedSourceFile[],
+  swiftUiFiles: number,
+  swiftUiChecks: string[],
+): AppQualitySourceCoverage {
+  const webFiles = sources.filter((source) => WEB_SOURCE_EXTENSIONS.has(source.extension)).length;
+  const swiftFiles = sources.filter((source) => source.extension === ".swift").length;
+  const metalFiles = sources.filter((source) => source.extension === ".metal").length;
+  const webDimensions = webFiles > 0 ? Object.keys(CATEGORY_BASE) as AppQualityCategory[] : [];
+  const entry = (
+    scannedFiles: number,
+    analysis: AppQualitySourceCoverageEntry["analysis"],
+    assessedDimensions: AppQualityCategory[] = [],
+    assessedChecks: string[] = [],
+  ): AppQualitySourceCoverageEntry => ({
+    scannedFiles,
+    analysis,
+    assessedDimensions: [...assessedDimensions],
+    assessedChecks: [...assessedChecks].sort(),
+  });
+
+  return {
+    web: entry(webFiles, webFiles > 0 ? "ruleset" : "not-detected", webDimensions),
+    swiftui: entry(swiftUiFiles, swiftUiFiles > 0 ? "partial" : "not-detected", [], swiftUiChecks),
+    swift: entry(
+      Math.max(0, swiftFiles - swiftUiFiles),
+      swiftFiles > swiftUiFiles ? "unassessed" : "not-detected",
+    ),
+    metal: entry(metalFiles, metalFiles > 0 ? "unassessed" : "not-detected"),
+  };
 }
 
 function extractClassTokens(content: string): string[] {
@@ -595,9 +713,19 @@ function fixCategoryForIssue(issue: AppQualityIssue): AppQualityIssue["fixCatego
   return "code-health";
 }
 
-function scoreCategories(issues: AppQualityIssue[]): Record<AppQualityCategory, number> {
-  const scores = { ...CATEGORY_BASE };
+function scoreCategories(
+  issues: AppQualityIssue[],
+  assessedCategories: Iterable<AppQualityCategory> = Object.keys(CATEGORY_BASE) as AppQualityCategory[],
+): Record<AppQualityCategory, number> {
+  const assessed = new Set(assessedCategories);
+  const scores = Object.fromEntries(
+    (Object.keys(CATEGORY_BASE) as AppQualityCategory[]).map((category) => [
+      category,
+      assessed.has(category) ? CATEGORY_BASE[category] : 0,
+    ]),
+  ) as Record<AppQualityCategory, number>;
   for (const current of issues) {
+    if (!assessed.has(current.category)) continue;
     const penalty = current.severity === "critical" ? 30
       : current.severity === "high" ? 20
         : current.severity === "medium" ? 12
@@ -611,11 +739,24 @@ function severityRank(severity: AppQualitySeverity): number {
   return severity === "critical" ? 4 : severity === "high" ? 3 : severity === "medium" ? 2 : 1;
 }
 
-function verdictForScore(score: number): string {
-  if (score >= 90) return "strong";
-  if (score >= 75) return "usable but uneven";
-  if (score >= 60) return "visibly inconsistent";
-  return "needs a design-system pass";
+function verdictForScore(score: number, coverage: AppQualitySourceCoverage): string {
+  if (coverage.web.scannedFiles === 0) {
+    if (coverage.swiftui.scannedFiles > 0) return "unassessed — SwiftUI coverage is partial";
+    if (coverage.swift.scannedFiles > 0 || coverage.metal.scannedFiles > 0) {
+      return "unassessed — detected source has no supported analyzer";
+    }
+    return "unassessed — no supported source files detected";
+  }
+  const webVerdict = score >= 90 ? "strong"
+    : score >= 75 ? "usable but uneven"
+      : score >= 60 ? "visibly inconsistent"
+        : "needs a design-system pass";
+  const nativeSourceDetected = coverage.swiftui.scannedFiles > 0
+    || coverage.swift.scannedFiles > 0
+    || coverage.metal.scannedFiles > 0;
+  return nativeSourceDetected
+    ? `${webVerdict} — web ruleset only; native coverage incomplete`
+    : webVerdict;
 }
 
 function buildDirections(
@@ -678,7 +819,7 @@ function renderDiagnosisMarkdown(diagnosis: AppQualityDiagnosis): string {
   const lines = [
     "# Memoire App Diagnosis",
     "",
-    `Target: \`${diagnosis.target}\``,
+    `Target: ${markdownCodeSpan(diagnosis.target)}`,
     `Score: ${diagnosis.summary.score}/100 (${diagnosis.summary.verdict})`,
     `Generated: ${diagnosis.generatedAt}`,
     "",
@@ -687,17 +828,23 @@ function renderDiagnosisMarkdown(diagnosis: AppQualityDiagnosis): string {
     `- Files scanned: ${diagnosis.summary.scannedFiles}`,
     `- Routes: ${diagnosis.summary.routes}`,
     `- Components: ${diagnosis.summary.components}`,
+    `- Web files: ${diagnosis.sourceCoverage.web.scannedFiles} (${diagnosis.sourceCoverage.web.analysis})`,
+    `- SwiftUI files: ${diagnosis.sourceCoverage.swiftui.scannedFiles} (${diagnosis.sourceCoverage.swiftui.analysis})`,
+    `- Metal files: ${diagnosis.sourceCoverage.metal.scannedFiles} (${diagnosis.sourceCoverage.metal.analysis})`,
     `- Tailwind classes: ${diagnosis.summary.tailwindClasses}`,
     `- shadcn imports: ${diagnosis.summary.shadcnImports}`,
     `- CSS variables: ${diagnosis.summary.cssVariables}`,
     `- Raw hex colors: ${diagnosis.summary.hexColors}`,
+    `- Unassessed dimensions: ${diagnosis.unassessedDimensions.length > 0 ? diagnosis.unassessedDimensions.join(", ") : "none"}`,
     "",
     "## Issues",
     "",
   ];
 
   if (diagnosis.issues.length === 0) {
-    lines.push("- No major app-quality issues detected.");
+    lines.push(diagnosis.unassessedDimensions.length > 0
+      ? "- No findings from assessed checks. Unassessed dimensions remain unverified."
+      : "- No major app-quality issues detected.");
   } else {
     for (const current of diagnosis.issues) {
       lines.push(`- **${current.severity.toUpperCase()} ${current.category}: ${current.title}**`);
@@ -705,10 +852,13 @@ function renderDiagnosisMarkdown(diagnosis: AppQualityDiagnosis): string {
       lines.push(`  Recommendation: ${current.recommendation}`);
       if (current.confidence !== undefined) lines.push(`  Confidence: ${Math.round(current.confidence * 100)}%`);
       if (current.estimatedEffort) lines.push(`  Estimated effort: ${current.estimatedEffort}`);
-      if (current.affectedFiles && current.affectedFiles.length > 0) lines.push(`  Affected files: ${current.affectedFiles.slice(0, 5).join(", ")}`);
+      if (current.affectedFiles && current.affectedFiles.length > 0) {
+        lines.push(`  Affected files: ${current.affectedFiles.slice(0, 5).map(markdownCodeSpan).join(", ")}`);
+      }
       if (current.evidenceLocations && current.evidenceLocations.length > 0) {
         const location = current.evidenceLocations[0];
-        lines.push(`  Evidence: ${location.file}${location.line ? `:${location.line}` : ""}${location.excerpt ? ` — ${location.excerpt}` : ""}`);
+        const path = markdownCodeSpan(`${location.file}${location.line ? `:${location.line}` : ""}`);
+        lines.push(`  Evidence: ${path}${location.excerpt ? ` — ${markdownCodeSpan(location.excerpt)}` : ""}`);
       }
     }
   }

@@ -4,6 +4,7 @@ import { diagnoseAppQuality, type AppQualityDiagnosis, type AppQualitySeverity, 
 import { loadPolicy } from "../app-quality/policy.js";
 import { filterWithBaseline, readBaseline } from "../app-quality/baseline.js";
 import { ui } from "../tui/format.js";
+import { sanitizeDisplayText } from "../utils/output-sanitization.js";
 
 interface DiagnoseOptions {
   json?: boolean;
@@ -37,7 +38,7 @@ function shouldFail(gatingIssues: AppQualityIssue[], failOn: string): boolean {
 export function registerDiagnoseCommand(program: Command, engine: MemoireEngine): void {
   program
     .command("diagnose [target]")
-    .description("Diagnose design debt in an existing web app from code or URL")
+    .description("Run a read-only design engineering audit on web or SwiftUI source, or a web URL")
     .option("--json", "Output the diagnosis as JSON")
     .option("--max-files <count>", "Maximum source files to scan", "500")
     .option("--no-write", "Do not write .memoire/app-quality reports")
@@ -96,12 +97,13 @@ export function registerDiagnoseCommand(program: Command, engine: MemoireEngine)
         if (opts.failOnRegression !== undefined || opts.trend) {
           const { readHistory, checkRegression, entryFromDiagnosis, renderTrend } = await import("../app-quality/history.js");
           const history = await readHistory(engine.config.projectRoot);
+          const currentEntry = entryFromDiagnosis(diagnosis);
           if (opts.failOnRegression !== undefined) {
             const budget = typeof opts.failOnRegression === "string" ? Number.parseInt(opts.failOnRegression, 10) : 0;
-            regression = checkRegression(entryFromDiagnosis(diagnosis), history, Number.isFinite(budget) ? budget : 0);
+            regression = checkRegression(currentEntry, history, Number.isFinite(budget) ? budget : 0);
           }
           if (opts.trend && !opts.json) {
-            const lines = renderTrend(history, diagnosis.policy?.hash);
+            const lines = renderTrend(history, diagnosis.policy?.hash, currentEntry.coverageFingerprint);
             console.log(ui.section("Score trend (comparable runs)"));
             if (lines.length === 0) {
               console.log(ui.dim("  No comparable history yet — entries accrue on every full scan that writes reports under the same policy."));
@@ -154,7 +156,7 @@ export function registerDiagnoseCommand(program: Command, engine: MemoireEngine)
 }
 
 function printDiagnosis(diagnosis: AppQualityDiagnosis, wroteReports: boolean): void {
-  console.log(ui.brand("Design CI for shadcn/Tailwind apps"));
+  console.log(ui.brand("Read-only design engineering audit"));
   console.log(ui.dots("Target", diagnosis.target));
   console.log(ui.dots("Score", `${diagnosis.summary.score}/100`));
   console.log(ui.dots("Verdict", diagnosis.summary.verdict));
@@ -167,12 +169,26 @@ function printDiagnosis(diagnosis: AppQualityDiagnosis, wroteReports: boolean): 
   }
   console.log(ui.dots("Routes", String(diagnosis.summary.routes)));
   console.log(ui.dots("Components", String(diagnosis.summary.components)));
-  console.log(ui.dots("Tailwind classes", String(diagnosis.summary.tailwindClasses)));
+  if (diagnosis.sourceCoverage.web.scannedFiles > 0) {
+    console.log(ui.dots("Web files", String(diagnosis.sourceCoverage.web.scannedFiles)));
+    console.log(ui.dots("Tailwind classes", String(diagnosis.summary.tailwindClasses)));
+  }
+  if (diagnosis.sourceCoverage.swiftui.scannedFiles > 0) {
+    console.log(ui.dots("SwiftUI files", `${diagnosis.sourceCoverage.swiftui.scannedFiles} (partial static checks)`));
+  }
+  if (diagnosis.sourceCoverage.metal.scannedFiles > 0) {
+    console.log(ui.dots("Metal files", `${diagnosis.sourceCoverage.metal.scannedFiles} (unassessed)`));
+  }
+  if (diagnosis.unassessedDimensions.length > 0) {
+    console.log(ui.dots("Unassessed", diagnosis.unassessedDimensions.join(", ")));
+  }
   console.log();
 
   console.log(ui.section("Highest impact issues"));
   if (diagnosis.issues.length === 0) {
-    console.log(ui.ok("No major app-quality issues detected"));
+    console.log(diagnosis.unassessedDimensions.length > 0
+      ? ui.dim("No findings from assessed checks; unassessed dimensions remain unverified")
+      : ui.ok("No major app-quality issues detected"));
   } else {
     for (const issue of diagnosis.issues.slice(0, 6)) {
       const label = `${issue.severity.toUpperCase()} ${issue.category}`;
@@ -180,7 +196,8 @@ function printDiagnosis(diagnosis: AppQualityDiagnosis, wroteReports: boolean): 
       console.log(`      ${issue.recommendation}`);
       if (issue.affectedFiles?.[0]) {
         const location = issue.evidenceLocations?.[0];
-        console.log(ui.dim(`      evidence: ${location?.file ?? issue.affectedFiles[0]}${location?.line ? `:${location.line}` : ""}`));
+        const evidencePath = `${location?.file ?? issue.affectedFiles[0]}${location?.line ? `:${location.line}` : ""}`;
+        console.log(ui.dim(`      evidence: ${sanitizeDisplayText(evidencePath)}`));
       }
       if (issue.confidence !== undefined || issue.estimatedEffort) {
         const confidence = issue.confidence !== undefined ? `${Math.round(issue.confidence * 100)}% confidence` : "";
@@ -190,16 +207,16 @@ function printDiagnosis(diagnosis: AppQualityDiagnosis, wroteReports: boolean): 
     }
   }
 
-  console.log(ui.section("Design directions"));
-  for (const direction of diagnosis.directions) {
-    console.log(`  ${direction.id}  ${direction.name}`);
-    console.log(`      ${direction.fit}`);
+  if (diagnosis.directions.length > 0) {
+    console.log(ui.section("Design directions"));
+    for (const direction of diagnosis.directions) {
+      console.log(`  ${direction.id}  ${direction.name}`);
+      console.log(`      ${direction.fit}`);
+    }
   }
 
   console.log(ui.section("Next"));
-  console.log(ui.guide("memi diagnose --json", "use in CI or automation"));
-  console.log(ui.guide("memi theme import", "bring in a stronger visual direction"));
-  console.log(ui.guide("memi publish", "package the improved system as a registry"));
+  for (const action of diagnosis.nextActions) console.log(`  ${action}`);
   if (wroteReports) {
     console.log();
     console.log(ui.dim("  Reports written to .memoire/app-quality/diagnosis.{json,md}"));

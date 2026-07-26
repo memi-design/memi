@@ -125,6 +125,12 @@ export interface BuildUxAuditReportInput {
   issues?: AppQualityIssue[];
   appQualityScore?: number;
   source?: UxFindingSource;
+  /** Limits clean/protected claims to categories actually analyzed by the caller. */
+  assessedCategories?: AppQualityIssue["category"][];
+  /** Distinguishes "no findings" from "nothing was analyzed". */
+  analysisPerformed?: boolean;
+  /** Marks evidence that ran useful checks but cannot support a whole-category UX score. */
+  partialAnalysis?: boolean;
 }
 
 interface Mapping {
@@ -392,15 +398,29 @@ export function buildUxAuditReport(input: BuildUxAuditReportInput): UxAuditRepor
   const findings = (input.issues ?? [])
     .map(mapAppQualityIssueToUxFinding)
     .sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
-  const tenetCoverage = buildTenetCoverage(findings);
-  const trapRisks = buildTrapRisks(findings);
-  const hasAnalyzedEvidence = input.appQualityScore !== undefined || findings.length > 0;
+  const assessmentScope = buildAssessmentScope(findings, input.assessedCategories);
+  const tenetCoverage = buildTenetCoverage(findings, assessmentScope.tenetIds);
+  const trapRisks = buildTrapRisks(findings, assessmentScope.trapIds);
+  const hasAnalyzedEvidence = input.analysisPerformed ?? (
+    findings.length > 0
+      || (input.assessedCategories === undefined
+        ? input.appQualityScore !== undefined
+        : input.assessedCategories.length > 0)
+  );
   const noEvidenceCap = hasAnalyzedEvidence ? [] : [{
     id: "no-analyzed-evidence",
     maximum: 0,
     reason: "The supplied artifact was recorded but not analyzed.",
   }];
-  const score = noEvidenceCap.length > 0 ? 0 : scoreUx(findings, input.appQualityScore);
+  const partialEvidenceCap = hasAnalyzedEvidence && input.partialAnalysis ? [{
+    id: "partial-static-analysis",
+    maximum: 0,
+    reason: "Static checks ran, but the available evidence does not cover whole UX categories.",
+  }] : [];
+  const evidenceCaps = [...noEvidenceCap, ...partialEvidenceCap];
+  const score = evidenceCaps.length > 0
+    ? Math.min(scoreUx(findings, input.appQualityScore), ...evidenceCaps.map((cap) => cap.maximum))
+    : scoreUx(findings, input.appQualityScore);
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const dimensionStatuses = [
     ...tenetCoverage.map((entry) => ({
@@ -427,7 +447,7 @@ export function buildUxAuditReport(input: BuildUxAuditReportInput): UxAuditRepor
       }] : []),
     ],
     findingConfidences: findings.map((finding) => finding.confidence),
-    appliedScoreCaps: noEvidenceCap,
+    appliedScoreCaps: evidenceCaps,
   });
 
   return {
@@ -514,7 +534,10 @@ export function renderUxAuditMarkdown(report: UxAuditReport): string {
   return lines.join("\n");
 }
 
-function buildTenetCoverage(findings: UxAuditFinding[]): UxTenetCoverage[] {
+function buildTenetCoverage(
+  findings: UxAuditFinding[],
+  assessableTenetIds: ReadonlySet<UxTenetId> = ASSESSABLE_TENET_IDS,
+): UxTenetCoverage[] {
   return UX_TENETS.map((tenet) => {
     const related = findings.filter((finding) => finding.tenetIds.includes(tenet.id));
     if (related.length > 0) {
@@ -529,7 +552,7 @@ function buildTenetCoverage(findings: UxAuditFinding[]): UxTenetCoverage[] {
     // No findings for this tenet. Only claim "protected" when the scan could
     // actually have violated it — an unassessable tenet must never read as
     // verified-good just because other findings exist.
-    if (!ASSESSABLE_TENET_IDS.has(tenet.id)) {
+    if (!assessableTenetIds.has(tenet.id)) {
       return {
         tenetId: tenet.id,
         name: tenet.name,
@@ -548,12 +571,15 @@ function buildTenetCoverage(findings: UxAuditFinding[]): UxTenetCoverage[] {
   });
 }
 
-function buildTrapRisks(findings: UxAuditFinding[]): UxTrapRisk[] {
+function buildTrapRisks(
+  findings: UxAuditFinding[],
+  assessableTrapIds: ReadonlySet<UxTrapId> = ASSESSABLE_TRAP_IDS,
+): UxTrapRisk[] {
   return UX_TRAPS.map((trap) => {
     const related = findings.filter((finding) => finding.trapIds.includes(trap.id));
     const riskScore = Math.min(100, related.reduce((sum, finding) => sum + SEVERITY_PENALTY[finding.severity], 0) * 3);
     const highestSeverity = related.map((finding) => finding.severity).sort((a, b) => severityRank(b) - severityRank(a))[0];
-    if (related.length === 0 && !ASSESSABLE_TRAP_IDS.has(trap.id)) {
+    if (related.length === 0 && !assessableTrapIds.has(trap.id)) {
       return {
         trapId: trap.id,
         name: trap.name,
@@ -573,6 +599,31 @@ function buildTrapRisks(findings: UxAuditFinding[]): UxTrapRisk[] {
       defaultFix: trap.defaultFix,
     };
   });
+}
+
+function buildAssessmentScope(
+  findings: UxAuditFinding[],
+  categories: AppQualityIssue["category"][] | undefined,
+): { tenetIds: Set<UxTenetId>; trapIds: Set<UxTrapId> } {
+  if (categories === undefined) {
+    return {
+      tenetIds: new Set(ASSESSABLE_TENET_IDS),
+      trapIds: new Set(ASSESSABLE_TRAP_IDS),
+    };
+  }
+
+  const tenetIds = new Set<UxTenetId>();
+  const trapIds = new Set<UxTrapId>();
+  for (const category of categories) {
+    const mapping = CATEGORY_MAPPINGS[category];
+    for (const tenetId of mapping.tenetIds) tenetIds.add(tenetId);
+    for (const trapId of mapping.trapIds) trapIds.add(trapId);
+  }
+  for (const finding of findings) {
+    for (const tenetId of finding.tenetIds) tenetIds.add(tenetId);
+    for (const trapId of finding.trapIds) trapIds.add(trapId);
+  }
+  return { tenetIds, trapIds };
 }
 
 function recommendedTweaks(findings: UxAuditFinding[]): string[] {

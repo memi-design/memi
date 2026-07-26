@@ -75,18 +75,23 @@ export interface BuildAppGraphOptions {
   sources?: ScannedSourceFile[];
 }
 
-const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".html", ".css", ".mdx"]);
+const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".html", ".css", ".mdx", ".swift", ".metal"]);
 const IGNORE_DIRS = new Set([
   ".git",
   ".memoire",
   ".next",
   ".turbo",
   ".vite",
+  ".build",
+  "Carthage",
   "coverage",
+  "DerivedData",
   "dist",
   "build",
   "node_modules",
   "out",
+  "Pods",
+  "Preview Content",
 ]);
 
 export async function buildAppGraph(options: BuildAppGraphOptions): Promise<AppGraph> {
@@ -164,7 +169,7 @@ export async function buildAppGraph(options: BuildAppGraphOptions): Promise<AppG
 function analyzeGraphFile(path: string, content: string): AppGraphFile {
   return {
     path,
-    kind: classifyGraphFile(path),
+    kind: classifyGraphFile(path, content),
     imports: extractImports(content),
     importedBy: [],
     shadcnImports: extractShadcnImports(content),
@@ -175,8 +180,14 @@ function analyzeGraphFile(path: string, content: string): AppGraphFile {
   };
 }
 
-function classifyGraphFile(path: string): AppGraphFileKind {
+function classifyGraphFile(path: string, content: string): AppGraphFileKind {
   if (/\.(test|spec)\.(tsx?|jsx?)$/.test(path)) return "test";
+  if (/\.swift$/.test(path)) {
+    if (/(^|\/)(Tests?|UITests?)\//.test(path) || /Tests?\.swift$/.test(path)) return "test";
+    if (/\bstruct\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*App\b/.test(content)) return "route";
+    if (/\b(?:struct|extension)\s+[A-Za-z_][A-Za-z0-9_]*[\s\S]{0,120}:\s*(?:View|ViewModifier)\b/.test(content)) return "component";
+    return "config";
+  }
   if (/(\.css|tailwind\.config|components\.json)$/.test(path)) return "style";
   if (/\.html$/.test(path)) return "markup";
   if (/(^|\/)(app|pages|routes)\//.test(path) || /(^|\/)(page|layout)\.(tsx|jsx|ts|js|mdx)$/.test(path)) return "route";
@@ -191,6 +202,9 @@ function extractImports(content: string): string[] {
     imports.add(match[1]);
   }
   for (const match of content.matchAll(/require\(["']([^"']+)["']\)/g)) {
+    imports.add(match[1]);
+  }
+  for (const match of content.matchAll(/^\s*import\s+([A-Za-z_][A-Za-z0-9_.]*)\s*$/gm)) {
     imports.add(match[1]);
   }
   return [...imports].sort();

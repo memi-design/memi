@@ -127,6 +127,7 @@ export function registerCiCommand(program: Command, engine: MemoireEngine): void
           suppressedByBaseline,
           scopedFiles: scopeFiles ? scopeFiles.size : undefined,
           regression,
+          unassessedDimensions: diagnosis.unassessedDimensions,
         });
         if (process.env.GITHUB_STEP_SUMMARY) {
           await appendFile(process.env.GITHUB_STEP_SUMMARY, summaryMarkdown, "utf-8").catch(() => {});
