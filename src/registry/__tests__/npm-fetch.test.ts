@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { fetchNpmPackageToCache } from "../npm-fetch.js";
+import { assertSafeNpmArchiveEntries, fetchNpmPackageToCache } from "../npm-fetch.js";
 
 describe("npm registry cache", () => {
   afterEach(() => {
@@ -54,6 +54,17 @@ describe("npm registry cache", () => {
     } finally {
       await rm(cwd, { recursive: true, force: true });
     }
+  });
+
+  it("rejects traversal, absolute, link, and oversized npm archive entries", () => {
+    expect(() => assertSafeNpmArchiveEntries([{ path: "../escape", type: "File", size: 1 }]))
+      .toThrow(/path traversal/i);
+    expect(() => assertSafeNpmArchiveEntries([{ path: "/tmp/escape", type: "File", size: 1 }]))
+      .toThrow(/absolute path/i);
+    expect(() => assertSafeNpmArchiveEntries([{ path: "package/link", type: "SymbolicLink", size: 0 }]))
+      .toThrow(/link/i);
+    expect(() => assertSafeNpmArchiveEntries([{ path: "package/huge", type: "File", size: 51 * 1024 * 1024 }]))
+      .toThrow(/size limit/i);
   });
 });
 

@@ -35,4 +35,25 @@ describe("public package supply-chain defaults", () => {
     expect(mcpTools).not.toContain("figma_execute");
     expect(studioToolBroker).not.toContain("figma_execute");
   });
+
+  it("pins and verifies the MCP Registry publisher before execution", async () => {
+    const workflow = await readFile(join(process.cwd(), ".github", "workflows", "publish-mcp-registry.yml"), "utf-8");
+
+    expect(workflow).toContain("MCP_PUBLISHER_VERSION: v1.8.0");
+    expect(workflow).toContain("1370446bbe74d562608e8005a6ccce02d146a661fbd78674e11cc70b9618d6cf");
+    expect(workflow).not.toContain("/releases/latest/download/");
+    expect(workflow).toContain("sha256sum --check");
+  });
+
+  it("pins patched production dependency resolutions", async () => {
+    const pkg = JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf-8"));
+    const lock = JSON.parse(await readFile(join(process.cwd(), "package-lock.json"), "utf-8"));
+
+    expect(pkg.dependencies.tar).toBe("7.5.22");
+    expect(lock.packages["node_modules/tar"]?.version).toBe("7.5.22");
+    expect(lock.packages["node_modules/fast-uri"]?.version).toBe("3.1.4");
+    expect(lock.packages["node_modules/hono"]?.version).toBe("4.12.32");
+    expect(lock.packages["node_modules/body-parser"]?.version).toBe("2.3.0");
+    expect(lock.packages["node_modules/@hono/node-server"]?.version).toBe("2.0.12");
+  });
 });

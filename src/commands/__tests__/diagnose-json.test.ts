@@ -41,10 +41,28 @@ describe("memi diagnose", () => {
       const payload = JSON.parse(lastLog(logs));
 
       expect(payload.version).toBe(1);
+      expect(payload.schemaVersion).toBe(2);
+      expect(payload.confidence).toEqual(expect.any(Number));
+      expect(payload.confidence).toBeGreaterThan(0);
+      expect(payload.confidence).toBeLessThanOrEqual(1);
+      expect(payload.assessedDimensions).toContain("color");
+      expect(payload.unassessedDimensions).toEqual([]);
+      expect(payload.evidenceProvenance).toEqual([
+        expect.objectContaining({
+          kind: "static-scan",
+          analyzed: true,
+        }),
+      ]);
+      expect(payload.appliedScoreCaps).toEqual([]);
       expect(payload.summary.scannedFiles).toBe(1);
       expect(payload.summary.score).toBeLessThan(100);
       expect(payload.issues.some((issue: { id: string }) => issue.id === "color.raw-hex")).toBe(true);
+      expect(payload.issues.find((issue: { id: string }) => issue.id === "color.raw-hex")).toMatchObject({
+        normalizedId: "color.raw-hex",
+      });
       expect(payload.ux.score).toBeLessThan(100);
+      expect(payload.ux.assessedDimensions.length).toBeGreaterThan(0);
+      expect(payload.ux.unassessedDimensions.length).toBeGreaterThan(0);
       expect(payload.ux.trapRisks.some((trap: { trapId: string }) => trap.trapId === "token-drift")).toBe(true);
       expect(process.exitCode ?? 0).toBe(0);
       await expect(access(join(root, ".memoire"))).rejects.toThrow();

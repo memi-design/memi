@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { EventEmitter } from "events";
-import { PreviewApiServer } from "../api-server.js";
+import { PREVIEW_BIND_HOST, PreviewApiServer } from "../api-server.js";
 
 describe("PreviewApiServer", () => {
+  it("binds the local preview control plane to loopback", () => {
+    expect(PREVIEW_BIND_HOST).toBe("127.0.0.1");
+  });
+
   it("builds widget status payloads from cached figma events", async () => {
     const figma = new EventEmitter() as EventEmitter & {
       isConnected: boolean;

@@ -25,9 +25,19 @@ export default function Page() {
       const payload = JSON.parse(lastLog(logs));
 
       expect(payload.schemaVersion).toBe(2);
+      expect(payload.confidence).toEqual(expect.any(Number));
+      expect(payload.assessedDimensions).toContain("spacing-rhythm");
+      expect(payload.unassessedDimensions).toContain("motion-restraint");
+      expect(payload.evidenceProvenance).toEqual([
+        expect.objectContaining({ kind: "static-scan", analyzed: true }),
+      ]);
+      expect(payload.appliedScoreCaps).toEqual([]);
       expect(payload.score).toBeLessThan(100);
       expect(payload.dimensions.map((dimension: { dimensionId: string }) => dimension.dimensionId)).toContain("spacing-rhythm");
       expect(payload.findings.length).toBeGreaterThan(0);
+      expect(payload.findings[0]).toEqual(expect.objectContaining({
+        normalizedId: expect.any(String),
+      }));
       expect(payload.critique).toMatchObject({
         visualDesign: expect.any(String),
         interfaceDesign: expect.any(String),

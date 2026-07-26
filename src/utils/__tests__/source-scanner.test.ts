@@ -77,4 +77,33 @@ describe("scanSources", () => {
     expect(files.map((file) => file.path)).toEqual(["small.css"]);
     expect(files[0]?.sizeBytes).toBeGreaterThan(0);
   });
+
+  it("rejects local targets outside the project root", async () => {
+    const root = await makeRoot();
+    const outside = await makeRoot();
+    await writeFile(join(outside, "secret.ts"), "export const secret = true;");
+
+    await expect(scanSources({
+      projectRoot: root,
+      target: join(outside, "secret.ts"),
+      extensions: [".ts"],
+    })).rejects.toThrow(/outside the project root/i);
+  });
+
+  it.each([
+    "http://localhost/app",
+    "http://127.0.0.1/app",
+    "http://169.254.169.254/latest/meta-data",
+    "http://[::1]/app",
+  ])("rejects private and loopback URL targets: %s", async (target) => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(scanSources({
+      projectRoot: await makeRoot(),
+      target,
+      extensions: [".html"],
+    })).rejects.toThrow(/public http\\(s\\) address/i);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });

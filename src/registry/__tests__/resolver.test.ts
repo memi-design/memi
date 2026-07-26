@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { mkdtemp, rm, writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
-import { resolveRegistry, findComponentRef } from "../resolver.js";
+import { resolveRegistry, readRegistryFile, findComponentRef } from "../resolver.js";
 
 const validRegistry = {
   name: "@test/ds",
@@ -89,6 +89,20 @@ describe("Registry resolver", () => {
       await writeFile(join(subDir, "registry.json"), JSON.stringify(validRegistry));
       const resolved = await resolveRegistry("./sub", dir);
       expect(resolved.registry.name).toBe("@test/ds");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("contains local referenced files within the resolved registry directory", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "memoire-resolver-"));
+    try {
+      await writeFile(join(dir, "registry.json"), JSON.stringify(validRegistry));
+      await writeFile(join(dir, "tokens.json"), "{}");
+      const resolved = await resolveRegistry(dir);
+
+      await expect(readRegistryFile(resolved, "../tokens.json")).rejects.toThrow(/escapes the registry root/i);
+      await expect(readRegistryFile(resolved, "/etc/passwd")).rejects.toThrow(/escapes the registry root/i);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
