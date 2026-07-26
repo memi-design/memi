@@ -8,6 +8,37 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+### Design-engineering audit, trust boundaries, and release proof
+
+- `c01ff87e` test: add red gates for audit evidence and trust boundaries
+- `34996fc2` fix: unify audit evidence and harden trust boundaries
+- `746f473c` test: add red gates for local archive and registry boundaries
+- `265f320f` test: reproduce misleading growth status
+- `8974a2f8` fix: require sustained npm growth
+- `f47e4bbe` fix: contain registry reads and release extraction
+- `b342d6c0` chore: preserve tight package size gate
+- `5f374ae7` fix: align public release gate with design QA story
+- `8ef24b9b` test: add red gates for mapped IPs and ZIP traversal
+- `f68fe8d7` fix: normalize private IPs and validate release ZIPs
+- `d1cc675d` test: add red gate for canonical release manifest
+- `29a62056` feat: centralize public release manifest
+- `e74976c8` test: define clean install compatibility contract
+- `b803699f` ci: verify clean installs across supported runtimes
+- `b330a2c0` docs: document release manifest handoff
+- `14557dc8` test: require immutable release provenance
+- `ceaf85a4` fix: anchor release exports to committed source
+- `71967748` docs: require immutable release proof ordering
+- `88212761` docs: publish design engineering audit
+
+#### Architectural decisions
+
+- Treat unknown and unrendered audit dimensions as zero and attach normalized evidence, confidence, assessed dimensions, and applied caps to every aggregate.
+- Keep the first public action pinned and non-invasive: `diagnose --json --no-write --fail-on none`.
+- Resolve and validate network, registry, archive, symlink, and loopback boundaries before any read, fetch, extraction, or server bind.
+- Use one canonical release manifest for engine, npm, GitHub release, Action, MCP, Studio, and site release groups. Cross-repository exports carry immutable source-commit and SHA-256 provenance.
+- Separate offline manifest validation from live release proof, and require the engine PR to publish its immutable source before website CI verifies the derived artifact.
+- Test clean packed installs on Node 20, 22, and 24 across Linux, macOS, and Windows.
+
 ### Design Skills migration — `3009cf63`
 
 - Renamed the community repository to `sarveshsea/design-skills` and expanded the marketplace from 5 Notes to 78 installable Agent Skills with canonical `skills/<slug>/SKILL.md` packaging.
