@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 
 import { describe, expect, it } from "vitest";
@@ -74,5 +76,40 @@ describe("release manifest", () => {
     );
 
     expect(result.status, result.stderr || result.stdout).toBe(0);
+  });
+
+  it("validates a committed artifact from a depth-1 checkout", async () => {
+    const shallowRoot = await mkdtemp(join(tmpdir(), "memi-release-shallow-"));
+    const branch = spawnSync("git", ["branch", "--show-current"], {
+      cwd: root,
+      encoding: "utf8",
+    }).stdout.trim();
+
+    try {
+      const clone = spawnSync(
+        "git",
+        [
+          "clone",
+          "--quiet",
+          "--depth",
+          "1",
+          "--branch",
+          branch,
+          `file://${root}`,
+          shallowRoot,
+        ],
+        { encoding: "utf8" },
+      );
+      expect(clone.status, clone.stderr).toBe(0);
+
+      const result = spawnSync(
+        process.execPath,
+        [join(shallowRoot, "scripts", "sync-release-manifest.mjs"), "--check"],
+        { cwd: shallowRoot, encoding: "utf8" },
+      );
+      expect(result.status, result.stderr || result.stdout).toBe(0);
+    } finally {
+      await rm(shallowRoot, { recursive: true, force: true });
+    }
   });
 });
