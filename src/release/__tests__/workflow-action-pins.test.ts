@@ -30,7 +30,55 @@ function thirdPartyUses(source: string): string[] {
     .filter((ref) => !ref.startsWith("./"));
 }
 
+function jobSource(workflow: string, jobId: string): string {
+  const lines = workflow.split(/\r?\n/);
+  const start = lines.findIndex((line) => line === `  ${jobId}:`);
+  if (start === -1) return "";
+  const endOffset = lines.slice(start + 1).findIndex((line) => /^ {2}[a-zA-Z0-9_-]+:\s*$/.test(line));
+  const end = endOffset === -1 ? lines.length : start + 1 + endOffset;
+  return lines.slice(start, end).join("\n");
+}
+
 describe("workflow third-party action pins", () => {
+  it("defaults every workflow to read-only repository contents", async () => {
+    for (const name of await workflowFiles()) {
+      const workflow = await readFile(join(workflowsDir, name), "utf8");
+      const jobsOffset = workflow.search(/^jobs:\s*$/m);
+      expect(jobsOffset, `${name}: jobs block`).toBeGreaterThan(0);
+      const workflowDefaults = workflow.slice(0, jobsOffset);
+      expect(workflowDefaults, `${name}: top-level contents permission`).toMatch(
+        /^permissions:\s*\n {2}contents:\s*read\s*$/m,
+      );
+      expect(workflowDefaults, `${name}: top-level write permission`).not.toMatch(
+        /^ {2}[a-z-]+:\s*write\s*$/m,
+      );
+    }
+  });
+
+  it("retains the job-scoped write permissions required by publishing and SARIF upload", async () => {
+    const expected = [
+      ["ci.yml", "memi-ci", ["contents: read", "security-events: write"]],
+      ["hol-plugin-scanner.yml", "scan", ["contents: read", "security-events: write"]],
+      ["publish.yml", "publish", ["contents: read", "id-token: write"]],
+      ["publish-mcp-registry.yml", "publish", ["contents: read", "id-token: write"]],
+      ["release-binaries.yml", "build", ["contents: write"]],
+      ["release-binaries.yml", "publish-checksums", ["contents: write"]],
+      ["release-binaries.yml", "publish-docker", ["contents: read", "packages: write"]],
+      ["runtime-release.yml", "publish-release", ["contents: write"]],
+    ] as const;
+
+    for (const [name, jobId, permissions] of expected) {
+      const workflow = await readFile(join(workflowsDir, name), "utf8");
+      const job = jobSource(workflow, jobId);
+      expect(job, `${name}: jobs.${jobId}`).not.toBe("");
+      for (const permission of permissions) {
+        expect(job, `${name}: jobs.${jobId}.permissions.${permission}`).toMatch(
+          new RegExp(`^ {6}${permission.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "m"),
+        );
+      }
+    }
+  });
+
   it("pins every workflow action to an immutable commit", async () => {
     for (const name of await workflowFiles()) {
       const workflow = await readFile(join(workflowsDir, name), "utf8");
