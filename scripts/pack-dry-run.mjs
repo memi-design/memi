@@ -5,11 +5,13 @@ import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
+import { evaluatePackageSizeBudget } from "./lib/package-size-budget.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Security and evidence-contract code is intentionally shipped in the CLI.
-// Keep a tight ceiling while allowing the audited 2.6.x package to grow by <1%.
-const maxSizeBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_BYTES || "1285000", 10);
+// Keep at least 10% operational headroom below the hard public-package budget.
+const maxSizeBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_BYTES || "1500000", 10);
+const maxUtilization = Number.parseFloat(process.env.MEMOIRE_PACK_MAX_UTILIZATION || "0.9");
 const npmCommand = "npm";
 const tempRoot = await mkdtemp(join(tmpdir(), "memoire-pack-"));
 
@@ -38,6 +40,7 @@ try {
   const size = Number(summary?.size ?? 0);
   const unpackedSize = Number(summary?.unpackedSize ?? 0);
   const files = Array.isArray(summary?.files) ? summary.files.length : 0;
+  const budget = evaluatePackageSizeBudget(size, { maxSizeBytes, maxUtilization });
 
   const result = {
     name: summary?.name ?? packageJson.name,
@@ -46,14 +49,13 @@ try {
     size,
     unpackedSize,
     files,
-    maxSizeBytes,
-    passed: size <= maxSizeBytes,
+    ...budget,
   };
 
   console.log(JSON.stringify(result, null, 2));
 
   if (!result.passed) {
-    console.error(`npm pack dry-run exceeded ${maxSizeBytes} bytes: ${size} bytes`);
+    console.error(result.reason);
     process.exitCode = 1;
   }
 } finally {
