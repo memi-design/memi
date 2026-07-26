@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { applyChangelogData, parseChangelogMarkdown } from "./build-changelog-preview.mjs";
+import { loadReleaseManifest, verifyCoreReleaseSurfaces } from "./lib/release-manifest.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -29,6 +30,10 @@ function normalizeNewlines(value) {
 }
 
 const packageJson = await readJson(join(root, "package.json"));
+const releaseManifest = await loadReleaseManifest(root);
+for (const failure of await verifyCoreReleaseSurfaces(root, releaseManifest)) {
+  fail(failure);
+}
 const version = packageJson.version;
 const expectedMcpName = "io.github.sarveshsea/memi";
 if (packageJson.mcpName !== expectedMcpName) {
