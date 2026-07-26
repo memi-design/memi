@@ -31,6 +31,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `88212761` docs: publish design engineering audit
 - `dc947d37` test: reproduce shallow release manifest drift
 - `2374d6be` fix: validate release artifacts in shallow clones
+- `efb3ed34` test: require full history for release exports
+- `e0da86b1` fix: refuse shallow release artifact generation
 - `022427bb` fix: complete optional canvas lock metadata
 
 #### Architectural decisions
