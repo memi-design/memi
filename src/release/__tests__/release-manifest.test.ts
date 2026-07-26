@@ -25,10 +25,21 @@ describe("release manifest", () => {
       },
       surfaces: {
         npm: { releaseGroup: "engine", packageName: "@memi-design/cli" },
-        githubRelease: { releaseGroup: "engine", repository: "sarveshsea/memi" },
+        githubRelease: {
+          releaseGroup: "engine",
+          repository: "sarveshsea/memi",
+          tagPrefix: "v",
+          url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.2",
+        },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
-        studio: { releaseGroup: "studio", repository: "sarveshsea/memi-studio" },
+        studio: {
+          releaseGroup: "studio",
+          repository: "sarveshsea/memi-studio",
+          homebrewCask: "sarveshsea/memi/memi-studio",
+          homebrewCaskUrl:
+            "https://raw.githubusercontent.com/sarveshsea/homebrew-memi/main/Casks/memi-studio.rb",
+        },
         website: { releaseGroup: "site", repository: "sarveshsea/memoire-web" },
       },
     });
@@ -45,8 +56,20 @@ describe("release manifest", () => {
     expect(artifact.provenance).toEqual({
       repository: "https://github.com/sarveshsea/memi",
       path: "release-manifest.json",
+      sourceCommit: expect.stringMatching(/^[a-f0-9]{40}$/),
+      sourceUrl: expect.stringMatching(
+        /^https:\/\/raw\.githubusercontent\.com\/sarveshsea\/memi\/[a-f0-9]{40}\/release-manifest\.json$/,
+      ),
       manifestSha256: sha256,
     });
+
+    const committedManifest = spawnSync(
+      "git",
+      ["show", `${artifact.provenance.sourceCommit}:release-manifest.json`],
+      { cwd: root, encoding: "utf8" },
+    );
+    expect(committedManifest.status, committedManifest.stderr).toBe(0);
+    expect(JSON.parse(committedManifest.stdout)).toEqual(manifest);
   });
 
   it("passes the release-manifest drift gate", () => {
