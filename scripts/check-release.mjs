@@ -34,6 +34,16 @@ const releaseManifest = await loadReleaseManifest(root);
 for (const failure of await verifyCoreReleaseSurfaces(root, releaseManifest)) {
   fail(failure);
 }
+const currentReleaseDoc = spawnSync(process.execPath, [
+  join(root, "scripts", "render-current-release.mjs"),
+  "--check",
+], {
+  cwd: root,
+  encoding: "utf-8",
+});
+if (currentReleaseDoc.status !== 0) {
+  fail(`current release documentation gate failed: ${spawnFailureMessage(currentReleaseDoc, "failed")}`);
+}
 const version = packageJson.version;
 const expectedMcpName = "io.github.sarveshsea/memi";
 if (packageJson.mcpName !== expectedMcpName) {
@@ -104,6 +114,7 @@ const requiredPackagedDocs = [
   ["docs/AGENT_STACKS.md", "ECC / AGENTS.md stacks"],
   ["docs/V2_PACKAGE_POSITIONING.md", "High-download package bar"],
   ["docs/RELEASE_GATES.md", "Local Publish-Ready Gate"],
+  ["docs/CURRENT_RELEASE.md", "Current Memi release truth"],
   ["docs/IOS_SWIFT.md", "Apple-platform design CI"],
   ["docs/PROOF.md", "No-Figma"],
 ];
