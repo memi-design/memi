@@ -120,6 +120,14 @@ export function validateWebReleaseArtifact(manifest, artifact) {
 }
 
 export function resolveManifestSourceCommit(root, manifest) {
+  const isShallow = execFileSync(
+    "git",
+    ["rev-parse", "--is-shallow-repository"],
+    { cwd: root, encoding: "utf8" },
+  ).trim() === "true";
+  if (isShallow) {
+    throw new Error("release artifact generation requires full Git history; offline --check remains supported");
+  }
   const sourceCommit = execFileSync(
     "git",
     ["log", "-1", "--format=%H", "--", "release-manifest.json"],
