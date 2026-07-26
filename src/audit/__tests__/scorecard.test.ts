@@ -115,6 +115,32 @@ describe("AuditScorecardSchema", () => {
     expect(parsed.error?.issues.some((issue) => issue.message.includes("Derived audit evidence id"))).toBe(true);
   });
 
+  it("rejects unknown criterion and cap evidence references", () => {
+    const input = scorecard({
+      caps: [
+        {
+          id: "release-cap",
+          maximum: 84,
+          reason: "Release proof is missing.",
+          state: "cleared",
+          clearingEvidenceIds: ["missing-cap-proof"],
+          requiresIndependentVerification: true,
+        },
+      ],
+    });
+    input.dimensions[0]!.criteria[0]!.evidenceIds = ["missing-criterion-proof"];
+
+    const parsed = AuditScorecardSchema.safeParse(input);
+
+    expect(parsed.success).toBe(false);
+    expect(parsed.error?.issues.some((issue) =>
+      issue.message.includes("Unknown evidence id missing-criterion-proof"),
+    )).toBe(true);
+    expect(parsed.error?.issues.some((issue) =>
+      issue.message.includes("Unknown evidence id missing-cap-proof"),
+    )).toBe(true);
+  });
+
   it("rejects ambiguous or non-canonical reviewer identities", () => {
     const input = scorecard();
     input.evidence[0]!.producer = "agent:reviewer";

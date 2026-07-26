@@ -235,4 +235,18 @@ describe("render-audit-scorecard", () => {
     expect(oversizedArtifact.status).toBe(1);
     expect(oversizedArtifact.stderr).toContain("Evidence artifact exceeds 10485760 bytes");
   });
+
+  it("refuses to render a passed criterion whose evidence is permanently unverified", async () => {
+    const root = await fixtureRoot();
+    const ledgerPath = join(root, "docs", "audits", "ledger.json");
+    const ledger = JSON.parse(await readFile(ledgerPath, "utf8"));
+    delete ledger.derivedFromAudit;
+    ledger.evidence[0].status = "failed";
+    await writeFile(ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`, "utf8");
+
+    const unverified = run(root);
+
+    expect(unverified.status).toBe(1);
+    expect(unverified.stderr).toContain("Passed criteria remain unverified: activation/proof");
+  });
 });
