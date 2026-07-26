@@ -1,4 +1,13 @@
-# Starstruck And Distribution Plan
+# Historical Starstruck And Distribution Plan
+
+This file is retained as the early-July distribution snapshot.
+
+Do not use it as the current release or growth source of truth. Current planning lives in:
+
+- [CURRENT_RELEASE.md](./CURRENT_RELEASE.md)
+- [METRICS.md](./METRICS.md)
+- [current audit](./audits/memi-design-engineering-audit-2026-07-26.md)
+- [100-point closure plan](./audits/memi-100-closure-plan-2026-07-26.md)
 
 Goal: keep GitHub growth tied to useful memi distribution. The base Starstruck tier is now crossed: `sarveshsea/memi` had `17` stars on 2026-07-08. The next honest target is sustained npm activation, then the `128` star tier.
 

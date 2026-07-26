@@ -1,4 +1,8 @@
-# Memi v2.5 Public Surface Handoff
+# Historical Memi v2.5 Public Surface Handoff
+
+This dated handoff is retained as historical evidence and its local paths are
+not current operating instructions. Use [CURRENT_RELEASE.md](./CURRENT_RELEASE.md)
+and [RELEASE_GATES.md](./RELEASE_GATES.md) for present release work.
 
 Updated: 2026-07-14
 

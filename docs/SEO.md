@@ -67,7 +67,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS, Linux, Windows",
   "description": "Interface understanding and design-system memory for AI coding agents: UX audits, Tailwind token extraction, shadcn registry generation, MCP tools, Agent Skills, research-backed specs, and Figma/FigJam handoff.",
-  "softwareVersion": "2.5.0",
+  "softwareVersion": "2.6.2",
   "url": "https://www.npmjs.com/package/@memi-design/cli",
   "codeRepository": "https://github.com/sarveshsea/memi",
   "programmingLanguage": "TypeScript",

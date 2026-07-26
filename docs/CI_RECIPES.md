@@ -17,12 +17,12 @@ jobs:
       contents: read
       security-events: write   # SARIF → code-scanning PR annotations
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0        # memi ci needs the merge-base with the base branch
       - uses: sarveshsea/memi@v2
         with:
-          version: "2.5.0"      # pinned on purpose — gate behavior must not drift under you
+          version: "2.6.2"      # pinned on purpose — gate behavior must not drift under you
           # fail-on: high       # override memoire.policy.json if needed
           # report: "true"      # design-health.html artifact (default on)
           # upload-sarif: "false"  # set false on forks (no security-events permission)
@@ -37,13 +37,13 @@ What lands on the PR:
 ## GitHub Actions — raw commands (no marketplace action)
 
 ```yaml
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with: { node-version: 22 }
-      - run: npm i -g @memi-design/cli@2.5.0
+      - run: npm i -g @memi-design/cli@2.6.2
       - run: memi ci --report
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@1b168cd39490f61582a9beae412bb7057a6b2c4e
         if: always()
         with:
           sarif_file: .memoire/app-quality/memi-results.sarif
@@ -53,7 +53,7 @@ What lands on the PR:
 ## Any other CI (GitLab, Buildkite, Jenkins, …)
 
 ```bash
-npm i -g @memi-design/cli@2.5.0
+npm i -g @memi-design/cli@2.6.2
 memi ci --base origin/main --json > memi-ci.json   # exit code is the gate
 ```
 

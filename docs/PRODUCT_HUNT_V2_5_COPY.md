@@ -1,4 +1,7 @@
-# Product Hunt v2.5 Update Copy
+# Historical Product Hunt v2.5 Update Copy
+
+This file is retained as historical launch copy. Do not use it as current
+release guidance. Use [CURRENT_RELEASE.md](./CURRENT_RELEASE.md).
 
 Use this after npm `2.5.0`, MCP Registry `2.5.0`, Codex Marketplace status, and the website proof pages are live.
 

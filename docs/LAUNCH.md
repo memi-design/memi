@@ -1,4 +1,14 @@
-# memi Product Hunt Launch Pack
+# Historical memi Product Hunt Launch Pack
+
+This file is retained as historical `v2.5` launch copy.
+
+Do not use it as the current release source of truth. Current release truth lives in:
+
+- [README.md](../README.md)
+- [CURRENT_RELEASE.md](./CURRENT_RELEASE.md)
+- [RELEASE_GATES.md](./RELEASE_GATES.md)
+- [METRICS.md](./METRICS.md)
+- [100-point closure plan](./audits/memi-100-closure-plan-2026-07-26.md)
 
 Use one message everywhere for the current `2.5.x` launch:
 

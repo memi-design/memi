@@ -1,6 +1,6 @@
 # Weekly Growth Scorecard
 
-Use this every Friday during the v2 package-growth window. Record the value, source URL, and one action for the next week.
+Use this every Friday during the current public-growth window. Record the value, source URL, and one action for the next week.
 
 ## Baseline
 
@@ -19,10 +19,10 @@ Use this every Friday during the v2 package-growth window. Record the value, sou
 
 ## Targets
 
-- Week 1: npm latest is `2.5.0`, public release gate passes, Agent Skills discovery passes, MCP Registry metadata is refreshed, and active `memoire.cv` docs have no stale 0.14.x targets.
-- Week 2: weekly downloads are `1500+`, GitHub metadata matches the v2 phrase, and at least three external agent-stack or template guides link to runnable memi proof.
-- Week 4: weekly downloads are `4000+`, monthly downloads are `8000+`, and example registries or tutorials account for measurable npm traffic.
-- Week 8: weekly downloads are `7830+`, Codex/MCP/Agent Skills discovery routes all point to the same v2 story, and at least ten external repos or directories include runnable memi proof.
+- Week 1: npm latest remains aligned with `package.json`, the public release gate passes, Agent Skills discovery passes, MCP Registry metadata is refreshed, and active `memoire.cv` docs show the same current release story.
+- Week 2: current public copy is still consistent, the first audit path remains runnable, and at least three external guides or proof repos link to runnable memi evidence.
+- Week 4: the measured non-release daily baseline is improving toward the `24` median target and at least five verified external integrations are live.
+- Week 8: ten verified external integrations are live, one hundred successful first audits are logged, twenty-five repeat audits are verified within 7 to 21 days, and four consecutive non-release weeks meet or exceed the `24` median daily download threshold.
 
 ## Scorecard
 

@@ -60,6 +60,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `3b0557d5` fix: pin workflow action refs
 - `2d0d9428` test: require read-only workflow defaults
 - `db0219d2` fix: scope workflow write permissions
+- `72c61bb0` test: enforce public release documentation truth
+- `f180defe` fix: generate canonical public release truth
 
 #### Architectural decisions
 
@@ -79,6 +81,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Preserve a comparable web score in mixed repositories while exposing every native limitation as a machine-readable unassessed dimension, preventing CI and reports from turning partial coverage into clean-pass copy.
 - Pin every third-party GitHub Actions workflow dependency to an audited upstream release commit SHA, and test the exact refs so release, publish, scanner, and runtime trust does not drift silently.
 - Default every GitHub workflow to read-only repository contents and grant write scopes only at the specific job that uploads SARIF, publishes through OIDC, or mutates release assets, so permission drift fails closed.
+- Generate one human-readable release-truth document from `release-manifest.json`, enforce it in the release gate, and mark retained launch snapshots as historical before any obsolete instructions.
 
 ### Design Skills migration — `3009cf63`
 

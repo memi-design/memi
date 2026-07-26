@@ -1,5 +1,9 @@
 # Release Gates
 
+The generated [current release truth](./CURRENT_RELEASE.md) defines the active
+engine, Studio, and website release groups. Do not infer parity from a single
+package version.
+
 Use these checks before announcing, tagging, or publishing a public release.
 
 ## Canonical Release Manifest
@@ -70,25 +74,25 @@ npm publish --dry-run --access public --ignore-scripts --json
 ```bash
 npm run check:public-release
 SKIP_INSTALL_SMOKE=1 npm run check:public-release
-SKIP_SITE_SMOKE=1 npm run check:public-release
-EXPECTED_STUDIO_VERSION=2.4.0 EXPECTED_COMMUNITY_NOTES=5 npm run check:public-release
+SKIP_SITE_SMOKE=1 npm run check:public-release # diagnostic only; never parity evidence
+EXPECTED_STUDIO_VERSION=2.5.0 EXPECTED_COMMUNITY_NOTES=5 npm run check:public-release
 ```
 
-For the `2.5.x` line, npm must report the current `package.json` version and `memoire.cv` must show the same agent-design-CI public story before MCP Registry, Codex marketplace announcements, Product Hunt, or directory follow-up. Use `SKIP_SITE_SMOKE=1` only while a web deploy is intentionally pending.
+For the current public engine line, npm must report the current `package.json` version and `memoire.cv` must show the same first-fold story before MCP Registry, Codex marketplace announcements, Product Hunt, or directory follow-up. `SKIP_SITE_SMOKE=1` is diagnostic only and never proves release parity.
 
 ## External Trust Gate
 
-Before any public `2.5.x` distribution push, verify every external surface points to the same v2.5 story:
+Before any public distribution push, verify every external surface points to the same current release story:
 
-- npm latest: current `package.json` version, currently `2.5.0`
-- npm README phrase: `Interface understanding for AI coding agents`
+- npm latest: current `package.json` version, currently `2.6.2`
+- npm README phrase: `Design QA skills for coding agents`
 - npm install command: `npm i -g @memi-design/cli`
 - MCP name: `io.github.sarveshsea/memi`
 - Agent Skills command: `npx skills add sarveshsea/memi --skill memoire-design-tooling`
 - Codex marketplace command: `codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`
 - GitHub description: `Interface understanding and design-system memory for AI coding agents.`
 - GitHub topics: `interface-understanding`, `design-system`, `shadcn-registry`, `tailwind-audit`, `ux-audit`, `mcp-server`, `agent-skills`, `codex-plugin`, `design-tokens`, `figma-to-code`
-- Website hero: `Interface understanding for AI coding agents.`
+- Website hero or first-fold proof line: the current read-only audit story and current release metadata
 - Website `/components`: non-empty registry catalog with npm install commands and shadcn item URLs
 - Website `/notes/community/catalog.v1.json`: non-empty community Notes catalog with the public starter Notes
 
