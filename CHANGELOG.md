@@ -52,6 +52,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `60f0a5e8` test: close scorecard release fail-open paths
 - `fea0e567` fix: fail closed across scorecard release paths
 - `90d0067d` test: require full binary release gate
+- `b58c63ee` test: add SwiftUI audit truth regressions
+- `522d5f07` fix: fail closed on partial SwiftUI audit coverage
 
 #### Architectural decisions
 
@@ -67,6 +69,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Replace the near-zero npm tarball margin with a 1.5 MB hard budget and a 90% utilization gate, preserving at least 10% operational headroom.
 - Fail scorecard generation on stale release-time evidence, symlink escapes, oversized ledgers or artifacts, non-canonical reviewer identities, and candidate-point drift from the reviewed source audit.
 - Require every passed criterion and cleared cap to reference known evidence, reject permanently unverified passes, and run the full scorecard gate in every tagged binary build.
+- Keep native static analysis file-anchored and conservative: web scores stay explicitly scoped when SwiftUI or Metal evidence is incomplete, history trends compare only like-for-like coverage, and clean partial scans must not claim either whole-product proof or zero analysis.
 
 ### Design Skills migration — `3009cf63`
 
