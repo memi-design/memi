@@ -67,7 +67,7 @@ Core verification:
 - Package size: 1,281,175 of the 1,285,000-byte gate.
 - Independent security review reproduced the original SSRF, symlink, and ZIP failures, then verified them fail closed after correction.
 - The aggregate public-release gate still exits on live docs and changelog drift before its `installSmoke` stage. Its `installSmoke` field remains null; the public install result above comes from a separate site-skipped invocation and is not misreported as an aggregate gate pass.
-- A committed clean-install workflow covers Node 20, 22, and 24 on Linux, macOS, and Windows. The local packed-consumer smoke passed; hosted matrix proof begins with the core PR.
+- A committed clean-install workflow covers Node 20, 22, and 24 on Linux, macOS, and Windows. All nine hosted matrix jobs passed in run `30221969392`, including Node 24 with npm 11 after completing optional native lock metadata.
 
 ### Canonical design skills
 

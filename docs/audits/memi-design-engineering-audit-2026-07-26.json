@@ -186,6 +186,21 @@
       }
     },
     "hostedVerification": {
+      "coreCleanInstall": {
+        "run": "https://github.com/sarveshsea/memi/actions/runs/30221969392",
+        "status": "passed",
+        "operatingSystems": [
+          "ubuntu-latest",
+          "macos-latest",
+          "windows-latest"
+        ],
+        "nodeVersions": [
+          20,
+          22,
+          24
+        ],
+        "passedJobs": 9
+      },
       "website": {
         "source": "GET https://api.github.com/repos/sarveshsea/memoire-web/check-runs/89845025757/annotations",
         "run": "https://github.com/sarveshsea/memoire-web/actions/runs/30221659760",
