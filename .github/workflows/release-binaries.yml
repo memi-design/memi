@@ -11,6 +11,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 env:
   RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
 

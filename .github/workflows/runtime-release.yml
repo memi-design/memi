@@ -24,7 +24,7 @@ on:
         required: true
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: runtime-release-${{ github.ref }}
@@ -104,6 +104,8 @@ jobs:
     name: Publish runtime release
     needs: build-binary
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
