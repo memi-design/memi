@@ -5,6 +5,7 @@ import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { afterEach, describe, expect, it } from "vitest";
 import type { AuditScorecard } from "../scorecard.js";
+import { canonicalAuditPath } from "../paths.js";
 
 const repoRoot = resolve(import.meta.dirname, "../../..");
 const script = join(repoRoot, "scripts", "render-audit-scorecard.ts");
@@ -98,6 +99,15 @@ function run(root: string, ...args: string[]) {
 }
 
 describe("render-audit-scorecard", () => {
+  it("renders provenance paths identically on Windows and POSIX", () => {
+    expect(canonicalAuditPath("docs\\audits\\ledger.json")).toBe(
+      "docs/audits/ledger.json",
+    );
+    expect(canonicalAuditPath("docs/audits/ledger.json")).toBe(
+      "docs/audits/ledger.json",
+    );
+  });
+
   it("writes deterministic Markdown with only the ledger hash as report provenance", async () => {
     const root = await fixtureRoot();
 

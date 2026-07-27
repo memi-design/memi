@@ -40,6 +40,23 @@ describe("audit scorecard release surfaces", () => {
     expect(restoreStart).toBeLessThan(releaseCheckStart);
   });
 
+  it("scopes the historical Windows scorecard compatibility shim to v2.6.3", async () => {
+    const workflow = await readFile(
+      join(process.cwd(), ".github", "workflows", "release-binaries.yml"),
+      "utf8",
+    );
+
+    expect(workflow).toContain(
+      '[[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.6.3" ]]',
+    );
+    expect(workflow).toContain(
+      "docs\\\\audits\\\\memi-100-scorecard.json",
+    );
+    expect(workflow).toContain(
+      "git archive --format=tar HEAD docs/audits/memi-100-scorecard.md",
+    );
+  });
+
   it("resolves one version-matched tag commit for every binary release job", async () => {
     const workflow = await readFile(
       join(process.cwd(), ".github", "workflows", "release-binaries.yml"),
