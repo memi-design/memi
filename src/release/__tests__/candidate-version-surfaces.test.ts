@@ -27,7 +27,7 @@ describe("2.6.3 non-published candidate surfaces", () => {
         sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
       },
     });
-    expect(manifest.surfaces.githubRelease.url).toEndWith("/v2.6.3");
+    expect(manifest.surfaces.githubRelease.url.endsWith("/v2.6.3")).toBe(true);
   });
 
   it("aligns every executable and packaged version surface", async () => {

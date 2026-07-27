@@ -16,16 +16,25 @@ describe("current public release documentation", () => {
     )).not.toThrow();
   });
 
-  it("names each release group and immutable engine source", () => {
+  it("names each release group and the engine identity appropriate to its state", () => {
     const markdown = readFileSync(join(root, "docs", "CURRENT_RELEASE.md"), "utf8");
     const engine = manifest.releaseGroups.engine;
     const studio = manifest.releaseGroups.studio;
     const site = manifest.releaseGroups.site;
 
     expect(markdown).toContain("# Current Memi release truth");
-    expect(markdown).toContain(`CLI, npm, MCP, and Action | \`${engine.version}\``);
-    expect(markdown).toContain(`\`${engine.sourceCommit}\``);
-    expect(markdown).toContain(manifest.surfaces.githubRelease.url);
+    if (engine.state === "candidate") {
+      expect(markdown).toContain(`Engine candidate (unreleased) | \`${engine.version}\``);
+      expect(markdown).toContain("Source commit: Not assigned.");
+      expect(markdown).toContain(
+        `releases/tag/v${engine.previousPublicRelease.version}`,
+      );
+      expect(markdown).toContain(`GitHub tag: \`v${engine.version}\``);
+    } else {
+      expect(markdown).toContain(`CLI, npm, MCP, and Action | \`${engine.version}\``);
+      expect(markdown).toContain(`\`${engine.sourceCommit}\``);
+      expect(markdown).toContain(manifest.surfaces.githubRelease.url);
+    }
     expect(markdown).toContain(`Studio | \`${studio.version}\``);
     expect(markdown).toContain(`Memoire.Studio_${studio.version}_aarch64.dmg`);
     expect(markdown).toContain(`Website | \`${site.version}\``);

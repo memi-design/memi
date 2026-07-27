@@ -8,6 +8,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+## v2.6.3
+
 ### Design-engineering audit, trust boundaries, and release proof
 
 - `49abb28e` test: reproduce audit evidence integrity gaps
