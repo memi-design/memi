@@ -9,6 +9,7 @@ import {
   evaluateAuditScorecard,
   renderAuditScorecardMarkdown,
 } from "../src/audit/scorecard.js";
+import { canonicalAuditPath } from "../src/audit/paths.js";
 
 interface CliOptions {
   root: string;
@@ -59,7 +60,7 @@ async function main(): Promise<void> {
   const rendered = [
     renderAuditScorecardMarkdown(scorecard, { asOf: scorecard.assessedAt }).trimEnd(),
     "",
-    `Generated from \`${relative(root, inputPath)}\` · Ledger SHA-256: \`${ledgerHash}\``,
+    `Generated from \`${canonicalAuditPath(relative(root, inputPath))}\` · Ledger SHA-256: \`${ledgerHash}\``,
     "",
   ].join("\n");
   const verifiedAsOf = options.verifyAsOf ?? new Date().toISOString();
@@ -72,12 +73,12 @@ async function main(): Promise<void> {
         `Generated audit report is stale: run npm run audit:render-scorecard`,
       );
     }
-    process.stdout.write(`${relative(root, outputPath)} is current\n`);
+    process.stdout.write(`${canonicalAuditPath(relative(root, outputPath))} is current\n`);
     return;
   }
 
   await writeAtomically(outputPath, rendered);
-  process.stdout.write(`Wrote ${relative(root, outputPath)}\n`);
+  process.stdout.write(`Wrote ${canonicalAuditPath(relative(root, outputPath))}\n`);
 }
 
 function parseArguments(args: string[]): CliOptions {
