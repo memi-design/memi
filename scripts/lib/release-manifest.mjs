@@ -293,6 +293,107 @@ export function canClearPublicParityCap(manifest, evidence) {
   return true;
 }
 
+export function validateNpmPublishPreflight({
+  manifest,
+  packageVersion,
+  expectedVersion,
+  gitRef,
+  sourceCommit,
+  registryMetadata,
+}) {
+  const failures = validateReleaseManifest(manifest);
+  const engine = manifest?.releaseGroups?.engine;
+  if (gitRef !== "refs/heads/main") failures.push("npm publish must run from refs/heads/main");
+  if (!COMMIT_SHA.test(sourceCommit ?? "")) {
+    failures.push("npm publish source commit must be an exact commit SHA");
+  }
+  if (engine?.state !== "candidate") {
+    failures.push("npm publish requires an engine candidate manifest");
+  }
+  if (engine?.sourceCommit !== null || engine?.releaseRecord !== null) {
+    failures.push("npm publish candidate must not claim source or release evidence");
+  }
+  if (engine?.version !== expectedVersion) {
+    failures.push(`release manifest version ${engine?.version ?? "missing"} does not match requested ${expectedVersion}`);
+  }
+  if (packageVersion !== expectedVersion) {
+    failures.push(`package version ${packageVersion ?? "missing"} does not match requested ${expectedVersion}`);
+  }
+  if (registryMetadata?.versions?.[expectedVersion]) {
+    failures.push(`@memi-design/cli@${expectedVersion} already exists; use recovery mode and never republish`);
+  }
+  return failures;
+}
+
+export function validateTarballBytes({ bytes, integrity, shasum }) {
+  const buffer = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
+  if (!/^sha512-[A-Za-z0-9+/]+={0,2}$/.test(integrity ?? "")) {
+    throw new Error("tarball integrity must be a valid SHA-512 SRI value");
+  }
+  if (!SHASUM.test(shasum ?? "")) throw new Error("tarball shasum must be a SHA-1 digest");
+  const expectedSha512 = Buffer.from(integrity.slice("sha512-".length), "base64");
+  const actualSha512 = createHash("sha512").update(buffer).digest();
+  if (expectedSha512.length !== actualSha512.length
+    || !actualSha512.equals(expectedSha512)) {
+    throw new Error("tarball SHA-512 does not match npm integrity");
+  }
+  const actualSha1 = createHash("sha1").update(buffer).digest("hex");
+  if (actualSha1 !== shasum) throw new Error("tarball SHA-1 does not match npm shasum");
+  return {
+    sha512: actualSha512.toString("hex"),
+    sha1: actualSha1,
+    bytes: buffer.length,
+  };
+}
+
+export function validateEngineSurfaceSnapshot(manifest, snapshot) {
+  const failures = [];
+  const version = manifest?.releaseGroups?.engine?.version;
+  const npm = manifest?.surfaces?.npm;
+  const mcp = manifest?.surfaces?.mcp;
+  const packageJson = snapshot?.["package.json"];
+  const packageLock = snapshot?.["package-lock.json"];
+  const server = snapshot?.["server.json"];
+  const mcpb = snapshot?.["mcpb/manifest.json"];
+  const codexPlugin = snapshot?.["plugins/memoire/.codex-plugin/plugin.json"];
+  const claudePlugin = snapshot?.["plugins/memi-claude/.claude-plugin/plugin.json"];
+  const widget = snapshot?.["plugin/widget-meta.json"];
+  const action = snapshot?.["action.yml"];
+
+  const exactVersions = [
+    ["package.json", packageJson?.version],
+    ["package-lock.json", packageLock?.version],
+    ["package-lock.json root", packageLock?.packages?.[""]?.version],
+    ["server.json", server?.version],
+    ["server.json npm package", server?.packages?.find((entry) => entry.registryType === "npm")?.version],
+    ["mcpb/manifest.json", mcpb?.version],
+    ["Codex plugin", codexPlugin?.version],
+    ["Claude plugin", claudePlugin?.version],
+    ["Figma widget metadata", widget?.packageVersion],
+  ];
+  for (const [surface, actual] of exactVersions) {
+    if (actual !== version) failures.push(`${surface} version ${actual ?? "missing"} does not match release manifest ${version}`);
+  }
+  if (packageJson?.name !== npm?.packageName) {
+    failures.push(`package.json name ${packageJson?.name ?? "missing"} does not match release manifest ${npm?.packageName}`);
+  }
+  if (packageJson?.mcpName !== mcp?.serverName || server?.name !== mcp?.serverName) {
+    failures.push("package.json and server.json MCP names must match the release manifest");
+  }
+  if (typeof action !== "string" || !action.includes(`default: "${version}"`)) {
+    failures.push(`action.yml default CLI version does not match release manifest ${version}`);
+  }
+  if (typeof action !== "string" || !action.includes(`reviewed ${version} pin`)) {
+    failures.push(`action.yml version description does not match release manifest ${version}`);
+  }
+  for (const scriptName of ["build:mcpb", "publish:smithery"]) {
+    if (!packageJson?.scripts?.[scriptName]?.includes(`memi-${version}.mcpb`)) {
+      failures.push(`package.json ${scriptName} does not use release manifest ${version}`);
+    }
+  }
+  return failures;
+}
+
 function isNpmTarballUrl(value) {
   try {
     const url = new URL(value);
@@ -394,52 +495,19 @@ export function resolveManifestSourceCommit(root, manifest) {
 
 export async function verifyCoreReleaseSurfaces(root, manifest) {
   const failures = validateReleaseManifest(manifest);
-  const version = manifest?.releaseGroups?.engine?.version;
-  const npm = manifest?.surfaces?.npm;
-  const mcp = manifest?.surfaces?.mcp;
 
   const readJson = async (path) => JSON.parse(await readFile(join(root, path), "utf8"));
-  const packageJson = await readJson("package.json");
-  const packageLock = await readJson("package-lock.json");
-  const server = await readJson("server.json");
-  const mcpb = await readJson("mcpb/manifest.json");
-  const codexPlugin = await readJson("plugins/memoire/.codex-plugin/plugin.json");
-  const claudePlugin = await readJson("plugins/memi-claude/.claude-plugin/plugin.json");
-  const widget = await readJson("plugin/widget-meta.json");
-  const action = await readFile(join(root, "action.yml"), "utf8");
-
-  const exactVersions = [
-    ["package.json", packageJson.version],
-    ["package-lock.json", packageLock.version],
-    ["package-lock.json root", packageLock.packages?.[""]?.version],
-    ["server.json", server.version],
-    ["server.json npm package", server.packages?.find((entry) => entry.registryType === "npm")?.version],
-    ["mcpb/manifest.json", mcpb.version],
-    ["Codex plugin", codexPlugin.version],
-    ["Claude plugin", claudePlugin.version],
-    ["Figma widget metadata", widget.packageVersion],
-  ];
-  for (const [surface, actual] of exactVersions) {
-    if (actual !== version) failures.push(`${surface} version ${actual ?? "missing"} does not match release manifest ${version}`);
-  }
-
-  if (packageJson.name !== npm?.packageName) {
-    failures.push(`package.json name ${packageJson.name} does not match release manifest ${npm?.packageName}`);
-  }
-  if (packageJson.mcpName !== mcp?.serverName || server.name !== mcp?.serverName) {
-    failures.push("package.json and server.json MCP names must match the release manifest");
-  }
-  if (!action.includes(`default: "${version}"`)) {
-    failures.push(`action.yml default CLI version does not match release manifest ${version}`);
-  }
-  if (!action.includes(`reviewed ${version} pin`)) {
-    failures.push(`action.yml version description does not match release manifest ${version}`);
-  }
-  for (const scriptName of ["build:mcpb", "publish:smithery"]) {
-    if (!packageJson.scripts?.[scriptName]?.includes(`memi-${version}.mcpb`)) {
-      failures.push(`package.json ${scriptName} does not use release manifest ${version}`);
-    }
-  }
+  const snapshot = {
+    "package.json": await readJson("package.json"),
+    "package-lock.json": await readJson("package-lock.json"),
+    "server.json": await readJson("server.json"),
+    "mcpb/manifest.json": await readJson("mcpb/manifest.json"),
+    "plugins/memoire/.codex-plugin/plugin.json": await readJson("plugins/memoire/.codex-plugin/plugin.json"),
+    "plugins/memi-claude/.claude-plugin/plugin.json": await readJson("plugins/memi-claude/.claude-plugin/plugin.json"),
+    "plugin/widget-meta.json": await readJson("plugin/widget-meta.json"),
+    "action.yml": await readFile(join(root, "action.yml"), "utf8"),
+  };
+  failures.push(...validateEngineSurfaceSnapshot(manifest, snapshot));
 
   const artifactPath = join(root, "release-artifacts", "memoire-web.release.json");
   const artifact = await readFile(artifactPath, "utf8")

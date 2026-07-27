@@ -108,7 +108,7 @@ describe("npm publish workflow provenance contract", () => {
     );
 
     expect(workflow).toContain("EXPECTED_SOURCE_COMMIT: ${{ github.sha }}");
-    expect(workflow).toContain("EXPECTED_SOURCE_REF: ${{ github.ref }}");
+    expect(workflow).toContain("EXPECTED_SOURCE_REF: refs/heads/main");
     expect(workflow).toContain("npm audit signatures --include-attestations");
     expect(workflow).toContain('npm install --ignore-scripts "${PACKAGE_SPEC}"');
     expect(workflow).toContain("RELEASE_RECORD_OUTPUT:");

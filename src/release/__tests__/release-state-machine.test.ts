@@ -215,7 +215,15 @@ describe("verified engine release state machine", () => {
       releaseRecord: null,
     });
     const snapshot = {
-      "package.json": { name: "@memi-design/cli", version: "2.6.3", mcpName: "io.github.sarveshsea/memi" },
+      "package.json": {
+        name: "@memi-design/cli",
+        version: "2.6.3",
+        mcpName: "io.github.sarveshsea/memi",
+        scripts: {
+          "build:mcpb": "pack .dist/memi-2.6.3.mcpb",
+          "publish:smithery": "publish .dist/memi-2.6.3.mcpb",
+        },
+      },
       "package-lock.json": { version: "2.6.3", packages: { "": { version: "2.6.3" } } },
       "server.json": {
         name: "io.github.sarveshsea/memi",
