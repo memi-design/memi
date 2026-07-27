@@ -26,9 +26,11 @@ export function validateRegistryVersion({
   const readme = String(metadata.readme || "");
   const versionReadme = String(version?.readme || "");
   const combinedReadme = `${readme}\n${versionReadme}`;
+  const readableReadme = normalizeReadableMarkdown(combinedReadme);
+  const readablePhrase = normalizeReadableMarkdown(expectedPhrase);
 
   assert(latest === expectedVersion, `expected latest ${expectedVersion}, got ${latest}`);
-  assert(combinedReadme.includes(expectedPhrase), `README missing phrase: ${expectedPhrase}`);
+  assert(readableReadme.includes(readablePhrase), `README missing phrase: ${expectedPhrase}`);
   assert(combinedReadme.includes(expectedInstall), `README missing install command: ${expectedInstall}`);
   assert(
     typeof dist?.integrity === "string" && /^sha512-[A-Za-z0-9+/]+={0,2}$/.test(dist.integrity),
@@ -61,6 +63,13 @@ export function validateRegistryVersion({
     signatureCount: dist.signatures.length,
     attestationUrl,
   };
+}
+
+function normalizeReadableMarkdown(value) {
+  return String(value)
+    .replace(/[*_`~]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function assertRegistryAttestationUrl(value) {
