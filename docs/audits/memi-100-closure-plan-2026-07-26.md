@@ -371,13 +371,33 @@ Final acceptance rule:
 
 - If any criterion still says `unassessed`, any cap is still `active`, any public surface is stale, or the eight-week adoption proof is incomplete, Memi is not yet 100/100.
 
+## Closure progress recorded July 27, 2026
+
+- The SwiftUI rendered-rerun criterion is closed with a real source audit,
+  reduced-motion correction, simulator rendering, runtime accessibility action,
+  clean rerun, hosted validation, and independent review.
+- The shader proof now has real Apple M3 Pro GPU timer evidence, opaque-alpha
+  and sRGB diagnostics, deterministic frame hashes, Chromium and WebKit hosted
+  runs, successful artifact retention, source-commit ancestry validation, and
+  independent approval. See
+  [memi-shader-rendering-evidence-2026-07-27.json](./memi-shader-rendering-evidence-2026-07-27.json).
+- The shader criterion remains `unassessed`, not partially scored. Power
+  consumption is blocked because Xcode Power Profiler is unsupported on macOS
+  and `powermetrics` requires superuser access. Wide-gamut accuracy remains
+  pending because the verified drawing buffer is sRGB and no calibrated
+  Display P3 capture path has been proven.
+- Candidate SBOM and policy evidence is recorded, but complete supply-chain
+  proof still requires a public successor npm release with trusted-publisher
+  provenance and independent public-artifact review.
+- The raw score remains 87/100 and the verified score remains capped at 69/100.
+
 ## Recommended next three workstreams
 
 1. Website billing and hosted-CI unblock, followed by reviewed merge, publish,
    deploy, and live release parity so both caps can clear.
-2. Real SwiftUI audit/correction/simulator/rerun proof with non-zero scanned
-   source and analyzed before/after rendering.
-3. Durable shader rendering and complete supply-chain evidence, followed by the
+2. Complete the shader power and wide-gamut evidence on supported calibrated
+   hardware without privileged shortcuts or inferred passes.
+3. Publish and independently verify the successor npm release, then run the
    aggregate clean-room public-release gate.
 
 ## Critical path and stop rules
