@@ -22,12 +22,17 @@ npm run check:release
 ```
 
 The sync command writes
-`release-artifacts/memoire-web.release.json`. Copy that file byte-for-byte to
+`release-artifacts/memoire-web.release.json`. The schema-v2 artifact keeps the
+canonical candidate or published manifest under `orchestration`, while `release`
+and `publicTruth` are the only public-display contract. During candidate staging,
+those public fields resolve to `previousPublicRelease`; they must never expose
+the unpublished candidate version or tag. Copy the artifact byte-for-byte to
 `src/data/memi-release.generated.json` in `sarveshsea/memoire-web`; the website
-derives CLI and Studio metadata from it and verifies its SHA-256 provenance
-offline with `npm run check:release-manifest`. The export records the exact
-Memi commit that contains the canonical manifest. Push that commit before
-opening or refreshing the website pull request, then run the website's
+must derive CLI, GitHub release, and Studio metadata from `release` or
+`publicTruth`, never `orchestration`, and verify the canonical orchestration
+manifest's SHA-256 provenance offline with `npm run check:release-manifest`.
+The export records the exact Memi commit that contains the canonical manifest.
+Push that commit before opening or refreshing the website pull request, then run the website's
 `npm run check:public-release-manifest` network gate. That gate fetches the
 immutable source manifest and verifies the tagged Memi release plus the exact
 Studio arm64, x64, and checksum assets. Because the repositories publish

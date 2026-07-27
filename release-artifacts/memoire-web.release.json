@@ -1,11 +1,86 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "provenance": {
     "repository": "https://github.com/sarveshsea/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "c9e5790f1e5c38129a2078bf55407d9e9c4649f2",
-    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/c9e5790f1e5c38129a2078bf55407d9e9c4649f2/release-manifest.json",
-    "manifestSha256": "acdf98107777060d394d02013fa3aeb1932bb68305544e5e4f1b0c507bd1ae93"
+    "sourceCommit": "8232214e5a1b5e6db0c6036847eae08b54c804a9",
+    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/8232214e5a1b5e6db0c6036847eae08b54c804a9/release-manifest.json",
+    "manifestSha256": "8d469ea911793b9f28b176196ef5e9c7f79b0d605653a52fc71376927e48e02e"
+  },
+  "orchestration": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-26",
+    "releaseGroups": {
+      "engine": {
+        "version": "2.6.3",
+        "state": "candidate",
+        "sourceCommit": null,
+        "releaseRecord": null,
+        "verification": {
+          "eligibleForParity": false,
+          "reason": "2.6.3 is staged for verified publication and has not been published"
+        },
+        "previousPublicRelease": {
+          "version": "2.6.2",
+          "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354"
+        }
+      },
+      "studio": {
+        "version": "2.5.0",
+        "status": "available",
+        "channel": "stable",
+        "releaseDate": "July 2026",
+        "releaseSize": "48 MB"
+      },
+      "site": {
+        "version": "1.0.4"
+      }
+    },
+    "surfaces": {
+      "npm": {
+        "releaseGroup": "engine",
+        "packageName": "@memi-design/cli",
+        "url": "https://www.npmjs.com/package/@memi-design/cli"
+      },
+      "githubRelease": {
+        "releaseGroup": "engine",
+        "repository": "sarveshsea/memi",
+        "tagPrefix": "v",
+        "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.3"
+      },
+      "githubAction": {
+        "releaseGroup": "engine",
+        "repository": "sarveshsea/memi",
+        "majorTag": "v2"
+      },
+      "mcp": {
+        "releaseGroup": "engine",
+        "serverName": "io.github.sarveshsea/memi"
+      },
+      "studio": {
+        "releaseGroup": "studio",
+        "repository": "sarveshsea/memi-studio",
+        "tagPrefix": "v",
+        "arm64Asset": "Memoire.Studio_{version}_aarch64.dmg",
+        "x64Asset": "Memoire.Studio_{version}_x64.dmg",
+        "checksumAsset": "SHA256SUMS"
+      },
+      "website": {
+        "releaseGroup": "site",
+        "repository": "sarveshsea/memoire-web",
+        "publicUrl": "https://www.memoire.cv"
+      }
+    }
+  },
+  "publicTruth": {
+    "source": "previousPublicRelease",
+    "engine": {
+      "version": "2.6.2",
+      "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+      "packageName": "@memi-design/cli",
+      "npmUrl": "https://www.npmjs.com/package/@memi-design/cli",
+      "githubReleaseUrl": "https://github.com/sarveshsea/memi/releases/tag/v2.6.2"
+    }
   },
   "release": {
     "schemaVersion": 1,
@@ -18,7 +93,7 @@
         "releaseRecord": null,
         "verification": {
           "eligibleForParity": false,
-          "reason": "2.6.2 predates the provenance-bound release state machine"
+          "reason": "2.6.2 remains public while 2.6.3 is an unpublished candidate"
         },
         "plannedSuccessor": "2.6.3"
       },

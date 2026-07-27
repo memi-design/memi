@@ -3,15 +3,18 @@
   "updatedAt": "2026-07-26",
   "releaseGroups": {
     "engine": {
-      "version": "2.6.2",
-      "state": "historical",
-      "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+      "version": "2.6.3",
+      "state": "candidate",
+      "sourceCommit": null,
       "releaseRecord": null,
       "verification": {
         "eligibleForParity": false,
-        "reason": "2.6.2 predates the provenance-bound release state machine"
+        "reason": "2.6.3 is staged for verified publication and has not been published"
       },
-      "plannedSuccessor": "2.6.3"
+      "previousPublicRelease": {
+        "version": "2.6.2",
+        "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354"
+      }
     },
     "studio": {
       "version": "2.5.0",
@@ -34,7 +37,7 @@
       "releaseGroup": "engine",
       "repository": "sarveshsea/memi",
       "tagPrefix": "v",
-      "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.2"
+      "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.3"
     },
     "githubAction": {
       "releaseGroup": "engine",

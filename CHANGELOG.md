@@ -8,8 +8,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+## v2.6.3
+
 ### Design-engineering audit, trust boundaries, and release proof
 
+- `5400d338` test: require fail-closed 2.6.3 candidate surfaces
+- `8232214e` chore: stage 2.6.3 release candidate
+- `48b48da4` chore: export 2.6.3 candidate manifest
+- `2c02cdf1` test: preserve public docs during candidate staging
+- `dc4c8de5` test: fail closed on candidate website exports
+- `f59f5a02` fix: keep candidate website exports public-safe
 - `49abb28e` test: reproduce audit evidence integrity gaps
 - `97439674` fix: preserve honest audit evidence end to end
 - `c01ff87e` test: add red gates for audit evidence and trust boundaries

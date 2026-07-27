@@ -8,12 +8,22 @@ const manifest = JSON.parse(
   await readFile(join(root, "release-manifest.json"), "utf8"),
 ) as {
   releaseGroups: {
-    engine: { version: string };
+    engine: {
+      version: string;
+      state?: string;
+      previousPublicRelease?: { version: string };
+    };
     studio: { version: string };
   };
 };
 
-const engineVersion = manifest.releaseGroups.engine.version;
+const candidateVersion = manifest.releaseGroups.engine.version;
+const publicEngineVersion = manifest.releaseGroups.engine.state === "candidate"
+  ? manifest.releaseGroups.engine.previousPublicRelease?.version
+  : candidateVersion;
+if (!publicEngineVersion) {
+  throw new Error("Candidate manifest must identify its previous public release");
+}
 const studioVersion = manifest.releaseGroups.studio.version;
 const primaryStory = "read-only design engineering audit and skill layer for coding agents";
 
@@ -51,10 +61,11 @@ const expectedDocRefs = [
 ] as const;
 
 describe("public documentation release truth", () => {
-  it("derives current engine and Studio guidance from release-manifest.json", async () => {
+  it("derives verified public engine and Studio guidance from release-manifest.json", async () => {
     for (const path of engineDocs) {
       const source = await readFile(join(root, path), "utf8");
-      expect(source, `${path} should contain engine ${engineVersion}`).toContain(engineVersion);
+      expect(source, `${path} should contain public engine ${publicEngineVersion}`)
+        .toContain(publicEngineVersion);
       expect(source, `${path} should not recommend the old engine package`).not.toMatch(
         /@memi-design\/cli@(?:2\.4\.\d+|2\.5\.\d+)/,
       );

@@ -18,14 +18,17 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.6.2",
-          state: "historical",
-          sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+          version: "2.6.3",
+          state: "candidate",
+          sourceCommit: null,
           releaseRecord: null,
           verification: {
             eligibleForParity: false,
           },
-          plannedSuccessor: "2.6.3",
+          previousPublicRelease: {
+            version: "2.6.2",
+            sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+          },
         },
         studio: { version: "2.5.0" },
         site: { version: "1.0.4" },
@@ -36,7 +39,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "sarveshsea/memi",
           tagPrefix: "v",
-          url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.2",
+          url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.3",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
@@ -53,7 +56,45 @@ describe("release manifest", () => {
     const canonicalText = `${JSON.stringify(manifest, null, 2)}\n`;
     const sha256 = createHash("sha256").update(canonicalText).digest("hex");
 
-    expect(artifact.release).toEqual(manifest);
+    expect(artifact.schemaVersion).toBe(2);
+    expect(artifact.orchestration).toEqual(manifest);
+    expect(artifact.publicTruth).toEqual({
+      source: "previousPublicRelease",
+      engine: {
+        version: "2.6.2",
+        sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+        packageName: "@memi-design/cli",
+        npmUrl: "https://www.npmjs.com/package/@memi-design/cli",
+        githubReleaseUrl: "https://github.com/sarveshsea/memi/releases/tag/v2.6.2",
+      },
+    });
+    expect(artifact.release).toMatchObject({
+      releaseGroups: {
+        engine: {
+          version: "2.6.2",
+          state: "historical",
+          sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+          releaseRecord: null,
+          verification: {
+            eligibleForParity: false,
+            reason: "2.6.2 remains public while 2.6.3 is an unpublished candidate",
+          },
+          plannedSuccessor: "2.6.3",
+        },
+      },
+      surfaces: {
+        githubRelease: {
+          url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.2",
+        },
+        githubAction: {
+          majorTag: "v2",
+        },
+      },
+    });
+    expect(artifact.release.releaseGroups.engine.version)
+      .not.toBe(manifest.releaseGroups.engine.version);
+    expect(artifact.release.surfaces.githubRelease.url)
+      .not.toBe(manifest.surfaces.githubRelease.url);
     expect(artifact.provenance).toEqual({
       repository: "https://github.com/sarveshsea/memi",
       path: "release-manifest.json",

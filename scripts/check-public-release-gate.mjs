@@ -13,6 +13,7 @@ import {
   loadReleaseManifest,
   resolveReleaseRecordPath,
   serializeJson,
+  validateWebReleaseArtifact,
   verifyPublishedEngineTransitionFromGit,
 } from "./lib/release-manifest.mjs";
 
@@ -405,6 +406,10 @@ async function verifyWebsiteArtifact() {
   const url = manifest.surfaces.website.releaseArtifactUrl;
   if (!url) throw new Error("releaseArtifactUrl is not configured");
   const artifact = await fetchJson(url);
+  const artifactFailures = validateWebReleaseArtifact(manifest, artifact);
+  if (artifactFailures.length > 0) {
+    throw new Error(`deployed website release artifact is invalid: ${artifactFailures.join("; ")}`);
+  }
   if (serializeJson(artifact?.release) !== serializeJson(manifest)) {
     throw new Error("deployed website release payload does not match the canonical manifest");
   }
