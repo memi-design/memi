@@ -261,9 +261,23 @@ Acceptable evidence:
 - Workflow least-privilege review.
 - Independent reviewer signoff on archive, network, publisher, and licensing boundaries.
 
+Candidate preparation now present:
+
+- Commit `e3789ce6` makes the main-branch npm workflow OIDC-only, generates and
+  uploads a CycloneDX SBOM, publishes with npm provenance, validates the
+  registry signature and artifact integrity, binds the SLSA statement to the
+  exact package digest/repository/workflow/ref/commit, and runs npm's
+  signature-and-attestation verifier in a clean consumer.
+- This is implementation evidence only. The criterion remains `unassessed`
+  until a successor npm release runs that workflow successfully and an
+  independent reviewer verifies the resulting public tarball, SBOM,
+  attestation, advisory result, publisher boundary, and licensing boundary.
+
 Failure condition:
 
 - Relying only on `npm audit` and prior manual review notes.
+- Awarding the point from a locally generated SBOM or historical package
+  signature without public SLSA provenance.
 
 #### 7. `growth-and-community-proof/eight-week-adoption` (+5)
 

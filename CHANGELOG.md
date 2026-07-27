@@ -75,6 +75,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `14f1dfd7` test: require npm provenance release proof
 - `04e415f0` test: add supply-chain proof reproducer (superseded before merge)
 - `e3789ce6` fix: require verifiable npm provenance
+- `15faed69` test: reject manual npm publish bypass
 
 #### Architectural decisions
 

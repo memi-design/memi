@@ -38,7 +38,9 @@ and both pull requests must merge before the public-site gate is complete.
 
 `npm run publish:ready` verifies the local package is safe to publish before npm mutates anything:
 
-- npm auth is active for `https://registry.npmjs.org/`.
+- npm auth is active for `https://registry.npmjs.org/` when the maintainer is
+  deliberately checking account access. The authoritative publish path uses
+  GitHub OIDC instead of a local token.
 - `package.json`, `package-lock.json`, `server.json`, Codex plugin metadata, examples, and package docs use the same version.
 - Local version is newer than npm `latest`.
 - `server.json`, `dist/index.js`, `README.md`, `NOTICE`, Agent Skills, agent kits, and selected docs are present in the package tarball.
@@ -100,17 +102,35 @@ Before any public distribution push, verify every external surface points to the
 
 ## Publish Sequence
 
-The only desktop command that must be run by the npm account owner is:
+The npm account owner must configure one npm trusted publisher for
+`@memi-design/cli`:
+
+- repository: `sarveshsea/memi`
+- workflow: `publish.yml`
+- permission: publish
+
+Do not add a long-lived `NPM_TOKEN` fallback. After the reviewed release commit
+is merged to `main`, dispatch the GitHub Actions workflow named
+`Publish to npm` from `main` and supply the required `expected_version`. The
+workflow refuses other refs, verifies the requested version, installs from the
+lockfile, runs the release suite, uploads a CycloneDX SBOM, and calls
+`npm publish --access public --provenance`.
+
+The post-publish gate must then prove all of the following before any
+announcement:
+
+- npm registry integrity, shasum, and package signature exist.
+- SLSA provenance resolves the exact package digest, repository,
+  `.github/workflows/publish.yml`, Git ref, and source commit.
+- `npm audit signatures --include-attestations` succeeds in a clean consumer.
+- The public README contains the primary story and install command.
+
+If trusted publishing is missing or any post-publish verification fails, stop
+the release. Do not bypass the workflow with a desktop publish.
+
+Then verify the remaining public surfaces:
 
 ```bash
-npm logout --registry=https://registry.npmjs.org/; npm login --auth-type=web --registry=https://registry.npmjs.org/; npm publish --access public --auth-type=web
-```
-
-Then verify the public surfaces:
-
-```bash
-npm whoami --registry=https://registry.npmjs.org/
-npm run publish:ready
 npm view @memi-design/cli version dist-tags.latest mcpName --json
 mcp-publisher login github
 mcp-publisher publish server.json
