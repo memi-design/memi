@@ -1,10 +1,14 @@
 import { createHash } from "node:crypto";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 import {
   buildEngineReleaseRecord,
   canClearPublicParityCap,
+  resolveReleaseRecordPath,
   serializeJson,
   stagePublishedEngineManifest,
   validateEngineSurfaceSnapshot,
@@ -332,6 +336,28 @@ describe("verified engine release state machine", () => {
       },
     });
     expect(published.updatedAt).toBe("2026-07-28");
+  });
+
+  it("rejects a release record symlink that escapes the checkout", async () => {
+    const fixture = await mkdtemp(join(tmpdir(), "memi-release-record-"));
+    const outside = await mkdtemp(join(tmpdir(), "memi-release-outside-"));
+    try {
+      await mkdir(join(fixture, "release-artifacts", "npm"), { recursive: true });
+      const outsideRecord = join(outside, "2.6.3.release.json");
+      await writeFile(outsideRecord, serializeJson(releaseRecord()), "utf8");
+      await symlink(
+        outsideRecord,
+        join(fixture, "release-artifacts", "npm", "2.6.3.release.json"),
+      );
+
+      await expect(resolveReleaseRecordPath(
+        fixture,
+        "release-artifacts/npm/2.6.3.release.json",
+      )).rejects.toThrow("symlink");
+    } finally {
+      await rm(fixture, { recursive: true, force: true });
+      await rm(outside, { recursive: true, force: true });
+    }
   });
 
   it("rejects cross-version, non-ancestor, surface-drifted, or tampered transitions", () => {
