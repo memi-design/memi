@@ -94,7 +94,8 @@ jobs:
         with:
           github-token: ${{ github.token }}
           run-id: ${{ inputs.source_run_id }}
-          name: memi-release-sbom-${{ env.RECOVERY_SOURCE_COMMIT }}
+          pattern: memi-release-sbom-*
+          merge-multiple: true
           path: release-evidence
 
       - name: Verify candidate is unpublished

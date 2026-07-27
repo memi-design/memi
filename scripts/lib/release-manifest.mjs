@@ -71,6 +71,13 @@ export function validateReleaseManifest(manifest) {
   if (!manifest?.surfaces?.studio?.checksumAsset) {
     failures.push("release-manifest.json Studio checksumAsset is required");
   }
+  if (groups.engine?.state === "published"
+    && !isSameOriginArtifactUrl(
+      manifest?.surfaces?.website?.publicUrl,
+      manifest?.surfaces?.website?.releaseArtifactUrl,
+    )) {
+    failures.push("published engine release requires a same-origin website release artifact URL");
+  }
 
   return failures;
 }
@@ -544,6 +551,20 @@ function isNpmAttestationUrl(value) {
       && url.pathname.startsWith("/-/npm/v1/attestations/")
       && !url.username
       && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+function isSameOriginArtifactUrl(publicUrl, artifactUrl) {
+  try {
+    const site = new URL(publicUrl);
+    const artifact = new URL(artifactUrl);
+    return site.protocol === "https:"
+      && site.origin === artifact.origin
+      && artifact.pathname.endsWith(".json")
+      && !artifact.username
+      && !artifact.password;
   } catch {
     return false;
   }

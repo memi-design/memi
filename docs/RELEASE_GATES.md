@@ -115,12 +115,52 @@ The npm account owner must configure one npm trusted publisher for
 - workflow: `publish.yml`
 - permission: publish
 
-Do not add a long-lived `NPM_TOKEN` fallback. After the reviewed release commit
-is merged to `main`, dispatch the GitHub Actions workflow named
-`Publish to npm` from `main` and supply the required `expected_version`. The
-workflow refuses other refs, verifies the requested version, installs from the
-lockfile, runs the release suite, uploads a CycloneDX SBOM, and calls
-`npm publish --access public --provenance`.
+Do not add a long-lived `NPM_TOKEN` fallback. Releases use a fail-closed
+two-phase state machine:
+
+1. Prepare and merge candidate commit X. Every version-bearing engine surface
+   must use the new version. The manifest engine state is `candidate`, with
+   `sourceCommit: null`, `releaseRecord: null`, and the previous public release
+   identified separately. A candidate is unreleased and can never clear public
+   parity or audit score caps.
+2. Dispatch `Publish to npm` from `main` with `mode: publish` and the exact
+   `expected_version`. The workflow proves the version is absent from npm before
+   running the release suite and the single
+   `npm publish --access public --provenance` operation.
+3. The workflow verifies the downloaded tarball against npm integrity and
+   shasum, verifies registry signatures and SLSA provenance, and emits an
+   immutable release record. The record binds version, commit X, tarball
+   digests, attestation, workflow run and attempt, CycloneDX SBOM digest, and
+   npm's publish timestamp.
+4. Publish the GitHub tag and checksummed assets from X, move the reviewed
+   Action major tag to X, publish the matching MCP Registry record, and verify
+   the pinned Studio release.
+5. Download the workflow's release record to
+   `release-artifacts/npm/<version>.release.json`. Configure the website's
+   same-origin `releaseArtifactUrl`, then stage the post-publish manifest:
+
+   ```bash
+   node scripts/sync-release-manifest.mjs \
+     --stage-published release-artifacts/npm/<version>.release.json
+   ```
+
+6. Commit that transition as Y. The transition gate requires the preceding
+   manifest revision to be the same candidate version, proves X is an ancestor
+   of Y, re-reads every version surface at X, and verifies the committed release
+   record hash. Generate the website artifact from Y, deploy it, and run
+   `npm run check:public-release`.
+7. Merge or announce only when the live gate independently verifies npm
+   provenance, the exact GitHub tag and binary checksums, Action `v2`, the MCP
+   Registry, Studio assets, and the deployed website artifact. Published engine
+   state is immutable.
+
+If npm publish succeeds but evidence generation, a downstream surface, or the
+website deployment fails, leave the manifest in candidate state. Dispatch the
+same workflow with `mode: recover` and the original `source_run_id`. Recovery
+validates the original main-branch workflow run, downloads its SBOM, verifies
+npm provenance still resolves X, and reconstructs the record. Recovery must
+never republish an existing version; recovery mode is evidence reconstruction
+only.
 
 The post-publish gate must then prove all of the following before any
 announcement:
@@ -132,7 +172,8 @@ announcement:
 - The public README contains the primary story and install command.
 
 If trusted publishing is missing or any post-publish verification fails, stop
-the release. Do not bypass the workflow with a desktop publish.
+the release in candidate state. Do not bypass the workflow with a desktop
+publish.
 
 Then verify the remaining public surfaces:
 
