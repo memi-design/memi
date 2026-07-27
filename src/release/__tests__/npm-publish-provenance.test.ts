@@ -106,6 +106,20 @@ describe("npm publish workflow provenance contract", () => {
     expect(workflow).toContain("npm audit signatures --include-attestations");
     expect(workflow).toContain('npm install --ignore-scripts "${PACKAGE_SPEC}"');
   });
+
+  it("documents the trusted-publisher path without a manual token publish bypass", async () => {
+    const guide = await readFile(
+      join(process.cwd(), "docs", "RELEASE_GATES.md"),
+      "utf8",
+    );
+
+    expect(guide).toContain("npm trusted publisher");
+    expect(guide).toContain("Publish to npm");
+    expect(guide).toContain("expected_version");
+    expect(guide).toContain("SLSA");
+    expect(guide).not.toContain("npm publish --access public --auth-type=web");
+    expect(guide).not.toContain("npm login --auth-type=web");
+  });
 });
 
 describe("npm release verification", () => {
