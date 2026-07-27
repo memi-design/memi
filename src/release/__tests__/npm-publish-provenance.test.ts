@@ -13,7 +13,8 @@ import {
 
 const packageName = "@memi-design/cli";
 const expectedVersion = "2.6.3";
-const expectedIntegrity = `sha512-${Buffer.from("release digest").toString("base64")}`;
+const releaseDigest = Buffer.alloc(64, 0xab);
+const expectedIntegrity = `sha512-${releaseDigest.toString("base64")}`;
 const expectedSourceCommit = "a".repeat(40);
 const expectedRepository = "https://github.com/sarveshsea/memi";
 const expectedWorkflowPath = ".github/workflows/publish.yml";
@@ -24,7 +25,7 @@ function provenancePayload(overrides: Record<string, unknown> = {}) {
     subject: [{
       name: "pkg:npm/%40memi-design/cli@2.6.3",
       digest: {
-        sha512: Buffer.from("release digest").toString("hex"),
+        sha512: releaseDigest.toString("hex"),
       },
     }],
     predicateType: SLSA_PROVENANCE_V1,
@@ -74,7 +75,7 @@ describe("npm publish workflow provenance contract", () => {
     expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
     expect(workflow).toContain("group: npm-publish");
     expect(workflow).toContain("npm ci --ignore-scripts");
-    expect(workflow).not.toContain("npm install --ignore-scripts");
+    expect(workflow).not.toMatch(/^\s+- run: npm install --ignore-scripts\s*$/m);
     expect(workflow).toContain("EXPECTED_VERSION: ${{ inputs.expected_version }}");
   });
 
@@ -101,6 +102,7 @@ describe("npm publish workflow provenance contract", () => {
     );
 
     expect(workflow).toContain("EXPECTED_SOURCE_COMMIT: ${{ github.sha }}");
+    expect(workflow).toContain("EXPECTED_SOURCE_REF: ${{ github.ref }}");
     expect(workflow).toContain("npm audit signatures --include-attestations");
     expect(workflow).toContain('npm install --ignore-scripts "${PACKAGE_SPEC}"');
   });
@@ -175,6 +177,7 @@ describe("npm release verification", () => {
       sourceCommit: expectedSourceCommit,
       repository: expectedRepository,
       workflowPath: expectedWorkflowPath,
+      workflowRef: "refs/heads/main",
     });
   });
 

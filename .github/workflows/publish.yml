@@ -5,18 +5,25 @@ on:
     inputs:
       expected_version:
         description: 'Expected npm version after publish'
-        required: false
+        required: true
         type: string
 
 permissions:
   contents: read
 
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
 jobs:
   publish:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
+    env:
+      EXPECTED_VERSION: ${{ inputs.expected_version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -24,25 +31,43 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false
-      - run: npm install --ignore-scripts
+      - run: npm ci --ignore-scripts
+      - name: Verify requested package version
+        run: |
+          node -e 'const actual=require("./package.json").version;if(actual!==process.env.EXPECTED_VERSION){throw new Error(`package version ${actual} does not match requested ${process.env.EXPECTED_VERSION}`)}'
       - run: npm run check:release
       - run: npm run lint
       - run: npm test -- --run
       - run: npm run build
-      - name: Prepare npm publishing auth
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Generate release SBOM
         run: |
-          npm --version
-          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
-            npm config set //registry.npmjs.org/:_authToken "${NODE_AUTH_TOKEN}"
-            echo "Configured npm token fallback."
-          else
-            echo "No NPM_TOKEN configured; npm publish will use trusted publishing OIDC."
-          fi
+          mkdir -p release-evidence
+          npm sbom --package-lock-only --sbom-format cyclonedx > release-evidence/memi.cdx.json
+          node -e 'JSON.parse(require("node:fs").readFileSync("release-evidence/memi.cdx.json","utf8"))'
+          shasum -a 256 release-evidence/memi.cdx.json > release-evidence/memi.cdx.json.sha256
+      - name: Upload release SBOM
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: memi-release-sbom-${{ github.sha }}
+          path: release-evidence/
+          if-no-files-found: error
       - name: Publish npm package
-        run: npm publish --access public
+        run: npm publish --access public --provenance
       - name: Verify npm release
         run: node scripts/verify-npm-release.mjs
         env:
           EXPECTED_VERSION: ${{ inputs.expected_version }}
+          EXPECTED_SOURCE_COMMIT: ${{ github.sha }}
+          EXPECTED_SOURCE_REPOSITORY: https://github.com/sarveshsea/memi
+          EXPECTED_SOURCE_WORKFLOW: .github/workflows/publish.yml
+          EXPECTED_SOURCE_REF: ${{ github.ref }}
+      - name: Verify npm signatures and attestations
+        env:
+          PACKAGE_SPEC: '@memi-design/cli@${{ inputs.expected_version }}'
+        run: |
+          audit_root="$(mktemp -d)"
+          trap 'rm -rf "${audit_root}"' EXIT
+          cd "${audit_root}"
+          npm init --yes >/dev/null
+          npm install --ignore-scripts "${PACKAGE_SPEC}"
+          npm audit signatures --include-attestations
