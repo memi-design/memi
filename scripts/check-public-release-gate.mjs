@@ -11,6 +11,7 @@ import { runPublicReleaseGate } from "./lib/public-release-gate.mjs";
 import {
   canClearPublicParityCap,
   loadReleaseManifest,
+  resolveReleaseRecordPath,
   serializeJson,
   verifyPublishedEngineTransitionFromGit,
 } from "./lib/release-manifest.mjs";
@@ -292,9 +293,15 @@ async function verifyLiveNpm() {
   if (output.status !== "verified" || output.provenance?.sourceCommit !== engine.sourceCommit) {
     throw new Error("npm verifier did not bind the published source commit");
   }
+  const recordPath = await resolveReleaseRecordPath(root, engine.releaseRecord.path);
+  const record = JSON.parse(await readFile(recordPath, "utf8"));
+  if (output.invocationId !== record.attestation?.invocationId) {
+    throw new Error("live npm provenance does not match the recorded workflow invocation");
+  }
   return {
     verified: true,
     sourceCommit: output.provenance.sourceCommit,
+    invocationId: output.invocationId,
     integrity: output.integrity,
     shasum: output.shasum,
     tarball: output.tarball,

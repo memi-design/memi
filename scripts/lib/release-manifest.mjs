@@ -211,6 +211,10 @@ export function validateEngineReleaseRecord(record) {
   if (record?.attestation?.workflowRef !== "refs/heads/main") {
     failures.push("release record attestation workflow ref must be refs/heads/main");
   }
+  failures.push(...validateProvenanceInvocation(
+    record?.attestation?.invocationId,
+    record?.workflow,
+  ));
   if (!SHA512.test(record?.attestation?.sha512 ?? "")) {
     failures.push("release record attestation subject SHA-512 is required");
   }
@@ -244,6 +248,17 @@ export function validateEngineReleaseRecord(record) {
   }
 
   return failures;
+}
+
+export function validateProvenanceInvocation(invocationId, workflow) {
+  const expected =
+    `https://github.com/${workflow?.repository ?? ""}`
+    + `/actions/runs/${workflow?.runId ?? ""}`
+    + `/attempts/${workflow?.runAttempt ?? ""}`;
+  if (invocationId !== expected) {
+    return ["SLSA invocation does not match the recorded workflow run and attempt"];
+  }
+  return [];
 }
 
 export function validateEngineReleaseTransition({
