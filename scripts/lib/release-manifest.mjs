@@ -717,8 +717,9 @@ export async function resolveReleaseRecordPath(root, relativePath) {
 
 export function buildWebReleaseArtifact(manifest, sourceCommit) {
   const canonical = serializeJson(manifest);
+  const release = buildPublicReleaseManifest(manifest);
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     provenance: {
       repository: "https://github.com/sarveshsea/memi",
       path: "release-manifest.json",
@@ -727,7 +728,82 @@ export function buildWebReleaseArtifact(manifest, sourceCommit) {
         `https://raw.githubusercontent.com/sarveshsea/memi/${sourceCommit}/release-manifest.json`,
       manifestSha256: createHash("sha256").update(canonical).digest("hex"),
     },
-    release: manifest,
+    orchestration: manifest,
+    publicTruth: buildPublicTruth(manifest, release),
+    release,
+  };
+}
+
+export function buildPublicReleaseManifest(manifest) {
+  const engine = manifest?.releaseGroups?.engine;
+  if (engine?.state !== "candidate") {
+    return {
+      ...manifest,
+      releaseGroups: {
+        ...manifest.releaseGroups,
+        engine: { ...engine },
+      },
+      surfaces: {
+        ...manifest.surfaces,
+        githubRelease: { ...manifest.surfaces.githubRelease },
+        githubAction: { ...manifest.surfaces.githubAction },
+      },
+    };
+  }
+
+  const previous = engine.previousPublicRelease;
+  if (!SEMVER.test(previous?.version ?? "") || !COMMIT_SHA.test(previous?.sourceCommit ?? "")) {
+    throw new Error("candidate website export requires a valid previousPublicRelease");
+  }
+  const githubRelease = manifest.surfaces.githubRelease;
+  const publicGithubReleaseUrl =
+    `https://github.com/${githubRelease.repository}/releases/tag/`
+    + `${githubRelease.tagPrefix}${previous.version}`;
+
+  return {
+    ...manifest,
+    releaseGroups: {
+      ...manifest.releaseGroups,
+      engine: {
+        version: previous.version,
+        state: "historical",
+        sourceCommit: previous.sourceCommit,
+        releaseRecord: null,
+        verification: {
+          eligibleForParity: false,
+          reason:
+            `${previous.version} remains public while ${engine.version} is an unpublished candidate`,
+        },
+        plannedSuccessor: engine.version,
+      },
+    },
+    surfaces: {
+      ...manifest.surfaces,
+      githubRelease: {
+        ...githubRelease,
+        url: publicGithubReleaseUrl,
+      },
+      githubAction: {
+        ...manifest.surfaces.githubAction,
+        majorTag: `v${previous.version.split(".")[0]}`,
+      },
+    },
+  };
+}
+
+function buildPublicTruth(manifest, release) {
+  const engine = release.releaseGroups.engine;
+  return {
+    source: manifest.releaseGroups.engine.state === "candidate"
+      ? "previousPublicRelease"
+      : "currentRelease",
+    engine: {
+      version: engine.version,
+      sourceCommit: engine.sourceCommit,
+      packageName: release.surfaces.npm.packageName,
+      npmUrl: release.surfaces.npm.url,
+      githubReleaseUrl: release.surfaces.githubRelease.url,
+    },
   };
 }
 
@@ -736,12 +812,27 @@ export function validateWebReleaseArtifact(manifest, artifact) {
   const provenance = artifact?.provenance;
   const canonical = serializeJson(manifest);
   const expectedDigest = createHash("sha256").update(canonical).digest("hex");
-
-  if (artifact?.schemaVersion !== 1) {
-    failures.push("release-artifacts/memoire-web.release.json schemaVersion must be 1");
+  let expectedRelease;
+  let expectedPublicTruth;
+  try {
+    expectedRelease = buildPublicReleaseManifest(manifest);
+    expectedPublicTruth = buildPublicTruth(manifest, expectedRelease);
+  } catch (error) {
+    failures.push(error instanceof Error ? error.message : String(error));
   }
-  if (serializeJson(artifact?.release) !== canonical) {
-    failures.push("release-artifacts/memoire-web.release.json payload does not match release-manifest.json");
+
+  if (artifact?.schemaVersion !== 2) {
+    failures.push("release-artifacts/memoire-web.release.json schemaVersion must be 2");
+  }
+  if (serializeJson(artifact?.orchestration) !== canonical) {
+    failures.push("website release artifact orchestration payload does not match release-manifest.json");
+  }
+  if (expectedRelease && serializeJson(artifact?.release) !== serializeJson(expectedRelease)) {
+    failures.push("website release artifact public payload is not the fail-closed public projection");
+  }
+  if (expectedPublicTruth
+    && serializeJson(artifact?.publicTruth) !== serializeJson(expectedPublicTruth)) {
+    failures.push("website release artifact publicTruth does not match its public release projection");
   }
   if (provenance?.repository !== "https://github.com/sarveshsea/memi"
     || provenance?.path !== "release-manifest.json") {
