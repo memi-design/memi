@@ -75,6 +75,12 @@ npm publish --dry-run --access public --ignore-scripts --json
 - Website community Notes catalog contains at least five approved community Notes and was generated no earlier than July 4, 2026.
 - A clean temp install can run `memi --version`.
 
+The gate records every attempted stage in one JSON result. Registry, site, and
+install checks run as independent stages; a network or runtime exception is
+captured as a stage failure instead of hiding the other results. Unless
+`SKIP_INSTALL_SMOKE=1` is set, the clean install smoke still runs when npm or
+site parity fails.
+
 ```bash
 npm run check:public-release
 SKIP_INSTALL_SMOKE=1 npm run check:public-release

@@ -306,6 +306,18 @@ Requirement:
 
 - Run the full aggregate public-release path, not only isolated pieces.
 
+Candidate preparation now present:
+
+- The public-release gate now records registry, site, and `installSmoke` stages
+  independently unless explicitly skipped. A network or runtime exception is
+  converted into structured failure evidence without hiding the other stages.
+- Targeted release-gate tests pass for this behavior, and a live diagnostic run
+  confirms the JSON payload now contains both `siteSmoke` and `installSmoke`
+  instead of leaving the install stage null behind the first failure.
+- This is still implementation evidence only. The point remains `unassessed`
+  until one full public-release run passes end to end against the actual public
+  surfaces.
+
 Acceptable evidence:
 
 - Aggregate `npm run check:public-release` success including install smoke.

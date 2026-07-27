@@ -4,6 +4,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { runPublicReleaseGate } from "./lib/public-release-gate.mjs";
 
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 
@@ -19,62 +20,28 @@ const expectedCommunityNotes = Number.parseInt(process.env.EXPECTED_COMMUNITY_NO
 const minCommunityCatalogDate = process.env.MIN_COMMUNITY_CATALOG_DATE || "2026-07-04T00:00:00.000Z";
 const skipInstall = process.env.SKIP_INSTALL_SMOKE === "1";
 const skipSite = process.env.SKIP_SITE_SMOKE === "1";
-
 const registryUrl = `https://registry.npmjs.org/${encodeURIComponent(packageName).replace(/^%40/, "%40")}`;
-const metadata = await fetchJson(registryUrl);
-const latest = metadata["dist-tags"]?.latest;
-const latestReadme = [
-  metadata.readme,
-  latest ? metadata.versions?.[latest]?.readme : "",
-  metadata.versions?.[expectedVersion]?.readme,
-].filter(Boolean).join("\n");
 
-const failures = [];
-if (latest !== expectedVersion) {
-  failures.push(`npm latest is ${latest ?? "(missing)"}, expected ${expectedVersion}`);
-}
-if (!latestReadme.includes(expectedPhrase)) {
-  failures.push(`npm README missing phrase: ${expectedPhrase}`);
-}
-if (!latestReadme.includes(expectedInstall)) {
-  failures.push(`npm README missing install command: ${expectedInstall}`);
-}
-
-let siteSmoke = null;
-if (!skipSite) {
-  siteSmoke = await runSiteSmoke({
-    siteUrl: expectedSiteUrl,
-    packageName,
-    expectedVersion,
-    expectedStudioVersion,
-    expectedCommunityNotes,
-    minCommunityCatalogDate,
-  });
-  failures.push(...siteSmoke.failures);
-}
-
-let installSmoke = null;
-if (failures.length === 0 && !skipInstall) {
-  installSmoke = await runInstallSmoke(packageName, expectedVersion);
-  if (!installSmoke.ok) {
-    failures.push(installSmoke.error);
-  }
-}
-
-const payload = {
+const payload = await runPublicReleaseGate({
   packageName,
   expectedVersion,
-  latest,
   expectedPhrase,
   expectedInstall,
-  siteSmoke,
-  installSmoke,
-  status: failures.length === 0 ? "passed" : "failed",
-  failures,
-};
+  expectedSiteUrl,
+  expectedStudioVersion,
+  expectedCommunityNotes,
+  minCommunityCatalogDate,
+  skipInstall,
+  skipSite,
+  registryUrl,
+}, {
+  fetchJson,
+  runSiteSmoke,
+  runInstallSmoke,
+});
 
 console.log(JSON.stringify(payload, null, 2));
-if (failures.length > 0) process.exit(1);
+if (payload.failures.length > 0) process.exit(1);
 
 async function fetchJson(url) {
   const response = await fetch(url, {
