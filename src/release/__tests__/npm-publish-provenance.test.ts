@@ -182,6 +182,38 @@ describe("npm release verification", () => {
     expect(result.attestationUrl).toContain("/-/npm/v1/attestations/");
   });
 
+  it("matches the required README phrase across Markdown emphasis", () => {
+    const emphasizedPhrase = DEFAULT_README_PHRASE.replace(
+      "the read-only design engineering audit and skill layer for coding agents",
+      "the **read-only design engineering audit and skill layer for coding agents**",
+    );
+
+    expect(() => validateRegistryVersion({
+      metadata: {
+        "dist-tags": { latest: expectedVersion },
+        readme: `${emphasizedPhrase}\nnpm i -g ${packageName}`,
+        versions: {
+          [expectedVersion]: {
+            dist: {
+              integrity: expectedIntegrity,
+              shasum: "b".repeat(40),
+              signatures: [{ keyid: "fixture-key", sig: "fixture-signature" }],
+              attestations: {
+                url: `https://registry.npmjs.org/-/npm/v1/attestations/%40memi-design%2fcli@${expectedVersion}`,
+                provenance: { predicateType: SLSA_PROVENANCE_V1 },
+              },
+            },
+          },
+        },
+      },
+      packageName,
+      expectedVersion,
+      expectedPhrase: DEFAULT_README_PHRASE,
+      expectedInstall: `npm i -g ${packageName}`,
+      requireProvenance: true,
+    })).not.toThrow();
+  });
+
   it("rejects incomplete package integrity or provenance metadata", () => {
     expect(() => validateRegistryVersion({
       metadata: {
