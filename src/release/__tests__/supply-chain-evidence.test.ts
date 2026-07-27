@@ -9,21 +9,17 @@ const evidencePath = join(root, "docs", "audits", "memi-supply-chain-evidence-20
 const sbomPath = join(root, "docs", "audits", "memi-supply-chain-sbom-2026-07-27.cdx.json");
 const scorecardPath = join(root, "docs", "audits", "memi-100-scorecard.json");
 
-describe("supply-chain proof evidence", () => {
-  it("ships a machine-readable SBOM-backed evidence artifact and marks the criterion passed", async () => {
+describe("supply-chain proof evidence honesty", () => {
+  it("keeps the scorecard point unassessed until public provenance and approved review exist", async () => {
     expect(existsSync(evidencePath)).toBe(true);
     expect(existsSync(sbomPath)).toBe(true);
 
     const evidence = JSON.parse(await readFile(evidencePath, "utf8")) as {
       schemaVersion: number;
       evidenceId: string;
-      publishedPackage: {
-        version: string;
-        gitHead: string;
-        mcpName: string;
-        distIntegrity: string;
-        distShasum: string;
-        tarballSha256: string;
+      scope: {
+        claim: string;
+        doesNotClaim: string[];
       };
       sbom: {
         path: string;
@@ -32,37 +28,34 @@ describe("supply-chain proof evidence", () => {
         specVersion: string;
         componentCount: number;
       };
-      advisoryPolicy: {
-        command: string;
-        result: {
-          high: number;
-          critical: number;
-        };
+      publicProvenance?: {
+        requiredForPass: boolean;
+        status: string;
+        workflow: string;
+        successorReleaseRequired: boolean;
       };
       independentReview: {
         reviewer: string;
         verdict: string;
+        requiredForPass?: boolean;
         scope: string[];
       };
     };
     const scorecard = JSON.parse(await readFile(scorecardPath, "utf8")) as {
-      evidence: Array<{ id: string; artifact: { location: string } }>;
+      evidence: Array<{ id: string }>;
       dimensions: Array<{
         id: string;
-        criteria: Array<{ id: string; assessment: string; evidenceIds: string[] }>;
+        criteria: Array<{ id: string; title: string; assessment: string; evidenceIds: string[] }>;
       }>;
     };
 
     expect(evidence.schemaVersion).toBe(1);
     expect(evidence.evidenceId).toBe("supply-chain-proof-2026-07-27");
-    expect(evidence.publishedPackage).toMatchObject({
-      version: "2.6.2",
-      gitHead: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
-      mcpName: "io.github.sarveshsea/memi",
-    });
-    expect(evidence.publishedPackage.distIntegrity).toMatch(/^sha512-/);
-    expect(evidence.publishedPackage.distShasum).toMatch(/^[a-f0-9]{40}$/);
-    expect(evidence.publishedPackage.tarballSha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(evidence.scope.claim).toContain("Candidate supply-chain evidence");
+    expect(evidence.scope.doesNotClaim).toEqual(expect.arrayContaining([
+      "published successor release parity",
+      "reproducibility of the immutable npm 2.6.2 tarball from the current checkout",
+    ]));
 
     expect(evidence.sbom).toMatchObject({
       path: "memi-supply-chain-sbom-2026-07-27.cdx.json",
@@ -72,14 +65,16 @@ describe("supply-chain proof evidence", () => {
     expect(evidence.sbom.sha256).toMatch(/^[a-f0-9]{64}$/);
     expect(evidence.sbom.componentCount).toBeGreaterThan(0);
 
-    expect(evidence.advisoryPolicy.command).toBe("npm audit --omit=dev --audit-level=high --json");
-    expect(evidence.advisoryPolicy.result).toMatchObject({
-      high: 0,
-      critical: 0,
+    expect(evidence.publicProvenance).toMatchObject({
+      requiredForPass: true,
+      status: "missing-successor-release",
+      workflow: ".github/workflows/publish.yml",
+      successorReleaseRequired: true,
     });
 
     expect(evidence.independentReview.reviewer).toMatch(/^agent:/);
-    expect(evidence.independentReview.verdict).toBe("approve");
+    expect(evidence.independentReview.verdict).toBe("pending");
+    expect(evidence.independentReview.requiredForPass).toBe(true);
     expect(evidence.independentReview.scope).toEqual(expect.arrayContaining([
       "archive-boundary",
       "publisher-boundary",
@@ -87,17 +82,17 @@ describe("supply-chain proof evidence", () => {
       "licensing-boundary",
     ]));
 
-    expect(scorecard.evidence.some((entry) =>
-      entry.id === "supply-chain-proof"
-      && entry.artifact.location === "memi-supply-chain-evidence-2026-07-27.json"
-    )).toBe(true);
+    expect(scorecard.evidence.some((entry) => entry.id === "supply-chain-proof")).toBe(false);
 
     const criterion = scorecard.dimensions
       .find((dimension) => dimension.id === "security-privacy-licensing")
       ?.criteria.find((entry) => entry.id === "complete-supply-chain-proof");
 
     expect(criterion).toBeDefined();
-    expect(criterion?.assessment).toBe("passed");
-    expect(criterion?.evidenceIds).toContain("supply-chain-proof");
+    expect(criterion?.title).toBe(
+      "SBOM, public provenance, advisory policy, least privilege, and independent signoff",
+    );
+    expect(criterion?.assessment).toBe("unassessed");
+    expect(criterion?.evidenceIds).toEqual([]);
   });
 });
