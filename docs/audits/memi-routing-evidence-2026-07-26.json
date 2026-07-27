@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "evidenceId": "routing-zero-confusion-2026-07-26",
-  "capturedAt": "2026-07-26T23:50:55Z",
+  "capturedAt": "2026-07-27T03:18:53Z",
   "repository": "https://github.com/sarveshsea/design-skills",
   "pullRequest": "https://github.com/sarveshsea/design-skills/pull/5",
-  "commit": "58b0c9a9abc20fbc91c01e9b6c2736e466446dbc",
-  "workflowRun": "https://github.com/sarveshsea/design-skills/actions/runs/30226100966",
-  "workflowJob": "https://github.com/sarveshsea/design-skills/actions/runs/30226100966/job/89856424256",
+  "commit": "7cce9438e3781f6e495e4d26c13746c55b14739f",
+  "workflowRun": "https://github.com/sarveshsea/design-skills/actions/runs/30234304324",
+  "workflowJob": "https://github.com/sarveshsea/design-skills/actions/runs/30234304324/job/89878998755",
   "workflowConclusion": "success",
   "command": "npm run check",
   "catalog": {
@@ -15,13 +15,13 @@
   },
   "benchmark": {
     "method": "deterministic-catalog-metadata-qa",
-    "correct": 45,
-    "total": 45,
+    "correct": 52,
+    "total": 52,
     "accuracy": 1,
     "requiredAccuracy": 1,
     "knownConfusions": 0,
-    "negativeNearMisses": 6,
-    "negativeNearMissesCorrectlyAbstained": 6
+    "negativeNearMisses": 9,
+    "negativeNearMissesCorrectlyAbstained": 9
   },
   "regression": {
     "id": "shader-wgsl-ripple",

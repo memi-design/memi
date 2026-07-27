@@ -3,7 +3,7 @@
   "auditId": "memi-100",
   "title": "Memi 100-point end-to-end scorecard",
   "targetScore": 100,
-  "assessedAt": "2026-07-27T03:11:24.000Z",
+  "assessedAt": "2026-07-27T03:21:07.000Z",
   "subject": {
     "repository": "https://github.com/sarveshsea/memi",
     "commit": "922035607a1cc688edc90f47e4b98473bba13764"
@@ -13,10 +13,10 @@
       "id": "reviewed-candidate-audit",
       "kind": "implementation",
       "status": "passed",
-      "capturedAt": "2026-07-26T21:16:34.000Z",
+      "capturedAt": "2026-07-27T03:21:07.000Z",
       "artifact": {
         "location": "memi-design-engineering-audit-2026-07-26.json",
-        "sha256": "34ca9ac42dab52100fb35210f8e8d818d350610c244e8625823ebddaa8e827b3"
+        "sha256": "e283116116da6fbdd9c936ffd79ebc0d56809d1c519a79ea7fbb0c5ce8851f63"
       },
       "producer": "agent:memi-audit-implementation",
       "verifier": "agent:independent-audit-review",
@@ -39,27 +39,27 @@
       "id": "routing-zero-confusion",
       "kind": "implementation",
       "status": "passed",
-      "capturedAt": "2026-07-26T23:50:55.000Z",
+      "capturedAt": "2026-07-27T03:18:53.000Z",
       "artifact": {
         "location": "memi-routing-evidence-2026-07-26.json",
-        "sha256": "c93d7fb29ac932516e7bc4575a54ff408d2ed5131397982d04e18608b75ae455"
+        "sha256": "6335fb1afd7ada56d2e86ede8316ca64c2ad062ad17323a40f12f19c687a9945"
       },
       "producer": "ci:design-skills",
       "verifier": "agent:independent-audit-review",
-      "environment": "GitHub-hosted design-skills validation at immutable commit 58b0c9a9abc20fbc91c01e9b6c2736e466446dbc"
+      "environment": "GitHub-hosted design-skills validation on merged main commit 7cce9438e3781f6e495e4d26c13746c55b14739f"
     },
     {
       "id": "swiftui-rendered-rerun",
       "kind": "implementation",
       "status": "passed",
-      "capturedAt": "2026-07-27T00:41:28.000Z",
+      "capturedAt": "2026-07-27T03:21:07.000Z",
       "artifact": {
         "location": "memi-swiftui-rendered-rerun-2026-07-26.json",
-        "sha256": "5a8f86dd44658c8c6b49d6415feaf4384734b290e0d3a098df1094179dc3971e"
+        "sha256": "e8d046bcb50117d9755db59c77fc917441321f23842f0337005ad232e547ec1e"
       },
       "producer": "agent:swiftui-rendered-rerun",
       "verifier": "agent:independent-audit-review",
-      "environment": "Clean candidate audits, XcodeBuildMCP iOS 26.5 simulator rendering, runtime accessibility action, reduced-motion screenshots, and GitHub-hosted validation"
+      "environment": "Clean candidate audits, XcodeBuildMCP iOS 26.5 simulator rendering, runtime accessibility action, reduced-motion screenshots, and GitHub-hosted validation on merged fork main commit 8037c8bb7db68a4c78b03b0053e241005304e3b6"
     },
     {
       "id": "candidate-head-validation",

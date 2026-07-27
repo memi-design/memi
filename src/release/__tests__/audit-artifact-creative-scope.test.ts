@@ -70,7 +70,7 @@ describe("audit artifact creative-rendering honesty", () => {
     const shaderDimension = scorecard.dimensions.find((dimension) => dimension.id === "shader-and-dither");
     const shaderCriterion = shaderDimension?.criteria.find((criterion) => criterion.id === "candidate-webgl-proof");
 
-    expect(auditMarkdown).toContain("separate `design-sandbox` candidate");
+    expect(auditMarkdown).toContain("separate `design-sandbox` project");
     expect(evidence.repository).toBe("https://github.com/sarveshsea/design-sandbox");
     expect(evidence.pullRequest).toMatch(/\/pull\/\d+$/);
     expect(evidence.commit).toMatch(/^[a-f0-9]{40}$/);
@@ -92,6 +92,11 @@ describe("audit artifact creative-rendering honesty", () => {
         renderedSourceCommit: string;
         summarySha256: string;
         rawEvidenceSha256: string;
+      };
+      hardwareProof: {
+        gpuDrawPassMedianMs: number;
+        animationFrameCadenceMedianMs: number;
+        animationFrameCadenceP95Ms: number;
       };
       hostedProof: { run: string; conclusion: string };
       independentReview: { status: string };
@@ -126,13 +131,20 @@ describe("audit artifact creative-rendering honesty", () => {
     expect(evidence.independentReview.status).toBe("approved");
     expect(evidence.assessedDimensions).toEqual(
       expect.arrayContaining([
-        "gpu-frame-time",
+        "animation-frame-cadence",
+        "gpu-draw-pass-duration",
         "opaque-alpha-contract",
         "render-color-space",
         "temporal-stability",
         "chromium-webkit-runtime",
       ]),
     );
+    expect(evidence.hardwareProof.gpuDrawPassMedianMs).toBeGreaterThanOrEqual(0);
+    expect(evidence.hardwareProof.animationFrameCadenceMedianMs).toBeLessThanOrEqual(16.7);
+    expect(evidence.hardwareProof.animationFrameCadenceP95Ms).toBeGreaterThanOrEqual(
+      evidence.hardwareProof.animationFrameCadenceMedianMs,
+    );
+    expect(evidence.hardwareProof).not.toHaveProperty("gpuFrameMedianMs");
     expect(evidence.unassessedDimensions).toEqual([
       "power-consumption",
       "wide-gamut-color-accuracy",

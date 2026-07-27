@@ -1,26 +1,30 @@
 {
   "schemaVersion": 1,
   "evidenceId": "memi-shader-rendering-2026-07-27",
-  "capturedAt": "2026-07-27T01:29:09.000Z",
+  "capturedAt": "2026-07-27T03:21:06.000Z",
   "assessment": "partial",
   "source": {
     "repository": "https://github.com/sarveshsea/design-sandbox",
     "pullRequest": "https://github.com/sarveshsea/design-sandbox/pull/2",
-    "headCommit": "87d5a1ffcffd46609264cd896246dbe6bf42d987",
-    "renderedSourceCommit": "0d37b20507bca7d2c15c18266d7075932e8c5abf",
+    "headCommit": "0389679394fbdc7a8c54c764daa9cabe9dc9a91e",
+    "reviewedPullRequestHead": "a36bb2b9bada61a3702c6f141f3b8da7a1dedc08",
+    "renderedSourceCommit": "6c5ef82549f557f6fd5e5c0d86eef39028534b52",
     "route": "/labs/shaders",
     "summaryArtifact": "docs/evidence/shader-lab-hardware-2026-07-27.json",
-    "summarySha256": "7dfa3b8bd061a354a313f52aaf2791c952965e5c0199ed35b84247ed50a559ce",
+    "summarySha256": "6c003ae33960cc4f888bd41f52401d0f82a23c3ac8c6daa106da21a6a0b4d624",
     "rawArtifact": "docs/evidence/shader-lab-hardware-raw-2026-07-27.json",
-    "rawEvidenceSha256": "6538176c7a2ad7d5de3c5fbc1e9aef37bdd1ffce84cb6c91e79b0177bb41e775"
+    "rawEvidenceSha256": "e624dd0344df21b8dc8ba28fa48220302b94ff8eded343de9f656d3cf4154c95"
   },
   "hardwareProof": {
-    "environment": "MacBook Pro Mac15,7, Apple M3 Pro, macOS 26.2, Google Chrome binary 150.0.7871.186",
-    "renderer": "ANGLE Metal Renderer: Apple M3 Pro",
+    "environment": "MacBook Pro Mac15,7, Apple M3 Pro, Darwin 25.2.0, Google Chrome binary 150.0.7871.186",
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
     "softwareRenderer": false,
     "gpuTimer": "EXT_disjoint_timer_query_webgl2",
-    "gpuFrameMedianMs": 0.079,
-    "gpuSampleCount": 50,
+    "gpuDrawPassMedianMs": 0.083,
+    "gpuDrawPassSampleCount": 50,
+    "animationFrameCadenceMedianMs": 16.7,
+    "animationFrameCadenceP95Ms": 17.1,
+    "animationFrameCadenceSampleCount": 49,
     "frameBudgetMs": 16.7,
     "opaqueAlphaVerified": true,
     "requestedColorSpace": "display-p3",
@@ -29,12 +33,12 @@
     "deterministicFrameSha256": "c8b64b76496b72ceffc053e7ba4be7244be28b61376e87972cedaf413bae017a"
   },
   "hostedProof": {
-    "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30229832368",
-    "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30229832368/job/89866461871",
+    "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003",
+    "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003/job/89879007118",
     "conclusion": "success",
     "tests": {
-      "unitAndEvidenceContracts": 18,
-      "chromiumAndWebkitE2e": 8
+      "unitAndEvidenceContracts": 29,
+      "chromiumAndWebkitE2e": 12
     },
     "artifactsRetained": true,
     "artifactRetentionDays": 30,
@@ -50,7 +54,8 @@
   "independentReview": {
     "reviewer": "agent:audit-review",
     "status": "approved",
-    "reviewedHead": "87d5a1ffcffd46609264cd896246dbe6bf42d987",
+    "reviewedHead": "a36bb2b9bada61a3702c6f141f3b8da7a1dedc08",
+    "mergedHead": "0389679394fbdc7a8c54c764daa9cabe9dc9a91e",
     "finding": "No release-blocking issue remains in the shader evidence provenance path."
   },
   "assessedDimensions": [
@@ -59,12 +64,13 @@
     "canvas-2d-fallback",
     "webgl2-availability",
     "main-thread-webgl-submission",
-    "gpu-frame-time",
+    "animation-frame-cadence",
+    "gpu-draw-pass-duration",
     "opaque-alpha-contract",
     "render-color-space",
     "temporal-stability",
     "chromium-webkit-runtime",
-    "artifact-durability",
+    "durable-artifact-binding",
     "source-provenance",
     "wide-gamut-output-contract",
     "low-power-context"

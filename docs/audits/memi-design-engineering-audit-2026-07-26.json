@@ -68,7 +68,7 @@
       "candidate": 15,
       "evidence": [
         "The canonical catalog was governed but documentation counts were stale and shader ownership was absent.",
-        "The candidate validates 94 skills, scores every entry, adds five-state dispositions, eliminates duplicate primary routes, enforces 180-day shader-source freshness, and scores 45/45 (100%) with all six negative controls abstaining on a transparent catalog-metadata routing benchmark."
+        "The merged catalog validates 94 skills, scores every entry, adds five-state dispositions, eliminates duplicate primary routes, enforces 180-day shader-source freshness, and scores 52/52 (100%) with all nine negative controls abstaining on a transparent catalog-metadata routing benchmark."
       ]
     },
     {
@@ -109,19 +109,19 @@
       "candidate": 9,
       "evidence": [
         "The baseline built, but the source release gate failed on dependency and public-surface parity checks.",
-        "The candidate passes 1,820 Memi tests across 244 files, 33 parallel-safe design-skills checks, a 45/45 catalog-routing benchmark, 208 site tests, blocking shader unit/browser CI, iOS simulator build, production audits, and independent review. An isolated public 2.6.2 install smoke passed; the aggregate public-release gate still exits on live docs and changelog drift before its installSmoke stage."
+        "The candidate passes 1,891 Memi tests across 256 files, 45 design-skills checks, a 52/52 catalog-routing benchmark, 208 site tests, blocking shader unit/browser CI, iOS simulator build, production audits, and independent review. An isolated public 2.6.2 install smoke passed; the aggregate public-release gate remains ineligible until a provenance-bound 2.6.3 release exists."
       ]
     }
   ],
   "evidenceLedger": {
-    "capturedAt": "2026-07-26T21:16:34Z",
+    "capturedAt": "2026-07-27T03:21:07Z",
     "relatedRepositories": {
       "designSkills": {
         "repository": "https://github.com/sarveshsea/design-skills",
         "pullRequest": "https://github.com/sarveshsea/design-skills/pull/5",
-        "commit": "58b0c9a9abc20fbc91c01e9b6c2736e466446dbc",
-        "run": "https://github.com/sarveshsea/design-skills/actions/runs/30226100966",
-        "job": "https://github.com/sarveshsea/design-skills/actions/runs/30226100966/job/89856424256",
+        "commit": "7cce9438e3781f6e495e4d26c13746c55b14739f",
+        "run": "https://github.com/sarveshsea/design-skills/actions/runs/30234304324",
+        "job": "https://github.com/sarveshsea/design-skills/actions/runs/30234304324/job/89878998755",
         "status": "checks-passed",
         "skills": [
           "shader-design-engineering",
@@ -131,10 +131,10 @@
       "designSandbox": {
         "repository": "https://github.com/sarveshsea/design-sandbox",
         "pullRequest": "https://github.com/sarveshsea/design-sandbox/pull/2",
-        "commit": "65bd7efdd20af4d38474b3de80703e364df2d580",
+        "commit": "0389679394fbdc7a8c54c764daa9cabe9dc9a91e",
         "route": "/labs/shaders",
-        "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30221374856",
-        "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30221374856/job/89844295228",
+        "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003",
+        "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003/job/89879007118",
         "status": "passed"
       }
     },
@@ -151,11 +151,11 @@
     },
     "routingBenchmark": {
       "artifact": "memi-routing-evidence-2026-07-26.json",
-      "sha256": "c93d7fb29ac932516e7bc4575a54ff408d2ed5131397982d04e18608b75ae455",
-      "commit": "58b0c9a9abc20fbc91c01e9b6c2736e466446dbc",
-      "correct": 45,
-      "total": 45,
-      "negativeAbstentions": "6/6",
+      "sha256": "6335fb1afd7ada56d2e86ede8316ca64c2ad062ad17323a40f12f19c687a9945",
+      "commit": "7cce9438e3781f6e495e4d26c13746c55b14739f",
+      "correct": 52,
+      "total": 52,
+      "negativeAbstentions": "9/9",
       "knownConfusions": 0,
       "status": "passed"
     },
@@ -247,26 +247,28 @@
         "passedJobs": 9
       },
       "website": {
-        "source": "GET https://api.github.com/repos/sarveshsea/memoire-web/check-runs/89845025757/annotations",
-        "run": "https://github.com/sarveshsea/memoire-web/actions/runs/30221659760",
+        "source": "GET https://api.github.com/repos/sarveshsea/memoire-web/actions/jobs/89855906526",
+        "run": "https://github.com/sarveshsea/memoire-web/actions/runs/30225897481",
         "runnerId": 0,
         "status": "not-started",
         "annotation": "The job was not started because recent account payments have failed or the spending limit needs to be increased.",
         "vercelPreviewStatus": "passed"
       },
       "shaderLab": {
-        "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30221374856",
-        "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30221374856/job/89844295228",
+        "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003",
+        "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003/job/89879007118",
         "status": "passed",
         "duration": "1m11s",
         "blocking": true
       }
     },
     "swiftUiFork": {
-      "pullRequest": "https://github.com/sarveshsea/ripple-image-transitions/pull/1",
-      "mergedAt": "2026-07-26T21:22:20Z",
+      "pullRequest": "https://github.com/sarveshsea/ripple-image-transitions/pull/3",
+      "mergedAt": "2026-07-27T03:18:40Z",
       "defaultBranch": "main",
-      "mergeCommit": "dee236074a04d88158353b37a63805749d993075"
+      "mergeCommit": "8037c8bb7db68a4c78b03b0053e241005304e3b6",
+      "run": "https://github.com/sarveshsea/ripple-image-transitions/actions/runs/30234383225",
+      "job": "https://github.com/sarveshsea/ripple-image-transitions/actions/runs/30234383225/job/89879234824"
     }
   },
   "growthBaseline": {

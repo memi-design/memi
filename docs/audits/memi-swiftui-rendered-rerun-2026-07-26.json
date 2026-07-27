@@ -2,12 +2,13 @@
   "schemaVersion": 1,
   "evidenceId": "swiftui-rendered-rerun",
   "status": "passed",
-  "capturedAt": "2026-07-27T00:41:28Z",
+  "capturedAt": "2026-07-27T03:21:07Z",
   "subject": {
     "repository": "https://github.com/sarveshsea/ripple-image-transitions",
     "upstream": "https://github.com/eujinco/ripple-image-transitions",
-    "branch": "codex/swiftui-rendered-rerun",
-    "headCommit": "9f6315dee64dc8e6d9f05e327d690d999c41b465"
+    "branch": "main",
+    "headCommit": "8037c8bb7db68a4c78b03b0053e241005304e3b6",
+    "reviewedPullRequestHead": "5f8bd5bfbce78dd70a091c15f468a5855bd13c86"
   },
   "audit": {
     "memiRepository": "https://github.com/sarveshsea/memi",
@@ -62,24 +63,25 @@
     },
     "artifacts": [
       {
-        "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/9f6315dee64dc8e6d9f05e327d690d999c41b465/docs/media/memi-reduced-motion-before.jpg",
+        "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/8037c8bb7db68a4c78b03b0053e241005304e3b6/docs/media/memi-reduced-motion-before.jpg",
         "sha256": "fa70661aeb75405dd5b4612dd78fddbc1d55b36fcd2a874160bf51499d366709"
       },
       {
-        "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/9f6315dee64dc8e6d9f05e327d690d999c41b465/docs/media/memi-reduced-motion-after.jpg",
+        "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/8037c8bb7db68a4c78b03b0053e241005304e3b6/docs/media/memi-reduced-motion-after.jpg",
         "sha256": "a96bd1ad8e7c5ca0dfd4ed076d1410778ca6f01dc4fa659b8472984ba401ef98"
       }
     ]
   },
   "verification": {
     "hostedRun": {
-      "url": "https://github.com/sarveshsea/ripple-image-transitions/actions/runs/30227996055",
-      "headCommit": "9f6315dee64dc8e6d9f05e327d690d999c41b465",
+      "url": "https://github.com/sarveshsea/ripple-image-transitions/actions/runs/30234383225",
+      "job": "https://github.com/sarveshsea/ripple-image-transitions/actions/runs/30234383225/job/89879234824",
+      "headCommit": "8037c8bb7db68a4c78b03b0053e241005304e3b6",
       "conclusion": "success"
     },
     "forkEvidence": {
-      "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/9f6315dee64dc8e6d9f05e327d690d999c41b465/docs/memi-rerun-evidence.json",
-      "sha256": "9c591c55d1b997888997fbf0c59b38b5d2ddc3754f22909369a7ab1c4d299ede"
+      "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/8037c8bb7db68a4c78b03b0053e241005304e3b6/docs/memi-rerun-evidence.json",
+      "sha256": "a4b054e400842fc5b3411d3984a5d92572c59e72429dff62ae83d655c30fcdfb"
     },
     "independentReview": {
       "verifier": "agent:audit-review",

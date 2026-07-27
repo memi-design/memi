@@ -36,7 +36,7 @@ Stars and npm downloads are therefore lagging indicators. The operating funnel i
 | Core job, activation, useful first result | 15 | 9 | 15 | Pinned no-write activation now proves useful or honestly unassessed results on three fresh external repositories without mutation. |
 | CLI, MCP, skills, site, Studio, release parity | 15 | 6 | 11 | Candidate centralizes site release data, but it is not deployed and the corrected core is not published. |
 | Design-engineering depth and rendered quality | 15 | 9 | 13 | Artifact-backed website proof, a separately owned WebGL2 lab, and SwiftUI simulator evaluation now exist. |
-| Skill governance, routing, freshness, provenance | 15 | 9 | 15 | 94 skills scored; mean 86/100; five-state dispositions; zero duplicate primary routes; 45/45 routing; 180-day shader freshness gate. |
+| Skill governance, routing, freshness, provenance | 15 | 9 | 15 | 94 skills scored; mean 86/100; five-state dispositions; zero duplicate primary routes; 52/52 routing; 180-day shader freshness gate. |
 | Shader, dither, creative rendering | 10 | 1 | 8 | Two canonical skills and a separately owned original WebGL2 proof cover ordered/noise dithering, distortion, fallback, and evidence export. |
 | Security, privacy, licensing, supply chain | 10 | 3 | 9 | Candidate production audits are zero; fetch, path, archive, publisher, and media-provenance boundaries are hardened. |
 | GitHub/npm funnel and community proof | 10 | 3 | 5 | Funnel and measurement are repaired, but external adoption targets are not yet achieved. |
@@ -62,7 +62,7 @@ Machine-readable evidence is in [`memi-design-engineering-audit-2026-07-26.json`
 
 Core verification:
 
-- 1,820 tests across 244 files.
+- 1,891 tests across 256 files.
 - Strict typecheck, lint, build, release consistency, Codex plugin smoke, local packed-install smoke, isolated public 2.6.2 install smoke, and `npm audit` pass. The MCP smoke observed 50 tools; its enforced regression floor remains 20 tools plus six named tools.
 - Package size: 1,281,175 of the 1,285,000-byte gate.
 - Independent security review reproduced the original SSRF, symlink, and ZIP failures, then verified them fail closed after correction.
@@ -100,16 +100,16 @@ External clean-repository proof at candidate commit
 - Implemented concrete `Merge into <canonical>` output for future routing collisions.
 - Enforced actual completion timestamps and a 180-day shader-reference freshness gate.
 
-These canonical catalog additions live in the separate `design-skills` candidate
-at commit `58b0c9a9abc20fbc91c01e9b6c2736e466446dbc`; Memi continues to ship only
+These canonical catalog additions live in the separate `design-skills` catalog
+at merged main commit `7cce9438e3781f6e495e4d26c13746c55b14739f`; Memi continues to ship only
 focused entry skills and routers rather than duplicating the full catalog.
 
-Catalog verification: 33 checks pass under the default parallel command, including an isolated-workspace regression for the former catalog rewrite race. The 45-prompt catalog QA benchmark now requires and achieves 45/45; all six negative near-misses abstain. The original WGSL WebGPU implementation/audit prompt remains in the fixture and now routes correctly after platform-term normalization. The benchmark evaluates catalog metadata and skill descriptions, not Memi runtime routing. All 94 skills validate and list through `npx skills@1.5.17`, and the production dependency audit is clean.
+Catalog verification: 45 checks pass under the default parallel command, including an isolated-workspace regression for the former catalog rewrite race. The 52-prompt catalog QA benchmark now requires and achieves 52/52; all nine negative near-misses abstain. The original WGSL WebGPU implementation/audit prompt remains in the fixture and now routes correctly after platform-term normalization. The benchmark evaluates catalog metadata and skill descriptions, not Memi runtime routing. All 94 skills validate and list through `npx skills@1.5.17`, and the production dependency audit is clean.
 
 ### Web shader proof
 
-The separate `design-sandbox` candidate at commit
-`65bd7efdd20af4d38474b3de80703e364df2d580` provides the isolated
+The separate `design-sandbox` project at merged main commit
+`0389679394fbdc7a8c54c764daa9cabe9dc9a91e` provides the merged
 `/labs/shaders` route:
 
 - Original WebGL2/GLSL ES 3 rendering.
@@ -122,10 +122,10 @@ The separate `design-sandbox` candidate at commit
 - A WebGPU/WGSL future-adapter boundary without delaying the first proof.
 
 The proof does not copy source or media from The Book of Shaders or LYGIA.
-Its blocking hosted workflow passed. The candidate points remain non-public
-until the skill and lab PRs are merged and the lab is deployed. Durable GPU,
-energy, color, alpha, temporal-stability, and cross-browser evidence remains
-unassessed.
+Its blocking hosted workflow passed on merged main. Hardware GPU draw-pass,
+animation cadence, alpha, deterministic frame, reduced-motion, and
+Chromium/WebKit evidence is hash-bound; measured power consumption and
+calibrated wide-gamut accuracy remain unassessed.
 
 ### SwiftUI evaluation fork
 
@@ -136,11 +136,14 @@ The public evaluation fork is [`sarveshsea/ripple-image-transitions`](https://gi
 - Replacement prompts, tool output IDs, timestamps, dimensions, hashes, and licensing limits are recorded.
 - CI rejects the three excluded upstream hashes regardless of filename.
 - The Memi Action and CLI are pinned. GitHub permissions are read-only and SARIF upload is disabled; the Action still generates workspace-local report artifacts, so it is not described as a no-write CLI invocation.
-- XcodeBuildMCP built and launched the unchanged SwiftUI/Metal implementation with zero structured diagnostics.
-- A separate generic `xcodebuild` succeeded with the documented AppIntents metadata warning.
-- No upstream issue or PR was opened because Memi 2.6.2 scanned zero SwiftUI files.
+- Memi candidate source analysis found and then verified fixes for reduced-motion and gesture accessibility behavior across nine SwiftUI files.
+- XcodeBuildMCP built and launched the minimally changed SwiftUI/Metal implementation with zero warnings or errors and verified the runtime accessibility action.
+- The rendered proof and current main workflow are bound to immutable source, project, media, and report hashes.
+- No upstream issue or PR was opened; the fork remains an evaluation integration and does not imply partnership.
 
-The nominal Memi score of 98 is explicitly rejected as design-quality evidence because `scannedFiles` was zero. This is a primary product gap, not a success metric.
+The rerun retains a zero whole-category score and a partial-source cap. It proves
+only the two assessed SwiftUI checks; Metal semantics, GPU performance, color
+correctness, and whole-category rendered quality remain unassessed.
 
 ### Public website candidate
 
