@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "candidate-head-validation",
+  "capturedAt": "2026-07-27T01:35:02.000Z",
+  "assessment": "passed",
+  "repository": "https://github.com/sarveshsea/memi",
+  "commit": "8a928fa6e465244bf10ef017055967185b3239e0",
+  "hostedRuns": [
+    {
+      "workflow": "CI",
+      "url": "https://github.com/sarveshsea/memi/actions/runs/30229947672",
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Clean install compatibility",
+      "url": "https://github.com/sarveshsea/memi/actions/runs/30229947673",
+      "conclusion": "success"
+    },
+    {
+      "workflow": "HOL Plugin Scanner",
+      "url": "https://github.com/sarveshsea/memi/actions/runs/30229947696",
+      "conclusion": "success"
+    }
+  ],
+  "cleanInstallMatrix": [
+    {
+      "os": "ubuntu-latest",
+      "node": 20,
+      "conclusion": "success"
+    },
+    {
+      "os": "ubuntu-latest",
+      "node": 22,
+      "conclusion": "success"
+    },
+    {
+      "os": "ubuntu-latest",
+      "node": 24,
+      "conclusion": "success"
+    },
+    {
+      "os": "macos-latest",
+      "node": 20,
+      "conclusion": "success"
+    },
+    {
+      "os": "macos-latest",
+      "node": 22,
+      "conclusion": "success"
+    },
+    {
+      "os": "macos-latest",
+      "node": 24,
+      "conclusion": "success"
+    },
+    {
+      "os": "windows-latest",
+      "node": 20,
+      "conclusion": "success"
+    },
+    {
+      "os": "windows-latest",
+      "node": 22,
+      "conclusion": "success"
+    },
+    {
+      "os": "windows-latest",
+      "node": 24,
+      "conclusion": "success"
+    }
+  ],
+  "validatedGates": [
+    "release consistency",
+    "lint",
+    "unit and integration tests",
+    "build",
+    "plugin bundle version",
+    "self-hosted memi ci",
+    "SARIF generation and upload",
+    "HOL plugin scanning",
+    "package build",
+    "pack and clean consumer install",
+    "consumer binary invocation"
+  ],
+  "scope": {
+    "publicRelease": false,
+    "candidateBranch": true,
+    "scoreImpact": "No new points. This refreshes the already-passed candidate verification evidence and does not clear public release or hosted website caps."
+  }
+}

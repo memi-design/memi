@@ -3,10 +3,10 @@
   "auditId": "memi-100",
   "title": "Memi 100-point end-to-end scorecard",
   "targetScore": 100,
-  "assessedAt": "2026-07-27T00:41:28.000Z",
+  "assessedAt": "2026-07-27T01:35:02.000Z",
   "subject": {
     "repository": "https://github.com/sarveshsea/memi",
-    "commit": "b02e150c623e495ba1cf8400b07587eadb5d39c1"
+    "commit": "8a928fa6e465244bf10ef017055967185b3239e0"
   },
   "evidence": [
     {
@@ -60,6 +60,19 @@
       "producer": "agent:swiftui-rendered-rerun",
       "verifier": "agent:independent-audit-review",
       "environment": "Clean candidate audits, XcodeBuildMCP iOS 26.5 simulator rendering, runtime accessibility action, reduced-motion screenshots, and GitHub-hosted validation"
+    },
+    {
+      "id": "candidate-head-validation",
+      "kind": "clean-install",
+      "status": "passed",
+      "capturedAt": "2026-07-27T01:35:02.000Z",
+      "artifact": {
+        "location": "memi-candidate-head-validation-2026-07-27.json",
+        "sha256": "538088cdbd9d789f202813a7fc2979a3ab43fa091cbb2c60923ed2a39af86fa8"
+      },
+      "producer": "ci:memi-hosted-validation",
+      "verifier": "agent:audit-review",
+      "environment": "GitHub-hosted CI, HOL scanner, and nine-cell clean install matrix across Linux, macOS, Windows, and Node 20, 22, and 24 at immutable commit 8a928fa6e465244bf10ef017055967185b3239e0"
     }
   ],
   "derivedFromAudit": {
@@ -268,7 +281,8 @@
           "points": 9,
           "assessment": "passed",
           "evidenceIds": [
-            "reviewed-candidate-audit"
+            "reviewed-candidate-audit",
+            "candidate-head-validation"
           ],
           "requiresIndependentVerification": true
         },
