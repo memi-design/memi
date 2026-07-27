@@ -1,6 +1,6 @@
 # Memi 100-point end-to-end scorecard
 
-Evidence evaluated: 2026-07-26T23:54:23.381Z
+Evidence evaluated: 2026-07-27T00:41:28.000Z
 
 **Verified score: 69/100**
 
@@ -8,7 +8,7 @@ Evidence evaluated: 2026-07-26T23:54:23.381Z
 | --- | ---: | ---: |
 | Core job, activation, and useful first result | 15 | 15 |
 | CLI, MCP, skills, site, Studio, and release consistency | 11 | 15 |
-| Design-engineering depth and rendered quality | 13 | 15 |
+| Design-engineering depth and rendered quality | 15 | 15 |
 | Skill governance, routing, freshness, and provenance | 15 | 15 |
 | Shader, dither, and creative-rendering capability | 8 | 10 |
 | Security, privacy, licensing, and supply chain | 9 | 10 |
@@ -17,7 +17,6 @@ Evidence evaluated: 2026-07-26T23:54:23.381Z
 
 ## Remaining gaps
 
-- Unassessed criterion: `design-engineering-depth/swiftui-rendered-rerun`
 - Unassessed criterion: `growth-and-community-proof/eight-week-adoption`
 - Unassessed criterion: `security-privacy-licensing/complete-supply-chain-proof`
 - Unassessed criterion: `shader-and-dither/durable-rendering-evidence`
@@ -26,4 +25,4 @@ Evidence evaluated: 2026-07-26T23:54:23.381Z
 - Applied cap: `public-version-drift` at 69
 - Applied cap: `hosted-ci-incomplete` at 84
 
-Generated from `docs/audits/memi-100-scorecard.json` · Ledger SHA-256: `9ca330dbf743c4ccf70749a0cdcc324639f7464ea9a1f6820ae6bc6df69ba796`
+Generated from `docs/audits/memi-100-scorecard.json` · Ledger SHA-256: `1cb850dcffbbaa2249dc4d5cb9a8686e053326278c315f80e01df01ff7b4ead9`

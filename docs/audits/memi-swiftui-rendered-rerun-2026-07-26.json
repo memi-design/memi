@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "swiftui-rendered-rerun",
+  "status": "passed",
+  "capturedAt": "2026-07-27T00:41:28Z",
+  "subject": {
+    "repository": "https://github.com/sarveshsea/ripple-image-transitions",
+    "upstream": "https://github.com/eujinco/ripple-image-transitions",
+    "branch": "codex/swiftui-rendered-rerun",
+    "headCommit": "9f6315dee64dc8e6d9f05e327d690d999c41b465"
+  },
+  "audit": {
+    "memiRepository": "https://github.com/sarveshsea/memi",
+    "memiCommit": "b02e150c623e495ba1cf8400b07587eadb5d39c1",
+    "memiDistIndexSha256": "ceb04a36b5a6c60ff320b7c433232c65ef546d64cecddc110bd55713459b4354",
+    "command": "DO_NOT_TRACK=1 MEMI_TELEMETRY_DISABLED=1 node <memi-checkout>/dist/index.js diagnose . --json --no-write --fail-on none",
+    "before": {
+      "commit": "962590872163f6b3fa8f3e4d6a41987f22595bc2",
+      "scannedFiles": 16,
+      "swiftUiFiles": 9,
+      "gatingIssues": 2,
+      "findingIds": [
+        "swiftui.reduced-motion-missing",
+        "swiftui.gesture-accessibility-action-missing"
+      ],
+      "worktreeCleanBeforeAndAfter": true
+    },
+    "after": {
+      "commit": "22df4797e8b0d87cb5a64a81c933b7c4d7445890",
+      "scannedFiles": 16,
+      "swiftUiFiles": 9,
+      "gatingIssues": 0,
+      "findingIds": [],
+      "worktreeCleanBeforeAndAfter": true,
+      "score": 0,
+      "scoreScope": "none",
+      "appliedScoreCap": "partial-source-analysis"
+    }
+  },
+  "renderedEvidence": {
+    "host": {
+      "modelName": "MacBook Pro",
+      "modelIdentifier": "Mac15,7",
+      "chip": "Apple M3 Pro",
+      "memory": "36 GB"
+    },
+    "simulator": {
+      "name": "Nate Design QA 26.5",
+      "runtime": "iOS 26.5",
+      "bundleId": "com.example.ripple",
+      "systemReduceMotionEnabledDuringCapture": true
+    },
+    "buildRun": {
+      "status": "succeeded",
+      "warnings": 0,
+      "errors": 0
+    },
+    "runtimeAccessibility": {
+      "beforeAction": "Ripple image preview, Image 1 of 2",
+      "action": "default tap action",
+      "afterAction": "Ripple image preview, Image 2 of 2"
+    },
+    "artifacts": [
+      {
+        "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/9f6315dee64dc8e6d9f05e327d690d999c41b465/docs/media/memi-reduced-motion-before.jpg",
+        "sha256": "fa70661aeb75405dd5b4612dd78fddbc1d55b36fcd2a874160bf51499d366709"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/9f6315dee64dc8e6d9f05e327d690d999c41b465/docs/media/memi-reduced-motion-after.jpg",
+        "sha256": "a96bd1ad8e7c5ca0dfd4ed076d1410778ca6f01dc4fa659b8472984ba401ef98"
+      }
+    ]
+  },
+  "verification": {
+    "hostedRun": {
+      "url": "https://github.com/sarveshsea/ripple-image-transitions/actions/runs/30227996055",
+      "headCommit": "9f6315dee64dc8e6d9f05e327d690d999c41b465",
+      "conclusion": "success"
+    },
+    "forkEvidence": {
+      "url": "https://raw.githubusercontent.com/sarveshsea/ripple-image-transitions/9f6315dee64dc8e6d9f05e327d690d999c41b465/docs/memi-rerun-evidence.json",
+      "sha256": "9c591c55d1b997888997fbf0c59b38b5d2ddc3754f22909369a7ab1c4d299ede"
+    },
+    "independentReview": {
+      "verifier": "agent:audit-review",
+      "result": "approved",
+      "scope": "Reduced-motion behavior, accessibility semantics, Swift buildability, evidence honesty, CI portability, licensing, and provenance"
+    }
+  },
+  "limitations": [
+    "The after audit passes only the two assessed SwiftUI checks.",
+    "The retained zero score and partial-source cap prevent this proof from being misread as whole-category native quality coverage.",
+    "Metal shader semantics, GPU performance, color correctness, and other whole-category dimensions remain unassessed."
+  ]
+}

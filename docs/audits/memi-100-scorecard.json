@@ -3,10 +3,10 @@
   "auditId": "memi-100",
   "title": "Memi 100-point end-to-end scorecard",
   "targetScore": 100,
-  "assessedAt": "2026-07-26T23:54:23.381Z",
+  "assessedAt": "2026-07-27T00:41:28.000Z",
   "subject": {
     "repository": "https://github.com/sarveshsea/memi",
-    "commit": "ccb2971c87285413443e0e98996bfb17a87209d4"
+    "commit": "b02e150c623e495ba1cf8400b07587eadb5d39c1"
   },
   "evidence": [
     {
@@ -47,6 +47,19 @@
       "producer": "ci:design-skills",
       "verifier": "agent:independent-audit-review",
       "environment": "GitHub-hosted design-skills validation at immutable commit 58b0c9a9abc20fbc91c01e9b6c2736e466446dbc"
+    },
+    {
+      "id": "swiftui-rendered-rerun",
+      "kind": "implementation",
+      "status": "passed",
+      "capturedAt": "2026-07-27T00:41:28.000Z",
+      "artifact": {
+        "location": "memi-swiftui-rendered-rerun-2026-07-26.json",
+        "sha256": "5a8f86dd44658c8c6b49d6415feaf4384734b290e0d3a098df1094179dc3971e"
+      },
+      "producer": "agent:swiftui-rendered-rerun",
+      "verifier": "agent:independent-audit-review",
+      "environment": "Clean candidate audits, XcodeBuildMCP iOS 26.5 simulator rendering, runtime accessibility action, reduced-motion screenshots, and GitHub-hosted validation"
     }
   ],
   "derivedFromAudit": {
@@ -128,8 +141,10 @@
           "id": "swiftui-rendered-rerun",
           "title": "Real SwiftUI source audit, correction, analyzed rendering, and verified rerun",
           "points": 2,
-          "assessment": "unassessed",
-          "evidenceIds": [],
+          "assessment": "passed",
+          "evidenceIds": [
+            "swiftui-rendered-rerun"
+          ],
           "requiresIndependentVerification": true
         }
       ]
