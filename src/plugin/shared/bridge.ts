@@ -47,6 +47,7 @@ export interface BridgeIdentifyEnvelope {
   port?: number;
   studioUrl?: string;
   runtimeUrl?: string;
+  capability?: string;
 }
 
 export interface BridgeHelloEnvelope {
@@ -56,6 +57,7 @@ export interface BridgeHelloEnvelope {
   file: string;
   fileKey: string;
   editor: string;
+  capability?: string;
 }
 
 export interface BridgeEventEnvelope {
@@ -233,9 +235,16 @@ export type BridgeEnvelope =
 
 export function isBridgeEnvelope(value: unknown): value is BridgeEnvelope {
   if (!value || typeof value !== "object") return false;
-  const v = value as { channel?: unknown; type?: unknown; method?: unknown };
+  const v = value as { channel?: unknown; type?: unknown; method?: unknown; capability?: unknown };
   if (v.channel !== BRIDGE_V2_CHANNEL) return false;
   if (typeof v.type !== "string") return false;
+  if (
+    (v.type === "identify" || v.type === "bridge-hello")
+    && v.capability !== undefined
+    && typeof v.capability !== "string"
+  ) {
+    return false;
+  }
   // If the envelope claims to be a command, the method must be on the
   // approved list — otherwise the fast-path in normalizeBridgeMessage
   // would let unknown commands through, defeating the validation we
@@ -317,6 +326,7 @@ export function normalizeBridgeMessage(value: unknown): BridgeEnvelope | null {
           port: typeof message.port === "number" ? message.port : undefined,
           studioUrl: asString(message.studioUrl),
           runtimeUrl: asString(message.runtimeUrl),
+          capability: asString(message.capability),
         };
       }
       return null;
@@ -328,6 +338,7 @@ export function normalizeBridgeMessage(value: unknown): BridgeEnvelope | null {
         file: asString(message.file) ?? "unknown",
         fileKey: asString(message.fileKey) ?? "",
         editor: asString(message.editor) ?? "figma",
+        capability: asString(message.capability),
       };
     case "event":
       if (typeof message.message === "string") {
@@ -521,6 +532,7 @@ export function serializeBridgeEnvelope(
         port: envelope.port,
         studioUrl: envelope.studioUrl,
         runtimeUrl: envelope.runtimeUrl,
+        capability: envelope.capability,
       };
     case "bridge-hello":
       return {
@@ -528,6 +540,7 @@ export function serializeBridgeEnvelope(
         file: envelope.file,
         fileKey: envelope.fileKey,
         editor: envelope.editor,
+        capability: envelope.capability,
       };
     case "event":
       return {

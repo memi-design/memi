@@ -8,11 +8,13 @@
 
 import { createLogger } from "../engine/logger.js";
 import type { DesignToken } from "../engine/registry.js";
+import { fetchPublicText } from "../security/safe-fetch.js";
 import { extractDesignTokensFromCss, type TokenExtractionReport } from "../tokens/extractor.js";
 
 const log = createLogger("css-extractor");
 
 const FETCH_TIMEOUT_MS = 15000;
+const MAX_REMOTE_TEXT_BYTES = 2_000_000;
 const MAX_STYLESHEETS = 10;
 const MAX_COLORS = 50;        // cap to avoid noise from icon-heavy sites
 
@@ -84,18 +86,16 @@ function assertPublicUrl(rawUrl: string): void {
 
 async function fetchText(url: string, timeoutMs = FETCH_TIMEOUT_MS): Promise<string | null> {
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    const response = await fetch(url, {
-      signal: controller.signal,
+    const response = await fetchPublicText(url, {
+      maxBytes: MAX_REMOTE_TEXT_BYTES,
+      timeoutMs,
       headers: {
         "User-Agent": "Memoire-DesignDoc/1.0",
         "Accept": "text/html,text/css,*/*",
       },
     });
-    clearTimeout(timer);
     if (!response.ok) return null;
-    return await response.text();
+    return response.text;
   } catch {
     return null;
   }

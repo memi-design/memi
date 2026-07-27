@@ -63,7 +63,10 @@ export function resolveBridgeResponse(
   return createBridgeResponseEnvelope(matched.bridgeId, message.result, message.error);
 }
 
-export function createBridgeHelloMessage(connection: WidgetConnectionState): BridgeHelloEnvelope {
+export function createBridgeHelloMessage(
+  connection: WidgetConnectionState,
+  capability?: string,
+): BridgeHelloEnvelope {
   return {
     channel: BRIDGE_V2_CHANNEL,
     source: "plugin",
@@ -71,6 +74,7 @@ export function createBridgeHelloMessage(connection: WidgetConnectionState): Bri
     file: connection.fileName || "unknown",
     fileKey: connection.fileKey || "",
     editor: connection.editorType || "figma",
+    capability,
   };
 }
 

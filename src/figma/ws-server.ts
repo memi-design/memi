@@ -7,6 +7,7 @@
  */
 
 import { WebSocketServer, WebSocket } from "ws";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createLogger } from "../engine/logger.js";
 import { EventEmitter } from "events";
 import type { MemoireEvent } from "../engine/core.js";
@@ -15,11 +16,24 @@ import {
   normalizeBridgeMessage,
   serializeBridgeEnvelope,
   type BridgeEnvelope,
+  type BridgeHelloEnvelope,
 } from "../plugin/shared/bridge.js";
 import type { AgentBoxState, WidgetCommandName } from "../plugin/shared/contracts.js";
 import { BRIDGE_PORT_START, BRIDGE_PORT_END, isPortInUse, getPortOwnerPid, isMemoireProcess } from "./port-scanner.js";
 
 const log = createLogger("ws-server");
+export const BRIDGE_BIND_HOST = "127.0.0.1";
+
+export function verifyBridgeCapability(
+  presented: unknown,
+  expected: string,
+): boolean {
+  if (typeof presented !== "string") return false;
+  const presentedBytes = Buffer.from(presented);
+  const expectedBytes = Buffer.from(expected);
+  return presentedBytes.length === expectedBytes.length
+    && timingSafeEqual(presentedBytes, expectedBytes);
+}
 
 export interface BridgeClient {
   id: string;
@@ -79,6 +93,7 @@ export class MemoireWsServer extends EventEmitter {
   private config: MemoireWsServerConfig;
   private wss: WebSocketServer | null = null;
   private clients = new Map<string, BridgeClient>();
+  private pendingClients = new Map<string, BridgeClient>();
   private rateLimits = new Map<string, RateLimit>();
   private port = 0;
   private _running = false;
@@ -93,6 +108,7 @@ export class MemoireWsServer extends EventEmitter {
   /** Tracks in-flight idempotent reads to prevent duplicate requests. method → commandId */
   private inFlightMethods = new Map<string, string>();
   private commandId = 0;
+  private readonly capabilityToken = randomBytes(32).toString("base64url");
 
   // ── Connection state tracking ──────────────────────────
   private _reconnectAttempts = 0;
@@ -230,7 +246,11 @@ export class MemoireWsServer extends EventEmitter {
       for (const client of this.clients.values()) {
         client.ws.close(1000, "Server shutting down");
       }
+      for (const client of this.pendingClients.values()) {
+        client.ws.close(1008, "Authentication incomplete");
+      }
       this.clients.clear();
+      this.pendingClients.clear();
       this.wss.close();
       this.wss = null;
       this._running = false;
@@ -437,7 +457,7 @@ export class MemoireWsServer extends EventEmitter {
 
   private startOnPort(port: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      const wss = new WebSocketServer({ port });
+      const wss = new WebSocketServer({ port, host: BRIDGE_BIND_HOST });
 
       wss.on("listening", () => {
         this.wss = wss;
@@ -468,17 +488,7 @@ export class MemoireWsServer extends EventEmitter {
         lastPing: new Date(),
       };
 
-      this.clients.set(clientId, client);
-      this._lastConnectedAt = new Date();
-      this._reconnectAttempts = 0;
-      this._isReconnecting = false;
-      if (this._reconnectTimer) {
-        clearTimeout(this._reconnectTimer);
-        this._reconnectTimer = null;
-      }
-      log.info(`Plugin connected: ${clientId}`);
-      this.emitEvent("success", "Figma plugin connected");
-      this.emit("client-connected", client);
+      this.pendingClients.set(clientId, client);
 
       // Send identification — wrapped in try-catch for early disconnect
       try {
@@ -492,12 +502,13 @@ export class MemoireWsServer extends EventEmitter {
               port: this.port,
               studioUrl: this.studioUrl,
               runtimeUrl: this.runtimeUrl,
+              capability: this.capabilityToken,
             }, "v2"),
           ),
         );
       } catch (err) {
         log.warn({ clientId, err: (err as Error).message }, "Failed to send identify — client already gone");
-        this.clients.delete(clientId);
+        this.pendingClients.delete(clientId);
         return;
       }
 
@@ -530,6 +541,15 @@ export class MemoireWsServer extends EventEmitter {
             log.warn({ clientId }, "Invalid message: unsupported bridge payload");
             return;
           }
+          if (this.pendingClients.has(clientId)) {
+            if (msg.type !== "bridge-hello" || !verifyBridgeCapability(msg.capability, this.capabilityToken)) {
+              log.warn({ clientId }, "Rejected unauthenticated bridge client");
+              ws.close(1008, "Invalid bridge capability");
+              return;
+            }
+            this.activateClient(client, msg);
+            return;
+          }
           this.handleMessage(clientId, msg);
         } catch (err) {
           log.warn({ clientId, err: (err as Error).message }, "Invalid JSON message");
@@ -537,7 +557,8 @@ export class MemoireWsServer extends EventEmitter {
       });
 
       ws.on("close", () => {
-        this.clients.delete(clientId);
+        const wasAuthenticated = this.clients.delete(clientId);
+        this.pendingClients.delete(clientId);
         this.rateLimits.delete(clientId);
 
         // Reject pending commands that were sent to this specific client
@@ -553,12 +574,14 @@ export class MemoireWsServer extends EventEmitter {
           }
         }
 
-        log.info(`Plugin disconnected: ${clientId}`);
-        this.emitEvent("warn", "Figma plugin disconnected");
-        this.emit("client-disconnected", clientId);
+        if (wasAuthenticated) {
+          log.info(`Plugin disconnected: ${clientId}`);
+          this.emitEvent("warn", "Figma plugin disconnected");
+          this.emit("client-disconnected", clientId);
+        }
 
         // Only start backoff when the last client disconnects
-        if (this.clients.size === 0 && this._running) {
+        if (wasAuthenticated && this.clients.size === 0 && this._running) {
           this._lastDisconnectedAt = new Date();
           this._scheduleReconnectWarn();
         }
@@ -609,6 +632,26 @@ export class MemoireWsServer extends EventEmitter {
         try { client.ws.ping(); } catch { /* ignore — close handler will clean up */ }
       }
     }, 30000);
+  }
+
+  private activateClient(client: BridgeClient, hello: BridgeHelloEnvelope): void {
+    this.pendingClients.delete(client.id);
+    client.file = hello.file;
+    client.fileKey = hello.fileKey;
+    client.editor = hello.editor;
+    client.lastPing = new Date();
+    this.clients.set(client.id, client);
+    this._lastConnectedAt = new Date();
+    this._reconnectAttempts = 0;
+    this._isReconnecting = false;
+    if (this._reconnectTimer) {
+      clearTimeout(this._reconnectTimer);
+      this._reconnectTimer = null;
+    }
+    log.info(`Plugin authenticated: ${client.id}`);
+    this.emitEvent("success", "Figma plugin connected");
+    this.emit("client-connected", client);
+    this.emit("client-updated", client);
   }
 
   private handleMessage(clientId: string, msg: BridgeEnvelope): void {

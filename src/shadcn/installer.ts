@@ -8,6 +8,7 @@ import { resolveMarketplaceAlias } from "../marketplace/catalog-loader.js";
 import { fetchNpmPackageToCache } from "../registry/npm-fetch.js";
 import { packagePath } from "../utils/asset-path.js";
 import { isPrivateOrLocalHostname } from "../security/network-address.js";
+import { fetchPublicText } from "../security/safe-fetch.js";
 import {
   type ShadcnRegistry,
   type ShadcnRegistryFile,
@@ -18,6 +19,7 @@ import {
 } from "./schema.js";
 
 const FETCH_TIMEOUT_MS = 15000;
+const MAX_REGISTRY_TEXT_BYTES = 2_000_000;
 
 export interface InstallShadcnItemOptions {
   from: string;
@@ -265,15 +267,12 @@ async function readComponentsJson(projectRoot: string): Promise<ComponentsJson> 
 
 async function fetchText(url: string): Promise<string> {
   assertSafePublicUrl(url);
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const response = await fetch(url, { signal: controller.signal, redirect: "error" });
-    if (!response.ok) throw new Error(`Failed to fetch shadcn registry item: ${response.status}`);
-    return response.text();
-  } finally {
-    clearTimeout(timer);
-  }
+  const response = await fetchPublicText(url, {
+    maxBytes: MAX_REGISTRY_TEXT_BYTES,
+    timeoutMs: FETCH_TIMEOUT_MS,
+  });
+  if (!response.ok) throw new Error(`Failed to fetch shadcn registry item: ${response.status}`);
+  return response.text;
 }
 
 function assertSafePublicUrl(url: string): void {

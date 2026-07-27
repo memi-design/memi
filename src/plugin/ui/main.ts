@@ -71,6 +71,7 @@ interface UiState {
     scanTimer: number | null;
     offlineSince: number | null;
     reconnectAttempts: number;
+    capability: string;
   };
 }
 
@@ -220,6 +221,7 @@ const state: UiState = {
     scanTimer: null,
     offlineSince: Date.now(),
     reconnectAttempts: 0,
+    capability: "",
   },
 };
 
@@ -508,12 +510,16 @@ function adoptBridge(ws: WebSocket, port: number, payload: Partial<BridgeIdentif
   state.bridge.name = payload.name || "Mémoire";
   state.bridge.studioUrl = payload.studioUrl || state.bridge.studioUrl;
   state.bridge.runtimeUrl = payload.runtimeUrl || state.bridge.runtimeUrl;
+  state.bridge.capability = payload.capability || "";
   state.bridge.reconnectDelayMs = 2000;
   state.bridge.reconnectAttempts = 0;
   writeCachedPort(port);
   setBridgeStage("connected");
   addLog("success", `Connected :${port}`);
-  forwardToBridge(serializeBridgeEnvelope(createBridgeHelloMessage(state.connection), "v2"));
+  forwardToBridge(serializeBridgeEnvelope(
+    createBridgeHelloMessage(state.connection, state.bridge.capability),
+    "v2",
+  ));
   scheduleRender();
   // Auto-sync on connect — pull selection immediately
   window.setTimeout(() => {
@@ -522,7 +528,10 @@ function adoptBridge(ws: WebSocket, port: number, payload: Partial<BridgeIdentif
 }
 
 function announceBridgeHello(): void {
-  forwardToBridge(serializeBridgeEnvelope(createBridgeHelloMessage(state.connection), "v2"));
+  forwardToBridge(serializeBridgeEnvelope(
+    createBridgeHelloMessage(state.connection, state.bridge.capability),
+    "v2",
+  ));
 }
 
 const MAX_RECONNECT_ATTEMPTS = 20;

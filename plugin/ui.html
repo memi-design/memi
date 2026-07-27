@@ -179,6 +179,9 @@ function isBridgeEnvelope(value) {
   const v = value;
   if (v.channel !== BRIDGE_V2_CHANNEL) return false;
   if (typeof v.type !== "string") return false;
+  if ((v.type === "identify" || v.type === "bridge-hello") && v.capability !== void 0 && typeof v.capability !== "string") {
+    return false;
+  }
   if (v.type === "command" && !isWidgetCommandName(v.method)) return false;
   return true;
 }
@@ -242,7 +245,8 @@ function normalizeBridgeMessage(value) {
           name: message.name,
           port: typeof message.port === "number" ? message.port : void 0,
           studioUrl: asString(message.studioUrl),
-          runtimeUrl: asString(message.runtimeUrl)
+          runtimeUrl: asString(message.runtimeUrl),
+          capability: asString(message.capability)
         };
       }
       return null;
@@ -253,7 +257,8 @@ function normalizeBridgeMessage(value) {
         type,
         file: (_a = asString(message.file)) != null ? _a : "unknown",
         fileKey: (_b = asString(message.fileKey)) != null ? _b : "",
-        editor: (_c = asString(message.editor)) != null ? _c : "figma"
+        editor: (_c = asString(message.editor)) != null ? _c : "figma",
+        capability: asString(message.capability)
       };
     case "event":
       if (typeof message.message === "string") {
@@ -441,14 +446,16 @@ function serializeBridgeEnvelope(envelope, mode = "legacy") {
         name: envelope.name,
         port: envelope.port,
         studioUrl: envelope.studioUrl,
-        runtimeUrl: envelope.runtimeUrl
+        runtimeUrl: envelope.runtimeUrl,
+        capability: envelope.capability
       };
     case "bridge-hello":
       return {
         type: "bridge-hello",
         file: envelope.file,
         fileKey: envelope.fileKey,
-        editor: envelope.editor
+        editor: envelope.editor,
+        capability: envelope.capability
       };
     case "event":
       return {
@@ -556,14 +563,15 @@ function resolveBridgeResponse(pending, message) {
   pending.delete(message.requestId);
   return createBridgeResponseEnvelope(matched.bridgeId, message.result, message.error);
 }
-function createBridgeHelloMessage(connection) {
+function createBridgeHelloMessage(connection, capability) {
   return {
     channel: BRIDGE_V2_CHANNEL,
     source: "plugin",
     type: "bridge-hello",
     file: connection.fileName || "unknown",
     fileKey: connection.fileKey || "",
-    editor: connection.editorType || "figma"
+    editor: connection.editorType || "figma",
+    capability
   };
 }
 function createBridgeSelectionMessage(selection) {
@@ -920,7 +928,8 @@ const state = {
     lastPingSentAt: 0,
     scanTimer: null,
     offlineSince: Date.now(),
-    reconnectAttempts: 0
+    reconnectAttempts: 0,
+    capability: ""
   }
 };
 bootstrap();
@@ -1176,19 +1185,26 @@ function adoptBridge(ws, port, payload) {
   state.bridge.name = payload.name || "Mémoire";
   state.bridge.studioUrl = payload.studioUrl || state.bridge.studioUrl;
   state.bridge.runtimeUrl = payload.runtimeUrl || state.bridge.runtimeUrl;
+  state.bridge.capability = payload.capability || "";
   state.bridge.reconnectDelayMs = 2e3;
   state.bridge.reconnectAttempts = 0;
   writeCachedPort(port);
   setBridgeStage("connected");
   addLog("success", `Connected :${port}`);
-  forwardToBridge(serializeBridgeEnvelope(createBridgeHelloMessage(state.connection), "v2"));
+  forwardToBridge(serializeBridgeEnvelope(
+    createBridgeHelloMessage(state.connection, state.bridge.capability),
+    "v2"
+  ));
   scheduleRender();
   window.setTimeout(() => {
     requestCommand("getSelection", {}, "Auto-inspect", "selection");
   }, 300);
 }
 function announceBridgeHello() {
-  forwardToBridge(serializeBridgeEnvelope(createBridgeHelloMessage(state.connection), "v2"));
+  forwardToBridge(serializeBridgeEnvelope(
+    createBridgeHelloMessage(state.connection, state.bridge.capability),
+    "v2"
+  ));
 }
 const MAX_RECONNECT_ATTEMPTS = 20;
 function scheduleReconnect() {
