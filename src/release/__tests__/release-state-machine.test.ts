@@ -14,6 +14,7 @@ import {
   validateEngineSurfaceSnapshot,
   validateEngineReleaseTransition,
   validateNpmPublishPreflight,
+  validateProvenanceInvocation,
   validateTarballBytes,
   validateReleaseManifest,
 } from "../../../scripts/lib/release-manifest.mjs";
@@ -99,6 +100,7 @@ function releaseRecord() {
       repository: "https://github.com/sarveshsea/memi",
       workflowPath: ".github/workflows/publish.yml",
       workflowRef: "refs/heads/main",
+      invocationId: "https://github.com/sarveshsea/memi/actions/runs/123456789/attempts/1",
     },
     workflow: {
       repository: "sarveshsea/memi",
@@ -240,6 +242,25 @@ describe("verified engine release state machine", () => {
       integrity: `sha512-${sha512.toString("base64")}`,
       shasum: sha1,
     })).toThrow("tarball SHA-512 does not match npm integrity");
+  });
+
+  it("binds the release record run and attempt to the SLSA invocation", () => {
+    const workflow = {
+      repository: "sarveshsea/memi",
+      path: ".github/workflows/publish.yml",
+      ref: "refs/heads/main",
+      runId: "123456789",
+      runAttempt: 1,
+    };
+
+    expect(validateProvenanceInvocation(
+      "https://github.com/sarveshsea/memi/actions/runs/123456789/attempts/1",
+      workflow,
+    )).toEqual([]);
+    expect(validateProvenanceInvocation(
+      "https://github.com/sarveshsea/memi/actions/runs/123456789/attempts/2",
+      workflow,
+    )).toContain("SLSA invocation does not match the recorded workflow run and attempt");
   });
 
   it("verifies every version-bearing surface at the candidate commit", () => {
