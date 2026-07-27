@@ -207,7 +207,7 @@
         },
         {
           "id": "complete-supply-chain-proof",
-          "title": "SBOM, provenance, advisory policy, fuzzing, least privilege, and independent signoff",
+          "title": "SBOM, public provenance, advisory policy, least privilege, and independent signoff",
           "points": 1,
           "assessment": "unassessed",
           "evidenceIds": [],

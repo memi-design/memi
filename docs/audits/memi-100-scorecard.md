@@ -26,4 +26,4 @@ Evidence evaluated: 2026-07-26T23:54:23.381Z
 - Applied cap: `public-version-drift` at 69
 - Applied cap: `hosted-ci-incomplete` at 84
 
-Generated from `docs/audits/memi-100-scorecard.json` · Ledger SHA-256: `6f1bec2bae9ad30e96933801c16b6ec2c96830739fc9e1e34d292c3d186b75cc`
+Generated from `docs/audits/memi-100-scorecard.json` · Ledger SHA-256: `9ca330dbf743c4ccf70749a0cdcc324639f7464ea9a1f6820ae6bc6df69ba796`

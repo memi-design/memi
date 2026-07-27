@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "supply-chain-proof-2026-07-27",
+  "capturedAt": "2026-07-27T00:35:50.692Z",
+  "candidate": {
+    "repository": "https://github.com/sarveshsea/memi",
+    "assessedCommit": "ccb2971c87285413443e0e98996bfb17a87209d4",
+    "evidenceCommit": "ef6957fd98d4add8bcc59a2c2a993f1e2463b466",
+    "packageName": "@memi-design/cli",
+    "version": "2.6.2",
+    "nodeVersion": "v22.22.3",
+    "npmVersion": "10.9.8"
+  },
+  "packageLock": {
+    "path": "package-lock.json",
+    "sha256": "fa37edc98c37a481c376fff005d46105830bde922fa4ec88e3aa1ec5ad7a89f5"
+  },
+  "sbom": {
+    "path": "memi-supply-chain-sbom-2026-07-27.cdx.json",
+    "format": "CycloneDX",
+    "specVersion": "1.5",
+    "sha256": "0f08b8822f0e3a0109b45fada0e8f0cff80f7110d472c75426c16408c5895054",
+    "componentCount": 326
+  },
+  "publishedPackage": {
+    "version": "2.6.2",
+    "gitHead": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+    "mcpName": "io.github.sarveshsea/memi",
+    "distIntegrity": "sha512-cvWfRIVQhAr6m26ySFO7ZyFlaaexeWPXJZCmiiKMaeSZUWXlyvWQGTjBUZzsJNh8+uj9k6CDgOdX4r8V9VPJIA==",
+    "distShasum": "c1ccfa65706023949798f5948445d22e6cd3128b",
+    "tarballSha256": "3877d11c6baf5be9dd52691fe79d975876d68bb561b8546d8195491d9c23957b",
+    "filename": "memi-design-cli-2.6.2.tgz",
+    "size": 1274601,
+    "unpackedSize": 4996398,
+    "entryCount": 790
+  },
+  "candidatePack": {
+    "version": "2.6.2",
+    "filename": "memi-design-cli-2.6.2.tgz",
+    "size": 1294106,
+    "unpackedSize": 5077614,
+    "shasum": "4c2ad08bb8c95467d9ceec34842cd7055c75f59b",
+    "integrity": "sha512-oFpI/PbgStjUbuWtYD+wm4WN5/5kBHItQA9MqLNkrCLdAIAPrYjmNscudhy3e6UkJJQeMacmZpZ2iRjZuB5OOg==",
+    "tarballSha256": "6fbe5b581fcf132639e9d884e0c0279374343a8e366649241c2e747a7c07cb79",
+    "entryCount": 801,
+    "note": "This is candidate-branch reproducibility evidence only. It is not a claim that the immutable npm 2.6.2 tarball can be rebuilt from the current checkout."
+  },
+  "advisoryPolicy": {
+    "command": "npm audit --omit=dev --audit-level=high --json",
+    "result": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "dependencies": {
+      "prod": 181,
+      "dev": 129,
+      "optional": 94,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 326
+    }
+  },
+  "publicProvenance": {
+    "requiredForPass": true,
+    "status": "missing-successor-release",
+    "workflow": ".github/workflows/publish.yml",
+    "successorReleaseRequired": true,
+    "reason": "The trusted-publisher workflow and public SLSA provenance verifier were added after npm 2.6.2. This candidate artifact does not claim a publicly published successor tarball with registry attestations."
+  },
+  "leastPrivilege": {
+    "workflow": ".github/workflows/publish-mcp-registry.yml",
+    "topLevelPermissions": [
+      "contents: read"
+    ],
+    "jobPermissions": {
+      "publish": [
+        "contents: read",
+        "id-token: write"
+      ]
+    },
+    "publisher": {
+      "version": "v1.8.0",
+      "linuxAmd64Sha256": "1370446bbe74d562608e8005a6ccce02d146a661fbd78674e11cc70b9618d6cf"
+    },
+    "verificationEvidence": [
+      "src/release/__tests__/workflow-action-pins.test.ts",
+      "scripts/publish-ready.mjs"
+    ]
+  },
+  "boundaryReviewTargets": {
+    "archiveBoundary": [
+      "scripts/install.sh",
+      "src/registry/catalog-notes.ts"
+    ],
+    "publisherBoundary": [
+      ".github/workflows/publish-mcp-registry.yml",
+      "server.json"
+    ],
+    "licensingBoundary": [
+      "package.json",
+      "LICENSE",
+      "NOTICE"
+    ]
+  },
+  "scope": {
+    "claim": "Candidate supply-chain evidence for the current public package plus the current reviewed engine branch safeguards.",
+    "doesNotClaim": [
+      "published successor release parity",
+      "website deployment parity",
+      "reproducibility of the immutable npm 2.6.2 tarball from the current checkout"
+    ]
+  },
+  "independentReview": {
+    "reviewer": "agent:pending",
+    "verdict": "pending",
+    "requiredForPass": true,
+    "scope": [
+      "archive-boundary",
+      "publisher-boundary",
+      "least-privilege-workflows",
+      "licensing-boundary"
+    ],
+    "notes": "Pending independent review."
+  }
+}
