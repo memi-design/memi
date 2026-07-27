@@ -137,4 +137,26 @@ describe("public release gate helper", () => {
     );
     expect(result.status).toBe("failed");
   });
+
+  it("fails closed when a stage returns a malformed result", async () => {
+    const result = await runPublicReleaseGate(baseOptions, {
+      fetchJson: vi.fn(async () => registryMetadata),
+      runSiteSmoke: vi.fn(async () => undefined),
+      runInstallSmoke: vi.fn(async () => undefined),
+    });
+
+    expect(result.siteSmoke).toMatchObject({
+      ok: false,
+      error: "site smoke returned an invalid result",
+    });
+    expect(result.installSmoke).toMatchObject({
+      ok: false,
+      error: "install smoke returned an invalid result",
+    });
+    expect(result.failures).toEqual([
+      "site smoke failed: site smoke returned an invalid result",
+      "install smoke failed: install smoke returned an invalid result",
+    ]);
+    expect(result.status).toBe("failed");
+  });
 });
