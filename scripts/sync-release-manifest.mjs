@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -9,13 +10,41 @@ import {
   loadReleaseManifest,
   resolveManifestSourceCommit,
   serializeJson,
+  stagePublishedEngineManifest,
   verifyCoreReleaseSurfaces,
+  verifyPublishedEngineTransitionFromGit,
 } from "./lib/release-manifest.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const checkOnly = process.argv.includes("--check");
-const manifest = await loadReleaseManifest(root);
+const stageIndex = process.argv.indexOf("--stage-published");
+let manifest = await loadReleaseManifest(root);
 const artifactPath = join(root, "release-artifacts", "memoire-web.release.json");
+
+if (stageIndex >= 0) {
+  const requestedPath = process.argv[stageIndex + 1];
+  if (!requestedPath) throw new Error("--stage-published requires a release record path");
+  const absoluteRecordPath = resolve(root, requestedPath);
+  const recordPath = relative(root, absoluteRecordPath);
+  if (!recordPath || recordPath === ".." || recordPath.startsWith("../")) {
+    throw new Error("release record path must stay inside the checkout");
+  }
+  const releaseRecordBytes = await readFile(absoluteRecordPath, "utf8");
+  const releaseRecord = JSON.parse(releaseRecordBytes);
+  manifest = stagePublishedEngineManifest({
+    manifest,
+    releaseRecord,
+    releaseRecordPath: recordPath,
+    releaseRecordBytes,
+    updatedAt: new Date().toISOString().slice(0, 10),
+  });
+  await writeFile(join(root, "release-manifest.json"), serializeJson(manifest), "utf8");
+  console.log(
+    `Staged published manifest bound to ${recordPath} (${createHash("sha256").update(releaseRecordBytes).digest("hex")}).`,
+  );
+  console.log("Commit release-manifest.json, then regenerate derived artifacts and run the live public gate.");
+  process.exit(0);
+}
 
 if (!checkOnly) {
   const sourceCommit = resolveManifestSourceCommit(root, manifest);
@@ -28,6 +57,7 @@ if (!checkOnly) {
 }
 
 const failures = await verifyCoreReleaseSurfaces(root, manifest);
+failures.push(...await verifyPublishedEngineTransitionFromGit(root, manifest));
 if (failures.length > 0) {
   console.error("Release manifest check failed:");
   for (const failure of failures) console.error(`- ${failure}`);

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const COMMIT_SHA = /^[a-f0-9]{40}$/;
@@ -90,6 +90,15 @@ function validateEngineManifestState(engine) {
     if (engine.releaseRecord !== null) {
       failures.push("candidate engine release releaseRecord must be null");
     }
+    if (engine.previousPublicRelease !== undefined) {
+      if (!SEMVER.test(engine.previousPublicRelease?.version ?? "")
+        || !COMMIT_SHA.test(engine.previousPublicRelease?.sourceCommit ?? "")) {
+        failures.push("candidate previousPublicRelease must include an exact version and source commit");
+      }
+      if (engine.previousPublicRelease?.version === engine.version) {
+        failures.push("candidate previousPublicRelease must differ from the candidate version");
+      }
+    }
     return failures;
   }
 
@@ -106,6 +115,8 @@ function validateEngineManifestState(engine) {
     }
   } else if (engine.releaseRecord !== null) {
     failures.push("historical engine release releaseRecord must be null");
+  } else if (engine.verification?.eligibleForParity !== false) {
+    failures.push("historical engine release must be explicitly ineligible for parity");
   }
 
   return failures;
@@ -196,6 +207,13 @@ export function validateEngineReleaseRecord(record) {
   if (!SHA512.test(record?.attestation?.sha512 ?? "")) {
     failures.push("release record attestation subject SHA-512 is required");
   }
+  const integritySha512 = integrityToHex(record?.integrity);
+  if (integritySha512 && record?.tarball?.sha512 !== integritySha512) {
+    failures.push("release record tarball SHA-512 must match npm integrity");
+  }
+  if (integritySha512 && record?.attestation?.sha512 !== integritySha512) {
+    failures.push("release record attestation digest must match npm integrity");
+  }
   const expectedSubject = `pkg:npm/%40memi-design/cli@${record?.version ?? ""}`;
   if (record?.attestation?.subject !== expectedSubject) {
     failures.push(`release record attestation subject must be ${expectedSubject}`);
@@ -238,9 +256,7 @@ export function validateEngineReleaseTransition({
     if (serializeJson(previous) !== serializeJson(current)) {
       failures.push("published engine release state is immutable");
     }
-    return failures;
-  }
-  if (previous?.state !== "candidate") {
+  } else if (previous?.state !== "candidate") {
     failures.push("published transition requires a prior candidate engine release");
   }
   if (current?.state !== "published") {
@@ -274,6 +290,112 @@ export function validateEngineReleaseTransition({
   return failures;
 }
 
+export async function verifyPublishedEngineTransitionFromGit(root, manifest) {
+  const engine = manifest?.releaseGroups?.engine;
+  if (engine?.state !== "published") return [];
+  const failures = [];
+  const manifestCommits = execFileSync(
+    "git",
+    ["log", "--format=%H", "--", "release-manifest.json"],
+    { cwd: root, encoding: "utf8" },
+  ).trim().split(/\r?\n/).filter(Boolean);
+  if (manifestCommits.length < 2) {
+    return ["published engine release is missing a prior candidate manifest revision"];
+  }
+  const transitionCommit = manifestCommits[0];
+  const previousManifest = JSON.parse(execFileSync(
+    "git",
+    ["show", `${manifestCommits[1]}:release-manifest.json`],
+    { cwd: root, encoding: "utf8" },
+  ));
+  const sourceCommit = engine.sourceCommit;
+  let sourceIsAncestor = false;
+  try {
+    execFileSync(
+      "git",
+      ["merge-base", "--is-ancestor", sourceCommit, transitionCommit],
+      { cwd: root, stdio: "ignore" },
+    );
+    sourceIsAncestor = true;
+  } catch {
+    sourceIsAncestor = false;
+  }
+  let sourceSurfaceFailures = [];
+  try {
+    sourceSurfaceFailures = validateEngineSurfaceSnapshot(
+      manifest,
+      readSurfaceSnapshotFromGit(root, sourceCommit),
+    );
+  } catch (error) {
+    sourceSurfaceFailures = [
+      `unable to verify release surfaces at source commit: ${error instanceof Error ? error.message : String(error)}`,
+    ];
+  }
+  const recordPath = resolveContainedPath(root, engine.releaseRecord?.path);
+  const releaseRecordBytes = await readFile(recordPath, "utf8").catch(() => "");
+  let releaseRecord = null;
+  try {
+    releaseRecord = JSON.parse(releaseRecordBytes);
+  } catch {
+    failures.push("published engine release record is missing or invalid JSON");
+  }
+  if (releaseRecord) {
+    failures.push(...validateEngineReleaseTransition({
+      previousManifest,
+      currentManifest: manifest,
+      releaseRecord,
+      releaseRecordBytes,
+      currentCommit: transitionCommit,
+      sourceIsAncestor,
+      sourceSurfaceFailures,
+    }));
+  }
+  return failures;
+}
+
+export function stagePublishedEngineManifest({
+  manifest,
+  releaseRecord,
+  releaseRecordPath,
+  releaseRecordBytes,
+  updatedAt,
+}) {
+  const engine = manifest?.releaseGroups?.engine;
+  if (engine?.state !== "candidate") {
+    throw new Error("only a candidate engine release can be staged as published");
+  }
+  const recordFailures = validateEngineReleaseRecord(releaseRecord);
+  if (recordFailures.length > 0) {
+    throw new Error(`Invalid engine release record:\n- ${recordFailures.join("\n- ")}`);
+  }
+  if (releaseRecord.version !== engine.version) {
+    throw new Error("release record version does not match the candidate");
+  }
+  if (!RELEASE_RECORD_PATH.test(releaseRecordPath ?? "")) {
+    throw new Error("release record path must be an immutable version path");
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(updatedAt ?? "")) {
+    throw new Error("published manifest updatedAt must use YYYY-MM-DD");
+  }
+  const { previousPublicRelease: _previous, ...sharedEngine } = engine;
+  return {
+    ...manifest,
+    updatedAt,
+    releaseGroups: {
+      ...manifest.releaseGroups,
+      engine: {
+        ...sharedEngine,
+        state: "published",
+        sourceCommit: releaseRecord.sourceCommit,
+        releaseRecord: {
+          path: releaseRecordPath,
+          sha256: createHash("sha256").update(releaseRecordBytes).digest("hex"),
+        },
+      },
+    },
+  };
+}
+
 export function canClearPublicParityCap(manifest, evidence) {
   const engine = manifest?.releaseGroups?.engine;
   if (engine?.state !== "published" || !COMMIT_SHA.test(engine.sourceCommit ?? "")) return false;
@@ -289,8 +411,17 @@ export function canClearPublicParityCap(manifest, evidence) {
   if (evidence.githubAction?.sourceCommit !== engine.sourceCommit) return false;
   if (evidence.mcp?.version !== engine.version) return false;
   if (evidence.studio?.version !== manifest?.releaseGroups?.studio?.version) return false;
-  if (!SHA256.test(evidence.website?.manifestSha256 ?? "")) return false;
+  const expectedManifestSha256 = createHash("sha256")
+    .update(serializeJson(manifest))
+    .digest("hex");
+  if (evidence.website?.manifestSha256 !== expectedManifestSha256) return false;
   return true;
+}
+
+function integrityToHex(integrity) {
+  if (!/^sha512-[A-Za-z0-9+/]+={0,2}$/.test(integrity ?? "")) return "";
+  const digest = Buffer.from(integrity.slice("sha512-".length), "base64");
+  return digest.length === 64 ? digest.toString("hex") : "";
 }
 
 export function validateNpmPublishPreflight({
@@ -416,6 +547,37 @@ function isNpmAttestationUrl(value) {
   } catch {
     return false;
   }
+}
+
+function readSurfaceSnapshotFromGit(root, commit) {
+  const show = (path) => execFileSync(
+    "git",
+    ["show", `${commit}:${path}`],
+    { cwd: root, encoding: "utf8" },
+  );
+  const json = (path) => JSON.parse(show(path));
+  return {
+    "package.json": json("package.json"),
+    "package-lock.json": json("package-lock.json"),
+    "server.json": json("server.json"),
+    "mcpb/manifest.json": json("mcpb/manifest.json"),
+    "plugins/memoire/.codex-plugin/plugin.json": json("plugins/memoire/.codex-plugin/plugin.json"),
+    "plugins/memi-claude/.claude-plugin/plugin.json": json("plugins/memi-claude/.claude-plugin/plugin.json"),
+    "plugin/widget-meta.json": json("plugin/widget-meta.json"),
+    "action.yml": show("action.yml"),
+  };
+}
+
+function resolveContainedPath(root, relativePath) {
+  if (typeof relativePath !== "string" || !relativePath) {
+    throw new Error("release record path is required");
+  }
+  const target = resolve(root, relativePath);
+  const fromRoot = relative(resolve(root), target);
+  if (!fromRoot || fromRoot === ".." || fromRoot.startsWith("../")) {
+    throw new Error("release record path must stay inside the checkout");
+  }
+  return target;
 }
 
 export function buildWebReleaseArtifact(manifest, sourceCommit) {

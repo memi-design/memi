@@ -4,9 +4,10 @@
 
 Manifest updated: 2026-07-26
 
+
 Memi is the read-only design engineering audit and skill layer for coding agents. The CLI and focused skills are primary; Studio is a companion.
 
-| Release group | Current version | Canonical evidence |
+| Release group | Version | Canonical evidence |
 |---|---:|---|
 | CLI, npm, MCP, and Action | `2.6.2` | [GitHub release](https://github.com/sarveshsea/memi/releases/tag/v2.6.2) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
 | Studio | `2.5.0` | [Studio release](https://github.com/sarveshsea/memi-studio/releases/tag/v2.5.0) |
@@ -14,6 +15,7 @@ Memi is the read-only design engineering audit and skill layer for coding agents
 
 ## Immutable engine identity
 
+- Release state: `historical`
 - Source commit: `ee3f3f00731a7a08c7616d4dfb14440165a86354`
 - GitHub tag: `v2.6.2`
 - GitHub Action major channel: `v2`
