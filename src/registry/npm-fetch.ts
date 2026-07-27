@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { list as listTar } from "tar";
+import { fetchPublicResource, fetchPublicText } from "../security/safe-fetch.js";
 
 const NPM_REGISTRY_URL = "https://registry.npmjs.org";
 const FETCH_TIMEOUT_MS = 15000;
@@ -11,6 +12,8 @@ const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_ARCHIVE_ENTRIES = 4_096;
 const MAX_ARCHIVE_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_ARCHIVE_UNCOMPRESSED_BYTES = 200 * 1024 * 1024;
+const MAX_NPM_METADATA_BYTES = 10 * 1024 * 1024;
+const MAX_ARCHIVE_COMPRESSED_BYTES = 100 * 1024 * 1024;
 
 export interface NpmArchiveEntry {
   path: string;
@@ -100,20 +103,15 @@ export async function fetchNpmPackageToCache(
 }
 
 async function fetchNpmMetadata(packageName: string): Promise<NpmPackageMetadata> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const response = await fetch(`${NPM_REGISTRY_URL}/${encodeURIComponent(packageName)}`, {
-      signal: controller.signal,
-      headers: { "User-Agent": "memoire-registry-resolver" },
-    });
-    if (!response.ok) {
-      throw new Error(`npm registry lookup failed for ${packageName}: ${response.status}`);
-    }
-    return await response.json() as NpmPackageMetadata;
-  } finally {
-    clearTimeout(timer);
+  const response = await fetchPublicText(`${NPM_REGISTRY_URL}/${encodeURIComponent(packageName)}`, {
+    maxBytes: MAX_NPM_METADATA_BYTES,
+    timeoutMs: FETCH_TIMEOUT_MS,
+    headers: { "User-Agent": "memoire-registry-resolver" },
+  });
+  if (!response.ok) {
+    throw new Error(`npm registry lookup failed for ${packageName}: ${response.status}`);
   }
+  return JSON.parse(response.text) as NpmPackageMetadata;
 }
 
 function resolveVersion(metadata: NpmPackageMetadata, versionRange: string): string {
@@ -127,17 +125,14 @@ function resolveVersion(metadata: NpmPackageMetadata, versionRange: string): str
 }
 
 async function downloadFile(url: string, outputPath: string): Promise<void> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const response = await fetch(url, { signal: controller.signal, redirect: "error" });
-    if (!response.ok) {
-      throw new Error(`tarball download failed (${response.status}): ${url}`);
-    }
-    await writeFile(outputPath, Buffer.from(await response.arrayBuffer()));
-  } finally {
-    clearTimeout(timer);
+  const response = await fetchPublicResource(url, {
+    maxBytes: MAX_ARCHIVE_COMPRESSED_BYTES,
+    timeoutMs: FETCH_TIMEOUT_MS,
+  });
+  if (!response.ok) {
+    throw new Error(`tarball download failed (${response.status}): ${url}`);
   }
+  await writeFile(outputPath, response.body);
 }
 
 async function verifyTarball(tarballPath: string, dist: NpmPackageDist): Promise<void> {
@@ -160,16 +155,28 @@ async function verifyTarball(tarballPath: string, dist: NpmPackageDist): Promise
     if (actual !== dist.shasum) {
       throw new Error(`npm tarball shasum mismatch: expected ${dist.shasum}, got ${actual}`);
     }
+    return;
   }
+  throw new Error("npm tarball metadata must provide integrity or shasum");
 }
 
 async function extractTarball(tarballPath: string, outDir: string): Promise<void> {
   const entries: NpmArchiveEntry[] = [];
+  let totalBytes = 0;
   await listTar({
     file: tarballPath,
     strict: true,
     onentry: (entry) => {
-      entries.push({ path: entry.path, type: entry.type, size: entry.size });
+      const candidate = { path: entry.path, type: entry.type, size: entry.size };
+      assertSafeNpmArchiveEntries([candidate]);
+      if (entries.length >= MAX_ARCHIVE_ENTRIES) {
+        throw new Error(`npm archive exceeds entry limit of ${MAX_ARCHIVE_ENTRIES}`);
+      }
+      totalBytes += entry.size;
+      if (totalBytes > MAX_ARCHIVE_UNCOMPRESSED_BYTES) {
+        throw new Error(`npm archive exceeds uncompressed size limit of ${MAX_ARCHIVE_UNCOMPRESSED_BYTES} bytes`);
+      }
+      entries.push(candidate);
     },
   });
   assertSafeNpmArchiveEntries(entries);

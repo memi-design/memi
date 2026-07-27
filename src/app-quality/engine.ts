@@ -1,5 +1,5 @@
 import { access, mkdir, writeFile } from "node:fs/promises";
-import { isAbsolute, join, resolve } from "node:path";
+import { isAbsolute, join, relative, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { scanSources, type ScannedSourceFile } from "../utils/source-scanner.js";
 import { markdownCodeSpan } from "../utils/output-sanitization.js";
@@ -13,6 +13,7 @@ import {
   buildAuditEvidenceMetadata,
   normalizeAuditFindingId,
   type AuditEvidenceMetadata,
+  type AuditScoreCap,
 } from "../audit/evidence.js";
 
 export type AppQualitySeverity = "critical" | "high" | "medium" | "low";
@@ -92,6 +93,10 @@ export interface AppQualityDiagnosis {
     cssVariables: number;
     hexColors: number;
     scannedBytes?: number;
+    /** Canonical project-relative scan target used for history comparability. */
+    scanTarget?: string;
+    /** Configured candidate-file ceiling, included in history comparability. */
+    scanLimit?: number;
     scanMs?: number;
     analysisMs?: number;
   };
@@ -135,6 +140,31 @@ export interface AppQualityDiagnosis {
   unassessedDimensions: AuditEvidenceMetadata["unassessedDimensions"];
   evidenceProvenance: AuditEvidenceMetadata["evidenceProvenance"];
   appliedScoreCaps: AuditEvidenceMetadata["appliedScoreCaps"];
+}
+
+export interface AppQualityAuditContext {
+  assessedCategories: AppQualityCategory[];
+  analysisPerformed: boolean;
+  partialAnalysis: boolean;
+  appliedScoreCaps: AuditScoreCap[];
+}
+
+/** Reuses the engine's evidence scope when downstream reports are rebuilt. */
+export function auditContextFromDiagnosis(diagnosis: AppQualityDiagnosis): AppQualityAuditContext {
+  const partialAnalysis = diagnosis.sourceCoverage.swiftui.scannedFiles > 0
+    || diagnosis.sourceCoverage.swift.scannedFiles > 0
+    || diagnosis.sourceCoverage.metal.scannedFiles > 0;
+  const caps = new Map<string, AuditScoreCap>();
+  for (const cap of [...diagnosis.appliedScoreCaps, ...diagnosis.ux.appliedScoreCaps]) {
+    const previous = caps.get(cap.id);
+    if (!previous || cap.maximum < previous.maximum) caps.set(cap.id, { ...cap });
+  }
+  return {
+    assessedCategories: [...diagnosis.sourceCoverage.web.assessedDimensions],
+    analysisPerformed: diagnosis.evidenceProvenance.some((entry) => entry.analyzed),
+    partialAnalysis,
+    appliedScoreCaps: [...caps.values()],
+  };
 }
 
 interface ScanOptions {
@@ -219,11 +249,6 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
     .filter((source) => source.extension === ".swift")
     .map((source) => ({ path: source.projectPath, content: source.content }));
   const swiftUiAnalysis = analyzeSwiftUiSources(swiftSources);
-  const sourceCoverage = buildSourceCoverage(sources, swiftUiAnalysis.swiftUiFiles.length, swiftUiAnalysis.assessedChecks);
-  const nativeSourceDetected = sourceCoverage.swiftui.scannedFiles > 0
-    || sourceCoverage.swift.scannedFiles > 0
-    || sourceCoverage.metal.scannedFiles > 0;
-  const nativeEvidenceDimensions = buildNativeEvidenceDimensions(sourceCoverage);
   const graphStartedAt = performance.now();
   const appGraph = await buildAppGraph({
     projectRoot: options.projectRoot,
@@ -236,9 +261,20 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   const fileSignals = files.map(analyzeFile);
   const webFileSignals = webFiles.map(analyzeFile);
   const aggregate = aggregateSignals(webFiles, webFileSignals);
-  const webAnalysisAvailable = aggregate.classTokens.length > 0;
-  const assessedCategories = webAnalysisAvailable ? Object.keys(CATEGORY_BASE) as AppQualityCategory[] : [];
-  const unassessedCategories = webAnalysisAvailable ? [] : Object.keys(CATEGORY_BASE) as AppQualityCategory[];
+  const assessedCategories = deriveAssessedCategories(aggregate);
+  const webAnalysisAvailable = assessedCategories.length > 0;
+  const unassessedCategories = (Object.keys(CATEGORY_BASE) as AppQualityCategory[])
+    .filter((category) => !assessedCategories.includes(category));
+  const sourceCoverage = buildSourceCoverage(
+    sources,
+    swiftUiAnalysis.swiftUiFiles.length,
+    swiftUiAnalysis.assessedChecks,
+    assessedCategories,
+  );
+  const nativeSourceDetected = sourceCoverage.swiftui.scannedFiles > 0
+    || sourceCoverage.swift.scannedFiles > 0
+    || sourceCoverage.metal.scannedFiles > 0;
+  const nativeEvidenceDimensions = buildNativeEvidenceDimensions(sourceCoverage);
   // Policy overrides apply BEFORE enrichment/scoring so severities, scores,
   // and downstream UX reports all reflect the team's policy, not the defaults.
   const policyAdjusted = applyPolicyToIssues(
@@ -330,6 +366,8 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
       cssVariables: aggregate.cssVariables.length,
       hexColors: aggregate.hexColors.length,
       scannedBytes: sources.reduce((sum, source) => sum + (source.sizeBytes ?? source.content.length), 0),
+      scanTarget: canonicalScanTarget(options.projectRoot, target),
+      scanLimit: options.maxFiles ?? DEFAULT_MAX_FILES,
       scanMs: Math.round(scanMs),
       analysisMs: Math.round(analysisMs),
     },
@@ -386,6 +424,13 @@ export async function diagnoseAppQuality(options: ScanOptions): Promise<AppQuali
   return diagnosis;
 }
 
+function canonicalScanTarget(projectRoot: string, target: string): string {
+  if (/^https?:\/\//i.test(target)) return new URL(target).href;
+  const root = resolve(projectRoot);
+  const absoluteTarget = resolve(isAbsolute(target) ? target : resolve(root, target));
+  return relative(root, absoluteTarget).replace(/\\/g, "/") || ".";
+}
+
 async function scanTargetSources(projectRoot: string, target: string, maxFiles: number): Promise<ScannedSourceFile[]> {
   const sources = await scanSources({
     projectRoot,
@@ -399,17 +444,9 @@ async function scanTargetSources(projectRoot: string, target: string, maxFiles: 
     includeInlineStyles: true,
     includeLinkedStyles: false,
     userAgent: "Memoire-Diagnose/1.0",
+    excludePath: isDefaultNoisePath,
   });
-  return shouldApplyDefaultNoiseFilters(projectRoot, target)
-    ? sources.filter((source) => !isDefaultNoisePath(source.projectPath))
-    : sources;
-}
-
-function shouldApplyDefaultNoiseFilters(projectRoot: string, target: string): boolean {
-  if (/^https?:\/\//i.test(target)) return false;
-  const root = resolve(projectRoot);
-  const resolvedTarget = isAbsolute(target) ? resolve(target) : resolve(root, target);
-  return resolvedTarget === root;
+  return sources;
 }
 
 function isDefaultNoisePath(path: string): boolean {
@@ -465,11 +502,11 @@ function buildSourceCoverage(
   sources: ScannedSourceFile[],
   swiftUiFiles: number,
   swiftUiChecks: string[],
+  webDimensions: AppQualityCategory[],
 ): AppQualitySourceCoverage {
   const webFiles = sources.filter((source) => WEB_SOURCE_EXTENSIONS.has(source.extension)).length;
   const swiftFiles = sources.filter((source) => source.extension === ".swift").length;
   const metalFiles = sources.filter((source) => source.extension === ".metal").length;
-  const webDimensions = webFiles > 0 ? Object.keys(CATEGORY_BASE) as AppQualityCategory[] : [];
   const entry = (
     scannedFiles: number,
     analysis: AppQualitySourceCoverageEntry["analysis"],
@@ -483,7 +520,11 @@ function buildSourceCoverage(
   });
 
   return {
-    web: entry(webFiles, webFiles > 0 ? "ruleset" : "not-detected", webDimensions),
+    web: entry(
+      webFiles,
+      webFiles === 0 ? "not-detected" : webDimensions.length > 0 ? "ruleset" : "unassessed",
+      webDimensions,
+    ),
     swiftui: entry(swiftUiFiles, swiftUiFiles > 0 ? "partial" : "not-detected", [], swiftUiChecks),
     swift: entry(
       Math.max(0, swiftFiles - swiftUiFiles),
@@ -576,6 +617,30 @@ function aggregateSignals(files: RawFile[], fileSignals: AppQualityFileSignal[])
     componentFiles: scopedSignals.filter((file) => file.kind === "component"),
     routeFiles: scopedSignals.filter((file) => file.kind === "route"),
   };
+}
+
+function deriveAssessedCategories(
+  aggregate: ReturnType<typeof aggregateSignals>,
+): AppQualityCategory[] {
+  const assessed = new Set<AppQualityCategory>();
+  if (aggregate.textSizes.length > 0) assessed.add("typography");
+  if (aggregate.spacing.length > 0) assessed.add("spacing");
+  const colorUtilities = aggregate.colors.filter((token) => !aggregate.textSizes.includes(token));
+  if (colorUtilities.length > 0 || aggregate.hexColors.length > 0) assessed.add("color");
+  if (aggregate.componentFiles.length > 0 || aggregate.shadcnImports.length > 0) assessed.add("components");
+  if (aggregate.images > 0 || aggregate.interactive > 0) assessed.add("accessibility");
+  if (aggregate.responsive.length > 0 || aggregate.routeFiles.length > 1) assessed.add("responsive");
+  if (
+    aggregate.classTokens.length > 5
+    || aggregate.cssVariables.length > 0
+    || aggregate.radius.length > 0
+    || aggregate.shadows.length > 0
+  ) {
+    assessed.add("visual-system");
+  }
+  if (aggregate.classTokens.length > 0) assessed.add("maintainability");
+  return (Object.keys(CATEGORY_BASE) as AppQualityCategory[])
+    .filter((category) => assessed.has(category));
 }
 
 function uiSignalPairs(files: RawFile[], fileSignals: AppQualityFileSignal[]): Array<{ file: RawFile; signal: AppQualityFileSignal }> {

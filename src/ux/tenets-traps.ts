@@ -5,6 +5,7 @@ import {
   buildAuditEvidenceMetadata,
   normalizeAuditFindingId,
   type AuditEvidenceMetadata,
+  type AuditScoreCap,
 } from "../audit/evidence.js";
 
 export type UxTenetId =
@@ -131,6 +132,8 @@ export interface BuildUxAuditReportInput {
   analysisPerformed?: boolean;
   /** Marks evidence that ran useful checks but cannot support a whole-category UX score. */
   partialAnalysis?: boolean;
+  /** Score caps inherited from the upstream audit evidence. */
+  appliedScoreCaps?: AuditScoreCap[];
 }
 
 interface Mapping {
@@ -417,7 +420,7 @@ export function buildUxAuditReport(input: BuildUxAuditReportInput): UxAuditRepor
     maximum: 0,
     reason: "Static checks ran, but the available evidence does not cover whole UX categories.",
   }] : [];
-  const evidenceCaps = [...noEvidenceCap, ...partialEvidenceCap];
+  const evidenceCaps = mergeScoreCaps(input.appliedScoreCaps ?? [], noEvidenceCap, partialEvidenceCap);
   const score = evidenceCaps.length > 0
     ? Math.min(scoreUx(findings, input.appQualityScore), ...evidenceCaps.map((cap) => cap.maximum))
     : scoreUx(findings, input.appQualityScore);
@@ -469,6 +472,15 @@ export function buildUxAuditReport(input: BuildUxAuditReportInput): UxAuditRepor
     },
     ...auditEvidence,
   };
+}
+
+function mergeScoreCaps(...groups: AuditScoreCap[][]): AuditScoreCap[] {
+  const caps = new Map<string, AuditScoreCap>();
+  for (const cap of groups.flat()) {
+    const previous = caps.get(cap.id);
+    if (!previous || cap.maximum < previous.maximum) caps.set(cap.id, { ...cap });
+  }
+  return [...caps.values()];
 }
 
 export async function writeUxAuditReport(projectRoot: string, report: UxAuditReport): Promise<{ jsonPath: string; markdownPath: string }> {

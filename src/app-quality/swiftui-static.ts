@@ -82,8 +82,46 @@ function hasDirectReducedMotionGate(content: string, motionOffset: number): bool
   const invocation = extractMotionInvocation(content, motionOffset);
   return variables.some((variable) => {
     const escaped = variable.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return new RegExp(`\\b${escaped}\\b`).test(invocation);
+    return new RegExp(`\\b${escaped}\\b`).test(invocation)
+      || hasEnclosingReducedMotionGate(content, motionOffset, escaped);
   });
+}
+
+function hasEnclosingReducedMotionGate(
+  content: string,
+  motionOffset: number,
+  escapedVariable: string,
+): boolean {
+  const branchPattern = new RegExp(`\\bif\\s+(!\\s*)?${escapedVariable}\\s*\\{`, "g");
+  for (const match of content.matchAll(branchPattern)) {
+    if (match.index === undefined || match.index > motionOffset) continue;
+    const bodyOpen = content.indexOf("{", match.index);
+    const bodyClose = findMatchingBrace(content, bodyOpen);
+    if (bodyClose === -1) continue;
+    const negated = Boolean(match[1]);
+    if (negated && motionOffset > bodyOpen && motionOffset < bodyClose) return true;
+    if (negated) continue;
+
+    const suffix = content.slice(bodyClose + 1);
+    const elseMatch = suffix.match(/^\s*else\s*\{/);
+    if (!elseMatch) continue;
+    const elseOpen = bodyClose + 1 + (elseMatch.index ?? 0) + elseMatch[0].lastIndexOf("{");
+    const elseClose = findMatchingBrace(content, elseOpen);
+    if (elseClose !== -1 && motionOffset > elseOpen && motionOffset < elseClose) return true;
+  }
+  return false;
+}
+
+function findMatchingBrace(content: string, openOffset: number): number {
+  if (openOffset < 0 || content[openOffset] !== "{") return -1;
+  let depth = 0;
+  for (let index = openOffset; index < content.length; index += 1) {
+    if (content[index] === "{") depth += 1;
+    if (content[index] !== "}") continue;
+    depth -= 1;
+    if (depth === 0) return index;
+  }
+  return -1;
 }
 
 function extractMotionInvocation(content: string, motionOffset: number): string {

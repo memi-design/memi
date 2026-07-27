@@ -190,7 +190,7 @@ export const fixture = '<Image src="/test.png" className="p-[99px] bg-[#00ff00]"
         write: false,
       });
 
-      expect(diagnosis.files.map((file) => file.path)).toEqual(["app/page.tsx"]);
+      expect(diagnosis.files.map((file) => file.path)).toEqual(["src/app/page.tsx"]);
       expect(diagnosis.summary.hexColors).toBe(0);
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -378,7 +378,7 @@ struct MotionView: View {
       expect(diagnosis.summary.scannedFiles).toBe(2);
       expect(diagnosis.summary.score).toBeLessThan(100);
       expect(diagnosis.summary.scoreScope).toBe("web");
-      expect(diagnosis.summary.verdict).toBe("strong — web ruleset only; native coverage incomplete");
+      expect(diagnosis.summary.verdict).toBe("needs a design-system pass — web ruleset only; native coverage incomplete");
       expect(diagnosis.sourceCoverage.web.analysis).toBe("ruleset");
       expect(diagnosis.sourceCoverage.swiftui.analysis).toBe("partial");
       expect(diagnosis.assessedDimensions).toEqual([
@@ -427,7 +427,7 @@ let package = Package(
 
       expect(diagnosis.summary.score).toBeLessThan(100);
       expect(diagnosis.summary.scoreScope).toBe("web");
-      expect(diagnosis.summary.verdict).toBe("strong — web ruleset only; native coverage incomplete");
+      expect(diagnosis.summary.verdict).toBe("needs a design-system pass — web ruleset only; native coverage incomplete");
       expect(diagnosis.sourceCoverage.swift.scannedFiles).toBe(1);
       expect(diagnosis.sourceCoverage.swiftui.scannedFiles).toBe(0);
       expect(diagnosis.assessedDimensions).toEqual([

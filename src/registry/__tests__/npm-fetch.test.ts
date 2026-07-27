@@ -7,6 +7,29 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { assertSafeNpmArchiveEntries, fetchNpmPackageToCache } from "../npm-fetch.js";
 
+vi.mock("../../security/safe-fetch.js", () => ({
+  fetchPublicText: vi.fn(async (url: string, options: { headers?: Record<string, string> }) => {
+    const response = await fetch(url, { headers: options.headers });
+    return {
+      url,
+      status: response.status,
+      ok: response.ok,
+      headers: {},
+      text: await response.text(),
+    };
+  }),
+  fetchPublicResource: vi.fn(async (url: string, options: { headers?: Record<string, string> }) => {
+    const response = await fetch(url, { headers: options.headers });
+    return {
+      url,
+      status: response.status,
+      ok: response.ok,
+      headers: {},
+      body: Buffer.from(await response.arrayBuffer()),
+    };
+  }),
+}));
+
 describe("npm registry cache", () => {
   afterEach(() => {
     vi.unstubAllGlobals();

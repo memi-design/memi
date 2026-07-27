@@ -152,11 +152,13 @@ export function renderTrend(
 }
 
 function sourceCoverageFingerprint(diagnosis: AppQualityDiagnosis): string {
-  if (!diagnosis.sourceCoverage) return "legacy:unknown";
+  const target = diagnosis.summary.scanTarget ?? diagnosis.target;
+  const scanContext = `target=${target}|scanLimit=${diagnosis.summary.scanLimit ?? "legacy"}`;
+  if (!diagnosis.sourceCoverage) return `${scanContext}|legacy:unknown`;
   const entries = Object.entries(diagnosis.sourceCoverage).map(([platform, coverage]) => {
     const dimensions = [...coverage.assessedDimensions].sort().join(",");
     const checks = [...coverage.assessedChecks].sort().join(",");
     return `${platform}:${coverage.analysis}:dimensions=${dimensions}:checks=${checks}`;
   });
-  return entries.sort().join("|");
+  return `${scanContext}|${entries.sort().join("|")}`;
 }

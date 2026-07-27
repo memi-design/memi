@@ -21,6 +21,7 @@ import { resolveMarketplaceAlias } from "../marketplace/catalog-loader.js";
 import { fetchNpmPackageToCache } from "./npm-fetch.js";
 import { packagePath } from "../utils/asset-path.js";
 import { isPrivateOrLocalHostname } from "../security/network-address.js";
+import { fetchPublicText } from "../security/safe-fetch.js";
 
 export interface ResolvedRegistry {
   /** The parsed registry document */
@@ -37,6 +38,7 @@ export interface ResolveRegistryOptions {
 }
 
 const FETCH_TIMEOUT_MS = 15000;
+const MAX_REGISTRY_RESPONSE_BYTES = 5 * 1024 * 1024;
 
 // ── SSRF guard (same pattern as penpot-client) ───────────────
 
@@ -125,7 +127,13 @@ async function resolveNpm(pkgName: string, cwd: string, options: ResolveRegistry
   const { packageName, version } = splitNpmPackageRef(pkgName);
   const baseDir = resolve(cwd, "node_modules", packageName);
   try {
-    return await resolveLocal(baseDir, cwd);
+    const local = await resolveLocal(baseDir, cwd);
+    if (version !== "latest" && local.registry.version !== version) {
+      throw new Error(
+        `Local registry version ${local.registry.version} does not satisfy exact pin ${version}`,
+      );
+    }
+    return local;
   } catch (localError) {
     try {
       const cached = await fetchNpmPackageToCache(packageName, cwd, version, {
@@ -175,17 +183,14 @@ async function resolveGitHub(ref: string): Promise<ResolvedRegistry> {
 async function resolveHttp(registryUrl: string, explicitBase?: string): Promise<ResolvedRegistry> {
   assertSafePublicUrl(registryUrl);
   const baseUrl = explicitBase ?? registryUrl.replace(/\/[^/]+$/, "");
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const res = await fetch(registryUrl, { signal: controller.signal, redirect: "error" });
-    if (!res.ok) throw new Error(`Registry fetch failed (${res.status}): ${registryUrl}`);
-    const raw = await res.text();
-    const registry = parseRegistry(JSON.parse(raw));
-    return { registry, baseUrl, source: registryUrl };
-  } finally {
-    clearTimeout(timer);
-  }
+  const response = await fetchPublicText(registryUrl, {
+    maxBytes: MAX_REGISTRY_RESPONSE_BYTES,
+    timeoutMs: FETCH_TIMEOUT_MS,
+    headers: { "User-Agent": "memoire-registry-resolver" },
+  });
+  if (!response.ok) throw new Error(`Registry fetch failed (${response.status}): ${registryUrl}`);
+  const registry = parseRegistry(JSON.parse(response.text));
+  return { registry, baseUrl, source: registryUrl };
 }
 
 // ── Fetching referenced files ────────────────────────────────
@@ -208,15 +213,13 @@ export async function readRegistryFile(resolved: ResolvedRegistry, href: string)
     if (url.origin !== normalizedBase.origin || !url.pathname.startsWith(normalizedBase.pathname)) {
       throw new Error(`Registry file reference escapes the registry root: ${href}`);
     }
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-    try {
-      const res = await fetch(url, { signal: controller.signal, redirect: "error" });
-      if (!res.ok) throw new Error(`Failed to fetch ${href}: ${res.status}`);
-      return await res.text();
-    } finally {
-      clearTimeout(timer);
-    }
+    const response = await fetchPublicText(url.href, {
+      maxBytes: MAX_REGISTRY_RESPONSE_BYTES,
+      timeoutMs: FETCH_TIMEOUT_MS,
+      headers: { "User-Agent": "memoire-registry-resolver" },
+    });
+    if (!response.ok) throw new Error(`Failed to fetch ${href}: ${response.status}`);
+    return response.text;
   }
 
   // Local path

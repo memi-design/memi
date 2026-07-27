@@ -65,9 +65,9 @@ export default function Page() {
 
       expect(payload.score).toBe(0);
       expect(payload.assessedDimensions).toEqual([]);
-      expect(payload.appliedScoreCaps).toEqual([
+      expect(payload.appliedScoreCaps).toEqual(expect.arrayContaining([
         expect.objectContaining({ maximum: 0 }),
-      ]);
+      ]));
     } finally {
       await rm(root, { recursive: true, force: true });
     }

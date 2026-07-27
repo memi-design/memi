@@ -5,6 +5,7 @@ import {
   buildAuditEvidenceMetadata,
   normalizeAuditFindingId,
   type AuditEvidenceMetadata,
+  type AuditScoreCap,
 } from "../audit/evidence.js";
 
 export type InterfaceCraftDimensionId =
@@ -108,6 +109,10 @@ export interface BuildInterfaceCraftReportInput {
   issues?: AppQualityIssue[];
   appQualityScore?: number;
   source?: InterfaceCraftFindingSource;
+  assessedCategories?: AppQualityIssue["category"][];
+  analysisPerformed?: boolean;
+  partialAnalysis?: boolean;
+  appliedScoreCaps?: AuditScoreCap[];
 }
 
 interface CraftMapping {
@@ -343,13 +348,32 @@ export function buildInterfaceCraftReport(input: BuildInterfaceCraftReportInput)
     .map(mapAppQualityIssueToInterfaceCraftFinding)
     .sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
   const generatedAt = input.generatedAt ?? new Date().toISOString();
-  const dimensions = buildDimensionAssessments(findings);
-  const hasAnalyzedEvidence = input.appQualityScore !== undefined || findings.length > 0;
+  const hasAnalyzedEvidence = input.analysisPerformed ?? (
+    findings.length > 0
+    || (input.assessedCategories === undefined
+      ? input.appQualityScore !== undefined
+      : input.assessedCategories.length > 0)
+  );
+  const assessmentScope = buildAssessmentScope(
+    hasAnalyzedEvidence ? findings : [],
+    input.assessedCategories,
+  );
+  const dimensions = buildDimensionAssessments(findings, assessmentScope);
   const noEvidenceCap = hasAnalyzedEvidence ? [] : [{
     id: "no-analyzed-evidence",
     maximum: 0,
     reason: "The supplied artifact was recorded but not analyzed.",
   }];
+  const partialEvidenceCap = hasAnalyzedEvidence && input.partialAnalysis ? [{
+    id: "partial-static-analysis",
+    maximum: 0,
+    reason: "Static checks ran, but the available evidence does not cover whole interface-craft categories.",
+  }] : [];
+  const evidenceCaps = mergeScoreCaps(
+    input.appliedScoreCaps ?? [],
+    noEvidenceCap,
+    partialEvidenceCap,
+  );
   const auditEvidence = buildAuditEvidenceMetadata({
     dimensions: dimensions.map((dimension) => dimension.dimensionId),
     unassessedDimensions: dimensions
@@ -365,14 +389,18 @@ export function buildInterfaceCraftReport(input: BuildInterfaceCraftReportInput)
       }] : []),
     ],
     findingConfidences: findings.map((finding) => finding.confidence),
-    appliedScoreCaps: noEvidenceCap,
+    appliedScoreCaps: evidenceCaps,
   });
+  const rawScore = scoreInterfaceCraft(findings, input.appQualityScore);
+  const score = evidenceCaps.length > 0
+    ? Math.min(rawScore, ...evidenceCaps.map((cap) => cap.maximum))
+    : rawScore;
 
   return {
     schemaVersion: 2,
     target,
     generatedAt,
-    score: noEvidenceCap.length > 0 ? 0 : scoreInterfaceCraft(findings, input.appQualityScore),
+    score,
     dimensions,
     critique: buildCritique(findings, input.appQualityScore),
     findings,
@@ -452,10 +480,28 @@ export function renderInterfaceCraftMarkdown(report: InterfaceCraftReport): stri
   return lines.join("\n");
 }
 
-function buildDimensionAssessments(findings: InterfaceCraftFinding[]): InterfaceCraftDimensionAssessment[] {
+function buildAssessmentScope(
+  findings: InterfaceCraftFinding[],
+  assessedCategories?: AppQualityIssue["category"][],
+): ReadonlySet<InterfaceCraftDimensionId> {
+  if (assessedCategories === undefined) return ASSESSABLE_DIMENSION_IDS;
+  const dimensionIds = new Set<InterfaceCraftDimensionId>();
+  for (const category of assessedCategories) {
+    for (const dimensionId of CATEGORY_MAPPINGS[category].dimensionIds) dimensionIds.add(dimensionId);
+  }
+  for (const finding of findings) {
+    for (const dimensionId of finding.dimensionIds) dimensionIds.add(dimensionId);
+  }
+  return dimensionIds;
+}
+
+function buildDimensionAssessments(
+  findings: InterfaceCraftFinding[],
+  assessableDimensionIds: ReadonlySet<InterfaceCraftDimensionId> = ASSESSABLE_DIMENSION_IDS,
+): InterfaceCraftDimensionAssessment[] {
   return INTERFACE_CRAFT_DIMENSIONS.map((dimension) => {
     const related = findings.filter((finding) => finding.dimensionIds.includes(dimension.id));
-    if (related.length === 0 && !ASSESSABLE_DIMENSION_IDS.has(dimension.id)) {
+    if (!assessableDimensionIds.has(dimension.id)) {
       return {
         dimensionId: dimension.id,
         name: dimension.name,
@@ -480,6 +526,15 @@ function buildDimensionAssessments(findings: InterfaceCraftFinding[]): Interface
         : dimension.inspectFor.slice(0, 2),
     };
   });
+}
+
+function mergeScoreCaps(...groups: AuditScoreCap[][]): AuditScoreCap[] {
+  const caps = new Map<string, AuditScoreCap>();
+  for (const cap of groups.flat()) {
+    const previous = caps.get(cap.id);
+    if (!previous || cap.maximum < previous.maximum) caps.set(cap.id, { ...cap });
+  }
+  return [...caps.values()];
 }
 
 function buildCritique(findings: InterfaceCraftFinding[], appQualityScore?: number): InterfaceCraftCritique {

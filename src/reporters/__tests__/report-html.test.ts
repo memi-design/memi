@@ -71,7 +71,7 @@ let package = Package(name: "WebCompanion", targets: [])
       const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: true });
       const report = await composeReport({ projectRoot: root });
 
-      expect(diagnosis.summary.score).toBe(100);
+      expect(diagnosis.summary.score).toBeLessThan(100);
       expect(diagnosis.unassessedDimensions).toContain("swift:source-analysis");
       expect(report.markdown).toContain("swift:source-analysis");
       expect(report.markdown).toContain("Unassessed dimensions remain unverified");

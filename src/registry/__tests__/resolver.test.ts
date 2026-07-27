@@ -8,6 +8,19 @@ import { join } from "path";
 import { tmpdir } from "os";
 import { resolveRegistry, readRegistryFile, findComponentRef } from "../resolver.js";
 
+vi.mock("../../security/safe-fetch.js", () => ({
+  fetchPublicText: vi.fn(async (url: string, options: { headers?: Record<string, string> }) => {
+    const response = await fetch(url, { headers: options.headers });
+    return {
+      url,
+      status: response.status,
+      ok: response.ok,
+      headers: {},
+      text: await response.text(),
+    };
+  }),
+}));
+
 const validRegistry = {
   name: "@test/ds",
   version: "1.0.0",

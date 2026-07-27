@@ -49,7 +49,7 @@ describe("app-quality score history comparability", () => {
       generatedAt: "2026-07-26T00:00:00.000Z",
       target: ".",
       scope: undefined,
-      summary: { score: 80, scanLimit: 500 },
+      summary: { score: 80, scanTarget: ".", scanLimit: 500 },
       scores: {},
       issues: [],
       sourceCoverage: {
@@ -66,6 +66,7 @@ describe("app-quality score history comparability", () => {
     const scopedEntry = entryFromDiagnosis({
       ...base,
       target: "src/app",
+      summary: { ...base.summary, scanTarget: "src/app" },
     } as AppQualityDiagnosis);
     const truncatedEntry = entryFromDiagnosis({
       ...base,
@@ -74,5 +75,11 @@ describe("app-quality score history comparability", () => {
 
     expect(rootEntry.coverageFingerprint).not.toBe(scopedEntry.coverageFingerprint);
     expect(rootEntry.coverageFingerprint).not.toBe(truncatedEntry.coverageFingerprint);
+
+    const absoluteAlias = entryFromDiagnosis({
+      ...base,
+      target: "/tmp/example-project",
+    } as AppQualityDiagnosis);
+    expect(rootEntry.coverageFingerprint).toBe(absoluteAlias.coverageFingerprint);
   });
 });

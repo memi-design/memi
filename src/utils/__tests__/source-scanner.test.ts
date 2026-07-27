@@ -4,6 +4,19 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { scanSources } from "../source-scanner.js";
 
+vi.mock("../../security/safe-fetch.js", () => ({
+  fetchPublicText: vi.fn(async (url: string, options: { headers?: Record<string, string> }) => {
+    const response = await fetch(url, { headers: options.headers });
+    return {
+      url,
+      status: response.status ?? (response.ok ? 200 : 500),
+      ok: response.ok,
+      headers: {},
+      text: await response.text(),
+    };
+  }),
+}));
+
 const roots: string[] = [];
 
 async function makeRoot(): Promise<string> {
@@ -75,7 +88,9 @@ describe("scanSources", () => {
       "https://example.com#inline-1",
     ]);
     expect(fetch).toHaveBeenCalledWith("https://example.com", expect.objectContaining({
-      signal: expect.any(AbortSignal),
+      headers: expect.objectContaining({
+        "User-Agent": "Memoire-SourceScanner/1.0",
+      }),
     }));
   });
 

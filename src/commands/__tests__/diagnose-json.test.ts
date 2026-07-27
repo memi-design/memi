@@ -46,7 +46,7 @@ describe("memi diagnose", () => {
       expect(payload.confidence).toBeGreaterThan(0);
       expect(payload.confidence).toBeLessThanOrEqual(1);
       expect(payload.assessedDimensions).toContain("color");
-      expect(payload.unassessedDimensions).toEqual([]);
+      expect(payload.unassessedDimensions).toEqual(["components", "responsive"]);
       expect(payload.evidenceProvenance).toEqual([
         expect.objectContaining({
           kind: "static-scan",

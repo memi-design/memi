@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import { stat } from "node:fs/promises";
 import type { MemoireEngine } from "../engine/core.js";
-import { diagnoseAppQuality } from "../app-quality/engine.js";
+import { auditContextFromDiagnosis, diagnoseAppQuality } from "../app-quality/engine.js";
 import {
   buildInterfaceCraftReport,
   writeInterfaceCraftReport,
@@ -80,6 +80,7 @@ async function createInterfaceCraftReport(options: {
     maxFiles: options.maxFiles,
     write: false,
   });
+  const auditContext = auditContextFromDiagnosis(diagnosis);
 
   return buildInterfaceCraftReport({
     target: diagnosis.target,
@@ -87,6 +88,7 @@ async function createInterfaceCraftReport(options: {
     appQualityScore: diagnosis.summary.score,
     artifactPath: options.screenshot,
     source: options.screenshot ? "screenshot" : "app-quality",
+    ...auditContext,
   });
 }
 
