@@ -7,6 +7,12 @@ const root = join(import.meta.dirname, "..", "..", "..");
 const auditMarkdownPath = join(root, "docs", "audits", "memi-design-engineering-audit-2026-07-26.md");
 const auditJsonPath = join(root, "docs", "audits", "memi-design-engineering-audit-2026-07-26.json");
 const scorecardPath = join(root, "docs", "audits", "memi-100-scorecard.json");
+const durableShaderEvidencePath = join(
+  root,
+  "docs",
+  "audits",
+  "memi-shader-rendering-evidence-2026-07-27.json",
+);
 
 describe("audit artifact creative-rendering honesty", () => {
   it("backs canonical shader-skill claims with immutable cross-repository evidence", async () => {
@@ -73,5 +79,64 @@ describe("audit artifact creative-rendering honesty", () => {
     expect(evidence.job).toContain(`/runs/${evidence.run.split("/").at(-1)}/job/`);
     expect(evidence.status).toBe("passed");
     expect(shaderCriterion?.assessment).toBe("passed");
+  });
+
+  it("records durable shader progress without closing unsupported energy or gamut claims", async () => {
+    const evidence = JSON.parse(
+      await readFile(durableShaderEvidencePath, "utf8"),
+    ) as {
+      assessment: string;
+      source: {
+        repository: string;
+        headCommit: string;
+        renderedSourceCommit: string;
+        summarySha256: string;
+        rawEvidenceSha256: string;
+      };
+      hostedProof: { run: string; conclusion: string };
+      independentReview: { status: string };
+      assessedDimensions: string[];
+      unassessedDimensions: string[];
+    };
+    const scorecard = JSON.parse(await readFile(scorecardPath, "utf8")) as {
+      dimensions: Array<{
+        id: string;
+        criteria: Array<{ id: string; assessment: string }>;
+      }>;
+    };
+    const shaderDimension = scorecard.dimensions.find(
+      (dimension) => dimension.id === "shader-and-dither",
+    );
+    const durableCriterion = shaderDimension?.criteria.find(
+      (criterion) => criterion.id === "durable-rendering-evidence",
+    );
+
+    expect(evidence.assessment).toBe("partial");
+    expect(evidence.source.repository).toBe(
+      "https://github.com/sarveshsea/design-sandbox",
+    );
+    expect(evidence.source.headCommit).toMatch(/^[a-f0-9]{40}$/);
+    expect(evidence.source.renderedSourceCommit).toMatch(/^[a-f0-9]{40}$/);
+    expect(evidence.source.summarySha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(evidence.source.rawEvidenceSha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(evidence.hostedProof.run).toMatch(
+      /^https:\/\/github\.com\/sarveshsea\/design-sandbox\/actions\/runs\/\d+$/,
+    );
+    expect(evidence.hostedProof.conclusion).toBe("success");
+    expect(evidence.independentReview.status).toBe("approved");
+    expect(evidence.assessedDimensions).toEqual(
+      expect.arrayContaining([
+        "gpu-frame-time",
+        "opaque-alpha-contract",
+        "render-color-space",
+        "temporal-stability",
+        "chromium-webkit-runtime",
+      ]),
+    );
+    expect(evidence.unassessedDimensions).toEqual([
+      "power-consumption",
+      "wide-gamut-color-accuracy",
+    ]);
+    expect(durableCriterion?.assessment).toBe("unassessed");
   });
 });
