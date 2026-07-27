@@ -106,6 +106,13 @@ jobs:
           ref: ${{ needs.release-gate.outputs.release_commit }}
           fetch-depth: 0
 
+      - name: Restore exact repository bytes on Windows
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          git config core.autocrlf false
+          git checkout-index --force --all
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '20'
