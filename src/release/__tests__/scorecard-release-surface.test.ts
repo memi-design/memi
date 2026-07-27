@@ -13,6 +13,21 @@ describe("audit scorecard release surfaces", () => {
     expect(workflow.match(/npm run check:release/g)).toHaveLength(2);
   });
 
+  it("restores exact Git blob bytes before Windows release verification", async () => {
+    const workflow = await readFile(
+      join(process.cwd(), ".github", "workflows", "release-binaries.yml"),
+      "utf8",
+    );
+
+    expect(workflow).toContain("if: runner.os == 'Windows'");
+    expect(workflow).toContain("git config core.autocrlf false");
+    expect(workflow).toContain("git checkout-index --force --all");
+    const buildJobStart = workflow.indexOf("\n  build:");
+    expect(workflow.indexOf("git checkout-index --force --all")).toBeLessThan(
+      workflow.indexOf("npm run check:release", buildJobStart),
+    );
+  });
+
   it("resolves one version-matched tag commit for every binary release job", async () => {
     const workflow = await readFile(
       join(process.cwd(), ".github", "workflows", "release-binaries.yml"),
