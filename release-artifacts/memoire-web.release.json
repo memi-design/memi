@@ -3,9 +3,9 @@
   "provenance": {
     "repository": "https://github.com/sarveshsea/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "29a620569723565597837415d5947bc36a042c20",
-    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/29a620569723565597837415d5947bc36a042c20/release-manifest.json",
-    "manifestSha256": "419caf82b60ab2a6f8bbd1de0b0e3baab6d7f9e7776fb9d7fe2604585a4b10e1"
+    "sourceCommit": "c9e5790f1e5c38129a2078bf55407d9e9c4649f2",
+    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/c9e5790f1e5c38129a2078bf55407d9e9c4649f2/release-manifest.json",
+    "manifestSha256": "acdf98107777060d394d02013fa3aeb1932bb68305544e5e4f1b0c507bd1ae93"
   },
   "release": {
     "schemaVersion": 1,
@@ -13,7 +13,14 @@
     "releaseGroups": {
       "engine": {
         "version": "2.6.2",
-        "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354"
+        "state": "historical",
+        "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+        "releaseRecord": null,
+        "verification": {
+          "eligibleForParity": false,
+          "reason": "2.6.2 predates the provenance-bound release state machine"
+        },
+        "plannedSuccessor": "2.6.3"
       },
       "studio": {
         "version": "2.5.0",

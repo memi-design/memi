@@ -633,9 +633,6 @@ export function resolveManifestSourceCommit(root, manifest) {
     ["rev-parse", "--is-shallow-repository"],
     { cwd: root, encoding: "utf8" },
   ).trim() === "true";
-  if (isShallow) {
-    throw new Error("release artifact generation requires full Git history; offline --check remains supported");
-  }
   const sourceCommit = execFileSync(
     "git",
     ["log", "-1", "--format=%H", "--", "release-manifest.json"],
@@ -643,6 +640,22 @@ export function resolveManifestSourceCommit(root, manifest) {
   ).trim();
   if (!COMMIT_SHA.test(sourceCommit)) {
     throw new Error("release-manifest.json must be committed before generating its website artifact");
+  }
+  if (isShallow) {
+    let sourceHasParent = false;
+    try {
+      execFileSync(
+        "git",
+        ["rev-parse", "--verify", `${sourceCommit}^`],
+        { cwd: root, stdio: "ignore" },
+      );
+      sourceHasParent = true;
+    } catch {
+      sourceHasParent = false;
+    }
+    if (!sourceHasParent) {
+      throw new Error("release artifact generation requires full Git history; offline --check remains supported");
+    }
   }
   const committed = execFileSync(
     "git",
