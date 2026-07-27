@@ -7,7 +7,7 @@
  */
 
 import { WebSocketServer, WebSocket } from "ws";
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { createLogger } from "../engine/logger.js";
 import { EventEmitter } from "events";
 import type { MemoireEvent } from "../engine/core.js";
@@ -19,10 +19,32 @@ import {
   type BridgeHelloEnvelope,
 } from "../plugin/shared/bridge.js";
 import type { AgentBoxState, WidgetCommandName } from "../plugin/shared/contracts.js";
+import {
+  BRIDGE_AUTH_SCHEME,
+  BRIDGE_CLIENT_PROOF_DOMAIN,
+  BRIDGE_PROTOCOL_VERSION,
+  BRIDGE_SERVER_PROOF_DOMAIN,
+} from "../plugin/shared/bridge-auth.js";
+import {
+  isValidBridgeCapability,
+  readBridgeCapability,
+} from "../security/bridge-capability.js";
 import { BRIDGE_PORT_START, BRIDGE_PORT_END, isPortInUse, getPortOwnerPid, isMemoireProcess } from "./port-scanner.js";
 
 const log = createLogger("ws-server");
 export const BRIDGE_BIND_HOST = "127.0.0.1";
+
+export function isAllowedBridgeOrigin(origin: string | undefined): boolean {
+  if (!origin || origin === "null") return true;
+  try {
+    const parsed = new URL(origin);
+    if (parsed.protocol === "figma:") return true;
+    return parsed.protocol === "https:"
+      && (parsed.hostname === "figma.com" || parsed.hostname.endsWith(".figma.com"));
+  } catch {
+    return false;
+  }
+}
 
 export function verifyBridgeCapability(
   presented: unknown,
@@ -53,6 +75,8 @@ export interface MemoireWsServerConfig {
   onCommand?: (method: string, params: Record<string, unknown>) => Promise<unknown>;
   onChat?: (text: string, fromPlugin: string) => void;
   onEvent?: (event: MemoireEvent) => void;
+  /** Test-only dependency injection. Production reads ~/.memoire/bridge-capability. */
+  capabilityToken?: string;
 }
 
 /** Per-client rate limiter — sliding window counter */
@@ -94,6 +118,7 @@ export class MemoireWsServer extends EventEmitter {
   private wss: WebSocketServer | null = null;
   private clients = new Map<string, BridgeClient>();
   private pendingClients = new Map<string, BridgeClient>();
+  private pendingChallenges = new Map<string, string>();
   private rateLimits = new Map<string, RateLimit>();
   private port = 0;
   private _running = false;
@@ -108,7 +133,7 @@ export class MemoireWsServer extends EventEmitter {
   /** Tracks in-flight idempotent reads to prevent duplicate requests. method → commandId */
   private inFlightMethods = new Map<string, string>();
   private commandId = 0;
-  private readonly capabilityToken = randomBytes(32).toString("base64url");
+  private capabilityToken: string | null = null;
 
   // ── Connection state tracking ──────────────────────────
   private _reconnectAttempts = 0;
@@ -177,8 +202,22 @@ export class MemoireWsServer extends EventEmitter {
       return this.port;
     }
 
+    const configuredCapability = this.config.capabilityToken;
+    if (configuredCapability !== undefined && !isValidBridgeCapability(configuredCapability)) {
+      throw new Error("Configured Figma bridge capability is invalid.");
+    }
+    if (!this.capabilityToken) {
+      try {
+        this.capabilityToken = configuredCapability ?? await readBridgeCapability();
+      } catch {
+        throw new Error(
+          "Figma bridge capability is missing or invalid. Run `memi setup plugin` to securely pair the plugin.",
+        );
+      }
+    }
+
     const startPort = preferPort ?? this.config.port ?? BRIDGE_PORT_START;
-    const endPort = BRIDGE_PORT_END;
+    const endPort = startPort > BRIDGE_PORT_END ? startPort : BRIDGE_PORT_END;
 
     for (let p = startPort; p <= endPort; p++) {
       // Pre-check: is the port in use before we try to bind?
@@ -251,6 +290,7 @@ export class MemoireWsServer extends EventEmitter {
       }
       this.clients.clear();
       this.pendingClients.clear();
+      this.pendingChallenges.clear();
       this.wss.close();
       this.wss = null;
       this._running = false;
@@ -457,7 +497,17 @@ export class MemoireWsServer extends EventEmitter {
 
   private startOnPort(port: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      const wss = new WebSocketServer({ port, host: BRIDGE_BIND_HOST });
+      const wss = new WebSocketServer({
+        port,
+        host: BRIDGE_BIND_HOST,
+        verifyClient: ({ origin }, done) => {
+          if (isAllowedBridgeOrigin(origin)) {
+            done(true);
+            return;
+          }
+          done(false, 403, "Forbidden origin");
+        },
+      });
 
       wss.on("listening", () => {
         this.wss = wss;
@@ -489,6 +539,11 @@ export class MemoireWsServer extends EventEmitter {
       };
 
       this.pendingClients.set(clientId, client);
+      const challenge = randomBytes(32).toString("base64url");
+      this.pendingChallenges.set(clientId, challenge);
+      const serverProof = createHmac("sha256", this.capabilityToken!)
+        .update(`${BRIDGE_SERVER_PROOF_DOMAIN}${challenge}`)
+        .digest("base64url");
 
       // Send identification — wrapped in try-catch for early disconnect
       try {
@@ -502,13 +557,17 @@ export class MemoireWsServer extends EventEmitter {
               port: this.port,
               studioUrl: this.studioUrl,
               runtimeUrl: this.runtimeUrl,
-              capability: this.capabilityToken,
+              auth: BRIDGE_AUTH_SCHEME,
+              minimumProtocolVersion: BRIDGE_PROTOCOL_VERSION,
+              challenge,
+              serverProof,
             }, "v2"),
           ),
         );
       } catch (err) {
         log.warn({ clientId, err: (err as Error).message }, "Failed to send identify — client already gone");
         this.pendingClients.delete(clientId);
+        this.pendingChallenges.delete(clientId);
         return;
       }
 
@@ -542,9 +601,24 @@ export class MemoireWsServer extends EventEmitter {
             return;
           }
           if (this.pendingClients.has(clientId)) {
-            if (msg.type !== "bridge-hello" || !verifyBridgeCapability(msg.capability, this.capabilityToken)) {
+            if (
+              msg.type !== "bridge-hello"
+              || msg.protocolVersion !== BRIDGE_PROTOCOL_VERSION
+              || !msg.proof
+            ) {
+              log.warn({ clientId }, "Rejected legacy unauthenticated bridge client");
+              ws.close(1008, "Plugin upgrade required: run memi setup plugin");
+              return;
+            }
+            const pendingChallenge = this.pendingChallenges.get(clientId);
+            const expectedProof = pendingChallenge
+              ? createHmac("sha256", this.capabilityToken!)
+                .update(`${BRIDGE_CLIENT_PROOF_DOMAIN}${pendingChallenge}`)
+                .digest("base64url")
+              : "";
+            if (!verifyBridgeCapability(msg.proof, expectedProof)) {
               log.warn({ clientId }, "Rejected unauthenticated bridge client");
-              ws.close(1008, "Invalid bridge capability");
+              ws.close(1008, "Invalid bridge authentication proof");
               return;
             }
             this.activateClient(client, msg);
@@ -559,6 +633,7 @@ export class MemoireWsServer extends EventEmitter {
       ws.on("close", () => {
         const wasAuthenticated = this.clients.delete(clientId);
         this.pendingClients.delete(clientId);
+        this.pendingChallenges.delete(clientId);
         this.rateLimits.delete(clientId);
 
         // Reject pending commands that were sent to this specific client
@@ -636,6 +711,7 @@ export class MemoireWsServer extends EventEmitter {
 
   private activateClient(client: BridgeClient, hello: BridgeHelloEnvelope): void {
     this.pendingClients.delete(client.id);
+    this.pendingChallenges.delete(client.id);
     client.file = hello.file;
     client.fileKey = hello.fileKey;
     client.editor = hello.editor;

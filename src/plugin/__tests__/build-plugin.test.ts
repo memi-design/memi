@@ -44,6 +44,7 @@ describe("plugin build pipeline", () => {
       expect(html).toContain("ui-monospace");
       expect(html).not.toContain('src="/assets/');
       expect(html).not.toContain('href="/assets/');
+      expect(html.match(/__MEMOIRE_BRIDGE_CAPABILITY_V1__/g)).toHaveLength(1);
       // Nullish-coalescing and optional-chaining checks use the syntax-
       // aware scan from hasRawToken so acorn's internal token tables
       // (which carry "??" and "?." as *string literals* describing the

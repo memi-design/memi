@@ -1,5 +1,9 @@
 import { cp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import {
+  ensureBridgeCapability,
+  injectBridgeCapability,
+} from "../security/bridge-capability.js";
 
 export interface PluginInstallResult {
   status: "installed";
@@ -27,6 +31,15 @@ export async function installPluginToHome(projectRoot: string, homeDir = default
     dereference: true,
     force: true,
   });
+
+  const capability = await ensureBridgeCapability(homeDir);
+  const installedUiPath = join(pluginDest, "ui.html");
+  const installedUi = await readFile(installedUiPath, "utf-8");
+  await writeFile(
+    installedUiPath,
+    injectBridgeCapability(installedUi, capability),
+    { encoding: "utf-8", mode: 0o600 },
+  );
 
   const widgetMeta = await readWidgetMeta(join(pluginDest, "widget-meta.json"));
   await writeFile(

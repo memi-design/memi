@@ -42,6 +42,6 @@ describe("figma widget studio companion", () => {
     const ui = await readFile(join(process.cwd(), "src", "plugin", "ui", "main.ts"), "utf-8");
 
     expect(ui).not.toContain("forwardToBridge({\n    type: \"bridge-hello\"");
-    expect(ui).toContain("serializeBridgeEnvelope(createBridgeHelloMessage");
+    expect(ui).toMatch(/serializeBridgeEnvelope\(\s*createBridgeHelloMessage/);
   });
 });
