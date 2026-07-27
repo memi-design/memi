@@ -2,12 +2,13 @@
 
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
   buildWebReleaseArtifact,
   loadReleaseManifest,
+  resolveReleaseRecordPath,
   resolveManifestSourceCommit,
   serializeJson,
   stagePublishedEngineManifest,
@@ -24,11 +25,8 @@ const artifactPath = join(root, "release-artifacts", "memoire-web.release.json")
 if (stageIndex >= 0) {
   const requestedPath = process.argv[stageIndex + 1];
   if (!requestedPath) throw new Error("--stage-published requires a release record path");
-  const absoluteRecordPath = resolve(root, requestedPath);
+  const absoluteRecordPath = await resolveReleaseRecordPath(root, requestedPath);
   const recordPath = relative(root, absoluteRecordPath);
-  if (!recordPath || recordPath === ".." || recordPath.startsWith("../")) {
-    throw new Error("release record path must stay inside the checkout");
-  }
   const releaseRecordBytes = await readFile(absoluteRecordPath, "utf8");
   const releaseRecord = JSON.parse(releaseRecordBytes);
   manifest = stagePublishedEngineManifest({

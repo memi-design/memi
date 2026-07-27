@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
@@ -338,8 +338,15 @@ export async function verifyPublishedEngineTransitionFromGit(root, manifest) {
       `unable to verify release surfaces at source commit: ${error instanceof Error ? error.message : String(error)}`,
     ];
   }
-  const recordPath = resolveContainedPath(root, engine.releaseRecord?.path);
-  const releaseRecordBytes = await readFile(recordPath, "utf8").catch(() => "");
+  let recordPath = "";
+  try {
+    recordPath = await resolveReleaseRecordPath(root, engine.releaseRecord?.path);
+  } catch (error) {
+    failures.push(error instanceof Error ? error.message : String(error));
+  }
+  const releaseRecordBytes = recordPath
+    ? await readFile(recordPath, "utf8").catch(() => "")
+    : "";
   let releaseRecord = null;
   try {
     releaseRecord = JSON.parse(releaseRecordBytes);
@@ -589,16 +596,29 @@ function readSurfaceSnapshotFromGit(root, commit) {
   };
 }
 
-function resolveContainedPath(root, relativePath) {
+export async function resolveReleaseRecordPath(root, relativePath) {
   if (typeof relativePath !== "string" || !relativePath) {
     throw new Error("release record path is required");
+  }
+  if (!RELEASE_RECORD_PATH.test(relativePath)) {
+    throw new Error("release record path must use the immutable release-artifacts/npm version form");
   }
   const target = resolve(root, relativePath);
   const fromRoot = relative(resolve(root), target);
   if (!fromRoot || fromRoot === ".." || fromRoot.startsWith("../")) {
     throw new Error("release record path must stay inside the checkout");
   }
-  return target;
+  const targetStat = await lstat(target);
+  if (targetStat.isSymbolicLink()) {
+    throw new Error("release record path must not be a symlink");
+  }
+  if (!targetStat.isFile()) throw new Error("release record path must be a regular file");
+  const [realRoot, realTarget] = await Promise.all([realpath(root), realpath(target)]);
+  const realFromRoot = relative(realRoot, realTarget);
+  if (!realFromRoot || realFromRoot === ".." || realFromRoot.startsWith("../")) {
+    throw new Error("release record real path must stay inside the checkout");
+  }
+  return realTarget;
 }
 
 export function buildWebReleaseArtifact(manifest, sourceCommit) {
