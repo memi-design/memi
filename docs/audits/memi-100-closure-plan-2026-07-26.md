@@ -377,15 +377,16 @@ Final acceptance rule:
   reduced-motion correction, simulator rendering, runtime accessibility action,
   clean rerun, hosted validation, and independent review.
 - The shader proof now has real Apple M3 Pro GPU timer evidence, opaque-alpha
-  and sRGB diagnostics, deterministic frame hashes, Chromium and WebKit hosted
-  runs, successful artifact retention, source-commit ancestry validation, and
-  independent approval. See
+  diagnostics, requested-and-applied Display P3 output, a verified low-power
+  context, deterministic frame hashes, Chromium and WebKit hosted runs,
+  successful artifact retention, source-commit ancestry validation, semantic
+  summary-to-raw validation, and independent approval. See
   [memi-shader-rendering-evidence-2026-07-27.json](./memi-shader-rendering-evidence-2026-07-27.json).
 - The shader criterion remains `unassessed`, not partially scored. Power
   consumption is blocked because Xcode Power Profiler is unsupported on macOS
-  and `powermetrics` requires superuser access. Wide-gamut accuracy remains
-  pending because the verified drawing buffer is sRGB and no calibrated
-  Display P3 capture path has been proven.
+  and `powermetrics` requires superuser access. Calibrated wide-gamut accuracy
+  remains pending because no Display P3 reference and physical capture path has
+  been proven; successful Display P3 buffer selection alone does not prove it.
 - Candidate SBOM and policy evidence is recorded, but complete supply-chain
   proof still requires a public successor npm release with trusted-publisher
   provenance and independent public-artifact review.

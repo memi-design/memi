@@ -1,34 +1,36 @@
 {
   "schemaVersion": 1,
   "evidenceId": "memi-shader-rendering-2026-07-27",
-  "capturedAt": "2026-07-27T01:03:44.000Z",
+  "capturedAt": "2026-07-27T01:29:09.000Z",
   "assessment": "partial",
   "source": {
     "repository": "https://github.com/sarveshsea/design-sandbox",
     "pullRequest": "https://github.com/sarveshsea/design-sandbox/pull/2",
-    "headCommit": "aa2d262559cfaae1e1132d5e920a13449b316d6c",
-    "renderedSourceCommit": "cb4a7098645b6d7a40cd4d99b71cb7f6c1edcda3",
+    "headCommit": "87d5a1ffcffd46609264cd896246dbe6bf42d987",
+    "renderedSourceCommit": "0d37b20507bca7d2c15c18266d7075932e8c5abf",
     "route": "/labs/shaders",
     "summaryArtifact": "docs/evidence/shader-lab-hardware-2026-07-27.json",
-    "summarySha256": "8215cc392f7b65a77fe3db3f8ce829f649203e324df103d8b7830fbc8af05a8a",
+    "summarySha256": "7dfa3b8bd061a354a313f52aaf2791c952965e5c0199ed35b84247ed50a559ce",
     "rawArtifact": "docs/evidence/shader-lab-hardware-raw-2026-07-27.json",
-    "rawEvidenceSha256": "36385b109b057a5a38aa3886b954afe0b82ec3fa8a2db4b8d41665804fd798bb"
+    "rawEvidenceSha256": "6538176c7a2ad7d5de3c5fbc1e9aef37bdd1ffce84cb6c91e79b0177bb41e775"
   },
   "hardwareProof": {
-    "environment": "MacBook Pro Mac15,7, Apple M3 Pro, macOS 26.2, Chrome 151.0.7922.34",
+    "environment": "MacBook Pro Mac15,7, Apple M3 Pro, macOS 26.2, Google Chrome binary 150.0.7871.186",
     "renderer": "ANGLE Metal Renderer: Apple M3 Pro",
     "softwareRenderer": false,
     "gpuTimer": "EXT_disjoint_timer_query_webgl2",
-    "gpuFrameMedianMs": 0.543,
-    "gpuSampleCount": 49,
+    "gpuFrameMedianMs": 0.079,
+    "gpuSampleCount": 50,
     "frameBudgetMs": 16.7,
     "opaqueAlphaVerified": true,
-    "drawingBufferColorSpace": "srgb",
-    "deterministicFrameSha256": "1c682314b0fb14df72fa0a56d4a24caf7eeed654c61680580a648828b10c7d5f"
+    "requestedColorSpace": "display-p3",
+    "drawingBufferColorSpace": "display-p3",
+    "powerPreference": "low-power",
+    "deterministicFrameSha256": "c8b64b76496b72ceffc053e7ba4be7244be28b61376e87972cedaf413bae017a"
   },
   "hostedProof": {
-    "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30228812805",
-    "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30228812805/job/89863745139",
+    "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30229832368",
+    "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30229832368/job/89866461871",
     "conclusion": "success",
     "tests": {
       "unitAndEvidenceContracts": 18,
@@ -48,7 +50,7 @@
   "independentReview": {
     "reviewer": "agent:audit-review",
     "status": "approved",
-    "reviewedHead": "aa2d262559cfaae1e1132d5e920a13449b316d6c",
+    "reviewedHead": "87d5a1ffcffd46609264cd896246dbe6bf42d987",
     "finding": "No release-blocking issue remains in the shader evidence provenance path."
   },
   "assessedDimensions": [
@@ -63,7 +65,9 @@
     "temporal-stability",
     "chromium-webkit-runtime",
     "artifact-durability",
-    "source-provenance"
+    "source-provenance",
+    "wide-gamut-output-contract",
+    "low-power-context"
   ],
   "unassessedDimensions": [
     "power-consumption",
@@ -76,13 +80,13 @@
     },
     {
       "dimension": "wide-gamut-color-accuracy",
-      "reason": "The verified drawing buffer is sRGB. No calibrated Display P3 reference and capture path has been verified."
+      "reason": "Requested and applied Display P3 output are verified on hardware and in Chromium/WebKit, but no calibrated Display P3 reference and physical capture path has been verified."
     }
   ],
   "scorecardDisposition": {
     "criterion": "shader-and-dither/durable-rendering-evidence",
     "points": 2,
     "assessment": "unassessed",
-    "reason": "The artifact closes GPU timing, alpha, temporal stability, cross-browser runtime, and durability, but it does not close power consumption or wide-gamut accuracy."
+    "reason": "The artifact closes GPU timing, alpha, temporal stability, cross-browser runtime, durability, Display P3 output selection, and a low-power context contract, but it does not close measured power consumption or calibrated wide-gamut accuracy."
   }
 }
