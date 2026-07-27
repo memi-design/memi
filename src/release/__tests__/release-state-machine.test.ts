@@ -13,6 +13,7 @@ import {
   stagePublishedEngineManifest,
   validateEngineSurfaceSnapshot,
   validateEngineReleaseTransition,
+  validatePublishedStagingPreconditions,
   validateNpmPublishPreflight,
   validateProvenanceInvocation,
   validateTarballBytes,
@@ -357,6 +358,49 @@ describe("verified engine release state machine", () => {
       },
     });
     expect(published.updatedAt).toBe("2026-07-28");
+  });
+
+  it("refuses to stage a record from an arbitrary or drifted source commit", () => {
+    const candidate = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+    });
+    const record = releaseRecord();
+
+    expect(validatePublishedStagingPreconditions({
+      manifest: candidate,
+      committedManifest: candidate,
+      sourceManifest: candidate,
+      releaseRecord: record,
+      sourceIsAncestor: true,
+      sourceSurfaceFailures: [],
+    })).toEqual([]);
+    expect(validatePublishedStagingPreconditions({
+      manifest: candidate,
+      committedManifest: {
+        ...candidate,
+        updatedAt: "2026-07-26",
+      },
+      sourceManifest: {
+        ...candidate,
+        releaseGroups: {
+          ...candidate.releaseGroups,
+          engine: { ...candidate.releaseGroups.engine, version: "2.6.2" },
+        },
+      },
+      releaseRecord: {
+        ...record,
+        sourceCommit: "f".repeat(40),
+      },
+      sourceIsAncestor: false,
+      sourceSurfaceFailures: ["package.json at source commit drifted"],
+    })).toEqual(expect.arrayContaining([
+      "candidate manifest must be committed without working-tree drift before staging",
+      "release record source commit is not an ancestor of the candidate checkout",
+      "release record source commit does not contain the same candidate manifest",
+      "package.json at source commit drifted",
+    ]));
   });
 
   it("rejects a release record symlink that escapes the checkout", async () => {
