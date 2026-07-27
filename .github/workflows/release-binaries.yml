@@ -136,18 +136,21 @@ jobs:
       - name: Check release metadata
         shell: bash
         run: |
-          restore_scorecard() {
+          restore_compatibility_files() {
             if [[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.6.3" ]]; then
-              git archive --format=tar HEAD docs/audits/memi-100-scorecard.md |
+              git archive --format=tar HEAD \
+                docs/audits/memi-100-scorecard.md \
+                scripts/check-release.mjs |
                 tar --extract --file=-
               git diff --exit-code
             fi
           }
-          trap restore_scorecard EXIT
+          trap restore_compatibility_files EXIT
           if [[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.6.3" ]]; then
             node --input-type=module <<'NODE'
           import { readFile, writeFile } from "node:fs/promises";
           const reportPath = "docs/audits/memi-100-scorecard.md";
+          const releaseCheckPath = "scripts/check-release.mjs";
           const canonical = "Generated from `docs/audits/memi-100-scorecard.json`";
           const windows = "Generated from `docs\\audits\\memi-100-scorecard.json`";
           const report = await readFile(reportPath, "utf8");
@@ -155,6 +158,17 @@ jobs:
             throw new Error("v2.6.3 scorecard compatibility precondition failed");
           }
           await writeFile(reportPath, report.replace(canonical, windows), "utf8");
+          const releaseCheck = await readFile(releaseCheckPath, "utf8");
+          const npmAudit = 'const audit = spawnSync("npm", ["audit", "--omit=dev", "--audit-level=high", "--json"], {\n    cwd: root,';
+          const windowsNpmAudit = 'const audit = spawnSync("npm", ["audit", "--omit=dev", "--audit-level=high", "--json"], {\n    shell: process.platform === "win32",\n    cwd: root,';
+          if (!releaseCheck.includes(npmAudit) || releaseCheck.includes(windowsNpmAudit)) {
+            throw new Error("v2.6.3 npm audit compatibility precondition failed");
+          }
+          await writeFile(
+            releaseCheckPath,
+            releaseCheck.replace(npmAudit, windowsNpmAudit),
+            "utf8",
+          );
           NODE
           fi
           npm run check:release

@@ -479,6 +479,7 @@ if (process.env.SKIP_AUDIT_GATE !== "1") {
   }
 
   const audit = spawnSync("npm", ["audit", "--omit=dev", "--audit-level=high", "--json"], {
+    shell: process.platform === "win32",
     cwd: root,
     encoding: "utf-8",
     maxBuffer: 1024 * 1024 * 5,

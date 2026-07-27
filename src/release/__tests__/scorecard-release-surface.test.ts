@@ -52,8 +52,22 @@ describe("audit scorecard release surfaces", () => {
     expect(workflow).toContain(
       "docs\\\\audits\\\\memi-100-scorecard.json",
     );
+    expect(workflow).toMatch(
+      /git archive --format=tar HEAD \\\s+docs\/audits\/memi-100-scorecard\.md \\\s+scripts\/check-release\.mjs/,
+    );
     expect(workflow).toContain(
-      "git archive --format=tar HEAD docs/audits/memi-100-scorecard.md",
+      'shell: process.platform === "win32"',
+    );
+  });
+
+  it("executes npm audit through the Windows command shell", async () => {
+    const releaseCheck = await readFile(
+      join(process.cwd(), "scripts", "check-release.mjs"),
+      "utf8",
+    );
+
+    expect(releaseCheck).toContain(
+      'shell: process.platform === "win32"',
     );
   });
 
