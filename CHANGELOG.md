@@ -76,6 +76,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `04e415f0` test: add supply-chain proof reproducer (superseded before merge)
 - `e3789ce6` fix: require verifiable npm provenance
 - `15faed69` test: reject manual npm publish bypass
+- `4ca15191` test: require complete public gate evidence
+- `47a71610` test: fail closed on malformed release stages
+- `be49db4a` fix: preserve aggregate release evidence
 
 #### Architectural decisions
 
@@ -98,6 +101,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Generate one human-readable release-truth document from `release-manifest.json`, enforce it in the release gate, and mark retained launch snapshots as historical before any obsolete instructions.
 - Treat the read-only design-engineering audit and skill layer as the one primary public story across README, package, MCP, plugin, release-gate, growth, and SEO metadata; public parity fails until npm and the website carry that same story.
 - Publish npm releases only from an explicit main-branch version through trusted OIDC, attach a CycloneDX SBOM, and require the registry signature plus SLSA provenance to resolve the exact package digest, repository, workflow, ref, and commit. A local SBOM or historical signed tarball does not close the provenance criterion.
+- Run registry, website, and clean-install public release checks as independent fail-closed stages, preserving every attempted result even when another stage reports drift, throws, or returns malformed evidence.
 
 ### Design Skills migration — `3009cf63`
 
