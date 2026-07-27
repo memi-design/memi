@@ -17,6 +17,7 @@ import {
 } from "../shared/contracts.js";
 import {
   createBridgeCommandDispatch,
+  createBridgeHelloMessage,
   resolveBridgeResponse,
   trackBridgeRequest,
   type PendingBridgeRequest,
@@ -159,32 +160,41 @@ describe("bridge round-trip", () => {
     });
   });
 
-  it("preserves the per-session capability through identify and hello frames", () => {
+  it("keeps the pre-shared capability out of identify and sends it in protocol-v3 hello", () => {
     const identify = normalizeBridgeMessage({
       channel: BRIDGE_V2_CHANNEL,
       source: "server",
       type: "identify",
       name: "Mémoire",
-      capability: "capability-1",
+      auth: "pre-shared-capability-v1",
+      minimumProtocolVersion: 3,
     });
-    const hello = normalizeBridgeMessage({
-      channel: BRIDGE_V2_CHANNEL,
-      source: "plugin",
-      type: "bridge-hello",
-      file: "Design System",
+    const hello = createBridgeHelloMessage({
+      channel: WIDGET_V2_CHANNEL,
+      source: "main",
+      type: "connection-state",
+      fileName: "Design System",
       fileKey: "file-key",
-      editor: "figma",
-      capability: "capability-1",
-    });
+      editorType: "figma",
+      online: true,
+      sessionId: "session-test",
+      updatedAt: Date.now(),
+    }, "capability-1");
 
-    expect(identify).toMatchObject({ type: "identify", capability: "capability-1" });
-    expect(hello).toMatchObject({ type: "bridge-hello", capability: "capability-1" });
-    expect(serializeBridgeEnvelope(identify!, "legacy")).toMatchObject({
+    expect(identify).toMatchObject({
       type: "identify",
+      auth: "pre-shared-capability-v1",
+      minimumProtocolVersion: 3,
+    });
+    expect(identify).not.toHaveProperty("capability");
+    expect(hello).toMatchObject({
+      type: "bridge-hello",
+      protocolVersion: 3,
       capability: "capability-1",
     });
     expect(serializeBridgeEnvelope(hello!, "legacy")).toMatchObject({
       type: "bridge-hello",
+      protocolVersion: 3,
       capability: "capability-1",
     });
   });
