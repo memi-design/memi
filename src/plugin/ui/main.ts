@@ -39,6 +39,10 @@ import {
   trackBridgeRequest,
   type PendingBridgeRequest,
 } from "./bridge-adapter.js";
+import { BRIDGE_CAPABILITY_PLACEHOLDER } from "../shared/bridge-auth.js";
+import {
+  authenticateBridgeIdentify,
+} from "./bridge-auth.js";
 import { buildJobsOverview, describeSelectionNode, formatElapsedTime } from "./presenters.js";
 import { disconnectActiveJobs, mergeSyncSummaries, reduceHealEvent, upsertJobState } from "./job-state.js";
 
@@ -71,12 +75,15 @@ interface UiState {
     scanTimer: number | null;
     offlineSince: number | null;
     reconnectAttempts: number;
+    capability: string;
+    proof: string;
   };
 }
 
 const PORT_START = 9223;
 const PORT_END = 9232;
 const LOG_LIMIT = 80;
+const INSTALLED_BRIDGE_CAPABILITY = BRIDGE_CAPABILITY_PLACEHOLDER;
 
 const OFFLINE_CTA_GRACE_MS = 5000;
 
@@ -220,6 +227,8 @@ const state: UiState = {
     scanTimer: null,
     offlineSince: Date.now(),
     reconnectAttempts: 0,
+    capability: INSTALLED_BRIDGE_CAPABILITY,
+    proof: "",
   },
 };
 
@@ -460,7 +469,7 @@ function scanBridge(): void {
           // Remove THIS socket from the candidate list, close all others.
           scanCandidates = scanCandidates.filter((candidate) => candidate !== ws);
           closeScanCandidates();
-          adoptBridge(ws, port, payload as Partial<BridgeIdentifyEnvelope>);
+          void adoptBridge(ws, port, payload as Partial<BridgeIdentifyEnvelope>);
           return;
         }
       }
@@ -502,7 +511,26 @@ function closeScanCandidates(): void {
   scanCandidates = [];
 }
 
-function adoptBridge(ws: WebSocket, port: number, payload: Partial<BridgeIdentifyEnvelope>): void {
+async function adoptBridge(ws: WebSocket, port: number, payload: Partial<BridgeIdentifyEnvelope>): Promise<void> {
+  try {
+    state.bridge.proof = await authenticateBridgeIdentify(
+      state.bridge.capability,
+      payload,
+    );
+  } catch (error) {
+    ws.close();
+    setBridgeStage("offline");
+    addLog("error", "Secure bridge pairing failed", error instanceof Error ? error.message : String(error));
+    scheduleReconnect();
+    scheduleRender();
+    return;
+  }
+  if (ws.readyState !== WebSocket.OPEN) {
+    setBridgeStage("offline");
+    scheduleReconnect();
+    scheduleRender();
+    return;
+  }
   state.bridge.ws = ws;
   state.bridge.port = port;
   state.bridge.name = payload.name || "Mémoire";
@@ -513,7 +541,10 @@ function adoptBridge(ws: WebSocket, port: number, payload: Partial<BridgeIdentif
   writeCachedPort(port);
   setBridgeStage("connected");
   addLog("success", `Connected :${port}`);
-  forwardToBridge(serializeBridgeEnvelope(createBridgeHelloMessage(state.connection), "v2"));
+  forwardToBridge(serializeBridgeEnvelope(
+    createBridgeHelloMessage(state.connection, state.bridge.proof),
+    "v2",
+  ));
   scheduleRender();
   // Auto-sync on connect — pull selection immediately
   window.setTimeout(() => {
@@ -522,7 +553,11 @@ function adoptBridge(ws: WebSocket, port: number, payload: Partial<BridgeIdentif
 }
 
 function announceBridgeHello(): void {
-  forwardToBridge(serializeBridgeEnvelope(createBridgeHelloMessage(state.connection), "v2"));
+  if (!state.bridge.proof) return;
+  forwardToBridge(serializeBridgeEnvelope(
+    createBridgeHelloMessage(state.connection, state.bridge.proof),
+    "v2",
+  ));
 }
 
 const MAX_RECONNECT_ATTEMPTS = 20;

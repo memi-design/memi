@@ -6,7 +6,7 @@ memi v2 needs public proof repos, not only package claims. Use this file to keep
 
 | Repo | Role | Public promise |
 | --- | --- | --- |
-| [`sarveshsea/memi`](https://github.com/sarveshsea/memi) | Engine, CLI, MCP server, Agent Skills, Codex plugin, examples, release gates | Interface understanding for AI coding agents. |
+| [`sarveshsea/memi`](https://github.com/sarveshsea/memi) | Engine, CLI, MCP server, Agent Skills, Codex plugin, examples, release gates | Memi is the read-only design engineering audit and skill layer for coding agents. |
 | [`sarveshsea/design-sandbox`](https://github.com/sarveshsea/design-sandbox) | Proof workspace | memi-ready Next.js, Tailwind, shadcn, MCP, and Agent Skills sandbox for design-to-code exploration. |
 | [`sarveshsea/memi-studio`](https://github.com/sarveshsea/memi-studio) | macOS workbench | Supervised Codex and Claude Code runs with project memory, receipts, artifacts, and Figma/FigJam handoff. |
 | [`sarveshsea/memoire-agent-skills`](https://github.com/sarveshsea/memoire-agent-skills) | Skill mirror | Mirror-ready Hermes/OpenClaw skill packages generated from the npm engine. |
@@ -21,7 +21,7 @@ memi v2 needs public proof repos, not only package claims. Use this file to keep
 `sarveshsea/memi`:
 
 ```text
-Interface understanding and design-system memory for AI coding agents.
+Memi is the read-only design engineering audit and skill layer for coding agents.
 ```
 
 `sarveshsea/design-sandbox`:
@@ -146,7 +146,7 @@ pnpm verify
 | Hermes/OpenClaw | `agent-kits/mirror` | Mirror-ready skill packages. |
 | Design sandbox | `.agents/skills`, `.mcp.json`, `memoire.agent.yaml` | Public repo that proves integration. |
 | Community Notes | `notes/<note-name>/note.json` | Reviewed downloadable Notes catalog at `/notes/community/catalog.v1.json`. |
-| GitHub Action | `sarveshsea/memi@v2` | Floating v2 action with immutable third-party pins, SARIF, and design-health artifacts. |
+| GitHub Action | `sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354` | Immutable action commit for v2.6.2 with pinned third-party actions, SARIF, and design-health artifacts. |
 | shadcn registry | `https://memoire.cv/r/design-ci.json` | Installs the workflow and recommended policy with `npx shadcn add`. |
 
 ## Live interoperability proposals

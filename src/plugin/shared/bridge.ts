@@ -47,6 +47,10 @@ export interface BridgeIdentifyEnvelope {
   port?: number;
   studioUrl?: string;
   runtimeUrl?: string;
+  auth?: "pre-shared-hmac-sha256-v1";
+  minimumProtocolVersion?: number;
+  challenge?: string;
+  serverProof?: string;
 }
 
 export interface BridgeHelloEnvelope {
@@ -56,6 +60,8 @@ export interface BridgeHelloEnvelope {
   file: string;
   fileKey: string;
   editor: string;
+  protocolVersion?: number;
+  proof?: string;
 }
 
 export interface BridgeEventEnvelope {
@@ -233,9 +239,31 @@ export type BridgeEnvelope =
 
 export function isBridgeEnvelope(value: unknown): value is BridgeEnvelope {
   if (!value || typeof value !== "object") return false;
-  const v = value as { channel?: unknown; type?: unknown; method?: unknown };
+  const v = value as {
+    channel?: unknown;
+    type?: unknown;
+    method?: unknown;
+    name?: unknown;
+    auth?: unknown;
+    minimumProtocolVersion?: unknown;
+    challenge?: unknown;
+    serverProof?: unknown;
+    protocolVersion?: unknown;
+    proof?: unknown;
+  };
   if (v.channel !== BRIDGE_V2_CHANNEL) return false;
   if (typeof v.type !== "string") return false;
+  if (v.type === "identify") {
+    return typeof v.name === "string"
+      && (v.auth === undefined || v.auth === "pre-shared-hmac-sha256-v1")
+      && (v.minimumProtocolVersion === undefined || typeof v.minimumProtocolVersion === "number")
+      && (v.challenge === undefined || typeof v.challenge === "string")
+      && (v.serverProof === undefined || typeof v.serverProof === "string");
+  }
+  if (v.type === "bridge-hello") {
+    return (v.proof === undefined || typeof v.proof === "string")
+      && (v.protocolVersion === undefined || typeof v.protocolVersion === "number");
+  }
   // If the envelope claims to be a command, the method must be on the
   // approved list — otherwise the fast-path in normalizeBridgeMessage
   // would let unknown commands through, defeating the validation we
@@ -317,6 +345,12 @@ export function normalizeBridgeMessage(value: unknown): BridgeEnvelope | null {
           port: typeof message.port === "number" ? message.port : undefined,
           studioUrl: asString(message.studioUrl),
           runtimeUrl: asString(message.runtimeUrl),
+          auth: message.auth === "pre-shared-hmac-sha256-v1" ? message.auth : undefined,
+          minimumProtocolVersion: typeof message.minimumProtocolVersion === "number"
+            ? message.minimumProtocolVersion
+            : undefined,
+          challenge: asString(message.challenge),
+          serverProof: asString(message.serverProof),
         };
       }
       return null;
@@ -328,6 +362,10 @@ export function normalizeBridgeMessage(value: unknown): BridgeEnvelope | null {
         file: asString(message.file) ?? "unknown",
         fileKey: asString(message.fileKey) ?? "",
         editor: asString(message.editor) ?? "figma",
+        protocolVersion: typeof message.protocolVersion === "number"
+          ? message.protocolVersion
+          : undefined,
+        proof: asString(message.proof),
       };
     case "event":
       if (typeof message.message === "string") {
@@ -521,6 +559,10 @@ export function serializeBridgeEnvelope(
         port: envelope.port,
         studioUrl: envelope.studioUrl,
         runtimeUrl: envelope.runtimeUrl,
+        auth: envelope.auth,
+        minimumProtocolVersion: envelope.minimumProtocolVersion,
+        challenge: envelope.challenge,
+        serverProof: envelope.serverProof,
       };
     case "bridge-hello":
       return {
@@ -528,6 +570,8 @@ export function serializeBridgeEnvelope(
         file: envelope.file,
         fileKey: envelope.fileKey,
         editor: envelope.editor,
+        protocolVersion: envelope.protocolVersion,
+        proof: envelope.proof,
       };
     case "event":
       return {

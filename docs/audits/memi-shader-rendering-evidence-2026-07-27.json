@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "memi-shader-rendering-2026-07-27",
+  "capturedAt": "2026-07-27T03:21:06.000Z",
+  "assessment": "partial",
+  "source": {
+    "repository": "https://github.com/sarveshsea/design-sandbox",
+    "pullRequest": "https://github.com/sarveshsea/design-sandbox/pull/2",
+    "headCommit": "0389679394fbdc7a8c54c764daa9cabe9dc9a91e",
+    "reviewedPullRequestHead": "a36bb2b9bada61a3702c6f141f3b8da7a1dedc08",
+    "renderedSourceCommit": "6c5ef82549f557f6fd5e5c0d86eef39028534b52",
+    "route": "/labs/shaders",
+    "summaryArtifact": "docs/evidence/shader-lab-hardware-2026-07-27.json",
+    "summarySha256": "6c003ae33960cc4f888bd41f52401d0f82a23c3ac8c6daa106da21a6a0b4d624",
+    "rawArtifact": "docs/evidence/shader-lab-hardware-raw-2026-07-27.json",
+    "rawEvidenceSha256": "e624dd0344df21b8dc8ba28fa48220302b94ff8eded343de9f656d3cf4154c95"
+  },
+  "hardwareProof": {
+    "environment": "MacBook Pro Mac15,7, Apple M3 Pro, Darwin 25.2.0, Google Chrome binary 150.0.7871.186",
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+    "softwareRenderer": false,
+    "gpuTimer": "EXT_disjoint_timer_query_webgl2",
+    "gpuDrawPassMedianMs": 0.083,
+    "gpuDrawPassSampleCount": 50,
+    "animationFrameCadenceMedianMs": 16.7,
+    "animationFrameCadenceP95Ms": 17.1,
+    "animationFrameCadenceSampleCount": 49,
+    "frameBudgetMs": 16.7,
+    "opaqueAlphaVerified": true,
+    "requestedColorSpace": "display-p3",
+    "drawingBufferColorSpace": "display-p3",
+    "powerPreference": "low-power",
+    "deterministicFrameSha256": "c8b64b76496b72ceffc053e7ba4be7244be28b61376e87972cedaf413bae017a"
+  },
+  "hostedProof": {
+    "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003",
+    "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003/job/89879007118",
+    "conclusion": "success",
+    "tests": {
+      "unitAndEvidenceContracts": 29,
+      "chromiumAndWebkitE2e": 12
+    },
+    "artifactsRetained": true,
+    "artifactRetentionDays": 30,
+    "artifactContentsVerified": [
+      "Chromium audit JSON and deterministic frame digest",
+      "WebKit audit JSON and deterministic frame digest",
+      "reduced-motion evidence for Chromium and WebKit",
+      "fallback render evidence",
+      "Playwright HTML report",
+      "coverage summary"
+    ]
+  },
+  "independentReview": {
+    "reviewer": "agent:audit-review",
+    "status": "approved",
+    "reviewedHead": "a36bb2b9bada61a3702c6f141f3b8da7a1dedc08",
+    "mergedHead": "0389679394fbdc7a8c54c764daa9cabe9dc9a91e",
+    "finding": "No release-blocking issue remains in the shader evidence provenance path."
+  },
+  "assessedDimensions": [
+    "deterministic-output",
+    "reduced-motion",
+    "canvas-2d-fallback",
+    "webgl2-availability",
+    "main-thread-webgl-submission",
+    "animation-frame-cadence",
+    "gpu-draw-pass-duration",
+    "opaque-alpha-contract",
+    "render-color-space",
+    "temporal-stability",
+    "chromium-webkit-runtime",
+    "durable-artifact-binding",
+    "source-provenance",
+    "wide-gamut-output-contract",
+    "low-power-context"
+  ],
+  "unassessedDimensions": [
+    "power-consumption",
+    "wide-gamut-color-accuracy"
+  ],
+  "accessIssues": [
+    {
+      "dimension": "power-consumption",
+      "reason": "Xcode Power Profiler reports that it is unsupported on macOS. powermetrics requires superuser access, and no privilege escalation was attempted."
+    },
+    {
+      "dimension": "wide-gamut-color-accuracy",
+      "reason": "Requested and applied Display P3 output are verified on hardware and in Chromium/WebKit, but no calibrated Display P3 reference and physical capture path has been verified."
+    }
+  ],
+  "scorecardDisposition": {
+    "criterion": "shader-and-dither/durable-rendering-evidence",
+    "points": 2,
+    "assessment": "unassessed",
+    "reason": "The artifact closes GPU timing, alpha, temporal stability, cross-browser runtime, durability, Display P3 output selection, and a low-power context contract, but it does not close measured power consumption or calibrated wide-gamut accuracy."
+  }
+}

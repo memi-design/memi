@@ -5,7 +5,7 @@
 <h1 align="center">memi</h1>
 
 <p align="center">
-  <strong>Design QA skills for coding agents.</strong><br/>
+  <strong>Read-only design engineering audits for coding agents.</strong><br/>
   Audit real interfaces, remember their design systems, and stop UI regressions before merge.
 </p>
 
@@ -16,7 +16,9 @@
   <a href="https://skills.sh/sarveshsea/memi"><img src="https://skills.sh/b/sarveshsea/memi" alt="skills.sh"></a>
 </p>
 
-**Package:** [@memi-design/cli](https://www.npmjs.com/package/@memi-design/cli) · **Homepage:** [memoire.cv](https://memoire.cv) · **MCP Registry:** `io.github.sarveshsea/memi`
+**Package:** [@memi-design/cli](https://www.npmjs.com/package/@memi-design/cli) · **Homepage:** [memoire.cv](https://memoire.cv) · **MCP Registry:** `io.github.sarveshsea/memi` · **Release truth:** [current versions](docs/CURRENT_RELEASE.md)
+
+Memi is the **read-only design engineering audit and skill layer for coding agents**. Studio is a companion, not the primary activation path.
 
 memi turns a real product codebase into **evidence agents can trust** before they edit UI: tokens, components, routes, screenshots, UX risks, interface craft scores, shadcn registries, research specs, and deterministic CI gates. Works with **Grok Build (Grok 4.5)**, Codex, Claude Code, Cursor, Hermes, OpenCode, OpenClaw, and any MCP client.
 
@@ -172,10 +174,10 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: sarveshsea/memi@v2
+      - uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
         with:
           version: "2.6.2"
 ```
@@ -311,7 +313,7 @@ memi studio web --port 1422
 | `plugins/memoire/` | Codex plugin bundle |
 | `notes/` | Built-in research, agent, and design notes |
 | `docs/` | Interface understanding, CI, growth, release gates |
-| `action.yml` | GitHub Action for design CI (`sarveshsea/memi@v2`) |
+| `action.yml` | GitHub Action for design CI (`sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354`) |
 
 ---
 

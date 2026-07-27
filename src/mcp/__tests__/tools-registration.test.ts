@@ -94,6 +94,7 @@ describe("MCP tools registration", () => {
     const src = await readToolsSrc();
     expect(src).toContain('"audit_interface_craft"');
     expect(src).toContain("buildInterfaceCraftReport");
+    expect(src).toContain("auditContextFromDiagnosis(diagnosis)");
   });
 
   it("registers compact read-only design-systems-mcp context normalization", async () => {

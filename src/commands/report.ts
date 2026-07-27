@@ -9,7 +9,7 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
-import { diagnoseAppQuality } from "../app-quality/engine.js";
+import { auditContextFromDiagnosis, diagnoseAppQuality } from "../app-quality/engine.js";
 import { loadPolicy } from "../app-quality/policy.js";
 import { buildUxAuditReport, writeUxAuditReport } from "../ux/tenets-traps.js";
 import { buildInterfaceCraftReport, writeInterfaceCraftReport } from "../ux/interface-craft.js";
@@ -52,15 +52,18 @@ export function registerReportCommand(program: Command, engine: MemoireEngine): 
             write: true,
             policy,
           });
+          const auditContext = auditContextFromDiagnosis(diagnosis);
           await writeUxAuditReport(projectRoot, buildUxAuditReport({
             target: diagnosis.target,
             issues: diagnosis.issues,
             appQualityScore: diagnosis.summary.score,
+            ...auditContext,
           }));
           await writeInterfaceCraftReport(projectRoot, buildInterfaceCraftReport({
             target: diagnosis.target,
             issues: diagnosis.issues,
             appQualityScore: diagnosis.summary.score,
+            ...auditContext,
           }));
         }
 

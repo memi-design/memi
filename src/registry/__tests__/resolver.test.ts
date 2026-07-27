@@ -3,10 +3,23 @@
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { mkdtemp, rm, writeFile, mkdir } from "fs/promises";
+import { mkdtemp, rm, writeFile, mkdir, symlink } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
-import { resolveRegistry, findComponentRef } from "../resolver.js";
+import { resolveRegistry, readRegistryFile, findComponentRef } from "../resolver.js";
+
+vi.mock("../../security/safe-fetch.js", () => ({
+  fetchPublicText: vi.fn(async (url: string, options: { headers?: Record<string, string> }) => {
+    const response = await fetch(url, { headers: options.headers });
+    return {
+      url,
+      status: response.status,
+      ok: response.ok,
+      headers: {},
+      text: await response.text(),
+    };
+  }),
+}));
 
 const validRegistry = {
   name: "@test/ds",
@@ -54,6 +67,14 @@ describe("Registry resolver", () => {
     await expect(resolveRegistry("http://10.0.0.1/r.json")).rejects.toThrow(/private\/loopback/);
   });
 
+  it.each([
+    "http://[::ffff:127.0.0.1]/registry.json",
+    "http://[::ffff:169.254.169.254]/registry.json",
+    "http://[::ffff:10.0.0.1]/registry.json",
+  ])("blocks IPv4-mapped IPv6 private URLs: %s", async (url) => {
+    await expect(resolveRegistry(url)).rejects.toThrow(/private\/loopback/);
+  });
+
   it("rejects non-http(s) protocols", async () => {
     await expect(resolveRegistry("ftp://example.com/r.json")).rejects.toThrow(/http\(s\)|npm/);
   });
@@ -94,6 +115,36 @@ describe("Registry resolver", () => {
     }
   });
 
+  it("contains local referenced files within the resolved registry directory", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "memoire-resolver-"));
+    try {
+      await writeFile(join(dir, "registry.json"), JSON.stringify(validRegistry));
+      await writeFile(join(dir, "tokens.json"), "{}");
+      const resolved = await resolveRegistry(dir);
+
+      await expect(readRegistryFile(resolved, "../tokens.json")).rejects.toThrow(/escapes the registry root/i);
+      await expect(readRegistryFile(resolved, "/etc/passwd")).rejects.toThrow(/escapes the registry root/i);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("rejects local registry symlinks that escape the registry root", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "memoire-resolver-"));
+    const outside = await mkdtemp(join(tmpdir(), "memoire-resolver-secret-"));
+    try {
+      await writeFile(join(dir, "registry.json"), JSON.stringify(validRegistry));
+      await writeFile(join(outside, "secret.json"), "{\"secret\":true}");
+      await symlink(join(outside, "secret.json"), join(dir, "linked.json"));
+      const resolved = await resolveRegistry(dir);
+
+      await expect(readRegistryFile(resolved, "./linked.json")).rejects.toThrow(/escapes the registry root/i);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+      await rm(outside, { recursive: true, force: true });
+    }
+  });
+
   it("resolves featured marketplace aliases to catalog package names", async () => {
     const dir = await mkdtemp(join(tmpdir(), "memoire-resolver-"));
     const pkgDir = join(dir, "node_modules", "@memoire-examples", "ai-chat");
@@ -116,6 +167,23 @@ describe("Registry resolver", () => {
     try {
       vi.stubGlobal("fetch", vi.fn(async () => new Response("missing", { status: 404 })));
       await expect(resolveRegistry("@missing/ds", dir)).rejects.toThrow(/could not be resolved locally or from npm/i);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not satisfy an exact npm pin from a mismatched local registry version", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "memoire-resolver-pin-"));
+    const packageDir = join(dir, "node_modules", "@test", "ds");
+    try {
+      await mkdir(packageDir, { recursive: true });
+      await writeFile(join(packageDir, "registry.json"), JSON.stringify({
+        ...validRegistry,
+        version: "2.0.0",
+      }));
+      vi.stubGlobal("fetch", vi.fn(async () => new Response("missing", { status: 404 })));
+
+      await expect(resolveRegistry("@test/ds@1.0.0", dir)).rejects.toThrow(/could not be resolved|version/i);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

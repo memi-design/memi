@@ -99,6 +99,7 @@ export function registerCiCommand(program: Command, engine: MemoireEngine): void
           && gating.some((issue) => SEVERITY_RANK[issue.severity] >= SEVERITY_RANK[failOn as AppQualitySeverity]);
         const minScore = policy.gates.minScore;
         const minScoreFailed = minScore !== undefined && diagnosis.summary.score < minScore;
+        const coverageFailed = diagnosis.assessedDimensions.length === 0;
         let regression: RegressionCheck | undefined;
         let regressionFailed = false;
         if (policy.gates.regressionBudget !== undefined) {
@@ -106,7 +107,7 @@ export function registerCiCommand(program: Command, engine: MemoireEngine): void
           regression = checkRegression(entryFromDiagnosis(diagnosis), history, policy.gates.regressionBudget);
           regressionFailed = regression.comparable === true && regression.regressed === true;
         }
-        const failed = severityFailed || minScoreFailed || regressionFailed;
+        const failed = severityFailed || minScoreFailed || regressionFailed || coverageFailed;
 
         // 6. Outputs.
         const sarifPath = resolve(projectRoot, opts.sarif ?? join(".memoire", "app-quality", "memi-results.sarif"));
@@ -127,6 +128,7 @@ export function registerCiCommand(program: Command, engine: MemoireEngine): void
           suppressedByBaseline,
           scopedFiles: scopeFiles ? scopeFiles.size : undefined,
           regression,
+          unassessedDimensions: diagnosis.unassessedDimensions,
         });
         if (process.env.GITHUB_STEP_SUMMARY) {
           await appendFile(process.env.GITHUB_STEP_SUMMARY, summaryMarkdown, "utf-8").catch(() => {});
@@ -157,6 +159,10 @@ export function registerCiCommand(program: Command, engine: MemoireEngine): void
           gates: {
             severity: { failed: severityFailed, gatingIssues: gating.length },
             minScore: minScore !== undefined ? { threshold: minScore, failed: minScoreFailed } : undefined,
+            coverage: {
+              failed: coverageFailed,
+              reason: coverageFailed ? "no design dimensions were assessed" : undefined,
+            },
             regression,
           },
           scope: scopeFiles ? { base: scopeBase, changedFiles: scopeFiles.size } : undefined,
@@ -179,6 +185,7 @@ export function registerCiCommand(program: Command, engine: MemoireEngine): void
           }
           if (gating.length > 10) console.log(ui.dim(`  …and ${gating.length - 10} more (see SARIF / step summary)`));
           if (minScoreFailed) console.log(ui.fail(`Score ${diagnosis.summary.score} is below the policy minimum ${minScore}`));
+          if (coverageFailed) console.log(ui.fail("No design dimensions were assessed"));
           if (regressionFailed && regression?.previous) {
             console.log(ui.fail(`Regression: ${regression.delta} point(s) vs ${regression.previous.sha ?? regression.previous.at} (budget ${policy.gates.regressionBudget})`));
           }

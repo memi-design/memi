@@ -1,5 +1,7 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir, readFile, realpath, stat } from "node:fs/promises";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { isPrivateOrLocalHostname } from "../security/network-address.js";
+import { fetchPublicText } from "../security/safe-fetch.js";
 
 export interface ScannedSourceFile {
   id: string;
@@ -25,6 +27,8 @@ export interface SourceScanOptions {
   includeLinkedStyles?: boolean;
   maxLinkedStyles?: number;
   userAgent?: string;
+  /** Excludes project-relative paths before they consume the max-files budget. */
+  excludePath?: (projectPath: string) => boolean;
 }
 
 const DEFAULT_IGNORE_DIRS = [
@@ -43,17 +47,22 @@ const DEFAULT_IGNORE_DIRS = [
 const DEFAULT_MAX_FILES = 500;
 const DEFAULT_CONCURRENCY = 16;
 const DEFAULT_FETCH_TIMEOUT_MS = 15000;
+const DEFAULT_MAX_RESPONSE_BYTES = 750_000;
 
 export async function scanSources(options: SourceScanOptions): Promise<ScannedSourceFile[]> {
   const target = options.target ?? options.projectRoot;
   const maxFiles = Math.max(1, options.maxFiles ?? DEFAULT_MAX_FILES);
   if (isHttpUrl(target)) {
+    assertSafePublicHttpUrl(target);
     return scanUrl(target, options, maxFiles);
   }
 
   const root = resolve(options.projectRoot);
-  const resolvedTarget = isAbsolute(target) ? target : resolve(root, target);
+  const resolvedTarget = resolve(isAbsolute(target) ? target : resolve(root, target));
+  assertPathWithinRoot(root, resolvedTarget);
   const targetStat = await stat(resolvedTarget);
+  const [realRoot, realTarget] = await Promise.all([realpath(root), realpath(resolvedTarget)]);
+  assertPathWithinRoot(realRoot, realTarget);
   const extensions = normalizeExtensions(options.extensions);
 
   if (targetStat.isFile()) {
@@ -65,7 +74,14 @@ export async function scanSources(options: SourceScanOptions): Promise<ScannedSo
   }
 
   const ignoreDirs = new Set([...DEFAULT_IGNORE_DIRS, ...(options.ignoreDirs ?? [])]);
-  const candidates = await collectCandidates(resolvedTarget, extensions, ignoreDirs, maxFiles);
+  const candidates = await collectCandidates(
+    root,
+    resolvedTarget,
+    extensions,
+    ignoreDirs,
+    maxFiles,
+    options.excludePath,
+  );
   const sortedCandidates = candidates.sort((a, b) => normalizePath(a).localeCompare(normalizePath(b))).slice(0, maxFiles);
   const sources = await mapWithConcurrency(sortedCandidates, options.concurrency ?? DEFAULT_CONCURRENCY, (filePath) => {
     return readLocalFile(root, filePath, resolvedTarget, options.maxBytesPerFile).catch(() => null);
@@ -74,22 +90,26 @@ export async function scanSources(options: SourceScanOptions): Promise<ScannedSo
 }
 
 async function collectCandidates(
+  projectRoot: string,
   dir: string,
   extensions: Set<string>,
   ignoreDirs: Set<string>,
   maxFiles: number,
+  excludePath?: (projectPath: string) => boolean,
 ): Promise<string[]> {
   const files: string[] = [];
-  await walk(dir, files, extensions, ignoreDirs, maxFiles);
+  await walk(projectRoot, dir, files, extensions, ignoreDirs, maxFiles, excludePath);
   return files;
 }
 
 async function walk(
+  projectRoot: string,
   dir: string,
   files: string[],
   extensions: Set<string>,
   ignoreDirs: Set<string>,
   maxFiles: number,
+  excludePath?: (projectPath: string) => boolean,
 ): Promise<void> {
   if (files.length >= maxFiles) return;
   const entries = (await readdir(dir, { withFileTypes: true }))
@@ -100,13 +120,17 @@ async function walk(
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       if (!ignoreDirs.has(entry.name)) {
-        await walk(fullPath, files, extensions, ignoreDirs, maxFiles);
+        const projectPath = normalizePath(relative(projectRoot, fullPath));
+        if (!excludePath?.(projectPath)) {
+          await walk(projectRoot, fullPath, files, extensions, ignoreDirs, maxFiles, excludePath);
+        }
       }
       continue;
     }
     if (!entry.isFile()) continue;
     const extension = extname(entry.name).toLowerCase();
-    if (extensions.has(extension)) files.push(fullPath);
+    const projectPath = normalizePath(relative(projectRoot, fullPath));
+    if (extensions.has(extension) && !excludePath?.(projectPath)) files.push(fullPath);
   }
 }
 
@@ -191,21 +215,17 @@ function urlSource(id: string, content: string, extension: string): ScannedSourc
 }
 
 async function fetchText(url: string, timeoutMs: number, userAgent: string): Promise<string> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "Accept": "text/html,text/css,*/*",
-        "User-Agent": userAgent,
-      },
-    });
-    if (!response.ok) throw new Error(`Could not fetch ${url}: ${response.status}`);
-    return await response.text();
-  } finally {
-    clearTimeout(timer);
-  }
+  assertSafePublicHttpUrl(url);
+  const response = await fetchPublicText(url, {
+    maxBytes: DEFAULT_MAX_RESPONSE_BYTES,
+    timeoutMs,
+    headers: {
+      "Accept": "text/html,text/css,*/*",
+      "User-Agent": userAgent,
+    },
+  });
+  if (!response.ok) throw new Error(`Could not fetch ${url}: ${response.status}`);
+  return response.text;
 }
 
 function extractInlineStyles(html: string): string[] {
@@ -229,7 +249,9 @@ function extractStylesheetUrls(html: string, baseUrl: string): string[] {
       const href = match[1];
       if (!href) continue;
       try {
-        urls.add(new URL(href, baseUrl).href);
+        const resolved = new URL(href, baseUrl).href;
+        assertSafePublicHttpUrl(resolved);
+        urls.add(resolved);
       } catch {
         continue;
       }
@@ -273,6 +295,27 @@ function isHttpUrl(value: string): boolean {
     return parsed.protocol === "http:" || parsed.protocol === "https:";
   } catch {
     return false;
+  }
+}
+
+function assertPathWithinRoot(root: string, candidate: string): void {
+  const relativePath = relative(resolve(root), resolve(candidate));
+  if (relativePath === "" || (!relativePath.startsWith(`..${sep}`) && relativePath !== ".." && !isAbsolute(relativePath))) {
+    return;
+  }
+  throw new Error(`Source target is outside the project root: ${candidate}`);
+}
+
+function assertSafePublicHttpUrl(value: string): void {
+  const parsed = new URL(value);
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error(`Source URL must use a public http(s) address: ${value}`);
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error(`Source URL must use a public http(s) address without credentials: ${value}`);
+  }
+  if (isPrivateOrLocalHostname(parsed.hostname)) {
+    throw new Error(`Source URL must use a public http(s) address: ${value}`);
   }
 }
 

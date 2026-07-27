@@ -1,12 +1,12 @@
 # memi design CI for GitHub Actions
 
-`memi design CI` is the supported GitHub distribution surface for the deterministic `memi ci` gate. It defaults to the reviewed `@memi-design/cli@2.5.0` pin, scans the checked-out repository, writes a GitHub step summary, uploads design-health evidence, and can publish SARIF annotations to code scanning.
+`memi design CI` is the supported GitHub distribution surface for the deterministic `memi ci` gate. It defaults to the reviewed `@memi-design/cli@2.6.2` pin, scans the checked-out repository, writes a GitHub step summary, uploads design-health evidence, and can publish SARIF annotations to code scanning.
 
 The action does not accept API keys, Figma credentials, model credentials, or a GitHub token input. The design gate does not invoke an LLM, and the action sets `DO_NOT_TRACK=1` and `MEMI_TELEMETRY_DISABLED=1` for CLI execution.
 
 ## Recommended workflow
 
-Pin the action release, check out full history for PR merge-base discovery, and grant only the permissions needed by the selected outputs.
+Pin the action commit, check out full history for PR merge-base discovery, and grant only the permissions needed by the selected outputs.
 
 ```yaml
 name: design
@@ -22,12 +22,12 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - id: memi
-        uses: sarveshsea/memi@v2.5.0
+        uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
 
       - name: Show evidence locations
         if: ${{ always() }}
@@ -43,7 +43,7 @@ jobs:
 
 | Input | Default | Contract |
 | --- | --- | --- |
-| `version` | `2.5.0` | Exact CLI version. The reviewed default is pinned; exact prior versions remain accepted for existing workflows. Ranges and dist-tags are rejected. |
+| `version` | `2.6.2` | Exact CLI version. The reviewed default is pinned; exact prior versions remain accepted for existing workflows. Ranges and dist-tags are rejected. |
 | `fail-on` | empty | `critical`, `high`, `medium`, `low`, or `none`. Empty defers to `memoire.policy.json`. |
 | `base` | empty | Git ref used for PR scoping. Empty lets the CLI try `origin/$GITHUB_BASE_REF`, then `origin/main`. |
 | `target` | empty | Directory to scan. Empty scans the repository root. Paths are passed as one argument, including spaces and leading dashes. |
@@ -80,7 +80,7 @@ Artifacts are inspected and uploaded with `if: always()`, so a policy failure st
 SARIF upload requires `security-events: write`. The action automatically skips code-scanning upload for pull requests from forks, while still running the gate and uploading the report artifact. For repositories where code scanning is unavailable or permissions are intentionally read-only, disable only that integration:
 
 ```yaml
-- uses: sarveshsea/memi@v2.5.0
+- uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
   with:
     upload-sarif: "false"
 ```
@@ -91,14 +91,14 @@ No secret is needed for the report artifact. GitHub's maintained upload actions 
 
 ```yaml
 - id: memi
-  uses: sarveshsea/memi@v2.5.0
+  uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
   with:
     fail-on: high
     base: origin/main
     target: packages/web
     report: "true"
     upload-sarif: "false"
-    version: "2.5.0"
+    version: "2.6.2"
 ```
 
 ## Marketplace release checklist
@@ -112,7 +112,7 @@ No secret is needed for the report artifact. GitHub's maintained upload actions 
 
 2. Validate `action.yml` as YAML and with `actionlint` when available.
 3. Merge the reviewed action commit to `main`.
-4. Create the immutable `v2.5.0` release tag on that commit. Never retag an existing release.
+4. Create the immutable `v2.6.2` release tag on that commit. Never retag an existing release.
 5. In the GitHub release UI, select **Publish this Action to the GitHub Marketplace**.
 6. Use **Code quality** as the primary category and **Continuous integration** as the secondary category.
 7. After Marketplace publication, move the floating `v2` tag to the same reviewed commit for consumers that intentionally follow compatible v2 updates.

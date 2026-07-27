@@ -8,6 +8,14 @@ import type { AnySpec } from "../../specs/types.js";
 import { installShadcnRegistryItem, resolveShadcnRegistryItem } from "../installer.js";
 
 describe("shadcn registry installer", () => {
+  it.each([
+    "http://[::ffff:127.0.0.1]/registry.json",
+    "http://[::ffff:169.254.169.254]/registry.json",
+    "http://[::ffff:10.0.0.1]/registry.json",
+  ])("rejects IPv4-mapped IPv6 private registry URLs: %s", async (url) => {
+    await expect(resolveShadcnRegistryItem(url, "Button", process.cwd())).rejects.toThrow(/unsafe/i);
+  });
+
   it("installs item content to file targets and records a spec", async () => {
     const projectRoot = await mkdtemp(join(tmpdir(), "memoire-shadcn-install-"));
     try {
@@ -47,6 +55,38 @@ describe("shadcn registry installer", () => {
     try {
       await writeShadcnFixture(projectRoot);
       await expect(resolveShadcnRegistryItem(join(projectRoot, "public", "r"), "Missing", projectRoot)).rejects.toThrow(/Missing|missing/i);
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses to read item files outside the local registry root", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memoire-shadcn-traversal-"));
+    try {
+      const registryRoot = join(projectRoot, "public", "r");
+      await mkdir(registryRoot, { recursive: true });
+      await writeFile(join(projectRoot, "secret.ts"), "export const secret = true;");
+      await writeFile(join(registryRoot, "button.json"), JSON.stringify({
+        "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+        name: "button",
+        type: "registry:ui",
+        title: "Button",
+        files: [{
+          path: "../../secret.ts",
+          type: "registry:component",
+          target: "@/components/ui/button.tsx",
+        }],
+      }));
+
+      const engine = {
+        config: { projectRoot },
+        registry: { saveSpec: async () => undefined },
+      } as unknown as MemoireEngine;
+
+      await expect(installShadcnRegistryItem(engine, {
+        from: join(registryRoot, "button.json"),
+        name: "Button",
+      })).rejects.toThrow(/escapes the shadcn registry root/i);
     } finally {
       await rm(projectRoot, { recursive: true, force: true });
     }

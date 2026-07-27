@@ -203,7 +203,9 @@ describe("packaged agent kits", () => {
         termsOfServiceURL: "https://www.memoire.cv/terms",
       },
     });
-    expect(manifest.description).toContain("memi design memory");
+    expect(manifest.description).toContain(
+      "read-only design engineering audit and skill layer for coding agents",
+    );
     expect(manifest.interface.defaultPrompt.length).toBeLessThanOrEqual(4);
     expect(manifest.interface.defaultPrompt).toContain("Audit this UI with memi before editing.");
     expect(manifest.interface.logo).toBeUndefined();

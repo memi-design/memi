@@ -1,4 +1,13 @@
-# Site and GitHub Handoff
+# Historical Site and GitHub Handoff
+
+This file is retained as the earlier `v2.5` site handoff snapshot.
+
+Do not use it as the current website release checklist. Current release truth lives in:
+
+- [release-manifest.json](../release-manifest.json)
+- [CURRENT_RELEASE.md](./CURRENT_RELEASE.md)
+- [RELEASE_GATES.md](./RELEASE_GATES.md)
+- [current audit](./audits/memi-design-engineering-audit-2026-07-26.md)
 
 These are the external-surface updates for the v2.5 agent-design-CI Product Hunt recovery launch.
 

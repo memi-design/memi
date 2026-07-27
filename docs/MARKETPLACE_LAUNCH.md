@@ -1,4 +1,8 @@
-# Marketplace Launch Campaign
+# Historical Marketplace Launch Campaign
+
+This file is retained as historical `v2.5.0` marketplace launch copy. Do not
+use it as the current release source of truth. Use
+[CURRENT_RELEASE.md](./CURRENT_RELEASE.md).
 
 Use these posts after `2.5.0` is published and npm latest verifies. Keep every link pointed at npm until `https://www.memoire.cv/components` is deployed and healthy.
 

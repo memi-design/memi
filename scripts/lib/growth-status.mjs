@@ -103,6 +103,7 @@ export async function buildGrowthStatus(options = {}) {
     options.weeklyNpmDownloadTarget ?? WEEKLY_NPM_DOWNLOAD_TARGET,
   );
   const downloadTrend = summarizeDownloadRange(downloadRange);
+  const adoptionTargets = buildAdoptionTargets();
 
   return {
     generatedAt: now().toISOString(),
@@ -122,6 +123,7 @@ export async function buildGrowthStatus(options = {}) {
     growth: {
       weeklyNpmDownloads,
       downloadTrend,
+      adoptionTargets,
     },
     github,
     skillsSh,
@@ -162,6 +164,10 @@ export function printHuman(status) {
   if (status.growth?.weeklyNpmDownloads) {
     const goal = status.growth.weeklyNpmDownloads;
     console.log(`10x weekly target: ${formatNumber(goal.current)} / ${formatNumber(goal.target)} (${formatPercent(goal.percentToTarget)} · ${formatNumber(goal.gap)} gap · ${formatMultiple(goal.multipleToTarget)} to target)`);
+  }
+  if (status.growth?.adoptionTargets) {
+    const targets = status.growth.adoptionTargets;
+    console.log(`Verified adoption targets (no telemetry): ${formatNumber(targets.externalIntegrations.target)} external integrations · ${formatNumber(targets.successfulFirstAudits.target)} successful first audits · ${formatNumber(targets.repeatAudits.target)} repeats · +${formatPercent(targets.sustainedNonReleaseBaselineGrowth.target)} sustained non-release baseline`);
   }
   for (const alias of status.downloads.legacyAliases) {
     console.log(`Legacy alias ${alias.name}: ${formatDownloads(alias.weekly, "weekly")} · ${formatDownloads(alias.monthly, "monthly")}`);
@@ -236,6 +242,30 @@ export function buildWeeklyNpmDownloadGoal(point, target = WEEKLY_NPM_DOWNLOAD_T
   };
 }
 
+export function buildAdoptionTargets() {
+  return {
+    telemetryRequired: false,
+    evidenceMode: "privacy_safe_verified_aggregate",
+    externalIntegrations: {
+      target: 10,
+      unit: "integrations",
+    },
+    successfulFirstAudits: {
+      target: 100,
+      unit: "audits",
+    },
+    repeatAudits: {
+      target: 25,
+      unit: "repeat_audits",
+    },
+    sustainedNonReleaseBaselineGrowth: {
+      target: 0.25,
+      unit: "ratio",
+      releasePeriodsExcluded: true,
+    },
+  };
+}
+
 export function summarizeDownloadRange(range) {
   if (range?.ok === false) {
     return {
@@ -272,7 +302,7 @@ export function summarizeDownloadRange(range) {
     classification = "declining";
   } else if (previous7 > latest7 * 2 && latest7 >= prior7 * 1.25) {
     classification = "normalizing_after_spike";
-  } else if (latest7 > previous7 * 1.2) {
+  } else if (latest7 > previous7 * 1.2 && latest7 >= prior7) {
     classification = "growing";
   }
 

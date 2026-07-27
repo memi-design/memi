@@ -4,42 +4,167 @@ on:
   workflow_dispatch:
     inputs:
       expected_version:
-        description: 'Expected npm version after publish'
+        description: 'Exact npm version to publish or recover'
+        required: true
+        type: string
+      mode:
+        description: 'Publish once, or recover evidence after a partial post-publish failure'
+        required: true
+        default: publish
+        type: choice
+        options:
+          - publish
+          - recover
+      source_run_id:
+        description: 'Original publish workflow run ID; required only for recovery'
+        required: false
+        type: string
+      source_run_attempt:
+        description: 'Original publish workflow run attempt; required only for recovery'
         required: false
         type: string
 
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
 jobs:
   publish:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       id-token: write
+    env:
+      EXPECTED_VERSION: ${{ inputs.expected_version }}
+      EXPECTED_SOURCE_REPOSITORY: https://github.com/sarveshsea/memi
+      EXPECTED_SOURCE_WORKFLOW: .github/workflows/publish.yml
+      EXPECTED_SOURCE_REF: refs/heads/main
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false
-      - run: npm install --ignore-scripts
-      - run: npm run check:release
-      - run: npm run lint
-      - run: npm test -- --run
-      - run: npm run build
-      - name: Prepare npm publishing auth
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - run: npm ci --ignore-scripts
+
+      - name: Resolve publish source
+        if: inputs.mode == 'publish'
         run: |
-          npm --version
-          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
-            npm config set //registry.npmjs.org/:_authToken "${NODE_AUTH_TOKEN}"
-            echo "Configured npm token fallback."
-          else
-            echo "No NPM_TOKEN configured; npm publish will use trusted publishing OIDC."
+          echo "EXPECTED_SOURCE_COMMIT=${GITHUB_SHA}" >> "${GITHUB_ENV}"
+          echo "RELEASE_WORKFLOW_RUN_ID=${GITHUB_RUN_ID}" >> "${GITHUB_ENV}"
+          echo "RELEASE_WORKFLOW_RUN_ATTEMPT=${GITHUB_RUN_ATTEMPT}" >> "${GITHUB_ENV}"
+
+      - name: Resolve and validate recovery source run
+        if: inputs.mode == 'recover'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          SOURCE_RUN_ATTEMPT: ${{ inputs.source_run_attempt }}
+        run: |
+          set -euo pipefail
+          if [[ ! "${SOURCE_RUN_ID}" =~ ^[0-9]+$ ]] ||
+             [[ ! "${SOURCE_RUN_ATTEMPT}" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::source_run_id and source_run_attempt must identify the original publish attempt"
+            exit 1
           fi
-      - name: Publish npm package
-        run: npm publish --access public
-      - name: Verify npm release
+          run_json="$(
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}/attempts/${SOURCE_RUN_ATTEMPT}"
+          )"
+          workflow_path="$(jq -r '.path' <<<"${run_json}")"
+          source_commit="$(jq -r '.head_sha' <<<"${run_json}")"
+          source_branch="$(jq -r '.head_branch' <<<"${run_json}")"
+          run_attempt="$(jq -r '.run_attempt' <<<"${run_json}")"
+          if [ "${workflow_path}" != ".github/workflows/publish.yml" ] ||
+             [ "${source_branch}" != "main" ] ||
+             [[ ! "${source_commit}" =~ ^[0-9a-f]{40}$ ]] ||
+             [ "${run_attempt}" != "${SOURCE_RUN_ATTEMPT}" ]; then
+            echo "::error::source run is not a valid main-branch Publish to npm run"
+            exit 1
+          fi
+          echo "RECOVERY_SOURCE_COMMIT=${source_commit}" >> "${GITHUB_ENV}"
+          echo "EXPECTED_SOURCE_COMMIT=${source_commit}" >> "${GITHUB_ENV}"
+          echo "RELEASE_WORKFLOW_RUN_ID=${SOURCE_RUN_ID}" >> "${GITHUB_ENV}"
+          echo "RELEASE_WORKFLOW_RUN_ATTEMPT=${run_attempt}" >> "${GITHUB_ENV}"
+
+      - name: Download original SBOM evidence
+        if: inputs.mode == 'recover'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.source_run_id }}
+          pattern: memi-release-sbom-*-${{ inputs.source_run_attempt }}
+          merge-multiple: true
+          path: release-evidence
+
+      - name: Verify candidate is unpublished
+        if: inputs.mode == 'publish'
+        run: node scripts/verify-npm-release.mjs --prepublish
+        env:
+          EXPECTED_SOURCE_COMMIT: ${{ github.sha }}
+
+      - name: Verify recoverable candidate and published source
+        if: inputs.mode == 'recover'
+        run: node scripts/verify-npm-release.mjs --recovery-preflight
+
+      - name: Run release gates
+        run: |
+          npm run check:release
+          npm run lint
+          npm test -- --run
+          npm run build
+
+      - name: Generate release SBOM
+        if: inputs.mode == 'publish'
+        run: |
+          mkdir -p release-evidence
+          npm sbom --package-lock-only --sbom-format cyclonedx > release-evidence/memi.cdx.json
+          node -e 'JSON.parse(require("node:fs").readFileSync("release-evidence/memi.cdx.json","utf8"))'
+          shasum -a 256 release-evidence/memi.cdx.json > release-evidence/memi.cdx.json.sha256
+
+      - name: Upload release SBOM
+        if: inputs.mode == 'publish'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: memi-release-sbom-${{ github.sha }}-${{ github.run_attempt }}
+          path: release-evidence/
+          if-no-files-found: error
+
+      - name: Publish npm package exactly once
+        if: inputs.mode == 'publish'
+        run: npm publish --access public --provenance
+
+      - name: Verify npm signatures and attestations
+        env:
+          PACKAGE_SPEC: '@memi-design/cli@${{ inputs.expected_version }}'
+        run: |
+          audit_root="$(mktemp -d)"
+          trap 'rm -rf "${audit_root}"' EXIT
+          cd "${audit_root}"
+          npm init --yes >/dev/null
+          npm install --ignore-scripts "${PACKAGE_SPEC}"
+          npm audit signatures --include-attestations
+
+      - name: Build immutable release record
         run: node scripts/verify-npm-release.mjs
         env:
-          EXPECTED_VERSION: ${{ inputs.expected_version }}
+          NPM_SIGNATURE_AUDIT_VERIFIED: '1'
+          SBOM_PATH: release-evidence/memi.cdx.json
+          RELEASE_RECORD_OUTPUT: release-evidence/release-artifacts/npm/${{ inputs.expected_version }}.release.json
+
+      - name: Upload verified release transition bundle
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: memi-release-record-${{ inputs.expected_version }}-${{ env.EXPECTED_SOURCE_COMMIT }}-${{ env.RELEASE_WORKFLOW_RUN_ATTEMPT }}
+          path: release-evidence/
+          if-no-files-found: error

@@ -9,8 +9,8 @@
  *   - Local path:             "./path/to/registry" or "/abs/path"
  */
 
-import { access, readFile } from "fs/promises";
-import { join, isAbsolute, resolve } from "path";
+import { access, readFile, realpath } from "fs/promises";
+import { isAbsolute, join, relative, resolve, sep } from "path";
 import {
   parseRegistry,
   type Registry,
@@ -20,6 +20,8 @@ import {
 import { resolveMarketplaceAlias } from "../marketplace/catalog-loader.js";
 import { fetchNpmPackageToCache } from "./npm-fetch.js";
 import { packagePath } from "../utils/asset-path.js";
+import { isPrivateOrLocalHostname } from "../security/network-address.js";
+import { fetchPublicText } from "../security/safe-fetch.js";
 
 export interface ResolvedRegistry {
   /** The parsed registry document */
@@ -36,6 +38,7 @@ export interface ResolveRegistryOptions {
 }
 
 const FETCH_TIMEOUT_MS = 15000;
+const MAX_REGISTRY_RESPONSE_BYTES = 5 * 1024 * 1024;
 
 // ── SSRF guard (same pattern as penpot-client) ───────────────
 
@@ -49,9 +52,7 @@ function assertSafePublicUrl(url: string): void {
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     throw new Error(`URL must be http(s): ${url}`);
   }
-  const host = parsed.hostname.toLowerCase();
-  const PRIVATE_IPV4 = /^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0)/;
-  if (host === "localhost" || host === "::1" || PRIVATE_IPV4.test(host)) {
+  if (isPrivateOrLocalHostname(parsed.hostname)) {
     throw new Error(`Registry URL cannot point to a private/loopback address: ${url}`);
   }
 }
@@ -126,7 +127,13 @@ async function resolveNpm(pkgName: string, cwd: string, options: ResolveRegistry
   const { packageName, version } = splitNpmPackageRef(pkgName);
   const baseDir = resolve(cwd, "node_modules", packageName);
   try {
-    return await resolveLocal(baseDir, cwd);
+    const local = await resolveLocal(baseDir, cwd);
+    if (version !== "latest" && local.registry.version !== version) {
+      throw new Error(
+        `Local registry version ${local.registry.version} does not satisfy exact pin ${version}`,
+      );
+    }
+    return local;
   } catch (localError) {
     try {
       const cached = await fetchNpmPackageToCache(packageName, cwd, version, {
@@ -176,17 +183,14 @@ async function resolveGitHub(ref: string): Promise<ResolvedRegistry> {
 async function resolveHttp(registryUrl: string, explicitBase?: string): Promise<ResolvedRegistry> {
   assertSafePublicUrl(registryUrl);
   const baseUrl = explicitBase ?? registryUrl.replace(/\/[^/]+$/, "");
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const res = await fetch(registryUrl, { signal: controller.signal, redirect: "error" });
-    if (!res.ok) throw new Error(`Registry fetch failed (${res.status}): ${registryUrl}`);
-    const raw = await res.text();
-    const registry = parseRegistry(JSON.parse(raw));
-    return { registry, baseUrl, source: registryUrl };
-  } finally {
-    clearTimeout(timer);
-  }
+  const response = await fetchPublicText(registryUrl, {
+    maxBytes: MAX_REGISTRY_RESPONSE_BYTES,
+    timeoutMs: FETCH_TIMEOUT_MS,
+    headers: { "User-Agent": "memoire-registry-resolver" },
+  });
+  if (!response.ok) throw new Error(`Registry fetch failed (${response.status}): ${registryUrl}`);
+  const registry = parseRegistry(JSON.parse(response.text));
+  return { registry, baseUrl, source: registryUrl };
 }
 
 // ── Fetching referenced files ────────────────────────────────
@@ -198,24 +202,40 @@ export async function readRegistryFile(resolved: ResolvedRegistry, href: string)
   const { baseUrl } = resolved;
   // Strip leading ./
   const cleanHref = href.startsWith("./") ? href.slice(2) : href;
+  if (!cleanHref || cleanHref.includes("\\")) {
+    throw new Error(`Registry file reference is invalid: ${href}`);
+  }
 
   if (/^https?:\/\//.test(baseUrl)) {
-    const url = `${baseUrl}/${cleanHref}`;
-    assertSafePublicUrl(url);
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-    try {
-      const res = await fetch(url, { signal: controller.signal, redirect: "error" });
-      if (!res.ok) throw new Error(`Failed to fetch ${href}: ${res.status}`);
-      return await res.text();
-    } finally {
-      clearTimeout(timer);
+    const normalizedBase = new URL(baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`);
+    const url = new URL(cleanHref, normalizedBase);
+    assertSafePublicUrl(url.href);
+    if (url.origin !== normalizedBase.origin || !url.pathname.startsWith(normalizedBase.pathname)) {
+      throw new Error(`Registry file reference escapes the registry root: ${href}`);
     }
+    const response = await fetchPublicText(url.href, {
+      maxBytes: MAX_REGISTRY_RESPONSE_BYTES,
+      timeoutMs: FETCH_TIMEOUT_MS,
+      headers: { "User-Agent": "memoire-registry-resolver" },
+    });
+    if (!response.ok) throw new Error(`Failed to fetch ${href}: ${response.status}`);
+    return response.text;
   }
 
   // Local path
-  const fullPath = join(baseUrl, cleanHref);
-  return readFile(fullPath, "utf-8");
+  const root = resolve(baseUrl);
+  const fullPath = resolve(root, cleanHref);
+  assertRegistryPathContained(root, fullPath, href);
+  const [realRoot, realFile] = await Promise.all([realpath(root), realpath(fullPath)]);
+  assertRegistryPathContained(realRoot, realFile, href);
+  return readFile(realFile, "utf-8");
+}
+
+function assertRegistryPathContained(root: string, candidate: string, href: string): void {
+  const relativePath = relative(root, candidate);
+  if (relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath)) {
+    throw new Error(`Registry file reference escapes the registry root: ${href}`);
+  }
 }
 
 /**

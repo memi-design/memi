@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { applyChangelogData, parseChangelogMarkdown } from "./build-changelog-preview.mjs";
+import { loadReleaseManifest, verifyCoreReleaseSurfaces } from "./lib/release-manifest.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -29,6 +30,20 @@ function normalizeNewlines(value) {
 }
 
 const packageJson = await readJson(join(root, "package.json"));
+const releaseManifest = await loadReleaseManifest(root);
+for (const failure of await verifyCoreReleaseSurfaces(root, releaseManifest)) {
+  fail(failure);
+}
+const currentReleaseDoc = spawnSync(process.execPath, [
+  join(root, "scripts", "render-current-release.mjs"),
+  "--check",
+], {
+  cwd: root,
+  encoding: "utf-8",
+});
+if (currentReleaseDoc.status !== 0) {
+  fail(`current release documentation gate failed: ${spawnFailureMessage(currentReleaseDoc, "failed")}`);
+}
 const version = packageJson.version;
 const expectedMcpName = "io.github.sarveshsea/memi";
 if (packageJson.mcpName !== expectedMcpName) {
@@ -77,7 +92,7 @@ const readme = await readFile(join(root, "README.md"), "utf-8");
 const readmeTopFold = readme.slice(0, 3000);
 const skillsPackageInstallCommand = "npx skills add sarveshsea/memi --skill audit-frontend-design";
 const requiredReadmeTerms = [
-  "Design QA skills for coding agents",
+  "read-only design engineering audit and skill layer for coding agents",
   "remember-design-system",
   "enforce-design-ci",
   "No account, API key, Figma file, global install, or daemon is required",
@@ -99,6 +114,7 @@ const requiredPackagedDocs = [
   ["docs/AGENT_STACKS.md", "ECC / AGENTS.md stacks"],
   ["docs/V2_PACKAGE_POSITIONING.md", "High-download package bar"],
   ["docs/RELEASE_GATES.md", "Local Publish-Ready Gate"],
+  ["docs/CURRENT_RELEASE.md", "Current Memi release truth"],
   ["docs/IOS_SWIFT.md", "Apple-platform design CI"],
   ["docs/PROOF.md", "No-Figma"],
 ];
@@ -449,6 +465,19 @@ if (process.env.SKIP_PACK_GATE !== "1") {
 }
 
 if (process.env.SKIP_AUDIT_GATE !== "1") {
+  const scorecard = spawnSync(process.execPath, [
+    join(root, "node_modules", "tsx", "dist", "cli.mjs"),
+    join(root, "scripts", "render-audit-scorecard.ts"),
+    "--check",
+  ], {
+    cwd: root,
+    encoding: "utf-8",
+    maxBuffer: 1024 * 1024 * 5,
+  });
+  if (scorecard.status !== 0) {
+    fail(`audit scorecard gate failed: ${spawnFailureMessage(scorecard, "failed")}`);
+  }
+
   const audit = spawnSync("npm", ["audit", "--omit=dev", "--audit-level=high", "--json"], {
     cwd: root,
     encoding: "utf-8",

@@ -2,7 +2,7 @@
   "name": "@memi-design/cli",
   "version": "2.6.2",
   "mcpName": "io.github.sarveshsea/memi",
-  "description": "Interface understanding and design-system memory for AI coding agents: UX audits, Tailwind tokens, shadcn registries, MCP, and Agent Skills.",
+  "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,6 +27,13 @@
     "build:mcpb": "mkdir -p .dist && npx -y @anthropic-ai/mcpb@latest validate mcpb/manifest.json && npx -y @anthropic-ai/mcpb@latest pack mcpb .dist/memi-2.6.2.mcpb",
     "bench:cli": "node scripts/bench-cli.mjs",
     "growth:status": "node scripts/growth-status.mjs",
+    "audit:render-scorecard": "tsx scripts/render-audit-scorecard.ts",
+    "check:audit-scorecard": "tsx scripts/render-audit-scorecard.ts --check",
+    "sync:release-manifest": "node scripts/sync-release-manifest.mjs",
+    "check:release-manifest": "node scripts/sync-release-manifest.mjs --check",
+    "sync:current-release": "node scripts/render-current-release.mjs",
+    "check:current-release": "node scripts/render-current-release.mjs --check",
+    "smoke:clean-install": "node scripts/smoke-clean-install.mjs",
     "smoke:mcp": "node scripts/smoke-mcp-stdio.mjs",
     "smoke:codex-plugin": "node scripts/smoke-codex-plugin-marketplace.mjs",
     "pack:dry-run": "node scripts/pack-dry-run.mjs",
@@ -96,6 +103,7 @@
     "docs/IOS_SWIFT.md",
     "docs/PROOF.md",
     "docs/RELEASE_GATES.md",
+    "docs/CURRENT_RELEASE.md",
     "!assets/demo.gif",
     "!assets/noche-moon.svg",
     "!plugin/*.png",
@@ -120,7 +128,7 @@
     "pino-pretty": "^13.0.0",
     "react": "^18.3.1",
     "ssf": "^0.11.2",
-    "tar": "7.5.20",
+    "tar": "7.5.22",
     "ws": "^8.18.0",
     "xlsx-populate": "^1.21.0",
     "zod": "^3.25.0"
@@ -144,6 +152,10 @@
     "playwright": "^1.59.1"
   },
   "overrides": {
+    "@hono/node-server": "2.0.12",
+    "body-parser": "2.3.0",
+    "fast-uri": "3.1.4",
+    "hono": "4.12.32",
     "tsx": {
       "esbuild": "0.28.1"
     }

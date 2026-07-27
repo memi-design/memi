@@ -5,6 +5,7 @@
 
 import type { AppQualityIssue } from "../app-quality/engine.js";
 import type { RegressionCheck } from "../app-quality/history.js";
+import { markdownCodeSpan } from "../utils/output-sanitization.js";
 
 export interface StepSummaryInput {
   score: number;
@@ -16,6 +17,7 @@ export interface StepSummaryInput {
   suppressedByBaseline: number;
   scopedFiles?: number;
   regression?: RegressionCheck;
+  unassessedDimensions?: string[];
 }
 
 export function renderStepSummary(input: StepSummaryInput): string {
@@ -38,12 +40,17 @@ export function renderStepSummary(input: StepSummaryInput): string {
 
   lines.push("");
   if (input.gatingIssues.length === 0) {
-    lines.push("No new gating findings. 🎉");
+    if ((input.unassessedDimensions?.length ?? 0) > 0) {
+      lines.push("No gating findings from assessed checks.");
+      lines.push(`Unassessed dimensions remain unverified: ${input.unassessedDimensions?.join(", ")}.`);
+    } else {
+      lines.push("No new gating findings. 🎉");
+    }
   } else {
     lines.push(`### Gating findings (${input.gatingIssues.length})`, "");
     for (const issue of input.gatingIssues.slice(0, 15)) {
       const location = issue.evidenceLocations?.[0];
-      lines.push(`- **[${issue.severity.toUpperCase()}] ${issue.title}**${location ? ` — \`${location.file}${location.line ? `:${location.line}` : ""}\`` : ""}`);
+      lines.push(`- **[${issue.severity.toUpperCase()}] ${issue.title}**${location ? ` — ${markdownCodeSpan(`${location.file}${location.line ? `:${location.line}` : ""}`)}` : ""}`);
       lines.push(`  - ${issue.recommendation}`);
     }
     if (input.gatingIssues.length > 15) {

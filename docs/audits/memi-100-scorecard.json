@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "auditId": "memi-100",
+  "title": "Memi 100-point end-to-end scorecard",
+  "targetScore": 100,
+  "assessedAt": "2026-07-27T03:21:07.000Z",
+  "subject": {
+    "repository": "https://github.com/sarveshsea/memi",
+    "commit": "922035607a1cc688edc90f47e4b98473bba13764"
+  },
+  "evidence": [
+    {
+      "id": "reviewed-candidate-audit",
+      "kind": "implementation",
+      "status": "passed",
+      "capturedAt": "2026-07-27T03:21:07.000Z",
+      "artifact": {
+        "location": "memi-design-engineering-audit-2026-07-26.json",
+        "sha256": "e283116116da6fbdd9c936ffd79ebc0d56809d1c519a79ea7fbb0c5ce8851f63"
+      },
+      "producer": "agent:memi-audit-implementation",
+      "verifier": "agent:independent-audit-review",
+      "environment": "Cross-repository audit ledger with GitHub, npm, skills.sh, Vercel, simulator, and clean-install evidence"
+    },
+    {
+      "id": "external-clean-repositories",
+      "kind": "implementation",
+      "status": "passed",
+      "capturedAt": "2026-07-26T23:54:23.381Z",
+      "artifact": {
+        "location": "memi-external-clean-repositories-2026-07-26.json",
+        "sha256": "00ea5cdaa7f9a8cc324eecd15d936de6eb5c7b8e1505c288d269b5f240edc84d"
+      },
+      "producer": "agent:memi-clean-room",
+      "verifier": "agent:independent-audit-review",
+      "environment": "Three fresh depth-one external clones with before and after Git status, candidate CLI schema v2, and bounded findings"
+    },
+    {
+      "id": "routing-zero-confusion",
+      "kind": "implementation",
+      "status": "passed",
+      "capturedAt": "2026-07-27T03:18:53.000Z",
+      "artifact": {
+        "location": "memi-routing-evidence-2026-07-26.json",
+        "sha256": "6335fb1afd7ada56d2e86ede8316ca64c2ad062ad17323a40f12f19c687a9945"
+      },
+      "producer": "ci:design-skills",
+      "verifier": "agent:independent-audit-review",
+      "environment": "GitHub-hosted design-skills validation on merged main commit 7cce9438e3781f6e495e4d26c13746c55b14739f"
+    },
+    {
+      "id": "swiftui-rendered-rerun",
+      "kind": "implementation",
+      "status": "passed",
+      "capturedAt": "2026-07-27T03:21:07.000Z",
+      "artifact": {
+        "location": "memi-swiftui-rendered-rerun-2026-07-26.json",
+        "sha256": "e8d046bcb50117d9755db59c77fc917441321f23842f0337005ad232e547ec1e"
+      },
+      "producer": "agent:swiftui-rendered-rerun",
+      "verifier": "agent:independent-audit-review",
+      "environment": "Clean candidate audits, XcodeBuildMCP iOS 26.5 simulator rendering, runtime accessibility action, reduced-motion screenshots, and GitHub-hosted validation on merged fork main commit 8037c8bb7db68a4c78b03b0053e241005304e3b6"
+    },
+    {
+      "id": "candidate-head-validation",
+      "kind": "clean-install",
+      "status": "passed",
+      "capturedAt": "2026-07-27T03:11:24.000Z",
+      "artifact": {
+        "location": "memi-candidate-head-validation-2026-07-27.json",
+        "sha256": "7a4ff5ae9930e2637af4472fda79e514e88b60af78dcc038e4fd2f0b995256a6"
+      },
+      "producer": "ci:memi-hosted-validation",
+      "verifier": "agent:audit-review",
+      "environment": "GitHub-hosted CI, HOL scanner, and nine-cell clean install matrix across Linux, macOS, Windows, and Node 20, 22, and 24 at immutable commit 922035607a1cc688edc90f47e4b98473bba13764"
+    }
+  ],
+  "derivedFromAudit": {
+    "candidateAuditEvidenceId": "reviewed-candidate-audit"
+  },
+  "dimensions": [
+    {
+      "id": "core-activation",
+      "title": "Core job, activation, and useful first result",
+      "maximum": 15,
+      "owner": "memi-core",
+      "criteria": [
+        {
+          "id": "candidate-activation",
+          "title": "Pinned read-only command and normalized file-anchored evidence",
+          "points": 13,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "external-clean-repositories",
+          "title": "Three external clean repositories prove no mutation, useful results, and honest unsupported states",
+          "points": 2,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit",
+            "external-clean-repositories"
+          ],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "surface-parity",
+      "title": "CLI, MCP, skills, site, Studio, and release consistency",
+      "maximum": 15,
+      "owner": "release-engineering",
+      "criteria": [
+        {
+          "id": "candidate-release-manifest",
+          "title": "Candidate release manifest and immutable cross-repository artifact",
+          "points": 11,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "public-release-parity",
+          "title": "Merged, published, and deployed public surfaces match one verified release manifest",
+          "points": 4,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "design-engineering-depth",
+      "title": "Design-engineering depth and rendered quality",
+      "maximum": 15,
+      "owner": "design-engineering",
+      "criteria": [
+        {
+          "id": "candidate-rendered-proof",
+          "title": "Reviewed website, separate WebGL2 lab, and simulator proof artifacts",
+          "points": 13,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "swiftui-rendered-rerun",
+          "title": "Real SwiftUI source audit, correction, analyzed rendering, and verified rerun",
+          "points": 2,
+          "assessment": "passed",
+          "evidenceIds": [
+            "swiftui-rendered-rerun"
+          ],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "skill-governance",
+      "title": "Skill governance, routing, freshness, and provenance",
+      "maximum": 15,
+      "owner": "design-skills",
+      "criteria": [
+        {
+          "id": "candidate-catalog",
+          "title": "Ninety-four scored skills, governed ownership, freshness, and complete representative routing benchmark",
+          "points": 14,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "zero-routing-gaps",
+          "title": "All dispositions resolved with zero known held-out routing confusion",
+          "points": 1,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit",
+            "routing-zero-confusion"
+          ],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "shader-and-dither",
+      "title": "Shader, dither, and creative-rendering capability",
+      "maximum": 10,
+      "owner": "design-sandbox",
+      "criteria": [
+        {
+          "id": "candidate-webgl-proof",
+          "title": "Original deterministic WebGL2 Bayer and seeded-noise proof with fallbacks in the separately owned design-sandbox candidate",
+          "points": 8,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "durable-rendering-evidence",
+          "title": "Durable GPU, energy, color, alpha, temporal-stability, and cross-browser evidence",
+          "points": 2,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "security-privacy-licensing",
+      "title": "Security, privacy, licensing, and supply chain",
+      "maximum": 10,
+      "owner": "security-review",
+      "criteria": [
+        {
+          "id": "candidate-hardening",
+          "title": "Reviewed network, path, archive, publisher, dependency, and licensing hardening",
+          "points": 9,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "complete-supply-chain-proof",
+          "title": "SBOM, public provenance, advisory policy, least privilege, and independent signoff",
+          "points": 1,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "growth-and-community-proof",
+      "title": "GitHub, npm, and community proof",
+      "maximum": 10,
+      "owner": "growth-evidence",
+      "criteria": [
+        {
+          "id": "measured-funnel",
+          "title": "Privacy-safe funnel, preregistered definitions, and public baseline",
+          "points": 5,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "eight-week-adoption",
+          "title": "Ten integrations, one hundred first audits, twenty-five repeats, and four qualifying npm weeks",
+          "points": 5,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    },
+    {
+      "id": "testing-and-operations",
+      "title": "Testing, compatibility, and operations",
+      "maximum": 10,
+      "owner": "release-engineering",
+      "criteria": [
+        {
+          "id": "candidate-verification",
+          "title": "Core, catalog, site, shader, simulator, and clean-install candidate gates",
+          "points": 9,
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit",
+            "candidate-head-validation"
+          ],
+          "requiresIndependentVerification": true
+        },
+        {
+          "id": "aggregate-clean-room-release",
+          "title": "Aggregate public-release, rollback, package-headroom, and independent clean-room gates",
+          "points": 1,
+          "assessment": "unassessed",
+          "evidenceIds": [],
+          "requiresIndependentVerification": true
+        }
+      ]
+    }
+  ],
+  "caps": [
+    {
+      "id": "public-version-drift",
+      "maximum": 69,
+      "reason": "The reviewed candidate branches are not merged, published, and deployed across every public surface.",
+      "state": "active",
+      "clearingEvidenceIds": [],
+      "requiresIndependentVerification": true
+    },
+    {
+      "id": "hosted-ci-incomplete",
+      "maximum": 84,
+      "reason": "Website hosted CI has not run successfully because the repository account billing gate prevented runner startup.",
+      "state": "active",
+      "clearingEvidenceIds": [],
+      "requiresIndependentVerification": true
+    }
+  ]
+}

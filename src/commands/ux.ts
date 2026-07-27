@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import { stat } from "node:fs/promises";
 import type { MemoireEngine } from "../engine/core.js";
-import { diagnoseAppQuality } from "../app-quality/engine.js";
+import { auditContextFromDiagnosis, diagnoseAppQuality } from "../app-quality/engine.js";
 import { buildUxAuditReport, writeUxAuditReport, type UxAuditReport } from "../ux/tenets-traps.js";
 import { ui } from "../tui/format.js";
 
@@ -79,12 +79,14 @@ async function createUxAuditReport(options: {
 
   if (!options.screenshot) return diagnosis.ux;
 
+  const auditContext = auditContextFromDiagnosis(diagnosis);
   return buildUxAuditReport({
     target: diagnosis.target,
     issues: diagnosis.issues,
     appQualityScore: diagnosis.summary.score,
     artifactPath: options.screenshot,
     source: "screenshot",
+    ...auditContext,
   });
 }
 

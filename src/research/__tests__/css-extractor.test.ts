@@ -4,20 +4,29 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fetchPublicText } from "../../security/safe-fetch.js";
 import { fetchPageAssets, parseCSSTokens, hexToRgb, relativeLuminance, contrastRatio, wcagLevel } from "../css-extractor.js";
+
+vi.mock("../../security/safe-fetch.js", () => ({
+  fetchPublicText: vi.fn(),
+}));
+
+const fetchPublicTextMock = vi.mocked(fetchPublicText);
 
 // ── Fetch mock helpers ───────────────────────────────────
 
 function mockFetchSequence(responses: Array<{ ok: boolean; status?: number; body?: string }>) {
   let i = 0;
-  vi.stubGlobal("fetch", vi.fn(async () => {
+  fetchPublicTextMock.mockImplementation(async (url) => {
     const r = responses[i++] ?? { ok: false, status: 404, body: "" };
     return {
+      url,
       ok: r.ok,
       status: r.status ?? (r.ok ? 200 : 404),
-      text: async () => r.body ?? "",
+      headers: {},
+      text: r.body ?? "",
     };
-  }));
+  });
 }
 
 function stubFetch(html: string, css = "") {
@@ -29,7 +38,7 @@ function stubFetch(html: string, css = "") {
 }
 
 afterEach(() => {
-  vi.unstubAllGlobals();
+  fetchPublicTextMock.mockReset();
   vi.restoreAllMocks();
 });
 
@@ -37,7 +46,7 @@ afterEach(() => {
 
 describe("fetchPageAssets — basic fetch", () => {
   it("returns empty assets on network failure", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("ECONNREFUSED")));
+    fetchPublicTextMock.mockRejectedValue(new Error("ECONNREFUSED"));
     const assets = await fetchPageAssets("https://example.com");
     expect(assets.html).toBe("");
     expect(assets.cssBlocks).toEqual([]);
@@ -145,10 +154,15 @@ describe("fetchPageAssets — linked stylesheets", () => {
   });
 
   it("gracefully handles a stylesheet fetch failure", async () => {
-    vi.stubGlobal("fetch", vi.fn()
-      .mockResolvedValueOnce({ ok: true, text: async () => '<html><link rel="stylesheet" href="/bad.css"></html>' })
-      .mockRejectedValueOnce(new Error("Timeout"))
-    );
+    fetchPublicTextMock
+      .mockResolvedValueOnce({
+        url: "https://example.com",
+        ok: true,
+        status: 200,
+        headers: {},
+        text: '<html><link rel="stylesheet" href="/bad.css"></html>',
+      })
+      .mockRejectedValueOnce(new Error("Timeout"));
     const assets = await fetchPageAssets("https://example.com");
     expect(assets).toBeDefined(); // doesn't throw
     expect(assets.cssBlocks).toHaveLength(0);
@@ -177,10 +191,9 @@ describe("fetchPageAssets — linked stylesheets", () => {
       ...Array.from({ length: 10 }, (_, i) => ({ ok: true, body: `.c${i}{color:red}` })),
     ];
     mockFetchSequence(responses);
-    const fetchMock = vi.mocked(global.fetch);
     const assets = await fetchPageAssets("https://example.com");
     // 1 for page + up to 10 for stylesheets = max 11 calls
-    expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(11);
+    expect(fetchPublicTextMock.mock.calls.length).toBeLessThanOrEqual(11);
     expect(assets.cssBlocks.length).toBeLessThanOrEqual(10);
   });
 });

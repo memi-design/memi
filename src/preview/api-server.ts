@@ -6,6 +6,7 @@
  */
 
 import { createServer, type IncomingMessage, type ServerResponse } from "http";
+import { randomBytes, timingSafeEqual } from "crypto";
 import { readFile, readdir } from "fs/promises";
 import { existsSync } from "fs";
 import { join, extname, basename, resolve as resolvePath } from "path";
@@ -28,6 +29,31 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 const MAX_PORT_RETRIES = 10;
+export const PREVIEW_BIND_HOST = "127.0.0.1";
+const PREVIEW_SESSION_COOKIE = "memoire_preview_session";
+
+export function isAllowedPreviewHost(rawHost: string | undefined, port: number): boolean {
+  if (!rawHost) return false;
+  const host = rawHost.toLowerCase();
+  return host === `localhost:${port}` || host === `127.0.0.1:${port}`;
+}
+
+export function isAllowedPreviewOrigin(origin: string | undefined, port: number): boolean {
+  if (!origin) return false;
+  return origin === `http://localhost:${port}` || origin === `http://127.0.0.1:${port}`;
+}
+
+export function isAuthorizedPreviewMutation(
+  headers: Pick<IncomingMessage["headers"], "host" | "origin" | "cookie">,
+  port: number,
+  sessionToken: string,
+): boolean {
+  if (!isAllowedPreviewHost(headers.host, port) || !isAllowedPreviewOrigin(headers.origin, port)) {
+    return false;
+  }
+  const presented = readCookie(headers.cookie, PREVIEW_SESSION_COOKIE);
+  return constantTimeEqual(presented, sessionToken);
+}
 
 function createPortBindError(port: number, err: NodeJS.ErrnoException): Error & { code?: string; port?: number } {
   const wrapped = new Error(`Failed to bind preview port ${port}: ${err.message}`) as Error & {
@@ -64,6 +90,7 @@ export class PreviewApiServer {
   private onFigmaPluginDisconnected: (() => void) | null = null;
   private widgetState = new PreviewWidgetStateCache();
   private sseClients = new Set<ServerResponse>();
+  private readonly sessionToken = randomBytes(32).toString("base64url");
 
   constructor(engine: MemoireEngine, staticDir: string, port = 3030) {
     this.engine = engine;
@@ -81,6 +108,16 @@ export class PreviewApiServer {
       let resolved = false;
 
       this.server = createServer(async (req, res) => {
+        if (!isAllowedPreviewHost(req.headers.host, this.port)) {
+          res.statusCode = 403;
+          res.setHeader("Content-Type", "text/plain");
+          res.end("Forbidden");
+          return;
+        }
+        res.setHeader(
+          "Set-Cookie",
+          `${PREVIEW_SESSION_COOKIE}=${this.sessionToken}; HttpOnly; SameSite=Strict; Path=/`,
+        );
         const url = new URL(req.url || "/", `http://localhost:${this.port}`);
 
         // API routes
@@ -88,10 +125,7 @@ export class PreviewApiServer {
           res.setHeader("Content-Type", "application/json");
           // Fix #8 (MEDIUM): scope CORS to exact port this server is on
           const origin = req.headers.origin;
-          if (origin && (
-            origin === `http://localhost:${this.port}` ||
-            origin === `https://localhost:${this.port}`
-          )) {
+          if (origin && isAllowedPreviewOrigin(origin, this.port)) {
             res.setHeader("Access-Control-Allow-Origin", origin);
           }
 
@@ -242,6 +276,11 @@ export class PreviewApiServer {
 
           // POST /api/sync/resolve — resolve a sync conflict
           if (url.pathname === "/api/sync/resolve" && req.method === "POST") {
+            if (!isAuthorizedPreviewMutation(req.headers, this.port, this.sessionToken)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ ok: false, error: "Forbidden" }));
+              return;
+            }
             const body = await readRequestBody(req);
             try {
               const { name, resolution } = JSON.parse(body);
@@ -256,6 +295,11 @@ export class PreviewApiServer {
 
           // POST /api/action — dispatch actions to Figma bridge
           if (url.pathname === "/api/action" && req.method === "POST") {
+            if (!isAuthorizedPreviewMutation(req.headers, this.port, this.sessionToken)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ ok: false, error: "Forbidden" }));
+              return;
+            }
             const body = await readRequestBody(req);
             try {
               const { action } = JSON.parse(body);
@@ -277,6 +321,11 @@ export class PreviewApiServer {
 
           // Handle CORS preflight for POST endpoints
           if (req.method === "OPTIONS") {
+            if (!isAllowedPreviewOrigin(origin, this.port)) {
+              res.statusCode = 403;
+              res.end(JSON.stringify({ error: "Forbidden" }));
+              return;
+            }
             res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
             res.setHeader("Access-Control-Allow-Headers", "Content-Type");
             res.statusCode = 204;
@@ -403,8 +452,12 @@ export class PreviewApiServer {
           server: this.server,
           verifyClient: (info: { req: IncomingMessage; secure: boolean; origin: string }) => {
             const origin = info.req.headers.origin;
-            if (!origin) return true; // non-browser clients (curl, CLI) allowed
-            return /^https?:\/\/localhost(:\d+)?$/.test(origin);
+            return isAllowedPreviewHost(info.req.headers.host, this.port)
+              && isAllowedPreviewOrigin(origin, this.port)
+              && constantTimeEqual(
+                readCookie(info.req.headers.cookie, PREVIEW_SESSION_COOKIE),
+                this.sessionToken,
+              );
           },
         });
         this.wss.on("connection", (ws) => {
@@ -446,13 +499,13 @@ export class PreviewApiServer {
             return;
           }
           this.port++;
-          this.server?.listen(this.port);
+          this.server?.listen(this.port, PREVIEW_BIND_HOST);
         } else {
           reject(createPortBindError(this.port, err));
         }
       });
 
-      this.server.listen(this.port);
+      this.server.listen(this.port, PREVIEW_BIND_HOST);
     });
   }
 
@@ -610,6 +663,26 @@ export class PreviewApiServer {
         throw new Error(`Unknown action: ${action}`);
     }
   }
+}
+
+function readCookie(rawCookie: string | undefined, name: string): string | undefined {
+  if (!rawCookie) return undefined;
+  for (const part of rawCookie.split(";")) {
+    const separator = part.indexOf("=");
+    if (separator < 0) continue;
+    if (part.slice(0, separator).trim() === name) {
+      return part.slice(separator + 1).trim();
+    }
+  }
+  return undefined;
+}
+
+function constantTimeEqual(presented: string | undefined, expected: string): boolean {
+  if (!presented) return false;
+  const presentedBytes = Buffer.from(presented);
+  const expectedBytes = Buffer.from(expected);
+  return presentedBytes.length === expectedBytes.length
+    && timingSafeEqual(presentedBytes, expectedBytes);
 }
 
 /**

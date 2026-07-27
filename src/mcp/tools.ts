@@ -20,7 +20,7 @@ import { getAI, getTracker } from "../ai/index.js";
 import { ComponentSpecSchema, PageSpecSchema, DataVizSpecSchema, type ComponentSpec } from "../specs/types.js";
 import { fetchPageAssets, parseCSSTokens } from "../research/css-extractor.js";
 import { buildShadcnRegistry, toShadcnItemName } from "../shadcn/index.js";
-import { diagnoseAppQuality } from "../app-quality/engine.js";
+import { auditContextFromDiagnosis, diagnoseAppQuality } from "../app-quality/engine.js";
 import { runFullAudit, auditTokenContrast } from "../engine/accessibility.js";
 import { buildUiFixPlan } from "../app-quality/fix-plan.js";
 import { buildUxAuditReport } from "../ux/tenets-traps.js";
@@ -504,6 +504,7 @@ Use this tool: when an agent needs a focused design critique packet for clarity,
         maxFiles,
         write: false,
       });
+      const auditContext = auditContextFromDiagnosis(diagnosis);
       const report = screenshotPath
         ? buildUxAuditReport({
           target: diagnosis.target,
@@ -511,6 +512,7 @@ Use this tool: when an agent needs a focused design critique packet for clarity,
           appQualityScore: diagnosis.summary.score,
           artifactPath: screenshotPath,
           source: "mcp",
+          ...auditContext,
         })
         : diagnosis.ux;
       return { content: [{ type: "text" as const, text: JSON.stringify(report) }] };
@@ -546,12 +548,14 @@ Returns: InterfaceCraftReport JSON — score, critique, dimensions, findings, to
         maxFiles,
         write: false,
       });
+      const auditContext = auditContextFromDiagnosis(diagnosis);
       const report = buildInterfaceCraftReport({
         target: diagnosis.target,
         issues: diagnosis.issues,
         appQualityScore: diagnosis.summary.score,
         artifactPath: screenshotPath,
         source: "mcp",
+        ...auditContext,
       });
       return { content: [{ type: "text" as const, text: JSON.stringify(report) }] };
     },

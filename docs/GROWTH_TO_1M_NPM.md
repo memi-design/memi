@@ -1,4 +1,9 @@
-# Growth To 1M Weekly NPM Downloads
+# Historical Growth To 1M Weekly NPM Downloads
+
+This file is retained as a historical growth brainstorm from the `v2.5`
+transition. Do not use it as the current growth contract. Use
+[CURRENT_RELEASE.md](./CURRENT_RELEASE.md), [METRICS.md](./METRICS.md), and the
+[current audit](./audits/memi-design-engineering-audit-2026-07-26.md).
 
 Updated: 2026-07-09
 

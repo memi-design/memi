@@ -1,4 +1,9 @@
-# Distribution Submissions
+# Historical Distribution Submissions
+
+This file is retained as a historical `v2.5` submissions checklist. Do not use
+it as a current operating board. Use [CURRENT_RELEASE.md](./CURRENT_RELEASE.md),
+[RELEASE_GATES.md](./RELEASE_GATES.md), and the
+[100-point closure plan](./audits/memi-100-closure-plan-2026-07-26.md).
 
 Use this as the operating board for Product Hunt and real directory work. Every entry should improve memi discovery, trust, or npm activation.
 

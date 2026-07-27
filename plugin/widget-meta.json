@@ -1,8 +1,8 @@
 {
   "widgetVersion": "2",
   "packageVersion": "2.6.2",
-  "builtAt": "2026-07-07T21:10:51.033Z",
-  "bundleHash": "e3a9ca425d9cce330501b336b3e29a4bda48542fc55455252e04ebf55b2cb66b",
+  "builtAt": "2026-07-27T02:59:52.257Z",
+  "bundleHash": "36b8ff3a3ff38b2df80043bc87ebbce7bfe90b44f8dacc15659245867df97e01",
   "manifest": {
     "path": "manifest.json",
     "exists": true,
@@ -18,7 +18,7 @@
   "ui": {
     "path": "ui.html",
     "exists": true,
-    "bytes": 93930,
-    "sha256": "8e61e42da2825c1d2afbbbc285aaf02c86c66f2751b1b9538b59fb8ca2a4f192"
+    "bytes": 98452,
+    "sha256": "46861ffd67f3997572f35fc0289c4cf6488a98fd12336b8c872291d916e4b792"
   }
 }

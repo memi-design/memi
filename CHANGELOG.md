@@ -8,6 +8,103 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+### Design-engineering audit, trust boundaries, and release proof
+
+- `49abb28e` test: reproduce audit evidence integrity gaps
+- `97439674` fix: preserve honest audit evidence end to end
+- `c01ff87e` test: add red gates for audit evidence and trust boundaries
+- `34996fc2` fix: unify audit evidence and harden trust boundaries
+- `746f473c` test: add red gates for local archive and registry boundaries
+- `265f320f` test: reproduce misleading growth status
+- `8974a2f8` fix: require sustained npm growth
+- `f47e4bbe` fix: contain registry reads and release extraction
+- `b342d6c0` chore: preserve tight package size gate
+- `5f374ae7` fix: align public release gate with design QA story
+- `8ef24b9b` test: add red gates for mapped IPs and ZIP traversal
+- `f68fe8d7` fix: normalize private IPs and validate release ZIPs
+- `d1cc675d` test: add red gate for canonical release manifest
+- `29a62056` feat: centralize public release manifest
+- `e74976c8` test: define clean install compatibility contract
+- `b803699f` ci: verify clean installs across supported runtimes
+- `b330a2c0` docs: document release manifest handoff
+- `14557dc8` test: require immutable release provenance
+- `ceaf85a4` fix: anchor release exports to committed source
+- `71967748` docs: require immutable release proof ordering
+- `88212761` docs: publish design engineering audit
+- `dc947d37` test: reproduce shallow release manifest drift
+- `2374d6be` fix: validate release artifacts in shallow clones
+- `d1c7e5ea` docs: record shallow release validation fix
+- `efb3ed34` test: require full history for release exports
+- `e0da86b1` fix: refuse shallow release artifact generation
+- `a9be8860` fix: isolate release manifest CI fixtures
+- `25474e40` docs: record detached CI fixture fix
+- `426ba5fb` docs: record full-history export guard
+- `022427bb` fix: complete optional canvas lock metadata
+- `96ada33c` docs: record npm lock portability decision
+- `13c9d6a5` docs: refresh final audit verification count
+- `7b14e5e2` docs: record hosted compatibility proof
+- `e35e4583` test: define verified audit scorecard contract
+- `0c23a0c6` feat: enforce verified audit scorecards
+- `f64d1daf` test: define deterministic audit report gate
+- `a6a949e5` feat: generate verified 100-point audit ledger
+- `ef8ae5f7` test: require package size headroom
+- `039fd823` fix: enforce package size headroom
+- `b4509197` test: close scorecard trust bypasses
+- `ec55e6b3` fix: harden audit scorecard trust gates
+- `60f0a5e8` test: close scorecard release fail-open paths
+- `fea0e567` fix: fail closed across scorecard release paths
+- `90d0067d` test: require full binary release gate
+- `b58c63ee` test: add SwiftUI audit truth regressions
+- `522d5f07` fix: fail closed on partial SwiftUI audit coverage
+- `abb67e53` test: expose mixed native audit gaps
+- `f804ba6b` fix: report native audit gaps in mixed repos
+- `fcdf4a11` test: pin workflow action refs
+- `3b0557d5` fix: pin workflow action refs
+- `2d0d9428` test: require read-only workflow defaults
+- `db0219d2` fix: scope workflow write permissions
+- `72c61bb0` test: enforce public release documentation truth
+- `f180defe` fix: generate canonical public release truth
+- `a13b79f9` test: enforce public audit story parity
+- `03dc20a1` fix: align public product story
+- `435e4858` test: align plugin positioning contract
+- `0018113d` docs: record plugin positioning gate
+- `53cf80ac` test: add creative-rendering audit honesty reproducer
+- `4b209cb4` fix: remove unshipped creative-rendering claims from audit
+- `6f1d82ad` fix: pin public action guidance
+- `8975d962` fix: bind audit claims to immutable evidence
+- `ccb2971c` fix: mark non-ui audits unassessed
+- `e246fcb6` docs: close activation and routing evidence gaps
+- `14f1dfd7` test: require npm provenance release proof
+- `04e415f0` test: add supply-chain proof reproducer (superseded before merge)
+- `e3789ce6` fix: require verifiable npm provenance
+- `15faed69` test: reject manual npm publish bypass
+- `4ca15191` test: require complete public gate evidence
+- `47a71610` test: fail closed on malformed release stages
+- `be49db4a` fix: preserve aggregate release evidence
+
+#### Architectural decisions
+
+- Treat unknown and unrendered audit dimensions as zero and attach normalized evidence, confidence, assessed dimensions, and applied caps to every aggregate.
+- Keep the first public action pinned and non-invasive: `diagnose --json --no-write --fail-on none`.
+- Resolve and validate network, registry, archive, symlink, and loopback boundaries before any read, fetch, extraction, or server bind.
+- Use one canonical release manifest for engine, npm, GitHub release, Action, MCP, Studio, and site release groups. Cross-repository exports carry immutable source-commit and SHA-256 provenance.
+- Separate offline manifest validation from live release proof, and require the engine PR to publish its immutable source before website CI verifies the derived artifact.
+- Test clean packed installs on Node 20, 22, and 24 across Linux, macOS, and Windows.
+- Keep every declared optional native package in the lockfile so strict `npm ci --include=optional` remains portable across supported npm versions and operating systems.
+- Award scorecard points only from fresh immutable evidence, require independent verification where declared, and apply uncleared score caps mechanically. Unknown, stale, failed, contradicted, missing, or self-verified proof earns zero.
+- Keep the goal audit on an exact 100-point scale, recompute local evidence SHA-256 digests, derive Markdown one-way from the canonical JSON ledger, and byte-check that report inside the release gate.
+- Replace the near-zero npm tarball margin with a 1.5 MB hard budget and a 90% utilization gate, preserving at least 10% operational headroom.
+- Fail scorecard generation on stale release-time evidence, symlink escapes, oversized ledgers or artifacts, non-canonical reviewer identities, and candidate-point drift from the reviewed source audit.
+- Require every passed criterion and cleared cap to reference known evidence, reject permanently unverified passes, and run the full scorecard gate in every tagged binary build.
+- Keep native static analysis file-anchored and conservative: web scores stay explicitly scoped when SwiftUI or Metal evidence is incomplete, history trends compare only like-for-like coverage, and clean partial scans must not claim either whole-product proof or zero analysis.
+- Preserve a comparable web score in mixed repositories while exposing every native limitation as a machine-readable unassessed dimension, preventing CI and reports from turning partial coverage into clean-pass copy.
+- Pin every third-party GitHub Actions workflow dependency to an audited upstream release commit SHA, and test the exact refs so release, publish, scanner, and runtime trust does not drift silently.
+- Default every GitHub workflow to read-only repository contents and grant write scopes only at the specific job that uploads SARIF, publishes through OIDC, or mutates release assets, so permission drift fails closed.
+- Generate one human-readable release-truth document from `release-manifest.json`, enforce it in the release gate, and mark retained launch snapshots as historical before any obsolete instructions.
+- Treat the read-only design-engineering audit and skill layer as the one primary public story across README, package, MCP, plugin, release-gate, growth, and SEO metadata; public parity fails until npm and the website carry that same story.
+- Publish npm releases only from an explicit main-branch version through trusted OIDC, attach a CycloneDX SBOM, and require the registry signature plus SLSA provenance to resolve the exact package digest, repository, workflow, ref, and commit. A local SBOM or historical signed tarball does not close the provenance criterion.
+- Run registry, website, and clean-install public release checks as independent fail-closed stages, preserving every attempted result even when another stage reports drift, throws, or returns malformed evidence.
+
 ### Design Skills migration — `3009cf63`
 
 - Renamed the community repository to `sarveshsea/design-skills` and expanded the marketplace from 5 Notes to 78 installable Agent Skills with canonical `skills/<slug>/SKILL.md` packaging.

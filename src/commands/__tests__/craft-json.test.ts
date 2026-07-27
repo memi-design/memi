@@ -25,9 +25,19 @@ export default function Page() {
       const payload = JSON.parse(lastLog(logs));
 
       expect(payload.schemaVersion).toBe(2);
+      expect(payload.confidence).toEqual(expect.any(Number));
+      expect(payload.assessedDimensions).toContain("spacing-rhythm");
+      expect(payload.unassessedDimensions).toContain("motion-restraint");
+      expect(payload.evidenceProvenance).toEqual([
+        expect.objectContaining({ kind: "static-scan", analyzed: true }),
+      ]);
+      expect(payload.appliedScoreCaps).toEqual([]);
       expect(payload.score).toBeLessThan(100);
       expect(payload.dimensions.map((dimension: { dimensionId: string }) => dimension.dimensionId)).toContain("spacing-rhythm");
       expect(payload.findings.length).toBeGreaterThan(0);
+      expect(payload.findings[0]).toEqual(expect.objectContaining({
+        normalizedId: expect.any(String),
+      }));
       expect(payload.critique).toMatchObject({
         visualDesign: expect.any(String),
         interfaceDesign: expect.any(String),
@@ -36,6 +46,28 @@ export default function Page() {
       });
       expect(payload.topOpportunities.length).toBeGreaterThan(0);
       await expect(access(join(root, ".memoire"))).rejects.toThrow();
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("does not synthesize a passing craft score for wholly unassessed source", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-craft-unassessed-"));
+    try {
+      await mkdir(join(root, "lib"), { recursive: true });
+      await writeFile(join(root, "lib", "server.js"), "export const server = true;\n");
+      const logs = captureLogs();
+      const program = new Command();
+      registerCraftCommand(program, { config: { projectRoot: root } } as never);
+
+      await program.parseAsync(["craft", "audit", "--json", "--no-write"], { from: "user" });
+      const payload = JSON.parse(lastLog(logs));
+
+      expect(payload.score).toBe(0);
+      expect(payload.assessedDimensions).toEqual([]);
+      expect(payload.appliedScoreCaps).toEqual(expect.arrayContaining([
+        expect.objectContaining({ maximum: 0 }),
+      ]));
     } finally {
       await rm(root, { recursive: true, force: true });
     }

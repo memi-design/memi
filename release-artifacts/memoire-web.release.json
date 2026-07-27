@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "repository": "https://github.com/sarveshsea/memi",
+    "path": "release-manifest.json",
+    "sourceCommit": "c9e5790f1e5c38129a2078bf55407d9e9c4649f2",
+    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/c9e5790f1e5c38129a2078bf55407d9e9c4649f2/release-manifest.json",
+    "manifestSha256": "acdf98107777060d394d02013fa3aeb1932bb68305544e5e4f1b0c507bd1ae93"
+  },
+  "release": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-26",
+    "releaseGroups": {
+      "engine": {
+        "version": "2.6.2",
+        "state": "historical",
+        "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+        "releaseRecord": null,
+        "verification": {
+          "eligibleForParity": false,
+          "reason": "2.6.2 predates the provenance-bound release state machine"
+        },
+        "plannedSuccessor": "2.6.3"
+      },
+      "studio": {
+        "version": "2.5.0",
+        "status": "available",
+        "channel": "stable",
+        "releaseDate": "July 2026",
+        "releaseSize": "48 MB"
+      },
+      "site": {
+        "version": "1.0.4"
+      }
+    },
+    "surfaces": {
+      "npm": {
+        "releaseGroup": "engine",
+        "packageName": "@memi-design/cli",
+        "url": "https://www.npmjs.com/package/@memi-design/cli"
+      },
+      "githubRelease": {
+        "releaseGroup": "engine",
+        "repository": "sarveshsea/memi",
+        "tagPrefix": "v",
+        "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.2"
+      },
+      "githubAction": {
+        "releaseGroup": "engine",
+        "repository": "sarveshsea/memi",
+        "majorTag": "v2"
+      },
+      "mcp": {
+        "releaseGroup": "engine",
+        "serverName": "io.github.sarveshsea/memi"
+      },
+      "studio": {
+        "releaseGroup": "studio",
+        "repository": "sarveshsea/memi-studio",
+        "tagPrefix": "v",
+        "arm64Asset": "Memoire.Studio_{version}_aarch64.dmg",
+        "x64Asset": "Memoire.Studio_{version}_x64.dmg",
+        "checksumAsset": "SHA256SUMS"
+      },
+      "website": {
+        "releaseGroup": "site",
+        "repository": "sarveshsea/memoire-web",
+        "publicUrl": "https://www.memoire.cv"
+      }
+    }
+  }
+}

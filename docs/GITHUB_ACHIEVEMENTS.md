@@ -1,4 +1,9 @@
-# GitHub Achievement Growth Plan
+# Historical GitHub Achievement Growth Plan
+
+This file is retained as a historical `v2.5` achievement-plan snapshot. Do not
+use it as current release or growth guidance. Use
+[CURRENT_RELEASE.md](./CURRENT_RELEASE.md), [METRICS.md](./METRICS.md), and the
+[100-point closure plan](./audits/memi-100-closure-plan-2026-07-26.md).
 
 This tracker keeps achievement work tied to real memi distribution. The goal is to earn profile credibility without creating spam, fake stars, fake accounts, or low-quality pull requests.
 

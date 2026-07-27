@@ -16,7 +16,7 @@ describe("runtime release workflow", () => {
 });
 
 describe("release binary workflow", () => {
-  it("keeps platform optional packages available and defers the npm audit gate", async () => {
+  it("keeps platform optional packages available without bypassing the audit gate", async () => {
     const workflow = await readFile(
       join(process.cwd(), ".github", "workflows", "release-binaries.yml"),
       "utf-8",
@@ -27,7 +27,7 @@ describe("release binary workflow", () => {
     expect(workflow).toContain("esbuildPackage: win32-x64");
     expect(workflow).toContain("ESBUILD_VERSION=\"$(node -p \"require('./node_modules/vite/node_modules/esbuild/package.json').version\")\"");
     expect(workflow).toContain('npm install --no-save --package-lock=false --ignore-scripts "@esbuild/${{ matrix.esbuildPackage }}@${ESBUILD_VERSION}"');
-    expect(workflow).toContain("SKIP_AUDIT_GATE: \"1\"");
+    expect(workflow).not.toContain("SKIP_AUDIT_GATE");
   });
 
   it("supports repairing an existing release without moving its tag", async () => {

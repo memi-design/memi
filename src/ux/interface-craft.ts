@@ -1,6 +1,12 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AppQualityIssue, AppQualitySeverity } from "../app-quality/engine.js";
+import {
+  buildAuditEvidenceMetadata,
+  normalizeAuditFindingId,
+  type AuditEvidenceMetadata,
+  type AuditScoreCap,
+} from "../audit/evidence.js";
 
 export type InterfaceCraftDimensionId =
   | "focusing-mechanism"
@@ -35,6 +41,7 @@ export interface InterfaceCraftDimensionDefinition {
 
 export interface InterfaceCraftFinding {
   id: string;
+  normalizedId: string;
   title: string;
   severity: AppQualitySeverity;
   lens: InterfaceCraftLens;
@@ -88,6 +95,11 @@ export interface InterfaceCraftReport {
     issueCount?: number;
     appQualityScore?: number;
   };
+  confidence: AuditEvidenceMetadata["confidence"];
+  assessedDimensions: AuditEvidenceMetadata["assessedDimensions"];
+  unassessedDimensions: AuditEvidenceMetadata["unassessedDimensions"];
+  evidenceProvenance: AuditEvidenceMetadata["evidenceProvenance"];
+  appliedScoreCaps: AuditEvidenceMetadata["appliedScoreCaps"];
 }
 
 export interface BuildInterfaceCraftReportInput {
@@ -97,6 +109,10 @@ export interface BuildInterfaceCraftReportInput {
   issues?: AppQualityIssue[];
   appQualityScore?: number;
   source?: InterfaceCraftFindingSource;
+  assessedCategories?: AppQualityIssue["category"][];
+  analysisPerformed?: boolean;
+  partialAnalysis?: boolean;
+  appliedScoreCaps?: AuditScoreCap[];
 }
 
 interface CraftMapping {
@@ -305,6 +321,7 @@ export function mapAppQualityIssueToInterfaceCraftFinding(issue: AppQualityIssue
   const mapping = ISSUE_MAPPINGS[issue.id] ?? CATEGORY_MAPPINGS[issue.category];
   return {
     id: `craft.${issue.id}`,
+    normalizedId: normalizeAuditFindingId(issue.normalizedId ?? issue.id),
     title: issue.title,
     severity: issue.severity,
     lens: mapping.lens,
@@ -331,13 +348,60 @@ export function buildInterfaceCraftReport(input: BuildInterfaceCraftReportInput)
     .map(mapAppQualityIssueToInterfaceCraftFinding)
     .sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
   const generatedAt = input.generatedAt ?? new Date().toISOString();
+  const hasAnalyzedEvidence = input.analysisPerformed ?? (
+    findings.length > 0
+    || (input.assessedCategories === undefined
+      ? input.appQualityScore !== undefined
+      : input.assessedCategories.length > 0)
+  );
+  const assessmentScope = buildAssessmentScope(
+    hasAnalyzedEvidence ? findings : [],
+    input.assessedCategories,
+  );
+  const dimensions = buildDimensionAssessments(findings, assessmentScope);
+  const noEvidenceCap = hasAnalyzedEvidence ? [] : [{
+    id: "no-analyzed-evidence",
+    maximum: 0,
+    reason: "The supplied artifact was recorded but not analyzed.",
+  }];
+  const partialEvidenceCap = hasAnalyzedEvidence && input.partialAnalysis ? [{
+    id: "partial-static-analysis",
+    maximum: 0,
+    reason: "Static checks ran, but the available evidence does not cover whole interface-craft categories.",
+  }] : [];
+  const evidenceCaps = mergeScoreCaps(
+    input.appliedScoreCaps ?? [],
+    noEvidenceCap,
+    partialEvidenceCap,
+  );
+  const auditEvidence = buildAuditEvidenceMetadata({
+    dimensions: dimensions.map((dimension) => dimension.dimensionId),
+    unassessedDimensions: dimensions
+      .filter((dimension) => dimension.status === "unknown" || dimension.status === "not-assessed")
+      .map((dimension) => dimension.dimensionId),
+    evidenceProvenance: [
+      ...(hasAnalyzedEvidence ? [{ kind: "static-scan" as const, analyzed: true, target }] : []),
+      ...(input.artifactPath ? [{
+        kind: "screenshot" as const,
+        analyzed: false,
+        target,
+        artifactPath: input.artifactPath,
+      }] : []),
+    ],
+    findingConfidences: findings.map((finding) => finding.confidence),
+    appliedScoreCaps: evidenceCaps,
+  });
+  const rawScore = scoreInterfaceCraft(findings, input.appQualityScore);
+  const score = evidenceCaps.length > 0
+    ? Math.min(rawScore, ...evidenceCaps.map((cap) => cap.maximum))
+    : rawScore;
 
   return {
     schemaVersion: 2,
     target,
     generatedAt,
-    score: scoreInterfaceCraft(findings, input.appQualityScore),
-    dimensions: buildDimensionAssessments(findings),
+    score,
+    dimensions,
     critique: buildCritique(findings, input.appQualityScore),
     findings,
     topOpportunities: buildTopOpportunities(findings),
@@ -349,6 +413,7 @@ export function buildInterfaceCraftReport(input: BuildInterfaceCraftReportInput)
       issueCount: input.issues?.length ?? 0,
       appQualityScore: input.appQualityScore,
     },
+    ...auditEvidence,
   };
 }
 
@@ -415,10 +480,28 @@ export function renderInterfaceCraftMarkdown(report: InterfaceCraftReport): stri
   return lines.join("\n");
 }
 
-function buildDimensionAssessments(findings: InterfaceCraftFinding[]): InterfaceCraftDimensionAssessment[] {
+function buildAssessmentScope(
+  findings: InterfaceCraftFinding[],
+  assessedCategories?: AppQualityIssue["category"][],
+): ReadonlySet<InterfaceCraftDimensionId> {
+  if (assessedCategories === undefined) return ASSESSABLE_DIMENSION_IDS;
+  const dimensionIds = new Set<InterfaceCraftDimensionId>();
+  for (const category of assessedCategories) {
+    for (const dimensionId of CATEGORY_MAPPINGS[category].dimensionIds) dimensionIds.add(dimensionId);
+  }
+  for (const finding of findings) {
+    for (const dimensionId of finding.dimensionIds) dimensionIds.add(dimensionId);
+  }
+  return dimensionIds;
+}
+
+function buildDimensionAssessments(
+  findings: InterfaceCraftFinding[],
+  assessableDimensionIds: ReadonlySet<InterfaceCraftDimensionId> = ASSESSABLE_DIMENSION_IDS,
+): InterfaceCraftDimensionAssessment[] {
   return INTERFACE_CRAFT_DIMENSIONS.map((dimension) => {
     const related = findings.filter((finding) => finding.dimensionIds.includes(dimension.id));
-    if (related.length === 0 && !ASSESSABLE_DIMENSION_IDS.has(dimension.id)) {
+    if (!assessableDimensionIds.has(dimension.id)) {
       return {
         dimensionId: dimension.id,
         name: dimension.name,
@@ -443,6 +526,15 @@ function buildDimensionAssessments(findings: InterfaceCraftFinding[]): Interface
         : dimension.inspectFor.slice(0, 2),
     };
   });
+}
+
+function mergeScoreCaps(...groups: AuditScoreCap[][]): AuditScoreCap[] {
+  const caps = new Map<string, AuditScoreCap>();
+  for (const cap of groups.flat()) {
+    const previous = caps.get(cap.id);
+    if (!previous || cap.maximum < previous.maximum) caps.set(cap.id, { ...cap });
+  }
+  return [...caps.values()];
 }
 
 function buildCritique(findings: InterfaceCraftFinding[], appQualityScore?: number): InterfaceCraftCritique {

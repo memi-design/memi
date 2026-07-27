@@ -1,5 +1,5 @@
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
-import { basename, dirname, isAbsolute, join, resolve } from "node:path";
+import { access, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import type { MemoireEngine } from "../engine/core.js";
 import type { ComponentSpec } from "../specs/types.js";
@@ -7,6 +7,8 @@ import { ComponentSpecSchema } from "../specs/types.js";
 import { resolveMarketplaceAlias } from "../marketplace/catalog-loader.js";
 import { fetchNpmPackageToCache } from "../registry/npm-fetch.js";
 import { packagePath } from "../utils/asset-path.js";
+import { isPrivateOrLocalHostname } from "../security/network-address.js";
+import { fetchPublicText } from "../security/safe-fetch.js";
 import {
   type ShadcnRegistry,
   type ShadcnRegistryFile,
@@ -17,6 +19,7 @@ import {
 } from "./schema.js";
 
 const FETCH_TIMEOUT_MS = 15000;
+const MAX_REGISTRY_TEXT_BYTES = 2_000_000;
 
 export interface InstallShadcnItemOptions {
   from: string;
@@ -146,7 +149,7 @@ async function resolveLocalShadcnItem(ref: string, name: string, cwd: string, so
     return {
       item,
       source: sourceOverride ?? `local:${directFile}`,
-      readFileContent: (file) => readFile(resolve(dirname(directFile), file.path), "utf8"),
+      readFileContent: (file) => readContainedShadcnFile(dirname(directFile), file.path),
     };
   }
 
@@ -161,7 +164,7 @@ async function resolveLocalShadcnItem(ref: string, name: string, cwd: string, so
       return {
         item,
         source: sourceOverride ?? `local:${candidate}`,
-        readFileContent: (file) => readFile(resolve(dirname(candidate), file.path), "utf8"),
+        readFileContent: (file) => readContainedShadcnFile(dirname(candidate), file.path),
       };
     }
   }
@@ -178,7 +181,7 @@ async function resolveLocalShadcnItem(ref: string, name: string, cwd: string, so
     return {
       item,
       source: sourceOverride ?? `local:${candidate}`,
-      readFileContent: (file) => readFile(resolve(dirname(candidate), file.path), "utf8"),
+      readFileContent: (file) => readContainedShadcnFile(dirname(candidate), file.path),
     };
   }
 
@@ -196,7 +199,7 @@ async function resolveHttpShadcnItem(url: string, name: string): Promise<Resolve
     return {
       item,
       source: url,
-      readFileContent: (file) => fetchText(new URL(file.path, `${baseUrl}/`).toString()),
+      readFileContent: (file) => fetchText(resolveContainedShadcnUrl(baseUrl, file.path)),
     };
   } catch {
     const registry = parseShadcnRegistry(JSON.parse(raw)) as ShadcnRegistry;
@@ -208,7 +211,7 @@ async function resolveHttpShadcnItem(url: string, name: string): Promise<Resolve
     return {
       item,
       source: itemUrl,
-      readFileContent: (file) => fetchText(new URL(file.path, `${itemUrl.replace(/\/[^/]+$/, "")}/`).toString()),
+      readFileContent: (file) => fetchText(resolveContainedShadcnUrl(itemUrl.replace(/\/[^/]+$/, ""), file.path)),
     };
   }
 }
@@ -217,7 +220,7 @@ async function readItemFromRegistry(registry: ShadcnRegistry, itemName: string, 
   const itemRef = registry.items.find((item) => toShadcnItemName(item.name) === itemName);
   if (!itemRef) throw new Error(`No shadcn registry item "${itemName}" found in registry ${registry.name}`);
   const route = itemRoute(itemRef).replace(/^\/r\//, "");
-  return parseShadcnRegistryItem(JSON.parse(await readFile(join(baseDir, route), "utf8")));
+  return parseShadcnRegistryItem(JSON.parse(await readContainedShadcnFile(baseDir, route)));
 }
 
 function itemRoute(item: ShadcnRegistryItem): string {
@@ -264,24 +267,48 @@ async function readComponentsJson(projectRoot: string): Promise<ComponentsJson> 
 
 async function fetchText(url: string): Promise<string> {
   assertSafePublicUrl(url);
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const response = await fetch(url, { signal: controller.signal, redirect: "error" });
-    if (!response.ok) throw new Error(`Failed to fetch shadcn registry item: ${response.status}`);
-    return response.text();
-  } finally {
-    clearTimeout(timer);
-  }
+  const response = await fetchPublicText(url, {
+    maxBytes: MAX_REGISTRY_TEXT_BYTES,
+    timeoutMs: FETCH_TIMEOUT_MS,
+  });
+  if (!response.ok) throw new Error(`Failed to fetch shadcn registry item: ${response.status}`);
+  return response.text;
 }
 
 function assertSafePublicUrl(url: string): void {
   const parsed = new URL(url);
-  const host = parsed.hostname.toLowerCase();
-  const privateIpv4 = /^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.0\.0\.0)/;
-  if (!["http:", "https:"].includes(parsed.protocol) || host === "localhost" || host === "::1" || privateIpv4.test(host)) {
+  if (!["http:", "https:"].includes(parsed.protocol) || isPrivateOrLocalHostname(parsed.hostname)) {
     throw new Error(`Unsafe shadcn registry URL: ${url}`);
   }
+}
+
+async function readContainedShadcnFile(root: string, filePath: string): Promise<string> {
+  if (!filePath || filePath.includes("\\")) {
+    throw new Error(`Shadcn file reference is invalid: ${filePath}`);
+  }
+  const resolvedRoot = await realpath(resolve(root));
+  const candidate = resolve(resolvedRoot, filePath);
+  assertContainedShadcnPath(resolvedRoot, candidate, filePath);
+  const resolvedCandidate = await realpath(candidate);
+  assertContainedShadcnPath(resolvedRoot, resolvedCandidate, filePath);
+  return readFile(resolvedCandidate, "utf8");
+}
+
+function assertContainedShadcnPath(root: string, candidate: string, source: string): void {
+  const relativePath = relative(root, candidate);
+  if (relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath)) {
+    throw new Error(`Shadcn file reference escapes the shadcn registry root: ${source}`);
+  }
+}
+
+function resolveContainedShadcnUrl(baseUrl: string, filePath: string): string {
+  const base = new URL(baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`);
+  const candidate = new URL(filePath, base);
+  assertSafePublicUrl(candidate.href);
+  if (candidate.origin !== base.origin || !candidate.pathname.startsWith(base.pathname)) {
+    throw new Error(`Shadcn file reference escapes the shadcn registry root: ${filePath}`);
+  }
+  return candidate.href;
 }
 
 async function exists(path: string): Promise<boolean> {

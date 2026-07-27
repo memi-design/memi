@@ -4,6 +4,7 @@
 // normalize / adapter pipeline without mocking out the shape.
 
 import { describe, expect, it } from "vitest";
+import { createHmac, webcrypto } from "node:crypto";
 import {
   BRIDGE_V2_CHANNEL,
   createBridgeCommandEnvelope,
@@ -17,10 +18,15 @@ import {
 } from "../shared/contracts.js";
 import {
   createBridgeCommandDispatch,
+  createBridgeHelloMessage,
   resolveBridgeResponse,
   trackBridgeRequest,
   type PendingBridgeRequest,
 } from "../ui/bridge-adapter.js";
+import {
+  createBridgeAuthenticationProof,
+  verifyBridgeServerProof,
+} from "../ui/bridge-auth.js";
 
 // A single-hop "network": anything send()-ed is delivered to the peer's
 // subscriber on the next microtask so we get a realistic async ordering.
@@ -157,6 +163,72 @@ describe("bridge round-trip", () => {
       name: "Mémoire Terminal",
       port: 9223,
     });
+  });
+
+  it("keeps the pre-shared capability off the wire and sends only a protocol-v3 proof", () => {
+    const identify = normalizeBridgeMessage({
+      channel: BRIDGE_V2_CHANNEL,
+      source: "server",
+      type: "identify",
+      name: "Mémoire",
+      auth: "pre-shared-hmac-sha256-v1",
+      minimumProtocolVersion: 3,
+      challenge: "challenge-1",
+      serverProof: "server-proof-1",
+    });
+    const hello = createBridgeHelloMessage({
+      stage: "connected",
+      port: 9223,
+      name: "Mémoire",
+      latencyMs: 1,
+      fileName: "Design System",
+      fileKey: "file-key",
+      pageName: "Page 1",
+      pageId: "0:1",
+      editorType: "figma",
+      connectedAt: Date.now(),
+      reconnectDelayMs: null,
+    }, "proof-1");
+
+    expect(identify).toMatchObject({
+      type: "identify",
+      auth: "pre-shared-hmac-sha256-v1",
+      minimumProtocolVersion: 3,
+      challenge: "challenge-1",
+      serverProof: "server-proof-1",
+    });
+    expect(identify).not.toHaveProperty("capability");
+    expect(hello).toMatchObject({
+      type: "bridge-hello",
+      protocolVersion: 3,
+      proof: "proof-1",
+    });
+    expect(hello).not.toHaveProperty("capability");
+    expect(serializeBridgeEnvelope(hello!, "legacy")).toMatchObject({
+      type: "bridge-hello",
+      protocolVersion: 3,
+      proof: "proof-1",
+    });
+  });
+
+  it("creates the same HMAC proof in the plugin and Node bridge runtimes", async () => {
+    if (!globalThis.crypto) {
+      Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true });
+    }
+    const capability = "A".repeat(43);
+    const challenge = "B".repeat(43);
+    const proof = await createBridgeAuthenticationProof(capability, challenge);
+    const expected = createHmac("sha256", capability)
+      .update(`memoire-figma-bridge-v3:client:${challenge}`)
+      .digest("base64url");
+    const serverProof = createHmac("sha256", capability)
+      .update(`memoire-figma-bridge-v3:server:${challenge}`)
+      .digest("base64url");
+
+    expect(proof).toBe(expected);
+    expect(proof).not.toContain(capability);
+    await expect(verifyBridgeServerProof(capability, challenge, serverProof)).resolves.toBe(true);
+    await expect(verifyBridgeServerProof(capability, challenge, "B".repeat(43))).resolves.toBe(false);
   });
 
   it("resolveBridgeResponse ignores mismatched command names", () => {

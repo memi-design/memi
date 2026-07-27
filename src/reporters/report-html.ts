@@ -16,8 +16,9 @@ import { join } from "node:path";
 import type { AppQualityDiagnosis } from "../app-quality/engine.js";
 import type { UxAuditReport } from "../ux/tenets-traps.js";
 import type { InterfaceCraftReport } from "../ux/interface-craft.js";
-import { readHistory, renderTrend, type HistoryEntry } from "../app-quality/history.js";
+import { entryFromDiagnosis, readHistory, renderTrend, type HistoryEntry } from "../app-quality/history.js";
 import { readBaseline, filterWithBaseline } from "../app-quality/baseline.js";
+import { markdownCodeSpan } from "../utils/output-sanitization.js";
 
 export interface ComposeReportOptions {
   projectRoot: string;
@@ -66,6 +67,8 @@ export async function composeReport(options: ComposeReportOptions): Promise<Comp
 
   if (diagnosis) {
     sections.push("diagnosis");
+    const unassessed = diagnosis.unassessedDimensions ?? [];
+    const coverage = diagnosis.sourceCoverage;
     md.push(
       "",
       "## App Quality",
@@ -73,6 +76,10 @@ export async function composeReport(options: ComposeReportOptions): Promise<Comp
       `Score: **${diagnosis.summary.score}/100** (${diagnosis.summary.verdict})`,
       `Policy: \`${diagnosis.policy?.hash ?? "default"}\` (${diagnosis.policy?.preset ?? "memi-recommended"})`,
       `Scanned: ${diagnosis.summary.scannedFiles} files`,
+      ...(coverage ? [
+        `Source coverage: web ${coverage.web.scannedFiles} (${coverage.web.analysis}), SwiftUI ${coverage.swiftui.scannedFiles} (${coverage.swiftui.analysis}), Metal ${coverage.metal.scannedFiles} (${coverage.metal.analysis})`,
+      ] : []),
+      `Unassessed dimensions: ${unassessed.length > 0 ? unassessed.join(", ") : "none"}`,
     );
     let suppressed = 0;
     if (baseline) {
@@ -81,21 +88,32 @@ export async function composeReport(options: ComposeReportOptions): Promise<Comp
     }
     md.push("", "### Findings", "");
     if (diagnosis.issues.length === 0) {
-      md.push("- No issues detected by the static scan.");
+      md.push(unassessed.length > 0
+        ? "- No findings from assessed checks. Unassessed dimensions remain unverified."
+        : "- No issues detected by the static scan.");
     }
     for (const issue of diagnosis.issues) {
       md.push(`- **[${issue.severity.toUpperCase()}] ${issue.title}** \`${issue.id}\``);
       md.push(`  - ${redact ? "(evidence redacted)" : issue.detail}`);
       const location = issue.evidenceLocations?.[0];
-      if (location) md.push(`  - Evidence: \`${location.file}${location.line ? `:${location.line}` : ""}\`${redact || !location.excerpt ? "" : ` — \`${location.excerpt.slice(0, 120)}\``}`);
+      if (location) {
+        const path = markdownCodeSpan(`${location.file}${location.line ? `:${location.line}` : ""}`);
+        const excerpt = redact || !location.excerpt ? "" : ` — ${markdownCodeSpan(location.excerpt.slice(0, 120))}`;
+        md.push(`  - Evidence: ${path}${excerpt}`);
+      }
       md.push(`  - Fix: ${issue.recommendation}`);
     }
 
     body.push(htmlSection("App Quality", [
       scoreRow(diagnosis.summary.score, diagnosis.summary.verdict),
-      `<p class="meta">Policy <code>${escapeHtml(diagnosis.policy?.hash ?? "default")}</code> (${escapeHtml(diagnosis.policy?.preset ?? "memi-recommended")}) · ${diagnosis.summary.scannedFiles} files scanned${suppressed ? ` · ${suppressed} baselined finding(s) suppressed from gating` : ""}</p>`,
+      `<p class="meta">Policy <code>${escapeHtml(diagnosis.policy?.hash ?? "default")}</code> (${escapeHtml(diagnosis.policy?.preset ?? "memi-recommended")}) · ${diagnosis.summary.scannedFiles} files scanned${coverage ? ` · SwiftUI ${coverage.swiftui.scannedFiles} (${coverage.swiftui.analysis}) · Metal ${coverage.metal.scannedFiles} (${coverage.metal.analysis})` : ""}${suppressed ? ` · ${suppressed} baselined finding(s) suppressed from gating` : ""}</p>`,
+      unassessed.length > 0
+        ? `<p class="legend">Unassessed dimensions remain unverified: ${escapeHtml(unassessed.join(", "))}.</p>`
+        : "",
       diagnosis.issues.length === 0
-        ? `<p class="ok">No issues detected by the static scan.</p>`
+        ? unassessed.length > 0
+          ? `<p class="legend">No findings from assessed checks. This is not a whole-product pass.</p>`
+          : `<p class="ok">No issues detected by the static scan.</p>`
         : `<ul class="findings">${diagnosis.issues.map((issue) => {
             const location = issue.evidenceLocations?.[0];
             return `<li><span class="sev sev-${issue.severity}">${issue.severity}</span> <strong>${escapeHtml(issue.title)}</strong> <code>${escapeHtml(issue.id)}</code><span class="prov">static-scan</span>` +
@@ -173,12 +191,23 @@ export async function composeReport(options: ComposeReportOptions): Promise<Comp
     ]));
   }
 
-  const trendLines = renderTrend(history, diagnosis?.policy?.hash, 15);
+  const trendLines = renderTrend(
+    history,
+    diagnosis?.policy?.hash,
+    diagnosis ? entryFromDiagnosis(diagnosis).coverageFingerprint : undefined,
+    15,
+  );
   if (trendLines.length > 0) {
+    const coverageFingerprint = diagnosis ? entryFromDiagnosis(diagnosis).coverageFingerprint : undefined;
+    const comparableHistory = history.filter((entry) =>
+      entry.scope === "full"
+      && entry.policyHash === diagnosis?.policy?.hash
+      && (coverageFingerprint === undefined || entry.coverageFingerprint === coverageFingerprint),
+    ).slice(-15);
     sections.push("trend");
     md.push("", "## Score Trend", "", ...trendLines.map((line) => `- ${line}`));
     body.push(htmlSection("Score Trend", [
-      trendSvg(history.filter((entry) => entry.scope === "full" && entry.policyHash === diagnosis?.policy?.hash).slice(-15)),
+      trendSvg(comparableHistory),
       `<pre class="trend">${trendLines.map(escapeHtml).join("\n")}</pre>`,
     ]));
   }

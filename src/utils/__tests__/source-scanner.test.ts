@@ -4,6 +4,19 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { scanSources } from "../source-scanner.js";
 
+vi.mock("../../security/safe-fetch.js", () => ({
+  fetchPublicText: vi.fn(async (url: string, options: { headers?: Record<string, string> }) => {
+    const response = await fetch(url, { headers: options.headers });
+    return {
+      url,
+      status: response.status ?? (response.ok ? 200 : 500),
+      ok: response.ok,
+      headers: {},
+      text: await response.text(),
+    };
+  }),
+}));
+
 const roots: string[] = [];
 
 async function makeRoot(): Promise<string> {
@@ -39,6 +52,24 @@ describe("scanSources", () => {
     expect(files.map((file) => file.projectPath)).toEqual(["src/a.css", "src/nested/b.jsx"]);
   });
 
+  it("applies path exclusions before consuming the max-files budget", async () => {
+    const root = await makeRoot();
+    await mkdir(join(root, "src", "__tests__"), { recursive: true });
+    await mkdir(join(root, "src", "app"), { recursive: true });
+    await writeFile(join(root, "src", "__tests__", "a.test.tsx"), "export const fixture = '<div />';");
+    await writeFile(join(root, "src", "app", "page.tsx"), "export default function Page(){ return <main />; }");
+
+    const files = await scanSources({
+      projectRoot: root,
+      target: "src",
+      extensions: [".tsx"],
+      maxFiles: 1,
+      excludePath: (projectPath) => projectPath.includes("__tests__"),
+    });
+
+    expect(files.map((file) => file.projectPath)).toEqual(["src/app/page.tsx"]);
+  });
+
   it("fetches url html and inline styles with a timeout", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => ({
       ok: true,
@@ -57,7 +88,9 @@ describe("scanSources", () => {
       "https://example.com#inline-1",
     ]);
     expect(fetch).toHaveBeenCalledWith("https://example.com", expect.objectContaining({
-      signal: expect.any(AbortSignal),
+      headers: expect.objectContaining({
+        "User-Agent": "Memoire-SourceScanner/1.0",
+      }),
     }));
   });
 
@@ -76,5 +109,37 @@ describe("scanSources", () => {
 
     expect(files.map((file) => file.path)).toEqual(["small.css"]);
     expect(files[0]?.sizeBytes).toBeGreaterThan(0);
+  });
+
+  it("rejects local targets outside the project root", async () => {
+    const root = await makeRoot();
+    const outside = await makeRoot();
+    await writeFile(join(outside, "secret.ts"), "export const secret = true;");
+
+    await expect(scanSources({
+      projectRoot: root,
+      target: join(outside, "secret.ts"),
+      extensions: [".ts"],
+    })).rejects.toThrow(/outside the project root/i);
+  });
+
+  it.each([
+    "http://localhost/app",
+    "http://127.0.0.1/app",
+    "http://169.254.169.254/latest/meta-data",
+    "http://[::1]/app",
+    "http://[::ffff:127.0.0.1]/app",
+    "http://[::ffff:169.254.169.254]/latest/meta-data",
+    "http://[::ffff:10.0.0.1]/app",
+  ])("rejects private and loopback URL targets: %s", async (target) => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(scanSources({
+      projectRoot: await makeRoot(),
+      target,
+      extensions: [".html"],
+    })).rejects.toThrow(/public http\(s\) address/i);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

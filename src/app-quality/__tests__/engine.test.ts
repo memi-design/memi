@@ -5,6 +5,42 @@ import { join } from "node:path";
 import { diagnoseAppQuality } from "../engine.js";
 
 describe("diagnoseAppQuality", () => {
+  it("returns an explicit unassessed result for source repositories with no UI signal", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-non-ui-"));
+    try {
+      await mkdir(join(root, "lib"), { recursive: true });
+      await writeFile(
+        join(root, "lib", "server.js"),
+        "export function handle(request, response) { response.end('ok'); }\n",
+        "utf-8",
+      );
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+
+      expect(diagnosis.summary.scannedFiles).toBe(1);
+      expect(diagnosis.summary.score).toBe(0);
+      expect(diagnosis.summary.scoreScope).toBe("none");
+      expect(diagnosis.summary.verdict).toBe("unassessed — no UI class signal found");
+      expect(diagnosis.assessedDimensions).toEqual([]);
+      expect(diagnosis.unassessedDimensions).toEqual([
+        "accessibility",
+        "color",
+        "components",
+        "maintainability",
+        "responsive",
+        "spacing",
+        "typography",
+        "visual-system",
+      ]);
+      expect(diagnosis.issues.map((issue) => issue.id)).toEqual(["scan.empty"]);
+      expect(diagnosis.nextActions).toContain(
+        "Run the audit against a route, app directory, or built HTML page with visible UI.",
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("detects code-native design debt and writes reports", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-"));
     try {
@@ -134,6 +170,307 @@ export const fixture = '<Image src="/test.png" className="p-[99px] bg-[#00ff00]"
       expect(issueIds).not.toContain("a11y.focus-missing");
       expect(issueIds).not.toContain("maintainability.arbitrary-tailwind");
       expect(diagnosis.summary.hexColors).toBe(0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("does not let excluded fixtures consume the scan budget for an explicit directory target", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-budget-"));
+    try {
+      await mkdir(join(root, "src", "__tests__"), { recursive: true });
+      await mkdir(join(root, "src", "app"), { recursive: true });
+      await writeFile(join(root, "src", "__tests__", "a.test.tsx"), "export const fixture = '<div className=\"text-[#ff00ff]\" />';");
+      await writeFile(join(root, "src", "app", "page.tsx"), "export default function Page(){ return <main className=\"p-4 text-base\" />; }");
+
+      const diagnosis = await diagnoseAppQuality({
+        projectRoot: root,
+        target: "src",
+        maxFiles: 1,
+        write: false,
+      });
+
+      expect(diagnosis.files.map((file) => file.path)).toEqual(["src/app/page.tsx"]);
+      expect(diagnosis.summary.hexColors).toBe(0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("returns a file-anchored SwiftUI motion finding without awarding unassessed web dimensions", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-swiftui-"));
+    try {
+      await mkdir(join(root, "Sources", "Ripple"), { recursive: true });
+      await writeFile(join(root, "Sources", "Ripple", "RippleView.swift"), `import SwiftUI
+
+struct RippleView: View {
+    let trigger: Int
+
+    var body: some View {
+        Text("Ripple")
+            .keyframeAnimator(initialValue: 0.0, trigger: trigger) { view, value in
+                view.opacity(value)
+            } keyframes: { _ in
+                LinearKeyframe(1.0, duration: 0.4)
+            }
+            .onSpatialTap { _ in }
+    }
+}
+`, "utf-8");
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+      const finding = diagnosis.issues.find((issue) => issue.id === "swiftui.reduced-motion-missing");
+
+      expect(diagnosis.summary.scannedFiles).toBe(1);
+      expect(diagnosis.summary.components).toBe(1);
+      expect(diagnosis.appGraph?.components).toBe(1);
+      expect(diagnosis.summary.score).toBe(0);
+      expect(diagnosis.summary.verdict).toBe("unassessed — SwiftUI coverage is partial");
+      expect(diagnosis.assessedDimensions).toEqual([
+        "swiftui.gesture-accessibility-action",
+        "swiftui.reduced-motion",
+      ]);
+      expect(diagnosis.unassessedDimensions).toEqual([
+        "accessibility",
+        "color",
+        "components",
+        "maintainability",
+        "responsive",
+        "spacing",
+        "swiftui:rendered-quality",
+        "swiftui:runtime-accessibility",
+        "swiftui:whole-category-analysis",
+        "typography",
+        "visual-system",
+      ]);
+      expect(diagnosis.sourceCoverage.swiftui).toMatchObject({
+        scannedFiles: 1,
+        analysis: "partial",
+        assessedChecks: [
+          "swiftui.gesture-accessibility-action",
+          "swiftui.reduced-motion",
+        ],
+      });
+      expect(finding?.affectedFiles).toEqual(["Sources/Ripple/RippleView.swift"]);
+      expect(finding?.evidenceLocations).toEqual([
+        expect.objectContaining({
+          file: "Sources/Ripple/RippleView.swift",
+          line: 8,
+        }),
+      ]);
+      expect(diagnosis.issues.map((issue) => issue.id)).not.toContain("scan.empty");
+      expect(diagnosis.ux.findings.map((finding) => finding.id)).toContain("ux.swiftui.reduced-motion-missing");
+      expect(diagnosis.issues.find((issue) => issue.id === "swiftui.gesture-accessibility-action-missing")?.evidenceLocations).toEqual([
+        expect.objectContaining({
+          file: "Sources/Ripple/RippleView.swift",
+          line: 13,
+        }),
+      ]);
+      expect(diagnosis.ux.tenetCoverage.find((entry) => entry.tenetId === "consistency")?.status).toBe("not-assessed");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("recognizes explicit reduced-motion and accessibility-action handling", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-swiftui-covered-"));
+    try {
+      await mkdir(join(root, "Sources"), { recursive: true });
+      await writeFile(join(root, "Sources", "CoveredView.swift"), `import SwiftUI
+
+struct CoveredView: View {
+    @Environment(\\.accessibilityReduceMotion) private var reduceMotion
+    let trigger: Int
+
+    var body: some View {
+        Text("Ripple")
+            .keyframeAnimator(initialValue: 0.0, trigger: reduceMotion ? 0 : trigger) { view, value in
+                view.opacity(value)
+            } keyframes: { _ in
+                LinearKeyframe(1.0, duration: 0.4)
+            }
+            .onSpatialTap { _ in }
+            .accessibilityAction { }
+    }
+}
+`, "utf-8");
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+
+      expect(diagnosis.summary.scannedFiles).toBe(1);
+      expect(diagnosis.issues.map((issue) => issue.id)).not.toContain("swiftui.reduced-motion-missing");
+      expect(diagnosis.issues.map((issue) => issue.id)).not.toContain("swiftui.gesture-accessibility-action-missing");
+      expect(diagnosis.sourceCoverage.swiftui.assessedChecks).toEqual([
+        "swiftui.gesture-accessibility-action",
+        "swiftui.reduced-motion",
+      ]);
+      expect(diagnosis.ux.appliedScoreCaps).toEqual([
+        expect.objectContaining({
+          id: "partial-static-analysis",
+          maximum: 0,
+        }),
+      ]);
+      expect(diagnosis.ux.evidenceProvenance).toContainEqual(
+        expect.objectContaining({ kind: "static-scan", analyzed: true }),
+      );
+      expect(diagnosis.ux.appliedScoreCaps.map((cap) => cap.id)).not.toContain("no-analyzed-evidence");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("discovers Metal sources but leaves them explicitly unassessed", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-metal-"));
+    try {
+      await mkdir(join(root, "Shaders"), { recursive: true });
+      await writeFile(join(root, "Shaders", "Ripple.metal"), `#include <metal_stdlib>
+using namespace metal;
+
+[[ stitchable ]] half4 Ripple(float2 position, half4 color) {
+    return color;
+}
+`, "utf-8");
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+
+      expect(diagnosis.summary.scannedFiles).toBe(1);
+      expect(diagnosis.summary.score).toBe(0);
+      expect(diagnosis.summary.verdict).toBe("unassessed — detected source has no supported analyzer");
+      expect(diagnosis.sourceCoverage.metal).toEqual({
+        scannedFiles: 1,
+        analysis: "unassessed",
+        assessedDimensions: [],
+        assessedChecks: [],
+      });
+      expect(diagnosis.assessedDimensions).toEqual([]);
+      expect(diagnosis.unassessedDimensions).toContain("metal:shader-semantics");
+      expect(diagnosis.unassessedDimensions).toContain("metal:gpu-performance");
+      expect(diagnosis.unassessedDimensions).toContain("metal:color-correctness");
+      expect(diagnosis.issues).toEqual([]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps the web score explicitly scoped when SwiftUI coverage is partial", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-mixed-"));
+    try {
+      await mkdir(join(root, "src", "app"), { recursive: true });
+      await mkdir(join(root, "Sources"), { recursive: true });
+      await writeFile(join(root, "src", "app", "page.tsx"), `
+export default function Page() {
+  return <main className="p-4 text-base"><button type="button">Save</button></main>;
+}
+`, "utf-8");
+      await writeFile(join(root, "Sources", "MotionView.swift"), `import SwiftUI
+struct MotionView: View {
+    var body: some View {
+        Text("Motion")
+            .phaseAnimator([false, true]) { view, active in
+                view.opacity(active ? 1 : 0)
+            }
+    }
+}
+`, "utf-8");
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+
+      expect(diagnosis.summary.scannedFiles).toBe(2);
+      expect(diagnosis.summary.score).toBeLessThan(100);
+      expect(diagnosis.summary.scoreScope).toBe("web");
+      expect(diagnosis.summary.verdict).toBe("needs a design-system pass — web ruleset only; native coverage incomplete");
+      expect(diagnosis.sourceCoverage.web.analysis).toBe("ruleset");
+      expect(diagnosis.sourceCoverage.swiftui.analysis).toBe("partial");
+      expect(diagnosis.assessedDimensions).toEqual([
+        "accessibility",
+        "maintainability",
+        "spacing",
+        "swiftui.gesture-accessibility-action",
+        "swiftui.reduced-motion",
+        "typography",
+      ]);
+      expect(diagnosis.unassessedDimensions).toEqual([
+        "color",
+        "components",
+        "responsive",
+        "swiftui:rendered-quality",
+        "swiftui:runtime-accessibility",
+        "swiftui:whole-category-analysis",
+        "visual-system",
+      ]);
+      expect(diagnosis.issues.map((issue) => issue.id)).toContain("swiftui.reduced-motion-missing");
+      expect(diagnosis.directions.map((direction) => direction.id)).toContain("premium-saas");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps web scoring comparable when a Package.swift manifest is present", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-web-helper-swift-"));
+    try {
+      await mkdir(join(root, "src", "app"), { recursive: true });
+      await writeFile(join(root, "src", "app", "page.tsx"), `
+export default function Page() {
+  return <main className="p-4 text-base"><button type="button">Save</button></main>;
+}
+`, "utf-8");
+      await writeFile(join(root, "Package.swift"), `// swift-tools-version: 6.0
+import PackageDescription
+let package = Package(
+    name: "WebCompanion",
+    products: [],
+    targets: []
+)
+`, "utf-8");
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+
+      expect(diagnosis.summary.score).toBeLessThan(100);
+      expect(diagnosis.summary.scoreScope).toBe("web");
+      expect(diagnosis.summary.verdict).toBe("needs a design-system pass — web ruleset only; native coverage incomplete");
+      expect(diagnosis.sourceCoverage.swift.scannedFiles).toBe(1);
+      expect(diagnosis.sourceCoverage.swiftui.scannedFiles).toBe(0);
+      expect(diagnosis.assessedDimensions).toEqual([
+        "accessibility",
+        "maintainability",
+        "spacing",
+        "typography",
+      ]);
+      expect(diagnosis.unassessedDimensions).toEqual([
+        "color",
+        "components",
+        "responsive",
+        "swift:source-analysis",
+        "visual-system",
+      ]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("excludes Swift test and generated fixture sources from native coverage", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-swift-exclusions-"));
+    try {
+      await mkdir(join(root, "Tests"), { recursive: true });
+      await mkdir(join(root, "Fixtures"), { recursive: true });
+      await mkdir(join(root, "Generated"), { recursive: true });
+      const fixture = `import SwiftUI
+struct FixtureView: View {
+    var body: some View {
+        Text("fixture").keyframeAnimator(initialValue: 0.0, trigger: 1) { view, _ in view }
+    }
+}
+`;
+      await writeFile(join(root, "Tests", "RippleTests.swift"), fixture, "utf-8");
+      await writeFile(join(root, "Fixtures", "Preview.swift"), fixture, "utf-8");
+      await writeFile(join(root, "Generated", "GeneratedView.swift"), fixture, "utf-8");
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+
+      expect(diagnosis.summary.scannedFiles).toBe(0);
+      expect(diagnosis.sourceCoverage.swiftui.analysis).toBe("not-detected");
+      expect(diagnosis.issues).toEqual([]);
+      expect(diagnosis.summary.verdict).toBe("unassessed — no supported source files detected");
     } finally {
       await rm(root, { recursive: true, force: true });
     }

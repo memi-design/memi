@@ -179,6 +179,12 @@ function isBridgeEnvelope(value) {
   const v = value;
   if (v.channel !== BRIDGE_V2_CHANNEL) return false;
   if (typeof v.type !== "string") return false;
+  if (v.type === "identify") {
+    return typeof v.name === "string" && (v.auth === void 0 || v.auth === "pre-shared-hmac-sha256-v1") && (v.minimumProtocolVersion === void 0 || typeof v.minimumProtocolVersion === "number") && (v.challenge === void 0 || typeof v.challenge === "string") && (v.serverProof === void 0 || typeof v.serverProof === "string");
+  }
+  if (v.type === "bridge-hello") {
+    return (v.proof === void 0 || typeof v.proof === "string") && (v.protocolVersion === void 0 || typeof v.protocolVersion === "number");
+  }
   if (v.type === "command" && !isWidgetCommandName(v.method)) return false;
   return true;
 }
@@ -242,7 +248,11 @@ function normalizeBridgeMessage(value) {
           name: message.name,
           port: typeof message.port === "number" ? message.port : void 0,
           studioUrl: asString(message.studioUrl),
-          runtimeUrl: asString(message.runtimeUrl)
+          runtimeUrl: asString(message.runtimeUrl),
+          auth: message.auth === "pre-shared-hmac-sha256-v1" ? message.auth : void 0,
+          minimumProtocolVersion: typeof message.minimumProtocolVersion === "number" ? message.minimumProtocolVersion : void 0,
+          challenge: asString(message.challenge),
+          serverProof: asString(message.serverProof)
         };
       }
       return null;
@@ -253,7 +263,9 @@ function normalizeBridgeMessage(value) {
         type,
         file: (_a = asString(message.file)) != null ? _a : "unknown",
         fileKey: (_b = asString(message.fileKey)) != null ? _b : "",
-        editor: (_c = asString(message.editor)) != null ? _c : "figma"
+        editor: (_c = asString(message.editor)) != null ? _c : "figma",
+        protocolVersion: typeof message.protocolVersion === "number" ? message.protocolVersion : void 0,
+        proof: asString(message.proof)
       };
     case "event":
       if (typeof message.message === "string") {
@@ -441,14 +453,20 @@ function serializeBridgeEnvelope(envelope, mode = "legacy") {
         name: envelope.name,
         port: envelope.port,
         studioUrl: envelope.studioUrl,
-        runtimeUrl: envelope.runtimeUrl
+        runtimeUrl: envelope.runtimeUrl,
+        auth: envelope.auth,
+        minimumProtocolVersion: envelope.minimumProtocolVersion,
+        challenge: envelope.challenge,
+        serverProof: envelope.serverProof
       };
     case "bridge-hello":
       return {
         type: "bridge-hello",
         file: envelope.file,
         fileKey: envelope.fileKey,
-        editor: envelope.editor
+        editor: envelope.editor,
+        protocolVersion: envelope.protocolVersion,
+        proof: envelope.proof
       };
     case "event":
       return {
@@ -535,6 +553,11 @@ function asString(value) {
 function asNumber(value) {
   return typeof value === "number" ? value : void 0;
 }
+const BRIDGE_CAPABILITY_PLACEHOLDER = "__MEMOIRE_BRIDGE_CAPABILITY_V1__";
+const BRIDGE_AUTH_SCHEME = "pre-shared-hmac-sha256-v1";
+const BRIDGE_PROTOCOL_VERSION = 3;
+const BRIDGE_CLIENT_PROOF_DOMAIN = "memoire-figma-bridge-v3:client:";
+const BRIDGE_SERVER_PROOF_DOMAIN = "memoire-figma-bridge-v3:server:";
 function createBridgeCommandDispatch(message) {
   return {
     requestId: createRunId("bridge"),
@@ -556,14 +579,16 @@ function resolveBridgeResponse(pending, message) {
   pending.delete(message.requestId);
   return createBridgeResponseEnvelope(matched.bridgeId, message.result, message.error);
 }
-function createBridgeHelloMessage(connection) {
+function createBridgeHelloMessage(connection, proof) {
   return {
     channel: BRIDGE_V2_CHANNEL,
     source: "plugin",
     type: "bridge-hello",
     file: connection.fileName || "unknown",
     fileKey: connection.fileKey || "",
-    editor: connection.editorType || "figma"
+    editor: connection.editorType || "figma",
+    protocolVersion: BRIDGE_PROTOCOL_VERSION,
+    proof
   };
 }
 function createBridgeSelectionMessage(selection) {
@@ -661,6 +686,65 @@ function summarizeSyncResult(part, result, error) {
     summary.styles = Array.isArray(result) ? result.length : 0;
   }
   return summary;
+}
+async function authenticateBridgeIdentify(capability, identify) {
+  if (identify.auth !== BRIDGE_AUTH_SCHEME || identify.minimumProtocolVersion !== BRIDGE_PROTOCOL_VERSION || !identify.challenge || !identify.serverProof) {
+    throw new Error("Bridge requires a securely paired protocol-v3 plugin.");
+  }
+  const trustedServer = await verifyBridgeServerProof(
+    capability,
+    identify.challenge,
+    identify.serverProof
+  );
+  if (!trustedServer) {
+    throw new Error("Server authentication proof did not match the installed capability.");
+  }
+  return createBridgeAuthenticationProof(capability, identify.challenge);
+}
+async function createBridgeAuthenticationProof(capability, challenge) {
+  const [key, encoder] = await importHmacKey(capability);
+  const signature = await globalThis.crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(`${BRIDGE_CLIENT_PROOF_DOMAIN}${challenge}`)
+  );
+  return bytesToBase64Url(new Uint8Array(signature));
+}
+async function verifyBridgeServerProof(capability, challenge, serverProof) {
+  const [key, encoder] = await importHmacKey(capability);
+  return globalThis.crypto.subtle.verify(
+    "HMAC",
+    key,
+    base64UrlToBytes(serverProof),
+    encoder.encode(`${BRIDGE_SERVER_PROOF_DOMAIN}${challenge}`)
+  );
+}
+async function importHmacKey(capability) {
+  const encoder = new TextEncoder();
+  const key = await globalThis.crypto.subtle.importKey(
+    "raw",
+    encoder.encode(capability),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
+  return [key, encoder];
+}
+function bytesToBase64Url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/u, "");
+}
+function base64UrlToBytes(value) {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = (4 - normalized.length % 4) % 4;
+  const padded = normalized + "=".repeat(padding);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes.buffer;
 }
 function buildJobsOverview(jobs) {
   const active = jobs.filter((job) => job.status === "running" || job.status === "queued");
@@ -807,6 +891,7 @@ function unique(values) {
 const PORT_START = 9223;
 const PORT_END = 9232;
 const LOG_LIMIT = 80;
+const INSTALLED_BRIDGE_CAPABILITY = BRIDGE_CAPABILITY_PLACEHOLDER;
 const OFFLINE_CTA_GRACE_MS = 5e3;
 const TABS = [
   { id: "jobs", label: "Jobs", count: (s) => s.jobs.length || null },
@@ -920,7 +1005,9 @@ const state = {
     lastPingSentAt: 0,
     scanTimer: null,
     offlineSince: Date.now(),
-    reconnectAttempts: 0
+    reconnectAttempts: 0,
+    capability: INSTALLED_BRIDGE_CAPABILITY,
+    proof: ""
   }
 };
 bootstrap();
@@ -1131,7 +1218,7 @@ function scanBridge() {
           window.clearTimeout(scanTimeout);
           scanCandidates = scanCandidates.filter((candidate) => candidate !== ws);
           closeScanCandidates();
-          adoptBridge(ws, port, payload);
+          void adoptBridge(ws, port, payload);
           return;
         }
       }
@@ -1170,7 +1257,26 @@ function closeScanCandidates() {
   }
   scanCandidates = [];
 }
-function adoptBridge(ws, port, payload) {
+async function adoptBridge(ws, port, payload) {
+  try {
+    state.bridge.proof = await authenticateBridgeIdentify(
+      state.bridge.capability,
+      payload
+    );
+  } catch (error) {
+    ws.close();
+    setBridgeStage("offline");
+    addLog("error", "Secure bridge pairing failed", error instanceof Error ? error.message : String(error));
+    scheduleReconnect();
+    scheduleRender();
+    return;
+  }
+  if (ws.readyState !== WebSocket.OPEN) {
+    setBridgeStage("offline");
+    scheduleReconnect();
+    scheduleRender();
+    return;
+  }
   state.bridge.ws = ws;
   state.bridge.port = port;
   state.bridge.name = payload.name || "Mémoire";
@@ -1181,14 +1287,21 @@ function adoptBridge(ws, port, payload) {
   writeCachedPort(port);
   setBridgeStage("connected");
   addLog("success", `Connected :${port}`);
-  forwardToBridge(serializeBridgeEnvelope(createBridgeHelloMessage(state.connection), "v2"));
+  forwardToBridge(serializeBridgeEnvelope(
+    createBridgeHelloMessage(state.connection, state.bridge.proof),
+    "v2"
+  ));
   scheduleRender();
   window.setTimeout(() => {
     requestCommand("getSelection", {}, "Auto-inspect", "selection");
   }, 300);
 }
 function announceBridgeHello() {
-  forwardToBridge(serializeBridgeEnvelope(createBridgeHelloMessage(state.connection), "v2"));
+  if (!state.bridge.proof) return;
+  forwardToBridge(serializeBridgeEnvelope(
+    createBridgeHelloMessage(state.connection, state.bridge.proof),
+    "v2"
+  ));
 }
 const MAX_RECONNECT_ATTEMPTS = 20;
 function scheduleReconnect() {

@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-07-26T21:16:34Z",
+  "evidenceAsOf": "2026-07-26",
+  "repository": "https://github.com/sarveshsea/memi",
+  "publicBaseline": {
+    "score": 47,
+    "maximum": 100,
+    "verdict": "blocked",
+    "snapshotKind": "kickoff",
+    "confidence": 0.91,
+    "appliedCaps": [
+      {
+        "id": "public-version-drift",
+        "maximum": 69,
+        "reason": "At kickoff, npm, GitHub releases, Studio, and the public website did not agree on current releases. The exact v2.6.2 source tag was restored during this audit, but live site and Studio metadata remain stale until deployment."
+      }
+    ],
+    "postSnapshotRemediations": [
+      "Restored GitHub release v2.6.2 at the exact npm gitHead.",
+      "Merged the reviewed Memi integration into the evaluation fork's default branch."
+    ]
+  },
+  "implementationCandidate": {
+    "score": 85,
+    "maximum": 100,
+    "verdict": "launchable-with-caveats",
+    "confidence": 0.9,
+    "isPublicCurrentState": false,
+    "appliedCaps": []
+  },
+  "dimensions": [
+    {
+      "id": "core-activation",
+      "maximum": 15,
+      "baseline": 9,
+      "candidate": 15,
+      "evidence": [
+        "A pinned no-write audit command already existed.",
+        "The candidate makes it the first public action and returns normalized file-anchored evidence metadata.",
+        "Three fresh external repositories retained clean Git status: a web UI repository returned file-anchored findings, a SwiftUI repository returned partial-coverage findings without a whole-category score, and a non-UI repository returned an explicit zero-score unassessed state."
+      ]
+    },
+    {
+      "id": "surface-parity",
+      "maximum": 15,
+      "baseline": 6,
+      "candidate": 11,
+      "evidence": [
+        "At kickoff, npm and origin/main were 2.6.2 while the latest GitHub release was 2.6.1 and public pages contained 2.4.0 and 2.5.0. The exact v2.6.2 source tag and release were restored after npm gitHead verification.",
+        "The site candidate centralizes CLI and Studio release metadata, but it is not deployed and the corrected core is not published."
+      ]
+    },
+    {
+      "id": "design-engineering-depth",
+      "maximum": 15,
+      "baseline": 9,
+      "candidate": 13,
+      "evidence": [
+        "Memi had broad design-system and audit machinery but limited rendered proof.",
+        "The candidate adds artifact-backed website proof, a separately owned WebGL2 lab, and a SwiftUI simulator evaluation."
+      ]
+    },
+    {
+      "id": "skill-governance",
+      "maximum": 15,
+      "baseline": 9,
+      "candidate": 15,
+      "evidence": [
+        "The canonical catalog was governed but documentation counts were stale and shader ownership was absent.",
+        "The merged catalog validates 94 skills, scores every entry, adds five-state dispositions, eliminates duplicate primary routes, enforces 180-day shader-source freshness, and scores 52/52 (100%) with all nine negative controls abstaining on a transparent catalog-metadata routing benchmark."
+      ]
+    },
+    {
+      "id": "shader-and-dither",
+      "maximum": 10,
+      "baseline": 1,
+      "candidate": 8,
+      "evidence": [
+        "No canonical shader or dither workflow existed.",
+        "The separately owned candidate adds two canonical shader skills plus an original deterministic WebGL2 proof with Bayer and seeded-noise dithering, fallbacks, and evidence export."
+      ]
+    },
+    {
+      "id": "security-privacy-licensing",
+      "maximum": 10,
+      "baseline": 3,
+      "candidate": 9,
+      "evidence": [
+        "The baseline source checkout release gate found six production advisories including one high severity issue. A separate clean install of the published 2.6.2 package returned zero high and critical advisories, so no public-package security cap was applied.",
+        "The candidate has zero production dependency advisories across Memi core, the public site, and the shader lab; it also hardens IP, path, symlink, archive, loopback, and publisher boundaries.",
+        "The SwiftUI fork preserves MIT attribution, removes excluded media, records replacement provenance, and rejects forbidden media hashes in CI."
+      ]
+    },
+    {
+      "id": "growth-and-community-proof",
+      "maximum": 10,
+      "baseline": 3,
+      "candidate": 5,
+      "evidence": [
+        "The baseline had 27 GitHub API stars, four forks, seven focused-skill installs, and one website referral in the current GitHub traffic window.",
+        "The candidate repairs the funnel and growth measurement but has not yet produced the targeted external integrations or repeat use."
+      ]
+    },
+    {
+      "id": "testing-and-operations",
+      "maximum": 10,
+      "baseline": 7,
+      "candidate": 9,
+      "evidence": [
+        "The baseline built, but the source release gate failed on dependency and public-surface parity checks.",
+        "The candidate passes 1,891 Memi tests across 256 files, 45 design-skills checks, a 52/52 catalog-routing benchmark, 208 site tests, blocking shader unit/browser CI, iOS simulator build, production audits, and independent review. An isolated public 2.6.2 install smoke passed; the aggregate public-release gate remains ineligible until a provenance-bound 2.6.3 release exists."
+      ]
+    }
+  ],
+  "evidenceLedger": {
+    "capturedAt": "2026-07-27T03:21:07Z",
+    "relatedRepositories": {
+      "designSkills": {
+        "repository": "https://github.com/sarveshsea/design-skills",
+        "pullRequest": "https://github.com/sarveshsea/design-skills/pull/5",
+        "commit": "7cce9438e3781f6e495e4d26c13746c55b14739f",
+        "run": "https://github.com/sarveshsea/design-skills/actions/runs/30234304324",
+        "job": "https://github.com/sarveshsea/design-skills/actions/runs/30234304324/job/89878998755",
+        "status": "checks-passed",
+        "skills": [
+          "shader-design-engineering",
+          "creative-rendering-audit"
+        ]
+      },
+      "designSandbox": {
+        "repository": "https://github.com/sarveshsea/design-sandbox",
+        "pullRequest": "https://github.com/sarveshsea/design-sandbox/pull/2",
+        "commit": "0389679394fbdc7a8c54c764daa9cabe9dc9a91e",
+        "route": "/labs/shaders",
+        "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003",
+        "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003/job/89879007118",
+        "status": "passed"
+      }
+    },
+    "externalCleanRepositories": {
+      "artifact": "memi-external-clean-repositories-2026-07-26.json",
+      "sha256": "00ea5cdaa7f9a8cc324eecd15d936de6eb5c7b8e1505c288d269b5f240edc84d",
+      "candidateCommit": "ccb2971c87285413443e0e98996bfb17a87209d4",
+      "repositories": 3,
+      "cleanBefore": 3,
+      "cleanAfter": 3,
+      "fileAnchoredResultRepositories": 2,
+      "honestUnsupportedRepositories": 1,
+      "status": "passed-candidate"
+    },
+    "routingBenchmark": {
+      "artifact": "memi-routing-evidence-2026-07-26.json",
+      "sha256": "6335fb1afd7ada56d2e86ede8316ca64c2ad062ad17323a40f12f19c687a9945",
+      "commit": "7cce9438e3781f6e495e4d26c13746c55b14739f",
+      "correct": 52,
+      "total": 52,
+      "negativeAbstentions": "9/9",
+      "knownConfusions": 0,
+      "status": "passed"
+    },
+    "githubRepository": {
+      "sources": [
+        "GET https://api.github.com/repos/sarveshsea/memi",
+        "GET https://api.github.com/repos/sarveshsea/memi/traffic/views",
+        "GET https://api.github.com/repos/sarveshsea/memi/traffic/clones",
+        "GET https://api.github.com/repos/sarveshsea/memi/traffic/popular/referrers"
+      ],
+      "access": "Authenticated repository-owner API; values are a time-bounded snapshot.",
+      "values": {
+        "stars": 27,
+        "forks": 4,
+        "views14d": 162,
+        "uniqueViews14d": 98,
+        "clones14d": 708,
+        "uniqueCloners14d": 177,
+        "websiteReferrals14d": 1
+      }
+    },
+    "npmDownloads": {
+      "sources": [
+        "GET https://api.npmjs.org/downloads/point/last-week/@memi-design/cli",
+        "GET https://api.npmjs.org/downloads/point/last-year/@memi-design/cli",
+        "GET https://api.npmjs.org/downloads/range/last-year/@memi-design/cli"
+      ],
+      "method": "The daily baseline excludes published release dates before taking the median; ceil(19 * 1.25) gives the target of 24.",
+      "values": {
+        "downloadsLastCompleteWeek": 697,
+        "downloadsLastYear": 3757,
+        "nonReleaseDailyMedian": 19,
+        "targetDailyMedian": 24
+      }
+    },
+    "skillsSh": {
+      "sources": [
+        "https://skills.sh/sarveshsea/memi/audit-frontend-design",
+        "https://skills.sh/sarveshsea/memi/remember-design-system",
+        "https://skills.sh/sarveshsea/memi/enforce-design-ci",
+        "https://skills.sh/sarveshsea/memi/memoire-design-tooling"
+      ],
+      "values": {
+        "focusedSkills": 4,
+        "totalInstalls": 7
+      }
+    },
+    "releaseProvenance": {
+      "npmVersion": "2.6.2",
+      "npmGitHead": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+      "isolatedPublicInstallSmoke": {
+        "command": "SKIP_SITE_SMOKE=1 EXPECTED_VERSION=2.6.2 node scripts/check-public-release-gate.mjs",
+        "ok": true,
+        "reportedVersion": "2.6.2"
+      },
+      "githubReleaseRestoredAt": "2026-07-26T21:27:50Z",
+      "githubRelease": "https://github.com/sarveshsea/memi/releases/tag/v2.6.2"
+    },
+    "releaseManifest": {
+      "canonicalPath": "release-manifest.json",
+      "websiteArtifact": "release-artifacts/memoire-web.release.json",
+      "immutableSourceCommit": "29a620569723565597837415d5947bc36a042c20",
+      "websiteOfflineGate": "passed",
+      "websiteLiveProof": {
+        "memiRelease": "v2.6.2",
+        "studioRelease": "v2.5.0",
+        "requiredStudioAssets": [
+          "Memoire.Studio_2.5.0_aarch64.dmg",
+          "Memoire.Studio_2.5.0_x64.dmg",
+          "SHA256SUMS"
+        ],
+        "status": "passed"
+      }
+    },
+    "hostedVerification": {
+      "coreCleanInstall": {
+        "run": "https://github.com/sarveshsea/memi/actions/runs/30221969392",
+        "status": "passed",
+        "operatingSystems": [
+          "ubuntu-latest",
+          "macos-latest",
+          "windows-latest"
+        ],
+        "nodeVersions": [
+          20,
+          22,
+          24
+        ],
+        "passedJobs": 9
+      },
+      "website": {
+        "source": "GET https://api.github.com/repos/sarveshsea/memoire-web/actions/jobs/89855906526",
+        "run": "https://github.com/sarveshsea/memoire-web/actions/runs/30225897481",
+        "runnerId": 0,
+        "status": "not-started",
+        "annotation": "The job was not started because recent account payments have failed or the spending limit needs to be increased.",
+        "vercelPreviewStatus": "passed"
+      },
+      "shaderLab": {
+        "run": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003",
+        "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30234307003/job/89879007118",
+        "status": "passed",
+        "duration": "1m11s",
+        "blocking": true
+      }
+    },
+    "swiftUiFork": {
+      "pullRequest": "https://github.com/sarveshsea/ripple-image-transitions/pull/3",
+      "mergedAt": "2026-07-27T03:18:40Z",
+      "defaultBranch": "main",
+      "mergeCommit": "8037c8bb7db68a4c78b03b0053e241005304e3b6",
+      "run": "https://github.com/sarveshsea/ripple-image-transitions/actions/runs/30234383225",
+      "job": "https://github.com/sarveshsea/ripple-image-transitions/actions/runs/30234383225/job/89879234824"
+    }
+  },
+  "growthBaseline": {
+    "github": {
+      "stars": 27,
+      "forks": 4,
+      "views14d": 162,
+      "uniqueViews14d": 98,
+      "clones14d": 708,
+      "uniqueCloners14d": 177,
+      "websiteReferrals14d": 1
+    },
+    "npm": {
+      "downloadsLastCompleteWeek": 697,
+      "downloadsLastYear": 3757,
+      "nonReleaseDailyMedian": 19,
+      "targetDailyMedian": 24
+    },
+    "skillsSh": {
+      "focusedSkills": 4,
+      "totalInstalls": 7
+    }
+  },
+  "adoptionTargets": {
+    "telemetryRequired": false,
+    "externalIntegrations": 10,
+    "successfulFirstAudits": 100,
+    "repeatAuditsWithin7To21Days": 25,
+    "sustainedNonReleaseBaselineIncrease": 0.25
+  },
+  "remainingEvidenceGaps": [
+    "Merge, publish, and deploy the candidate branches before using 75/100 as a public claim.",
+    "Memi 2.6.2 scans zero SwiftUI files and must not claim SwiftUI design-quality coverage.",
+    "The canonical shader skills and shader lab are reviewed candidate branches in their separately owned repositories; they must be merged, published or deployed, and reverified before becoming public-current proof.",
+    "Durable cross-browser GPU, energy, color, alpha, and temporal-stability evidence remains unassessed.",
+    "The website hosted CI did not start because of the GitHub account billing/spending gate; local tests and the Vercel preview passed, but hosted runner proof remains outstanding.",
+    "The public-release gate exits on live docs and changelog parity before installSmoke, so the public aggregate result cannot claim that stage passed.",
+    "Growth targets require eight weeks of public or explicitly opted-in evidence.",
+    "Dev-only legacy tooling retains advisories where forced dependency overrides break the old module API."
+  ]
+}

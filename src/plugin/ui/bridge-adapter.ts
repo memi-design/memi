@@ -22,6 +22,7 @@ import type {
   BridgeVariableChangedEnvelope,
 } from "../shared/bridge.js";
 import { BRIDGE_V2_CHANNEL, createBridgeResponseEnvelope } from "../shared/bridge.js";
+import { BRIDGE_PROTOCOL_VERSION } from "../shared/bridge-auth.js";
 
 export interface PendingBridgeRequest {
   bridgeId: string;
@@ -63,7 +64,10 @@ export function resolveBridgeResponse(
   return createBridgeResponseEnvelope(matched.bridgeId, message.result, message.error);
 }
 
-export function createBridgeHelloMessage(connection: WidgetConnectionState): BridgeHelloEnvelope {
+export function createBridgeHelloMessage(
+  connection: WidgetConnectionState,
+  proof: string,
+): BridgeHelloEnvelope {
   return {
     channel: BRIDGE_V2_CHANNEL,
     source: "plugin",
@@ -71,6 +75,8 @@ export function createBridgeHelloMessage(connection: WidgetConnectionState): Bri
     file: connection.fileName || "unknown",
     fileKey: connection.fileKey || "",
     editor: connection.editorType || "figma",
+    protocolVersion: BRIDGE_PROTOCOL_VERSION,
+    proof,
   };
 }
 

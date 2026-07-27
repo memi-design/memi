@@ -1,6 +1,6 @@
 # Weekly Growth Scorecard
 
-Use this every Friday during the v2 package-growth window. Record the value, source URL, and one action for the next week.
+Use this every Friday during the current public-growth window. Record the value, source URL, and one action for the next week.
 
 ## Baseline
 
@@ -11,18 +11,18 @@ Use this every Friday during the v2 package-growth window. Record the value, sou
 - Trend context: the previous seven-day bucket had 1,524 downloads because release and verification activity produced several one-day spikes; the seven days before that had 152. The current 354 is down from the spike but 133% above the pre-spike bucket.
 - 10x target from the 2026-07-08 baseline: 7,830 weekly downloads and 13,060 monthly downloads.
 - Primary CTA: `https://www.npmjs.com/package/@memi-design/cli`
-- Primary phrase: `Interface understanding for AI coding agents`
-- Secondary phrase: `Design-system memory for coding agents`
+- Primary story: `Memi is the read-only design engineering audit and skill layer for coding agents.`
+- Secondary phrase: `File-anchored design QA evidence before coding agents edit UI`
 - Core proof: `memi diagnose`, `memi ux audit --json`, `memi craft audit --json`, `memi tokens --from ./src --report`, `memi shadcn export --out public/r`
 - Agent proof: `npx skills add sarveshsea/memi --skill memoire-design-tooling`
 - MCP proof: `memi mcp start --no-figma`
 
 ## Targets
 
-- Week 1: npm latest is `2.5.0`, public release gate passes, Agent Skills discovery passes, MCP Registry metadata is refreshed, and active `memoire.cv` docs have no stale 0.14.x targets.
-- Week 2: weekly downloads are `1500+`, GitHub metadata matches the v2 phrase, and at least three external agent-stack or template guides link to runnable memi proof.
-- Week 4: weekly downloads are `4000+`, monthly downloads are `8000+`, and example registries or tutorials account for measurable npm traffic.
-- Week 8: weekly downloads are `7830+`, Codex/MCP/Agent Skills discovery routes all point to the same v2 story, and at least ten external repos or directories include runnable memi proof.
+- Week 1: npm latest remains aligned with `package.json`, the public release gate passes, Agent Skills discovery passes, MCP Registry metadata is refreshed, and active `memoire.cv` docs show the same current release story.
+- Week 2: current public copy is still consistent, the first audit path remains runnable, and at least three external guides or proof repos link to runnable memi evidence.
+- Week 4: the measured non-release daily baseline is improving toward the `24` median target and at least five verified external integrations are live.
+- Week 8: ten verified external integrations are live, one hundred successful first audits are logged, twenty-five repeat audits are verified within 7 to 21 days, and four consecutive non-release weeks meet or exceed the `24` median daily download threshold.
 
 ## Scorecard
 
@@ -57,7 +57,7 @@ npm run check:public-release
 ## Weekly review questions
 
 - Did npm latest match the repo release?
-- Did the first README screen still say `Interface understanding for AI coding agents`?
+- Did the first README screen still say `read-only design engineering audit and skill layer for coding agents`?
 - Did the first code block still prove value without Figma?
 - Did Agent Skills install and MCP startup still work?
 - Which post, directory, agent stack, example, or tutorial created the most clicks?

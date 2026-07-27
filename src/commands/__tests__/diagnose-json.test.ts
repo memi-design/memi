@@ -41,11 +41,79 @@ describe("memi diagnose", () => {
       const payload = JSON.parse(lastLog(logs));
 
       expect(payload.version).toBe(1);
+      expect(payload.schemaVersion).toBe(2);
+      expect(payload.confidence).toEqual(expect.any(Number));
+      expect(payload.confidence).toBeGreaterThan(0);
+      expect(payload.confidence).toBeLessThanOrEqual(1);
+      expect(payload.assessedDimensions).toContain("color");
+      expect(payload.unassessedDimensions).toEqual(["components", "responsive"]);
+      expect(payload.evidenceProvenance).toEqual([
+        expect.objectContaining({
+          kind: "static-scan",
+          analyzed: true,
+        }),
+      ]);
+      expect(payload.appliedScoreCaps).toEqual([]);
       expect(payload.summary.scannedFiles).toBe(1);
       expect(payload.summary.score).toBeLessThan(100);
       expect(payload.issues.some((issue: { id: string }) => issue.id === "color.raw-hex")).toBe(true);
+      expect(payload.issues.find((issue: { id: string }) => issue.id === "color.raw-hex")).toMatchObject({
+        normalizedId: "color.raw-hex",
+      });
       expect(payload.ux.score).toBeLessThan(100);
+      expect(payload.ux.assessedDimensions.length).toBeGreaterThan(0);
+      expect(payload.ux.unassessedDimensions.length).toBeGreaterThan(0);
       expect(payload.ux.trapRisks.some((trap: { trapId: string }) => trap.trapId === "token-drift")).toBe(true);
+      expect(process.exitCode ?? 0).toBe(0);
+      await expect(access(join(root, ".memoire"))).rejects.toThrow();
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("emits read-only file-anchored SwiftUI findings without a nominal web score", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-diagnose-swiftui-"));
+    try {
+      await mkdir(join(root, "Sources"), { recursive: true });
+      await writeFile(join(root, "Sources", "MotionView.swift"), `import SwiftUI
+struct MotionView: View {
+    var body: some View {
+        Text("Motion")
+            .phaseAnimator([false, true]) { view, active in
+                view.opacity(active ? 1 : 0)
+            }
+    }
+}
+`, "utf-8");
+      const logs = captureLogs();
+      const program = new Command();
+      registerDiagnoseCommand(program, { config: { projectRoot: root } } as never);
+
+      await program.parseAsync(["diagnose", "--json", "--no-write", "--fail-on", "none"], { from: "user" });
+      const payload = JSON.parse(lastLog(logs));
+      const finding = payload.issues.find((issue: { id: string }) => issue.id === "swiftui.reduced-motion-missing");
+
+      expect(payload.summary).toMatchObject({
+        scannedFiles: 1,
+        score: 0,
+        verdict: "unassessed — SwiftUI coverage is partial",
+      });
+      expect(payload.assessedDimensions).toEqual([
+        "swiftui.gesture-accessibility-action",
+        "swiftui.reduced-motion",
+      ]);
+      expect(payload.unassessedDimensions).toContain("swiftui:whole-category-analysis");
+      expect(payload.unassessedDimensions).toContain("swiftui:rendered-quality");
+      expect(payload.unassessedDimensions).toContain("swiftui:runtime-accessibility");
+      expect(payload.sourceCoverage.swiftui.analysis).toBe("partial");
+      expect(finding).toMatchObject({
+        normalizedId: "swiftui.reduced-motion-missing",
+        affectedFiles: ["Sources/MotionView.swift"],
+      });
+      expect(finding.evidenceLocations[0]).toMatchObject({
+        file: "Sources/MotionView.swift",
+        line: 5,
+      });
       expect(process.exitCode ?? 0).toBe(0);
       await expect(access(join(root, ".memoire"))).rejects.toThrow();
     } finally {

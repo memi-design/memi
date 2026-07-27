@@ -134,6 +134,8 @@ const KNOWN_RULE_IDS = new Set([
   "responsive.coverage-low",
   "a11y.image-alt",
   "a11y.focus-missing",
+  "swiftui.gesture-accessibility-action-missing",
+  "swiftui.reduced-motion-missing",
 ]);
 
 /** Resolve the default policy (no file present). */
