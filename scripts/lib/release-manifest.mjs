@@ -5,6 +5,11 @@ import { join } from "node:path";
 
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const COMMIT_SHA = /^[a-f0-9]{40}$/;
+const SHA256 = /^[a-f0-9]{64}$/;
+const SHA512 = /^[a-f0-9]{128}$/;
+const SHASUM = /^[a-f0-9]{40}$/;
+const ENGINE_STATES = new Set(["candidate", "published", "historical"]);
+const RELEASE_RECORD_PATH = /^release-artifacts\/npm\/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\.release\.json$/;
 
 export function serializeJson(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
@@ -25,9 +30,7 @@ export function validateReleaseManifest(manifest) {
       failures.push(`release-manifest.json releaseGroups.${name}.version must be exact semver`);
     }
   }
-  if (!COMMIT_SHA.test(groups.engine?.sourceCommit ?? "")) {
-    failures.push("release-manifest.json releaseGroups.engine.sourceCommit must be a 40-character commit SHA");
-  }
+  failures.push(...validateEngineManifestState(groups.engine));
 
   for (const [name, surface] of Object.entries(manifest?.surfaces ?? {})) {
     if (!groups[surface?.releaseGroup]) {
@@ -70,6 +73,248 @@ export function validateReleaseManifest(manifest) {
   }
 
   return failures;
+}
+
+function validateEngineManifestState(engine) {
+  const failures = [];
+  const state = engine?.state;
+  if (!ENGINE_STATES.has(state)) {
+    failures.push("release-manifest.json releaseGroups.engine.state must be candidate, published, or historical");
+    return failures;
+  }
+
+  if (state === "candidate") {
+    if (engine.sourceCommit !== null) {
+      failures.push("candidate engine release sourceCommit must be null");
+    }
+    if (engine.releaseRecord !== null) {
+      failures.push("candidate engine release releaseRecord must be null");
+    }
+    return failures;
+  }
+
+  if (!COMMIT_SHA.test(engine.sourceCommit ?? "")) {
+    failures.push("release-manifest.json releaseGroups.engine.sourceCommit must be a 40-character commit SHA");
+  }
+
+  if (state === "published") {
+    if (!RELEASE_RECORD_PATH.test(engine.releaseRecord?.path ?? "")) {
+      failures.push("published engine release record path must be an immutable release-artifacts/npm version path");
+    }
+    if (!SHA256.test(engine.releaseRecord?.sha256 ?? "")) {
+      failures.push("published engine release record must include its SHA-256");
+    }
+  } else if (engine.releaseRecord !== null) {
+    failures.push("historical engine release releaseRecord must be null");
+  }
+
+  return failures;
+}
+
+export function buildEngineReleaseRecord(input) {
+  const record = {
+    schemaVersion: 1,
+    version: input.version,
+    packageName: input.packageName,
+    sourceCommit: input.sourceCommit,
+    integrity: input.integrity,
+    shasum: input.shasum,
+    tarball: {
+      url: input.tarballUrl,
+      sha512: input.tarballSha512,
+      sha1: input.tarballSha1,
+    },
+    signature: {
+      count: input.signatureCount,
+      npmAuditSignaturesVerified: input.npmAuditSignaturesVerified,
+    },
+    attestation: {
+      ...input.attestation,
+    },
+    workflow: {
+      ...input.workflow,
+    },
+    sbom: {
+      ...input.sbom,
+    },
+    publishedAt: input.publishedAt,
+  };
+  const failures = validateEngineReleaseRecord(record);
+  if (failures.length > 0) {
+    throw new Error(`Invalid engine release record:\n- ${failures.join("\n- ")}`);
+  }
+  return record;
+}
+
+export function validateEngineReleaseRecord(record) {
+  const failures = [];
+  if (record?.schemaVersion !== 1) failures.push("release record schemaVersion must be 1");
+  if (!SEMVER.test(record?.version ?? "")) failures.push("release record version must be exact semver");
+  if (record?.packageName !== "@memi-design/cli") {
+    failures.push("release record packageName must be @memi-design/cli");
+  }
+  if (!COMMIT_SHA.test(record?.sourceCommit ?? "")) {
+    failures.push("release record sourceCommit must be an exact commit SHA");
+  }
+  if (!/^sha512-[A-Za-z0-9+/]+={0,2}$/.test(record?.integrity ?? "")) {
+    failures.push("release record integrity must be an npm sha512 integrity value");
+  }
+  if (!SHASUM.test(record?.shasum ?? "")) failures.push("release record shasum must be SHA-1");
+  if (!isNpmTarballUrl(record?.tarball?.url)) {
+    failures.push("release record tarball URL must use the npm registry");
+  }
+  if (!SHA512.test(record?.tarball?.sha512 ?? "")) {
+    failures.push("release record tarball SHA-512 is required");
+  }
+  if (!SHASUM.test(record?.tarball?.sha1 ?? "")) {
+    failures.push("release record tarball SHA-1 is required");
+  }
+  if (record?.tarball?.sha1 !== record?.shasum) {
+    failures.push("release record tarball SHA-1 must equal the registry shasum");
+  }
+  if (!Number.isInteger(record?.signature?.count) || record.signature.count < 1) {
+    failures.push("release record must include at least one npm registry signature");
+  }
+  if (record?.signature?.npmAuditSignaturesVerified !== true) {
+    failures.push("release record must prove npm audit signatures completed");
+  }
+  if (!isNpmAttestationUrl(record?.attestation?.url)) {
+    failures.push("release record attestation URL must use the npm registry");
+  }
+  if (record?.attestation?.predicateType !== "https://slsa.dev/provenance/v1") {
+    failures.push("release record attestation must use SLSA provenance v1");
+  }
+  if (record?.attestation?.repository !== "https://github.com/sarveshsea/memi") {
+    failures.push("release record attestation repository is incorrect");
+  }
+  if (record?.attestation?.workflowPath !== ".github/workflows/publish.yml") {
+    failures.push("release record attestation workflow path is incorrect");
+  }
+  if (record?.attestation?.workflowRef !== "refs/heads/main") {
+    failures.push("release record attestation workflow ref must be refs/heads/main");
+  }
+  if (!SHA512.test(record?.attestation?.sha512 ?? "")) {
+    failures.push("release record attestation subject SHA-512 is required");
+  }
+  const expectedSubject = `pkg:npm/%40memi-design/cli@${record?.version ?? ""}`;
+  if (record?.attestation?.subject !== expectedSubject) {
+    failures.push(`release record attestation subject must be ${expectedSubject}`);
+  }
+  if (record?.workflow?.repository !== "sarveshsea/memi"
+    || record?.workflow?.path !== ".github/workflows/publish.yml"
+    || record?.workflow?.ref !== "refs/heads/main") {
+    failures.push("release record workflow identity is incorrect");
+  }
+  if (!/^\d+$/.test(String(record?.workflow?.runId ?? ""))) {
+    failures.push("release record workflow runId is required");
+  }
+  if (!Number.isInteger(record?.workflow?.runAttempt) || record.workflow.runAttempt < 1) {
+    failures.push("release record workflow runAttempt must be a positive integer");
+  }
+  if (record?.sbom?.path !== "memi.cdx.json" || !SHA256.test(record?.sbom?.sha256 ?? "")) {
+    failures.push("release record must bind the CycloneDX SBOM SHA-256");
+  }
+  if (!Number.isFinite(Date.parse(record?.publishedAt ?? ""))) {
+    failures.push("release record publishedAt must be an ISO timestamp");
+  }
+
+  return failures;
+}
+
+export function validateEngineReleaseTransition({
+  previousManifest,
+  currentManifest,
+  releaseRecord,
+  releaseRecordBytes,
+  currentCommit,
+  sourceIsAncestor,
+  sourceSurfaceFailures = [],
+}) {
+  const failures = [];
+  const previous = previousManifest?.releaseGroups?.engine;
+  const current = currentManifest?.releaseGroups?.engine;
+
+  if (previous?.state === "published") {
+    if (serializeJson(previous) !== serializeJson(current)) {
+      failures.push("published engine release state is immutable");
+    }
+    return failures;
+  }
+  if (previous?.state !== "candidate") {
+    failures.push("published transition requires a prior candidate engine release");
+  }
+  if (current?.state !== "published") {
+    failures.push("engine transition target must be published");
+  }
+  if (previous?.version !== current?.version) {
+    failures.push("published transition must preserve the candidate version");
+  }
+  if (releaseRecord?.version !== current?.version) {
+    failures.push("release record version does not match the published manifest");
+  }
+  if (releaseRecord?.sourceCommit !== current?.sourceCommit) {
+    failures.push("release record source commit does not match the published manifest");
+  }
+  if (!COMMIT_SHA.test(currentCommit ?? "")) {
+    failures.push("transition commit must be an exact commit SHA");
+  }
+  if (!sourceIsAncestor) {
+    failures.push("engine source commit must be an ancestor of the transition commit");
+  }
+  const actualRecordSha256 = createHash("sha256").update(releaseRecordBytes ?? "").digest("hex");
+  if (current?.releaseRecord?.sha256 !== actualRecordSha256) {
+    failures.push("release record SHA-256 does not match its committed bytes");
+  }
+  if (!RELEASE_RECORD_PATH.test(current?.releaseRecord?.path ?? "")) {
+    failures.push("published release record path is invalid");
+  }
+  failures.push(...validateEngineReleaseRecord(releaseRecord));
+  failures.push(...sourceSurfaceFailures);
+
+  return failures;
+}
+
+export function canClearPublicParityCap(manifest, evidence) {
+  const engine = manifest?.releaseGroups?.engine;
+  if (engine?.state !== "published" || !COMMIT_SHA.test(engine.sourceCommit ?? "")) return false;
+  if (!RELEASE_RECORD_PATH.test(engine.releaseRecord?.path ?? "")
+    || !SHA256.test(engine.releaseRecord?.sha256 ?? "")) return false;
+
+  const required = ["transition", "npm", "githubRelease", "githubAction", "mcp", "studio", "website"];
+  if (!required.every((name) => evidence?.[name]?.verified === true)) return false;
+  if (evidence.transition?.sourceCommit !== engine.sourceCommit) return false;
+  if (evidence.npm?.sourceCommit !== engine.sourceCommit) return false;
+  if (evidence.githubRelease?.sourceCommit !== engine.sourceCommit
+    || evidence.githubRelease?.checksumsVerified !== true) return false;
+  if (evidence.githubAction?.sourceCommit !== engine.sourceCommit) return false;
+  if (evidence.mcp?.version !== engine.version) return false;
+  if (evidence.studio?.version !== manifest?.releaseGroups?.studio?.version) return false;
+  if (!SHA256.test(evidence.website?.manifestSha256 ?? "")) return false;
+  return true;
+}
+
+function isNpmTarballUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.origin === "https://registry.npmjs.org"
+      && url.pathname.endsWith(".tgz")
+      && !url.username
+      && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+function isNpmAttestationUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.origin === "https://registry.npmjs.org"
+      && url.pathname.startsWith("/-/npm/v1/attestations/")
+      && !url.username
+      && !url.password;
+  } catch {
+    return false;
+  }
 }
 
 export function buildWebReleaseArtifact(manifest, sourceCommit) {
