@@ -3,24 +3,27 @@
   "provenance": {
     "repository": "https://github.com/sarveshsea/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "c9e5790f1e5c38129a2078bf55407d9e9c4649f2",
-    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/c9e5790f1e5c38129a2078bf55407d9e9c4649f2/release-manifest.json",
-    "manifestSha256": "acdf98107777060d394d02013fa3aeb1932bb68305544e5e4f1b0c507bd1ae93"
+    "sourceCommit": "8232214e5a1b5e6db0c6036847eae08b54c804a9",
+    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/8232214e5a1b5e6db0c6036847eae08b54c804a9/release-manifest.json",
+    "manifestSha256": "8d469ea911793b9f28b176196ef5e9c7f79b0d605653a52fc71376927e48e02e"
   },
   "release": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-26",
     "releaseGroups": {
       "engine": {
-        "version": "2.6.2",
-        "state": "historical",
-        "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+        "version": "2.6.3",
+        "state": "candidate",
+        "sourceCommit": null,
         "releaseRecord": null,
         "verification": {
           "eligibleForParity": false,
-          "reason": "2.6.2 predates the provenance-bound release state machine"
+          "reason": "2.6.3 is staged for verified publication and has not been published"
         },
-        "plannedSuccessor": "2.6.3"
+        "previousPublicRelease": {
+          "version": "2.6.2",
+          "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354"
+        }
       },
       "studio": {
         "version": "2.5.0",
@@ -43,7 +46,7 @@
         "releaseGroup": "engine",
         "repository": "sarveshsea/memi",
         "tagPrefix": "v",
-        "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.2"
+        "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.3"
       },
       "githubAction": {
         "releaseGroup": "engine",
