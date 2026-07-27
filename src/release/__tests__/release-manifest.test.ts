@@ -18,14 +18,17 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.6.2",
-          state: "historical",
-          sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+          version: "2.6.3",
+          state: "candidate",
+          sourceCommit: null,
           releaseRecord: null,
           verification: {
             eligibleForParity: false,
           },
-          plannedSuccessor: "2.6.3",
+          previousPublicRelease: {
+            version: "2.6.2",
+            sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+          },
         },
         studio: { version: "2.5.0" },
         site: { version: "1.0.4" },
@@ -36,7 +39,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "sarveshsea/memi",
           tagPrefix: "v",
-          url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.2",
+          url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.3",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
