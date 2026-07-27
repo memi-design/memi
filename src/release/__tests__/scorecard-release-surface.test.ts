@@ -122,4 +122,36 @@ describe("audit scorecard release surfaces", () => {
       /tags:\s*\|[\s\S]*?ghcr\.io\/sarveshsea\/memi:latest[\s\S]*?ghcr\.io\/sarveshsea\/memi:\$\{\{ env\.RELEASE_TAG \}\}/,
     );
   });
+
+  it("promotes a verified existing release without rebuilding immutable assets", async () => {
+    const workflow = await readFile(
+      join(process.cwd(), ".github", "workflows", "promote-release.yml"),
+      "utf8",
+    );
+
+    expect(workflow).toContain("workflow_dispatch:");
+    expect(workflow).toContain("release_tag:");
+    expect(workflow).toContain("packages: write");
+    expect(workflow).toContain('git rev-parse "${RELEASE_TAG}^{commit}"');
+    expect(workflow).toContain(
+      'git merge-base --is-ancestor "${release_commit}" "origin/${DEFAULT_BRANCH}"',
+    );
+    expect(workflow).toContain(
+      'test "${RELEASE_TAG}" = "v${current_package_version}"',
+    );
+    expect(workflow).toContain(
+      'test "$(npm view @memi-design/cli version)" = "${RELEASE_TAG#v}"',
+    );
+    expect(workflow).toContain("gh release download");
+    expect(workflow).toContain("sha256sum --check SHA256SUMS.txt");
+    expect(workflow).toContain(
+      "docker buildx imagetools create --tag ghcr.io/sarveshsea/memi:latest",
+    );
+    expect(workflow).toContain(
+      'git tag --force "v${major}" "${RELEASE_COMMIT}"',
+    );
+    expect(workflow).toContain("gh release edit");
+    expect(workflow).not.toContain("docker/build-push-action");
+    expect(workflow).not.toContain("softprops/action-gh-release");
+  });
 });
