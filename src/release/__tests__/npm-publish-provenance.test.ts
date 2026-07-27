@@ -139,6 +139,11 @@ describe("npm publish workflow provenance contract", () => {
     expect(guide).toContain("Publish to npm");
     expect(guide).toContain("expected_version");
     expect(guide).toContain("SLSA");
+    expect(guide).toContain("candidate");
+    expect(guide).toContain("sourceCommit: null");
+    expect(guide).toContain("--stage-published");
+    expect(guide).toContain("recovery");
+    expect(guide).toContain("never republish");
     expect(guide).not.toContain("npm publish --access public --auth-type=web");
     expect(guide).not.toContain("npm login --auth-type=web");
   });
