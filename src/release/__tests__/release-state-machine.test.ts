@@ -6,7 +6,10 @@ import {
   buildEngineReleaseRecord,
   canClearPublicParityCap,
   serializeJson,
+  validateEngineSurfaceSnapshot,
   validateEngineReleaseTransition,
+  validateNpmPublishPreflight,
+  validateTarballBytes,
   validateReleaseManifest,
 } from "../../../scripts/lib/release-manifest.mjs";
 
@@ -150,6 +153,87 @@ describe("verified engine release state machine", () => {
       }),
       evidence,
     )).toBe(false);
+  });
+
+  it("allows publishing only a main-branch candidate absent from npm", () => {
+    const candidate = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+    });
+
+    expect(validateNpmPublishPreflight({
+      manifest: candidate,
+      packageVersion: "2.6.3",
+      expectedVersion: "2.6.3",
+      gitRef: "refs/heads/main",
+      sourceCommit,
+      registryMetadata: {
+        versions: { "2.6.2": {} },
+      },
+    })).toEqual([]);
+    expect(validateNpmPublishPreflight({
+      manifest: candidate,
+      packageVersion: "2.6.3",
+      expectedVersion: "2.6.3",
+      gitRef: "refs/heads/feature",
+      sourceCommit,
+      registryMetadata: {
+        versions: { "2.6.3": {} },
+      },
+    })).toEqual(expect.arrayContaining([
+      "npm publish must run from refs/heads/main",
+      "@memi-design/cli@2.6.3 already exists; use recovery mode and never republish",
+    ]));
+  });
+
+  it("verifies downloaded tarball bytes against both npm digests", () => {
+    const bytes = Buffer.from("immutable npm tarball fixture");
+    const sha512 = createHash("sha512").update(bytes).digest();
+    const sha1 = createHash("sha1").update(bytes).digest("hex");
+
+    expect(validateTarballBytes({
+      bytes,
+      integrity: `sha512-${sha512.toString("base64")}`,
+      shasum: sha1,
+    })).toEqual({
+      sha512: sha512.toString("hex"),
+      sha1,
+      bytes: bytes.length,
+    });
+    expect(() => validateTarballBytes({
+      bytes: Buffer.from("tampered"),
+      integrity: `sha512-${sha512.toString("base64")}`,
+      shasum: sha1,
+    })).toThrow("tarball SHA-512 does not match npm integrity");
+  });
+
+  it("verifies every version-bearing surface at the candidate commit", () => {
+    const manifest = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+    });
+    const snapshot = {
+      "package.json": { name: "@memi-design/cli", version: "2.6.3", mcpName: "io.github.sarveshsea/memi" },
+      "package-lock.json": { version: "2.6.3", packages: { "": { version: "2.6.3" } } },
+      "server.json": {
+        name: "io.github.sarveshsea/memi",
+        version: "2.6.3",
+        packages: [{ registryType: "npm", version: "2.6.3" }],
+      },
+      "mcpb/manifest.json": { version: "2.6.3" },
+      "plugins/memoire/.codex-plugin/plugin.json": { version: "2.6.3" },
+      "plugins/memi-claude/.claude-plugin/plugin.json": { version: "2.6.3" },
+      "plugin/widget-meta.json": { packageVersion: "2.6.3" },
+      "action.yml": 'default: "2.6.3"\ndescription: "reviewed 2.6.3 pin"',
+    };
+
+    expect(validateEngineSurfaceSnapshot(manifest, snapshot)).toEqual([]);
+    expect(validateEngineSurfaceSnapshot(manifest, {
+      ...snapshot,
+      "server.json": { ...snapshot["server.json"], version: "2.6.2" },
+    })).toContain("server.json version 2.6.2 does not match release manifest 2.6.3");
   });
 
   it("binds a published transition to the exact candidate, source commit, and record bytes", () => {

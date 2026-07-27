@@ -77,6 +77,11 @@ describe("npm publish workflow provenance contract", () => {
     expect(workflow).toContain("npm ci --ignore-scripts");
     expect(workflow).not.toMatch(/^\s+- run: npm install --ignore-scripts\s*$/m);
     expect(workflow).toContain("EXPECTED_VERSION: ${{ inputs.expected_version }}");
+    expect(workflow).toContain("mode:");
+    expect(workflow).toContain("source_run_id:");
+    expect(workflow).toContain("node scripts/verify-npm-release.mjs --prepublish");
+    expect(workflow).toContain("github.ref == 'refs/heads/main'");
+    expect(workflow).toContain("github.sha");
   });
 
   it("generates and uploads a CycloneDX SBOM before publishing with provenance", async () => {
@@ -93,6 +98,7 @@ describe("npm publish workflow provenance contract", () => {
     );
     expect(workflow).toContain("path: release-evidence/");
     expect(workflow).toContain("npm publish --access public --provenance");
+    expect(workflow).toContain("if: inputs.mode == 'publish'");
   });
 
   it("verifies the published package signatures and attestations in a clean consumer", async () => {
@@ -105,6 +111,22 @@ describe("npm publish workflow provenance contract", () => {
     expect(workflow).toContain("EXPECTED_SOURCE_REF: ${{ github.ref }}");
     expect(workflow).toContain("npm audit signatures --include-attestations");
     expect(workflow).toContain('npm install --ignore-scripts "${PACKAGE_SPEC}"');
+    expect(workflow).toContain("RELEASE_RECORD_OUTPUT:");
+    expect(workflow).toContain("GITHUB_RUN_ATTEMPT");
+    expect(workflow).toContain("release-artifacts/npm/");
+  });
+
+  it("supports evidence recovery without republishing an existing version", async () => {
+    const workflow = await readFile(
+      join(process.cwd(), ".github", "workflows", "publish.yml"),
+      "utf8",
+    );
+
+    expect(workflow).toContain("inputs.mode == 'recover'");
+    expect(workflow).toContain("source_run_id");
+    expect(workflow).toContain("actions/download-artifact@");
+    expect(workflow).toContain("RECOVERY_SOURCE_COMMIT");
+    expect(workflow).not.toMatch(/inputs\.mode == 'recover'[\s\S]{0,400}npm publish/);
   });
 
   it("documents the trusted-publisher path without a manual token publish bypass", async () => {
