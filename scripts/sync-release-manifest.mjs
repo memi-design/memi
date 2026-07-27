@@ -14,6 +14,7 @@ import {
   stagePublishedEngineManifest,
   verifyCoreReleaseSurfaces,
   verifyPublishedEngineTransitionFromGit,
+  verifyPublishedStagingPreconditionsFromGit,
 } from "./lib/release-manifest.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -29,6 +30,14 @@ if (stageIndex >= 0) {
   const recordPath = relative(root, absoluteRecordPath);
   const releaseRecordBytes = await readFile(absoluteRecordPath, "utf8");
   const releaseRecord = JSON.parse(releaseRecordBytes);
+  const stagingFailures = verifyPublishedStagingPreconditionsFromGit(
+    root,
+    manifest,
+    releaseRecord,
+  );
+  if (stagingFailures.length > 0) {
+    throw new Error(`Cannot stage published release:\n- ${stagingFailures.join("\n- ")}`);
+  }
   manifest = stagePublishedEngineManifest({
     manifest,
     releaseRecord,

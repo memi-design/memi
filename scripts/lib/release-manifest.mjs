@@ -425,6 +425,85 @@ export function stagePublishedEngineManifest({
   };
 }
 
+export function validatePublishedStagingPreconditions({
+  manifest,
+  committedManifest,
+  sourceManifest,
+  releaseRecord,
+  sourceIsAncestor,
+  sourceSurfaceFailures = [],
+}) {
+  const failures = [];
+  const candidate = manifest?.releaseGroups?.engine;
+  const sourceCandidate = sourceManifest?.releaseGroups?.engine;
+  if (candidate?.state !== "candidate") {
+    failures.push("published staging requires a candidate engine manifest");
+  }
+  if (serializeJson(committedManifest) !== serializeJson(manifest)) {
+    failures.push("candidate manifest must be committed without working-tree drift before staging");
+  }
+  if (!sourceIsAncestor) {
+    failures.push("release record source commit is not an ancestor of the candidate checkout");
+  }
+  if (sourceCandidate?.state !== "candidate"
+    || sourceCandidate?.version !== candidate?.version
+    || releaseRecord?.version !== candidate?.version) {
+    failures.push("release record source commit does not contain the same candidate manifest");
+  }
+  failures.push(...validateEngineReleaseRecord(releaseRecord));
+  failures.push(...sourceSurfaceFailures);
+  return failures;
+}
+
+export function verifyPublishedStagingPreconditionsFromGit(root, manifest, releaseRecord) {
+  const failures = [];
+  let committedManifest = null;
+  let sourceManifest = null;
+  let sourceIsAncestor = false;
+  let sourceSurfaceFailures = [];
+  try {
+    committedManifest = JSON.parse(execFileSync(
+      "git",
+      ["show", "HEAD:release-manifest.json"],
+      { cwd: root, encoding: "utf8" },
+    ));
+  } catch (error) {
+    failures.push(
+      `unable to read the committed candidate manifest: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  try {
+    sourceManifest = JSON.parse(execFileSync(
+      "git",
+      ["show", `${releaseRecord?.sourceCommit}:release-manifest.json`],
+      { cwd: root, encoding: "utf8" },
+    ));
+    execFileSync(
+      "git",
+      ["merge-base", "--is-ancestor", releaseRecord.sourceCommit, "HEAD"],
+      { cwd: root, stdio: "ignore" },
+    );
+    sourceIsAncestor = true;
+    sourceSurfaceFailures = validateEngineSurfaceSnapshot(
+      sourceManifest,
+      readSurfaceSnapshotFromGit(root, releaseRecord.sourceCommit),
+    );
+  } catch (error) {
+    failures.push(
+      `unable to verify the release record source commit: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  failures.push(...validatePublishedStagingPreconditions({
+    manifest,
+    committedManifest,
+    sourceManifest,
+    releaseRecord,
+    sourceIsAncestor,
+    sourceSurfaceFailures,
+  }));
+  return failures;
+}
+
 export function canClearPublicParityCap(manifest, evidence) {
   const engine = manifest?.releaseGroups?.engine;
   if (engine?.state !== "published" || !COMMIT_SHA.test(engine.sourceCommit ?? "")) return false;
