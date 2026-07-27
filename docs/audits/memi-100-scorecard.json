@@ -3,10 +3,10 @@
   "auditId": "memi-100",
   "title": "Memi 100-point end-to-end scorecard",
   "targetScore": 100,
-  "assessedAt": "2026-07-26T21:16:34.000Z",
+  "assessedAt": "2026-07-26T23:54:23.381Z",
   "subject": {
     "repository": "https://github.com/sarveshsea/memi",
-    "commit": "2a557274eeec278e9439d8ba2fd54680c1ca2302"
+    "commit": "ccb2971c87285413443e0e98996bfb17a87209d4"
   },
   "evidence": [
     {
@@ -16,11 +16,37 @@
       "capturedAt": "2026-07-26T21:16:34.000Z",
       "artifact": {
         "location": "memi-design-engineering-audit-2026-07-26.json",
-        "sha256": "2711540c925b10ba605356f95542ecc11857f9c0917ef3b8f35d309d4bf88a00"
+        "sha256": "34ca9ac42dab52100fb35210f8e8d818d350610c244e8625823ebddaa8e827b3"
       },
       "producer": "agent:memi-audit-implementation",
       "verifier": "agent:independent-audit-review",
       "environment": "Cross-repository audit ledger with GitHub, npm, skills.sh, Vercel, simulator, and clean-install evidence"
+    },
+    {
+      "id": "external-clean-repositories",
+      "kind": "implementation",
+      "status": "passed",
+      "capturedAt": "2026-07-26T23:54:23.381Z",
+      "artifact": {
+        "location": "memi-external-clean-repositories-2026-07-26.json",
+        "sha256": "00ea5cdaa7f9a8cc324eecd15d936de6eb5c7b8e1505c288d269b5f240edc84d"
+      },
+      "producer": "agent:memi-clean-room",
+      "verifier": "agent:independent-audit-review",
+      "environment": "Three fresh depth-one external clones with before and after Git status, candidate CLI schema v2, and bounded findings"
+    },
+    {
+      "id": "routing-zero-confusion",
+      "kind": "implementation",
+      "status": "passed",
+      "capturedAt": "2026-07-26T23:50:55.000Z",
+      "artifact": {
+        "location": "memi-routing-evidence-2026-07-26.json",
+        "sha256": "c93d7fb29ac932516e7bc4575a54ff408d2ed5131397982d04e18608b75ae455"
+      },
+      "producer": "ci:design-skills",
+      "verifier": "agent:independent-audit-review",
+      "environment": "GitHub-hosted design-skills validation at immutable commit 58b0c9a9abc20fbc91c01e9b6c2736e466446dbc"
     }
   ],
   "derivedFromAudit": {
@@ -47,8 +73,11 @@
           "id": "external-clean-repositories",
           "title": "Three external clean repositories prove no mutation, useful results, and honest unsupported states",
           "points": 2,
-          "assessment": "unassessed",
-          "evidenceIds": [],
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit",
+            "external-clean-repositories"
+          ],
           "requiresIndependentVerification": true
         }
       ]
@@ -113,7 +142,7 @@
       "criteria": [
         {
           "id": "candidate-catalog",
-          "title": "Ninety-four scored skills, governed ownership, freshness, and 97.8 percent routing benchmark",
+          "title": "Ninety-four scored skills, governed ownership, freshness, and complete representative routing benchmark",
           "points": 14,
           "assessment": "passed",
           "evidenceIds": [
@@ -125,8 +154,11 @@
           "id": "zero-routing-gaps",
           "title": "All dispositions resolved with zero known held-out routing confusion",
           "points": 1,
-          "assessment": "unassessed",
-          "evidenceIds": [],
+          "assessment": "passed",
+          "evidenceIds": [
+            "reviewed-candidate-audit",
+            "routing-zero-confusion"
+          ],
           "requiresIndependentVerification": true
         }
       ]

@@ -22,7 +22,7 @@
     ]
   },
   "implementationCandidate": {
-    "score": 82,
+    "score": 85,
     "maximum": 100,
     "verdict": "launchable-with-caveats",
     "confidence": 0.9,
@@ -34,10 +34,11 @@
       "id": "core-activation",
       "maximum": 15,
       "baseline": 9,
-      "candidate": 13,
+      "candidate": 15,
       "evidence": [
         "A pinned no-write audit command already existed.",
-        "The candidate makes it the first public action and returns normalized file-anchored evidence metadata."
+        "The candidate makes it the first public action and returns normalized file-anchored evidence metadata.",
+        "Three fresh external repositories retained clean Git status: a web UI repository returned file-anchored findings, a SwiftUI repository returned partial-coverage findings without a whole-category score, and a non-UI repository returned an explicit zero-score unassessed state."
       ]
     },
     {
@@ -64,10 +65,10 @@
       "id": "skill-governance",
       "maximum": 15,
       "baseline": 9,
-      "candidate": 14,
+      "candidate": 15,
       "evidence": [
         "The canonical catalog was governed but documentation counts were stale and shader ownership was absent.",
-        "The candidate validates 94 skills, scores every entry, adds five-state dispositions, eliminates duplicate primary routes, enforces 180-day shader-source freshness, and scores 44/45 (97.8%) on a transparent catalog-metadata routing benchmark."
+        "The candidate validates 94 skills, scores every entry, adds five-state dispositions, eliminates duplicate primary routes, enforces 180-day shader-source freshness, and scores 45/45 (100%) with all six negative controls abstaining on a transparent catalog-metadata routing benchmark."
       ]
     },
     {
@@ -108,7 +109,7 @@
       "candidate": 9,
       "evidence": [
         "The baseline built, but the source release gate failed on dependency and public-surface parity checks.",
-        "The candidate passes 1,763 Memi tests across 233 files, 33 parallel-safe design-skills checks, a 44/45 catalog-routing benchmark, 206 site tests, blocking shader unit/browser CI, iOS simulator build, production audits, and independent review. An isolated public 2.6.2 install smoke passed; the aggregate public-release gate still exits on live docs and changelog drift before its installSmoke stage."
+        "The candidate passes 1,820 Memi tests across 244 files, 33 parallel-safe design-skills checks, a 45/45 catalog-routing benchmark, 208 site tests, blocking shader unit/browser CI, iOS simulator build, production audits, and independent review. An isolated public 2.6.2 install smoke passed; the aggregate public-release gate still exits on live docs and changelog drift before its installSmoke stage."
       ]
     }
   ],
@@ -118,9 +119,9 @@
       "designSkills": {
         "repository": "https://github.com/sarveshsea/design-skills",
         "pullRequest": "https://github.com/sarveshsea/design-skills/pull/5",
-        "commit": "8a5f29f6b3ab5336b103386e225d21dd523e3bec",
-        "run": "https://github.com/sarveshsea/design-skills/actions/runs/30221440493",
-        "job": "https://github.com/sarveshsea/design-skills/actions/runs/30221440493/job/89844464264",
+        "commit": "58b0c9a9abc20fbc91c01e9b6c2736e466446dbc",
+        "run": "https://github.com/sarveshsea/design-skills/actions/runs/30226100966",
+        "job": "https://github.com/sarveshsea/design-skills/actions/runs/30226100966/job/89856424256",
         "status": "checks-passed",
         "skills": [
           "shader-design-engineering",
@@ -136,6 +137,27 @@
         "job": "https://github.com/sarveshsea/design-sandbox/actions/runs/30221374856/job/89844295228",
         "status": "passed"
       }
+    },
+    "externalCleanRepositories": {
+      "artifact": "memi-external-clean-repositories-2026-07-26.json",
+      "sha256": "00ea5cdaa7f9a8cc324eecd15d936de6eb5c7b8e1505c288d269b5f240edc84d",
+      "candidateCommit": "ccb2971c87285413443e0e98996bfb17a87209d4",
+      "repositories": 3,
+      "cleanBefore": 3,
+      "cleanAfter": 3,
+      "fileAnchoredResultRepositories": 2,
+      "honestUnsupportedRepositories": 1,
+      "status": "passed-candidate"
+    },
+    "routingBenchmark": {
+      "artifact": "memi-routing-evidence-2026-07-26.json",
+      "sha256": "c93d7fb29ac932516e7bc4575a54ff408d2ed5131397982d04e18608b75ae455",
+      "commit": "58b0c9a9abc20fbc91c01e9b6c2736e466446dbc",
+      "correct": 45,
+      "total": 45,
+      "negativeAbstentions": "6/6",
+      "knownConfusions": 0,
+      "status": "passed"
     },
     "githubRepository": {
       "sources": [

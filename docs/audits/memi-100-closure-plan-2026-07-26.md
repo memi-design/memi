@@ -4,7 +4,7 @@ Evidence baseline: 2026-07-26
 
 Current verified score: 69/100
 
-Raw passed points before caps: 82/100
+Raw passed points before caps: 85/100
 
 Engineering-only ceiling before the time-bound adoption criterion: 95/100
 
@@ -21,16 +21,16 @@ Current caps:
 
 | Workstream | Repository / PR | Current immutable head | Status | Blocking exit |
 |---|---|---|---|---|
-| Engine, CLI, MCP, package, Action | `sarveshsea/memi` PR 73 | `0018113dfbbe7886a332ce76726874e9e2a06715` | Candidate CI, clean-install matrix, and plugin scanner are green | Review, merge, publish a verified successor to immutable npm 2.6.2 |
+| Engine, CLI, MCP, package, Action | `sarveshsea/memi` PR 73 | `ccb2971c87285413443e0e98996bfb17a87209d4` | Local 1,820-test suite and all three hosted workflows pass | Review, merge, publish a verified successor to immutable npm 2.6.2 |
 | Public website | `sarveshsea/memoire-web` PR 20 | `ed746daedfdde52b7d8cdb326c9db29560fdbaa6` | Local unit/build/size/Chromium proof and Vercel preview pass | GitHub-hosted job is blocked before startup by account billing or spending limits; then review, merge, and deploy |
-| Canonical shader skills | `sarveshsea/design-skills` PR 5 | `8a5f29f6b3ab5336b103386e225d21dd523e3bec` | Checks pass; canonical skills and routing gate exist | Review, merge, publish/install proof, then record immutable release evidence |
+| Canonical shader skills | `sarveshsea/design-skills` PR 5 | `58b0c9a9abc20fbc91c01e9b6c2736e466446dbc` | Hosted checks pass; 45/45 routing with 6/6 negative abstentions | Review, merge, publish/install proof |
 | WebGL2 shader lab | `sarveshsea/design-sandbox` PR 2 | `65bd7efdd20af4d38474b3de80703e364df2d580` | Checks pass; isolated lab and blocking proof workflow exist | Review, merge, deploy, and capture durable cross-browser/rendering evidence |
 
 Hosted engine evidence:
 
-- CI: <https://github.com/sarveshsea/memi/actions/runs/30225637493>
-- Clean install compatibility: <https://github.com/sarveshsea/memi/actions/runs/30225637505>
-- HOL Plugin Scanner: <https://github.com/sarveshsea/memi/actions/runs/30225637521>
+- CI: <https://github.com/sarveshsea/memi/actions/runs/30226226769>
+- Clean install compatibility: <https://github.com/sarveshsea/memi/actions/runs/30226226789>
+- HOL Plugin Scanner: <https://github.com/sarveshsea/memi/actions/runs/30226226773>
 
 Website blocker evidence:
 
@@ -44,10 +44,8 @@ website hosted-CI cap.
 
 Current unassessed criteria:
 
-- `core-activation/external-clean-repositories`
 - `surface-parity/public-release-parity`
 - `design-engineering-depth/swiftui-rendered-rerun`
-- `skill-governance/zero-routing-gaps`
 - `shader-and-dither/durable-rendering-evidence`
 - `security-privacy-licensing/complete-supply-chain-proof`
 - `growth-and-community-proof/eight-week-adoption`
@@ -61,7 +59,7 @@ Memi cannot truthfully claim 100/100 until every active cap is cleared and every
 
 1. Public release truth is still split across old `2.5.x` docs, current `2.6.2` engine releases, `2.5.0` Studio assets, and a separate website repository.
 2. The website hosted GitHub workflow has not executed because of account billing or spending limits, so the hosted proof cap remains active.
-3. The scorecard still has eight unassessed criteria, each worth real points.
+3. The scorecard still has six unassessed criteria, each worth real points.
 4. The growth criterion requires eight weeks of verified external behavior and cannot be compressed into one release day.
 
 ## Required sequence
@@ -137,7 +135,7 @@ active and is not a code failure.
 
 Why second: until both caps clear, no rescore can exceed 84 regardless of technical quality.
 
-### Phase 2: Close the eight unassessed criteria
+### Phase 2: Close the remaining unassessed criteria
 
 Goal: convert every remaining point into independent evidence.
 
@@ -162,6 +160,12 @@ Minimum bar:
 - At least one web repository.
 - At least one Apple or SwiftUI repository.
 - At least one repository outside the Memi-maintained set.
+
+Current state: passed for the candidate. Three fresh checkouts stayed clean.
+The web repository returned file-anchored findings, the SwiftUI repository
+returned partial-coverage findings without a whole-category score, and the
+non-UI negative control returned an explicit zero-score unassessed result.
+See `memi-external-clean-repositories-2026-07-26.json`.
 
 #### 2. `surface-parity/public-release-parity` (+4)
 
@@ -218,6 +222,11 @@ Acceptable evidence:
 Minimum bar:
 
 - 45/45 on the current benchmark or a stronger replacement benchmark with no known unresolved confusion.
+
+Current state: passed. Commit
+`58b0c9a9abc20fbc91c01e9b6c2736e466446dbc` requires and achieves 45/45,
+preserves the original WGSL WebGPU prompt, and keeps all six negative controls
+abstaining. Hosted run `30226100966` passed.
 
 #### 5. `shader-and-dither/durable-rendering-evidence` (+2)
 
@@ -338,13 +347,12 @@ Final acceptance rule:
 
 ## Recommended next three workstreams
 
-1. Truth reset PR in this repo to remove stale `2.5.x` operating guidance and make current release truth explicit.
-2. Website parity and hosted-CI unblock in the website repository so both active caps can clear.
-3. Technical evidence PRs for the four fast-closing unassessed criteria:
-   - external clean repositories
-   - SwiftUI rendered rerun
-   - zero routing gaps
-   - durable rendering evidence
+1. Website billing and hosted-CI unblock, followed by reviewed merge, publish,
+   deploy, and live release parity so both caps can clear.
+2. Real SwiftUI audit/correction/simulator/rerun proof with non-zero scanned
+   source and analyzed before/after rendering.
+3. Durable shader rendering and complete supply-chain evidence, followed by the
+   aggregate clean-room public-release gate.
 
 ## Critical path and stop rules
 
@@ -357,7 +365,8 @@ Final acceptance rule:
    website release artifact from that same release manifest.
 4. Deploy the website and shader lab, then run public parity and clean-room
    install gates from fresh directories.
-5. Close the seven technical unknowns with independently reviewed artifacts.
+5. Close the remaining five non-adoption unknowns with independently reviewed
+   artifacts.
 6. Start the eight-week adoption clock only after public parity is green.
 7. Perform a fresh final audit from public state, not from a feature branch.
 

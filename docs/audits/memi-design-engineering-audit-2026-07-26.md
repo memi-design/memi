@@ -6,9 +6,9 @@ Evidence date: 2026-07-26
 
 **Kickoff public baseline: 47/100, blocked.**
 
-**Verified implementation candidate: 82/100, launchable with caveats.**
+**Verified implementation candidate: 85/100, launchable with caveats.**
 
-The 82/100 score is not the current public score. It belongs to reviewed candidate branches across the explicitly owned Memi, design-skills, design-sandbox, website, and evaluation-fork repositories. The exact 2.6.2 release tag and fork integration were completed after the kickoff snapshot, but partial remediation is not silently folded into a new score. Until a complete post-deployment rescore, 47/100 remains the last fully assessed public snapshot.
+The 85/100 score is not the current public score. It belongs to reviewed candidate branches across the explicitly owned Memi, design-skills, design-sandbox, website, and evaluation-fork repositories. The exact 2.6.2 release tag and fork integration were completed after the kickoff snapshot, but partial remediation is not silently folded into a new score. Until a complete post-deployment rescore, 47/100 remains the last fully assessed public snapshot.
 
 The baseline score is capped at 69 for public version and product-story drift. The source checkout's baseline lockfile did contain a high-severity production advisory, but a separate clean install of the published 2.6.2 package returned zero high and critical advisories. The stricter 49-point public-package security cap therefore does not apply.
 
@@ -33,15 +33,15 @@ Stars and npm downloads are therefore lagging indicators. The operating funnel i
 
 | Dimension | Maximum | Public baseline | Candidate | Evidence |
 | --- | ---: | ---: | ---: | --- |
-| Core job, activation, useful first result | 15 | 9 | 13 | Pinned no-write command becomes the first action; audit JSON gains normalized evidence metadata. |
+| Core job, activation, useful first result | 15 | 9 | 15 | Pinned no-write activation now proves useful or honestly unassessed results on three fresh external repositories without mutation. |
 | CLI, MCP, skills, site, Studio, release parity | 15 | 6 | 11 | Candidate centralizes site release data, but it is not deployed and the corrected core is not published. |
 | Design-engineering depth and rendered quality | 15 | 9 | 13 | Artifact-backed website proof, a separately owned WebGL2 lab, and SwiftUI simulator evaluation now exist. |
-| Skill governance, routing, freshness, provenance | 15 | 9 | 14 | 94 skills scored; mean 86/100; five-state dispositions; zero duplicate primary routes; 180-day shader freshness gate. |
+| Skill governance, routing, freshness, provenance | 15 | 9 | 15 | 94 skills scored; mean 86/100; five-state dispositions; zero duplicate primary routes; 45/45 routing; 180-day shader freshness gate. |
 | Shader, dither, creative rendering | 10 | 1 | 8 | Two canonical skills and a separately owned original WebGL2 proof cover ordered/noise dithering, distortion, fallback, and evidence export. |
 | Security, privacy, licensing, supply chain | 10 | 3 | 9 | Candidate production audits are zero; fetch, path, archive, publisher, and media-provenance boundaries are hardened. |
 | GitHub/npm funnel and community proof | 10 | 3 | 5 | Funnel and measurement are repaired, but external adoption targets are not yet achieved. |
 | Testing, compatibility, operations | 10 | 7 | 9 | Core, catalog, site, web proof, simulator build, and independent review gates pass. |
-| **Total** | **100** | **47** | **82** | Candidate score remains non-public until release and deployment. |
+| **Total** | **100** | **47** | **85** | Candidate score remains capped at 69 until release and deployment. |
 
 Machine-readable evidence is in [`memi-design-engineering-audit-2026-07-26.json`](./memi-design-engineering-audit-2026-07-26.json). Its evidence ledger records the capture time, API endpoints, calculation method, and time-bounded values for GitHub, npm, skills.sh, and release provenance.
 
@@ -62,12 +62,27 @@ Machine-readable evidence is in [`memi-design-engineering-audit-2026-07-26.json`
 
 Core verification:
 
-- 1,763 tests across 233 files.
+- 1,820 tests across 244 files.
 - Strict typecheck, lint, build, release consistency, Codex plugin smoke, local packed-install smoke, isolated public 2.6.2 install smoke, and `npm audit` pass. The MCP smoke observed 50 tools; its enforced regression floor remains 20 tools plus six named tools.
 - Package size: 1,281,175 of the 1,285,000-byte gate.
 - Independent security review reproduced the original SSRF, symlink, and ZIP failures, then verified them fail closed after correction.
 - The aggregate public-release gate still exits on live docs and changelog drift before its `installSmoke` stage. Its `installSmoke` field remains null; the public install result above comes from a separate site-skipped invocation and is not misreported as an aggregate gate pass.
 - A committed clean-install workflow covers Node 20, 22, and 24 on Linux, macOS, and Windows. All nine hosted matrix jobs passed in run `30221969392`, including Node 24 with npm 11 after completing optional native lock metadata.
+
+External clean-repository proof at candidate commit
+`ccb2971c87285413443e0e98996bfb17a87209d4`:
+
+- `ibelick/motion-primitives` returned high-confidence web findings anchored to
+  real files and lines.
+- `eujinco/ripple-image-transitions` scanned 16 SwiftUI files, returned two
+  file-anchored accessibility findings, and kept whole-category quality
+  unassessed at score 0.
+- `expressjs/express` returned score 0 and
+  `unassessed — no UI class signal found` as the non-UI negative control.
+- All three fresh checkouts had empty `git status --short` output before and
+  after the audit.
+- Bounded machine-readable evidence is in
+  [`memi-external-clean-repositories-2026-07-26.json`](./memi-external-clean-repositories-2026-07-26.json).
 
 ### Canonical design skills
 
@@ -86,10 +101,10 @@ Core verification:
 - Enforced actual completion timestamps and a 180-day shader-reference freshness gate.
 
 These canonical catalog additions live in the separate `design-skills` candidate
-at commit `8a5f29f6b3ab5336b103386e225d21dd523e3bec`; Memi continues to ship only
+at commit `58b0c9a9abc20fbc91c01e9b6c2736e466446dbc`; Memi continues to ship only
 focused entry skills and routers rather than duplicating the full catalog.
 
-Catalog verification: 33 checks pass under the default parallel command, including an isolated-workspace regression for the former catalog rewrite race. A 45-prompt catalog QA benchmark scores 44/45, or 97.8%, against the 90% gate; all six negative near-misses abstain. The benchmark evaluates catalog metadata and skill descriptions, not Memi runtime routing, and preserves one WGSL ripple/creative-audit confusion instead of hiding it. All 94 skills validate and list through `npx skills@1.5.17`, and the production dependency audit is clean.
+Catalog verification: 33 checks pass under the default parallel command, including an isolated-workspace regression for the former catalog rewrite race. The 45-prompt catalog QA benchmark now requires and achieves 45/45; all six negative near-misses abstain. The original WGSL WebGPU implementation/audit prompt remains in the fixture and now routes correctly after platform-term normalization. The benchmark evaluates catalog metadata and skill descriptions, not Memi runtime routing. All 94 skills validate and list through `npx skills@1.5.17`, and the production dependency audit is clean.
 
 ### Web shader proof
 

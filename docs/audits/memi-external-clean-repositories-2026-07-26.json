@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "external-clean-repositories-2026-07-26",
+  "capturedAt": "2026-07-26T23:54:23.381Z",
+  "candidate": {
+    "repository": "https://github.com/sarveshsea/memi",
+    "commit": "ccb2971c87285413443e0e98996bfb17a87209d4",
+    "command": "node <candidate>/dist/index.js diagnose . --json --no-write --fail-on none",
+    "schemaVersion": 2
+  },
+  "method": {
+    "checkout": "Fresh depth-one clone in a temporary directory",
+    "mutationCheck": "git status --short captured immediately before and after each audit",
+    "successRule": "A clean run must preserve an empty Git status and return file-anchored findings or an explicit evidence-backed unassessed result.",
+    "rawOutputNote": "The full stdout digest is retained for run identity. Generated timestamps and timing fields make byte-for-byte reruns intentionally non-deterministic; semantic fields and source commits are the reproducible contract."
+  },
+  "repositories": [
+    {
+      "category": "web-ui",
+      "repository": "https://github.com/ibelick/motion-primitives",
+      "commit": "92586e62a951eb9b6bfd1cc7c8a4e6e2ab6ba17d",
+      "license": "MIT",
+      "beforeStatus": "",
+      "afterStatus": "",
+      "exitCode": 0,
+      "outputSha256": "b6abaaba517331bb7fdb33d5f56ea1a449c8980fe24532e678e3ec6dc6c7b902",
+      "outputBytes": 146650,
+      "result": "passed-file-anchored-findings",
+      "confidence": 0.95,
+      "summary": {
+        "score": 87,
+        "scoreScope": "web",
+        "verdict": "usable but uneven",
+        "scannedFiles": 207,
+        "assessedDimensions": [
+          "accessibility",
+          "color",
+          "components",
+          "maintainability",
+          "responsive",
+          "spacing",
+          "typography",
+          "visual-system"
+        ],
+        "unassessedDimensions": []
+      },
+      "evidence": [
+        {
+          "id": "color.raw-hex",
+          "severity": "high",
+          "file": "app/docs/cursor/cursor-2.tsx",
+          "line": 15
+        },
+        {
+          "id": "color.raw-hex",
+          "severity": "high",
+          "file": "app/docs/dialog/dialog-custom-backdrop.tsx",
+          "line": 17
+        },
+        {
+          "id": "type.scale-wide",
+          "severity": "medium",
+          "file": "app/docs/accordion/accordion-basic.tsx",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "category": "swiftui",
+      "repository": "https://github.com/eujinco/ripple-image-transitions",
+      "commit": "c1c131ca8f7b2fc65ce95df0f82be000084df44f",
+      "license": "MIT",
+      "beforeStatus": "",
+      "afterStatus": "",
+      "exitCode": 0,
+      "outputSha256": "c2b2585faeee878773fdc150acfef508413c7fd5718af806ef8255b4cfe1c868",
+      "outputBytes": 20895,
+      "result": "passed-partial-coverage-with-file-anchored-findings",
+      "confidence": 0.11,
+      "summary": {
+        "score": 0,
+        "scoreScope": "none",
+        "verdict": "unassessed — SwiftUI coverage is partial",
+        "scannedFiles": 16,
+        "assessedDimensions": [
+          "swiftui.gesture-accessibility-action",
+          "swiftui.reduced-motion"
+        ],
+        "unassessedDimensions": [
+          "accessibility",
+          "color",
+          "components",
+          "maintainability",
+          "metal:color-correctness",
+          "metal:gpu-performance",
+          "metal:shader-semantics",
+          "responsive",
+          "spacing",
+          "swift:source-analysis",
+          "swiftui:rendered-quality",
+          "swiftui:runtime-accessibility",
+          "swiftui:whole-category-analysis",
+          "typography",
+          "visual-system"
+        ],
+        "appliedScoreCap": {
+          "id": "partial-source-analysis",
+          "maximum": 0
+        }
+      },
+      "evidence": [
+        {
+          "id": "swiftui.reduced-motion-missing",
+          "severity": "high",
+          "file": "ripple/Effects/RippleEffect.swift",
+          "line": 26
+        },
+        {
+          "id": "swiftui.reduced-motion-missing",
+          "severity": "high",
+          "file": "ripple/Features/RipplePreview/RippleCanvasView.swift",
+          "line": 60
+        },
+        {
+          "id": "swiftui.gesture-accessibility-action-missing",
+          "severity": "medium",
+          "file": "ripple/Features/RipplePreview/RippleCanvasView.swift",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "category": "non-ui-negative-control",
+      "repository": "https://github.com/expressjs/express",
+      "commit": "ae6dd37680e3a00618d6c8a3e522f0ee4eeba1a4",
+      "license": "MIT",
+      "beforeStatus": "",
+      "afterStatus": "",
+      "exitCode": 0,
+      "outputSha256": "cd91a23f74450d1b3285425d443908112bc44a84a34baa3057e4aff293a132a4",
+      "outputBytes": 15348,
+      "result": "passed-honest-unassessed-state",
+      "confidence": 0,
+      "summary": {
+        "score": 0,
+        "scoreScope": "none",
+        "verdict": "unassessed — no UI class signal found",
+        "scannedFiles": 7,
+        "assessedDimensions": [],
+        "unassessedDimensions": [
+          "accessibility",
+          "color",
+          "components",
+          "maintainability",
+          "responsive",
+          "spacing",
+          "typography",
+          "visual-system"
+        ],
+        "appliedScoreCap": {
+          "id": "partial-source-analysis",
+          "maximum": 0
+        }
+      },
+      "evidence": [
+        {
+          "id": "scan.empty",
+          "severity": "high",
+          "file": null,
+          "line": null
+        }
+      ]
+    }
+  ],
+  "assessment": {
+    "status": "passed-candidate",
+    "repositories": 3,
+    "cleanBefore": 3,
+    "cleanAfter": 3,
+    "fileAnchoredResultRepositories": 2,
+    "honestUnsupportedRepositories": 1,
+    "publicReleaseRequired": true
+  }
+}

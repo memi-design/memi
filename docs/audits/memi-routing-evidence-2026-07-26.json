@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "routing-zero-confusion-2026-07-26",
+  "capturedAt": "2026-07-26T23:50:55Z",
+  "repository": "https://github.com/sarveshsea/design-skills",
+  "pullRequest": "https://github.com/sarveshsea/design-skills/pull/5",
+  "commit": "58b0c9a9abc20fbc91c01e9b6c2736e466446dbc",
+  "workflowRun": "https://github.com/sarveshsea/design-skills/actions/runs/30226100966",
+  "workflowJob": "https://github.com/sarveshsea/design-skills/actions/runs/30226100966/job/89856424256",
+  "workflowConclusion": "success",
+  "command": "npm run check",
+  "catalog": {
+    "skills": 94,
+    "validated": 94
+  },
+  "benchmark": {
+    "method": "deterministic-catalog-metadata-qa",
+    "correct": 45,
+    "total": 45,
+    "accuracy": 1,
+    "requiredAccuracy": 1,
+    "knownConfusions": 0,
+    "negativeNearMisses": 6,
+    "negativeNearMissesCorrectlyAbstained": 6
+  },
+  "regression": {
+    "id": "shader-wgsl-ripple",
+    "promptPreserved": true,
+    "priorPrediction": "creative-rendering-audit",
+    "currentPrediction": "shader-design-engineering",
+    "fix": "Normalize branded platform terms before camel-case token splitting."
+  },
+  "scope": {
+    "claim": "Zero known confusion in the checked-in representative catalog benchmark.",
+    "doesNotClaim": [
+      "Memi runtime routing",
+      "LLM classifier accuracy",
+      "external traffic representativeness",
+      "multi-skill composition accuracy"
+    ]
+  },
+  "status": "passed"
+}
