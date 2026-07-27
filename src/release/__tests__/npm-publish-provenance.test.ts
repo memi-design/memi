@@ -79,6 +79,8 @@ describe("npm publish workflow provenance contract", () => {
     expect(workflow).toContain("EXPECTED_VERSION: ${{ inputs.expected_version }}");
     expect(workflow).toContain("mode:");
     expect(workflow).toContain("source_run_id:");
+    expect(workflow).toContain("source_run_attempt:");
+    expect(workflow).toContain("/attempts/${SOURCE_RUN_ATTEMPT}");
     expect(workflow).toContain("node scripts/verify-npm-release.mjs --prepublish");
     expect(workflow).toContain("github.ref == 'refs/heads/main'");
     expect(workflow).toContain("github.sha");
