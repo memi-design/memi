@@ -9,8 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 env:
   RELEASE_TAG: ${{ inputs.release_tag }}
@@ -19,6 +18,9 @@ env:
 jobs:
   promote:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
