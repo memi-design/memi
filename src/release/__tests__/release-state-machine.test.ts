@@ -6,6 +6,7 @@ import {
   buildEngineReleaseRecord,
   canClearPublicParityCap,
   serializeJson,
+  stagePublishedEngineManifest,
   validateEngineSurfaceSnapshot,
   validateEngineReleaseTransition,
   validateNpmPublishPreflight,
@@ -271,6 +272,39 @@ describe("verified engine release state machine", () => {
     })).toEqual([]);
   });
 
+  it("stages a new immutable published manifest without mutating the candidate", () => {
+    const candidate = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+    });
+    const record = releaseRecord();
+    const recordBytes = serializeJson(record);
+    const published = stagePublishedEngineManifest({
+      manifest: candidate,
+      releaseRecord: record,
+      releaseRecordPath: recordPath,
+      releaseRecordBytes: recordBytes,
+      updatedAt: "2026-07-28",
+    });
+
+    expect(candidate.releaseGroups.engine).toMatchObject({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+    });
+    expect(published.releaseGroups.engine).toEqual({
+      version: "2.6.3",
+      state: "published",
+      sourceCommit,
+      releaseRecord: {
+        path: recordPath,
+        sha256: createHash("sha256").update(recordBytes).digest("hex"),
+      },
+    });
+    expect(published.updatedAt).toBe("2026-07-28");
+  });
+
   it("rejects cross-version, non-ancestor, surface-drifted, or tampered transitions", () => {
     const record = releaseRecord();
     const recordSha256 = createHash("sha256")
@@ -354,7 +388,10 @@ describe("verified engine release state machine", () => {
       githubAction: { verified: true, sourceCommit },
       mcp: { verified: true, version: "2.6.3" },
       studio: { verified: true, version: "2.5.0" },
-      website: { verified: true, manifestSha256: "e".repeat(64) },
+      website: {
+        verified: true,
+        manifestSha256: createHash("sha256").update(serializeJson(manifest)).digest("hex"),
+      },
     };
 
     expect(canClearPublicParityCap(manifest, evidence)).toBe(true);

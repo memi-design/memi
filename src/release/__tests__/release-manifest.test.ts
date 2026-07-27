@@ -19,7 +19,13 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.6.2",
+          state: "historical",
           sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+          releaseRecord: null,
+          verification: {
+            eligibleForParity: false,
+          },
+          plannedSuccessor: "2.6.3",
         },
         studio: { version: "2.5.0" },
         site: { version: "1.0.4" },
