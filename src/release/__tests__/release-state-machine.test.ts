@@ -69,6 +69,7 @@ function manifestFor(engine: Record<string, unknown>) {
         releaseGroup: "site",
         repository: "sarveshsea/memoire-web",
         publicUrl: "https://www.memoire.cv",
+        releaseArtifactUrl: "https://www.memoire.cv/release/memi-release.json",
       },
     },
   };
@@ -128,6 +129,34 @@ describe("verified engine release state machine", () => {
       "candidate engine release sourceCommit must be null",
       "candidate engine release releaseRecord must be null",
     ]));
+  });
+
+  it("requires a published website artifact endpoint but not a historical one", () => {
+    const record = releaseRecord();
+    const published = manifestFor({
+      state: "published",
+      sourceCommit,
+      releaseRecord: {
+        path: recordPath,
+        sha256: createHash("sha256").update(serializeJson(record)).digest("hex"),
+      },
+    });
+    const withoutArtifactEndpoint = {
+      ...published,
+      surfaces: {
+        ...published.surfaces,
+        website: {
+          releaseGroup: "site",
+          repository: "sarveshsea/memoire-web",
+          publicUrl: "https://www.memoire.cv",
+        },
+      },
+    };
+
+    expect(validateReleaseManifest(published)).toEqual([]);
+    expect(validateReleaseManifest(withoutArtifactEndpoint)).toContain(
+      "published engine release requires a same-origin website release artifact URL",
+    );
   });
 
   it("never lets candidate or historical state clear the public parity cap", () => {
