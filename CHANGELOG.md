@@ -10,6 +10,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Design-engineering audit, trust boundaries, and release proof
 
+- `49abb28e` test: reproduce audit evidence integrity gaps
+- `97439674` fix: preserve honest audit evidence end to end
 - `c01ff87e` test: add red gates for audit evidence and trust boundaries
 - `34996fc2` fix: unify audit evidence and harden trust boundaries
 - `746f473c` test: add red gates for local archive and registry boundaries
