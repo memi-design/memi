@@ -1,0 +1,274 @@
+import { createHash } from "node:crypto";
+
+import { describe, expect, it } from "vitest";
+
+import {
+  buildEngineReleaseRecord,
+  canClearPublicParityCap,
+  serializeJson,
+  validateEngineReleaseTransition,
+  validateReleaseManifest,
+} from "../../../scripts/lib/release-manifest.mjs";
+
+const sourceCommit = "a".repeat(40);
+const transitionCommit = "b".repeat(40);
+const recordPath = "release-artifacts/npm/2.6.3.release.json";
+
+function manifestFor(engine: Record<string, unknown>) {
+  return {
+    schemaVersion: 1,
+    updatedAt: "2026-07-27",
+    releaseGroups: {
+      engine: {
+        version: "2.6.3",
+        ...engine,
+      },
+      studio: {
+        version: "2.5.0",
+        status: "available",
+        channel: "stable",
+        releaseDate: "July 2026",
+        releaseSize: "48 MB",
+      },
+      site: { version: "1.0.4" },
+    },
+    surfaces: {
+      npm: {
+        releaseGroup: "engine",
+        packageName: "@memi-design/cli",
+        url: "https://www.npmjs.com/package/@memi-design/cli",
+      },
+      githubRelease: {
+        releaseGroup: "engine",
+        repository: "sarveshsea/memi",
+        tagPrefix: "v",
+        url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.3",
+      },
+      githubAction: {
+        releaseGroup: "engine",
+        repository: "sarveshsea/memi",
+        majorTag: "v2",
+      },
+      mcp: {
+        releaseGroup: "engine",
+        serverName: "io.github.sarveshsea/memi",
+      },
+      studio: {
+        releaseGroup: "studio",
+        repository: "sarveshsea/memi-studio",
+        tagPrefix: "v",
+        arm64Asset: "Memoire.Studio_{version}_aarch64.dmg",
+        x64Asset: "Memoire.Studio_{version}_x64.dmg",
+        checksumAsset: "SHA256SUMS",
+      },
+      website: {
+        releaseGroup: "site",
+        repository: "sarveshsea/memoire-web",
+        publicUrl: "https://www.memoire.cv",
+      },
+    },
+  };
+}
+
+function releaseRecord() {
+  return buildEngineReleaseRecord({
+    version: "2.6.3",
+    packageName: "@memi-design/cli",
+    sourceCommit,
+    integrity: `sha512-${Buffer.alloc(64, 0xab).toString("base64")}`,
+    shasum: "c".repeat(40),
+    tarballUrl: "https://registry.npmjs.org/@memi-design/cli/-/cli-2.6.3.tgz",
+    tarballSha512: "ab".repeat(64),
+    tarballSha1: "c".repeat(40),
+    signatureCount: 1,
+    npmAuditSignaturesVerified: true,
+    attestation: {
+      url: "https://registry.npmjs.org/-/npm/v1/attestations/%40memi-design%2fcli@2.6.3",
+      predicateType: "https://slsa.dev/provenance/v1",
+      subject: "pkg:npm/%40memi-design/cli@2.6.3",
+      sha512: "ab".repeat(64),
+      repository: "https://github.com/sarveshsea/memi",
+      workflowPath: ".github/workflows/publish.yml",
+      workflowRef: "refs/heads/main",
+    },
+    workflow: {
+      repository: "sarveshsea/memi",
+      path: ".github/workflows/publish.yml",
+      ref: "refs/heads/main",
+      runId: "123456789",
+      runAttempt: 1,
+    },
+    sbom: {
+      path: "memi.cdx.json",
+      sha256: "d".repeat(64),
+    },
+    publishedAt: "2026-07-27T12:00:00.000Z",
+  });
+}
+
+describe("verified engine release state machine", () => {
+  it("requires candidate releases to have null source and release record fields", () => {
+    const valid = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+    });
+    const invalid = manifestFor({
+      state: "candidate",
+      sourceCommit,
+      releaseRecord: { path: recordPath, sha256: "e".repeat(64) },
+    });
+
+    expect(validateReleaseManifest(valid)).toEqual([]);
+    expect(validateReleaseManifest(invalid)).toEqual(expect.arrayContaining([
+      "candidate engine release sourceCommit must be null",
+      "candidate engine release releaseRecord must be null",
+    ]));
+  });
+
+  it("never lets candidate or historical state clear the public parity cap", () => {
+    const evidence = {
+      transition: { verified: true },
+      npm: { verified: true },
+      githubRelease: { verified: true },
+      githubAction: { verified: true },
+      mcp: { verified: true },
+      studio: { verified: true },
+      website: { verified: true },
+    };
+
+    expect(canClearPublicParityCap(
+      manifestFor({ state: "candidate", sourceCommit: null, releaseRecord: null }),
+      evidence,
+    )).toBe(false);
+    expect(canClearPublicParityCap(
+      manifestFor({
+        state: "historical",
+        sourceCommit,
+        releaseRecord: null,
+        verification: { eligibleForParity: false, reason: "legacy release" },
+      }),
+      evidence,
+    )).toBe(false);
+  });
+
+  it("binds a published transition to the exact candidate, source commit, and record bytes", () => {
+    const record = releaseRecord();
+    const recordSha256 = createHash("sha256")
+      .update(serializeJson(record))
+      .digest("hex");
+    const previous = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+    });
+    const current = manifestFor({
+      state: "published",
+      sourceCommit,
+      releaseRecord: { path: recordPath, sha256: recordSha256 },
+    });
+
+    expect(validateEngineReleaseTransition({
+      previousManifest: previous,
+      currentManifest: current,
+      releaseRecord: record,
+      releaseRecordBytes: serializeJson(record),
+      currentCommit: transitionCommit,
+      sourceIsAncestor: true,
+      sourceSurfaceFailures: [],
+    })).toEqual([]);
+  });
+
+  it("rejects cross-version, non-ancestor, surface-drifted, or tampered transitions", () => {
+    const record = releaseRecord();
+    const recordSha256 = createHash("sha256")
+      .update(serializeJson(record))
+      .digest("hex");
+    const previous = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+    });
+    const current = manifestFor({
+      state: "published",
+      sourceCommit,
+      releaseRecord: { path: recordPath, sha256: recordSha256 },
+    });
+
+    expect(validateEngineReleaseTransition({
+      previousManifest: previous,
+      currentManifest: {
+        ...current,
+        releaseGroups: {
+          ...current.releaseGroups,
+          engine: { ...current.releaseGroups.engine, version: "2.6.4" },
+        },
+      },
+      releaseRecord: record,
+      releaseRecordBytes: `${serializeJson(record)} `,
+      currentCommit: transitionCommit,
+      sourceIsAncestor: false,
+      sourceSurfaceFailures: ["package.json at source commit is 2.6.2"],
+    })).toEqual(expect.arrayContaining([
+      "published transition must preserve the candidate version",
+      "engine source commit must be an ancestor of the transition commit",
+      "release record SHA-256 does not match its committed bytes",
+      "package.json at source commit is 2.6.2",
+    ]));
+  });
+
+  it("makes published release state immutable", () => {
+    const record = releaseRecord();
+    const recordBytes = serializeJson(record);
+    const recordSha256 = createHash("sha256").update(recordBytes).digest("hex");
+    const previous = manifestFor({
+      state: "published",
+      sourceCommit,
+      releaseRecord: { path: recordPath, sha256: recordSha256 },
+    });
+    const current = {
+      ...previous,
+      releaseGroups: {
+        ...previous.releaseGroups,
+        engine: { ...previous.releaseGroups.engine, version: "2.6.4" },
+      },
+    };
+
+    expect(validateEngineReleaseTransition({
+      previousManifest: previous,
+      currentManifest: current,
+      releaseRecord: record,
+      releaseRecordBytes: recordBytes,
+      currentCommit: transitionCommit,
+      sourceIsAncestor: true,
+      sourceSurfaceFailures: [],
+    })).toContain("published engine release state is immutable");
+  });
+
+  it("clears the cap only for a fully verified published transition", () => {
+    const record = releaseRecord();
+    const recordSha256 = createHash("sha256")
+      .update(serializeJson(record))
+      .digest("hex");
+    const manifest = manifestFor({
+      state: "published",
+      sourceCommit,
+      releaseRecord: { path: recordPath, sha256: recordSha256 },
+    });
+    const evidence = {
+      transition: { verified: true, sourceCommit },
+      npm: { verified: true, sourceCommit },
+      githubRelease: { verified: true, sourceCommit, checksumsVerified: true },
+      githubAction: { verified: true, sourceCommit },
+      mcp: { verified: true, version: "2.6.3" },
+      studio: { verified: true, version: "2.5.0" },
+      website: { verified: true, manifestSha256: "e".repeat(64) },
+    };
+
+    expect(canClearPublicParityCap(manifest, evidence)).toBe(true);
+    expect(canClearPublicParityCap(manifest, {
+      ...evidence,
+      githubRelease: { ...evidence.githubRelease, checksumsVerified: false },
+    })).toBe(false);
+  });
+});
