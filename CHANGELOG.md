@@ -65,6 +65,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `a13b79f9` test: enforce public audit story parity
 - `03dc20a1` fix: align public product story
 - `435e4858` test: align plugin positioning contract
+- `0018113d` docs: record plugin positioning gate
+- `53cf80ac` test: add creative-rendering audit honesty reproducer
+- `4b209cb4` fix: remove unshipped creative-rendering claims from audit
+- `6f1d82ad` fix: pin public action guidance
+- `8975d962` fix: bind audit claims to immutable evidence
+- `ccb2971c` fix: mark non-ui audits unassessed
+- `e246fcb6` docs: close activation and routing evidence gaps
+- `14f1dfd7` test: require npm provenance release proof
+- `04e415f0` test: add supply-chain proof reproducer (superseded before merge)
+- `e3789ce6` fix: require verifiable npm provenance
 
 #### Architectural decisions
 
@@ -86,6 +96,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Default every GitHub workflow to read-only repository contents and grant write scopes only at the specific job that uploads SARIF, publishes through OIDC, or mutates release assets, so permission drift fails closed.
 - Generate one human-readable release-truth document from `release-manifest.json`, enforce it in the release gate, and mark retained launch snapshots as historical before any obsolete instructions.
 - Treat the read-only design-engineering audit and skill layer as the one primary public story across README, package, MCP, plugin, release-gate, growth, and SEO metadata; public parity fails until npm and the website carry that same story.
+- Publish npm releases only from an explicit main-branch version through trusted OIDC, attach a CycloneDX SBOM, and require the registry signature plus SLSA provenance to resolve the exact package digest, repository, workflow, ref, and commit. A local SBOM or historical signed tarball does not close the provenance criterion.
 
 ### Design Skills migration — `3009cf63`
 
