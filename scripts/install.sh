@@ -107,6 +107,10 @@ if [ "${VERIFY}" -eq 1 ]; then
       echo "  Re-run with --no-verify only if you trust the release source." >&2
       exit 1
     fi
+  else
+    echo "error: need shasum or sha256sum to verify the release" >&2
+    echo "  Re-run with --no-verify only if you trust the release source." >&2
+    exit 1
   fi
 fi
 

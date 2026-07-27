@@ -39,11 +39,16 @@ export async function runPublicReleaseGate(options, dependencies) {
       : captureInstallSmoke(() => runInstallSmoke(packageName, expectedVersion)),
   ]);
 
-  const failures = [
+  const stageFailures = [
     ...registrySmoke.failures,
     ...(siteSmoke?.failures ?? []),
     ...installFailures(installSmoke),
   ];
+  const skippedFailures = [
+    ...(skipSite ? ["required site smoke was skipped"] : []),
+    ...(skipInstall ? ["required install smoke was skipped"] : []),
+  ];
+  const failures = [...stageFailures, ...skippedFailures];
 
   return {
     packageName,
@@ -54,7 +59,12 @@ export async function runPublicReleaseGate(options, dependencies) {
     registrySmoke,
     siteSmoke,
     installSmoke,
-    status: failures.length === 0 ? "passed" : "failed",
+    status:
+      stageFailures.length > 0
+        ? "failed"
+        : skippedFailures.length > 0
+          ? "diagnostic"
+          : "passed",
     failures,
   };
 }

@@ -15,7 +15,7 @@ ARG TARGETARCH
 ARG VERSION=latest
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ca-certificates curl tar \
+ && apt-get install -y --no-install-recommends ca-certificates coreutils curl tar \
  && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
@@ -25,12 +25,20 @@ RUN set -eux; \
       *) echo "unsupported arch ${TARGETARCH}" >&2; exit 1 ;; \
     esac; \
     if [ "${VERSION}" = "latest" ]; then \
-      url="https://github.com/sarveshsea/memi/releases/latest/download/memi-${target}.tar.gz"; \
+      base="https://github.com/sarveshsea/memi/releases/latest/download"; \
     else \
-      url="https://github.com/sarveshsea/memi/releases/download/${VERSION}/memi-${target}.tar.gz"; \
+      base="https://github.com/sarveshsea/memi/releases/download/${VERSION}"; \
     fi; \
+    archive="memi-${target}.tar.gz"; \
+    mkdir -p /tmp/memi-download; \
+    curl -fsSL "${base}/${archive}" -o "/tmp/memi-download/${archive}"; \
+    curl -fsSL "${base}/SHA256SUMS.txt" -o /tmp/memi-download/SHA256SUMS.txt; \
+    grep " ${archive}\$" /tmp/memi-download/SHA256SUMS.txt > "/tmp/memi-download/${archive}.sha256"; \
+    cd /tmp/memi-download; \
+    sha256sum --check "${archive}.sha256"; \
     mkdir -p /opt-design/cli; \
-    curl -fsSL "${url}" | tar -xz -C /opt-design/cli --strip-components=1; \
+    tar -xzf "${archive}" -C /opt-design/cli --strip-components=1; \
+    rm -rf /tmp/memi-download; \
     chmod +x /opt-design/cli/memi; \
     ln -s /opt-design/cli/memi /usr/local/bin/memi
 

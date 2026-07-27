@@ -70,4 +70,24 @@ describe("public package supply-chain defaults", () => {
     expect(installer).toContain("unexpected archive root");
     expect(installer.indexOf("tar -tzf")).toBeLessThan(installer.indexOf("tar -xzf"));
   });
+
+  it("fails closed when checksum tooling is unavailable", async () => {
+    const installer = await readFile(join(process.cwd(), "scripts", "install.sh"), "utf-8");
+
+    expect(installer).toContain("error: need shasum or sha256sum to verify the release");
+    expect(installer).toContain("Re-run with --no-verify only if you trust the release source.");
+  });
+
+  it("verifies the Docker release archive before extraction", async () => {
+    const dockerfile = await readFile(
+      join(process.cwd(), "docker", "Dockerfile.binary"),
+      "utf-8",
+    );
+
+    expect(dockerfile).toContain("SHA256SUMS.txt");
+    expect(dockerfile).toContain("sha256sum --check");
+    expect(dockerfile.indexOf("sha256sum --check")).toBeLessThan(
+      dockerfile.indexOf("tar -xzf"),
+    );
+  });
 });

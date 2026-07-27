@@ -52,7 +52,7 @@ describe("public release gate helper", () => {
     expect(result.status).toBe("failed");
   });
 
-  it("skips install smoke only when explicitly requested", async () => {
+  it("marks an explicitly skipped required stage as diagnostic, never passed", async () => {
     const runInstallSmoke = vi.fn(async () => ({ ok: true, version: "2.6.2" }));
 
     const result = await runPublicReleaseGate({
@@ -66,7 +66,23 @@ describe("public release gate helper", () => {
 
     expect(runInstallSmoke).not.toHaveBeenCalled();
     expect(result.installSmoke).toBeNull();
-    expect(result.status).toBe("passed");
+    expect(result.status).toBe("diagnostic");
+    expect(result.failures).toContain("required install smoke was skipped");
+  });
+
+  it("marks a skipped site stage as diagnostic, never passed", async () => {
+    const result = await runPublicReleaseGate({
+      ...baseOptions,
+      skipSite: true,
+    }, {
+      fetchJson: vi.fn(async () => registryMetadata),
+      runSiteSmoke: vi.fn(async () => ({ ok: true, failures: [] })),
+      runInstallSmoke: vi.fn(async () => ({ ok: true, version: "2.6.2" })),
+    });
+
+    expect(result.siteSmoke).toBeNull();
+    expect(result.status).toBe("diagnostic");
+    expect(result.failures).toContain("required site smoke was skipped");
   });
 
   it("surfaces install smoke failures alongside earlier surface failures", async () => {
