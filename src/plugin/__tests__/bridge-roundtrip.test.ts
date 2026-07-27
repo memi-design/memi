@@ -159,6 +159,36 @@ describe("bridge round-trip", () => {
     });
   });
 
+  it("preserves the per-session capability through identify and hello frames", () => {
+    const identify = normalizeBridgeMessage({
+      channel: BRIDGE_V2_CHANNEL,
+      source: "server",
+      type: "identify",
+      name: "Mémoire",
+      capability: "capability-1",
+    });
+    const hello = normalizeBridgeMessage({
+      channel: BRIDGE_V2_CHANNEL,
+      source: "plugin",
+      type: "bridge-hello",
+      file: "Design System",
+      fileKey: "file-key",
+      editor: "figma",
+      capability: "capability-1",
+    });
+
+    expect(identify).toMatchObject({ type: "identify", capability: "capability-1" });
+    expect(hello).toMatchObject({ type: "bridge-hello", capability: "capability-1" });
+    expect(serializeBridgeEnvelope(identify!, "legacy")).toMatchObject({
+      type: "identify",
+      capability: "capability-1",
+    });
+    expect(serializeBridgeEnvelope(hello!, "legacy")).toMatchObject({
+      type: "bridge-hello",
+      capability: "capability-1",
+    });
+  });
+
   it("resolveBridgeResponse ignores mismatched command names", () => {
     const pending = new Map<string, PendingBridgeRequest>();
     trackBridgeRequest(pending, "r1", createBridgeCommandEnvelope("bridge-1", "getSelection", {}));

@@ -1,10 +1,44 @@
 import { describe, expect, it } from "vitest";
 import { EventEmitter } from "events";
-import { PREVIEW_BIND_HOST, PreviewApiServer } from "../api-server.js";
+import {
+  PREVIEW_BIND_HOST,
+  PreviewApiServer,
+  isAllowedPreviewHost,
+  isAllowedPreviewOrigin,
+  isAuthorizedPreviewMutation,
+} from "../api-server.js";
 
 describe("PreviewApiServer", () => {
   it("binds the local preview control plane to loopback", () => {
     expect(PREVIEW_BIND_HOST).toBe("127.0.0.1");
+  });
+
+  it("rejects DNS-rebinding hosts and cross-origin mutation requests", () => {
+    expect(isAllowedPreviewHost("attacker.example:4044", 4044)).toBe(false);
+    expect(isAllowedPreviewHost("localhost:4044", 4044)).toBe(true);
+    expect(isAllowedPreviewHost("127.0.0.1:4044", 4044)).toBe(true);
+    expect(isAllowedPreviewOrigin("https://attacker.example", 4044)).toBe(false);
+    expect(isAllowedPreviewOrigin("http://localhost:4044", 4044)).toBe(true);
+    expect(isAllowedPreviewOrigin("http://127.0.0.1:4044", 4044)).toBe(true);
+  });
+
+  it("requires the same-site preview session for state-changing requests", () => {
+    const token = "preview-session-token";
+    expect(isAuthorizedPreviewMutation({
+      host: "localhost:4044",
+      origin: "http://localhost:4044",
+      cookie: `memoire_preview_session=${token}`,
+    }, 4044, token)).toBe(true);
+    expect(isAuthorizedPreviewMutation({
+      host: "localhost:4044",
+      origin: "https://attacker.example",
+      cookie: `memoire_preview_session=${token}`,
+    }, 4044, token)).toBe(false);
+    expect(isAuthorizedPreviewMutation({
+      host: "localhost:4044",
+      origin: "http://localhost:4044",
+      cookie: "memoire_preview_session=wrong",
+    }, 4044, token)).toBe(false);
   });
 
   it("builds widget status payloads from cached figma events", async () => {
