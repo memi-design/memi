@@ -3,10 +3,10 @@
   "auditId": "memi-100",
   "title": "Memi 100-point end-to-end scorecard",
   "targetScore": 100,
-  "assessedAt": "2026-07-27T01:35:02.000Z",
+  "assessedAt": "2026-07-27T03:11:24.000Z",
   "subject": {
     "repository": "https://github.com/sarveshsea/memi",
-    "commit": "8a928fa6e465244bf10ef017055967185b3239e0"
+    "commit": "922035607a1cc688edc90f47e4b98473bba13764"
   },
   "evidence": [
     {
@@ -65,14 +65,14 @@
       "id": "candidate-head-validation",
       "kind": "clean-install",
       "status": "passed",
-      "capturedAt": "2026-07-27T01:35:02.000Z",
+      "capturedAt": "2026-07-27T03:11:24.000Z",
       "artifact": {
         "location": "memi-candidate-head-validation-2026-07-27.json",
-        "sha256": "538088cdbd9d789f202813a7fc2979a3ab43fa091cbb2c60923ed2a39af86fa8"
+        "sha256": "7a4ff5ae9930e2637af4472fda79e514e88b60af78dcc038e4fd2f0b995256a6"
       },
       "producer": "ci:memi-hosted-validation",
       "verifier": "agent:audit-review",
-      "environment": "GitHub-hosted CI, HOL scanner, and nine-cell clean install matrix across Linux, macOS, Windows, and Node 20, 22, and 24 at immutable commit 8a928fa6e465244bf10ef017055967185b3239e0"
+      "environment": "GitHub-hosted CI, HOL scanner, and nine-cell clean install matrix across Linux, macOS, Windows, and Node 20, 22, and 24 at immutable commit 922035607a1cc688edc90f47e4b98473bba13764"
     }
   ],
   "derivedFromAudit": {

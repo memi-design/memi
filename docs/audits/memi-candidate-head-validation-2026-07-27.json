@@ -1,25 +1,50 @@
 {
   "schemaVersion": 1,
   "evidenceId": "candidate-head-validation",
-  "capturedAt": "2026-07-27T01:35:02.000Z",
+  "capturedAt": "2026-07-27T03:11:24.000Z",
   "assessment": "passed",
   "repository": "https://github.com/sarveshsea/memi",
-  "commit": "8a928fa6e465244bf10ef017055967185b3239e0",
+  "commit": "922035607a1cc688edc90f47e4b98473bba13764",
   "hostedRuns": [
     {
       "workflow": "CI",
-      "url": "https://github.com/sarveshsea/memi/actions/runs/30229947672",
-      "conclusion": "success"
+      "url": "https://github.com/sarveshsea/memi/actions/runs/30233836642",
+      "conclusion": "success",
+      "headSha": "922035607a1cc688edc90f47e4b98473bba13764",
+      "runAttempt": 1,
+      "jobs": [
+        "build-and-test (20)",
+        "build-and-test (22)",
+        "memi-ci"
+      ]
     },
     {
       "workflow": "Clean install compatibility",
-      "url": "https://github.com/sarveshsea/memi/actions/runs/30229947673",
-      "conclusion": "success"
+      "url": "https://github.com/sarveshsea/memi/actions/runs/30233836684",
+      "conclusion": "success",
+      "headSha": "922035607a1cc688edc90f47e4b98473bba13764",
+      "runAttempt": 1,
+      "jobs": [
+        "macos-latest / Node 20",
+        "macos-latest / Node 22",
+        "macos-latest / Node 24",
+        "ubuntu-latest / Node 20",
+        "ubuntu-latest / Node 22",
+        "ubuntu-latest / Node 24",
+        "windows-latest / Node 20",
+        "windows-latest / Node 22",
+        "windows-latest / Node 24"
+      ]
     },
     {
       "workflow": "HOL Plugin Scanner",
-      "url": "https://github.com/sarveshsea/memi/actions/runs/30229947696",
-      "conclusion": "success"
+      "url": "https://github.com/sarveshsea/memi/actions/runs/30233836659",
+      "conclusion": "success",
+      "headSha": "922035607a1cc688edc90f47e4b98473bba13764",
+      "runAttempt": 1,
+      "jobs": [
+        "scan"
+      ]
     }
   ],
   "cleanInstallMatrix": [

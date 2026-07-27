@@ -33,7 +33,14 @@ describe("candidate head validation evidence", () => {
     const artifact = JSON.parse(artifactBytes.toString("utf8")) as {
       commit: string;
       assessment: string;
-      hostedRuns: Array<{ workflow: string; conclusion: string; url: string }>;
+      hostedRuns: Array<{
+        workflow: string;
+        conclusion: string;
+        url: string;
+        headSha: string;
+        runAttempt: number;
+        jobs: string[];
+      }>;
       cleanInstallMatrix: Array<{ os: string; node: number; conclusion: string }>;
     };
     const scorecard = JSON.parse(await readFile(scorecardPath, "utf8")) as {
@@ -76,12 +83,20 @@ describe("candidate head validation evidence", () => {
       artifact.hostedRuns.every(
         (run) =>
           run.conclusion === "success" &&
+          run.headSha === artifact.commit &&
+          run.runAttempt === 1 &&
+          run.jobs.length > 0 &&
           /^https:\/\/github\.com\/sarveshsea\/memi\/actions\/runs\/\d+$/.test(
             run.url,
           ),
       ),
     ).toBe(true);
     expect(artifact.cleanInstallMatrix).toHaveLength(9);
+    expect(
+      new Set(
+        artifact.cleanInstallMatrix.map((cell) => `${cell.os}:${cell.node}`),
+      ).size,
+    ).toBe(9);
     expect(
       artifact.cleanInstallMatrix.every(
         (cell) =>
