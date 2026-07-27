@@ -19,6 +19,10 @@ on:
         description: 'Original publish workflow run ID; required only for recovery'
         required: false
         type: string
+      source_run_attempt:
+        description: 'Original publish workflow run attempt; required only for recovery'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -65,13 +69,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          SOURCE_RUN_ATTEMPT: ${{ inputs.source_run_attempt }}
         run: |
           set -euo pipefail
-          if [[ ! "${SOURCE_RUN_ID}" =~ ^[0-9]+$ ]]; then
-            echo "::error::source_run_id must be the numeric original publish run ID"
+          if [[ ! "${SOURCE_RUN_ID}" =~ ^[0-9]+$ ]] ||
+             [[ ! "${SOURCE_RUN_ATTEMPT}" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::source_run_id and source_run_attempt must identify the original publish attempt"
             exit 1
           fi
-          run_json="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}")"
+          run_json="$(
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}/attempts/${SOURCE_RUN_ATTEMPT}"
+          )"
           workflow_path="$(jq -r '.path' <<<"${run_json}")"
           source_commit="$(jq -r '.head_sha' <<<"${run_json}")"
           source_branch="$(jq -r '.head_branch' <<<"${run_json}")"
@@ -79,7 +88,7 @@ jobs:
           if [ "${workflow_path}" != ".github/workflows/publish.yml" ] ||
              [ "${source_branch}" != "main" ] ||
              [[ ! "${source_commit}" =~ ^[0-9a-f]{40}$ ]] ||
-             [[ ! "${run_attempt}" =~ ^[1-9][0-9]*$ ]]; then
+             [ "${run_attempt}" != "${SOURCE_RUN_ATTEMPT}" ]; then
             echo "::error::source run is not a valid main-branch Publish to npm run"
             exit 1
           fi
@@ -94,7 +103,7 @@ jobs:
         with:
           github-token: ${{ github.token }}
           run-id: ${{ inputs.source_run_id }}
-          pattern: memi-release-sbom-*
+          pattern: memi-release-sbom-*-${{ inputs.source_run_attempt }}
           merge-multiple: true
           path: release-evidence
 
@@ -127,7 +136,7 @@ jobs:
         if: inputs.mode == 'publish'
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: memi-release-sbom-${{ github.sha }}
+          name: memi-release-sbom-${{ github.sha }}-${{ github.run_attempt }}
           path: release-evidence/
           if-no-files-found: error
 
@@ -156,6 +165,6 @@ jobs:
       - name: Upload verified release transition bundle
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: memi-release-record-${{ inputs.expected_version }}-${{ env.EXPECTED_SOURCE_COMMIT }}
+          name: memi-release-record-${{ inputs.expected_version }}-${{ env.EXPECTED_SOURCE_COMMIT }}-${{ env.RELEASE_WORKFLOW_RUN_ATTEMPT }}
           path: release-evidence/
           if-no-files-found: error

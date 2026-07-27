@@ -157,10 +157,12 @@ two-phase state machine:
 If npm publish succeeds but evidence generation, a downstream surface, or the
 website deployment fails, leave the manifest in candidate state. Dispatch the
 same workflow with `mode: recover` and the original `source_run_id`. Recovery
-validates the original main-branch workflow run, downloads its SBOM, verifies
-npm provenance still resolves X, and reconstructs the record. Recovery must
-never republish an existing version; recovery mode is evidence reconstruction
-only.
+also requires the original `source_run_attempt`; this prevents a later rerun
+from being mistaken for the attempt that performed the publish. Recovery
+validates that exact main-branch workflow attempt, downloads its attempt-bound
+SBOM, verifies npm provenance still resolves X, and reconstructs the record.
+Recovery must never republish an existing version; recovery mode is evidence
+reconstruction only.
 
 The post-publish gate must then prove all of the following before any
 announcement:
