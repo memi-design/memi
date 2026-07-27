@@ -13,8 +13,21 @@ const artifactPath = join(
   "memi-candidate-head-validation-2026-07-27.json",
 );
 const scorecardPath = join(root, "docs", "audits", "memi-100-scorecard.json");
+const ciWorkflowPath = join(root, ".github", "workflows", "ci.yml");
 
 describe("candidate head validation evidence", () => {
+  it("checks out full history before validating commit ancestry", async () => {
+    const workflow = await readFile(ciWorkflowPath, "utf8");
+    const buildAndTest = workflow.slice(
+      workflow.indexOf("  build-and-test:"),
+      workflow.indexOf("  memi-ci:"),
+    );
+
+    expect(buildAndTest).toMatch(
+      /actions\/checkout@[^\n]+\n\s+with:\n\s+fetch-depth: 0/,
+    );
+  });
+
   it("binds the audited subject to successful hosted and clean-install proof", async () => {
     const artifactBytes = await readFile(artifactPath);
     const artifact = JSON.parse(artifactBytes.toString("utf8")) as {
