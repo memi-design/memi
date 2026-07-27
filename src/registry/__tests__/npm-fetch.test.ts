@@ -56,6 +56,18 @@ describe("npm registry cache", () => {
     }
   });
 
+  it("rejects npm tarballs with neither integrity nor shasum metadata", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "memoire-npm-no-integrity-"));
+    try {
+      const tarball = await makePackageTarball(cwd, "@acme/ds");
+      mockNpmFetch("@acme/ds", tarball.bytes);
+
+      await expect(fetchNpmPackageToCache("@acme/ds", cwd)).rejects.toThrow(/integrity|shasum/i);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("rejects traversal, absolute, link, and oversized npm archive entries", () => {
     expect(() => assertSafeNpmArchiveEntries([{ path: "../escape", type: "File", size: 1 }]))
       .toThrow(/path traversal/i);
@@ -88,7 +100,7 @@ async function makePackageTarball(cwd: string, packageName: string): Promise<{ b
   };
 }
 
-function mockNpmFetch(packageName: string, tarballBytes: Buffer, integrity: string) {
+function mockNpmFetch(packageName: string, tarballBytes: Buffer, integrity?: string) {
   const fetchMock = vi.fn(async (url: string | URL) => {
     const href = String(url);
     if (href.includes("registry.npmjs.org")) {
@@ -101,7 +113,7 @@ function mockNpmFetch(packageName: string, tarballBytes: Buffer, integrity: stri
             version: "1.0.0",
             dist: {
               tarball: "https://registry.example.test/package.tgz",
-              integrity,
+              ...(integrity ? { integrity } : {}),
             },
           },
         },

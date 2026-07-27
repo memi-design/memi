@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { checkRegression, renderTrend, type HistoryEntry } from "../history.js";
+import { checkRegression, entryFromDiagnosis, renderTrend, type HistoryEntry } from "../history.js";
+import type { AppQualityDiagnosis } from "../engine.js";
 
 function entry(overrides: Partial<HistoryEntry> = {}): HistoryEntry {
   return {
@@ -41,5 +42,37 @@ describe("app-quality score history comparability", () => {
     expect(trend).toHaveLength(1);
     expect(trend[0]).toContain("2026-07-25");
     expect(trend[0]).not.toContain("90/100");
+  });
+
+  it("includes the target and configured scan extent in coverage comparability", () => {
+    const base = {
+      generatedAt: "2026-07-26T00:00:00.000Z",
+      target: ".",
+      scope: undefined,
+      summary: { score: 80, scanLimit: 500 },
+      scores: {},
+      issues: [],
+      sourceCoverage: {
+        web: {
+          scannedFiles: 1,
+          analysis: "ruleset",
+          assessedDimensions: ["spacing"],
+          assessedChecks: [],
+        },
+      },
+    } as unknown as AppQualityDiagnosis;
+
+    const rootEntry = entryFromDiagnosis(base);
+    const scopedEntry = entryFromDiagnosis({
+      ...base,
+      target: "src/app",
+    } as AppQualityDiagnosis);
+    const truncatedEntry = entryFromDiagnosis({
+      ...base,
+      summary: { ...base.summary, scanLimit: 10 },
+    } as AppQualityDiagnosis);
+
+    expect(rootEntry.coverageFingerprint).not.toBe(scopedEntry.coverageFingerprint);
+    expect(rootEntry.coverageFingerprint).not.toBe(truncatedEntry.coverageFingerprint);
   });
 });

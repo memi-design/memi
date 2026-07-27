@@ -93,4 +93,28 @@ export default function Page() {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("preserves native partial-analysis caps when a screenshot is attached", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-ux-native-"));
+    try {
+      await mkdir(join(root, "Sources"), { recursive: true });
+      await writeFile(join(root, "Sources", "View.swift"), "import SwiftUI\nstruct View: SwiftUI.View { var body: some SwiftUI.View { Text(\"Static\") } }\n");
+      const screenshot = join(root, "screen.png");
+      await writeFile(screenshot, "not-analyzed");
+      const logs = captureLogs();
+      const program = new Command();
+      registerUxCommand(program, { config: { projectRoot: root } } as never);
+
+      await program.parseAsync(["ux", "audit", ".", "--json", "--no-write", "--screenshot", screenshot], { from: "user" });
+      const payload = JSON.parse(lastLog(logs));
+
+      expect(payload.score).toBe(0);
+      expect(payload.appliedScoreCaps).toEqual(expect.arrayContaining([
+        expect.objectContaining({ maximum: 0 }),
+      ]));
+      expect(payload.assessedDimensions).not.toContain("tenet:consistency");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });

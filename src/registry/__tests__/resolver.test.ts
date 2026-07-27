@@ -158,4 +158,21 @@ describe("Registry resolver", () => {
       await rm(dir, { recursive: true, force: true });
     }
   });
+
+  it("does not satisfy an exact npm pin from a mismatched local registry version", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "memoire-resolver-pin-"));
+    const packageDir = join(dir, "node_modules", "@test", "ds");
+    try {
+      await mkdir(packageDir, { recursive: true });
+      await writeFile(join(packageDir, "registry.json"), JSON.stringify({
+        ...validRegistry,
+        version: "2.0.0",
+      }));
+      vi.stubGlobal("fetch", vi.fn(async () => new Response("missing", { status: 404 })));
+
+      await expect(resolveRegistry("@test/ds@1.0.0", dir)).rejects.toThrow(/could not be resolved|version/i);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
 });

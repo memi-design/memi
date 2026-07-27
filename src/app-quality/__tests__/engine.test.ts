@@ -175,6 +175,28 @@ export const fixture = '<Image src="/test.png" className="p-[99px] bg-[#00ff00]"
     }
   });
 
+  it("does not let excluded fixtures consume the scan budget for an explicit directory target", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-budget-"));
+    try {
+      await mkdir(join(root, "src", "__tests__"), { recursive: true });
+      await mkdir(join(root, "src", "app"), { recursive: true });
+      await writeFile(join(root, "src", "__tests__", "a.test.tsx"), "export const fixture = '<div className=\"text-[#ff00ff]\" />';");
+      await writeFile(join(root, "src", "app", "page.tsx"), "export default function Page(){ return <main className=\"p-4 text-base\" />; }");
+
+      const diagnosis = await diagnoseAppQuality({
+        projectRoot: root,
+        target: "src",
+        maxFiles: 1,
+        write: false,
+      });
+
+      expect(diagnosis.files.map((file) => file.path)).toEqual(["app/page.tsx"]);
+      expect(diagnosis.summary.hexColors).toBe(0);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("returns a file-anchored SwiftUI motion finding without awarding unassessed web dimensions", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-swiftui-"));
     try {
@@ -354,27 +376,27 @@ struct MotionView: View {
       const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
 
       expect(diagnosis.summary.scannedFiles).toBe(2);
-      expect(diagnosis.summary.score).toBe(100);
+      expect(diagnosis.summary.score).toBeLessThan(100);
       expect(diagnosis.summary.scoreScope).toBe("web");
       expect(diagnosis.summary.verdict).toBe("strong — web ruleset only; native coverage incomplete");
       expect(diagnosis.sourceCoverage.web.analysis).toBe("ruleset");
       expect(diagnosis.sourceCoverage.swiftui.analysis).toBe("partial");
       expect(diagnosis.assessedDimensions).toEqual([
         "accessibility",
-        "color",
-        "components",
         "maintainability",
-        "responsive",
         "spacing",
         "swiftui.gesture-accessibility-action",
         "swiftui.reduced-motion",
         "typography",
-        "visual-system",
       ]);
       expect(diagnosis.unassessedDimensions).toEqual([
+        "color",
+        "components",
+        "responsive",
         "swiftui:rendered-quality",
         "swiftui:runtime-accessibility",
         "swiftui:whole-category-analysis",
+        "visual-system",
       ]);
       expect(diagnosis.issues.map((issue) => issue.id)).toContain("swiftui.reduced-motion-missing");
       expect(diagnosis.directions.map((direction) => direction.id)).toContain("premium-saas");
@@ -403,22 +425,24 @@ let package = Package(
 
       const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
 
-      expect(diagnosis.summary.score).toBe(100);
+      expect(diagnosis.summary.score).toBeLessThan(100);
       expect(diagnosis.summary.scoreScope).toBe("web");
       expect(diagnosis.summary.verdict).toBe("strong — web ruleset only; native coverage incomplete");
       expect(diagnosis.sourceCoverage.swift.scannedFiles).toBe(1);
       expect(diagnosis.sourceCoverage.swiftui.scannedFiles).toBe(0);
       expect(diagnosis.assessedDimensions).toEqual([
         "accessibility",
-        "color",
-        "components",
         "maintainability",
-        "responsive",
         "spacing",
         "typography",
+      ]);
+      expect(diagnosis.unassessedDimensions).toEqual([
+        "color",
+        "components",
+        "responsive",
+        "swift:source-analysis",
         "visual-system",
       ]);
-      expect(diagnosis.unassessedDimensions).toEqual(["swift:source-analysis"]);
     } finally {
       await rm(root, { recursive: true, force: true });
     }

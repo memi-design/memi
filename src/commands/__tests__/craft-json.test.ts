@@ -50,4 +50,26 @@ export default function Page() {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("does not synthesize a passing craft score for wholly unassessed source", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-craft-unassessed-"));
+    try {
+      await mkdir(join(root, "lib"), { recursive: true });
+      await writeFile(join(root, "lib", "server.js"), "export const server = true;\n");
+      const logs = captureLogs();
+      const program = new Command();
+      registerCraftCommand(program, { config: { projectRoot: root } } as never);
+
+      await program.parseAsync(["craft", "audit", "--json", "--no-write"], { from: "user" });
+      const payload = JSON.parse(lastLog(logs));
+
+      expect(payload.score).toBe(0);
+      expect(payload.assessedDimensions).toEqual([]);
+      expect(payload.appliedScoreCaps).toEqual([
+        expect.objectContaining({ maximum: 0 }),
+      ]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });

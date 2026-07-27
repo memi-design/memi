@@ -164,4 +164,27 @@ struct TwoMotionsView: View {
       }),
     ]);
   });
+
+  it("recognizes motion inside the else branch of an enclosing reduced-motion gate", () => {
+    const result = analyzeSwiftUiSources([{
+      path: "Sources/EnclosingGateView.swift",
+      content: `import SwiftUI
+struct EnclosingGateView: View {
+    @Environment(\\.accessibilityReduceMotion) private var reduceMotion
+    var body: some View {
+        if reduceMotion {
+            Text("Static")
+        } else {
+            Text("Motion")
+                .phaseAnimator([false, true]) { view, active in
+                    view.opacity(active ? 1 : 0)
+                }
+        }
+    }
+}
+`,
+    }]);
+
+    expect(result.issues.map((issue) => issue.id)).not.toContain("swiftui.reduced-motion-missing");
+  });
 });

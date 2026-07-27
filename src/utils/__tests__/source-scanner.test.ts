@@ -39,6 +39,24 @@ describe("scanSources", () => {
     expect(files.map((file) => file.projectPath)).toEqual(["src/a.css", "src/nested/b.jsx"]);
   });
 
+  it("applies path exclusions before consuming the max-files budget", async () => {
+    const root = await makeRoot();
+    await mkdir(join(root, "src", "__tests__"), { recursive: true });
+    await mkdir(join(root, "src", "app"), { recursive: true });
+    await writeFile(join(root, "src", "__tests__", "a.test.tsx"), "export const fixture = '<div />';");
+    await writeFile(join(root, "src", "app", "page.tsx"), "export default function Page(){ return <main />; }");
+
+    const files = await scanSources({
+      projectRoot: root,
+      target: "src",
+      extensions: [".tsx"],
+      maxFiles: 1,
+      excludePath: (projectPath) => projectPath.includes("__tests__"),
+    });
+
+    expect(files.map((file) => file.projectPath)).toEqual(["src/app/page.tsx"]);
+  });
+
   it("fetches url html and inline styles with a timeout", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => ({
       ok: true,
