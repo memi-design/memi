@@ -12,6 +12,51 @@ afterEach(async () => {
 });
 
 describe("studio session store", () => {
+  it("redacts prompts, reasoning, and structured secrets before persistence", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-studio-private-store-"));
+    try {
+      const store = new (await import("../session-store.js")).StudioSessionStore(root);
+      store.init();
+      const now = new Date().toISOString();
+      const session = {
+        id: "private-session",
+        harness: "codex" as const,
+        action: "raw" as const,
+        cwd: root,
+        prompt: "Audit this OPENAI_API_KEY=sk-proj-secret person@example.com",
+        status: "completed" as const,
+        startedAt: now,
+        completedAt: now,
+        exitCode: 0,
+        activeStreamId: null,
+        pendingPrompt: null,
+        events: [],
+      };
+      store.appendEvent(session, {
+        id: "reasoning-1",
+        sessionId: session.id,
+        type: "reasoning",
+        timestamp: now,
+        message: "private chain of thought",
+        data: { cookie: "session=private", safe: "metadata" },
+      });
+
+      const indexRaw = await readFile(join(root, ".memoire", "studio", "session-index.json"), "utf-8");
+      const eventRaw = await readFile(join(root, ".memoire", "studio", "sessions", `${session.id}.jsonl`), "utf-8");
+      const persisted = `${indexRaw}\n${eventRaw}`;
+      expect(persisted).not.toContain("sk-proj-secret");
+      expect(persisted).not.toContain("person@example.com");
+      expect(persisted).not.toContain("private chain of thought");
+      expect(persisted).not.toContain("session=private");
+      expect(store.readSessionEvents(session.id)[0]).toMatchObject({
+        type: "reasoning",
+        message: "[reasoning omitted]",
+      });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("persists events to jsonl, indexes sessions, and reports runtime metrics", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-store-"));
     try {
