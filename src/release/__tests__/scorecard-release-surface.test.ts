@@ -154,4 +154,15 @@ describe("audit scorecard release surfaces", () => {
     expect(workflow).not.toContain("docker/build-push-action");
     expect(workflow).not.toContain("softprops/action-gh-release");
   });
+
+  it("bounds and supersedes stalled clean-install matrix runs", async () => {
+    const workflow = await readFile(
+      join(process.cwd(), ".github", "workflows", "clean-install.yml"),
+      "utf8",
+    );
+
+    expect(workflow).toContain("concurrency:");
+    expect(workflow).toContain("cancel-in-progress: true");
+    expect(workflow).toContain("timeout-minutes: 10");
+  });
 });
