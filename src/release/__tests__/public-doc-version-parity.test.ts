@@ -31,6 +31,7 @@ const engineDocs = [
   "docs/RELEASE_GATES.md",
   "docs/GITHUB_ACTION_MARKETPLACE.md",
   "docs/CI_RECIPES.md",
+  "docs/SOCIAL.md",
   "docs/SEO.md",
   "docs/METRICS.md",
 ] as const;
@@ -86,6 +87,7 @@ describe("public documentation release truth", () => {
       "docs/METRICS.md",
       "docs/PUBLIC_REPOS.md",
       "docs/RELEASE_GATES.md",
+      "docs/SOCIAL.md",
       "docs/SEO.md",
       "docs/V2_PACKAGE_POSITIONING.md",
     ]) {
@@ -116,6 +118,24 @@ describe("public documentation release truth", () => {
         `${path} should carry the primary public story`,
       ).toContain(primaryStory);
     }
+  });
+
+  it("keeps the README focused on one visual proof and one first-run path", async () => {
+    const readme = await readFile(join(root, "README.md"), "utf8");
+    const lines = readme.split("\n");
+    const quickstartIndex = readme.indexOf("## Quickstart");
+    const deeperPathsIndex = readme.indexOf("## Choose your integration");
+
+    expect(readme).toContain("assets/readme-hero.svg");
+    expect(readme).toContain("img.shields.io/npm/dw/@memi-design/cli");
+    expect(readme).toContain(
+      "npx -y @memi-design/cli@2.6.3 diagnose . --json --no-write --fail-on none",
+    );
+    expect(readme).toContain("If Memi catches a real interface issue");
+    expect(quickstartIndex).toBeGreaterThan(-1);
+    expect(deeperPathsIndex).toBeGreaterThan(quickstartIndex);
+    expect(lines.length).toBeLessThanOrEqual(300);
+    expect(readme).not.toContain("## Grok Build (Grok 4.5) — recommended setup");
   });
 
   it("marks every retained launch snapshot as historical before its old guidance", async () => {
