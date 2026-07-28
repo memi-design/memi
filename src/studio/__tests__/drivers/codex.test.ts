@@ -69,8 +69,31 @@ describe("drivers/codex", () => {
   it("start emits session.created and reaches ready", async () => {
     const fake = fakeTransport();
     const driver = makeDriver(async () => fake.transport);
+    const events = collectEvents(driver, 50, 0);
     await Effect.runPromise(driver.start());
     expect(driver.sessionState()).toBe("ready");
+    const collected = await events;
+    expect(collected).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        type: "session.state.changed",
+        from: "idle",
+        to: "starting",
+      }),
+      expect.objectContaining({
+        type: "session.state.changed",
+        from: "starting",
+        to: "ready",
+      }),
+      expect.objectContaining({
+        type: "model.selected",
+        providerId: "openai",
+        resolvedModel: "gpt-5.5",
+      }),
+    ]));
+    for (const event of collected) {
+      expect(event.trace?.traceId).toMatch(/^[0-9a-f]{32}$/);
+      expect(event.trace?.spanId).toMatch(/^[0-9a-f]{16}$/);
+    }
     await Effect.runPromise(driver.shutdown());
   });
 

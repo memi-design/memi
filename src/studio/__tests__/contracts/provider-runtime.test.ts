@@ -75,4 +75,60 @@ describe("contracts/provider-runtime", () => {
     });
     expect(result.ok).toBe(false);
   });
+
+  it("rejects event variants whose required payload is missing", () => {
+    const result = safeParseProviderRuntimeEvent({
+      ...envelope(),
+      type: "tool.call.started",
+    });
+    expect(result.ok).toBe(false);
+  });
+
+  it("validates model selection and model handoff receipts", () => {
+    const selected = parseProviderRuntimeEvent({
+      ...envelope(),
+      type: "model.selected",
+      providerId: "openai",
+      requestedModel: "gpt-5",
+      resolvedModel: "gpt-5",
+      reason: "requested",
+      capabilities: ["chat.text", "tool.call"],
+    });
+    expect(selected.type).toBe("model.selected");
+
+    const handoff = parseProviderRuntimeEvent({
+      ...envelope(),
+      type: "model.handoff",
+      handoffId: "handoff-1",
+      phase: "completed",
+      from: { providerId: "openai", modelId: "gpt-5" },
+      to: { providerId: "anthropic", modelId: "claude" },
+      reason: "visual-review",
+    });
+    expect(handoff.type).toBe("model.handoff");
+  });
+
+  it("validates W3C-compatible trace context when present", () => {
+    const valid = safeParseProviderRuntimeEvent({
+      ...envelope(),
+      type: "stream.heartbeat",
+      trace: {
+        runId: "run-1",
+        traceId: "4bf92f3577b34da6a3ce929d0e0e4736",
+        spanId: "00f067aa0ba902b7",
+      },
+    });
+    expect(valid.ok).toBe(true);
+
+    const invalid = safeParseProviderRuntimeEvent({
+      ...envelope(),
+      type: "stream.heartbeat",
+      trace: {
+        runId: "run-1",
+        traceId: "not-a-trace-id",
+        spanId: "short",
+      },
+    });
+    expect(invalid.ok).toBe(false);
+  });
 });
