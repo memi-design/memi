@@ -55,6 +55,7 @@ describe("studio provider runtime RPC", () => {
       expect(events.some((event) => event.type === "turn.completed")).toBe(true);
       for (const event of events) {
         expect(event.schemaVersion).toBe(1);
+        expect(event.contentTrust).toMatch(/^(trusted|user|tool_untrusted|web_untrusted|model_generated)$/);
         expect((event.trace as { traceId: string }).traceId).toMatch(/^[0-9a-f]{32}$/);
         expect((event.trace as { spanId: string }).spanId).toMatch(/^[0-9a-f]{16}$/);
       }
