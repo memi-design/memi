@@ -36,6 +36,7 @@ import type {
   ProviderRuntimeEvent,
   ProviderRuntimeEventBase,
   RuntimeTraceContext,
+  ModelRef,
   SessionState,
   TurnState,
 } from "../contracts/provider-runtime.js";
@@ -102,6 +103,18 @@ export interface HarnessDriver {
   shutdown(): Effect.Effect<void, HarnessError>;
   events(): Stream.Stream<ProviderRuntimeEvent, HarnessError>;
   sessionState(): SessionState;
+  recordModelChange(input: {
+    readonly from: ModelRef;
+    readonly to: ModelRef;
+    readonly reason: string;
+  }): void;
+  recordModelHandoff(input: {
+    readonly handoffId: string;
+    readonly phase: "requested" | "accepted" | "rejected" | "started" | "completed" | "failed" | "cancelled";
+    readonly from: ModelRef;
+    readonly to: ModelRef;
+    readonly reason?: string;
+  }): void;
 }
 
 type EventEmitter = (event: ProviderRuntimeEvent) => void;
@@ -191,16 +204,19 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
   }
 
   private publishEvent(event: ProviderRuntimeEvent): void {
+    const publishable = event.contentTrust
+      ? event
+      : { ...event, contentTrust: contentTrustForEvent(event) } as ProviderRuntimeEvent;
     for (const sub of this.subscribers) {
       try {
-        sub(event);
+        sub(publishable);
       } catch {
         // a misbehaving subscriber must never break the stream
       }
     }
-    this.maybeUpdateSnapshot(event);
-    this.maybeAppendJournal(event);
-    this.maybePublishToBus(event);
+    this.maybeUpdateSnapshot(publishable);
+    this.maybeAppendJournal(publishable);
+    this.maybePublishToBus(publishable);
   }
 
   private traceForTurn(turnId?: TurnId): RuntimeTraceContext {
@@ -439,6 +455,32 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
     });
   }
 
+  recordModelChange(input: {
+    readonly from: ModelRef;
+    readonly to: ModelRef;
+    readonly reason: string;
+  }): void {
+    this.emit({
+      ...this.envelope(),
+      type: "model.changed",
+      ...input,
+    });
+  }
+
+  recordModelHandoff(input: {
+    readonly handoffId: string;
+    readonly phase: "requested" | "accepted" | "rejected" | "started" | "completed" | "failed" | "cancelled";
+    readonly from: ModelRef;
+    readonly to: ModelRef;
+    readonly reason?: string;
+  }): void {
+    this.emit({
+      ...this.envelope(),
+      type: "model.handoff",
+      ...input,
+    });
+  }
+
   protected emitSessionStateChange(toState: SessionState, reason?: string): void {
     const fromState = this.lastEmittedSessionState;
     this.lastEmittedSessionState = toState;
@@ -486,4 +528,17 @@ function providerIdForHarness(harnessId: HarnessId): string {
   if (normalized === "ollama") return "local";
   if (normalized === "memoire") return "memoire";
   return normalized;
+}
+
+function contentTrustForEvent(event: ProviderRuntimeEvent): ProviderRuntimeEventBase["contentTrust"] {
+  if (event.type === "message.user" || event.type === "turn.created") return "user";
+  if (
+    event.type.startsWith("message.assistant")
+    || event.type.startsWith("reasoning.")
+  ) return "model_generated";
+  if (
+    event.type.startsWith("tool.")
+    || event.type.startsWith("diagnostic.")
+  ) return "tool_untrusted";
+  return "trusted";
 }
