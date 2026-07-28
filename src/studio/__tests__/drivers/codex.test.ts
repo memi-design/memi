@@ -190,4 +190,32 @@ describe("drivers/codex", () => {
     });
     await expect(Effect.runPromise(driver.start())).rejects.toThrow(/spawnTransport/);
   });
+
+  it("records model changes and handoff phases on the same trace", async () => {
+    const fake = fakeTransport();
+    const driver = makeDriver(async () => fake.transport);
+    const events = collectEvents(driver, 50, 0);
+    await Effect.runPromise(driver.start());
+
+    driver.recordModelChange({
+      from: { providerId: "openai", modelId: "gpt-5.5" },
+      to: { providerId: "anthropic", modelId: "claude" },
+      reason: "visual critique",
+    });
+    driver.recordModelHandoff({
+      handoffId: "handoff-1",
+      phase: "completed",
+      from: { providerId: "openai", modelId: "gpt-5.5" },
+      to: { providerId: "anthropic", modelId: "claude" },
+      reason: "visual critique",
+    });
+
+    const collected = await events;
+    const changed = collected.find((event) => event.type === "model.changed");
+    const handoff = collected.find((event) => event.type === "model.handoff");
+    expect(changed).toBeDefined();
+    expect(handoff).toBeDefined();
+    expect(changed?.trace?.traceId).toBe(handoff?.trace?.traceId);
+    await Effect.runPromise(driver.shutdown());
+  });
 });
