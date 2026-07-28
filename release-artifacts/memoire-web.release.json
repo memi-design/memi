@@ -3,26 +3,25 @@
   "provenance": {
     "repository": "https://github.com/sarveshsea/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "8232214e5a1b5e6db0c6036847eae08b54c804a9",
-    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/8232214e5a1b5e6db0c6036847eae08b54c804a9/release-manifest.json",
-    "manifestSha256": "8d469ea911793b9f28b176196ef5e9c7f79b0d605653a52fc71376927e48e02e"
+    "sourceCommit": "2700f5a29b499ed36da3d567c4e439e763d1f7a3",
+    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/2700f5a29b499ed36da3d567c4e439e763d1f7a3/release-manifest.json",
+    "manifestSha256": "dad728e596398a492fd43272536f4b2989b0c5266bafe48ac567ef0bdb3d0801"
   },
   "orchestration": {
     "schemaVersion": 1,
-    "updatedAt": "2026-07-26",
+    "updatedAt": "2026-07-27",
     "releaseGroups": {
       "engine": {
         "version": "2.6.3",
-        "state": "candidate",
-        "sourceCommit": null,
-        "releaseRecord": null,
+        "state": "published",
+        "sourceCommit": "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
+        "releaseRecord": {
+          "path": "release-artifacts/npm/2.6.3.release.json",
+          "sha256": "1a78e0619fe1b58977747eb704bd1ec02945f9b5872a72ca68b3ca2ebcf7416c"
+        },
         "verification": {
           "eligibleForParity": false,
-          "reason": "2.6.3 is staged for verified publication and has not been published"
-        },
-        "previousPublicRelease": {
-          "version": "2.6.2",
-          "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354"
+          "reason": "2.6.3 is published; parity remains capped until independent live verification passes"
         }
       },
       "studio": {
@@ -68,34 +67,37 @@
       "website": {
         "releaseGroup": "site",
         "repository": "sarveshsea/memoire-web",
-        "publicUrl": "https://www.memoire.cv"
+        "publicUrl": "https://www.memoire.cv",
+        "releaseArtifactUrl": "https://www.memoire.cv/release/memi-release.json"
       }
     }
   },
   "publicTruth": {
-    "source": "previousPublicRelease",
+    "source": "currentRelease",
     "engine": {
-      "version": "2.6.2",
-      "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+      "version": "2.6.3",
+      "sourceCommit": "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
       "packageName": "@memi-design/cli",
       "npmUrl": "https://www.npmjs.com/package/@memi-design/cli",
-      "githubReleaseUrl": "https://github.com/sarveshsea/memi/releases/tag/v2.6.2"
+      "githubReleaseUrl": "https://github.com/sarveshsea/memi/releases/tag/v2.6.3"
     }
   },
   "release": {
     "schemaVersion": 1,
-    "updatedAt": "2026-07-26",
+    "updatedAt": "2026-07-27",
     "releaseGroups": {
       "engine": {
-        "version": "2.6.2",
-        "state": "historical",
-        "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354",
-        "releaseRecord": null,
+        "version": "2.6.3",
+        "state": "published",
+        "sourceCommit": "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
+        "releaseRecord": {
+          "path": "release-artifacts/npm/2.6.3.release.json",
+          "sha256": "1a78e0619fe1b58977747eb704bd1ec02945f9b5872a72ca68b3ca2ebcf7416c"
+        },
         "verification": {
           "eligibleForParity": false,
-          "reason": "2.6.2 remains public while 2.6.3 is an unpublished candidate"
-        },
-        "plannedSuccessor": "2.6.3"
+          "reason": "2.6.3 is published; parity remains capped until independent live verification passes"
+        }
       },
       "studio": {
         "version": "2.5.0",
@@ -118,7 +120,7 @@
         "releaseGroup": "engine",
         "repository": "sarveshsea/memi",
         "tagPrefix": "v",
-        "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.2"
+        "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.3"
       },
       "githubAction": {
         "releaseGroup": "engine",
@@ -140,7 +142,8 @@
       "website": {
         "releaseGroup": "site",
         "repository": "sarveshsea/memoire-web",
-        "publicUrl": "https://www.memoire.cv"
+        "publicUrl": "https://www.memoire.cv",
+        "releaseArtifactUrl": "https://www.memoire.cv/release/memi-release.json"
       }
     }
   }
