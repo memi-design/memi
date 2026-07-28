@@ -4,7 +4,7 @@ description: Use when an OpenClaw workspace task involves UI design, interface c
 version: 2.6.3
 author: Sarvesh Chidambaram
 license: MIT
-metadata: {"openclaw":{"homepage":"https://github.com/sarveshsea/memi"}}
+metadata: {"openclaw":{"homepage":"https://github.com/memi-design/memi"}}
 ---
 
 # Memi Design Tooling For OpenClaw

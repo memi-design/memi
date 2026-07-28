@@ -33,7 +33,7 @@ async function fixtureRoot(): Promise<string> {
     targetScore: 100,
     assessedAt: "2026-07-26T12:00:00.000Z",
     subject: {
-      repository: "https://github.com/sarveshsea/memi",
+      repository: "https://github.com/memi-design/memi",
       commit: "29a620569723565597837415d5947bc36a042c20",
     },
     evidence: [

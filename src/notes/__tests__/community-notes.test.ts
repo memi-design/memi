@@ -71,7 +71,7 @@ describe("community Notes validation and forks", () => {
   it("forks a Note into .memoire/notes with fork metadata, computes a diff, and exports PR commands", async () => {
     const fork = await forkNoteDirectory(root, {
       sourcePath: sourceNote,
-      sourceRepo: "https://github.com/sarveshsea/memi",
+      sourceRepo: "https://github.com/memi-design/memi",
       sourcePathInRepo: "notes/design-systems",
     });
 
@@ -84,7 +84,7 @@ describe("community Notes validation and forks", () => {
       forkOf: {
         name: "design-systems",
         version: "0.1.0",
-        sourceRepo: "https://github.com/sarveshsea/memi",
+        sourceRepo: "https://github.com/memi-design/memi",
         sourcePath: "notes/design-systems",
       },
     });
@@ -97,12 +97,12 @@ describe("community Notes validation and forks", () => {
 
     const handoff = await buildNoteForkPrHandoff(root, "design-systems-fork");
     expect(handoff).toMatchObject({
-      sourceRepo: "https://github.com/sarveshsea/design-skills",
+      sourceRepo: "https://github.com/memi-design/design-skills",
       targetPath: "skills/design-systems-fork",
       commitMessage: "Update design-systems-fork Note",
     });
     expect(handoff.branchName).toMatch(/^notes\/design-systems-fork-/);
-    expect(handoff.commands.join("\n")).toContain("git clone https://github.com/sarveshsea/design-skills.git");
+    expect(handoff.commands.join("\n")).toContain("git clone https://github.com/memi-design/design-skills.git");
     expect(handoff.commands.join("\n")).toContain("git commit -m \"Update design-systems-fork Note\"");
 
     const forks = await listNoteForks(root);

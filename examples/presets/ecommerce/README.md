@@ -29,6 +29,6 @@ memi add ProductCard --from @memoire-examples/ecommerce
 - Five React components using CSS variables, not hardcoded hex
 - `ProductCard` organism with sale badge, price, rating copy, and CTA
 
-Source: [examples/presets/ecommerce](https://github.com/sarveshsea/memi/tree/main/examples/presets/ecommerce)
+Source: [examples/presets/ecommerce](https://github.com/memi-design/memi/tree/main/examples/presets/ecommerce)
 
 Generated for Memoire v0.16.3.

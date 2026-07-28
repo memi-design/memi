@@ -350,8 +350,8 @@ if (process.argv.length === 2) {
         console.log("    memi design-doc <url>  Extract a site into DESIGN.md");
         console.log();
         console.log("  npm:  https://www.npmjs.com/package/@memi-design/cli");
-        console.log("  Docs: https://github.com/sarveshsea/memi/tree/main/docs");
-        console.log("  Issues: https://github.com/sarveshsea/memi/issues");
+        console.log("  Docs: https://github.com/memi-design/memi/tree/main/docs");
+        console.log("  Issues: https://github.com/memi-design/memi/issues");
         console.log();
         mkdirSync(join(home, ".memoire"), { recursive: true });
         writeFileSync(stamp, new Date().toISOString());

@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
 
       - id: memi
-        uses: sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
+        uses: memi-design/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
 
       - name: Show evidence locations
         if: ${{ always() }}
@@ -80,7 +80,7 @@ Artifacts are inspected and uploaded with `if: always()`, so a policy failure st
 SARIF upload requires `security-events: write`. The action automatically skips code-scanning upload for pull requests from forks, while still running the gate and uploading the report artifact. For repositories where code scanning is unavailable or permissions are intentionally read-only, disable only that integration:
 
 ```yaml
-- uses: sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
+- uses: memi-design/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
   with:
     upload-sarif: "false"
 ```
@@ -91,7 +91,7 @@ No secret is needed for the report artifact. GitHub's maintained upload actions 
 
 ```yaml
 - id: memi
-  uses: sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
+  uses: memi-design/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
   with:
     fail-on: high
     base: origin/main

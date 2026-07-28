@@ -73,7 +73,7 @@ Only claim the stages that actually ran.
 Install the focused package skill:
 
 ```bash
-npx skills add sarveshsea/memi --skill build-swiftui-interface
+npx skills add memi-design/memi --skill build-swiftui-interface
 ```
 
-The broader [`sarveshsea/design-skills`](https://github.com/sarveshsea/design-skills) catalog provides the optional `ios-swift` collection with SwiftUI design engineering, Liquid Glass, concurrency, testing, SwiftData, App Intents, performance debugging, and Xcode build reliability skills.
+The broader [`memi-design/design-skills`](https://github.com/memi-design/design-skills) catalog provides the optional `ios-swift` collection with SwiftUI design engineering, Liquid Glass, concurrency, testing, SwiftData, App Intents, performance debugging, and Xcode build reliability skills.

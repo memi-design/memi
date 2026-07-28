@@ -324,7 +324,7 @@ function serializeRemoteMarketplaceNote(
 }
 
 function contributionUrlFor(name: string): string {
-  return `https://github.com/sarveshsea/design-skills/tree/main/skills/${name}`;
+  return `https://github.com/memi-design/design-skills/tree/main/skills/${name}`;
 }
 
 function freshnessStatus(lastResearchedAt?: string | null, freshnessDays?: number | null): string {

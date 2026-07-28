@@ -58,7 +58,7 @@ The goal is simple: before an agent changes product UI, it should know the token
 ## Proof Links
 
 - npm: `https://www.npmjs.com/package/@memi-design/cli`
-- GitHub: `https://github.com/sarveshsea/memi`
+- GitHub: `https://github.com/memi-design/memi`
 - MCP Registry: `io.github.sarveshsea/memi`
 - Codex plugin page: `https://www.memoire.cv/codex-plugin`
-- Runnable proof repo: `https://github.com/sarveshsea/design-sandbox`
+- Runnable proof repo: `https://github.com/memi-design/design-sandbox`

@@ -17,7 +17,7 @@ Use the brief first when an agent is about to touch UI; it returns evidence comm
 | Stack | Install | Output | Best use |
 | --- | --- | --- | --- |
 | Universal Agent Skills | `memi agent install universal --project .` | `.agents/skills/memoire-design-tooling/SKILL.md` | Agents that read standard project skills. |
-| Agent Skills ecosystem | `npx skills add sarveshsea/memi --skill memoire-design-tooling` | Installed `memoire-design-tooling` skill | Shareable package install path for skill-first users. |
+| Agent Skills ecosystem | `npx skills add memi-design/memi --skill memoire-design-tooling` | Installed `memoire-design-tooling` skill | Shareable package install path for skill-first users. |
 | Design-agent brief | `memi agent brief . --json` | JSON preflight contract | Any agent that needs evidence commands, cost controls, compatibility installs, and handoff rules before UI edits. |
 | ECC / AGENTS.md stacks | `memi agent install universal --project .` | `.agents/skills` plus local AGENTS.md instructions | Repos that use strict workflow rules, subagents, TDD, security review, and release gates. |
 | Hermes | `memi agent install hermes` | `~/.hermes/skills/memoire/memoire-design-tooling/SKILL.md` | Transcript-first design runs, product workbench flows, and research-aware UI work. |
@@ -108,7 +108,7 @@ Stronger rule:
 Before broad UI edits, run `memi agent brief . --intent "<task>" --json`, then run the evidence commands from the brief. Treat the brief as the cost, compatibility, and handoff contract.
 ```
 
-Reference repo: [`sarveshsea/design-sandbox`](https://github.com/sarveshsea/design-sandbox) shows this pattern with `AGENTS.md`, `.agents/skills/memoire-design-tooling`, `.mcp.json`, `memoire.agent.yaml`, and `pnpm verify`.
+Reference repo: [`memi-design/design-sandbox`](https://github.com/memi-design/design-sandbox) shows this pattern with `AGENTS.md`, `.agents/skills/memoire-design-tooling`, `.mcp.json`, `memoire.agent.yaml`, and `pnpm verify`.
 
 ## Hermes workflow
 
@@ -127,7 +127,7 @@ Use Hermes when the run benefits from transcript-first supervision, local receip
 memi agent install codex
 memi agent install codex-plugin
 memi agent brief . --agent codex --intent "Prepare a UI patch plan" --json
-codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
+codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
 ```
 
 Recommended prompt:

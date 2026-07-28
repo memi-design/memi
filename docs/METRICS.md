@@ -16,7 +16,7 @@ Use this every Friday during the current public-growth window. Record the value,
 - Primary story: `Memi is the read-only design engineering audit and skill layer for coding agents.`
 - Secondary phrase: `File-anchored design QA evidence before coding agents edit UI`
 - Core proof: `memi diagnose`, `memi ux audit --json`, `memi craft audit --json`, `memi tokens --from ./src --report`, `memi shadcn export --out public/r`
-- Agent proof: `npx skills add sarveshsea/memi --skill memoire-design-tooling`
+- Agent proof: `npx skills add memi-design/memi --skill memoire-design-tooling`
 - MCP proof: `memi mcp start --no-figma`
 
 ## Targets
@@ -52,7 +52,7 @@ npm run check:public-release
 - npm weekly downloads: `https://api.npmjs.org/downloads/point/last-week/%40memi-design%2Fcli`
 - npm monthly downloads: `https://api.npmjs.org/downloads/point/last-month/%40memi-design%2Fcli`
 - npm daily range: `https://api.npmjs.org/downloads/range/last-month/%40memi-design%2Fcli`
-- GitHub metadata: `https://api.github.com/repos/sarveshsea/memi`
+- GitHub metadata: `https://api.github.com/repos/memi-design/memi`
 - npm package page: `https://www.npmjs.com/package/@memi-design/cli`
 - Components page: `https://www.memoire.cv/components`
 - Codex plugin page: `https://www.memoire.cv/codex-plugin`

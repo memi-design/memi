@@ -68,7 +68,7 @@ jobs:
             sha256sum --check SHA256SUMS.txt
           )
 
-          docker buildx imagetools inspect "ghcr.io/sarveshsea/memi:${RELEASE_TAG}"
+          docker buildx imagetools inspect "ghcr.io/memi-design/memi:${RELEASE_TAG}"
           echo "RELEASE_COMMIT=${release_commit}" >> "${GITHUB_ENV}"
 
       - name: Promote container latest
@@ -80,8 +80,8 @@ jobs:
 
       - name: Point container latest at the verified image
         run: |
-          docker buildx imagetools create --tag ghcr.io/sarveshsea/memi:latest \
-            "ghcr.io/sarveshsea/memi:${RELEASE_TAG}"
+          docker buildx imagetools create --tag ghcr.io/memi-design/memi:latest \
+            "ghcr.io/memi-design/memi:${RELEASE_TAG}"
 
       - name: Promote GitHub release and Action major tag
         shell: bash

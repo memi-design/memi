@@ -42,10 +42,10 @@ memi suite run design-audit --project . --json
 
 ## Public sandbox proof
 
-Use [`sarveshsea/design-sandbox`](https://github.com/sarveshsea/design-sandbox) as the reference implementation of this loop in a small Next.js, Tailwind, shadcn, MCP, and Agent Skills workspace:
+Use [`memi-design/design-sandbox`](https://github.com/memi-design/design-sandbox) as the reference implementation of this loop in a small Next.js, Tailwind, shadcn, MCP, and Agent Skills workspace:
 
 ```bash
-git clone https://github.com/sarveshsea/design-sandbox.git
+git clone https://github.com/memi-design/design-sandbox.git
 cd design-sandbox
 pnpm install
 pnpm memi:diagnose

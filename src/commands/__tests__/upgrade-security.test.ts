@@ -23,9 +23,9 @@ afterEach(async () => {
 
 describe("verifyArchiveChecksum", () => {
   it("tries the combined checksum manifest before the per-archive checksum sidecar", () => {
-    expect(checksumUrlsForArchive("https://github.com/sarveshsea/memi/releases/latest/download", "memi-darwin-arm64.tar.gz")).toEqual([
-      "https://github.com/sarveshsea/memi/releases/latest/download/SHA256SUMS.txt",
-      "https://github.com/sarveshsea/memi/releases/latest/download/memi-darwin-arm64.tar.gz.sha256",
+    expect(checksumUrlsForArchive("https://github.com/memi-design/memi/releases/latest/download", "memi-darwin-arm64.tar.gz")).toEqual([
+      "https://github.com/memi-design/memi/releases/latest/download/SHA256SUMS.txt",
+      "https://github.com/memi-design/memi/releases/latest/download/memi-darwin-arm64.tar.gz.sha256",
     ]);
   });
 

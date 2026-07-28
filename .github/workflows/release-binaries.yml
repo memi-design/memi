@@ -257,12 +257,12 @@ jobs:
           push: true
           build-args: |
             VERSION=${{ env.RELEASE_TAG }}
-          tags: ghcr.io/sarveshsea/memi:${{ env.RELEASE_TAG }}
+          tags: ghcr.io/memi-design/memi:${{ env.RELEASE_TAG }}
       - name: Promote verified current release to latest
         if: needs.release-gate.outputs.promote_channels == 'true'
         run: |
-          docker buildx imagetools create --tag ghcr.io/sarveshsea/memi:latest \
-            "ghcr.io/sarveshsea/memi:${RELEASE_TAG}"
+          docker buildx imagetools create --tag ghcr.io/memi-design/memi:latest \
+            "ghcr.io/memi-design/memi:${RELEASE_TAG}"
 
   publish-homebrew:
     needs: [release-gate, publish-checksums]

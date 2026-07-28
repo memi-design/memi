@@ -18,7 +18,7 @@ Memi gives coding agents repository-specific interface evidence before they edit
 Install one focused skill directly:
 
 ```bash
-npx skills add sarveshsea/memi --skill audit-frontend-design
+npx skills add memi-design/memi --skill audit-frontend-design
 ```
 
 ## Compact Preflight

@@ -4,7 +4,7 @@ description: Use when an OpenClaw workspace task involves UI design, interface c
 version: 2.0.0
 author: Sarvesh Chidambaram
 license: MIT
-metadata: {"openclaw":{"homepage":"https://github.com/sarveshsea/memi","requires":{"bins":["memi"]},"install":[{"id":"npm","kind":"node","package":"@memi-design/cli","bins":["memi"],"label":"Install memi CLI with npm"}]}}
+metadata: {"openclaw":{"homepage":"https://github.com/memi-design/memi","requires":{"bins":["memi"]},"install":[{"id":"npm","kind":"node","package":"@memi-design/cli","bins":["memi"],"label":"Install memi CLI with npm"}]}}
 ---
 
 # memi Design Tooling

@@ -30,7 +30,7 @@ const bundleCatalog = {
   entries: [],
 };
 const codexPluginUrl = "https://www.memoire.cv/codex-plugin";
-const codexPluginInstallCommand = "codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
+const codexPluginInstallCommand = "codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
 const privacyUrl = "https://www.memoire.cv/privacy";
 const termsUrl = "https://www.memoire.cv/terms";
 const sitemapUrls = ["https://www.memoire.cv/components", codexPluginUrl, privacyUrl, termsUrl];
@@ -340,7 +340,7 @@ function renderPolicyPage({ title, canonicalUrl, body }) {
   <main>
     <h1>${escapeHtml(title)}</h1>
     ${body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("\n    ")}
-    <p>Contact: <a href="https://github.com/sarveshsea/memi">github.com/sarveshsea/memi</a></p>
+    <p>Contact: <a href="https://github.com/memi-design/memi">github.com/memi-design/memi</a></p>
   </main>
 </body>
 </html>

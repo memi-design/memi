@@ -25,14 +25,14 @@
         "forms"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/accessibility-audit",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/accessibility-audit",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/accessibility-audit",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/accessibility-audit/accessibility-audit-2.0.0.tgz",
         "sha256": "7af18582cfc56cccaf3441af236bc6bccf86bccb77f57aed33b97ce2114e5780",
@@ -59,7 +59,7 @@
           "forms"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -101,10 +101,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/agent-memory-profiles",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/agent-memory-profiles",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/agent-memory-profiles",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/agent-memory-profiles/agent-memory-profiles-0.1.0.tgz",
         "sha256": "eddd10222d2110225c8e084c3c1d3b1daf536e80d5f9180d51040e9b241bbf90",
@@ -168,10 +168,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/agent-messaging-gateway",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/agent-messaging-gateway",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/agent-messaging-gateway",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/agent-messaging-gateway/agent-messaging-gateway-0.1.0.tgz",
         "sha256": "287548a0c80ae594c8bae93b5c2d15e97418f595bde5ec17a786c9d5fb2e7a68",
@@ -235,10 +235,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/agent-session-checkpoints",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/agent-session-checkpoints",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/agent-session-checkpoints",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/agent-session-checkpoints/agent-session-checkpoints-0.1.0.tgz",
         "sha256": "e3c51b5eaecd55ca7616defe4719c1d90512870b35181e7db6c5aeb41b168f2c",
@@ -302,10 +302,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/agent-skill-migration",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/agent-skill-migration",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/agent-skill-migration",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/agent-skill-migration/agent-skill-migration-0.1.0.tgz",
         "sha256": "4f9aa36a70aeb64fa269cb0f4089352fee1a835ed9e009e52fc16730a1e190df",
@@ -369,10 +369,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/animation-craft",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/animation-craft",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/animation-craft",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/animation-craft/animation-craft-1.0.0.tgz",
         "sha256": "c7941fc3bea52d42a84b5fa9759fff619c08878820b7dfad30ee4d6016cef454",
@@ -435,10 +435,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/animation-vocabulary",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/animation-vocabulary",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/animation-vocabulary",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/animation-vocabulary/animation-vocabulary-1.0.0.tgz",
         "sha256": "783091a9d5de488baa0bcb82ae7ea08b764259dc4b227d1d56a2907cd574393d",
@@ -492,10 +492,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/apple-design",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/apple-design",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/apple-design",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/apple-design/apple-design-1.0.0.tgz",
         "sha256": "0cd1c281ceaff2aee4cb938f73c27f81affdd3e0a3e150c0ea5d20711136884b",
@@ -554,10 +554,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/apple-desktop-automation",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/apple-desktop-automation",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/apple-desktop-automation",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/apple-desktop-automation/apple-desktop-automation-0.1.0.tgz",
         "sha256": "5d3efa946267c3664d45f0cce7c792a41f76530fa15029fb30c81b35f9d4cb8d",
@@ -621,10 +621,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/approval-sandbox-policies",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/approval-sandbox-policies",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/approval-sandbox-policies",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/approval-sandbox-policies/approval-sandbox-policies-0.1.0.tgz",
         "sha256": "6a56847302a1c1343daa855ffbbf6dd6cedd5a6c42d2700109e2d1a943948ffc",
@@ -679,14 +679,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/atomic-design",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/atomic-design",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/atomic-design",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/atomic-design/atomic-design-1.0.0.tgz",
         "sha256": "1a0983b3dde8cce0ec7994d1c032ed8de8d426f662e72dcf4e36518eb9d1bc6d",
@@ -703,7 +703,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -740,10 +740,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/better-colors",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/better-colors",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/better-colors",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/better-colors/better-colors-1.0.0.tgz",
         "sha256": "9041915d98bef46f4745f05815b78577a688b665248ae6632f1ffdb6a8279b16",
@@ -797,10 +797,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/better-typography",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/better-typography",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/better-typography",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/better-typography/better-typography-1.0.0.tgz",
         "sha256": "400e242d9fc1dc79506afd513dd0217f10bc19293d47fd0a1414d266fa2c7958",
@@ -854,10 +854,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/better-ui",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/better-ui",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/better-ui",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/better-ui/better-ui-1.0.0.tgz",
         "sha256": "01abe22454eaa453a1a83fefe995bf0a4b82bd9b7787c6545abacf899d7d564c",
@@ -916,10 +916,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/browser-research-agent",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/browser-research-agent",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/browser-research-agent",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/browser-research-agent/browser-research-agent-0.1.0.tgz",
         "sha256": "100130d4b3b6b0bd2ae86648192304140c944d2c0c23a4e09b937f9e9e9072e0",
@@ -978,14 +978,14 @@
         "memory"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/codex-ops",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/codex-ops",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/codex-ops",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/codex-ops/codex-ops-1.0.0.tgz",
         "sha256": "0dff5e34116b21705c4d9abc876ab40cb34b233dc21908ddbab666aec221f401",
@@ -1006,7 +1006,7 @@
           "memory"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1042,14 +1042,14 @@
         "feature-matrix"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/competitive-intel",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/competitive-intel",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/competitive-intel",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/competitive-intel/competitive-intel-1.0.0.tgz",
         "sha256": "e5030940c1797a64907fb5439382b7b22de61ad0f8182ed40048ea67cc3bdbe7",
@@ -1069,7 +1069,7 @@
           "feature-matrix"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1102,14 +1102,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/component-catalog",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/component-catalog",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/component-catalog",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/component-catalog/component-catalog-1.0.0.tgz",
         "sha256": "0471ba3cad48de86f11288ee1959ebe816c4cd6cf5edfc7c8fea76298b7adefb",
@@ -1126,7 +1126,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1168,10 +1168,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/cron-agent-workflows",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/cron-agent-workflows",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/cron-agent-workflows",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/cron-agent-workflows/cron-agent-workflows-0.1.0.tgz",
         "sha256": "d8a87a7860ed9d9fb8c3c2c83cccd086f860d83b615c7eb4b6f2d68b821adba6",
@@ -1226,14 +1226,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/dashboard-from-research",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/dashboard-from-research",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/dashboard-from-research",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/dashboard-from-research/dashboard-from-research-1.0.0.tgz",
         "sha256": "8e02500b187b9e27386642c0f0417005630fa357a59d7b9f6583b96357dcaa47",
@@ -1250,7 +1250,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1287,14 +1287,14 @@
         "insights"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/data-synthesis",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/data-synthesis",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/data-synthesis",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/data-synthesis/data-synthesis-1.0.0.tgz",
         "sha256": "e2afb0d7a33b74d0e2d55b6340edc554011d65a6ac27390fb7ea7a36b2e8d467",
@@ -1315,7 +1315,7 @@
           "insights"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1348,14 +1348,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/design-extract",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/design-extract",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/design-extract",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/design-extract/design-extract-1.0.0.tgz",
         "sha256": "186433716778955277b8895193605ecc6dc950a4dce9719bc115c4f56494f921",
@@ -1372,7 +1372,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1411,16 +1411,16 @@
         "interface-craft"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/design-sandbox",
-        "https://github.com/sarveshsea/memi",
+        "https://github.com/memi-design/design-sandbox",
+        "https://github.com/memi-design/memi",
         "https://www.npmjs.com/package/@memi-design/cli"
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/design-sandbox-proof",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/design-sandbox-proof",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/design-sandbox-proof",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/design-sandbox-proof/design-sandbox-proof-2.0.0.tgz",
         "sha256": "e1787fb7fb8d4cd237de5837f5ff84931d735f139af386316c5709b386fe7827",
@@ -1443,8 +1443,8 @@
           "interface-craft"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/design-sandbox",
-          "https://github.com/sarveshsea/memi",
+          "https://github.com/memi-design/design-sandbox",
+          "https://github.com/memi-design/memi",
           "https://www.npmjs.com/package/@memi-design/cli"
         ],
         "lastResearchedAt": "2026-07-04T00:00:00.000Z",
@@ -1481,14 +1481,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/design-system-reference",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/design-system-reference",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/design-system-reference",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/design-system-reference/design-system-reference-1.0.0.tgz",
         "sha256": "6b4a211669e98912dd2317a548d4d5a32af1992edfdf499d612e10959a80ad0f",
@@ -1505,7 +1505,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1542,14 +1542,14 @@
         "versioning"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/design-systems",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/design-systems",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/design-systems",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/design-systems/design-systems-1.0.0.tgz",
         "sha256": "99497e4ad217fd236f3a46d73a8c318dfdaa4fc39a917801d092a32b794dab0b",
@@ -1570,7 +1570,7 @@
           "versioning"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1607,10 +1607,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/dialkit",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/dialkit",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/dialkit",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/dialkit/dialkit-1.0.0.tgz",
         "sha256": "63175bd61d0db330c794021d147d839206ce719792629d24a83dc75af992391d",
@@ -1666,14 +1666,14 @@
         "compose"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/docker-environments",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/docker-environments",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/docker-environments",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/docker-environments/docker-environments-1.0.0.tgz",
         "sha256": "c6472fe546de3b4f76f89d7dfa577cb9e04eb3a6d0765ea7d0fc5e7fe9510686",
@@ -1696,7 +1696,7 @@
           "compose"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1733,10 +1733,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/emil-design-eng",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/emil-design-eng",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/emil-design-eng",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/emil-design-eng/emil-design-eng-1.0.0.tgz",
         "sha256": "214abc69efccc18ab64f8a7e2a810dc64025b51dbd05cc0fb73a3cfea50543a6",
@@ -1786,14 +1786,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-audit",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-audit",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-audit",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-audit/figma-audit-1.0.0.tgz",
         "sha256": "b20db504f93a61a45de18cdeb11238e9ab6841fbcf0b3497e21df5d9e1f83c68",
@@ -1810,7 +1810,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1845,14 +1845,14 @@
         "design-system"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-code-connect",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-code-connect",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-code-connect",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-code-connect/figma-code-connect-1.0.0.tgz",
         "sha256": "faa10a41aa48797936d0fdb2b0427f2c483143583d965b492b78d597d6ab27f0",
@@ -1871,7 +1871,7 @@
           "design-system"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1906,14 +1906,14 @@
         "scaffold"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-create-file",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-create-file",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-create-file",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-create-file/figma-create-file-1.0.0.tgz",
         "sha256": "545899ecf543bb8d5e51041cb8fad5d4ac01f5c8d6e45ee17c42cf748760d415",
@@ -1932,7 +1932,7 @@
           "scaffold"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -1969,14 +1969,14 @@
         "styles"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-design-systems",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-design-systems",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-design-systems",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-design-systems/figma-design-systems-1.0.0.tgz",
         "sha256": "d02183fe1b3ac7d68ac1ed7dc1e6cabb495bcbd277b3f1a0267700c74703e715",
@@ -1997,7 +1997,7 @@
           "styles"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2033,14 +2033,14 @@
         "codegen"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-ds-rules",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-ds-rules",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-ds-rules",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-ds-rules/figma-ds-rules-1.0.0.tgz",
         "sha256": "1fbf138f8f96c1381a95c47d306cf7e1bd6914e409533081471ab796f45be876",
@@ -2060,7 +2060,7 @@
           "codegen"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2093,14 +2093,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-generate-design",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-generate-design",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-generate-design",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-generate-design/figma-generate-design-1.0.0.tgz",
         "sha256": "713a9edf69ef853c1371f9911ef3851c6f489cc5d2bb14d3461095f83fae9b64",
@@ -2117,7 +2117,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2150,14 +2150,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-generate-library",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-generate-library",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-generate-library",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-generate-library/figma-generate-library-1.0.0.tgz",
         "sha256": "ba7f3b0202c631e773c7c9068fdaf074c5113bfe701731718ce8960635f67d7b",
@@ -2174,7 +2174,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2210,14 +2210,14 @@
         "visual-parity"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-implement-design",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-implement-design",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-implement-design",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-implement-design/figma-implement-design-1.0.0.tgz",
         "sha256": "43344c7e38b7bdc7a3d6c9fe31bab5956636135fe7c0dbc3d45d7509c29f3f92",
@@ -2237,7 +2237,7 @@
           "visual-parity"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2274,14 +2274,14 @@
         "scripts"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-library-builder",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-library-builder",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-library-builder",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-library-builder/figma-library-builder-1.0.0.tgz",
         "sha256": "437efb85c69ff549522523484a1fa2bc60310a8d7a6ad1a9e3c7700c54b95e39",
@@ -2302,7 +2302,7 @@
           "scripts"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2338,14 +2338,14 @@
         "gotchas"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-plugin-api",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-plugin-api",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-plugin-api",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-plugin-api/figma-plugin-api-1.0.0.tgz",
         "sha256": "fff58631705dce933dda634b8d64a940416e38ff13498630f1297f1e9080261e",
@@ -2365,7 +2365,7 @@
           "gotchas"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2398,14 +2398,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-prototype",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-prototype",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-prototype",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-prototype/figma-prototype-1.0.0.tgz",
         "sha256": "d766c068e29b86856acaa52c565bcf0cccee1c0fe51fe08345a7af7bf7a1463b",
@@ -2422,7 +2422,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2458,14 +2458,14 @@
         "incremental"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-sync",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-sync",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-sync",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-sync/figma-sync-1.0.0.tgz",
         "sha256": "6e67979f4538b89d4f0187a3ec2e073237be4732304ba3a5ad2c22c1b29ec5ef",
@@ -2485,7 +2485,7 @@
           "incremental"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2518,14 +2518,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-use",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-use",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-use",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-use/figma-use-1.0.0.tgz",
         "sha256": "6e8b8156e9b745768b292c67012b3ac58a19ccf5cf2253466fa348543c7283f8",
@@ -2542,7 +2542,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2578,14 +2578,14 @@
         "editable-layers"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/figma-web-capture",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/figma-web-capture",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/figma-web-capture",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/figma-web-capture/figma-web-capture-1.0.0.tgz",
         "sha256": "1c7593aeceb788ed41a39671004fc5e657f993704f6b17f352439e7040673e95",
@@ -2605,7 +2605,7 @@
           "editable-layers"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2642,10 +2642,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/find-animation-opportunities",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/find-animation-opportunities",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/find-animation-opportunities",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/find-animation-opportunities/find-animation-opportunities-1.0.0.tgz",
         "sha256": "c88a81065c06f07944ec6330e93df506454891dce18d48a191f898c9c1982c7f",
@@ -2699,14 +2699,14 @@
         "codegen"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/flutter-gen",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/flutter-gen",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/flutter-gen",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/flutter-gen/flutter-gen-1.0.0.tgz",
         "sha256": "d6a87756018160e75dfc4b73aba0b16f0407befadce4a1f05035223c6875b4d8",
@@ -2727,7 +2727,7 @@
           "codegen"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -2769,10 +2769,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/gateway-ops-observability",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/gateway-ops-observability",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/gateway-ops-observability",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/gateway-ops-observability/gateway-ops-observability-0.1.0.tgz",
         "sha256": "017d9e52c09ffdac95377af68a8ae05fa0766a6535ea3f918ec9726cc1aa7b3a",
@@ -2836,10 +2836,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/hermes-agent-bridge",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/hermes-agent-bridge",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/hermes-agent-bridge",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/hermes-agent-bridge/hermes-agent-bridge-0.1.0.tgz",
         "sha256": "ada5c2ffe1805236d079714d4ba46bf121f60d5b24297a12a3b30bb8e6291e17",
@@ -2904,10 +2904,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/hyperframes-video",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/hyperframes-video",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/hyperframes-video",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/hyperframes-video/hyperframes-video-0.1.0.tgz",
         "sha256": "14a02892807195dae4cfa210017e800c0a3c5bb0a2b3486f918aef27505f6a93",
@@ -2967,10 +2967,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/improve-animations",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/improve-animations",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/improve-animations",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/improve-animations/improve-animations-1.0.0.tgz",
         "sha256": "bb3e13f6bd1816366422126ff2bec562c4a74b9fa149211f662e48a372d77800",
@@ -3026,16 +3026,16 @@
         "design-review"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi",
+        "https://github.com/memi-design/memi",
         "https://www.npmjs.com/package/@memi-design/cli",
-        "https://github.com/sarveshsea/design-sandbox"
+        "https://github.com/memi-design/design-sandbox"
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/interface-craft-gate",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/interface-craft-gate",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/interface-craft-gate",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/interface-craft-gate/interface-craft-gate-2.0.0.tgz",
         "sha256": "84d5e4f19c7b5c4479a71f2b1dec01a78ae03c2238d10597b007353e43ef5d30",
@@ -3058,9 +3058,9 @@
           "design-review"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi",
+          "https://github.com/memi-design/memi",
           "https://www.npmjs.com/package/@memi-design/cli",
-          "https://github.com/sarveshsea/design-sandbox"
+          "https://github.com/memi-design/design-sandbox"
         ],
         "lastResearchedAt": "2026-07-04T00:00:00.000Z",
         "freshnessDays": 30,
@@ -3099,14 +3099,14 @@
         "persona"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/interview-research",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/interview-research",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/interview-research",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/interview-research/interview-research-1.0.0.tgz",
         "sha256": "5182f40880819197dc1fbe94d682c0ca76d2df3f875ee0adc00cf729bf6c3c64",
@@ -3127,7 +3127,7 @@
           "persona"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -3164,14 +3164,14 @@
         "sync"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/linear-sync",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/linear-sync",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/linear-sync",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/linear-sync/linear-sync-1.0.0.tgz",
         "sha256": "8fce5d01772f8fe023d6e18dccf031d09e65977cb8464c6a993ec1b5f45b6ef4",
@@ -3192,7 +3192,7 @@
           "sync"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -3234,10 +3234,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/mcp-server-studio",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/mcp-server-studio",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/mcp-server-studio",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/mcp-server-studio/mcp-server-studio-0.1.0.tgz",
         "sha256": "3ac8d0aed3a12889839e2eabf1de8b8ce2d81e29fbf5d73d37748fd21c46ff9e",
@@ -3292,14 +3292,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/memoire-design-tooling",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/memoire-design-tooling",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/memoire-design-tooling",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/memoire-design-tooling/memoire-design-tooling-1.0.0.tgz",
         "sha256": "d63e9b7148f7733eb104c7b44f5743283ea6fd08ab43fad853f95739557ac57d",
@@ -3316,7 +3316,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -3354,16 +3354,16 @@
         "design-agent"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi/blob/main/server.json",
-        "https://github.com/sarveshsea/memi/tree/main/skills/memoire-design-tooling",
+        "https://github.com/memi-design/memi/blob/main/server.json",
+        "https://github.com/memi-design/memi/tree/main/skills/memoire-design-tooling",
         "https://www.npmjs.com/package/@memi-design/cli"
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/memoire-mcp-agent-skills",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/memoire-mcp-agent-skills",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/memoire-mcp-agent-skills",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/memoire-mcp-agent-skills/memoire-mcp-agent-skills-2.0.0.tgz",
         "sha256": "3053a5ded341912231217dd8e65c6e874f582e2f29ad4e26971824e5e1220733",
@@ -3385,8 +3385,8 @@
           "design-agent"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi/blob/main/server.json",
-          "https://github.com/sarveshsea/memi/tree/main/skills/memoire-design-tooling",
+          "https://github.com/memi-design/memi/blob/main/server.json",
+          "https://github.com/memi-design/memi/tree/main/skills/memoire-design-tooling",
           "https://www.npmjs.com/package/@memi-design/cli"
         ],
         "lastResearchedAt": "2026-07-04T00:00:00.000Z",
@@ -3427,16 +3427,16 @@
         "receipts"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi-studio",
-        "https://github.com/sarveshsea/memi",
+        "https://github.com/memi-design/memi-studio",
+        "https://github.com/memi-design/memi",
         "https://www.npmjs.com/package/@memi-design/cli"
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/memoire-studio-macos",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/memoire-studio-macos",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/memoire-studio-macos",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/memoire-studio-macos/memoire-studio-macos-2.0.0.tgz",
         "sha256": "ecd09ed269c3c86f0afe9771c29e6c20f05c0d68ec6ca62ffd9fb0d984c75c8b",
@@ -3458,8 +3458,8 @@
           "receipts"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi-studio",
-          "https://github.com/sarveshsea/memi",
+          "https://github.com/memi-design/memi-studio",
+          "https://github.com/memi-design/memi",
           "https://www.npmjs.com/package/@memi-design/cli"
         ],
         "lastResearchedAt": "2026-07-04T00:00:00.000Z",
@@ -3502,18 +3502,18 @@
         "community-notes"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi",
+        "https://github.com/memi-design/memi",
         "https://www.npmjs.com/package/@memi-design/cli",
-        "https://github.com/sarveshsea/memi-studio",
-        "https://github.com/sarveshsea/design-sandbox",
-        "https://github.com/sarveshsea/design-skills"
+        "https://github.com/memi-design/memi-studio",
+        "https://github.com/memi-design/design-sandbox",
+        "https://github.com/memi-design/design-skills"
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/memoire-v2-surface-map",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/memoire-v2-surface-map",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/memoire-v2-surface-map",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/memoire-v2-surface-map/memoire-v2-surface-map-2.0.0.tgz",
         "sha256": "c89cdbf2741472d5ca4f91789715e648b187f4e6ad963c4dd1754633c7556f51",
@@ -3536,11 +3536,11 @@
           "community-notes"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi",
+          "https://github.com/memi-design/memi",
           "https://www.npmjs.com/package/@memi-design/cli",
-          "https://github.com/sarveshsea/memi-studio",
-          "https://github.com/sarveshsea/design-sandbox",
-          "https://github.com/sarveshsea/design-skills"
+          "https://github.com/memi-design/memi-studio",
+          "https://github.com/memi-design/design-sandbox",
+          "https://github.com/memi-design/design-skills"
         ],
         "lastResearchedAt": "2026-07-04T00:00:00.000Z",
         "freshnessDays": 30,
@@ -3576,14 +3576,14 @@
         "user-flow"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/mermaid-jam",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/mermaid-jam",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/mermaid-jam",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/mermaid-jam/mermaid-jam-1.0.0.tgz",
         "sha256": "5510084c4251105b8524799e44ae02fad47e2d5f616cb8da0ec4c578e47f01d4",
@@ -3603,7 +3603,7 @@
           "user-flow"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -3641,14 +3641,14 @@
         "progressive-enhancement"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/mobile-craft",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/mobile-craft",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/mobile-craft",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/mobile-craft/mobile-craft-1.0.0.tgz",
         "sha256": "035e71fc05ed49f5acdbf83b60b411a2feccd647cef7ba4a737f660bd9ab260a",
@@ -3670,7 +3670,7 @@
           "progressive-enhancement"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -3712,10 +3712,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/model-router-diagnostics",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/model-router-diagnostics",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/model-router-diagnostics",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/model-router-diagnostics/model-router-diagnostics-0.1.0.tgz",
         "sha256": "282fea346a7f795af9f2a865c9b77d54ef1c4abd9606d3bee6b89a71eb111910",
@@ -3778,10 +3778,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/motion-performance",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/motion-performance",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/motion-performance",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/motion-performance/motion-performance-0.1.0.tgz",
         "sha256": "1f6cc10965960050422b0590b0fbb8c8b940707a68cce7ff3a376d2d91521a8c",
@@ -3835,14 +3835,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/motion-video",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/motion-video",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/motion-video",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/motion-video/motion-video-1.0.0.tgz",
         "sha256": "a61dfc66d51d0161aaaae6249c2c3afca6e7734724b6247ad407ee21051a2bfb",
@@ -3859,7 +3859,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -3892,14 +3892,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/multi-agent",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/multi-agent",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/multi-agent",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/multi-agent/multi-agent-1.0.0.tgz",
         "sha256": "20aa8fb5b69b2431172d87c7ac98fc834dbb766961c2bdc6a39e1cafe1062ec9",
@@ -3916,7 +3916,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -3958,10 +3958,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/multi-agent-kanban",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/multi-agent-kanban",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/multi-agent-kanban",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/multi-agent-kanban/multi-agent-kanban-0.1.0.tgz",
         "sha256": "fac8fd0a7370e8341c8d9c4ebf232a5b7521ed7a51b07cd31c0b828d46dda106",
@@ -4020,14 +4020,14 @@
         "database"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/notion-sync",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/notion-sync",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/notion-sync",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/notion-sync/notion-sync-1.0.0.tgz",
         "sha256": "ba92397cf6c25223019201ab99259d9c20e0d241a323c22b3f24138009b94a90",
@@ -4048,7 +4048,7 @@
           "database"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4090,10 +4090,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/openclaw-agent-bridge",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/openclaw-agent-bridge",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/openclaw-agent-bridge",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/openclaw-agent-bridge/openclaw-agent-bridge-0.1.0.tgz",
         "sha256": "6e385e40679244dc96b37f627330393935c68f3c6f27b1f215ffb92f7b06e973",
@@ -4152,14 +4152,14 @@
         "android"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/react-native-gen",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/react-native-gen",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/react-native-gen",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/react-native-gen/react-native-gen-1.0.0.tgz",
         "sha256": "654992e1658feff715548cf1abf5387eb98f36a068373b66a33132985247f856",
@@ -4180,7 +4180,7 @@
           "android"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4221,10 +4221,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/remotion-video",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/remotion-video",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/remotion-video",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/remotion-video/remotion-video-0.1.0.tgz",
         "sha256": "6290aea4b649f68776f65b06725e588c84c95fee3a8fd88297819eb67bc20a45",
@@ -4282,10 +4282,10 @@
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/review-animations",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/review-animations",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/review-animations",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/review-animations/review-animations-1.0.0.tgz",
         "sha256": "6e9af6c2f8aacfd1253f0b0a4012530937e84f395f2d4e1358491e54c1c54f5e",
@@ -4344,10 +4344,10 @@
       ],
       "freshnessDays": 30,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/secure-secrets-for-agents",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/secure-secrets-for-agents",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/secure-secrets-for-agents",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/secure-secrets-for-agents/secure-secrets-for-agents-0.1.0.tgz",
         "sha256": "a9037019d66532780351a37a69299639876c03b880bf956a12e07259b7ee00fd",
@@ -4404,14 +4404,14 @@
         "knowledge-management"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/self-improving-agent",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/self-improving-agent",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/self-improving-agent",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/self-improving-agent/self-improving-agent-3.0.6.tgz",
         "sha256": "96dd6dd3126010d10561cc621c7c8d82244ee445f35ccd21afe0fcee935cdec5",
@@ -4430,7 +4430,7 @@
           "knowledge-management"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4463,14 +4463,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/superpower",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/superpower",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/superpower",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/superpower/superpower-1.0.0.tgz",
         "sha256": "732a9dba1fb0d31a8a41e0a0e47a201a63a92a317098bbdc86677b784d140482",
@@ -4487,7 +4487,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4524,14 +4524,14 @@
         "import"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/survey-connect",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/survey-connect",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/survey-connect",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/survey-connect/survey-connect-1.0.0.tgz",
         "sha256": "1e28a4c9ef3c7fa55d3ae5abbabb7cf1df5cc468f386ad39e3e711ef841fb04f",
@@ -4552,7 +4552,7 @@
           "import"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4589,14 +4589,14 @@
         "semantic-tokens"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/token-architecture",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/token-architecture",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/token-architecture",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/token-architecture/token-architecture-1.0.0.tgz",
         "sha256": "ad42feec9ef8326cd12aa980fd4c3fb45d7d814432677cafa01321d6b2ede919",
@@ -4617,7 +4617,7 @@
           "semantic-tokens"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4654,14 +4654,14 @@
         "insights"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/usability-testing",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/usability-testing",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/usability-testing",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/usability-testing/usability-testing-1.0.0.tgz",
         "sha256": "67e9322fb3721b91dc1282d640d85f6429115c7e25fa5784bf75f8fc32067c29",
@@ -4682,7 +4682,7 @@
           "insights"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4715,14 +4715,14 @@
         "design-skills"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/ux-tenets-traps",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/ux-tenets-traps",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/ux-tenets-traps",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/ux-tenets-traps/ux-tenets-traps-1.0.0.tgz",
         "sha256": "9a5a1bd784fb49e6e652c2cf195dd1cbf0620f9851e643809ee29a84eb10bc06",
@@ -4739,7 +4739,7 @@
           "design-skills"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4776,14 +4776,14 @@
         "codegen"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/vue-gen",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/vue-gen",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/vue-gen",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/vue-gen/vue-gen-1.0.0.tgz",
         "sha256": "812297e87d5505213a3a59781219641d06494cce651d1e101440e4866a62015e",
@@ -4804,7 +4804,7 @@
           "codegen"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4840,14 +4840,14 @@
         "trends"
       ],
       "sourceUrls": [
-        "https://github.com/sarveshsea/memi"
+        "https://github.com/memi-design/memi"
       ],
       "freshnessDays": 90,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/web-research",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/web-research",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/web-research",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/web-research/web-research-1.0.0.tgz",
         "sha256": "e747b9003ac1d40b834c67564da6877ce437b19d109333c91f6c1391ea57f127",
@@ -4867,7 +4867,7 @@
           "trends"
         ],
         "sourceUrls": [
-          "https://github.com/sarveshsea/memi"
+          "https://github.com/memi-design/memi"
         ],
         "lastResearchedAt": "2026-07-15T00:00:00.000Z",
         "freshnessDays": 90,
@@ -4907,10 +4907,10 @@
       ],
       "freshnessDays": 60,
       "sourceKind": "community",
-      "sourceRepo": "https://github.com/sarveshsea/design-skills",
+      "sourceRepo": "https://github.com/memi-design/design-skills",
       "sourcePath": "skills/website-to-video",
       "reviewStatus": "approved",
-      "contributionUrl": "https://github.com/sarveshsea/design-skills/tree/main/skills/website-to-video",
+      "contributionUrl": "https://github.com/memi-design/design-skills/tree/main/skills/website-to-video",
       "archive": {
         "url": "https://www.memoire.cv/notes/community/website-to-video/website-to-video-0.1.0.tgz",
         "sha256": "db80055b83a26b929df5170444498b34a441cfdcfc695fe44b59ec60052df1ae",

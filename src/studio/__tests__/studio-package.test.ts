@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("studio runtime/web compatibility", () => {
-  // The Tauri macOS app moved to github.com/sarveshsea/memi-studio. The
+  // The Tauri macOS app moved to github.com/memi-design/memi-studio. The
   // engine repo's `memi studio web` mode still serves a packaged web bundle
   // when one is staged — this test pins that surface.
   it("serves packaged Studio web assets when staged", async () => {

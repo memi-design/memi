@@ -73,7 +73,7 @@ describe("current public release documentation", () => {
           ...manifest.surfaces,
           githubRelease: {
             ...manifest.surfaces.githubRelease,
-            url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.3",
+            url: "https://github.com/memi-design/memi/releases/tag/v2.6.3",
           },
         },
       };

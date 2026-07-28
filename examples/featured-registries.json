@@ -6,9 +6,9 @@
     "description": "Neutral SaaS starter with blue product accents and clean app-shell primitives.",
     "installCommand": "memi add Button --from @memoire-examples/starter-saas",
     "sourcePath": "examples/presets/starter-saas",
-    "sourceUrl": "https://github.com/sarveshsea/memi/tree/main/examples/presets/starter-saas",
+    "sourceUrl": "https://github.com/memi-design/memi/tree/main/examples/presets/starter-saas",
     "screenshotPath": "assets/showcases/starter-saas.svg",
-    "screenshotUrl": "https://raw.githubusercontent.com/sarveshsea/memi/main/assets/showcases/starter-saas.svg"
+    "screenshotUrl": "https://raw.githubusercontent.com/memi-design/memi/main/assets/showcases/starter-saas.svg"
   },
   {
     "slug": "docs-blog",
@@ -17,9 +17,9 @@
     "description": "Editorial docs/blog kit with softer surfaces and reading-friendly accents.",
     "installCommand": "memi add Button --from @memoire-examples/docs-blog",
     "sourcePath": "examples/presets/docs-blog",
-    "sourceUrl": "https://github.com/sarveshsea/memi/tree/main/examples/presets/docs-blog",
+    "sourceUrl": "https://github.com/memi-design/memi/tree/main/examples/presets/docs-blog",
     "screenshotPath": "assets/showcases/docs-blog.svg",
-    "screenshotUrl": "https://raw.githubusercontent.com/sarveshsea/memi/main/assets/showcases/docs-blog.svg"
+    "screenshotUrl": "https://raw.githubusercontent.com/memi-design/memi/main/assets/showcases/docs-blog.svg"
   },
   {
     "slug": "dashboard",
@@ -28,8 +28,8 @@
     "description": "High-contrast analytics dashboard starter for admin and ops products.",
     "installCommand": "memi add Button --from @memoire-examples/dashboard",
     "sourcePath": "examples/presets/dashboard",
-    "sourceUrl": "https://github.com/sarveshsea/memi/tree/main/examples/presets/dashboard",
+    "sourceUrl": "https://github.com/memi-design/memi/tree/main/examples/presets/dashboard",
     "screenshotPath": "assets/showcases/dashboard.svg",
-    "screenshotUrl": "https://raw.githubusercontent.com/sarveshsea/memi/main/assets/showcases/dashboard.svg"
+    "screenshotUrl": "https://raw.githubusercontent.com/memi-design/memi/main/assets/showcases/dashboard.svg"
   }
 ]

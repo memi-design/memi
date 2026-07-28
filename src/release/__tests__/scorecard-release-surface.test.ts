@@ -114,9 +114,9 @@ describe("audit scorecard release surfaces", () => {
     expect(workflow).toContain(
       "if: needs.release-gate.outputs.promote_channels == 'true'",
     );
-    expect(workflow).toContain("ghcr.io/sarveshsea/memi:${{ env.RELEASE_TAG }}");
+    expect(workflow).toContain("ghcr.io/memi-design/memi:${{ env.RELEASE_TAG }}");
     expect(workflow).toContain(
-      "docker buildx imagetools create --tag ghcr.io/sarveshsea/memi:latest",
+      "docker buildx imagetools create --tag ghcr.io/memi-design/memi:latest",
     );
     expect(workflow).not.toMatch(
       /tags:\s*\|[\s\S]*?ghcr\.io\/sarveshsea\/memi:latest[\s\S]*?ghcr\.io\/sarveshsea\/memi:\$\{\{ env\.RELEASE_TAG \}\}/,
@@ -145,7 +145,7 @@ describe("audit scorecard release surfaces", () => {
     expect(workflow).toContain("gh release download");
     expect(workflow).toContain("sha256sum --check SHA256SUMS.txt");
     expect(workflow).toContain(
-      "docker buildx imagetools create --tag ghcr.io/sarveshsea/memi:latest",
+      "docker buildx imagetools create --tag ghcr.io/memi-design/memi:latest",
     );
     expect(workflow).toContain(
       'git tag --force "v${major}" "${RELEASE_COMMIT}"',

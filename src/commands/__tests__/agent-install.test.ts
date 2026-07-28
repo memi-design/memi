@@ -353,7 +353,7 @@ describe("agent install command", () => {
     const payload = JSON.parse(smoke.stdout);
     expect(payload).toMatchObject({
       passed: true,
-      command: "codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire",
+      command: "codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire",
       sparsePaths: [".agents/plugins", "plugins/memoire"],
     });
   });

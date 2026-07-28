@@ -97,7 +97,7 @@ describe("packaged agent kits", () => {
       "grok-build",
     ]);
     expect(manifest.references?.craftSkills).toBe("emilkowalski/skills");
-    expect(manifest.references?.proofRepo).toBe("sarveshsea/design-sandbox");
+    expect(manifest.references?.proofRepo).toBe("memi-design/design-sandbox");
 
     for (const target of manifest.targets) {
       const sourcePath = target.sourceBase === "package"
@@ -248,7 +248,7 @@ describe("packaged agent kits", () => {
     const readme = await readFile(join(root, "README.md"), "utf-8");
     const codexPage = await readFile(join(root, "docs", "CODEX_PLUGIN.md"), "utf-8");
     const smokeScript = await readFile(join(root, "scripts", "smoke-codex-plugin-marketplace.mjs"), "utf-8");
-    const installCommand = "codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
+    const installCommand = "codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
 
     expect(readme).toContain(installCommand);
     expect(codexPage).toContain(installCommand);

@@ -8,9 +8,9 @@ Strong dependencies beat weak reinvention. Load these when the task needs more t
 | --- | --- | --- |
 | CLI + MCP | `npm i -g @memi-design/cli` · `memi mcp start --no-figma` | Evidence, tokens, audits, 40+ MCP tools |
 | Agent kits | `memi agent install grok-build --project .` | `.grok/config.toml` + skills + `memoire.agent.yaml` |
-| Universal skills | `npx skills add sarveshsea/memi --skill memoire-design-tooling` | skills.sh / Agent Skills ecosystem |
-| GitHub Action | `uses: sarveshsea/memi@v2` | Deterministic design CI gate |
-| Proof repo | [sarveshsea/design-sandbox](https://github.com/sarveshsea/design-sandbox) | Runnable Next.js + Tailwind + shadcn reference |
+| Universal skills | `npx skills add memi-design/memi --skill memoire-design-tooling` | skills.sh / Agent Skills ecosystem |
+| GitHub Action | `uses: memi-design/memi@v2` | Deterministic design CI gate |
+| Proof repo | [memi-design/design-sandbox](https://github.com/memi-design/design-sandbox) | Runnable Next.js + Tailwind + shadcn reference |
 | Homepage | [memoire.cv](https://memoire.cv) | Product + docs |
 
 ## Craft and motion (upstream patterns)
@@ -37,7 +37,7 @@ Per [xAI skills docs](https://docs.x.ai/build/features/skills-plugins-marketplac
 ```bash
 npm i -g @memi-design/cli
 memi agent install grok-build --project .
-npx skills add sarveshsea/memi --skill memoire-design-tooling
+npx skills add memi-design/memi --skill memoire-design-tooling
 npx skills add emilkowalski/skills
 # optional Cursor/Claude MCP mirrors
 memi agent install cursor --project .

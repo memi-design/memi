@@ -89,14 +89,14 @@ describe("growth status script contract", () => {
     const cask = parseHomebrewStudioCask(`
       cask "memi-studio" do
         version "1.0.0"
-        url "https://github.com/sarveshsea/memi-studio/releases/download/v#{version}/Memoire.Studio_#{version}_aarch64.dmg"
+        url "https://github.com/memi-design/memi-studio/releases/download/v#{version}/Memoire.Studio_#{version}_aarch64.dmg"
       end
     `);
 
     expect(cask).toEqual({
       name: "memi-studio",
       version: "1.0.0",
-      releaseUrls: ["https://github.com/sarveshsea/memi-studio/releases/download/v#{version}/Memoire.Studio_#{version}_aarch64.dmg"],
+      releaseUrls: ["https://github.com/memi-design/memi-studio/releases/download/v#{version}/Memoire.Studio_#{version}_aarch64.dmg"],
     });
   });
 
@@ -108,7 +108,7 @@ describe("growth status script contract", () => {
 
     expect(parseSkillsShPage(page)).toEqual({
       ok: true,
-      url: "https://skills.sh/sarveshsea/memi",
+      url: "https://skills.sh/memi-design/memi",
       discoveredSkills: 4,
       totalInstalls: 27,
     });
@@ -132,14 +132,14 @@ describe("growth status script contract", () => {
         if (url.includes("downloads/point/last-month/%40memi-design%2Fcli")) return { downloads: 256, start: "2026-04-12", end: "2026-05-11" };
         if (url.includes("downloads/point/last-week/%40sarveshsea%2Fmemoire")) return { downloads: 979, start: "2026-05-05", end: "2026-05-11" };
         if (url.includes("downloads/point/last-month/%40sarveshsea%2Fmemoire")) return { downloads: 2232, start: "2026-04-12", end: "2026-05-11" };
-        if (url.includes("repos/sarveshsea/memi-studio/releases/latest")) {
+        if (url.includes("repos/memi-design/memi-studio/releases/latest")) {
           return {
             tag_name: "v1.0.0",
             published_at: "2026-05-10T20:58:22Z",
             assets: [{ name: "Memoire.Studio_1.0.0_aarch64.dmg", download_count: 3 }],
           };
         }
-        if (url.includes("repos/sarveshsea/memi")) return { stargazers_count: 10, forks_count: 2, open_issues_count: 2, html_url: "https://github.com/sarveshsea/memi", topics: [] };
+        if (url.includes("repos/memi-design/memi")) return { stargazers_count: 10, forks_count: 2, open_issues_count: 2, html_url: "https://github.com/memi-design/memi", topics: [] };
         if (url.includes("registry.modelcontextprotocol.io")) return { servers: [], metadata: { count: 0 } };
         if (url.includes("/pulls/")) return { state: "open", number: 1, title: "PR", html_url: url, updated_at: "2026-05-13T00:00:00Z" };
         return {};
@@ -200,10 +200,10 @@ describe("growth status script contract", () => {
           return { "dist-tags": { latest: "1.1.0" }, versions: { "1.1.0": { mcpName: "io.github.sarveshsea/memi" } } };
         }
         if (url.includes("downloads/point/")) return { downloads: 188, start: "2026-05-27", end: "2026-06-02" };
-        if (url.includes("repos/sarveshsea/memi-studio/releases/latest")) {
+        if (url.includes("repos/memi-design/memi-studio/releases/latest")) {
           return { tag_name: "v1.0.3", published_at: "2026-05-27T19:26:42Z", assets: [] };
         }
-        if (url.includes("repos/sarveshsea/memi")) return { stargazers_count: 16, forks_count: 3, open_issues_count: 1, html_url: "https://github.com/sarveshsea/memi", topics: [] };
+        if (url.includes("repos/memi-design/memi")) return { stargazers_count: 16, forks_count: 3, open_issues_count: 1, html_url: "https://github.com/memi-design/memi", topics: [] };
         if (url.includes("registry.modelcontextprotocol.io")) return { servers: [{ name: "io.github.sarveshsea/memi" }], metadata: { count: 1 } };
         if (url.includes("/pulls/")) return { state: "closed", number: 2, title: "SafeSkill", html_url: url, updated_at: "2026-06-07T00:00:00Z" };
         return {};
@@ -230,10 +230,10 @@ describe("growth status script contract", () => {
           return { "dist-tags": { latest: "1.1.0" }, versions: { "1.1.0": { mcpName: "io.github.sarveshsea/memi" } } };
         }
         if (url.includes("downloads/point/")) return { downloads: 188, start: "2026-05-27", end: "2026-06-02" };
-        if (url.includes("repos/sarveshsea/memi-studio/releases/latest")) {
+        if (url.includes("repos/memi-design/memi-studio/releases/latest")) {
           return { tag_name: "v1.0.3", published_at: "2026-05-27T19:26:42Z", assets: [] };
         }
-        if (url.includes("repos/sarveshsea/memi")) return { stargazers_count: 16, forks_count: 3, open_issues_count: 1, html_url: "https://github.com/sarveshsea/memi", topics: [] };
+        if (url.includes("repos/memi-design/memi")) return { stargazers_count: 16, forks_count: 3, open_issues_count: 1, html_url: "https://github.com/memi-design/memi", topics: [] };
         if (url.includes("registry.modelcontextprotocol.io")) {
           return {
             servers: [

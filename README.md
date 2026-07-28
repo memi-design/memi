@@ -5,9 +5,9 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@memi-design/cli"><img src="https://img.shields.io/npm/v/@memi-design/cli?color=bd3f63&label=npm" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/@memi-design/cli"><img src="https://img.shields.io/npm/dw/@memi-design/cli?color=171718&label=weekly%20downloads" alt="weekly npm downloads"></a>
-  <a href="https://github.com/sarveshsea/memi/actions/workflows/ci.yml"><img src="https://github.com/sarveshsea/memi/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
-  <a href="https://github.com/sarveshsea/memi/stargazers"><img src="https://img.shields.io/github/stars/sarveshsea/memi?style=social" alt="GitHub stars"></a>
-  <a href="https://github.com/sarveshsea/memi/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-171718.svg" alt="MIT license"></a>
+  <a href="https://github.com/memi-design/memi/actions/workflows/ci.yml"><img src="https://github.com/memi-design/memi/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/memi-design/memi/stargazers"><img src="https://img.shields.io/github/stars/memi-design/memi?style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/memi-design/memi/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-171718.svg" alt="MIT license"></a>
 </p>
 
 # memi
@@ -20,7 +20,7 @@ Memi reads the product you already have, identifies accessibility, hierarchy, st
 
 **Supported today:** Node 20, 22, and 24 on macOS, Linux, and Windows. Figma and [Studio](https://memoire.cv/download) are optional companions.
 
-**Links:** [npm](https://www.npmjs.com/package/@memi-design/cli) · [memoire.cv](https://memoire.cv) · [current versions](docs/CURRENT_RELEASE.md) · [MCP Registry](https://registry.modelcontextprotocol.io) · [Agent Skills](https://skills.sh/sarveshsea/memi)
+**Links:** [npm](https://www.npmjs.com/package/@memi-design/cli) · [memoire.cv](https://memoire.cv) · [current versions](docs/CURRENT_RELEASE.md) · [MCP Registry](https://registry.modelcontextprotocol.io) · [Agent Skills](https://skills.sh/memi-design/memi)
 
 ## Quickstart
 
@@ -35,7 +35,7 @@ You get a score, normalized finding IDs, confidence, provenance, and `file:line`
 Keep the workflow available to your coding agent:
 
 ```bash
-npx skills add sarveshsea/memi --skill audit-frontend-design
+npx skills add memi-design/memi --skill audit-frontend-design
 ```
 
 Then ask:
@@ -51,7 +51,7 @@ Then ask:
 
 Compatible with the [shadcn registry](https://ui.shadcn.com/docs/registry/getting-started) and [v0 design systems](https://v0.app/docs/design-systems).
 
-If Memi catches a real interface issue in your project, [star the repository](https://github.com/sarveshsea/memi) and [share the finding](https://github.com/sarveshsea/memi/discussions/categories/show-and-tell). That is the most useful signal for deciding what to improve next.
+If Memi catches a real interface issue in your project, [star the repository](https://github.com/memi-design/memi) and [share the finding](https://github.com/memi-design/memi/discussions/categories/show-and-tell). That is the most useful signal for deciding what to improve next.
 
 ## What Memi catches
 
@@ -81,10 +81,10 @@ No LLM is used in the deterministic CI enforcement path.
 | --- | --- | --- |
 | One-time CLI audit | `npx -y @memi-design/cli@2.6.3 diagnose . --no-write` | Trying Memi without installing |
 | Global CLI | `npm i -g @memi-design/cli` | Daily local use |
-| Agent Skill | `npx skills add sarveshsea/memi --skill audit-frontend-design` | Codex, Claude, Cursor, and compatible agents |
-| GitHub Action | `uses: sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b` | Pull-request design CI |
+| Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude, Cursor, and compatible agents |
+| GitHub Action | `uses: memi-design/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b` | Pull-request design CI |
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
-| Studio | `brew install --cask sarveshsea/memi/memi-studio` | Supervised macOS workflows |
+| Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
 
 The CLI and focused skills are primary. Studio, Figma, research, scaffolding, registries, and the larger tool router are deeper paths.
 
@@ -109,7 +109,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
+      - uses: memi-design/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
         with:
           version: "2.6.3"
           report: true
@@ -151,14 +151,14 @@ memi mcp start --no-figma
 Codex plugin marketplace:
 
 ```bash
-codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
+codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
 ```
 
 [Agent stack guide](docs/AGENT_STACKS.md) · [copy-paste recipes](docs/AGENT_RECIPES.md) · [full skill router](skills/memoire-design-tooling/SKILL.md)
 
 ## Proof you can inspect
 
-- [design-sandbox](https://github.com/sarveshsea/design-sandbox) - runnable Next.js, Tailwind, shadcn, MCP, and Agent Skills integration.
+- [design-sandbox](https://github.com/memi-design/design-sandbox) - runnable Next.js, Tailwind, shadcn, MCP, and Agent Skills integration.
 - [Release gates](docs/RELEASE_GATES.md) - package, provenance, clean install, MCP, plugin, binary, and public-surface checks.
 - [Current release truth](docs/CURRENT_RELEASE.md) - one source for npm, GitHub, Action, Studio, and website versions.
 - [Audit reports](docs/audits/) - timestamped findings, evidence gaps, score caps, and owners.
@@ -177,10 +177,10 @@ codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins
 
 ## Community
 
-- [Ask a question](https://github.com/sarveshsea/memi/discussions/categories/q-a)
-- [Show what Memi found](https://github.com/sarveshsea/memi/discussions/categories/show-and-tell)
-- [Report a bug](https://github.com/sarveshsea/memi/issues/new?template=bug_report.md)
-- [Request a feature](https://github.com/sarveshsea/memi/issues/new?template=feature_request.md)
+- [Ask a question](https://github.com/memi-design/memi/discussions/categories/q-a)
+- [Show what Memi found](https://github.com/memi-design/memi/discussions/categories/show-and-tell)
+- [Report a bug](https://github.com/memi-design/memi/issues/new?template=bug_report.md)
+- [Request a feature](https://github.com/memi-design/memi/issues/new?template=feature_request.md)
 - [Contribute](CONTRIBUTING.md)
 
 Useful contributions include reproducible audit fixtures, framework adapters, skill improvements, accessible UI cases, shader and motion checks, and real before/after reports.
@@ -210,8 +210,8 @@ Useful contributions include reproducible audit fixtures, framework adapters, sk
 
 ```bash
 curl -fsSL https://memoire.cv/install.sh | sh
-brew install sarveshsea/memi/memoire
-docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/sarveshsea/memi --help
+brew install memi-design/memi/memoire
+docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/memi-design/memi --help
 ```
 
 ## License

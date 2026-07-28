@@ -6,43 +6,43 @@ memi v2 needs public proof repos, not only package claims. Use this file to keep
 
 | Repo | Role | Public promise |
 | --- | --- | --- |
-| [`sarveshsea/memi`](https://github.com/sarveshsea/memi) | Engine, CLI, MCP server, Agent Skills, Codex plugin, examples, release gates | Memi is the read-only design engineering audit and skill layer for coding agents. |
-| [`sarveshsea/design-sandbox`](https://github.com/sarveshsea/design-sandbox) | Proof workspace | memi-ready Next.js, Tailwind, shadcn, MCP, and Agent Skills sandbox for design-to-code exploration. |
-| [`sarveshsea/memi-studio`](https://github.com/sarveshsea/memi-studio) | macOS workbench | Supervised Codex and Claude Code runs with project memory, receipts, artifacts, and Figma/FigJam handoff. |
+| [`memi-design/memi`](https://github.com/memi-design/memi) | Engine, CLI, MCP server, Agent Skills, Codex plugin, examples, release gates | Memi is the read-only design engineering audit and skill layer for coding agents. |
+| [`memi-design/design-sandbox`](https://github.com/memi-design/design-sandbox) | Proof workspace | memi-ready Next.js, Tailwind, shadcn, MCP, and Agent Skills sandbox for design-to-code exploration. |
+| [`memi-design/memi-studio`](https://github.com/memi-design/memi-studio) | macOS workbench | Supervised Codex and Claude Code runs with project memory, receipts, artifacts, and Figma/FigJam handoff. |
 | [`sarveshsea/memoire-agent-skills`](https://github.com/sarveshsea/memoire-agent-skills) | Skill mirror | Mirror-ready Hermes/OpenClaw skill packages generated from the npm engine. |
-| [`sarveshsea/design-skills`](https://github.com/sarveshsea/design-skills) | Design Skills and Community Notes | Mémoire's complete design-skill corpus plus licensed, attributed adaptations for Agent Skills and the Notes marketplace. |
-| [`sarveshsea/audit-frontend-design`](https://github.com/sarveshsea/audit-frontend-design) | Focused Agent Skill | One-command, evidence-backed frontend design audits. |
-| [`sarveshsea/remember-design-system`](https://github.com/sarveshsea/remember-design-system) | Focused Agent Skill | Compact repository design-system context before agents edit UI. |
-| [`sarveshsea/enforce-design-ci`](https://github.com/sarveshsea/enforce-design-ci) | Focused Agent Skill | Deterministic design regression gates for pull requests. |
-| [`sarveshsea/chatbot`](https://github.com/sarveshsea/chatbot) | Maintained proof fork | Vercel Chatbot with a committed Memi policy, Agent Skill, GitHub Action, and measured 88/100 baseline. |
+| [`memi-design/design-skills`](https://github.com/memi-design/design-skills) | Design Skills and Community Notes | Mémoire's complete design-skill corpus plus licensed, attributed adaptations for Agent Skills and the Notes marketplace. |
+| [`memi-design/audit-frontend-design`](https://github.com/memi-design/audit-frontend-design) | Focused Agent Skill | One-command, evidence-backed frontend design audits. |
+| [`memi-design/remember-design-system`](https://github.com/memi-design/remember-design-system) | Focused Agent Skill | Compact repository design-system context before agents edit UI. |
+| [`memi-design/enforce-design-ci`](https://github.com/memi-design/enforce-design-ci) | Focused Agent Skill | Deterministic design regression gates for pull requests. |
+| [`memi-design/chatbot`](https://github.com/memi-design/chatbot) | Maintained proof fork | Vercel Chatbot with a committed Memi policy, Agent Skill, GitHub Action, and measured 88/100 baseline. |
 
 ## GitHub descriptions
 
-`sarveshsea/memi`:
+`memi-design/memi`:
 
 ```text
 Memi is the read-only design engineering audit and skill layer for coding agents.
 ```
 
-`sarveshsea/design-sandbox`:
+`memi-design/design-sandbox`:
 
 ```text
 memi-ready Next.js, Tailwind, shadcn, MCP, and Agent Skills sandbox for interface understanding and design-to-code exploration.
 ```
 
-`sarveshsea/memi-studio`:
+`memi-design/memi-studio`:
 
 ```text
 Agent design CI for Codex, Claude, Cursor, Grok, and MCP clients: compact design briefs, UI audits, token checks, and spec-first scaffolds.
 ```
 
-`sarveshsea/design-skills`:
+`memi-design/design-skills`:
 
 ```text
 Practical design judgment for AI coding agents: 78 installable skills for craft, research, generation, Figma, and Mémoire workflows.
 ```
 
-Use these topics on `sarveshsea/design-skills`:
+Use these topics on `memi-design/design-skills`:
 
 ```text
 agent-skills
@@ -60,7 +60,7 @@ memoire
 
 ## Topics
 
-Use these topics on `sarveshsea/memi`:
+Use these topics on `memi-design/memi`:
 
 ```text
 interface-understanding
@@ -77,7 +77,7 @@ design-engineering
 design-tokens
 ```
 
-Use these topics on `sarveshsea/design-sandbox`:
+Use these topics on `memi-design/design-sandbox`:
 
 ```text
 interface-understanding
@@ -103,7 +103,7 @@ nextjs
 
 ## Proof commands
 
-For `sarveshsea/memi`:
+For `memi-design/memi`:
 
 ```bash
 npm i -g @memi-design/cli
@@ -116,7 +116,7 @@ memi agent install universal --project .
 memi mcp start --no-figma
 ```
 
-For `sarveshsea/design-sandbox`:
+For `memi-design/design-sandbox`:
 
 ```bash
 pnpm install
@@ -146,7 +146,7 @@ pnpm verify
 | Hermes/OpenClaw | `agent-kits/mirror` | Mirror-ready skill packages. |
 | Design sandbox | `.agents/skills`, `.mcp.json`, `memoire.agent.yaml` | Public repo that proves integration. |
 | Community Notes | `notes/<note-name>/note.json` | Reviewed downloadable Notes catalog at `/notes/community/catalog.v1.json`. |
-| GitHub Action | `sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354` | Immutable action commit for v2.6.2 with pinned third-party actions, SARIF, and design-health artifacts. |
+| GitHub Action | `memi-design/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354` | Immutable action commit for v2.6.2 with pinned third-party actions, SARIF, and design-health artifacts. |
 | shadcn registry | `https://memoire.cv/r/design-ci.json` | Installs the workflow and recommended policy with `npx shadcn add`. |
 
 ## Live interoperability proposals
@@ -180,10 +180,10 @@ Start with surfaces we control, then move outward only when the target accepts i
 | Priority | Surface | Action | Proof to include |
 | --- | --- | --- | --- |
 | P0 | `memoire.cv` | Keep docs, changelog, footer, downloads, and `/notes/community/catalog.v1.json` synchronized with npm and Studio. | `npm run check:public-release` |
-| P0 | `sarveshsea/design-sandbox` | Refresh the sandbox so it proves the 2.3 mandate loop, not only older diagnose/token commands. | `pnpm memi:agent && pnpm verify` |
+| P0 | `memi-design/design-sandbox` | Refresh the sandbox so it proves the 2.3 mandate loop, not only older diagnose/token commands. | `pnpm memi:agent && pnpm verify` |
 | P0 | `sarveshsea/memoire-community-notes` | Keep the five starter Notes published and linked from the website catalog. | `npm run check:community-notes && npm run build:community-notes-catalog` |
 | P1 | MCP Registry and MCP directories | Submit or refresh `io.github.sarveshsea/memi` as the local design-system MCP server for coding agents. | `memi mcp start --no-figma` |
-| P1 | Agent Skills directories | Submit `memoire-design-tooling` as the design-system memory skill for Codex, Claude Code, Cursor, and OpenCode. | `npx skills add sarveshsea/memi --skill memoire-design-tooling` |
+| P1 | Agent Skills directories | Submit `memoire-design-tooling` as the design-system memory skill for Codex, Claude Code, Cursor, and OpenCode. | `npx skills add memi-design/memi --skill memoire-design-tooling` |
 | P1 | shadcn registry directories | Add memi as a registry-quality and design-audit companion for GitHub registries. | `memi shadcn export --out public/r` |
 | P2 | AI UI templates | Add memi to templates that already ship Tailwind/shadcn agent interfaces. | `memi craft audit --json` |
 | P2 | Dashboard/admin templates | Add memi as a CI design gate where token drift and visual regressions matter. | `memi ci` |

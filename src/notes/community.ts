@@ -2,7 +2,7 @@ import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promi
 import { basename, dirname, join, posix } from "node:path";
 import { NoteManifestSchema, type NoteManifest } from "./types.js";
 
-export const DEFAULT_COMMUNITY_NOTES_REPO = "https://github.com/sarveshsea/design-skills";
+export const DEFAULT_COMMUNITY_NOTES_REPO = "https://github.com/memi-design/design-skills";
 
 export interface CommunityNoteIssue {
   level: "error" | "warning";

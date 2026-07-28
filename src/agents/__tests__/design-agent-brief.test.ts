@@ -76,7 +76,7 @@ describe("design agent brief", () => {
     expect(brief.compatibility.installs).toEqual(expect.arrayContaining([
       "memi agent install hermes",
       "memi agent install universal --project .",
-      "npx skills add sarveshsea/memi --skill memoire-design-tooling",
+      "npx skills add memi-design/memi --skill memoire-design-tooling",
     ]));
   });
 });

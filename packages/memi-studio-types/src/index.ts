@@ -2,7 +2,7 @@
  * @sarveshsea/memi-studio-types — public type surface for the Mémoire
  * Studio runtime sidecar.
  *
- * Consumed by github.com/sarveshsea/memi-studio's React frontend so the
+ * Consumed by github.com/memi-design/memi-studio's React frontend so the
  * GUI app speaks the exact event protocol the engine emits. The engine
  * itself imports the same names from src/studio/contracts/* — this
  * package re-exports those names verbatim so memi-studio doesn't need

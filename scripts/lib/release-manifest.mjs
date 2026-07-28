@@ -10,6 +10,19 @@ const SHA512 = /^[a-f0-9]{128}$/;
 const SHASUM = /^[a-f0-9]{40}$/;
 const ENGINE_STATES = new Set(["candidate", "published", "historical"]);
 const RELEASE_RECORD_PATH = /^release-artifacts\/npm\/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\.release\.json$/;
+const PUBLISH_REPOSITORY = "memi-design/memi";
+const LEGACY_PUBLISH_PROVENANCE = Object.freeze({
+  repository: "sarveshsea/memi",
+  version: "2.6.3",
+  sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
+});
+
+function isSupportedPublishProvenance(record) {
+  if (record?.workflow?.repository === PUBLISH_REPOSITORY) return true;
+  return record?.workflow?.repository === LEGACY_PUBLISH_PROVENANCE.repository
+    && record?.version === LEGACY_PUBLISH_PROVENANCE.version
+    && record?.sourceCommit === LEGACY_PUBLISH_PROVENANCE.sourceCommit;
+}
 
 export function serializeJson(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
@@ -202,7 +215,9 @@ export function validateEngineReleaseRecord(record) {
   if (record?.attestation?.predicateType !== "https://slsa.dev/provenance/v1") {
     failures.push("release record attestation must use SLSA provenance v1");
   }
-  if (record?.attestation?.repository !== "https://github.com/sarveshsea/memi") {
+  const workflowRepository = record?.workflow?.repository;
+  const expectedAttestationRepository = `https://github.com/${workflowRepository ?? ""}`;
+  if (record?.attestation?.repository !== expectedAttestationRepository) {
     failures.push("release record attestation repository is incorrect");
   }
   if (record?.attestation?.workflowPath !== ".github/workflows/publish.yml") {
@@ -229,7 +244,7 @@ export function validateEngineReleaseRecord(record) {
   if (record?.attestation?.subject !== expectedSubject) {
     failures.push(`release record attestation subject must be ${expectedSubject}`);
   }
-  if (record?.workflow?.repository !== "sarveshsea/memi"
+  if (!isSupportedPublishProvenance(record)
     || record?.workflow?.path !== ".github/workflows/publish.yml"
     || record?.workflow?.ref !== "refs/heads/main") {
     failures.push("release record workflow identity is incorrect");
@@ -718,14 +733,15 @@ export async function resolveReleaseRecordPath(root, relativePath) {
 export function buildWebReleaseArtifact(manifest, sourceCommit) {
   const canonical = serializeJson(manifest);
   const release = buildPublicReleaseManifest(manifest);
+  const repository = manifest.surfaces.githubRelease.repository;
   return {
     schemaVersion: 2,
     provenance: {
-      repository: "https://github.com/sarveshsea/memi",
+      repository: `https://github.com/${repository}`,
       path: "release-manifest.json",
       sourceCommit,
       sourceUrl:
-        `https://raw.githubusercontent.com/sarveshsea/memi/${sourceCommit}/release-manifest.json`,
+        `https://raw.githubusercontent.com/${repository}/${sourceCommit}/release-manifest.json`,
       manifestSha256: createHash("sha256").update(canonical).digest("hex"),
     },
     orchestration: manifest,
@@ -812,6 +828,7 @@ export function validateWebReleaseArtifact(manifest, artifact) {
   const provenance = artifact?.provenance;
   const canonical = serializeJson(manifest);
   const expectedDigest = createHash("sha256").update(canonical).digest("hex");
+  const repository = manifest.surfaces.githubRelease.repository;
   let expectedRelease;
   let expectedPublicTruth;
   try {
@@ -834,7 +851,7 @@ export function validateWebReleaseArtifact(manifest, artifact) {
     && serializeJson(artifact?.publicTruth) !== serializeJson(expectedPublicTruth)) {
     failures.push("website release artifact publicTruth does not match its public release projection");
   }
-  if (provenance?.repository !== "https://github.com/sarveshsea/memi"
+  if (provenance?.repository !== `https://github.com/${repository}`
     || provenance?.path !== "release-manifest.json") {
     failures.push("website release artifact provenance must identify the canonical Memi manifest");
   }
@@ -842,7 +859,7 @@ export function validateWebReleaseArtifact(manifest, artifact) {
     failures.push("website release artifact provenance must include an exact source commit");
   }
   const expectedSourceUrl =
-    `https://raw.githubusercontent.com/sarveshsea/memi/${provenance?.sourceCommit}/release-manifest.json`;
+    `https://raw.githubusercontent.com/${repository}/${provenance?.sourceCommit}/release-manifest.json`;
   if (provenance?.sourceUrl !== expectedSourceUrl) {
     failures.push(`website release artifact source URL must be ${expectedSourceUrl}`);
   }

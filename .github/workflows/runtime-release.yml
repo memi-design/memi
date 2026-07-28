@@ -3,7 +3,7 @@ name: Runtime release
 # Publishes the Mémoire Studio runtime sidecar binary + resources tarball as
 # GitHub Release assets. Triggered on tag push `runtime-vX.Y.Z`.
 #
-# Studio (github.com/sarveshsea/memi-studio) consumes these via its
+# Studio (github.com/memi-design/memi-studio) consumes these via its
 # scripts/fetch-runtime.mjs at build time, pinned via the `memoireRuntime`
 # block in its package.json.
 #
@@ -135,7 +135,7 @@ jobs:
           cat > release-notes.md <<EOF
           Mémoire Studio runtime sidecar binaries + resources tarball.
 
-          Consumed by github.com/sarveshsea/memi-studio at build time via scripts/fetch-runtime.mjs.
+          Consumed by github.com/memi-design/memi-studio at build time via scripts/fetch-runtime.mjs.
 
           Pin in memi-studio's package.json:
 

@@ -90,7 +90,7 @@ for (const file of await collectPackagedFiles(packageJson.files ?? [])) {
 
 const readme = await readFile(join(root, "README.md"), "utf-8");
 const readmeTopFold = readme.slice(0, 3000);
-const skillsPackageInstallCommand = "npx skills add sarveshsea/memi --skill audit-frontend-design";
+const skillsPackageInstallCommand = "npx skills add memi-design/memi --skill audit-frontend-design";
 const requiredReadmeTerms = [
   "read-only design engineering audit and skill layer for coding agents",
   "remember-design-system",
@@ -130,7 +130,7 @@ for (const [docPath, requiredTerm] of requiredPackagedDocs) {
 }
 for (const [docPath, requiredTerm] of [
   ["docs/GROWTH_TO_1M_NPM.md", "interface understanding for AI coding agents"],
-  ["docs/PUBLIC_REPOS.md", "sarveshsea/design-sandbox"],
+  ["docs/PUBLIC_REPOS.md", "memi-design/design-sandbox"],
 ]) {
   const doc = await readFile(join(root, docPath), "utf-8");
   if (!doc.includes(requiredTerm)) {
@@ -141,7 +141,7 @@ if (!packageJson.files?.includes("NOTICE")) {
   fail("package.json files must include NOTICE for attribution");
 }
 
-const codexInstallCommand = "codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
+const codexInstallCommand = "codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
 const codexPluginDocs = await readFile(join(root, "docs", "CODEX_PLUGIN.md"), "utf-8");
 if (!codexPluginDocs.includes(codexInstallCommand)) {
   fail("docs/CODEX_PLUGIN.md is missing the public Codex marketplace install command");

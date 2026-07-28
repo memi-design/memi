@@ -8,9 +8,9 @@ Real Studio captures used for the gallery live in `source-captures-v2/`.
 
 ## Public Logo Links
 
-- memi logo SVG: https://raw.githubusercontent.com/sarveshsea/memi/main/assets/authentic-logo.svg
-- Mark-only SVG: https://raw.githubusercontent.com/sarveshsea/memi/main/assets/authentic-logo-mark.svg
-- Studio app icon PNG: https://raw.githubusercontent.com/sarveshsea/memi-studio/main/src-tauri/icons/icon.png
+- memi logo SVG: https://raw.githubusercontent.com/memi-design/memi/main/assets/authentic-logo.svg
+- Mark-only SVG: https://raw.githubusercontent.com/memi-design/memi/main/assets/authentic-logo-mark.svg
+- Studio app icon PNG: https://raw.githubusercontent.com/memi-design/memi-studio/main/src-tauri/icons/icon.png
 
 ## Launch Copy
 

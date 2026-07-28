@@ -137,11 +137,11 @@ async function readJson(path) {
 }
 
 function githubTreeUrl(path) {
-  return `https://github.com/sarveshsea/memi/tree/main/${path}`;
+  return `https://github.com/memi-design/memi/tree/main/${path}`;
 }
 
 function githubRawUrl(path) {
-  return `https://raw.githubusercontent.com/sarveshsea/memi/main/${path}`;
+  return `https://raw.githubusercontent.com/memi-design/memi/main/${path}`;
 }
 
 function memoireRegistryItemUrl(slug, componentName) {

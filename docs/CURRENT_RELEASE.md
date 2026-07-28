@@ -9,8 +9,8 @@ Memi is the read-only design engineering audit and skill layer for coding agents
 
 | Release group | Version | Canonical evidence |
 |---|---:|---|
-| CLI, npm, MCP, and Action | `2.6.3` | [GitHub release](https://github.com/sarveshsea/memi/releases/tag/v2.6.3) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
-| Studio | `2.5.0` | [Studio release](https://github.com/sarveshsea/memi-studio/releases/tag/v2.5.0) |
+| CLI, npm, MCP, and Action | `2.6.3` | [GitHub release](https://github.com/memi-design/memi/releases/tag/v2.6.3) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
+| Studio | `2.5.0` | [Studio release](https://github.com/memi-design/memi-studio/releases/tag/v2.5.0) |
 | Website | `1.0.4` | [memoire.cv](https://www.memoire.cv) |
 
 ## Immutable engine identity

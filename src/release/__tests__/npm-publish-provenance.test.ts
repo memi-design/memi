@@ -16,7 +16,7 @@ const expectedVersion = "2.6.3";
 const releaseDigest = Buffer.alloc(64, 0xab);
 const expectedIntegrity = `sha512-${releaseDigest.toString("base64")}`;
 const expectedSourceCommit = "a".repeat(40);
-const expectedRepository = "https://github.com/sarveshsea/memi";
+const expectedRepository = "https://github.com/memi-design/memi";
 const expectedWorkflowPath = ".github/workflows/publish.yml";
 
 function provenancePayload(overrides: Record<string, unknown> = {}) {

@@ -10,9 +10,9 @@
   "mirrorRepository": "sarveshsea/memoire-agent-skills",
   "references": {
     "craftSkills": "emilkowalski/skills",
-    "proofRepo": "sarveshsea/design-sandbox",
-    "githubAction": "sarveshsea/memi",
-    "skillsEcosystem": "npx skills add sarveshsea/memi --skill audit-frontend-design",
+    "proofRepo": "memi-design/design-sandbox",
+    "githubAction": "memi-design/memi",
+    "skillsEcosystem": "npx skills add memi-design/memi --skill audit-frontend-design",
     "grokDocs": "https://docs.x.ai/build/features/mcp-servers"
   },
   "targets": [

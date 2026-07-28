@@ -30,4 +30,4 @@ memi publish --name @yourscope/your-ds
 npm publish --access public
 ```
 
-Source: [examples/presets/dashboard](https://github.com/sarveshsea/memi/tree/main/examples/presets/dashboard)
+Source: [examples/presets/dashboard](https://github.com/memi-design/memi/tree/main/examples/presets/dashboard)
