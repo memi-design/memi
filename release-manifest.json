@@ -1,19 +1,18 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-27",
+  "updatedAt": "2026-07-28",
   "releaseGroups": {
     "engine": {
       "version": "2.6.4",
-      "state": "candidate",
-      "sourceCommit": null,
-      "releaseRecord": null,
+      "state": "published",
+      "sourceCommit": "ec4d804220bfbf08be810ceb692a338cf186e794",
+      "releaseRecord": {
+        "path": "release-artifacts/npm/2.6.4.release.json",
+        "sha256": "405cca4d4d1c45f4725d98f4219f22704cc203fd09afca0c82969d78e23b5a0b"
+      },
       "verification": {
         "eligibleForParity": false,
-        "reason": "2.6.4 is staged for verified publication and has not been published"
-      },
-      "previousPublicRelease": {
-        "version": "2.6.3",
-        "sourceCommit": "0f89cbf1b9972c779dbf14cc09f6c91485a1182b"
+        "reason": "2.6.4 is published; independent public-surface parity verification is pending"
       }
     },
     "studio": {
