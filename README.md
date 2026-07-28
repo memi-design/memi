@@ -29,7 +29,7 @@ Compatibility: [shadcn registry](https://ui.shadcn.com/docs/registry/getting-sta
 ## Try it on a real interface
 
 ```bash
-npx -y @memi-design/cli@2.6.2 diagnose . --json --no-write --fail-on none
+npx -y @memi-design/cli@2.6.3 diagnose . --json --no-write --fail-on none
 ```
 
 That runs a read-only, deterministic audit against the current repository and returns file-anchored evidence. No account, API key, Figma file, global install, or daemon is required.
@@ -177,9 +177,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354 # v2.6.2
+      - uses: sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
         with:
-          version: "2.6.2"
+          version: "2.6.3"
 ```
 
 What lands on the PR: **code-scanning annotations** at `file:line`, a **step summary** with score and gate verdict, and a **`memi-design-health` artifact** (HTML + markdown + badge).
@@ -313,7 +313,7 @@ memi studio web --port 1422
 | `plugins/memoire/` | Codex plugin bundle |
 | `notes/` | Built-in research, agent, and design notes |
 | `docs/` | Interface understanding, CI, growth, release gates |
-| `action.yml` | GitHub Action for design CI (`sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354`) |
+| `action.yml` | GitHub Action for design CI (`sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b`) |
 
 ---
 

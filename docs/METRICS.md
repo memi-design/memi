@@ -4,7 +4,7 @@ Use this every Friday during the current public-growth window. Record the value,
 
 ## Baseline
 
-- Current public release: `@memi-design/cli@2.6.2`
+- Current public release: `@memi-design/cli@2.6.3`
 - Public npm latest before v2 publish: `1.1.1`
 - Public npm latest before the 2.5 publish command: `2.4.1`
 - Latest complete npm window: 354 downloads for 2026-07-10 through 2026-07-16 and 2,151 downloads for 2026-06-17 through 2026-07-16.

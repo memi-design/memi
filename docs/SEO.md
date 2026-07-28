@@ -67,7 +67,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS, Linux, Windows",
   "description": "Memi is the read-only design engineering audit and skill layer for coding agents: file-anchored UI findings, design-system memory, MCP tools, and deterministic CI gates.",
-  "softwareVersion": "2.6.2",
+  "softwareVersion": "2.6.3",
   "url": "https://www.npmjs.com/package/@memi-design/cli",
   "codeRepository": "https://github.com/sarveshsea/memi",
   "programmingLanguage": "TypeScript",
