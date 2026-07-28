@@ -3,16 +3,17 @@
   "updatedAt": "2026-07-27",
   "releaseGroups": {
     "engine": {
-      "version": "2.6.3",
-      "state": "published",
-      "sourceCommit": "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
-      "releaseRecord": {
-        "path": "release-artifacts/npm/2.6.3.release.json",
-        "sha256": "1a78e0619fe1b58977747eb704bd1ec02945f9b5872a72ca68b3ca2ebcf7416c"
-      },
+      "version": "2.6.4",
+      "state": "candidate",
+      "sourceCommit": null,
+      "releaseRecord": null,
       "verification": {
         "eligibleForParity": false,
-        "reason": "2.6.3 is published; parity remains capped until independent live verification passes"
+        "reason": "2.6.4 is staged for verified publication and has not been published"
+      },
+      "previousPublicRelease": {
+        "version": "2.6.3",
+        "sourceCommit": "0f89cbf1b9972c779dbf14cc09f6c91485a1182b"
       }
     },
     "studio": {
@@ -36,7 +37,7 @@
       "releaseGroup": "engine",
       "repository": "memi-design/memi",
       "tagPrefix": "v",
-      "url": "https://github.com/memi-design/memi/releases/tag/v2.6.3"
+      "url": "https://github.com/memi-design/memi/releases/tag/v2.6.4"
     },
     "githubAction": {
       "releaseGroup": "engine",
