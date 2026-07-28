@@ -12,6 +12,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Provider-neutral model harness and tracing foundation
 
+- `f3dde1de` fix: recover Windows release binaries
 - `ffbf66d6` test: align release gates with published state
 - `9c3048cf` docs: export verified 2.6.4 release state
 - `98ea0435` chore: record 2.6.4 published transition
