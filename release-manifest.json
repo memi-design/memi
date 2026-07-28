@@ -57,7 +57,7 @@
     },
     "website": {
       "releaseGroup": "site",
-      "repository": "sarveshsea/memoire-web",
+      "repository": "memi-design/memoire-web",
       "publicUrl": "https://www.memoire.cv",
       "releaseArtifactUrl": "https://www.memoire.cv/release/memi-release.json"
     }

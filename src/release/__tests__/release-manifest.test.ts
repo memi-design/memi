@@ -45,7 +45,7 @@ describe("release manifest", () => {
         studio: { releaseGroup: "studio", repository: "sarveshsea/memi-studio" },
         website: {
           releaseGroup: "site",
-          repository: "sarveshsea/memoire-web",
+          repository: "memi-design/memoire-web",
           releaseArtifactUrl: "https://www.memoire.cv/release/memi-release.json",
         },
       },
