@@ -1,0 +1,84 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="background" x1="76" y1="37" x2="1124" y2="593" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17171E"/>
+      <stop offset="1" stop-color="#0B0B0F"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="209" y1="136" x2="480" y2="432" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F07A9C"/>
+      <stop offset="1" stop-color="#B83C62"/>
+    </linearGradient>
+    <pattern id="dither" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#F07A9C" fill-opacity=".25"/>
+      <circle cx="8" cy="8" r=".8" fill="#F07A9C" fill-opacity=".14"/>
+    </pattern>
+    <filter id="shadow" x="548" y="75" width="592" height="500" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity=".32"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" rx="28" fill="url(#background)"/>
+  <rect x="1" y="1" width="1198" height="628" rx="27" stroke="#FFFFFF" stroke-opacity=".08"/>
+  <circle cx="86" cy="548" r="162" fill="url(#dither)"/>
+  <circle cx="1114" cy="88" r="122" fill="url(#dither)"/>
+
+  <g font-family="Inter, ui-sans-serif, system-ui, sans-serif">
+    <rect x="72" y="72" width="304" height="34" rx="17" fill="#FFFFFF" fill-opacity=".07"/>
+    <circle cx="91" cy="89" r="5" fill="#F07A9C"/>
+    <text x="105" y="95" fill="#C9C9D2" font-size="14" font-weight="650" letter-spacing="1.4">MEMI / READ-ONLY AUDIT</text>
+
+    <text x="72" y="171" fill="#FFFFFF" font-size="48" font-weight="720" letter-spacing="-2">Audit the interface</text>
+    <text x="72" y="228" fill="#FFFFFF" font-size="48" font-weight="720" letter-spacing="-2">before the agent</text>
+    <text x="72" y="285" fill="url(#accent)" font-size="48" font-weight="720" letter-spacing="-2">edits it.</text>
+
+    <text x="72" y="382" fill="#A9A9B5" font-size="19" font-weight="450">File-anchored findings. Deterministic reruns. Zero writes.</text>
+
+    <g transform="translate(72 480)">
+      <rect width="136" height="42" rx="21" fill="#F07A9C" fill-opacity=".13"/>
+      <circle cx="21" cy="21" r="5" fill="#7ED9A6"/>
+      <text x="34" y="27" fill="#F7DCE5" font-size="15" font-weight="650">READ ONLY</text>
+      <rect x="148" width="149" height="42" rx="21" fill="#FFFFFF" fill-opacity=".06"/>
+      <text x="170" y="27" fill="#D7D7DF" font-size="15" font-weight="650">NO API KEY</text>
+      <rect x="309" width="165" height="42" rx="21" fill="#FFFFFF" fill-opacity=".06"/>
+      <text x="331" y="27" fill="#D7D7DF" font-size="15" font-weight="650">WORKS IN CI</text>
+    </g>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="572" y="99" width="544" height="452" rx="18" fill="#111119"/>
+    <rect x="572.5" y="99.5" width="543" height="451" rx="17.5" stroke="#FFFFFF" stroke-opacity=".11"/>
+    <path d="M572 148H1116" stroke="#FFFFFF" stroke-opacity=".08"/>
+    <circle cx="598" cy="124" r="5" fill="#F46D75"/>
+    <circle cx="618" cy="124" r="5" fill="#F5C451"/>
+    <circle cx="638" cy="124" r="5" fill="#67C587"/>
+    <text x="665" y="129" fill="#737381" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">sample read-only audit flow</text>
+
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15">
+      <text x="598" y="185" fill="#7ED9A6">$</text>
+      <text x="620" y="185" fill="#E7E7EC">npx @memi-design/cli diagnose . --no-write</text>
+
+      <text x="598" y="228" fill="#727280">01</text>
+      <text x="632" y="228" fill="#AFAFBA">INSPECT</text>
+      <text x="728" y="228" fill="#E7E7EC">154 interface files read</text>
+
+      <text x="598" y="271" fill="#727280">02</text>
+      <text x="632" y="271" fill="#F0A3B9">FIND</text>
+      <text x="728" y="271" fill="#E7E7EC">CopyButton.tsx</text>
+      <text x="728" y="296" fill="#AFAFBA">motion-missing-reduced-motion</text>
+
+      <text x="598" y="339" fill="#727280">03</text>
+      <text x="632" y="339" fill="#E8C875">CORRECT</text>
+      <text x="728" y="339" fill="#E7E7EC">reduced-motion fallback added</text>
+
+      <text x="598" y="382" fill="#727280">04</text>
+      <text x="632" y="382" fill="#7ED9A6">VERIFY</text>
+      <text x="728" y="382" fill="#E7E7EC">finding absent in rerun</text>
+
+      <rect x="598" y="420" width="492" height="1" fill="#FFFFFF" fill-opacity=".08"/>
+      <text x="598" y="459" fill="#7ED9A6">PASS</text>
+      <text x="650" y="459" fill="#AFAFBA">same command, evidence-backed result</text>
+      <text x="598" y="501" fill="#F0A3B9">WRITE</text>
+      <text x="658" y="501" fill="#E7E7EC">0 source files</text>
+    </g>
+  </g>
+</svg>
