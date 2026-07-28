@@ -5,6 +5,7 @@ import { diffDesignSystem } from "../engine/token-differ.js";
 import { ui } from "../tui/format.js";
 import { auditTokensForWcag, type WcagTokenReport } from "../figma/wcag-token-checker.js";
 import { pullFromPenpot } from "../figma/penpot-client.js";
+import { hasAI } from "../ai/index.js";
 
 export interface PullPayload {
   status: "completed" | "failed";
@@ -212,7 +213,7 @@ export function registerPullCommand(program: Command, engine: MemoireEngine) {
         // Bridge is running (or no REST creds) — wait for plugin
         const caps = checkCapabilities("pull", {
           figma: false,
-          ai: !!process.env.ANTHROPIC_API_KEY,
+          ai: hasAI(),
           specs: false,
           generatedCode: false,
           research: false,

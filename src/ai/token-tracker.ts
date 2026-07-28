@@ -13,14 +13,14 @@ interface UsageEntry {
   tier: ModelTier;
   input: number;
   output: number;
-  cost: number;
+  cost: number | null;
 }
 
 export class TokenTracker {
   private entries: UsageEntry[] = [];
 
-  record(usage: TokenUsage, tier: ModelTier, model: string): void {
-    const cost = estimateCost(usage, tier);
+  record(usage: TokenUsage, tier: ModelTier, model: string, costOverride?: number | null): void {
+    const cost = costOverride === undefined ? estimateCost(usage, tier) : costOverride;
     this.entries.push({
       timestamp: new Date().toISOString(),
       model,
@@ -40,7 +40,15 @@ export class TokenTracker {
   }
 
   get totalCost(): number {
-    return this.entries.reduce((s, e) => s + e.cost, 0);
+    return this.entries.reduce((sum, entry) => sum + (entry.cost ?? 0), 0);
+  }
+
+  get unpricedCallCount(): number {
+    return this.entries.filter((entry) => entry.cost === null).length;
+  }
+
+  get isCostComplete(): boolean {
+    return this.unpricedCallCount === 0;
   }
 
   get callCount(): number {
@@ -49,7 +57,10 @@ export class TokenTracker {
 
   get summary(): string {
     if (this.entries.length === 0) return "No AI calls made";
-    return `${this.callCount} calls | ${this.totalInput.toLocaleString()} in + ${this.totalOutput.toLocaleString()} out | ~$${this.totalCost.toFixed(4)}`;
+    const usage = `${this.callCount} calls | ${this.totalInput.toLocaleString()} in + ${this.totalOutput.toLocaleString()} out`;
+    if (!this.isCostComplete && this.totalCost === 0) return `${usage} | cost unknown`;
+    if (!this.isCostComplete) return `${usage} | ~$${this.totalCost.toFixed(4)} known + ${this.unpricedCallCount} unpriced`;
+    return `${usage} | ~$${this.totalCost.toFixed(4)}`;
   }
 
   async persist(projectRoot: string): Promise<void> {

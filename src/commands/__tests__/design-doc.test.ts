@@ -366,13 +366,13 @@ describe("design-doc — AI vs raw fallback", () => {
     expect(opts.model).toBe("deep");
   });
 
-  it("raw fallback output includes API key hint", async () => {
+  it("raw fallback output includes provider configuration hint", async () => {
     mockHasAI.mockReturnValue(false);
     captureLogs();
     const program = new Command();
     registerDesignDocCommand(program, makeEngine() as never);
     await program.parseAsync(["design-doc", "https://example.com"], { from: "user" });
     const content = await readFile(join(testDir, "DESIGN.md"), "utf-8");
-    expect(content).toContain("ANTHROPIC_API_KEY");
+    expect(content).toContain("Configure an AI provider");
   });
 });

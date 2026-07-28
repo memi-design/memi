@@ -251,7 +251,7 @@ Schemas — component: name, type, atomicLevel ("atom"|"molecule"|"organism"|"te
     "generate_code",
     `Generate shadcn/ui + Tailwind code from a saved spec and write files into atomic design folders (atoms → components/ui/, molecules/organisms/templates → components/<level>/).
 
-Returns: { entryFile, files[], generatedAt, findings[], critique? }. For page specs, critique is an AI layout score (0-100) + hierarchy/spacing/consistency notes when ANTHROPIC_API_KEY is set — informational only, never blocks.
+Returns: { entryFile, files[], generatedAt, findings[], critique? }. For page specs, critique is an AI layout score (0-100) + hierarchy/spacing/consistency notes when an AI provider is configured — informational only, never blocks.
 Errors: isError if specName is not found. isError with { blocked: true, findings } if a critical quality-gate finding (raw hex/color when tokens exist, a token-pair contrast failure, or a strict-mode skill-compliance violation) prevented the write — pass force:true to write anyway after reviewing the findings.`,
     {
       specName: z.string().describe("Name of the spec to generate code for (case-sensitive, must match a spec returned by get_specs)."),
@@ -1293,9 +1293,9 @@ Returns on success: SimulationRun with status, events, eventCount, and persisted
   // ── analyze_design ──────────────────────────────────────
   server.tool(
     "analyze_design",
-    `Capture a Figma node and analyze it with AI vision (Claude).
+    `Capture a Figma node and analyze it with configured AI vision.
 
-Prereq: bridge + plugin connected; ANTHROPIC_API_KEY set; spec-compliance mode needs the spec in the registry.
+Prereq: bridge + plugin connected; a vision-capable AI provider configured; spec-compliance mode needs the spec in the registry.
 Returns by mode — general: { summary, issues[], suggestions[], qualityScore }; accessibility: { summary, contrastIssues[], touchTargetIssues[], focusIssues[], wcagLevel }; spec-compliance: { summary, compliant, mismatches[], missingProps[], extraElements[] }.
 Errors: isError on missing key, no connection, bad node, or missing spec.
 Modes: general = visual polish; accessibility = WCAG checks of a frame; spec-compliance = rendered design vs saved spec before codegen. Core of the self-heal loop: create → capture_screenshot → analyze_design → fix → verify.`,
@@ -1308,7 +1308,7 @@ Modes: general = visual polish; accessibility = WCAG checks of a frame; spec-com
       requireFigma(engine);
       const ai = getAI();
       if (!ai) {
-        return { isError: true, content: [{ type: "text" as const, text: "ANTHROPIC_API_KEY not set — AI vision requires an API key" }] };
+        return { isError: true, content: [{ type: "text" as const, text: "No AI provider configured — AI vision requires Anthropic, OpenAI, or a vision-capable compatible endpoint" }] };
       }
 
       const screenshot = await engine.figma.captureScreenshot(nodeId, "PNG", 2);
@@ -1510,15 +1510,15 @@ Call this first before any Figma-dependent tool.`,
   // ── design_doc ────────────────────────────────────────
   server.tool(
     "design_doc",
-    `Scrape a public URL and extract its design system — parses CSS custom properties, colors, fonts, spacing, radii, shadows; Claude synthesizes a DESIGN.md.
+    `Scrape a public URL and extract its design system — parses CSS custom properties, colors, fonts, spacing, radii, shadows; the configured AI provider synthesizes a DESIGN.md.
 
-Prereq: publicly accessible URL; ANTHROPIC_API_KEY for synthesis (pass raw=true without it).
+Prereq: publicly accessible URL; configured AI provider for synthesis (pass raw=true without it).
 Returns (raw=false): DESIGN.md with Color System, Typography, Spacing, Borders & Surfaces, Component Patterns, Voice & Tone, Do/Don't, Tailwind Config Sketch. Returns (raw=true): { url, title, tokens: { cssVars, colors, fonts, fontSizes, spacing, radii, shadows, counts } }.
 Errors: isError if the URL is unreachable/has no usable CSS, or the key is missing in synthesis mode.
 Use to reverse-engineer a reference site's system or extract tokens for comparison.`,
     {
       url: z.string().url().describe("Fully-qualified public URL to extract design tokens from (e.g. 'https://stripe.com', 'https://linear.app'). Must be accessible without authentication."),
-      raw: z.boolean().default(false).describe("If false (default), returns an AI-synthesized DESIGN.md document (requires ANTHROPIC_API_KEY). If true, returns the raw parsed token data as JSON without calling the AI — useful when ANTHROPIC_API_KEY is unavailable or you want structured data."),
+      raw: z.boolean().default(false).describe("If false (default), returns an AI-synthesized DESIGN.md document (requires a configured AI provider). If true, returns raw parsed token data without calling AI."),
     },
     async ({ url, raw }) => {
       try {
@@ -1554,7 +1554,7 @@ Use to reverse-engineer a reference site's system or extract tokens for comparis
 
         const ai = getAI();
         if (!ai) {
-          return { isError: true, content: [{ type: "text" as const, text: "ANTHROPIC_API_KEY required for AI synthesis. Use raw=true for parsed tokens without AI." }] };
+          return { isError: true, content: [{ type: "text" as const, text: "A configured AI provider is required for synthesis. Use raw=true for parsed tokens without AI." }] };
         }
 
         const varSample = Object.entries(tokens.cssVars).slice(0, 60).map(([k, v]) => `${k}: ${v}`).join("\n");
@@ -1578,14 +1578,23 @@ Use to reverse-engineer a reference site's system or extract tokens for comparis
   // ── get_ai_usage ──────────────────────────────────────
   server.tool(
     "get_ai_usage",
-    `AI token usage and estimated cost for this MCP session (in-memory tracker; never throws — zero values when no key or no calls).
+    `AI token usage and estimated cost for this MCP session (in-memory tracker; never throws; unknown when provider pricing is not configured).
 
-Returns: { calls, inputTokens, outputTokens, estimatedCost, summary }. Use to monitor spend from analyze_design, design_doc, or compose.`,
+Returns: { calls, inputTokens, outputTokens, estimatedCost, knownEstimatedCost, costComplete, unpricedCalls, summary }. Use to monitor spend from analyze_design, design_doc, or compose.`,
     {},
     async () => {
       const tracker = getTracker();
       if (!tracker) {
-        return { content: [{ type: "text" as const, text: JSON.stringify({ calls: 0, inputTokens: 0, outputTokens: 0, estimatedCost: "$0.0000", summary: "No AI client initialized" }) }] };
+        return { content: [{ type: "text" as const, text: JSON.stringify({
+          calls: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          estimatedCost: "$0.0000",
+          knownEstimatedCost: "$0.0000",
+          costComplete: true,
+          unpricedCalls: 0,
+          summary: "No AI client initialized",
+        }) }] };
       }
       return {
         content: [{
@@ -1594,7 +1603,10 @@ Returns: { calls, inputTokens, outputTokens, estimatedCost, summary }. Use to mo
             calls: tracker.callCount,
             inputTokens: tracker.totalInput,
             outputTokens: tracker.totalOutput,
-            estimatedCost: `$${tracker.totalCost.toFixed(4)}`,
+            estimatedCost: tracker.isCostComplete ? `$${tracker.totalCost.toFixed(4)}` : "unknown",
+            knownEstimatedCost: `$${tracker.totalCost.toFixed(4)}`,
+            costComplete: tracker.isCostComplete,
+            unpricedCalls: tracker.unpricedCallCount,
             summary: tracker.summary,
           }),
         }],

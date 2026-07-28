@@ -10,7 +10,7 @@ import type { MemoireEngine } from "../engine/core.js";
 import type { DesignToken } from "../engine/registry.js";
 import type { AnySpec, ComponentSpec, PageSpec, DataVizSpec } from "../specs/types.js";
 import type { SubTask, SubAgentType, AgentContext } from "./plan-builder.js";
-import type { AnthropicClient } from "../ai/index.js";
+import type { AIClient } from "../ai/index.js";
 
 const log = createLogger("sub-agent-runner");
 
@@ -54,7 +54,7 @@ export class SubAgentRunner {
 
   // ── Main Dispatch ──────────────────────────────────────
 
-  async executeSubTask(task: SubTask, ctx: AgentContext, ai?: AnthropicClient | null): Promise<unknown> {
+  async executeSubTask(task: SubTask, ctx: AgentContext, ai?: AIClient | null): Promise<unknown> {
     log.info({ taskId: task.id, agent: task.agentType, name: task.name }, "Executing sub-task");
 
     // Try AI-powered execution first if available
@@ -646,7 +646,7 @@ export class SubAgentRunner {
 
   // ── AI-Powered Execution ───────────────────────────────
 
-  private async aiExecuteSubTask(ai: AnthropicClient, task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async aiExecuteSubTask(ai: AIClient, task: SubTask, ctx: AgentContext): Promise<unknown> {
     const systemPrompt = this.buildAgentSystemPrompt(task.agentType, ctx);
 
     const result = await ai.completeJSON<{

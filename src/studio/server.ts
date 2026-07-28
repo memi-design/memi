@@ -83,6 +83,11 @@ import { RpcServer } from "./rpc/server.js";
 import { EventBus } from "./event-bus.js";
 import { createChildTraceContext, createRuntimeTraceContext } from "./tracing/context.js";
 import { sanitizeRuntimeEvent } from "./tracing/privacy.js";
+import {
+  exportRuntimeEvent,
+  NoopTelemetrySink,
+  type TelemetrySink,
+} from "./tracing/opentelemetry.js";
 import { FileSimulationStore } from "../simulation/index.js";
 import type { ResearchStore } from "../research/engine.js";
 import {
@@ -134,11 +139,12 @@ import type {
   StudioUsageProviderId,
 } from "./types.js";
 
-interface StudioRuntimeServerOptions {
+export interface StudioRuntimeServerOptions {
   projectRoot: string;
   port?: number;
   host?: string;
   figma?: StudioFigmaController;
+  telemetrySink?: TelemetrySink;
 }
 
 interface SessionClient {
@@ -175,6 +181,7 @@ export class StudioRuntimeServer {
   private readonly downloads: StudioDownloadStore;
   private readonly eventJournal: FileEventJournal;
   private readonly providerEventBus = new EventBus();
+  private readonly telemetrySink: TelemetrySink;
   private readonly providerTraceContexts = new Map<string, RuntimeTraceContext>();
   private readonly providerToolTraceContexts = new Map<string, RuntimeTraceContext>();
   private readonly toolCalls = new Map<string, StudioToolCallResult>();
@@ -194,6 +201,7 @@ export class StudioRuntimeServer {
     this.automations = new StudioAutomationStore(this.projectRoot);
     this.downloads = new StudioDownloadStore(this.projectRoot);
     this.eventJournal = new FileEventJournal(this.projectRoot);
+    this.telemetrySink = options.telemetrySink ?? new NoopTelemetrySink();
     this.browser = new StudioBrowserAdapter({ projectRoot: this.projectRoot });
     this.computer = new StudioComputerAdapter({ projectRoot: this.projectRoot });
     this.figma = options.figma ?? new StudioFigmaController({
@@ -1721,13 +1729,9 @@ export class StudioRuntimeServer {
     this.sessionStore.appendEvent(session, event);
     const providerEvent = this.providerRuntimeEventFromStudioEvent(session, event);
     if (providerEvent) {
-      const publishable = sanitizeRuntimeEvent(providerEvent);
-      void this.eventJournal.append(publishable.sessionId, publishable).catch(() => undefined);
-      this.providerEventBus.publish(publishable);
+      this.publishProviderEvent(providerEvent);
       if (providerEvent.type === "session.created") {
-        const selection = sanitizeRuntimeEvent(this.modelSelectionEvent(session, providerEvent));
-        void this.eventJournal.append(selection.sessionId, selection).catch(() => undefined);
-        this.providerEventBus.publish(selection);
+        this.publishProviderEvent(this.modelSelectionEvent(session, providerEvent));
       }
     }
     if (shouldCaptureKnowledgeEvent(event)) {
@@ -1762,6 +1766,13 @@ export class StudioRuntimeServer {
     for (const client of this.clients) {
       if (client.sessionId === sessionId) writeSSE(client.res, sanitizeStudioEvent(event));
     }
+  }
+
+  private publishProviderEvent(event: ProviderRuntimeEvent): void {
+    const publishable = sanitizeRuntimeEvent(event);
+    void this.eventJournal.append(publishable.sessionId, publishable).catch(() => undefined);
+    this.providerEventBus.publish(publishable);
+    void exportRuntimeEvent(publishable, this.telemetrySink).catch(() => undefined);
   }
 
   private providerRuntimeEventFromStudioEvent(session: StudioSession, event: StudioEvent): ProviderRuntimeEvent | null {

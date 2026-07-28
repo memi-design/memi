@@ -7,6 +7,7 @@
  */
 
 import { createLogger } from "./logger.js";
+import { hasConfiguredAIProvider } from "../ai/provider-config.js";
 
 const log = createLogger("capabilities");
 
@@ -22,7 +23,7 @@ export interface CapabilityCheck {
 
 const RECOVERY: Record<Capability, string> = {
   figma: "Connect to Figma: memi connect\n  Or use offline mode: most commands work without Figma",
-  ai: "Set your API key: export ANTHROPIC_API_KEY=\"sk-ant-...\"\n  Get one at: https://console.anthropic.com/\n  Without AI, agents use heuristic fallbacks (still functional)",
+  ai: "Configure Anthropic, OpenAI, an OpenAI-compatible endpoint, or explicit Ollama via MEMI_AI_PROVIDER.\n  Run memi doctor for provider-specific requirements.\n  Without AI, agents use heuristic fallbacks (still functional)",
   specs: "Create specs first: memi spec component <name>\n  Or pull from Figma: memi pull (auto-generates specs from components)",
   "generated-code": "Generate code first: memi generate\n  This requires specs — run memi pull or memi spec first",
   research: "Import research data: memi research from-file <file>\n  Or from Figma stickies: memi research from-stickies",
@@ -150,7 +151,7 @@ export function detectCapabilities(engine: {
 }): { figma: boolean; ai: boolean; specs: boolean; generatedCode: boolean; research: boolean; daemon: boolean } {
   return {
     figma: engine.figma.isConnected,
-    ai: !!process.env.ANTHROPIC_API_KEY,
+    ai: hasConfiguredAIProvider(),
     specs: engine.registry.designSystem.tokens.length > 0,
     generatedCode: false, // checked lazily per command
     research: engine.research.getStore().findings.length > 0,

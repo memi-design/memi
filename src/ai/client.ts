@@ -1,5 +1,5 @@
 /**
- * Anthropic AI Client — Singleton wrapper for the Anthropic SDK.
+ * Provider-neutral AI client entry point with an Anthropic implementation.
  *
  * Provides structured completion, streaming, and JSON extraction.
  * Gracefully degrades when no API key is set — Memoire works
@@ -7,28 +7,54 @@
  */
 
 import Anthropic from "@anthropic-ai/sdk";
+import { createHash } from "node:crypto";
 import { createLogger } from "../engine/logger.js";
 import { TokenTracker } from "./token-tracker.js";
 import { getModelId, getMaxOutput } from "./model-config.js";
-import type { AIResponse, AICompletionOptions, AIContentBlock, ModelTier, TokenUsage } from "./types.js";
+import { OpenAICompatibleClient } from "./openai-compatible.js";
+import { resolveAIProviderConfig } from "./provider-config.js";
+import type {
+  AIClient,
+  AIProviderCapabilities,
+  AIProviderConfig,
+  AIResponse,
+  AICompletionOptions,
+  AIContentBlock,
+  ModelTier,
+  TokenUsage,
+} from "./types.js";
 
 const log = createLogger("ai");
 
-let instance: AnthropicClient | null = null;
+let instance: AIClient | null = null;
+let instanceKey: string | null = null;
 
-export class AnthropicClient {
+export class AnthropicClient implements AIClient {
   private sdk: Anthropic;
+  private readonly models: Record<ModelTier, string>;
+  readonly provider = "anthropic" as const;
+  readonly capabilities: AIProviderCapabilities = {
+    text: true,
+    vision: true,
+    streaming: true,
+    json: true,
+    tools: false,
+  };
   readonly tracker: TokenTracker;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, config?: AIProviderConfig) {
     this.sdk = new Anthropic({ apiKey });
+    this.models = config?.models ?? {
+      fast: getModelId("fast"),
+      deep: getModelId("deep"),
+    };
     this.tracker = new TokenTracker();
     log.info("Anthropic AI client initialized");
   }
 
   async complete(opts: AICompletionOptions): Promise<AIResponse> {
     const tier: ModelTier = opts.model || "fast";
-    const modelId = getModelId(tier);
+    const modelId = this.models[tier];
     const maxTokens = opts.maxTokens || getMaxOutput(tier);
 
     const maxRetries = 3;
@@ -62,6 +88,7 @@ export class AnthropicClient {
         return {
           content,
           model: modelId,
+          provider: this.provider,
           usage,
           stopReason: response.stop_reason || "end_turn",
         };
@@ -85,7 +112,7 @@ export class AnthropicClient {
 
   async *stream(opts: AICompletionOptions): AsyncGenerator<string, AIResponse> {
     const tier: ModelTier = opts.model || "fast";
-    const modelId = getModelId(tier);
+    const modelId = this.models[tier];
     const maxTokens = opts.maxTokens || getMaxOutput(tier);
 
     const stream = this.sdk.messages.stream({
@@ -119,6 +146,7 @@ export class AnthropicClient {
     return {
       content: fullContent,
       model: modelId,
+      provider: this.provider,
       usage,
       stopReason: finalMessage.stop_reason || "end_turn",
     };
@@ -282,16 +310,31 @@ function parseJSONFromResponse(content: string): unknown {
   }
 }
 
-export function getAI(): AnthropicClient | null {
-  if (instance) return instance;
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
-  instance = new AnthropicClient(key);
+export function getAI(): AIClient | null {
+  const config = resolveAIProviderConfig();
+  if (!config) {
+    instance = null;
+    instanceKey = null;
+    return null;
+  }
+  const nextInstanceKey = JSON.stringify({
+    provider: config.provider,
+    baseUrl: config.baseUrl,
+    models: config.models,
+    credentialFingerprint: config.apiKey
+      ? createHash("sha256").update(config.apiKey).digest("hex").slice(0, 16)
+      : null,
+  });
+  if (instance && instanceKey === nextInstanceKey) return instance;
+  instance = config.provider === "anthropic"
+    ? new AnthropicClient(config.apiKey!, config)
+    : new OpenAICompatibleClient(config);
+  instanceKey = nextInstanceKey;
   return instance;
 }
 
 export function hasAI(): boolean {
-  return !!process.env.ANTHROPIC_API_KEY;
+  return resolveAIProviderConfig() !== null;
 }
 
 export function getTracker(): TokenTracker | null {

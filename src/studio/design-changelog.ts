@@ -259,8 +259,10 @@ function buildCapturedEntry(projectRoot: string, input: {
 }
 
 function titleFromCapture(session: DesignChangelogCaptureRequest["session"], designEvents: StudioEvent[]): string {
-  const promptTitle = normalizeText(session?.prompt);
-  if (promptTitle) return promptTitle.length > 86 ? `${promptTitle.slice(0, 83)}...` : promptTitle;
+  const sessionTitle = [normalizeText(session?.harness), normalizeText(session?.action), "design change"]
+    .filter(Boolean)
+    .join(" ");
+  if (sessionTitle !== "design change") return sessionTitle;
   const firstTitle = normalizeText(designEvents[0]?.message);
   if (firstTitle) return firstTitle.length > 86 ? `${firstTitle.slice(0, 83)}...` : firstTitle;
   return "Captured design change";

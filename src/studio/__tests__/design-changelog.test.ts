@@ -70,7 +70,7 @@ describe("design changelog store", () => {
       });
 
       expect(captured.entry).toMatchObject({
-        title: "Pull design system into Memoire",
+        title: "codex audit design change",
         authoredBy: "agent",
         harness: "codex",
         action: "audit",
@@ -102,7 +102,7 @@ describe("design changelog store", () => {
       });
 
       expect(captured.entry).toMatchObject({
-        title: "Update Studio sidebar spacing",
+        title: "codex app-build design change",
         captureWarnings: expect.arrayContaining([
           expect.stringContaining("design_decision"),
         ]),

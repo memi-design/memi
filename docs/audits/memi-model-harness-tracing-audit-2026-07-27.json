@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "auditId": "memi-model-harness-tracing-2026-07-27",
+  "assessedAt": "2026-07-27T21:27:51-05:00",
+  "branch": "codex/model-harness-tracing",
+  "publicVerifiedScore": 69,
+  "reviewedCandidateRawScore": 87,
+  "scoreChangedByBranch": false,
+  "scoreChangeReason": "Unmerged and unpublished candidate code is not public release evidence.",
+  "candidateVerification": {
+    "testFilesPassed": 268,
+    "testsPassed": 1945,
+    "typecheck": "passed",
+    "build": "passed",
+    "runtimeSchemaDrift": "passed",
+    "productionDependencyAudit": "0 vulnerabilities"
+  },
+  "activeCaps": [
+    {
+      "id": "public-version-drift",
+      "maximum": 69,
+      "status": "active"
+    },
+    {
+      "id": "hosted-ci-incomplete",
+      "maximum": 84,
+      "status": "requires-current-verification"
+    }
+  ],
+  "providerSupport": [
+    {
+      "provider": "anthropic",
+      "surface": "direct-ai",
+      "implementation": "sdk",
+      "liveConformance": "unassessed"
+    },
+    {
+      "provider": "openai",
+      "surface": "direct-ai",
+      "implementation": "chat-completions-compatible-http",
+      "liveConformance": "unassessed"
+    },
+    {
+      "provider": "openai-compatible",
+      "surface": "direct-ai",
+      "implementation": "explicit-compatible-http",
+      "liveConformance": "unassessed"
+    },
+    {
+      "provider": "ollama",
+      "surface": "direct-ai",
+      "implementation": "explicit-local-compatible-http",
+      "liveConformance": "unassessed"
+    },
+    {
+      "provider": "codex-claude-gemini-opencode-hermes-ollama-memoire",
+      "surface": "studio-cli-harness",
+      "implementation": "canonical-runtime-event-projection",
+      "liveConformance": "partial"
+    }
+  ],
+  "closedCandidateGaps": [
+    "provider-neutral direct AI interface",
+    "strict provider response validation",
+    "explicit local-provider opt-in",
+    "canonical model selection change and handoff events",
+    "W3C trace and span context",
+    "metadata-only default capture",
+    "live RPC and SSE content omission",
+    "private trace and session persistence modes",
+    "generated language-neutral runtime schema",
+    "Atomic Design canvas projection contract",
+    "paired evidence-based design evaluation contract"
+  ],
+  "remainingGaps": [
+    "public release parity",
+    "current hosted CI proof",
+    "nine-cell clean-room release proof",
+    "complete supply-chain proof for the exact artifact",
+    "durable shader and Apple rendered proof",
+    "eight-week adoption proof",
+    "live provider and model conformance",
+    "typed drivers as the primary Studio execution source",
+    "external OpenTelemetry collector interoperability",
+    "Rust Serde consumer and golden vectors",
+    "canvas GUI implementation and browser E2E",
+    "real paired design-quality outcome studies"
+  ],
+  "publishDecision": "blocked-until-release-gates-pass"
+}

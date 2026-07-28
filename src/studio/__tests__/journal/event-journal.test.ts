@@ -120,6 +120,16 @@ describe("journal/FileEventJournal extras", () => {
     expect(replayed.length).toBe(2);
   });
 
+  it("replay waits for an append that was scheduled but not awaited", async () => {
+    const sessionId = asId("SessionId", makeId("SessionId"));
+    const pendingAppend = journal.append(sessionId, makeEvent(1, sessionId));
+
+    const replayed = await collectReplay(journal, sessionId);
+    await pendingAppend;
+
+    expect(replayed.map((event) => event.seq)).toEqual([1]);
+  });
+
   it("prune by age removes old journals from disk", async () => {
     const sessionId = asId("SessionId", makeId("SessionId"));
     await journal.append(sessionId, makeEvent(1, sessionId));
