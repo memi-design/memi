@@ -1,19 +1,18 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-26",
+  "updatedAt": "2026-07-27",
   "releaseGroups": {
     "engine": {
       "version": "2.6.3",
-      "state": "candidate",
-      "sourceCommit": null,
-      "releaseRecord": null,
+      "state": "published",
+      "sourceCommit": "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
+      "releaseRecord": {
+        "path": "release-artifacts/npm/2.6.3.release.json",
+        "sha256": "1a78e0619fe1b58977747eb704bd1ec02945f9b5872a72ca68b3ca2ebcf7416c"
+      },
       "verification": {
         "eligibleForParity": false,
-        "reason": "2.6.3 is staged for verified publication and has not been published"
-      },
-      "previousPublicRelease": {
-        "version": "2.6.2",
-        "sourceCommit": "ee3f3f00731a7a08c7616d4dfb14440165a86354"
+        "reason": "2.6.3 is published; parity remains capped until independent live verification passes"
       }
     },
     "studio": {
@@ -59,7 +58,8 @@
     "website": {
       "releaseGroup": "site",
       "repository": "sarveshsea/memoire-web",
-      "publicUrl": "https://www.memoire.cv"
+      "publicUrl": "https://www.memoire.cv",
+      "releaseArtifactUrl": "https://www.memoire.cv/release/memi-release.json"
     }
   }
 }
