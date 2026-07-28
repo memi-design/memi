@@ -44,6 +44,13 @@ const currentReleaseDoc = spawnSync(process.execPath, [
 if (currentReleaseDoc.status !== 0) {
   fail(`current release documentation gate failed: ${spawnFailureMessage(currentReleaseDoc, "failed")}`);
 }
+const runtimeSchema = spawnSync("npm", ["run", "check:runtime-schema"], {
+  cwd: root,
+  encoding: "utf-8",
+});
+if (runtimeSchema.status !== 0) {
+  fail(`runtime schema drift gate failed: ${spawnFailureMessage(runtimeSchema, "failed")}`);
+}
 const version = packageJson.version;
 const expectedMcpName = "io.github.sarveshsea/memi";
 if (packageJson.mcpName !== expectedMcpName) {

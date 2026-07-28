@@ -50,6 +50,7 @@ describe("studio provider runtime RPC", () => {
         .filter((response) => response.kind === "event")
         .map((response) => response.event!);
 
+      expect(events[0]?.type).toBe("session.created");
       expect(events.some((event) => event.type === "session.created")).toBe(true);
       expect(events.some((event) => event.type === "model.selected")).toBe(true);
       expect(events.some((event) => event.type === "turn.completed")).toBe(true);
@@ -59,6 +60,8 @@ describe("studio provider runtime RPC", () => {
         expect((event.trace as { traceId: string }).traceId).toMatch(/^[0-9a-f]{32}$/);
         expect((event.trace as { spanId: string }).spanId).toMatch(/^[0-9a-f]{16}$/);
       }
+      expect(new Set(events.map((event) => (event.trace as { spanId: string }).spanId)).size)
+        .toBeGreaterThan(1);
     } finally {
       await rm(root, { recursive: true, force: true });
     }

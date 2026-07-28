@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { StudioChatMode, StudioEvent, StudioPermissionMode, StudioRunAction, StudioSession, StudioSessionMode } from "./types.js";
+import { redactSecrets, redactSensitiveValue } from "./redact.js";
 
 export interface StudioSessionIndexEntry {
   id: string;
@@ -39,7 +40,7 @@ export class StudioSessionStore {
   }
 
   init(): void {
-    mkdirSync(this.sessionsDir, { recursive: true });
+    mkdirSync(this.sessionsDir, { recursive: true, mode: 0o700 });
     try {
       this.index = JSON.parse(readFileSync(this.indexPath, "utf-8")) as StudioSessionIndex;
       if (this.index.schemaVersion !== 1 || !Array.isArray(this.index.sessions)) {
@@ -53,8 +54,10 @@ export class StudioSessionStore {
   }
 
   appendEvent(session: StudioSession, event: StudioEvent): void {
-    mkdirSync(this.sessionsDir, { recursive: true });
-    appendFileSync(this.eventLogPath(session.id), `${JSON.stringify(event)}\n`);
+    mkdirSync(this.sessionsDir, { recursive: true, mode: 0o700 });
+    appendFileSync(this.eventLogPath(session.id), `${JSON.stringify(sanitizeStudioEvent(event, "local_content"))}\n`, {
+      mode: 0o600,
+    });
     this.upsertSession(session);
   }
 
@@ -63,7 +66,7 @@ export class StudioSessionStore {
       id: session.id,
       conversationId: session.conversationId,
       turnIndex: session.turnIndex,
-      goal: session.goal,
+      goal: session.goal ? "[content omitted]" : undefined,
       model: session.model,
       effort: session.effort,
       harness: session.harness,
@@ -71,8 +74,8 @@ export class StudioSessionStore {
       mode: session.mode,
       chatMode: session.chatMode,
       permissionMode: session.permissionMode,
-      cwd: session.cwd,
-      prompt: session.prompt,
+      cwd: redactSecrets(session.cwd),
+      prompt: "[content omitted]",
       status: session.status,
       startedAt: session.startedAt,
       completedAt: session.completedAt,
@@ -121,8 +124,10 @@ export class StudioSessionStore {
   }
 
   private flushIndex(): void {
-    mkdirSync(this.root, { recursive: true });
-    writeFileSync(this.indexPath, `${JSON.stringify(this.index, null, 2)}\n`);
+    mkdirSync(this.root, { recursive: true, mode: 0o700 });
+    writeFileSync(this.indexPath, `${JSON.stringify(this.index, null, 2)}\n`, {
+      mode: 0o600,
+    });
   }
 
   private finalizeAbandonedRunningSessions(): void {
@@ -154,4 +159,44 @@ export class StudioSessionStore {
     }
     this.flushIndex();
   }
+}
+
+export function sanitizeStudioEvent(
+  event: StudioEvent,
+  captureMode: "metadata_only" | "local_content" = "metadata_only",
+): StudioEvent {
+  if (event.type === "reasoning") {
+    return {
+      ...event,
+      message: "[reasoning omitted]",
+      data: event.data === undefined ? undefined : "[content omitted]",
+    };
+  }
+  if (captureMode === "metadata_only") {
+    const safeMessageTypes = new Set<StudioEvent["type"]>([
+      "session_started",
+      "session_done",
+      "session_error",
+      "auth_status",
+      "auth_state",
+      "token_usage",
+      "approval_request",
+      "approval_resolved",
+      "tool_call",
+    ]);
+    return {
+      ...event,
+      message: safeMessageTypes.has(event.type)
+        ? redactSecrets(event.message)
+        : "[content omitted]",
+      data: event.type === "token_usage" && event.data !== undefined
+        ? redactSensitiveValue(event.data)
+        : event.data === undefined ? undefined : "[content omitted]",
+    };
+  }
+  return {
+    ...event,
+    message: redactSecrets(event.message),
+    data: event.data === undefined ? undefined : redactSensitiveValue(event.data),
+  };
 }

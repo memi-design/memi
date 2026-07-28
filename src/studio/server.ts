@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { buildHarnessCommand, clearHarnessProbeCaches, harnessProbeCacheAgeMs, listHarnesses } from "./harnesses.js";
 import { loadStudioConfig, saveStudioConfig } from "./config.js";
 import { redactSecrets } from "./redact.js";
-import { StudioSessionStore, type StudioSessionIndexEntry } from "./session-store.js";
+import { sanitizeStudioEvent, StudioSessionStore, type StudioSessionIndexEntry } from "./session-store.js";
 import {
   DESIGN_AUTOMATION_TEMPLATES,
   StudioAutomationStore,
@@ -77,8 +77,12 @@ import { buildSessionReferenceTrace } from "./reference-trace.js";
 import { createStudioTraceSnapshot } from "./view-model.js";
 import { asId, makeId } from "./contracts/ids.js";
 import type { ProviderRuntimeEvent } from "./contracts/provider-runtime.js";
+import type { RuntimeTraceContext } from "./contracts/provider-runtime.js";
 import { FileEventJournal } from "./journal/event-journal.js";
 import { RpcServer } from "./rpc/server.js";
+import { EventBus } from "./event-bus.js";
+import { createChildTraceContext, createRuntimeTraceContext } from "./tracing/context.js";
+import { sanitizeRuntimeEvent } from "./tracing/privacy.js";
 import { FileSimulationStore } from "../simulation/index.js";
 import type { ResearchStore } from "../research/engine.js";
 import {
@@ -170,6 +174,9 @@ export class StudioRuntimeServer {
   private readonly automations: StudioAutomationStore;
   private readonly downloads: StudioDownloadStore;
   private readonly eventJournal: FileEventJournal;
+  private readonly providerEventBus = new EventBus();
+  private readonly providerTraceContexts = new Map<string, RuntimeTraceContext>();
+  private readonly providerToolTraceContexts = new Map<string, RuntimeTraceContext>();
   private readonly toolCalls = new Map<string, StudioToolCallResult>();
   private readonly providerEventSeq = new Map<string, number>();
   private readonly startedAt = Date.now();
@@ -232,6 +239,9 @@ export class StudioRuntimeServer {
     await this.browser.closeAll();
     for (const client of this.clients) client.res.end();
     this.clients.clear();
+    this.providerEventBus.clear();
+    this.providerTraceContexts.clear();
+    this.providerToolTraceContexts.clear();
     if (!this.server) return;
     await new Promise<void>((resolveStop) => this.server?.close(() => resolveStop()));
     this.server = null;
@@ -323,6 +333,7 @@ export class StudioRuntimeServer {
     this.sessions.set(session.id, session);
     this.activeStreams.add(session.id);
     const outputNormalizer = createStudioOutputNormalizer(commandSpec.outputParser);
+    this.addEvent(session.id, "session_started", `Started ${input.harness}`, { cwd, prompt: input.prompt, conversationId, turnIndex, goal, model, effort, mode, chatMode, permissionMode, attachments });
     this.addEvent(session.id, "chat_message", input.prompt.trim(), {
       role: "user",
       conversationId,
@@ -336,7 +347,6 @@ export class StudioRuntimeServer {
       action,
       attachments,
     });
-    this.addEvent(session.id, "session_started", `Started ${input.harness}`, { cwd, prompt: input.prompt, conversationId, turnIndex, goal, model, effort, mode, chatMode, permissionMode, attachments });
     this.addEvent(session.id, "reference_trace", "Mémoire package and source references loaded", {
       references: buildSessionReferenceTrace(agentContext),
     });
@@ -481,6 +491,10 @@ export class StudioRuntimeServer {
           createDriver: () => {
             throw new Error("Live ProviderRuntime drivers are not mounted on the legacy Studio server yet");
           },
+          subscribeEvents: (sessionId, onEvent) => this.providerEventBus.subscribeFiltered(
+            onEvent,
+            { sessionId: sessionId as unknown as string },
+          ),
         },
       });
       const responses: unknown[] = [];
@@ -1707,7 +1721,14 @@ export class StudioRuntimeServer {
     this.sessionStore.appendEvent(session, event);
     const providerEvent = this.providerRuntimeEventFromStudioEvent(session, event);
     if (providerEvent) {
-      void this.eventJournal.append(providerEvent.sessionId, providerEvent).catch(() => undefined);
+      const publishable = sanitizeRuntimeEvent(providerEvent);
+      void this.eventJournal.append(publishable.sessionId, publishable).catch(() => undefined);
+      this.providerEventBus.publish(publishable);
+      if (providerEvent.type === "session.created") {
+        const selection = sanitizeRuntimeEvent(this.modelSelectionEvent(session, providerEvent));
+        void this.eventJournal.append(selection.sessionId, selection).catch(() => undefined);
+        this.providerEventBus.publish(selection);
+      }
     }
     if (shouldCaptureKnowledgeEvent(event)) {
       void captureKnowledgeEvent(this.projectRoot, event, {
@@ -1739,19 +1760,22 @@ export class StudioRuntimeServer {
       }).catch(() => undefined);
     }
     for (const client of this.clients) {
-      if (client.sessionId === sessionId) writeSSE(client.res, event);
+      if (client.sessionId === sessionId) writeSSE(client.res, sanitizeStudioEvent(event));
     }
   }
 
   private providerRuntimeEventFromStudioEvent(session: StudioSession, event: StudioEvent): ProviderRuntimeEvent | null {
-    if (session.harness !== "codex" && session.harness !== "claude-code") return null;
+    const trace = this.providerTraceContextForStudioEvent(session.id, event);
     const base = {
+      schemaVersion: 1 as const,
       eventId: providerRuntimeId("EventId", event.id),
       seq: this.nextProviderEventSeq(session.id),
       harnessId: asId("HarnessId", `hns_${session.harness}`),
       providerInstanceId: asId("ProviderInstanceId", `prv_${session.id}`),
       sessionId: providerRuntimeId("SessionId", session.id),
       createdAt: event.timestamp,
+      trace,
+      contentTrust: contentTrustForStudioEvent(event.type),
     };
     const message = redactSecrets(event.message ?? "");
 
@@ -1761,7 +1785,7 @@ export class StudioRuntimeServer {
         type: "session.created",
         harnessConfigSummary: {
           harness: base.harnessId,
-          model: session.model ?? (session.harness === "codex" ? "gpt-5.5" : undefined),
+          model: this.resolvedSessionModel(session),
           effort: session.effort ?? undefined,
         },
       };
@@ -1811,6 +1835,70 @@ export class StudioRuntimeServer {
       return { ...base, type: "diagnostic.warn", message, data: event.data };
     }
     return null;
+  }
+
+  private modelSelectionEvent(
+    session: StudioSession,
+    created: Extract<ProviderRuntimeEvent, { type: "session.created" }>,
+  ): Extract<ProviderRuntimeEvent, { type: "model.selected" }> {
+    const harness = this.config?.harnesses.find((candidate) => candidate.id === session.harness);
+    const resolvedModel = this.resolvedSessionModel(session);
+    return {
+      schemaVersion: 1,
+      eventId: providerRuntimeId("EventId", `model-${session.id}`),
+      seq: this.nextProviderEventSeq(session.id),
+      harnessId: created.harnessId,
+      providerInstanceId: created.providerInstanceId,
+      sessionId: created.sessionId,
+      createdAt: created.createdAt,
+      trace: createChildTraceContext(this.providerTraceContext(session.id)),
+      contentTrust: "trusted",
+      type: "model.selected",
+      providerId: harness?.provider ?? session.harness,
+      requestedModel: session.model ?? undefined,
+      resolvedModel,
+      reason: session.model ? "requested" : "default",
+      capabilities: [...(harness?.capabilities ?? [])],
+    };
+  }
+
+  private resolvedSessionModel(session: StudioSession): string {
+    const harness = this.config?.harnesses.find((candidate) => candidate.id === session.harness);
+    return session.model
+      ?? harness?.defaultModel
+      ?? `${harness?.provider ?? session.harness}-default`;
+  }
+
+  private providerTraceContext(sessionId: string): RuntimeTraceContext {
+    const current = this.providerTraceContexts.get(sessionId);
+    if (current) return current;
+    const created = createRuntimeTraceContext({ runId: `run_${sessionId.replace(/[^A-Za-z0-9_-]/g, "")}` });
+    this.providerTraceContexts.set(sessionId, created);
+    return created;
+  }
+
+  private providerTraceContextForStudioEvent(
+    sessionId: string,
+    event: StudioEvent,
+  ): RuntimeTraceContext {
+    const root = this.providerTraceContext(sessionId);
+    if (event.type === "session_started") return root;
+    if (event.type === "tool_call") {
+      const data = isRecord(event.data) ? event.data : {};
+      const callId = String(data.callId ?? data.id ?? event.id);
+      const trace = createChildTraceContext(root);
+      this.providerToolTraceContexts.set(`${sessionId}:${callId}`, trace);
+      return trace;
+    }
+    if (event.type === "tool_result") {
+      const data = isRecord(event.data) ? event.data : {};
+      const callId = String(data.callId ?? data.id ?? data.toolUseId ?? event.id);
+      const key = `${sessionId}:${callId}`;
+      const trace = this.providerToolTraceContexts.get(key) ?? createChildTraceContext(root);
+      this.providerToolTraceContexts.delete(key);
+      return trace;
+    }
+    return createChildTraceContext(root);
   }
 
   private nextProviderEventSeq(sessionId: string): number {
@@ -2123,6 +2211,28 @@ function usageProviderForHarness(harness: StudioHarnessId): StudioUsageProviderI
   if (harness === "ollama") return "local";
   if (harness === "shell") return "shell";
   return "memoire";
+}
+
+function contentTrustForStudioEvent(
+  type: StudioEventType,
+): "trusted" | "user" | "tool_untrusted" | "web_untrusted" | "model_generated" {
+  if (type === "chat_message") return "user";
+  if (type === "reasoning") return "model_generated";
+
+  if (
+    type === "stdout" ||
+    type === "stderr" ||
+    type === "terminal_output" ||
+    type === "tool_call" ||
+    type === "tool_result" ||
+    type === "harness_log" ||
+    type === "package_log" ||
+    type === "mcp_call"
+  ) {
+    return "tool_untrusted";
+  }
+
+  return "trusted";
 }
 
 function normalizeRpcRequestSessionId(body: unknown): unknown {

@@ -14,12 +14,13 @@
  * Both are injected so tests can use mock implementations.
  */
 
-import { Effect } from "effect";
+import { Effect, Fiber, Stream } from "effect";
 import { asId } from "../contracts/ids.js";
 import type { HarnessId, SessionId, ThreadId, TurnId } from "../contracts/ids.js";
 import type { HarnessDriver, HarnessTurnRequest } from "../drivers/base.js";
 import type { EventJournal } from "../journal/event-journal.js";
 import type { ProviderRuntimeEvent } from "../contracts/provider-runtime.js";
+import { sanitizeRuntimeEvent } from "../tracing/privacy.js";
 import {
   parseRpcRequest,
   type RpcRequest,
@@ -45,6 +46,14 @@ export interface SessionResolver {
     threadId?: ThreadId;
     options?: Record<string, unknown>;
   }): HarnessDriver;
+  /**
+   * Optional bridge for live canonical events produced by an existing
+   * runtime that has not yet moved execution into HarnessDriver.
+   */
+  subscribeEvents?(
+    sessionId: SessionId,
+    onEvent: (event: ProviderRuntimeEvent) => void,
+  ): { unsubscribe(): void };
 }
 
 export interface RpcServerConfig {
@@ -154,7 +163,8 @@ export class RpcServer {
   ): RpcSubscription {
     const sessionId = req.sessionId as SessionId;
     const driver = this.config.resolver.resolveDriver(sessionId);
-    if (!driver) {
+    const canBridge = Boolean(this.config.resolver.subscribeEvents);
+    if (!driver && !canBridge) {
       return RpcSubscription.singleShot({
         kind: "error",
         requestId: req.requestId,
@@ -164,13 +174,41 @@ export class RpcServer {
     }
 
     const sub = new RpcSubscription();
-    // First, replay any missed events from the journal if a cursor is provided.
-    if (req.fromSeq !== undefined && this.config.journal) {
+    const replayPending = req.fromSeq !== undefined && Boolean(this.config.journal);
+    let bufferingLiveEvents = replayPending;
+    const liveBuffer: ProviderRuntimeEvent[] = [];
+    const pushLive = (event: ProviderRuntimeEvent) => {
+      const sanitized = sanitizeRuntimeEvent(event);
+      if (bufferingLiveEvents) {
+        liveBuffer.push(sanitized);
+        return;
+      }
+      sub.push({ kind: "event", requestId: req.requestId, event: sanitized });
+    };
+
+    if (this.config.resolver.subscribeEvents) {
+      const bridge = this.config.resolver.subscribeEvents(sessionId, pushLive);
+      sub.addCleanup(() => bridge.unsubscribe());
+    } else if (driver) {
+      const fiber = Effect.runFork(
+        Stream.runForEach(driver.events(), (event) =>
+          Effect.sync(() => pushLive(event))),
+      );
+      sub.addCleanup(() => {
+        Effect.runFork(Fiber.interrupt(fiber));
+      });
+    }
+
+    sub.push({ kind: "ack", requestId: req.requestId });
+    if (replayPending && this.config.journal) {
       const journal = this.config.journal;
       void (async () => {
+        let lastReplayedSeq = (req.fromSeq ?? 0) - 1;
         try {
           for await (const event of journal.replay(sessionId, req.fromSeq)) {
-            sub.push({ kind: "event", requestId: req.requestId, event });
+            const sanitized = sanitizeRuntimeEvent(event);
+            lastReplayedSeq = Math.max(lastReplayedSeq, sanitized.seq);
+            sub.push({ kind: "event", requestId: req.requestId, event: sanitized });
           }
         } catch (error) {
           sub.push({
@@ -178,31 +216,18 @@ export class RpcServer {
             requestId: req.requestId,
             error: `replay failed: ${error instanceof Error ? error.message : String(error)}`,
           });
+        } finally {
+          bufferingLiveEvents = false;
+          const deduped = new Map<number, ProviderRuntimeEvent>();
+          for (const event of liveBuffer) {
+            if (event.seq > lastReplayedSeq) deduped.set(event.seq, event);
+          }
+          for (const event of [...deduped.values()].sort((a, b) => a.seq - b.seq)) {
+            sub.push({ kind: "event", requestId: req.requestId, event });
+          }
         }
       })();
     }
-
-    // Then subscribe to the live event stream via the driver's events() Stream.
-    const stream = driver.events();
-    void Effect.runPromise(
-      Effect.scoped(
-        Effect.tryPromise({
-          try: async () => {
-            // Effect Stream → manual loop. We can't easily await a Stream
-            // here without bringing in more of Effect's runtime, so we use
-            // Effect.runPromise(Stream.runForEach(...)) under the hood
-            // when the consumer mounts WebSocket. For the in-process
-            // dispatcher today, the test fixtures use the BaseHarnessDriver's
-            // subscribers Set directly via push() to verify the contract.
-            return undefined;
-          },
-          catch: () => undefined,
-        }),
-      ),
-    );
-    void stream;
-
-    sub.push({ kind: "ack", requestId: req.requestId });
     return sub;
   }
 
@@ -276,6 +301,7 @@ export class RpcSubscription {
   private buffer: RpcResponse[] = [];
   private resolvers: Array<(response: IteratorResult<RpcResponse>) => void> = [];
   private closed = false;
+  private readonly cleanup = new Set<() => void>();
 
   static singleShot(response: RpcResponse): RpcSubscription {
     const sub = new RpcSubscription();
@@ -317,7 +343,16 @@ export class RpcSubscription {
   }
 
   close(): void {
+    if (this.closed) return;
     this.closed = true;
+    for (const cleanup of this.cleanup) {
+      try {
+        cleanup();
+      } catch {
+        // Cleanup must not prevent subscription closure.
+      }
+    }
+    this.cleanup.clear();
     while (this.resolvers.length > 0) {
       const next = this.resolvers.shift()!;
       next({ value: undefined as unknown as RpcResponse, done: true });
@@ -326,6 +361,14 @@ export class RpcSubscription {
 
   cancel(): void {
     this.close();
+  }
+
+  addCleanup(cleanup: () => void): void {
+    if (this.closed) {
+      cleanup();
+      return;
+    }
+    this.cleanup.add(cleanup);
   }
 
   [Symbol.asyncIterator](): AsyncIterator<RpcResponse> {

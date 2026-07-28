@@ -103,7 +103,7 @@ describe("studio session store", () => {
         action: "raw",
         conversationId: "conv-store",
         turnIndex: 0,
-        goal: "Keep the persisted session easy to reopen.",
+        goal: "[content omitted]",
       });
       expect(status.metrics).toMatchObject({
         indexedSessions: 1,
@@ -113,7 +113,7 @@ describe("studio session store", () => {
       expect(status.metrics.eventBufferSize).toBeGreaterThan(0);
 
       const logs = await fetch(`${runtime.url}/api/logs/${encodeURIComponent(session.id)}?limit=1`).then((res) => res.json());
-      expect(logs.session).toMatchObject({ id: session.id, status: "completed", conversationId: "conv-store", goal: "Keep the persisted session easy to reopen." });
+      expect(logs.session).toMatchObject({ id: session.id, status: "completed", conversationId: "conv-store", goal: "[content omitted]" });
       expect(logs.events).toHaveLength(1);
       expect(logs.events[0].type).toBe("session_done");
     } finally {

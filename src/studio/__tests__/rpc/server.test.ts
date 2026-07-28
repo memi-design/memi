@@ -296,4 +296,47 @@ describe("rpc/server", () => {
     expect(JSON.stringify(responses)).not.toContain("sk-proj-private");
     sub.cancel();
   });
+
+  it("replays a cursor before flushing newer live events without duplicates", async () => {
+    const sessionId = asId("SessionId", "ses_ordered");
+    const journal = new MemoryEventJournal();
+    await journal.append(sessionId, {
+      eventId: asId("EventId", makeId("EventId")),
+      seq: 1,
+      harnessId: asId("HarnessId", "hns_codex"),
+      providerInstanceId: asId("ProviderInstanceId", "prv_live"),
+      sessionId,
+      createdAt: new Date().toISOString(),
+      type: "stream.heartbeat",
+    });
+    let subscriber: ((event: ProviderRuntimeEvent) => void) | null = null;
+    const { resolver } = makeResolver();
+    resolver.subscribeEvents = (_sessionId, onEvent) => {
+      subscriber = onEvent;
+      return { unsubscribe: () => { subscriber = null; } };
+    };
+    const server = new RpcServer({ resolver, journal });
+    const sub = server.dispatch({
+      op: "subscribeThread",
+      requestId: "r-order",
+      sessionId,
+      fromSeq: 1,
+    });
+    subscriber?.({
+      eventId: asId("EventId", makeId("EventId")),
+      seq: 2,
+      harnessId: asId("HarnessId", "hns_codex"),
+      providerInstanceId: asId("ProviderInstanceId", "prv_live"),
+      sessionId,
+      createdAt: new Date().toISOString(),
+      type: "stream.heartbeat",
+    });
+
+    const responses = await collect(sub, 100);
+    const seqs = responses
+      .filter((response) => response.kind === "event")
+      .map((response) => (response as { event: ProviderRuntimeEvent }).event.seq);
+    expect(seqs).toEqual([1, 2]);
+    sub.cancel();
+  });
 });

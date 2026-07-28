@@ -9,6 +9,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = resolve(root, "dist");
 const tscBin = resolve(root, "node_modules", "typescript", "bin", "tsc");
 const buildInfo = resolve(root, "tsconfig.build.tsbuildinfo");
+const tsxBin = resolve(root, "node_modules", "tsx", "dist", "cli.mjs");
+const runtimeSchemaScript = resolve(root, "scripts", "build-runtime-schema.ts");
 
 const distExists = await pathExists(distDir);
 if (!distExists) {
@@ -32,6 +34,16 @@ const exitCode = await new Promise((resolveExit, reject) => {
 });
 
 if (exitCode !== 0) process.exit(exitCode);
+
+const runtimeSchemaExitCode = await new Promise((resolveExit, reject) => {
+  const child = spawn(process.execPath, [tsxBin, runtimeSchemaScript], {
+    cwd: root,
+    stdio: "inherit",
+  });
+  child.on("error", reject);
+  child.on("exit", (code) => resolveExit(code ?? 1));
+});
+if (runtimeSchemaExitCode !== 0) process.exit(runtimeSchemaExitCode);
 
 // The Studio React frontend lives at github.com/memi-design/memi-studio
 // and is built independently. It is no longer built or packaged from here.
