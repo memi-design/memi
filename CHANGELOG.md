@@ -12,7 +12,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Provider-neutral model harness and tracing foundation
 
-- `30ceee18` fix: validate organization release provenance
+- `9702758c` chore: record 2.6.4 published transition
+- `ffa63e01` fix: validate organization release provenance
 - `6f092842` chore: export 2.6.4 candidate manifest
 - `a6754d91` chore: stage 2.6.4 release candidate
 - `3581ed2a` feat: add provider-neutral model harness
