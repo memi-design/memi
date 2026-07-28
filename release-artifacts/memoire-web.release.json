@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "provenance": {
-    "repository": "https://github.com/sarveshsea/memi",
+    "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "f732b23cf0df779a4f471bef5a23abaa3df08464",
-    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/f732b23cf0df779a4f471bef5a23abaa3df08464/release-manifest.json",
-    "manifestSha256": "137b9a5f5a17fdecc6325049f9841aca9da87cad8f2bc22da5e3f9ae8d1ecf80"
+    "sourceCommit": "1ddcab8fe886ed7de85daba7d03f6d672b735c07",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/1ddcab8fe886ed7de85daba7d03f6d672b735c07/release-manifest.json",
+    "manifestSha256": "da4b56102d6bf53751ae3447abdee525b58d9675394bfbfaea1748af8f45d012"
   },
   "orchestration": {
     "schemaVersion": 1,
@@ -43,13 +43,13 @@
       },
       "githubRelease": {
         "releaseGroup": "engine",
-        "repository": "sarveshsea/memi",
+        "repository": "memi-design/memi",
         "tagPrefix": "v",
-        "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.3"
+        "url": "https://github.com/memi-design/memi/releases/tag/v2.6.3"
       },
       "githubAction": {
         "releaseGroup": "engine",
-        "repository": "sarveshsea/memi",
+        "repository": "memi-design/memi",
         "majorTag": "v2"
       },
       "mcp": {
@@ -58,7 +58,7 @@
       },
       "studio": {
         "releaseGroup": "studio",
-        "repository": "sarveshsea/memi-studio",
+        "repository": "memi-design/memi-studio",
         "tagPrefix": "v",
         "arm64Asset": "Memoire.Studio_{version}_aarch64.dmg",
         "x64Asset": "Memoire.Studio_{version}_x64.dmg",
@@ -79,7 +79,7 @@
       "sourceCommit": "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
       "packageName": "@memi-design/cli",
       "npmUrl": "https://www.npmjs.com/package/@memi-design/cli",
-      "githubReleaseUrl": "https://github.com/sarveshsea/memi/releases/tag/v2.6.3"
+      "githubReleaseUrl": "https://github.com/memi-design/memi/releases/tag/v2.6.3"
     }
   },
   "release": {
@@ -118,13 +118,13 @@
       },
       "githubRelease": {
         "releaseGroup": "engine",
-        "repository": "sarveshsea/memi",
+        "repository": "memi-design/memi",
         "tagPrefix": "v",
-        "url": "https://github.com/sarveshsea/memi/releases/tag/v2.6.3"
+        "url": "https://github.com/memi-design/memi/releases/tag/v2.6.3"
       },
       "githubAction": {
         "releaseGroup": "engine",
-        "repository": "sarveshsea/memi",
+        "repository": "memi-design/memi",
         "majorTag": "v2"
       },
       "mcp": {
@@ -133,7 +133,7 @@
       },
       "studio": {
         "releaseGroup": "studio",
-        "repository": "sarveshsea/memi-studio",
+        "repository": "memi-design/memi-studio",
         "tagPrefix": "v",
         "arm64Asset": "Memoire.Studio_{version}_aarch64.dmg",
         "x64Asset": "Memoire.Studio_{version}_x64.dmg",

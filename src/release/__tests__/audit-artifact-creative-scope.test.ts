@@ -32,7 +32,7 @@ describe("audit artifact creative-rendering honesty", () => {
     };
     const evidence = audit.evidenceLedger.relatedRepositories.designSkills;
 
-    expect(evidence.repository).toBe("https://github.com/memi-design/design-skills");
+    expect(evidence.repository).toBe("https://github.com/sarveshsea/design-skills");
     expect(evidence.pullRequest).toMatch(/\/pull\/\d+$/);
     expect(evidence.commit).toMatch(/^[a-f0-9]{40}$/);
     expect(evidence.run).toMatch(/^https:\/\/github\.com\/sarveshsea\/design-skills\/actions\/runs\/\d+$/);
@@ -71,7 +71,7 @@ describe("audit artifact creative-rendering honesty", () => {
     const shaderCriterion = shaderDimension?.criteria.find((criterion) => criterion.id === "candidate-webgl-proof");
 
     expect(auditMarkdown).toContain("separate `design-sandbox` project");
-    expect(evidence.repository).toBe("https://github.com/memi-design/design-sandbox");
+    expect(evidence.repository).toBe("https://github.com/sarveshsea/design-sandbox");
     expect(evidence.pullRequest).toMatch(/\/pull\/\d+$/);
     expect(evidence.commit).toMatch(/^[a-f0-9]{40}$/);
     expect(evidence.route).toBe("/labs/shaders");
@@ -118,7 +118,7 @@ describe("audit artifact creative-rendering honesty", () => {
 
     expect(evidence.assessment).toBe("partial");
     expect(evidence.source.repository).toBe(
-      "https://github.com/memi-design/design-sandbox",
+      "https://github.com/sarveshsea/design-sandbox",
     );
     expect(evidence.source.headCommit).toMatch(/^[a-f0-9]{40}$/);
     expect(evidence.source.renderedSourceCommit).toMatch(/^[a-f0-9]{40}$/);
