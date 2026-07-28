@@ -5,28 +5,29 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const currentVersion = "2.6.4";
-const previousPublicVersion = "2.6.3";
-const previousPublicSourceCommit = "0f89cbf1b9972c779dbf14cc09f6c91485a1182b";
+const sourceCommit = "ec4d804220bfbf08be810ceb692a338cf186e794";
+const releaseRecordPath = "release-artifacts/npm/2.6.4.release.json";
+const releaseRecordSha256 =
+  "405cca4d4d1c45f4725d98f4219f22704cc203fd09afca0c82969d78e23b5a0b";
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.6.4 candidate release surfaces", () => {
-  it("keeps the candidate unreleased and preserves immutable prior public truth", async () => {
+describe("2.6.4 published release surfaces", () => {
+  it("binds the published release to its immutable source and release record", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toEqual({
       version: currentVersion,
-      state: "candidate",
-      sourceCommit: null,
-      releaseRecord: null,
+      state: "published",
+      sourceCommit,
+      releaseRecord: {
+        path: releaseRecordPath,
+        sha256: releaseRecordSha256,
+      },
       verification: {
         eligibleForParity: false,
-        reason: "2.6.4 is staged for verified publication and has not been published",
-      },
-      previousPublicRelease: {
-        version: previousPublicVersion,
-        sourceCommit: previousPublicSourceCommit,
+        reason: "2.6.4 is published; independent public-surface parity verification is pending",
       },
     });
     expect(manifest.surfaces.githubRelease.url.endsWith("/v2.6.4")).toBe(true);
@@ -106,12 +107,11 @@ describe("2.6.4 candidate release surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(currentVersion);
   });
 
-  it("labels 2.6.4 as unreleased and keeps the public activation command on 2.6.3", async () => {
+  it("labels 2.6.4 as published and exposes only its verified activation command", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Engine candidate (unreleased)");
-    expect(currentRelease).toContain("Release state: `candidate`");
-    expect(currentRelease).toContain("Source commit: Not assigned.");
-    expect(currentRelease).toContain("npx -y @memi-design/cli@2.6.3");
-    expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.4");
+    expect(currentRelease).toContain("Release state: `published`");
+    expect(currentRelease).toContain(`Source commit: \`${sourceCommit}\``);
+    expect(currentRelease).toContain("npx -y @memi-design/cli@2.6.4");
+    expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.3");
   });
 });

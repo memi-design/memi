@@ -11,6 +11,7 @@ const manifest = JSON.parse(
     engine: {
       version: string;
       state?: string;
+      sourceCommit?: string | null;
       previousPublicRelease?: { version: string };
     };
     studio: { version: string };
@@ -25,6 +26,12 @@ if (!publicEngineVersion) {
   throw new Error("Candidate manifest must identify its previous public release");
 }
 const studioVersion = manifest.releaseGroups.studio.version;
+const publicEngineSourceCommit = manifest.releaseGroups.engine.state === "candidate"
+  ? "0f89cbf1b9972c779dbf14cc09f6c91485a1182b"
+  : manifest.releaseGroups.engine.sourceCommit;
+if (!publicEngineSourceCommit) {
+  throw new Error("Published manifest must identify its immutable source commit");
+}
 const primaryStory = "read-only design engineering audit and skill layer for coding agents";
 
 const engineDocs = [
@@ -58,7 +65,7 @@ const expectedDocRefs = [
   "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
   "github/codeql-action/upload-sarif@1b168cd39490f61582a9beae412bb7057a6b2c4e",
-  "memi-design/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
+  `memi-design/memi@${publicEngineSourceCommit}`,
 ] as const;
 
 describe("public documentation release truth", () => {
@@ -129,7 +136,7 @@ describe("public documentation release truth", () => {
     expect(readme).toContain("assets/readme-hero.svg");
     expect(readme).toContain("img.shields.io/npm/dw/@memi-design/cli");
     expect(readme).toContain(
-      "npx -y @memi-design/cli@2.6.3 diagnose . --json --no-write --fail-on none",
+      `npx -y @memi-design/cli@${publicEngineVersion} diagnose . --json --no-write --fail-on none`,
     );
     expect(readme).toContain("If Memi catches a real interface issue");
     expect(quickstartIndex).toBeGreaterThan(-1);
