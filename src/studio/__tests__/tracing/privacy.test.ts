@@ -37,7 +37,7 @@ describe("tracing/privacy", () => {
   it("recursively redacts secrets from structured tool payloads", () => {
     const sanitized = sanitizeRuntimeEvent(event({
       type: "tool.call.started",
-      toolCallId: asId("ToolCallId", "tool_x"),
+      toolCallId: asId("ToolCallId", "tcl_x"),
       tool: "Bash",
       args: {
         command: "echo safe",

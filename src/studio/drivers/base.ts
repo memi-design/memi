@@ -35,6 +35,7 @@ import {
 import type {
   ProviderRuntimeEvent,
   ProviderRuntimeEventBase,
+  RuntimeTraceContext,
   SessionState,
   TurnState,
 } from "../contracts/provider-runtime.js";
@@ -47,6 +48,10 @@ import {
 } from "../snapshots/snapshot-store.js";
 import type { EventJournal } from "../journal/event-journal.js";
 import type { EventBus } from "../event-bus.js";
+import {
+  createChildTraceContext,
+  createRuntimeTraceContext,
+} from "../tracing/context.js";
 
 export interface HarnessDriverConfig {
   readonly harnessId: HarnessId;
@@ -75,6 +80,12 @@ export interface HarnessDriverConfig {
    * called explicitly from the tool broker.
    */
   readonly eventBus?: EventBus;
+  /** Stable provider identity; defaults from the harness id when omitted. */
+  readonly providerId?: string;
+  /** Capabilities negotiated for this run. */
+  readonly capabilities?: readonly string[];
+  /** Optional upstream trace context for cross-process or model handoffs. */
+  readonly traceContext?: RuntimeTraceContext;
 }
 
 export interface HarnessTurnRequest {
@@ -103,10 +114,15 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
   private seq = 0;
   private readonly subscribers = new Set<EventEmitter>();
   private finalized = false;
+  private readonly rootTrace: RuntimeTraceContext;
+  private readonly turnTraces = new Map<string, RuntimeTraceContext>();
+  private readonly toolTraces = new Map<string, RuntimeTraceContext>();
+  private lastEmittedSessionState: SessionState = "idle";
 
   constructor(config: HarnessDriverConfig) {
     this.config = config;
     this.session = new SessionMachine("idle");
+    this.rootTrace = config.traceContext ?? createRuntimeTraceContext();
   }
 
   abstract start(): Effect.Effect<void, HarnessError>;
@@ -139,21 +155,42 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
     return this.seq;
   }
 
-  protected envelope(extra?: { turnId?: TurnId }): ProviderRuntimeEventBase {
+  protected envelope(extra?: {
+    turnId?: TurnId;
+    trace?: RuntimeTraceContext;
+  }): ProviderRuntimeEventBase {
+    const turnId = extra?.turnId ?? this.currentTurnId ?? undefined;
     return {
+      schemaVersion: 1,
       eventId: asId("EventId", makeId("EventId")),
       seq: this.nextSeq(),
       harnessId: this.config.harnessId,
       providerInstanceId: this.config.providerInstanceId,
       sessionId: this.config.sessionId,
       threadId: this.config.threadId,
-      turnId: extra?.turnId ?? this.currentTurnId ?? undefined,
+      turnId,
       createdAt: new Date().toISOString(),
+      trace: extra?.trace ?? this.traceForTurn(turnId),
     };
   }
 
   protected emit(event: ProviderRuntimeEvent): void {
     if (this.finalized) return;
+    this.publishEvent(event);
+    if (event.type === "session.created" && event.harnessConfigSummary.model) {
+      this.publishEvent({
+        ...this.envelope({ trace: this.rootTrace }),
+        type: "model.selected",
+        providerId: this.config.providerId ?? providerIdForHarness(this.config.harnessId),
+        requestedModel: event.harnessConfigSummary.model,
+        resolvedModel: event.harnessConfigSummary.model,
+        reason: "requested",
+        capabilities: [...(this.config.capabilities ?? [])],
+      });
+    }
+  }
+
+  private publishEvent(event: ProviderRuntimeEvent): void {
     for (const sub of this.subscribers) {
       try {
         sub(event);
@@ -164,6 +201,16 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
     this.maybeUpdateSnapshot(event);
     this.maybeAppendJournal(event);
     this.maybePublishToBus(event);
+  }
+
+  private traceForTurn(turnId?: TurnId): RuntimeTraceContext {
+    if (!turnId) return this.rootTrace;
+    const key = turnId as unknown as string;
+    const current = this.turnTraces.get(key);
+    if (current) return current;
+    const created = createChildTraceContext(this.rootTrace);
+    this.turnTraces.set(key, created);
+    return created;
   }
 
   private maybePublishToBus(event: ProviderRuntimeEvent): void {
@@ -335,7 +382,10 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
   }
 
   protected emitToolStarted(toolCallId: ToolCallId, tool: string, args: unknown): void {
-    this.emit({ ...this.envelope(), type: "tool.call.started", toolCallId, tool, args });
+    const parent = this.traceForTurn(this.currentTurnId ?? undefined);
+    const trace = createChildTraceContext(parent);
+    this.toolTraces.set(toolCallId as unknown as string, trace);
+    this.emit({ ...this.envelope({ trace }), type: "tool.call.started", toolCallId, tool, args });
   }
 
   protected emitToolOutput(
@@ -343,7 +393,9 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
     chunk: string,
     stream: "stdout" | "stderr" = "stdout",
   ): void {
-    this.emit({ ...this.envelope(), type: "tool.call.output", toolCallId, chunk, stream });
+    const trace = this.toolTraces.get(toolCallId as unknown as string)
+      ?? this.traceForTurn(this.currentTurnId ?? undefined);
+    this.emit({ ...this.envelope({ trace }), type: "tool.call.output", toolCallId, chunk, stream });
   }
 
   protected emitToolCompleted(
@@ -352,14 +404,18 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
     elapsedMs: number,
     extras?: { result?: unknown; error?: string },
   ): void {
+    const key = toolCallId as unknown as string;
+    const trace = this.toolTraces.get(key)
+      ?? this.traceForTurn(this.currentTurnId ?? undefined);
     this.emit({
-      ...this.envelope(),
+      ...this.envelope({ trace }),
       type: "tool.call.completed",
       toolCallId,
       ok,
       elapsedMs,
       ...(extras ?? {}),
     });
+    this.toolTraces.delete(key);
   }
 
   protected emitMessageDelta(delta: string): void {
@@ -384,7 +440,8 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
   }
 
   protected emitSessionStateChange(toState: SessionState, reason?: string): void {
-    const fromState = this.session.current();
+    const fromState = this.lastEmittedSessionState;
+    this.lastEmittedSessionState = toState;
     this.emit({
       ...this.envelope(),
       type: "session.state.changed",
@@ -419,4 +476,14 @@ export abstract class BaseHarnessDriver implements HarnessDriver {
     this.finalized = true;
     this.subscribers.clear();
   }
+}
+
+function providerIdForHarness(harnessId: HarnessId): string {
+  const normalized = String(harnessId).replace(/^hns_/, "");
+  if (normalized === "codex") return "openai";
+  if (normalized === "claude-code") return "anthropic";
+  if (normalized === "gemini") return "google";
+  if (normalized === "ollama") return "local";
+  if (normalized === "memoire") return "memoire";
+  return normalized;
 }

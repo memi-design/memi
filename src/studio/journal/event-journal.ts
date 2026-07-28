@@ -26,6 +26,17 @@ import { promises as fs } from "node:fs";
 import { join } from "node:path";
 import type { SessionId } from "../contracts/ids.js";
 import type { ProviderRuntimeEvent } from "../contracts/provider-runtime.js";
+import { safeParseProviderRuntimeEvent } from "../contracts/provider-runtime.js";
+import {
+  DEFAULT_TRACE_PRIVACY_POLICY,
+  sanitizeRuntimeEvent,
+  type TracePrivacyPolicy,
+} from "../tracing/privacy.js";
+
+export interface EventJournalOptions {
+  readonly privacyPolicy?: TracePrivacyPolicy;
+  readonly maxBytesPerSession?: number;
+}
 
 export interface EventJournal {
   append(sessionId: SessionId, event: ProviderRuntimeEvent): Promise<void>;
@@ -45,11 +56,17 @@ export interface EventJournal {
 export class MemoryEventJournal implements EventJournal {
   private readonly buffers = new Map<string, ProviderRuntimeEvent[]>();
   private readonly mtimes = new Map<string, number>();
+  private readonly privacyPolicy: TracePrivacyPolicy;
+
+  constructor(options: EventJournalOptions = {}) {
+    this.privacyPolicy = options.privacyPolicy ?? DEFAULT_TRACE_PRIVACY_POLICY;
+  }
 
   async append(sessionId: SessionId, event: ProviderRuntimeEvent): Promise<void> {
+    if (this.privacyPolicy.captureMode === "off") return;
     const key = sessionId as unknown as string;
     const buf = this.buffers.get(key) ?? [];
-    buf.push(event);
+    buf.push(sanitizeRuntimeEvent(event, this.privacyPolicy));
     this.buffers.set(key, buf);
     this.mtimes.set(key, Date.now());
   }
@@ -106,14 +123,18 @@ export class FileEventJournal implements EventJournal {
   private readonly dir: string;
   private ensureDirPromise: Promise<void> | null = null;
   private readonly inflight = new Map<string, Promise<void>>();
+  private readonly privacyPolicy: TracePrivacyPolicy;
+  private readonly maxBytesPerSession: number;
 
-  constructor(projectRoot: string) {
+  constructor(projectRoot: string, options: EventJournalOptions = {}) {
     this.dir = join(projectRoot, ".memoire", "studio", "events");
+    this.privacyPolicy = options.privacyPolicy ?? DEFAULT_TRACE_PRIVACY_POLICY;
+    this.maxBytesPerSession = options.maxBytesPerSession ?? 10 * 1024 * 1024;
   }
 
   private ensureDir(): Promise<void> {
     if (!this.ensureDirPromise) {
-      this.ensureDirPromise = fs.mkdir(this.dir, { recursive: true }).then(() => undefined);
+      this.ensureDirPromise = fs.mkdir(this.dir, { recursive: true, mode: 0o700 }).then(() => undefined);
     }
     return this.ensureDirPromise;
   }
@@ -123,10 +144,23 @@ export class FileEventJournal implements EventJournal {
   }
 
   async append(sessionId: SessionId, event: ProviderRuntimeEvent): Promise<void> {
+    if (this.privacyPolicy.captureMode === "off") return;
     await this.ensureDir();
     const key = sessionId as unknown as string;
     const previous = this.inflight.get(key) ?? Promise.resolve();
-    const next = previous.then(() => fs.appendFile(this.filePath(sessionId), JSON.stringify(event) + "\n", "utf-8"));
+    const persistedEvent = sanitizeRuntimeEvent(event, this.privacyPolicy);
+    const line = `${JSON.stringify(persistedEvent)}\n`;
+    const next = previous.then(async () => {
+      const path = this.filePath(sessionId);
+      const currentSize = await fs.stat(path).then((stat) => stat.size).catch((error: unknown) => {
+        if ((error as NodeJS.ErrnoException | undefined)?.code === "ENOENT") return 0;
+        throw error;
+      });
+      if (currentSize + Buffer.byteLength(line) > this.maxBytesPerSession) {
+        throw new Error(`event journal exceeded ${this.maxBytesPerSession} bytes for session ${sessionId}`);
+      }
+      await fs.appendFile(path, line, { encoding: "utf-8", mode: 0o600 });
+    });
     this.inflight.set(key, next.catch(() => undefined));
     await next;
   }
@@ -144,7 +178,9 @@ export class FileEventJournal implements EventJournal {
       const trimmed = line.trim();
       if (!trimmed) continue;
       try {
-        const event = JSON.parse(trimmed) as ProviderRuntimeEvent;
+        const parsed = safeParseProviderRuntimeEvent(JSON.parse(trimmed));
+        if (!parsed.ok) continue;
+        const event = parsed.event;
         if (fromSeq !== undefined && event.seq < fromSeq) continue;
         yield event;
       } catch {
