@@ -84,7 +84,7 @@ No LLM is used in the deterministic CI enforcement path.
 | Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude, Cursor, and compatible agents |
 | GitHub Action | `uses: memi-design/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b` | Pull-request design CI |
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
-| Studio | `brew install --cask sarveshsea/memi/memi-studio` | Supervised macOS workflows |
+| Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
 
 The CLI and focused skills are primary. Studio, Figma, research, scaffolding, registries, and the larger tool router are deeper paths.
 
@@ -210,7 +210,7 @@ Useful contributions include reproducible audit fixtures, framework adapters, sk
 
 ```bash
 curl -fsSL https://memoire.cv/install.sh | sh
-brew install sarveshsea/memi/memoire
+brew install memi-design/memi/memoire
 docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/memi-design/memi --help
 ```
 

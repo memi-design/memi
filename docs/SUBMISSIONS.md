@@ -48,7 +48,7 @@ codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugin
 macOS app:
 
 ```bash
-brew install --cask sarveshsea/memi/memi-studio
+brew install --cask memi-design/memi/memi-studio
 ```
 
 ## Directory Matrix
