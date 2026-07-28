@@ -7,6 +7,7 @@ import {
   DEFAULT_README_PHRASE,
   SLSA_PROVENANCE_V1,
   assertRegistryAttestationUrl,
+  extractProvenanceInvocation,
   validateProvenanceAttestations,
   validateRegistryVersion,
 } from "../../../scripts/lib/npm-release-verification.mjs";
@@ -45,6 +46,9 @@ function provenancePayload(overrides: Record<string, unknown> = {}) {
       },
       runDetails: {
         builder: { id: "https://github.com/actions/runner/github-hosted" },
+        metadata: {
+          invocationId: "https://github.com/memi-design/memi/actions/runs/123456789/attempts/1",
+        },
       },
     },
     ...overrides,
@@ -152,6 +156,20 @@ describe("npm publish workflow provenance contract", () => {
 });
 
 describe("npm release verification", () => {
+  it("accepts a workflow invocation from the configured organization repository", () => {
+    expect(extractProvenanceInvocation({
+      payload: provenancePayload(),
+      expectedRepository,
+    })).toBe("https://github.com/memi-design/memi/actions/runs/123456789/attempts/1");
+  });
+
+  it("rejects a workflow invocation from a different repository", () => {
+    expect(() => extractProvenanceInvocation({
+      payload: provenancePayload(),
+      expectedRepository: "https://github.com/sarveshsea/memi",
+    })).toThrow("SLSA provenance invocation does not identify the expected workflow run attempt");
+  });
+
   it("accepts complete registry integrity and provenance metadata", () => {
     const result = validateRegistryVersion({
       metadata: {

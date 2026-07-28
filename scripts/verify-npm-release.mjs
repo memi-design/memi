@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import {
   DEFAULT_README_PHRASE,
   assertRegistryAttestationUrl,
+  extractProvenanceInvocation,
   validateProvenanceAttestations,
   validateRegistryVersion,
 } from "./lib/npm-release-verification.mjs";
@@ -180,7 +181,10 @@ async function verifyRegistryAndTarball(attempt) {
     expectedWorkflowRef,
     expectedSourceCommit,
   });
-  const invocationId = extractProvenanceInvocation(attestationPayload);
+  const invocationId = extractProvenanceInvocation({
+    payload: attestationPayload,
+    expectedRepository,
+  });
 
   const version = metadata.versions?.[expectedVersion];
   const tarballUrl = assertNpmTarballUrl(version?.dist?.tarball);
@@ -316,29 +320,6 @@ function assertNpmTarballUrl(value) {
     throw new Error("npm tarball URL must use the registry tarball endpoint");
   }
   return url.href;
-}
-
-function extractProvenanceInvocation(payload) {
-  const attestation = payload?.attestations?.find(
-    (entry) => entry?.predicateType === "https://slsa.dev/provenance/v1",
-  );
-  const encoded = attestation?.bundle?.dsseEnvelope?.payload;
-  if (typeof encoded !== "string" || !encoded) {
-    throw new Error("SLSA provenance payload is missing");
-  }
-  let statement;
-  try {
-    statement = JSON.parse(Buffer.from(encoded, "base64").toString("utf8"));
-  } catch {
-    throw new Error("SLSA provenance payload is not valid JSON");
-  }
-  const invocationId = statement?.predicate?.runDetails?.metadata?.invocationId;
-  if (!/^https:\/\/github\.com\/sarveshsea\/memi\/actions\/runs\/\d+\/attempts\/[1-9]\d*$/.test(
-    invocationId ?? "",
-  )) {
-    throw new Error("SLSA provenance invocation does not identify a Memi workflow run attempt");
-  }
-  return invocationId;
 }
 
 async function readWorkingSurfaceSnapshot() {

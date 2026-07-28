@@ -164,6 +164,48 @@ export function validateProvenanceAttestations({
   };
 }
 
+export function extractProvenanceInvocation({ payload, expectedRepository }) {
+  const attestations = payload?.attestations;
+  assert(Array.isArray(attestations), "npm attestation response is missing attestations");
+  const provenance = attestations.find(
+    (attestation) => attestation?.predicateType === SLSA_PROVENANCE_V1,
+  );
+  assert(provenance, "npm attestation response is missing SLSA v1 provenance");
+
+  const statement = decodeStatement(provenance.bundle?.dsseEnvelope?.payload);
+  const invocationId = statement?.predicate?.runDetails?.metadata?.invocationId;
+  let repository;
+  let invocation;
+  try {
+    repository = new URL(expectedRepository);
+    invocation = new URL(invocationId);
+  } catch {
+    throw new Error(
+      "SLSA provenance invocation does not identify the expected workflow run attempt",
+    );
+  }
+
+  const repositoryPath = repository.pathname.replace(/\/+$/, "");
+  const expectedInvocationPath = new RegExp(
+    `^${escapeRegExp(repositoryPath)}/actions/runs/\\d+/attempts/[1-9]\\d*$`,
+  );
+  assert(
+    repository.origin === "https://github.com"
+      && !repository.username
+      && !repository.password
+      && !repository.search
+      && !repository.hash
+      && invocation.origin === repository.origin
+      && !invocation.username
+      && !invocation.password
+      && !invocation.search
+      && !invocation.hash
+      && expectedInvocationPath.test(invocation.pathname),
+    "SLSA provenance invocation does not identify the expected workflow run attempt",
+  );
+  return invocation.href;
+}
+
 function decodeStatement(value) {
   assert(typeof value === "string" && value.length > 0, "provenance payload is missing");
   try {
@@ -171,6 +213,10 @@ function decodeStatement(value) {
   } catch {
     throw new Error("provenance payload is not valid base64-encoded JSON");
   }
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function npmPackagePurl(packageName, version) {
