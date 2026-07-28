@@ -14,5 +14,8 @@ describe("runtime schema release surface", () => {
     expect(packageJson.files).toContain("schemas/memi-runtime-trace-v1.schema.json");
     expect(build).toContain("build-runtime-schema.ts");
     expect(release).toContain("check:runtime-schema");
+    expect(release).toMatch(
+      /spawnSync\("npm", \["run", "check:runtime-schema"\], \{\s+shell: process\.platform === "win32",/,
+    );
   });
 });
