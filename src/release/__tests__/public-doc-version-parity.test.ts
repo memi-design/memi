@@ -57,7 +57,7 @@ const expectedDocRefs = [
   "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
   "github/codeql-action/upload-sarif@1b168cd39490f61582a9beae412bb7057a6b2c4e",
-  "sarveshsea/memi@ee3f3f00731a7a08c7616d4dfb14440165a86354",
+  "sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
 ] as const;
 
 describe("public documentation release truth", () => {

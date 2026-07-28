@@ -6,6 +6,8 @@ package version.
 
 The primary public story is: `Memi is the read-only design engineering audit and skill layer for coding agents.` Studio is a companion.
 
+Current verified engine release: `2.6.3`.
+
 Use these checks before announcing, tagging, or publishing a public release.
 
 ## Canonical Release Manifest
@@ -27,7 +29,7 @@ canonical candidate or published manifest under `orchestration`, while `release`
 and `publicTruth` are the only public-display contract. During candidate staging,
 those public fields resolve to `previousPublicRelease`; they must never expose
 the unpublished candidate version or tag. Copy the artifact byte-for-byte to
-`src/data/memi-release.generated.json` in `sarveshsea/memoire-web`; the website
+`src/data/memi-release.generated.json` in `memi-design/memoire-web`; the website
 must derive CLI, GitHub release, and Studio metadata from `release` or
 `publicTruth`, never `orchestration`, and verify the canonical orchestration
 manifest's SHA-256 provenance offline with `npm run check:release-manifest`.

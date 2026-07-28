@@ -19,15 +19,14 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.6.3",
-          state: "candidate",
-          sourceCommit: null,
-          releaseRecord: null,
+          state: "published",
+          sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
+          releaseRecord: {
+            path: "release-artifacts/npm/2.6.3.release.json",
+            sha256: "1a78e0619fe1b58977747eb704bd1ec02945f9b5872a72ca68b3ca2ebcf7416c",
+          },
           verification: {
             eligibleForParity: false,
-          },
-          previousPublicRelease: {
-            version: "2.6.2",
-            sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
           },
         },
         studio: { version: "2.5.0" },
@@ -44,7 +43,11 @@ describe("release manifest", () => {
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
         studio: { releaseGroup: "studio", repository: "sarveshsea/memi-studio" },
-        website: { releaseGroup: "site", repository: "sarveshsea/memoire-web" },
+        website: {
+          releaseGroup: "site",
+          repository: "memi-design/memoire-web",
+          releaseArtifactUrl: "https://www.memoire.cv/release/memi-release.json",
+        },
       },
     });
   });
@@ -59,42 +62,16 @@ describe("release manifest", () => {
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
     expect(artifact.publicTruth).toEqual({
-      source: "previousPublicRelease",
+      source: "currentRelease",
       engine: {
-        version: "2.6.2",
-        sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+        version: "2.6.3",
+        sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
         packageName: "@memi-design/cli",
         npmUrl: "https://www.npmjs.com/package/@memi-design/cli",
-        githubReleaseUrl: "https://github.com/sarveshsea/memi/releases/tag/v2.6.2",
+        githubReleaseUrl: "https://github.com/sarveshsea/memi/releases/tag/v2.6.3",
       },
     });
-    expect(artifact.release).toMatchObject({
-      releaseGroups: {
-        engine: {
-          version: "2.6.2",
-          state: "historical",
-          sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
-          releaseRecord: null,
-          verification: {
-            eligibleForParity: false,
-            reason: "2.6.2 remains public while 2.6.3 is an unpublished candidate",
-          },
-          plannedSuccessor: "2.6.3",
-        },
-      },
-      surfaces: {
-        githubRelease: {
-          url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.2",
-        },
-        githubAction: {
-          majorTag: "v2",
-        },
-      },
-    });
-    expect(artifact.release.releaseGroups.engine.version)
-      .not.toBe(manifest.releaseGroups.engine.version);
-    expect(artifact.release.surfaces.githubRelease.url)
-      .not.toBe(manifest.surfaces.githubRelease.url);
+    expect(artifact.release).toEqual(manifest);
     expect(artifact.provenance).toEqual({
       repository: "https://github.com/sarveshsea/memi",
       path: "release-manifest.json",
@@ -117,7 +94,7 @@ describe("release manifest", () => {
     expect(result.status, result.stderr || result.stdout).toBe(0);
   });
 
-  it("validates a committed artifact from a depth-1 checkout", async () => {
+  it("fails closed when published-transition history is unavailable", async () => {
     const fixtureRoot = await mkdtemp(join(tmpdir(), "memi-release-fixture-"));
     const cloneParent = await mkdtemp(join(tmpdir(), "memi-release-clone-"));
     const shallowRoot = join(cloneParent, "checkout");
@@ -174,7 +151,10 @@ describe("release manifest", () => {
         [join(shallowRoot, "scripts", "sync-release-manifest.mjs"), "--check"],
         { cwd: shallowRoot, encoding: "utf8" },
       );
-      expect(result.status, result.stderr || result.stdout).toBe(0);
+      expect(result.status).not.toBe(0);
+      expect(result.stderr || result.stdout).toContain(
+        "published engine release is missing a prior candidate manifest revision",
+      );
 
       const writeResult = spawnSync(
         process.execPath,

@@ -4,27 +4,27 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const candidateVersion = "2.6.3";
+const currentVersion = "2.6.3";
+const sourceCommit = "0f89cbf1b9972c779dbf14cc09f6c91485a1182b";
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.6.3 non-published candidate surfaces", () => {
-  it("keeps the canonical manifest fail-closed as an unreleased candidate", async () => {
+describe("2.6.3 published release surfaces", () => {
+  it("binds the canonical manifest to immutable npm provenance", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toEqual({
-      version: candidateVersion,
-      state: "candidate",
-      sourceCommit: null,
-      releaseRecord: null,
+      version: currentVersion,
+      state: "published",
+      sourceCommit,
+      releaseRecord: {
+        path: "release-artifacts/npm/2.6.3.release.json",
+        sha256: "1a78e0619fe1b58977747eb704bd1ec02945f9b5872a72ca68b3ca2ebcf7416c",
+      },
       verification: {
         eligibleForParity: false,
-        reason: "2.6.3 is staged for verified publication and has not been published",
-      },
-      previousPublicRelease: {
-        version: "2.6.2",
-        sourceCommit: "ee3f3f00731a7a08c7616d4dfb14440165a86354",
+        reason: "2.6.3 is published; parity remains capped until independent live verification passes",
       },
     });
     expect(manifest.surfaces.githubRelease.url.endsWith("/v2.6.3")).toBe(true);
@@ -66,14 +66,14 @@ describe("2.6.3 non-published candidate surfaces", () => {
       widget.packageVersion,
       skillRegistry.version,
       agentMirror.version,
-    ]).toEqual(Array(12).fill(candidateVersion));
-    expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${candidateVersion}.mcpb`);
-    expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${candidateVersion}.mcpb`);
+    ]).toEqual(Array(12).fill(currentVersion));
+    expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${currentVersion}.mcpb`);
+    expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${currentVersion}.mcpb`);
     expect(await readFile(join(root, "mcpb/server/index.cjs"), "utf8"))
-      .toContain(`@memi-design/cli@${candidateVersion}`);
+      .toContain(`@memi-design/cli@${currentVersion}`);
     const action = await readFile(join(root, "action.yml"), "utf8");
-    expect(action).toContain(`default: "${candidateVersion}"`);
-    expect(action).toContain(`reviewed ${candidateVersion} pin`);
+    expect(action).toContain(`default: "${currentVersion}"`);
+    expect(action).toContain(`reviewed ${currentVersion} pin`);
   });
 
   it("keeps packaged skills, generated examples, and changelog aligned", async () => {
@@ -93,22 +93,22 @@ describe("2.6.3 non-published candidate surfaces", () => {
     ];
     for (const path of skillPaths) {
       expect(await readFile(join(root, path), "utf8"), path)
-        .toContain(`@memi-design/cli@${candidateVersion}`);
+        .toContain(`@memi-design/cli@${currentVersion}`);
     }
 
     const preset = await readJson("examples/presets/starter/registry.json");
-    expect(preset.meta.memoireVersion).toBe(candidateVersion);
+    expect(preset.meta.memoireVersion).toBe(currentVersion);
     expect(await readFile(join(root, "examples/presets/starter/README.md"), "utf8"))
-      .toContain(`Memoire v${candidateVersion}`);
+      .toContain(`Memoire v${currentVersion}`);
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
-    expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
+    expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(currentVersion);
   });
 
-  it("labels the candidate as unreleased while preserving the 2.6.2 public command", async () => {
+  it("labels 2.6.3 as published and uses its read-only activation command", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Engine candidate (unreleased)");
-    expect(currentRelease).toContain("2.6.3 is not the current public release");
-    expect(currentRelease).toContain("npx -y @memi-design/cli@2.6.2");
-    expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.3");
+    expect(currentRelease).toContain("CLI, npm, MCP, and Action");
+    expect(currentRelease).toContain("Release state: `published`");
+    expect(currentRelease).toContain(sourceCommit);
+    expect(currentRelease).toContain("npx -y @memi-design/cli@2.6.3");
   });
 });
