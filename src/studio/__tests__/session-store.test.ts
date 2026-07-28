@@ -52,6 +52,9 @@ describe("studio session store", () => {
         type: "reasoning",
         message: "[reasoning omitted]",
       });
+      expect(store.getSession(session.id)).toMatchObject({
+        prompt: "[content omitted]",
+      });
     } finally {
       await rm(root, { recursive: true, force: true });
     }

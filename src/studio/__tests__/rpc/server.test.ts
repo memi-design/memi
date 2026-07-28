@@ -257,4 +257,43 @@ describe("rpc/server", () => {
     sub.cancel();
     expect(subscriber).toBeNull();
   });
+
+  it("subscribeThread applies metadata-only privacy before exposing live events", async () => {
+    const { resolver } = makeResolver();
+    let subscriber: ((event: ProviderRuntimeEvent) => void) | null = null;
+    resolver.subscribeEvents = (_sessionId, onEvent) => {
+      subscriber = onEvent;
+      return { unsubscribe: () => { subscriber = null; } };
+    };
+    const server = new RpcServer({ resolver });
+    const sessionId = asId("SessionId", "ses_private_live");
+    const sub = server.dispatch({
+      op: "subscribeThread",
+      requestId: "r-private",
+      sessionId,
+    });
+    subscriber?.({
+      eventId: asId("EventId", makeId("EventId")),
+      seq: 1,
+      harnessId: asId("HarnessId", "hns_codex"),
+      providerInstanceId: asId("ProviderInstanceId", "prv_live"),
+      sessionId,
+      createdAt: new Date().toISOString(),
+      type: "tool.call.started",
+      toolCallId: asId("ToolCallId", "tcl_private"),
+      tool: "Bash",
+      args: { env: { OPENAI_API_KEY: "sk-proj-private" } },
+    });
+
+    const responses = await collect(sub);
+    const eventResponse = responses.find((response) => response.kind === "event") as
+      | { kind: "event"; event: ProviderRuntimeEvent }
+      | undefined;
+    expect(eventResponse?.event).toMatchObject({
+      type: "tool.call.started",
+      args: "[content omitted]",
+    });
+    expect(JSON.stringify(responses)).not.toContain("sk-proj-private");
+    sub.cancel();
+  });
 });
