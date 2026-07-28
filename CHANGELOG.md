@@ -12,8 +12,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Provider-neutral model harness and tracing foundation
 
-- `9409abea` chore: export 2.6.4 candidate manifest
-- `c29028d2` chore: stage 2.6.4 release candidate
+- `30ceee18` fix: validate organization release provenance
+- `6f092842` chore: export 2.6.4 candidate manifest
+- `a6754d91` chore: stage 2.6.4 release candidate
 - `3581ed2a` feat: add provider-neutral model harness
 - `10d079ae` test: require live telemetry projection
 - `b4448748` test: define provider-neutral AI adapter
