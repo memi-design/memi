@@ -3,9 +3,9 @@
   "provenance": {
     "repository": "https://github.com/sarveshsea/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "2700f5a29b499ed36da3d567c4e439e763d1f7a3",
-    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/2700f5a29b499ed36da3d567c4e439e763d1f7a3/release-manifest.json",
-    "manifestSha256": "dad728e596398a492fd43272536f4b2989b0c5266bafe48ac567ef0bdb3d0801"
+    "sourceCommit": "f732b23cf0df779a4f471bef5a23abaa3df08464",
+    "sourceUrl": "https://raw.githubusercontent.com/sarveshsea/memi/f732b23cf0df779a4f471bef5a23abaa3df08464/release-manifest.json",
+    "manifestSha256": "137b9a5f5a17fdecc6325049f9841aca9da87cad8f2bc22da5e3f9ae8d1ecf80"
   },
   "orchestration": {
     "schemaVersion": 1,
@@ -66,7 +66,7 @@
       },
       "website": {
         "releaseGroup": "site",
-        "repository": "sarveshsea/memoire-web",
+        "repository": "memi-design/memoire-web",
         "publicUrl": "https://www.memoire.cv",
         "releaseArtifactUrl": "https://www.memoire.cv/release/memi-release.json"
       }
@@ -141,7 +141,7 @@
       },
       "website": {
         "releaseGroup": "site",
-        "repository": "sarveshsea/memoire-web",
+        "repository": "memi-design/memoire-web",
         "publicUrl": "https://www.memoire.cv",
         "releaseArtifactUrl": "https://www.memoire.cv/release/memi-release.json"
       }
