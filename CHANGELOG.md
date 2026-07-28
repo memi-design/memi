@@ -8,6 +8,18 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+### Provider-neutral model harness and tracing foundation
+
+- `8b62c505` feat: add privacy-safe model tracing contracts
+- `95ada5e0` test: define model harness tracing contract
+
+#### Architectural decisions
+
+- Define "all-model support" as capability negotiation against a versioned adapter contract, with missing capabilities failing closed instead of branching on vendor names or implying unverified compatibility.
+- Keep Memi's strict run, span, and runtime-event records as the source of truth. OpenTelemetry and future Rust or canvas consumers integrate at explicit schema boundaries rather than owning provider-specific logs.
+- Default durable event journals to metadata-only content, recursively redact structured secrets, never persist hidden reasoning text, and attach W3C-compatible trace and span identifiers to driver events.
+- Record model selection, model changes, and model handoffs as first-class receipts so later Rust services and canvas/Figma interfaces can render the same immutable execution graph.
+
 ## v2.6.3
 
 ### Design-engineering audit, trust boundaries, and release proof
