@@ -7,6 +7,7 @@ import { asId, makeId } from "../../contracts/ids.js";
 import { MemoryEventJournal } from "../../journal/event-journal.js";
 import type { HarnessDriver } from "../../drivers/base.js";
 import type { HarnessId, SessionId, ThreadId } from "../../contracts/ids.js";
+import type { ProviderRuntimeEvent } from "../../contracts/provider-runtime.js";
 
 function fakeTransport() {
   const lineSubs = new Set<(line: string, stream: "stdout" | "stderr") => void>();
@@ -224,5 +225,36 @@ describe("rpc/server", () => {
       }),
     );
     expect(diff.some((r) => r.kind === "result")).toBe(true);
+  });
+
+  it("subscribeThread streams canonical live events through the resolver bridge", async () => {
+    const { resolver } = makeResolver();
+    let subscriber: ((event: ProviderRuntimeEvent) => void) | null = null;
+    resolver.subscribeEvents = (_sessionId, onEvent) => {
+      subscriber = onEvent;
+      return { unsubscribe: () => { subscriber = null; } };
+    };
+    const server = new RpcServer({ resolver });
+    const sessionId = asId("SessionId", "ses_live");
+    const sub = server.dispatch({
+      op: "subscribeThread",
+      requestId: "r-live",
+      sessionId,
+    });
+    subscriber?.({
+      eventId: asId("EventId", makeId("EventId")),
+      seq: 1,
+      harnessId: asId("HarnessId", "hns_codex"),
+      providerInstanceId: asId("ProviderInstanceId", "prv_live"),
+      sessionId,
+      createdAt: new Date().toISOString(),
+      type: "stream.heartbeat",
+    });
+
+    const responses = await collect(sub);
+    expect(responses.some((response) => response.kind === "ack")).toBe(true);
+    expect(responses.some((response) => response.kind === "event")).toBe(true);
+    sub.cancel();
+    expect(subscriber).toBeNull();
   });
 });
