@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
 import { defaultStudioConfig, saveStudioConfig } from "../config.js";
 import { StudioRuntimeServer } from "../server.js";
+import { MemoryTelemetrySink } from "../tracing/opentelemetry.js";
 
 const servers: StudioRuntimeServer[] = [];
 
@@ -66,6 +67,46 @@ describe("studio provider runtime RPC", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("projects live canonical events to an explicit telemetry sink without content", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memi-provider-telemetry-"));
+    try {
+      const config = defaultStudioConfig(root);
+      await saveStudioConfig(root, {
+        ...config,
+        enabledTools: { ...config.enabledTools, shell: true },
+        harnesses: config.harnesses.map((harness) =>
+          harness.id === "shell"
+            ? { ...harness, enabled: true, command: "sh", defaultModel: "shell-local" }
+            : harness),
+      });
+      const telemetrySink = new MemoryTelemetrySink();
+      const server = new StudioRuntimeServer({
+        projectRoot: root,
+        port: 0,
+        telemetrySink,
+      });
+      servers.push(server);
+      await server.start();
+      const session = await server.startSession({
+        harness: "shell",
+        cwd: root,
+        prompt: "printf 'private model content\\n'",
+        action: "raw",
+      });
+      await waitForSession(server, session.id);
+      await waitFor(() => telemetrySink.projections.length > 0);
+
+      expect(telemetrySink.projections.some((projection) =>
+        projection.attributes["gen_ai.operation.name"] === "invoke_workflow")).toBe(true);
+      expect(JSON.stringify(telemetrySink.projections)).not.toContain("private model content");
+      expect(telemetrySink.projections.every((projection) =>
+        /^[0-9a-f]{32}$/.test(projection.traceId)
+        && /^[0-9a-f]{16}$/.test(projection.spanId))).toBe(true);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });
 
 async function waitForSession(server: StudioRuntimeServer, sessionId: string): Promise<void> {
@@ -75,4 +116,12 @@ async function waitForSession(server: StudioRuntimeServer, sessionId: string): P
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
   throw new Error("timed out waiting for Studio session");
+}
+
+async function waitFor(predicate: () => boolean): Promise<void> {
+  for (let i = 0; i < 60; i += 1) {
+    if (predicate()) return;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  throw new Error("timed out waiting for telemetry");
 }
