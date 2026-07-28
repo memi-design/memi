@@ -1,0 +1,132 @@
+name: Promote verified release channels
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing semver release tag to promote
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_TAG: ${{ inputs.release_tag }}
+  DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "20"
+
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Verify current immutable release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::release tag must be exact vMAJOR.MINOR.PATCH semver"
+            exit 1
+          fi
+
+          git fetch origin "${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}" --force
+          git fetch origin "refs/tags/${RELEASE_TAG}:refs/tags/${RELEASE_TAG}" --force
+          release_commit="$(git rev-parse "${RELEASE_TAG}^{commit}")"
+          current_package_version="$(node -p "require('./package.json').version")"
+          current_manifest_version="$(node -p "require('./release-manifest.json').releaseGroups.engine.version")"
+
+          test "${RELEASE_TAG}" = "v${current_package_version}"
+          test "${current_manifest_version}" = "${current_package_version}"
+          git merge-base --is-ancestor "${release_commit}" "origin/${DEFAULT_BRANCH}"
+          test "$(npm view @memi-design/cli version)" = "${RELEASE_TAG#v}"
+          test "$(gh release view "${RELEASE_TAG}" --json isDraft --jq .isDraft)" = "false"
+          test "$(gh release view "${RELEASE_TAG}" --json isPrerelease --jq .isPrerelease)" = "false"
+
+          mkdir -p release-assets
+          gh release download "${RELEASE_TAG}" \
+            --pattern "memi-*.tar.gz" \
+            --pattern "memi-win-x64.zip" \
+            --pattern "SHA256SUMS.txt" \
+            --dir release-assets
+          (
+            cd release-assets
+            test "$(wc -l < SHA256SUMS.txt | tr -d ' ')" = "4"
+            sha256sum --check SHA256SUMS.txt
+          )
+
+          docker buildx imagetools inspect "ghcr.io/sarveshsea/memi:${RELEASE_TAG}"
+          echo "RELEASE_COMMIT=${release_commit}" >> "${GITHUB_ENV}"
+
+      - name: Promote container latest
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Point container latest at the verified image
+        run: |
+          docker buildx imagetools create --tag ghcr.io/sarveshsea/memi:latest \
+            "ghcr.io/sarveshsea/memi:${RELEASE_TAG}"
+
+      - name: Promote GitHub release and Action major tag
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release edit "${RELEASE_TAG}" --latest
+          major="${RELEASE_TAG#v}"
+          major="${major%%.*}"
+          git config user.name "sarveshsea-bot"
+          git config user.email "bot@memoire.cv"
+          git tag --force "v${major}" "${RELEASE_COMMIT}"
+          git push origin "refs/tags/v${major}" --force
+
+      - name: Render verified Homebrew formula
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist-bin
+          cp release-assets/SHA256SUMS.txt dist-bin/SHA256SUMS.txt
+          node scripts/homebrew/update-formula.mjs \
+            --version="${RELEASE_TAG#v}" \
+            --out=memoire.rb
+          ruby -c memoire.rb
+
+      - name: Promote Homebrew formula
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::HOMEBREW_TAP_TOKEN secret is required to publish the tap"
+            exit 1
+          fi
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/sarveshsea/homebrew-memi.git" tap
+          mkdir -p tap/Formula
+          cp memoire.rb tap/Formula/memoire.rb
+          cd tap
+          grep -Fq "version \"${RELEASE_TAG#v}\"" Formula/memoire.rb
+          git config user.name "sarveshsea-bot"
+          git config user.email "bot@memoire.cv"
+          git add Formula/memoire.rb
+          if ! git diff --cached --quiet; then
+            git commit -m "memoire ${RELEASE_TAG}"
+            git push
+          fi
