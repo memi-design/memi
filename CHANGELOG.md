@@ -8,20 +8,22 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+## v2.6.4
+
 ### Provider-neutral model harness and tracing foundation
 
-- `77338211` feat: add provider-neutral model harness
-- `8f7e607a` test: require live telemetry projection
-- `30da1296` test: define provider-neutral AI adapter
-- `2ad29f2f` feat: mount traced runtime integration boundary
-- `74ec78cc` test: close live trace privacy gaps
-- `db407138` test: gate runtime schema release drift
-- `572ad66e` test: require private Studio persistence
-- `a4d1d134` test: require traced legacy harness replay
-- `90f3d427` test: define traced runtime integration boundary
-- `75133d8a` docs: record model tracing architecture
-- `8b62c505` feat: add privacy-safe model tracing contracts
-- `95ada5e0` test: define model harness tracing contract
+- `3581ed2a` feat: add provider-neutral model harness
+- `10d079ae` test: require live telemetry projection
+- `b4448748` test: define provider-neutral AI adapter
+- `7f83c4d1` feat: mount traced runtime integration boundary
+- `f4bee071` test: close live trace privacy gaps
+- `9d71b231` test: gate runtime schema release drift
+- `f1c9a1b1` test: require private Studio persistence
+- `81900a14` test: require traced legacy harness replay
+- `cca7d3a9` test: define traced runtime integration boundary
+- `a7be4b7a` docs: record model tracing architecture
+- `b40f4194` feat: add privacy-safe model tracing contracts
+- `d3edf23b` test: define model harness tracing contract
 
 #### Architectural decisions
 

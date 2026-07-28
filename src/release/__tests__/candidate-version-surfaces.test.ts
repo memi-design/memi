@@ -4,30 +4,32 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const currentVersion = "2.6.3";
-const sourceCommit = "0f89cbf1b9972c779dbf14cc09f6c91485a1182b";
+const currentVersion = "2.6.4";
+const previousPublicVersion = "2.6.3";
+const previousPublicSourceCommit = "0f89cbf1b9972c779dbf14cc09f6c91485a1182b";
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.6.3 published release surfaces", () => {
-  it("binds the canonical manifest to immutable npm provenance", async () => {
+describe("2.6.4 candidate release surfaces", () => {
+  it("keeps the candidate unreleased and preserves immutable prior public truth", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toEqual({
       version: currentVersion,
-      state: "published",
-      sourceCommit,
-      releaseRecord: {
-        path: "release-artifacts/npm/2.6.3.release.json",
-        sha256: "1a78e0619fe1b58977747eb704bd1ec02945f9b5872a72ca68b3ca2ebcf7416c",
-      },
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
       verification: {
         eligibleForParity: false,
-        reason: "2.6.3 is published; parity remains capped until independent live verification passes",
+        reason: "2.6.4 is staged for verified publication and has not been published",
+      },
+      previousPublicRelease: {
+        version: previousPublicVersion,
+        sourceCommit: previousPublicSourceCommit,
       },
     });
-    expect(manifest.surfaces.githubRelease.url.endsWith("/v2.6.3")).toBe(true);
+    expect(manifest.surfaces.githubRelease.url.endsWith("/v2.6.4")).toBe(true);
   });
 
   it("aligns every executable and packaged version surface", async () => {
@@ -104,11 +106,12 @@ describe("2.6.3 published release surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(currentVersion);
   });
 
-  it("labels 2.6.3 as published and uses its read-only activation command", async () => {
+  it("labels 2.6.4 as unreleased and keeps the public activation command on 2.6.3", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("CLI, npm, MCP, and Action");
-    expect(currentRelease).toContain("Release state: `published`");
-    expect(currentRelease).toContain(sourceCommit);
+    expect(currentRelease).toContain("Engine candidate (unreleased)");
+    expect(currentRelease).toContain("Release state: `candidate`");
+    expect(currentRelease).toContain("Source commit: Not assigned.");
     expect(currentRelease).toContain("npx -y @memi-design/cli@2.6.3");
+    expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.4");
   });
 });
