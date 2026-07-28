@@ -18,15 +18,16 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.6.3",
-          state: "published",
-          sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
-          releaseRecord: {
-            path: "release-artifacts/npm/2.6.3.release.json",
-            sha256: "1a78e0619fe1b58977747eb704bd1ec02945f9b5872a72ca68b3ca2ebcf7416c",
-          },
+          version: "2.6.4",
+          state: "candidate",
+          sourceCommit: null,
+          releaseRecord: null,
           verification: {
             eligibleForParity: false,
+          },
+          previousPublicRelease: {
+            version: "2.6.3",
+            sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
           },
         },
         studio: { version: "2.5.0" },
@@ -38,7 +39,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.6.3",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.6.4",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
@@ -62,7 +63,7 @@ describe("release manifest", () => {
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
     expect(artifact.publicTruth).toEqual({
-      source: "currentRelease",
+      source: "previousPublicRelease",
       engine: {
         version: "2.6.3",
         sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
@@ -71,7 +72,27 @@ describe("release manifest", () => {
         githubReleaseUrl: "https://github.com/memi-design/memi/releases/tag/v2.6.3",
       },
     });
-    expect(artifact.release).toEqual(manifest);
+    expect(artifact.release).toMatchObject({
+      schemaVersion: 1,
+      releaseGroups: {
+        engine: {
+          version: "2.6.3",
+          state: "historical",
+          sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
+          releaseRecord: null,
+          verification: {
+            eligibleForParity: false,
+            reason: "2.6.3 remains public while 2.6.4 is an unpublished candidate",
+          },
+          plannedSuccessor: "2.6.4",
+        },
+      },
+      surfaces: {
+        githubRelease: {
+          url: "https://github.com/memi-design/memi/releases/tag/v2.6.3",
+        },
+      },
+    });
     expect(artifact.provenance).toEqual({
       repository: "https://github.com/memi-design/memi",
       path: "release-manifest.json",
@@ -94,7 +115,7 @@ describe("release manifest", () => {
     expect(result.status, result.stderr || result.stdout).toBe(0);
   });
 
-  it("fails closed when published-transition history is unavailable", async () => {
+  it("validates a committed candidate artifact from a depth-1 checkout", async () => {
     const fixtureRoot = await mkdtemp(join(tmpdir(), "memi-release-fixture-"));
     const cloneParent = await mkdtemp(join(tmpdir(), "memi-release-clone-"));
     const shallowRoot = join(cloneParent, "checkout");
@@ -151,10 +172,7 @@ describe("release manifest", () => {
         [join(shallowRoot, "scripts", "sync-release-manifest.mjs"), "--check"],
         { cwd: shallowRoot, encoding: "utf8" },
       );
-      expect(result.status).not.toBe(0);
-      expect(result.stderr || result.stdout).toContain(
-        "published engine release is missing a prior candidate manifest revision",
-      );
+      expect(result.status, result.stderr || result.stdout).toBe(0);
 
       const writeResult = spawnSync(
         process.execPath,
