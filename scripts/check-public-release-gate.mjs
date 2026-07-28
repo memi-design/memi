@@ -280,7 +280,7 @@ async function verifyLiveNpm() {
         ...process.env,
         EXPECTED_VERSION: engine.version,
         EXPECTED_SOURCE_COMMIT: engine.sourceCommit,
-        EXPECTED_SOURCE_REPOSITORY: "https://github.com/sarveshsea/memi",
+        EXPECTED_SOURCE_REPOSITORY: "https://github.com/memi-design/memi",
         EXPECTED_SOURCE_WORKFLOW: ".github/workflows/publish.yml",
         EXPECTED_SOURCE_REF: "refs/heads/main",
         NPM_VERIFY_ATTEMPTS: "1",

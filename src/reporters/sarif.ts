@@ -27,7 +27,7 @@ function sarifLevel(severity: AppQualitySeverity, failOn: SarifOptions["failOn"]
 
 export function toSarif(issues: AppQualityIssue[], options: SarifOptions): object {
   const ruleIds = [...new Set(issues.map((issue) => issue.id))];
-  const helpBase = options.helpBaseUri ?? "https://github.com/sarveshsea/memi/blob/main/docs/README.md";
+  const helpBase = options.helpBaseUri ?? "https://github.com/memi-design/memi/blob/main/docs/README.md";
 
   return {
     $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
@@ -36,7 +36,7 @@ export function toSarif(issues: AppQualityIssue[], options: SarifOptions): objec
       tool: {
         driver: {
           name: "memi",
-          informationUri: "https://github.com/sarveshsea/memi",
+          informationUri: "https://github.com/memi-design/memi",
           version: options.toolVersion,
           rules: ruleIds.map((ruleId) => {
             const sample = issues.find((issue) => issue.id === ruleId);

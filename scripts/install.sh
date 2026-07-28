@@ -11,7 +11,7 @@
 
 set -eu
 
-REPO="sarveshsea/memi"
+REPO="memi-design/memi"
 INSTALL_DIR="${HOME}/.memoire"
 VERSION="latest"
 PATCH_PATH=1
@@ -36,7 +36,7 @@ case "${uname_s}-${uname_m}" in
   Linux-x86_64)            target="linux-x64" ;;
   Linux-aarch64|Linux-arm64)
     echo "error: linux-arm64 not yet published." >&2
-    echo "  Try:  docker run --rm -it ghcr.io/sarveshsea/memi --help" >&2
+    echo "  Try:  docker run --rm -it ghcr.io/memi-design/memi --help" >&2
     exit 1 ;;
   *)
     echo "error: unsupported platform ${uname_s}-${uname_m}" >&2

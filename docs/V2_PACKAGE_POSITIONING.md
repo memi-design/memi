@@ -23,7 +23,7 @@ Adjacent categories:
 | Product designers | Agent runs lose research and design context. | Preserve research, specs, Figma context, and run receipts. |
 | Design system owners | Registries, tokens, Figma, and code drift apart. | Extract, validate, publish, and reinstall system memory. |
 | Agent stack builders | Each agent needs a different context format. | Install skills and MCP config for Codex, Claude Code, Cursor, Hermes, OpenCode, OpenClaw, ECC-style stacks, and generic MCP clients. |
-| Design engineers | They need a small repo that proves the workflow before wiring it into production. | Use `sarveshsea/design-sandbox` as the memi-ready public proof workspace. |
+| Design engineers | They need a small repo that proves the workflow before wiring it into production. | Use `memi-design/design-sandbox` as the memi-ready public proof workspace. |
 
 ## Message hierarchy
 
@@ -59,7 +59,7 @@ The package should keep these properties before every public push:
 | shadcn/v0 registry | Frontend teams need visible outputs, not only audits. | `memi shadcn export`, example registries. |
 | Research design | Product teams need design decisions tied to evidence. | `memi research design`, Scenario Lab, Mermaid Jam export. |
 | Studio | Designers need a supervised workbench for Codex and Claude Code. | `memi studio web|tui|logs|run` and macOS app. |
-| Public proof repos | Users trust runnable repositories more than claims. | `sarveshsea/design-sandbox` and future shadcn/Tailwind examples. |
+| Public proof repos | Users trust runnable repositories more than claims. | `memi-design/design-sandbox` and future shadcn/Tailwind examples. |
 
 ## Package structure target
 

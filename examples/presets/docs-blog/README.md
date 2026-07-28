@@ -26,4 +26,4 @@ memi publish --name @yourscope/your-ds
 npm publish --access public
 ```
 
-Source: [examples/presets/docs-blog](https://github.com/sarveshsea/memi/tree/main/examples/presets/docs-blog)
+Source: [examples/presets/docs-blog](https://github.com/memi-design/memi/tree/main/examples/presets/docs-blog)

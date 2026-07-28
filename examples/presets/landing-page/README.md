@@ -29,6 +29,6 @@ memi add HeroSection --from @memoire-examples/landing-page
 - Five React components using CSS variables, not hardcoded hex
 - `HeroSection` organism that composes Button, Badge, Input, and Card primitives
 
-Source: [examples/presets/landing-page](https://github.com/sarveshsea/memi/tree/main/examples/presets/landing-page)
+Source: [examples/presets/landing-page](https://github.com/memi-design/memi/tree/main/examples/presets/landing-page)
 
 Generated for Memoire v0.16.3.

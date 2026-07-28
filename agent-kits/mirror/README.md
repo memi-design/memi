@@ -1,6 +1,6 @@
 # memi Agent Skills
 
-Mirror-ready `SKILL.md` packages for `sarveshsea/memoire-agent-skills`. Copy this folder into that repo to make memi discoverable to Hermes agents, OpenClaw bots, ClawHub users, and any agent runtime that understands local `SKILL.md` folders. The npm package also ships a root `skills/memoire-design-tooling/SKILL.md` for `npx skills add sarveshsea/memi --skill memoire-design-tooling`.
+Mirror-ready `SKILL.md` packages for `sarveshsea/memoire-agent-skills`. Copy this folder into that repo to make memi discoverable to Hermes agents, OpenClaw bots, ClawHub users, and any agent runtime that understands local `SKILL.md` folders. The npm package also ships a root `skills/memoire-design-tooling/SKILL.md` for `npx skills add memi-design/memi --skill memoire-design-tooling`.
 
 memi gives agents a local interface-understanding layer: warmed daemon context, `memoire.agent.yaml` suite recipes, Figma bridge context, project memory, user research notes, UX tenets and traps, interface craft critique, Atomic Design specs, shadcn/ui codegen, Tailwind token diagnostics, and evidence-backed UI audits.
 

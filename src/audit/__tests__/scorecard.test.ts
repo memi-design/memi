@@ -17,7 +17,7 @@ function scorecard(overrides: Partial<AuditScorecard> = {}): AuditScorecard {
     targetScore: 100,
     assessedAt: AS_OF,
     subject: {
-      repository: "https://github.com/sarveshsea/memi",
+      repository: "https://github.com/memi-design/memi",
       commit: "29a620569723565597837415d5947bc36a042c20",
     },
     evidence: [

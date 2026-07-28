@@ -38,7 +38,7 @@ Use this in repos that enforce planning, TDD, review, security, and release gate
 
 ```bash
 memi agent install universal --project .
-npx skills add sarveshsea/memi --skill memoire-design-tooling
+npx skills add memi-design/memi --skill memoire-design-tooling
 ```
 
 `memi agent install universal` writes a standard project skill at `.agents/skills/memoire-design-tooling`. The root package also ships `skills/memoire-design-tooling/SKILL.md`, so the same instructions can be installed through the broader Agent Skills ecosystem.
@@ -68,7 +68,7 @@ MCP equivalent: call `prepare_design_agent_brief` first, then run the evidence t
 For plugin-native Claude Code installs, add the public marketplace from this repository:
 
 ```text
-/plugin marketplace add sarveshsea/memi
+/plugin marketplace add memi-design/memi
 /plugin install memi@memi
 ```
 
@@ -87,7 +87,7 @@ memi agent brief . --agent codex --intent "Prepare a UI patch plan" --json
 Public marketplace install:
 
 ```bash
-codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
+codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
 ```
 
 Then open `/plugins` in Codex and install Memoire from the marketplace list.

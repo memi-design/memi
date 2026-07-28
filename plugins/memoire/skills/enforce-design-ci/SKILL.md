@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: sarveshsea/memi@v2
+      - uses: memi-design/memi@v2
         with:
           version: "2.6.3"
 ```

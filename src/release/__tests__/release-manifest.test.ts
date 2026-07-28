@@ -36,13 +36,13 @@ describe("release manifest", () => {
         npm: { releaseGroup: "engine", packageName: "@memi-design/cli" },
         githubRelease: {
           releaseGroup: "engine",
-          repository: "sarveshsea/memi",
+          repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.3",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.6.3",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
-        studio: { releaseGroup: "studio", repository: "sarveshsea/memi-studio" },
+        studio: { releaseGroup: "studio", repository: "memi-design/memi-studio" },
         website: {
           releaseGroup: "site",
           repository: "memi-design/memoire-web",
@@ -68,16 +68,16 @@ describe("release manifest", () => {
         sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
         packageName: "@memi-design/cli",
         npmUrl: "https://www.npmjs.com/package/@memi-design/cli",
-        githubReleaseUrl: "https://github.com/sarveshsea/memi/releases/tag/v2.6.3",
+        githubReleaseUrl: "https://github.com/memi-design/memi/releases/tag/v2.6.3",
       },
     });
     expect(artifact.release).toEqual(manifest);
     expect(artifact.provenance).toEqual({
-      repository: "https://github.com/sarveshsea/memi",
+      repository: "https://github.com/memi-design/memi",
       path: "release-manifest.json",
       sourceCommit: expect.stringMatching(/^[a-f0-9]{40}$/),
       sourceUrl: expect.stringMatching(
-        /^https:\/\/raw\.githubusercontent\.com\/sarveshsea\/memi\/[a-f0-9]{40}\/release-manifest\.json$/,
+        /^https:\/\/raw\.githubusercontent\.com\/memi-design\/memi\/[a-f0-9]{40}\/release-manifest\.json$/,
       ),
       manifestSha256: sha256,
     });

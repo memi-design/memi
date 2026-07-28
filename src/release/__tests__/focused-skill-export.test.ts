@@ -51,7 +51,7 @@ describe("focused skill export", () => {
         expect(source).toMatchObject({
           skill: name,
           sourcePath: `skills/${name}/SKILL.md`,
-          sourceRepository: "https://github.com/sarveshsea/memi",
+          sourceRepository: "https://github.com/memi-design/memi",
         });
         expect(readme).toContain(`# ${name}`);
         expect(readme).toContain("npx skills add");

@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0        # memi ci needs the merge-base with the base branch
-      - uses: sarveshsea/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
+      - uses: memi-design/memi@0f89cbf1b9972c779dbf14cc09f6c91485a1182b # v2.6.3
         with:
           version: "2.6.3"      # CLI pin stays explicit even when the action commit is immutable
           # fail-on: high       # override memoire.policy.json if needed

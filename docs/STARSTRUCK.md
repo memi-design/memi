@@ -9,7 +9,7 @@ Do not use it as the current release or growth source of truth. Current planning
 - [current audit](./audits/memi-design-engineering-audit-2026-07-26.md)
 - [100-point closure plan](./audits/memi-100-closure-plan-2026-07-26.md)
 
-Goal: keep GitHub growth tied to useful memi distribution. The base Starstruck tier is now crossed: `sarveshsea/memi` had `17` stars on 2026-07-08. The next honest target is sustained npm activation, then the `128` star tier.
+Goal: keep GitHub growth tied to useful memi distribution. The base Starstruck tier was crossed when `sarveshsea/memi` had `17` stars on 2026-07-08; the repository now lives at `memi-design/memi`. The next honest target is sustained npm activation, then the `128` star tier.
 
 ## Current Reality
 
@@ -31,7 +31,7 @@ Use one ask everywhere:
 
 ```text
 If this saves you from rebuilding the same shadcn/Tailwind system again, star the repo so more frontend teams can find it:
-https://github.com/sarveshsea/memi
+https://github.com/memi-design/memi
 ```
 
 Do not ask for fake stars, star swaps, or bot engagement. The ask must sit after a demo, install command, or useful directory submission.
@@ -58,7 +58,7 @@ Why this matters: the official registry is a trust anchor for downstream MCP dir
 | P0 | Smithery | Distribution, analytics, and config UI for MCP servers | `https://smithery.ai/servers/sarveshsea/memi` | Public URL release is live against `https://www.memoire.cv/api/mcp` with five remote-safe tools, typed schemas, and optional agent configuration |
 | P0 | PulseMCP | MCP discovery and server popularity tracking | Confirm auto-index after official registry | Ready |
 | P0 | mcp.so | Large MCP marketplace surface | Submit/refresh after official registry | Submitted: https://github.com/chatmcp/mcpso/issues/1#issuecomment-4920418945 |
-| P1 | Agent Skills directories | Agent-native install discovery | `npx skills add sarveshsea/memi --skill memoire-design-tooling` | Ready |
+| P1 | Agent Skills directories | Agent-native install discovery | `npx skills add memi-design/memi --skill memoire-design-tooling` | Ready |
 | P1 | shadcn registry directories | Registry generator audience | PR with `memi shadcn export --out public/r` proof | Raw registry proof live in `design-sandbox`; PR refresh opened |
 | P2 | Product Hunt | One-time launch spike | Launch after registry and proof repo are current | Draft only |
 | P2 | Show HN | Developer credibility | Post practical demo, not hype | Draft only |
@@ -86,7 +86,7 @@ Why this matters: the official registry is a trust anchor for downstream MCP dir
 ## Launch Sequence For 10x Downloads
 
 1. Refresh MCP.Directory, Glama, and PulseMCP with the same v2 copy after npm latest and the official MCP Registry both show `2.5.0`; Smithery is already live.
-2. Keep `sarveshsea/design-sandbox` as the public proof repo; `pnpm verify` proves memi agent install, diagnose, UX audit, token extraction, MCP config, and shadcn registry output.
+2. Keep `memi-design/design-sandbox` as the public proof repo; `pnpm verify` proves memi agent install, diagnose, UX audit, token extraction, MCP config, and shadcn registry output.
 3. Follow up on open PRs only with new proof: official registry link, security hardening, demo video, or maintainer-requested fixes.
 4. Ship one 60-second terminal demo: install, `memi diagnose`, `memi ux audit --json`, `memi shadcn export`, `memi mcp start --no-figma`.
 5. Post the demo to X, Show HN, `r/mcp`, and `r/shadcn` with the GitHub star CTA.

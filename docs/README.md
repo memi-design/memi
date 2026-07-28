@@ -68,7 +68,7 @@ memi daemon start --project . --port auto
 memi agent brief . --intent "Prepare this repo for design-agent work" --json
 memi agent install --dry-run --json
 memi agent install universal --project .
-npx skills add sarveshsea/memi --skill memoire-design-tooling
+npx skills add memi-design/memi --skill memoire-design-tooling
 ```
 
 Use this before Codex, Claude Code, Cursor, OpenCode, Hermes, OpenClaw, or `.agents/skills` compatible agents make broad frontend changes.
@@ -76,7 +76,7 @@ Use this before Codex, Claude Code, Cursor, OpenCode, Hermes, OpenClaw, or `.age
 ### Public proof sandbox
 
 ```bash
-git clone https://github.com/sarveshsea/design-sandbox.git
+git clone https://github.com/memi-design/design-sandbox.git
 cd design-sandbox
 pnpm install
 pnpm memi:agent

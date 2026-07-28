@@ -53,7 +53,7 @@ describe("marketplace site bundle", () => {
     const seoPage = seo.pages.find((candidate: { slug: string }) => candidate.slug === "codex-plugin");
     const privacyPage = seo.pages.find((candidate: { slug: string }) => candidate.slug === "privacy");
     const termsPage = seo.pages.find((candidate: { slug: string }) => candidate.slug === "terms");
-    const installCommand = "codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
+    const installCommand = "codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
 
     expect(seoPage).toMatchObject({
       slug: "codex-plugin",

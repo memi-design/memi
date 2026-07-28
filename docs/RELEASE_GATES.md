@@ -105,8 +105,8 @@ Before any public distribution push, verify every external surface points to the
 - npm README phrase: `read-only design engineering audit and skill layer for coding agents`
 - npm install command: `npm i -g @memi-design/cli`
 - MCP name: `io.github.sarveshsea/memi`
-- Agent Skills command: `npx skills add sarveshsea/memi --skill memoire-design-tooling`
-- Codex marketplace command: `codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`
+- Agent Skills command: `npx skills add memi-design/memi --skill memoire-design-tooling`
+- Codex marketplace command: `codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`
 - GitHub description: `Memi is the read-only design engineering audit and skill layer for coding agents.`
 - GitHub topics: `interface-understanding`, `design-system`, `shadcn-registry`, `tailwind-audit`, `ux-audit`, `mcp-server`, `agent-skills`, `codex-plugin`, `design-tokens`, `figma-to-code`
 - Website hero or first-fold proof line: the current read-only audit story and current release metadata
@@ -118,7 +118,7 @@ Before any public distribution push, verify every external surface points to the
 The npm account owner must configure one npm trusted publisher for
 `@memi-design/cli`:
 
-- repository: `sarveshsea/memi`
+- repository: `memi-design/memi`
 - workflow: `publish.yml`
 - permission: publish
 

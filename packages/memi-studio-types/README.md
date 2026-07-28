@@ -1,6 +1,6 @@
 # @sarveshsea/memi-studio-types
 
-Public type contracts for the [Mémoire Studio](https://github.com/sarveshsea/memi-studio) runtime sidecar.
+Public type contracts for the [Mémoire Studio](https://github.com/memi-design/memi-studio) runtime sidecar.
 
 ## What's in here
 
@@ -28,7 +28,7 @@ const event: ProviderRuntimeEvent = parseProviderRuntimeEvent(rawJson);
 
 ## Versioning
 
-Tracks the engine's own `runtime-v*` release tags. A bump here means a corresponding `runtime-v*` tag landed on `sarveshsea/memi`.
+Tracks the engine's own `runtime-v*` release tags. A bump here means a corresponding `runtime-v*` tag landed on `memi-design/memi`.
 
 ## License
 

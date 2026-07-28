@@ -29,6 +29,6 @@ memi add AuthCard --from @memoire-examples/auth-flow
 - Five React components using CSS variables, not hardcoded hex
 - `AuthCard` organism with email/password inputs, CTA, helper action, and trust badge
 
-Source: [examples/presets/auth-flow](https://github.com/sarveshsea/memi/tree/main/examples/presets/auth-flow)
+Source: [examples/presets/auth-flow](https://github.com/memi-design/memi/tree/main/examples/presets/auth-flow)
 
 Generated for Memoire v0.16.3.

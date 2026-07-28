@@ -34,7 +34,7 @@ The output directory is created when missing. On an existing output root, only d
 The generated README includes the Agent Skills install command:
 
 ```bash
-npx skills add sarveshsea/memi --skill audit-frontend-design
+npx skills add memi-design/memi --skill audit-frontend-design
 ```
 
 For a focused skill published in another repository, provide that repository at export time:

@@ -2,7 +2,7 @@
   "name": "memi",
   "display_name": "memi",
   "description": "Design-memory MCP server and CLI behind memi agent design CI for AI coding agents.",
-  "repository": "https://github.com/sarveshsea/memi",
+  "repository": "https://github.com/memi-design/memi",
   "homepage": "https:/-design/cli.cv",
   "author": "sarveshsea",
   "license": "MIT",

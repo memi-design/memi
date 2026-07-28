@@ -764,7 +764,7 @@ export class StudioRuntimeServer {
         }
         const fork = await forkNoteDirectory(this.projectRoot, {
           sourcePath: note.sourcePath,
-          sourceRepo: note.sourceRepo ?? "https://github.com/sarveshsea/memi",
+          sourceRepo: note.sourceRepo ?? "https://github.com/memi-design/memi",
           sourcePathInRepo: note.sourcePath.includes("/notes/") ? `notes/${note.name}` : note.sourcePath,
         });
         this.sendJSON(res, 201, {
@@ -2185,7 +2185,7 @@ function resolveStudioAssetRoot(projectRoot: string): string {
 
 function candidateStudioAssetRoots(projectRoot: string): string[] {
   // Static web bundle now lives only in published runtime resources.
-  // The macOS app at github.com/sarveshsea/memi-studio bundles its own
+  // The macOS app at github.com/memi-design/memi-studio bundles its own
   // frontend via Tauri; this path is only used by `memi studio web`.
   return [fileURLToPath(new URL("../studio-web/", import.meta.url))];
 }

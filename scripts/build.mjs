@@ -33,7 +33,7 @@ const exitCode = await new Promise((resolveExit, reject) => {
 
 if (exitCode !== 0) process.exit(exitCode);
 
-// The Studio React frontend lives at github.com/sarveshsea/memi-studio
+// The Studio React frontend lives at github.com/memi-design/memi-studio
 // and is built independently. It is no longer built or packaged from here.
 
 // Copy non-TS assets that tsc doesn't handle (CSS, client JS, HTML, shared manifests)

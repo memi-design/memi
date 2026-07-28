@@ -12,8 +12,8 @@ const notesRoot = resolve(root, args.notesRoot ?? "notes");
 const outRoot = resolve(root, args.outRoot ?? "examples/site-bundle/notes");
 const baseUrl = args.baseUrl ?? process.env.MEMOIRE_NOTES_BASE_URL ?? "https://www.memoire.cv/notes";
 const sourceKind = args.sourceKind ?? "official";
-const sourceRepo = args.sourceRepo ?? "https://github.com/sarveshsea/memi";
-const contributionBaseUrl = args.contributionBaseUrl ?? "https://github.com/sarveshsea/design-skills/tree/main/skills";
+const sourceRepo = args.sourceRepo ?? "https://github.com/memi-design/memi";
+const contributionBaseUrl = args.contributionBaseUrl ?? "https://github.com/memi-design/design-skills/tree/main/skills";
 const reviewStatus = args.reviewStatus ?? "approved";
 const pageBasePath = (args.pageBasePath ?? "/notes").replace(/\/+$/, "");
 

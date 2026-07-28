@@ -23,8 +23,8 @@ Primary CTA: <https://www.memoire.cv>
 - Studio download: `memi-studio v2.4.0` signed macOS companion app from GitHub Releases.
 - Homebrew: `brew install --cask sarveshsea/memi/memi-studio`.
 - MCP Registry: `io.github.sarveshsea/memi`.
-- Codex plugin: `codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`.
-- Public proof repo: `https://github.com/sarveshsea/design-sandbox`.
+- Codex plugin: `codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`.
+- Public proof repo: `https://github.com/memi-design/design-sandbox`.
 
 ## Product Hunt Copy
 
@@ -61,7 +61,7 @@ memi craft audit --json
 memi mcp start --no-figma
 
 Try the proof repo:
-git clone https://github.com/sarveshsea/design-sandbox.git
+git clone https://github.com/memi-design/design-sandbox.git
 cd design-sandbox
 pnpm install
 pnpm memi:diagnose
@@ -99,7 +99,7 @@ memi mcp start --no-figma
 The goal: agents start from the product system, not a blank prompt.
 
 Proof repo:
-https://github.com/sarveshsea/design-sandbox
+https://github.com/memi-design/design-sandbox
 ```
 
 ### Codex / Claude
@@ -138,7 +138,7 @@ The handoff remains inspectable.
 - [ ] Verify npm install smoke with `npm run check:public-release`.
 - [ ] Republish `server.json` to the MCP Registry after auth refresh.
 - [ ] Create GitHub tag/release `v2.5.0`.
-- [x] Push and verify `sarveshsea/design-sandbox`.
+- [x] Push and verify `memi-design/design-sandbox`.
 - [ ] Confirm homepage shows npm latest `2.5.0`, Studio `2.4.0`, and the macOS download after publish.
 - [ ] Submit Product Hunt with the exact name, tagline, description, and CTA above.
 - [ ] Post the main launch thread and one engine-underneath reply.

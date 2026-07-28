@@ -7,7 +7,7 @@ Public page: https://www.memoire.cv/codex-plugin
 ## Git-backed Codex marketplace
 
 ```bash
-codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
+codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
 ```
 
 Then open `/plugins` in Codex and install memi from the marketplace list.

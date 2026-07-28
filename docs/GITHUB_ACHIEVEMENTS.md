@@ -47,7 +47,7 @@ Detailed operating board: [`docs/STARSTRUCK.md`](STARSTRUCK.md).
 Immediate sequence:
 
 1. Publish npm `2.5.0`, refresh the official MCP Registry, then update MCP.Directory, Glama, Smithery, and PulseMCP.
-2. Keep `sarveshsea/design-sandbox` proof current and make `pnpm verify` the public demo anchor.
+2. Keep `memi-design/design-sandbox` proof current and make `pnpm verify` the public demo anchor.
 3. Follow up on open directory PRs only with the official registry link or maintainer-requested fixes.
 4. Post the 60-second install/demo with a GitHub star CTA.
 

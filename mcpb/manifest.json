@@ -11,11 +11,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sarveshsea/memi.git"
+    "url": "https://github.com/memi-design/memi.git"
   },
   "homepage": "https://memoire.cv",
-  "documentation": "https://github.com/sarveshsea/memi#readme",
-  "support": "https://github.com/sarveshsea/memi/issues",
+  "documentation": "https://github.com/memi-design/memi#readme",
+  "support": "https://github.com/memi-design/memi/issues",
   "server": {
     "type": "node",
     "entry_point": "server/index.cjs",

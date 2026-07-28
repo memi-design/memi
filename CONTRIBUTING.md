@@ -61,7 +61,7 @@ memi notes install github:you/my-note
 ## Development setup
 
 ```bash
-git clone https://github.com/sarveshsea/memi
+git clone https://github.com/memi-design/memi
 cd memi
 npm install
 npm test

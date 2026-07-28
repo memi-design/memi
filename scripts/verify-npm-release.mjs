@@ -244,7 +244,7 @@ async function writeReleaseRecord(outputPath, verification) {
       invocationId: verification.invocationId,
     },
     workflow: {
-      repository: "sarveshsea/memi",
+      repository: "memi-design/memi",
       path: expectedWorkflowPath,
       ref: expectedWorkflowRef,
       runId,

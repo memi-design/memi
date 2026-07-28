@@ -3,8 +3,8 @@
 Interface understanding for AI coding agents. Design-system memory for coding agents.
 npm: https://www.npmjs.com/package/@memi-design/cli
 MCP registry: io.github.sarveshsea/memi
-GitHub: https://github.com/sarveshsea/memi
-Proof: https://github.com/sarveshsea/design-sandbox
+GitHub: https://github.com/memi-design/memi
+Proof: https://github.com/memi-design/design-sandbox
 Craft skills (upstream): https://github.com/emilkowalski/skills
 
 ## Install
@@ -51,7 +51,7 @@ memi agent install codex-plugin
 memi agent install hermes
 memi agent install openclaw --project .
 memi agent install opencode --project .
-npx skills add sarveshsea/memi --skill memoire-design-tooling
+npx skills add memi-design/memi --skill memoire-design-tooling
 npx skills add emilkowalski/skills
 ```
 
@@ -70,12 +70,12 @@ memi init --team
 memi ci
 ```
 
-GitHub Action: `uses: sarveshsea/memi@v2` with `version: "2.5.0"`.
+GitHub Action: `uses: memi-design/memi@v2` with `version: "2.5.0"`.
 
 ## Dependency graph
 
 - memi CLI/MCP ↔ agent kits ↔ Action ↔ design-sandbox (proof)
-- memi skills ↔ skills.sh (`npx skills add sarveshsea/memi`)
+- memi skills ↔ skills.sh (`npx skills add memi-design/memi`)
 - craft polish ↔ emilkowalski/skills (reference, not bundled)
 
 ## Agent policy

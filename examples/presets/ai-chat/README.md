@@ -29,6 +29,6 @@ memi add ChatComposer --from @memoire-examples/ai-chat
 - Six React components using CSS variables, not hardcoded hex
 - `ChatMessage` and `ChatComposer` primitives for prompt-driven products
 
-Source: [examples/presets/ai-chat](https://github.com/sarveshsea/memi/tree/main/examples/presets/ai-chat)
+Source: [examples/presets/ai-chat](https://github.com/memi-design/memi/tree/main/examples/presets/ai-chat)
 
 Generated for Memoire v0.16.3.

@@ -23,8 +23,8 @@ const result = spawnSync(process.execPath, [
   "--out-root", join(root, "examples", "site-bundle", "notes", "community"),
   "--base-url", process.env.MEMOIRE_COMMUNITY_NOTES_BASE_URL ?? "https://www.memoire.cv/notes/community",
   "--source-kind", "community",
-  "--source-repo", "https://github.com/sarveshsea/design-skills",
-  "--contribution-base-url", "https://github.com/sarveshsea/design-skills/tree/main/skills",
+  "--source-repo", "https://github.com/memi-design/design-skills",
+  "--contribution-base-url", "https://github.com/memi-design/design-skills/tree/main/skills",
   "--review-status", "approved",
   "--page-base-path", "/notes/community",
 ], {

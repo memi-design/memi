@@ -21,7 +21,7 @@ import type { MemoireEngine } from "../engine/core.js";
 import { packageRoot } from "../utils/asset-path.js";
 import { isStandaloneBinary } from "../utils/runtime.js";
 
-const REPO = "sarveshsea/memi";
+const REPO = "memi-design/memi";
 const MAX_RELEASE_ARCHIVE_ENTRIES = 4_096;
 const MAX_RELEASE_ARCHIVE_FILE_BYTES = 100 * 1024 * 1024;
 const MAX_RELEASE_ARCHIVE_UNCOMPRESSED_BYTES = 500 * 1024 * 1024;

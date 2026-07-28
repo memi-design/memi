@@ -93,7 +93,7 @@ export function buildDesignAgentBrief(options: DesignAgentBriefOptions): DesignA
     compatibility: {
       installs: detail === "compact" ? buildCompatibilityInstalls(agent).slice(0, 1) : buildCompatibilityInstalls(agent),
       mcp: "memi mcp start --no-figma",
-      skill: "npx skills add sarveshsea/memi --skill memoire-design-tooling",
+      skill: "npx skills add memi-design/memi --skill memoire-design-tooling",
       suite: "memi suite run design-audit --project . --json",
     },
     handoffChecklist: [
@@ -224,7 +224,7 @@ function applyDetailToEvidenceCommands(
 function buildCompatibilityInstalls(agent: string): string[] {
   const installs = [
     "memi agent install universal --project .",
-    "npx skills add sarveshsea/memi --skill memoire-design-tooling",
+    "npx skills add memi-design/memi --skill memoire-design-tooling",
     "memi agent install claude-code --project .",
     "memi agent install cursor --project .",
     "memi agent install codex",

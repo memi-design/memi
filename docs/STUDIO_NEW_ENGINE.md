@@ -82,6 +82,6 @@ Whole-PR cut-over criteria:
 
 ## See also
 
-- [PR #17](https://github.com/sarveshsea/memi/pull/17) — the rewrite
+- [PR #17](https://github.com/memi-design/memi/pull/17) — the rewrite
 - `~/.claude/plans/go-to-the-macos-radiant-sketch.md` — the engineering plan
 - [pingdotgg/t3code](https://github.com/pingdotgg/t3code) — the architecture inspiration

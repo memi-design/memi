@@ -4,7 +4,7 @@
  * package assets the compiled binary needs at runtime.
  *
  * Outputs to repo-root directories so the script is decoupled from the
- * (now-extracted) Studio Tauri app at github.com/sarveshsea/memi-studio:
+ * (now-extracted) Studio Tauri app at github.com/memi-design/memi-studio:
  *   dist-bin/memi-studio-runtime-<triple>           — the compiled binary
  *   dist-runtime-resources/                         — staged runtime payload
  *

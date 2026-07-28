@@ -1,7 +1,7 @@
 {
   "name": "@sarveshsea/memi-studio-types",
   "version": "0.1.0",
-  "description": "Public type contracts for the Mémoire Studio runtime sidecar — ProviderRuntime events, branded entity IDs, typed errors, state machine alphabets. Consumed by github.com/sarveshsea/memi-studio's frontend so the GUI app speaks the same protocol the engine emits.",
+  "description": "Public type contracts for the Mémoire Studio runtime sidecar — ProviderRuntime events, branded entity IDs, typed errors, state machine alphabets. Consumed by github.com/memi-design/memi-studio's frontend so the GUI app speaks the same protocol the engine emits.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -21,7 +21,7 @@
   "author": "Sarvesh Chidambaram",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sarveshsea/memi.git",
+    "url": "git+https://github.com/memi-design/memi.git",
     "directory": "packages/memi-studio-types"
   },
   "publishConfig": {

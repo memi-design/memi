@@ -11,7 +11,7 @@
 
 set -eu
 
-REPO="sarveshsea/memi"
+REPO="memi-design/memi"
 INSTALL_DIR="${HOME}/.memoire"
 VERSION="latest"
 PATCH_PATH=1
@@ -36,7 +36,7 @@ case "${uname_s}-${uname_m}" in
   Linux-x86_64)            target="linux-x64" ;;
   Linux-aarch64|Linux-arm64)
     echo "error: linux-arm64 not yet published." >&2
-    echo "  Try:  docker run --rm -it ghcr.io/sarveshsea/memi --help" >&2
+    echo "  Try:  docker run --rm -it ghcr.io/memi-design/memi --help" >&2
     exit 1 ;;
   *)
     echo "error: unsupported platform ${uname_s}-${uname_m}" >&2
@@ -107,11 +107,44 @@ if [ "${VERIFY}" -eq 1 ]; then
       echo "  Re-run with --no-verify only if you trust the release source." >&2
       exit 1
     fi
+  else
+    echo "error: need shasum or sha256sum to verify the release" >&2
+    echo "  Re-run with --no-verify only if you trust the release source." >&2
+    exit 1
   fi
 fi
 
 echo "-> Extracting to ${INSTALL_DIR}"
 mkdir -p "${INSTALL_DIR}"
+archive_root="memi-${target}"
+entries_file="${tmp}/archive.entries"
+tar -tzf "${tmp}/${archive}" > "${entries_file}"
+if [ ! -s "${entries_file}" ]; then
+  echo "error: unsafe archive entry: archive is empty" >&2
+  exit 1
+fi
+if ! awk -v root="${archive_root}" '
+  BEGIN { bad = 0 }
+  {
+    entry = $0
+    trimmed = entry
+    sub(/\/+$/, "", trimmed)
+    if (entry ~ /^\// || entry ~ /\\/ || entry ~ /(^|\/)\.\.(\/|$)/) {
+      print "error: unsafe archive entry: " entry > "/dev/stderr"
+      bad = 1
+    } else if (trimmed != root && index(trimmed, root "/") != 1) {
+      print "error: unexpected archive root: " entry > "/dev/stderr"
+      bad = 1
+    }
+  }
+  END { exit bad }
+' "${entries_file}"; then
+  exit 1
+fi
+if tar -tvzf "${tmp}/${archive}" | awk 'substr($1, 1, 1) ~ /[lh]/ { found = 1 } END { exit !found }'; then
+  echo "error: unsafe archive entry: links are not allowed" >&2
+  exit 1
+fi
 tar -xzf "${tmp}/${archive}" -C "${tmp}"
 rm -rf "${INSTALL_DIR}/app"
 mv "${tmp}/memi-${target}" "${INSTALL_DIR}/app"

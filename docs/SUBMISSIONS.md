@@ -30,7 +30,7 @@ MCP and agent skills:
 
 ```bash
 memi mcp start --no-figma
-npx skills add sarveshsea/memi --skill memoire-design-tooling
+npx skills add memi-design/memi --skill memoire-design-tooling
 ```
 
 Hosted MCP discovery:
@@ -42,7 +42,7 @@ https://www.memoire.cv/api/mcp
 Codex plugin:
 
 ```bash
-codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
+codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
 ```
 
 macOS app:
@@ -148,16 +148,16 @@ The engine is also available as an npm package and MCP server:
 The wedge is supervised design-aware agent runs. I want product designers to see what context went in, what happened during the run, and what should be kept after the session ends.
 
 https://www.memoire.cv
-https://github.com/sarveshsea/memi
-https://github.com/sarveshsea/design-sandbox
+https://github.com/memi-design/memi
+https://github.com/memi-design/design-sandbox
 ```
 
 ## Live Distribution Links
 
 | Surface | Link | Status |
 | --- | --- | --- |
-| design-sandbox proof repo | https://github.com/sarveshsea/design-sandbox | Pushed; pre-publish verification passes with local `MEMI_BIN` |
-| design-sandbox raw shadcn registry | https://raw.githubusercontent.com/sarveshsea/design-sandbox/main/public/r/registry.json | Public proof artifact |
+| design-sandbox proof repo | https://github.com/memi-design/design-sandbox | Pushed; pre-publish verification passes with local `MEMI_BIN` |
+| design-sandbox raw shadcn registry | https://raw.githubusercontent.com/memi-design/design-sandbox/main/public/r/registry.json | Public proof artifact |
 | mcp.so submission | https://github.com/chatmcp/mcpso/issues/1#issuecomment-4920418945 | Submitted with npm, MCP Registry, proof repo, and shadcn registry links |
 | Smithery | https://smithery.ai/servers/sarveshsea/memi | Public URL release succeeded against `https://www.memoire.cv/api/mcp`; five tools and optional `agent` config are visible in the public registry API |
 | Claude Plugin Directory | https://platform.claude.com/plugins/submissions | Memi submitted for Claude Code and pending Anthropic review as of 2026-07-15 |
@@ -175,7 +175,7 @@ https://github.com/sarveshsea/design-sandbox
 - [ ] Verify `npm run check:public-release`.
 - [x] Republish `server.json` to the Official MCP Registry.
 - [x] Create GitHub tag/release `v2.5.0`.
-- [x] Push the updated `sarveshsea/design-sandbox` proof repo.
+- [x] Push the updated `memi-design/design-sandbox` proof repo.
 - [ ] Submit Product Hunt.
 - [ ] Post X/Twitter launch thread.
 - [x] Submit mcp.so with current registry, proof repo, and package links.

@@ -12,6 +12,7 @@ import {
   serializeJson,
   stagePublishedEngineManifest,
   validateEngineSurfaceSnapshot,
+  validateEngineReleaseRecord,
   validateEngineReleaseTransition,
   validatePublishedStagingPreconditions,
   validateNpmPublishPreflight,
@@ -50,13 +51,13 @@ function manifestFor(engine: Record<string, unknown>) {
       },
       githubRelease: {
         releaseGroup: "engine",
-        repository: "sarveshsea/memi",
+        repository: "memi-design/memi",
         tagPrefix: "v",
-        url: "https://github.com/sarveshsea/memi/releases/tag/v2.6.3",
+        url: "https://github.com/memi-design/memi/releases/tag/v2.6.3",
       },
       githubAction: {
         releaseGroup: "engine",
-        repository: "sarveshsea/memi",
+        repository: "memi-design/memi",
         majorTag: "v2",
       },
       mcp: {
@@ -65,7 +66,7 @@ function manifestFor(engine: Record<string, unknown>) {
       },
       studio: {
         releaseGroup: "studio",
-        repository: "sarveshsea/memi-studio",
+        repository: "memi-design/memi-studio",
         tagPrefix: "v",
         arm64Asset: "Memoire.Studio_{version}_aarch64.dmg",
         x64Asset: "Memoire.Studio_{version}_x64.dmg",
@@ -73,7 +74,7 @@ function manifestFor(engine: Record<string, unknown>) {
       },
       website: {
         releaseGroup: "site",
-        repository: "sarveshsea/memoire-web",
+        repository: "memi-design/memoire-web",
         publicUrl: "https://www.memoire.cv",
         releaseArtifactUrl: "https://www.memoire.cv/release/memi-release.json",
       },
@@ -98,13 +99,13 @@ function releaseRecord() {
       predicateType: "https://slsa.dev/provenance/v1",
       subject: "pkg:npm/%40memi-design/cli@2.6.3",
       sha512: "ab".repeat(64),
-      repository: "https://github.com/sarveshsea/memi",
+      repository: "https://github.com/memi-design/memi",
       workflowPath: ".github/workflows/publish.yml",
       workflowRef: "refs/heads/main",
-      invocationId: "https://github.com/sarveshsea/memi/actions/runs/123456789/attempts/1",
+      invocationId: "https://github.com/memi-design/memi/actions/runs/123456789/attempts/1",
     },
     workflow: {
-      repository: "sarveshsea/memi",
+      repository: "memi-design/memi",
       path: ".github/workflows/publish.yml",
       ref: "refs/heads/main",
       runId: "123456789",
@@ -119,6 +120,33 @@ function releaseRecord() {
 }
 
 describe("verified engine release state machine", () => {
+  it("accepts only the pinned historical personal provenance and canonical organization provenance", () => {
+    const historical = {
+      ...releaseRecord(),
+      sourceCommit: "0f89cbf1b9972c779dbf14cc09f6c91485a1182b",
+      attestation: {
+        ...releaseRecord().attestation,
+        repository: "https://github.com/sarveshsea/memi",
+        invocationId: "https://github.com/sarveshsea/memi/actions/runs/123456789/attempts/1",
+      },
+      workflow: {
+        ...releaseRecord().workflow,
+        repository: "sarveshsea/memi",
+      },
+    };
+    const organization = releaseRecord();
+    const futurePersonalRelease = {
+      ...historical,
+      sourceCommit,
+    };
+
+    expect(validateEngineReleaseRecord(historical)).toEqual([]);
+    expect(validateEngineReleaseRecord(organization)).toEqual([]);
+    expect(validateEngineReleaseRecord(futurePersonalRelease)).toContain(
+      "release record workflow identity is incorrect",
+    );
+  });
+
   it("requires candidate releases to have null source and release record fields", () => {
     const valid = manifestFor({
       state: "candidate",
@@ -247,7 +275,7 @@ describe("verified engine release state machine", () => {
 
   it("binds the release record run and attempt to the SLSA invocation", () => {
     const workflow = {
-      repository: "sarveshsea/memi",
+      repository: "memi-design/memi",
       path: ".github/workflows/publish.yml",
       ref: "refs/heads/main",
       runId: "123456789",
@@ -255,11 +283,11 @@ describe("verified engine release state machine", () => {
     };
 
     expect(validateProvenanceInvocation(
-      "https://github.com/sarveshsea/memi/actions/runs/123456789/attempts/1",
+      "https://github.com/memi-design/memi/actions/runs/123456789/attempts/1",
       workflow,
     )).toEqual([]);
     expect(validateProvenanceInvocation(
-      "https://github.com/sarveshsea/memi/actions/runs/123456789/attempts/2",
+      "https://github.com/memi-design/memi/actions/runs/123456789/attempts/2",
       workflow,
     )).toContain("SLSA invocation does not match the recorded workflow run and attempt");
   });

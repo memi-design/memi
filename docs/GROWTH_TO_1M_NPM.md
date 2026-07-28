@@ -20,11 +20,11 @@ The category is **interface understanding for AI coding agents**: design-system 
 - npm downloads for the latest complete windows: 46 last-day downloads for 2026-07-05, 783 last-week downloads for 2026-06-29 through 2026-07-05, and 1,306 last-month downloads for 2026-06-06 through 2026-07-05.
 - The next 10x checkpoint is 7,830 weekly downloads and 13,060 monthly downloads.
 - MCP name is `io.github.sarveshsea/memi`.
-- Codex plugin install path is `codex plugin marketplace add sarveshsea/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`.
-- Standard Agent Skills install path is `npx skills add sarveshsea/memi --skill memoire-design-tooling`.
+- Codex plugin install path is `codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`.
+- Standard Agent Skills install path is `npx skills add memi-design/memi --skill memoire-design-tooling`.
 - The v2 package story must lead with code-first proof, not Studio-only positioning.
 - `memoire.cv` must stay synchronized with npm, Studio, MCP, changelog, and community Notes before any distribution push.
-- `sarveshsea/design-sandbox` is the primary public proof repo for memi v2 integration.
+- `memi-design/design-sandbox` is the primary public proof repo for memi v2 integration.
 
 Run the live check:
 
@@ -92,11 +92,11 @@ Make every agent stack installable and explainable:
 
 Seed memi only where the reader can run a command and see value:
 
-- `sarveshsea/design-sandbox`: keep `pnpm verify` proving memi agent install, diagnose, UX audit, token extraction, and shadcn registry output.
+- `memi-design/design-sandbox`: keep `pnpm verify` proving memi agent install, diagnose, UX audit, token extraction, and shadcn registry output.
 - `sarveshsea/memoire-community-notes`: publish the five starter community Notes and keep `/notes/community/catalog.v1.json` non-empty.
-- `sarveshsea/memi-studio`: link Studio releases back to the CLI engine, MCP server, and design-audit route.
+- `memi-design/memi-studio`: link Studio releases back to the CLI engine, MCP server, and design-audit route.
 - MCP Registry and MCP directories: list `io.github.sarveshsea/memi` as the local design-system MCP server for coding agents.
-- Agent Skills directories: submit `memoire-design-tooling` with `npx skills add sarveshsea/memi --skill memoire-design-tooling`.
+- Agent Skills directories: submit `memoire-design-tooling` with `npx skills add memi-design/memi --skill memoire-design-tooling`.
 - shadcn registry surfaces: seed examples that show `memi shadcn export --out public/r` and compatible GitHub registry install paths.
 - AI UI and dashboard templates: add memi as a design-quality gate where the template already uses Tailwind or shadcn.
 

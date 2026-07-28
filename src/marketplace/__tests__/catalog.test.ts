@@ -79,8 +79,8 @@ describe("marketplace catalog v1", () => {
       expect(entry.description.length).toBeGreaterThan(30);
       expect(entry.tags.length).toBeGreaterThanOrEqual(5);
       expect(entry.installCommand).toContain(entry.packageName);
-      expect(entry.sourceUrl).toContain("github.com/sarveshsea/memi");
-      expect(entry.screenshotUrl).toContain("raw.githubusercontent.com/sarveshsea/memi");
+      expect(entry.sourceUrl).toContain("github.com/memi-design/memi");
+      expect(entry.screenshotUrl).toContain("raw.githubusercontent.com/memi-design/memi");
       expect(existsSync(join(root, entry.sourcePath))).toBe(true);
       expect(existsSync(join(root, entry.screenshotPath))).toBe(true);
     }

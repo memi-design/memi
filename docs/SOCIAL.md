@@ -1,7 +1,7 @@
 # Memi Community Launch Kit
 
 Current release: `@memi-design/cli@2.6.3`
-Primary link: <https://github.com/sarveshsea/memi>
+Primary link: <https://github.com/memi-design/memi>
 Primary story: Memi is the read-only design engineering audit and skill layer for coding agents.
 
 ## Rules
@@ -45,7 +45,7 @@ it.
 
 Memi is MIT licensed and supports Node 20/22/24 on macOS, Linux, and Windows.
 
-GitHub: https://github.com/sarveshsea/memi
+GitHub: https://github.com/memi-design/memi
 
 I would especially value feedback on false positives, missing frontend states,
 and whether the finding evidence is enough to guide a safe agent patch.
@@ -77,7 +77,7 @@ make a scoped fix and rerun the same check.
 There are focused skills for Codex and Claude Code, but I am most interested in
 whether the raw audit is useful in real repositories.
 
-GitHub: https://github.com/sarveshsea/memi
+GitHub: https://github.com/memi-design/memi
 
 I maintain the project. If you try it, a false positive or missing check is more
 useful to me than a generic compliment.
@@ -106,7 +106,7 @@ file:line evidence.
 The command is read-only and deterministic. The same engine can run as a pinned
 GitHub Action, so accepted debt can stay visible while new debt fails a PR.
 
-GitHub: https://github.com/sarveshsea/memi
+GitHub: https://github.com/memi-design/memi
 
 I am the maintainer. I would like feedback from people with large Tailwind or
 design-system codebases, especially around false positives.
@@ -133,7 +133,7 @@ No account. No API key. No Figma file. No daemon.
 Memi is open source and works with Codex, Claude Code, Cursor, Grok Build, and
 MCP clients.
 
-https://github.com/sarveshsea/memi
+https://github.com/memi-design/memi
 
 If you work on frontend infrastructure or design systems, I would value a test
 against a real repository.
@@ -150,7 +150,7 @@ I built Memi: a read-only design audit before the agent edits UI.
 
 npx -y @memi-design/cli@2.6.3 diagnose . --no-write
 
-https://github.com/sarveshsea/memi
+https://github.com/memi-design/memi
 ```
 
 Post 2:
@@ -229,7 +229,7 @@ the agent's visual judgment. Make the check report the exact file and rule, then
 rerun it after the patch so the agent cannot declare success from prose alone.
 
 I maintain Memi, which implements that pattern for frontend design checks:
-https://github.com/sarveshsea/memi
+https://github.com/memi-design/memi
 
 The one-command trial is read-only. If you have a public reproduction, I would
 be happy to test whether the current rule catches it.

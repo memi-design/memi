@@ -6,8 +6,8 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const DEFAULT_SOURCE_REPOSITORY = "https://github.com/sarveshsea/memi";
-const DEFAULT_INSTALL_REPOSITORY = "sarveshsea/memi";
+const DEFAULT_SOURCE_REPOSITORY = "https://github.com/memi-design/memi";
+const DEFAULT_INSTALL_REPOSITORY = "memi-design/memi";
 const DEFAULT_VERSION = "0.0.0";
 const OPTIONAL_MEMI_MARKER = "## Optional Memi enhancements";
 

@@ -48,14 +48,14 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 - `og:description`: `Run UX audits, extract Tailwind tokens, export shadcn registries, and give Codex, Claude Code, Cursor, Hermes, OpenClaw, OpenCode, and MCP clients design-system memory.`
 - `og:url`: `https://www.npmjs.com/package/@memi-design/cli`
 - `og:type`: `website`
-- `og:image`: `https://raw.githubusercontent.com/sarveshsea/memi/main/assets/theme-workflow-demo.svg`
+- `og:image`: `https://raw.githubusercontent.com/memi-design/memi/main/assets/theme-workflow-demo.svg`
 
 ## Twitter Card
 
 - `twitter:card`: `summary_large_image`
 - `twitter:title`: `memi - Read-only design engineering audits for coding agents`
 - `twitter:description`: `Design-system memory, UX audit evidence, Tailwind tokens, shadcn registries, MCP tools, Agent Skills, and research-backed specs before agents edit UI.`
-- `twitter:image`: `https://raw.githubusercontent.com/sarveshsea/memi/main/assets/theme-workflow-demo.svg`
+- `twitter:image`: `https://raw.githubusercontent.com/memi-design/memi/main/assets/theme-workflow-demo.svg`
 
 ## JSON-LD
 
@@ -69,7 +69,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
   "description": "Memi is the read-only design engineering audit and skill layer for coding agents: file-anchored UI findings, design-system memory, MCP tools, and deterministic CI gates.",
   "softwareVersion": "2.6.3",
   "url": "https://www.npmjs.com/package/@memi-design/cli",
-  "codeRepository": "https://github.com/sarveshsea/memi",
+  "codeRepository": "https://github.com/memi-design/memi",
   "programmingLanguage": "TypeScript",
   "keywords": [
     "interface-understanding",
@@ -100,8 +100,8 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 - The first screen says `Memi is the read-only design engineering audit and skill layer for coding agents.`
 - The primary command block starts with `npm i -g @memi-design/cli`.
 - The first proof path works without Figma: `memi diagnose`, `memi ux audit --json`, `memi craft audit --json`, `memi tokens --from ./src --report`, `memi shadcn export --out public/r`.
-- Agent setup links include `npx skills add sarveshsea/memi --skill memoire-design-tooling`.
-- Public proof links include `https://github.com/sarveshsea/design-sandbox`.
+- Agent setup links include `npx skills add memi-design/memi --skill memoire-design-tooling`.
+- Public proof links include `https://github.com/memi-design/design-sandbox`.
 - MCP setup includes `memi mcp start --no-figma`.
 - `/components` renders `examples/marketplace-catalog.v1.json`; if that fails, it falls back to `examples/featured-registries.json`.
 - Footer links use `@memi-design/cli`, not legacy package names.

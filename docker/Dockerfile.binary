@@ -4,10 +4,10 @@
 # Docker pulls from ghcr.io are allowed (common in corporate networks).
 #
 # Run:
-#   docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/sarveshsea/memi --help
+#   docker run --rm -it -v "$PWD:/work" -w /work ghcr.io/memi-design/memi --help
 #
 # For `memi connect` the Figma plugin has to reach the container's WebSocket.
-#   docker run --rm -it -p 9223:9223 ghcr.io/sarveshsea/memi connect
+#   docker run --rm -it -p 9223:9223 ghcr.io/memi-design/memi connect
 
 FROM debian:bookworm-slim
 
@@ -25,9 +25,9 @@ RUN set -eux; \
       *) echo "unsupported arch ${TARGETARCH}" >&2; exit 1 ;; \
     esac; \
     if [ "${VERSION}" = "latest" ]; then \
-      base="https://github.com/sarveshsea/memi/releases/latest/download"; \
+      base="https://github.com/memi-design/memi/releases/latest/download"; \
     else \
-      base="https://github.com/sarveshsea/memi/releases/download/${VERSION}"; \
+      base="https://github.com/memi-design/memi/releases/download/${VERSION}"; \
     fi; \
     archive="memi-${target}.tar.gz"; \
     mkdir -p /tmp/memi-download; \

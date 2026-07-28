@@ -41,7 +41,7 @@ jobs:
       id-token: write
     env:
       EXPECTED_VERSION: ${{ inputs.expected_version }}
-      EXPECTED_SOURCE_REPOSITORY: https://github.com/sarveshsea/memi
+      EXPECTED_SOURCE_REPOSITORY: https://github.com/memi-design/memi
       EXPECTED_SOURCE_WORKFLOW: .github/workflows/publish.yml
       EXPECTED_SOURCE_REF: refs/heads/main
     steps:
