@@ -145,12 +145,12 @@ export class FileEventJournal implements EventJournal {
 
   async append(sessionId: SessionId, event: ProviderRuntimeEvent): Promise<void> {
     if (this.privacyPolicy.captureMode === "off") return;
-    await this.ensureDir();
     const key = sessionId as unknown as string;
     const previous = this.inflight.get(key) ?? Promise.resolve();
     const persistedEvent = sanitizeRuntimeEvent(event, this.privacyPolicy);
     const line = `${JSON.stringify(persistedEvent)}\n`;
     const next = previous.then(async () => {
+      await this.ensureDir();
       const path = this.filePath(sessionId);
       const currentSize = await fs.stat(path).then((stat) => stat.size).catch((error: unknown) => {
         if ((error as NodeJS.ErrnoException | undefined)?.code === "ENOENT") return 0;
@@ -166,6 +166,7 @@ export class FileEventJournal implements EventJournal {
   }
 
   async *replay(sessionId: SessionId, fromSeq?: number): AsyncIterable<ProviderRuntimeEvent> {
+    await (this.inflight.get(sessionId as unknown as string) ?? Promise.resolve());
     let raw: string;
     try {
       raw = await fs.readFile(this.filePath(sessionId), "utf-8");

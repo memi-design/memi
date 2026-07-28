@@ -7,7 +7,7 @@
 
 import { z } from "zod";
 import { createLogger } from "../engine/logger.js";
-import type { AnthropicClient } from "../ai/client.js";
+import type { AIClient } from "../ai/types.js";
 import type { DesignSystem } from "../engine/registry.js";
 
 const log = createLogger("design-analyzer");
@@ -79,9 +79,9 @@ Score severity: critical (blocker), major (should fix), minor (nice to fix), sug
 // ── DesignAnalyzer ────────────────────────────────────────
 
 export class DesignAnalyzer {
-  private ai: AnthropicClient;
+  private ai: AIClient;
 
-  constructor(ai: AnthropicClient) {
+  constructor(ai: AIClient) {
     this.ai = ai;
   }
 

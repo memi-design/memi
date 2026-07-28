@@ -75,6 +75,8 @@ describe("OpenAICompatibleClient", () => {
       },
       stopReason: "stop",
     });
+    expect(client.tracker.unpricedCallCount).toBe(1);
+    expect(client.tracker.summary).toContain("cost unknown");
   });
 
   it("serializes base64 images through the compatible image_url shape", async () => {
@@ -139,5 +141,58 @@ describe("OpenAICompatibleClient", () => {
       system: "",
       messages: [{ role: "user", content: "Hello" }],
     })).rejects.toThrow(/invalid chat completion response/i);
+  });
+
+  it("fails closed when streaming was not declared", async () => {
+    const client = new OpenAICompatibleClient({
+      provider: "openai-compatible",
+      baseUrl: "https://models.example.test/v1",
+      models: { fast: "model", deep: "model" },
+      capabilities: { text: true, vision: false, streaming: false, json: false, tools: false },
+    });
+
+    const stream = client.stream({
+      system: "",
+      messages: [{ role: "user", content: "Hello" }],
+    });
+
+    await expect(stream.next()).rejects.toThrow(/has not declared streaming capability/i);
+  });
+
+  it("rejects oversized non-streaming responses", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(
+      "x".repeat(4 * 1024 * 1024 + 1),
+      { status: 200 },
+    )));
+    const client = new OpenAICompatibleClient({
+      provider: "openai-compatible",
+      baseUrl: "https://models.example.test/v1",
+      models: { fast: "model", deep: "model" },
+      capabilities: { text: true, vision: false, streaming: false, json: false, tools: false },
+    });
+
+    await expect(client.complete({
+      system: "",
+      messages: [{ role: "user", content: "Hello" }],
+    })).rejects.toThrow(/response exceeded/i);
+  });
+
+  it("rejects oversized streaming event buffers", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(
+      `data: ${"x".repeat(1024 * 1024 + 1)}`,
+      { status: 200 },
+    )));
+    const client = new OpenAICompatibleClient({
+      provider: "openai-compatible",
+      baseUrl: "https://models.example.test/v1",
+      models: { fast: "model", deep: "model" },
+      capabilities: { text: true, vision: false, streaming: true, json: false, tools: false },
+    });
+    const stream = client.stream({
+      system: "",
+      messages: [{ role: "user", content: "Hello" }],
+    });
+
+    await expect(stream.next()).rejects.toThrow(/stream buffer exceeded/i);
   });
 });

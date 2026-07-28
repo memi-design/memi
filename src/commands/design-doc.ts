@@ -82,14 +82,14 @@ export function registerDesignDocCommand(program: Command, engine: MemoireEngine
           printContrastSummary(tokens.contrastPairs, !!opts.wcag);
         }
 
-        // 3. Generate DESIGN.md via Claude (or fallback to raw extraction)
+        // 3. Generate DESIGN.md via the configured provider (or raw fallback)
         let content: string;
 
         if (hasAI()) {
-          if (!opts.json) console.log("  · Synthesizing with Claude...");
+          if (!opts.json) console.log("  · Synthesizing with configured AI provider...");
           content = await synthesizeWithAI(url, assets.title, tokens);
         } else {
-          if (!opts.json) console.log("  · No ANTHROPIC_API_KEY — generating from raw extraction...");
+          if (!opts.json) console.log("  · No AI provider configured — generating from raw extraction...");
           content = generateFromRaw(url, assets.title, tokens);
         }
 
@@ -319,7 +319,7 @@ function generateFromRaw(url: string, title: string, tokens: RawDesignTokens): s
 
   return `# Design System — ${siteName}
 > Extracted ${date} · Source: ${url}
-> Note: Add ANTHROPIC_API_KEY to .env.local for AI-synthesized analysis
+> Note: Configure an AI provider for synthesized analysis
 
 ## CSS Custom Properties
 | Variable | Value |
@@ -345,7 +345,7 @@ ${spacingSection}
 ${tokens.shadows.length > 0 ? `**Shadows:**\n${tokens.shadows.slice(0, 4).map((s) => `\`${s}\``).join("\n")}` : ""}
 
 ## Notes
-- Run \`memi design-doc ${url}\` with ANTHROPIC_API_KEY set for full AI analysis
+- Run \`memi design-doc ${url}\` with an AI provider configured for full analysis
 - See raw data above to manually build your Tailwind config
 `;
 }
