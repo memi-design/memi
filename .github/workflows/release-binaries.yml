@@ -143,6 +143,9 @@ jobs:
                 scripts/check-release.mjs |
                 tar --extract --file=-
               git diff --exit-code
+            elif [[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.6.4" ]]; then
+              git archive --format=tar HEAD scripts/check-release.mjs | tar --extract --file=-
+              git diff --exit-code
             fi
           }
           trap restore_compatibility_files EXIT
@@ -167,6 +170,23 @@ jobs:
           await writeFile(
             releaseCheckPath,
             releaseCheck.replace(npmAudit, windowsNpmAudit),
+            "utf8",
+          );
+          NODE
+          fi
+          if [[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.6.4" ]]; then
+            node --input-type=module <<'NODE'
+          import { readFile, writeFile } from "node:fs/promises";
+          const releaseCheckPath = "scripts/check-release.mjs";
+          const releaseCheck = await readFile(releaseCheckPath, "utf8");
+          const runtimeSchema = 'const runtimeSchema = spawnSync("npm", ["run", "check:runtime-schema"], {\n  cwd: root,';
+          const windowsRuntimeSchema = 'const runtimeSchema = spawnSync("npm", ["run", "check:runtime-schema"], {\n  shell: process.platform === "win32",\n  cwd: root,';
+          if (!releaseCheck.includes(runtimeSchema) || releaseCheck.includes(windowsRuntimeSchema)) {
+            throw new Error("v2.6.4 runtime schema compatibility precondition failed");
+          }
+          await writeFile(
+            releaseCheckPath,
+            releaseCheck.replace(runtimeSchema, windowsRuntimeSchema),
             "utf8",
           );
           NODE

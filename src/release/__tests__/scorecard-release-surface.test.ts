@@ -60,6 +60,24 @@ describe("audit scorecard release surfaces", () => {
     );
   });
 
+  it("repairs the immutable v2.6.4 Windows runtime-schema command without retagging", async () => {
+    const workflow = await readFile(
+      join(process.cwd(), ".github", "workflows", "release-binaries.yml"),
+      "utf8",
+    );
+
+    expect(workflow).toContain(
+      '[[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.6.4" ]]',
+    );
+    expect(workflow).toContain("v2.6.4 runtime schema compatibility precondition failed");
+    expect(workflow).toContain(
+      'const windowsRuntimeSchema = \'const runtimeSchema = spawnSync("npm", ["run", "check:runtime-schema"], {\\n  shell: process.platform === "win32",\\n  cwd: root,\';',
+    );
+    expect(workflow).toMatch(
+      /git archive --format=tar HEAD scripts\/check-release\.mjs \| tar --extract --file=-/,
+    );
+  });
+
   it("executes npm audit through the Windows command shell", async () => {
     const releaseCheck = await readFile(
       join(process.cwd(), "scripts", "check-release.mjs"),

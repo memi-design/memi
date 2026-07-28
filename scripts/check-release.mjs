@@ -45,6 +45,7 @@ if (currentReleaseDoc.status !== 0) {
   fail(`current release documentation gate failed: ${spawnFailureMessage(currentReleaseDoc, "failed")}`);
 }
 const runtimeSchema = spawnSync("npm", ["run", "check:runtime-schema"], {
+  shell: process.platform === "win32",
   cwd: root,
   encoding: "utf-8",
 });
