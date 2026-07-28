@@ -143,6 +143,32 @@ describe("journal/FileEventJournal extras", () => {
     expect(removed).toBe(2);
     expect((await journal.list()).length).toBe(3);
   });
+
+  it("persists metadata-only content by default", async () => {
+    const sessionId = asId("SessionId", makeId("SessionId"));
+    await journal.append(sessionId, {
+      eventId: asId("EventId", makeId("EventId")),
+      seq: 1,
+      harnessId: asId("HarnessId", "hns_codex"),
+      providerInstanceId: asId("ProviderInstanceId", "prv_x"),
+      sessionId,
+      createdAt: new Date().toISOString(),
+      type: "message.user",
+      text: "ANTHROPIC_API_KEY=sk-ant-secret email me at person@example.com",
+    });
+
+    const path = join(root, ".memoire/studio/events", `${sessionId}.jsonl`);
+    const raw = await import("node:fs/promises").then((fs) => fs.readFile(path, "utf-8"));
+    expect(raw).not.toContain("sk-ant-secret");
+    expect(raw).not.toContain("person@example.com");
+    expect(raw).not.toContain("ANTHROPIC_API_KEY=");
+
+    const replayed = await collectReplay(journal, sessionId);
+    expect(replayed[0]).toMatchObject({
+      type: "message.user",
+      text: "[content omitted]",
+    });
+  });
 });
 
 suite("FileEventJournal", () => {
