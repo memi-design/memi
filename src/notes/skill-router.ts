@@ -111,13 +111,21 @@ export async function routeInstalledSkills(
     1_000_000,
     "maximumContextBytes",
   );
-  const queryTokens = tokenize(input.intent);
+  const queryTokens = tokenize(routableIntent(input.intent));
+  const requestedAction = inferRequestedAction(input.intent);
   const capabilities = new Set(input.capabilities.map(normalizeToken));
   const platforms = new Set((input.platforms ?? []).map(normalizeToken));
   const excluded: Array<{ id: string; reason: string }> = [];
   const ranked = input.notes
     .filter((note) => note.enabled)
-    .flatMap((note) => routeCandidates(note, queryTokens, capabilities, platforms, excluded))
+    .flatMap((note) => routeCandidates(
+      note,
+      queryTokens,
+      requestedAction,
+      capabilities,
+      platforms,
+      excluded,
+    ))
     .filter((candidate) => candidate.score >= 8)
     .sort(compareRouteCandidates);
   const selected: SkillRouteResult["selected"][number][] = [];
@@ -375,6 +383,7 @@ interface RankedRouteCandidate {
 function routeCandidates(
   note: InstalledNote,
   queryTokens: ReadonlySet<string>,
+  requestedAction: "create" | "validate" | null,
   capabilities: ReadonlySet<string>,
   platforms: ReadonlySet<string>,
   excluded: Array<{ id: string; reason: string }>,
@@ -395,6 +404,18 @@ function routeCandidates(
     excluded.push({
       id: note.manifest.name,
       reason: `platform-mismatch:${requiredPlatforms.join(",")}`,
+    });
+    return [];
+  }
+  const actions = routing?.actions?.map(normalizeToken) ?? [];
+  if (
+    requestedAction
+    && actions.length > 0
+    && !actions.some((action) => compatibleActions(requestedAction).has(action))
+  ) {
+    excluded.push({
+      id: note.manifest.name,
+      reason: `action-mismatch:${requestedAction}`,
     });
     return [];
   }
@@ -478,6 +499,36 @@ function tokenize(value: string): ReadonlySet<string> {
   return new Set(rawTokens(value)
     .filter((token) => !STOP_WORDS.has(token))
     .map(normalizeToken));
+}
+
+function routableIntent(value: string): string {
+  return value.replace(
+    /\b(?:preserve|preserving|retain|retaining)\s+(?:the\s+)?existing\s+[a-z0-9-]+(?:\s+[a-z0-9-]+){0,2}/gi,
+    " ",
+  );
+}
+
+function inferRequestedAction(value: string): "create" | "validate" | null {
+  const tokens = new Set(rawTokens(value).map(normalizeToken));
+  const createSignals = [
+    "add", "build", "change", "create", "design", "fix", "generate",
+    "implement", "integrate", "modify", "refactor", "repair", "update", "write",
+  ];
+  if (createSignals.some((signal) => tokens.has(normalizeToken(signal)))) {
+    return "create";
+  }
+  const validateSignals = [
+    "analyze", "audit", "inspect", "review", "test", "validate", "verify",
+  ];
+  return validateSignals.some((signal) => tokens.has(normalizeToken(signal)))
+    ? "validate"
+    : null;
+}
+
+function compatibleActions(action: "create" | "validate"): ReadonlySet<string> {
+  return action === "create"
+    ? new Set(["create", "generate", "integrate"])
+    : new Set(["analyze", "audit", "reference", "review"]);
 }
 
 function markdownReferences(content: string): readonly string[] {

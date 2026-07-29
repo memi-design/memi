@@ -64,6 +64,8 @@ export const NoteManifestSchema = z.object({
       capabilities: z.array(z.string().min(1)).default([]),
       platforms: z.array(z.string().min(1)).default([]),
       priority: z.number().int().default(0),
+      actions: z.array(z.string().min(1)).optional(),
+      lifecycle: z.array(z.string().min(1)).optional(),
     }).strict().optional(),
   }).optional(),
   reviewStatus: z.enum(["draft", "submitted", "approved", "rejected"]).optional(),

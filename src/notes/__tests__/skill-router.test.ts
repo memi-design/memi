@@ -205,6 +205,49 @@ describe("deterministic skill router", () => {
     });
   });
 
+  it("rejects audit-only guidance for a product implementation task", async () => {
+    const audit = await note("accessibility-audit", {
+      description: "Audit WCAG accessibility and keyboard focus.",
+      intents: ["accessibility-audit"],
+      actions: ["audit"],
+    });
+    const implementation = await note("accessible-interface", {
+      description: "Create accessible keyboard interactions.",
+      intents: ["accessible-interface"],
+      actions: ["create"],
+    });
+
+    const routed = await routeInstalledSkills({
+      intent: "Implement an accessible keyboard dialog and add focus restoration",
+      notes: [audit, implementation],
+      capabilities: [],
+      maximumSkills: 2,
+    });
+
+    expect(routed.selected.map((skill) => skill.id)).toEqual(["accessible-interface"]);
+    expect(routed.excluded).toContainEqual({
+      id: "accessibility-audit",
+      reason: "action-mismatch:create",
+    });
+  });
+
+  it("does not treat a preserved existing system as a requested creation domain", async () => {
+    const systems = await note("design-systems", {
+      description: "Create visual systems and reusable design tokens.",
+      intents: ["design-systems"],
+      actions: ["create"],
+    });
+
+    const routed = await routeInstalledSkills({
+      intent: "Implement a dialog while preserving the existing visual system",
+      notes: [systems],
+      capabilities: [],
+      maximumSkills: 2,
+    });
+
+    expect(routed.decision).toBe("abstain");
+  });
+
   it("formats portable skill paths and records references that exceed the context budget", async () => {
     const installed = await note("accessibility-audit", {
       description: "Audit WCAG accessibility and keyboard behavior.",
@@ -306,6 +349,7 @@ async function note(
     intents: string[];
     capabilities?: string[];
     body?: string;
+    actions?: string[];
   },
 ): Promise<InstalledNote> {
   const root = await mkdtemp(path.join(tmpdir(), `memi-skill-router-${name}-`));
@@ -342,6 +386,8 @@ async function note(
           capabilities: options.capabilities ?? [],
           platforms: [],
           priority: 0,
+          actions: options.actions ?? [],
+          lifecycle: [],
         },
       },
       createdAt: "2026-07-29T00:00:00.000Z",

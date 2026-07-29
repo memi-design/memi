@@ -77,6 +77,8 @@ interface WorkspaceRegistrySkill {
   readonly legacyCategory?: string;
   readonly tags?: string[];
   readonly surfaces?: string[];
+  readonly actions?: string[];
+  readonly lifecycle?: string[];
   readonly routing?: {
     readonly intents?: string[];
     readonly excludes?: string[];
@@ -420,6 +422,8 @@ function applyWorkspaceRegistryMetadata(
         capabilities,
         platforms,
         priority: rolePriority[metadata.routing?.role ?? ""] ?? 0,
+        actions: stringArray(metadata.actions),
+        lifecycle: stringArray(metadata.lifecycle),
       },
     },
   });

@@ -128,6 +128,8 @@ Workspace skill body.
           status: "canonical",
           legacyCategory: "craft",
           tags: ["web", "accessibility"],
+          actions: ["create", "audit"],
+          lifecycle: ["design", "validate"],
           routing: {
             intents: ["accessible-web-interface"],
             excludes: ["native-only"],
@@ -157,6 +159,8 @@ Workspace skill body.
       excludes: ["native-only"],
       platforms: ["web"],
       priority: 3,
+      actions: ["create", "audit"],
+      lifecycle: ["design", "validate"],
     });
     expect(loader.getNote("old-alias")?.enabled).toBe(false);
   });
