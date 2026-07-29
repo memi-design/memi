@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import {
   mkdir,
   mkdtemp,
+  readFile,
   rm,
   chmod,
   writeFile,
@@ -191,6 +192,39 @@ export async function runWorkflowTrial(input: {
         );
       }
     }
+    await requireSuccessfulProcess({
+      command: "git",
+      args: ["add", "-A", "--", "."],
+      cwd: workspaceRoot,
+      timeoutMs: 30_000,
+    });
+    await requireSuccessfulProcess({
+      command: "git",
+      args: [
+        "-c",
+        "user.name=Memi Workflow",
+        "-c",
+        "user.email=workflow@memi.invalid",
+        "commit",
+        "--quiet",
+        "--allow-empty",
+        "--no-gpg-sign",
+        "-m",
+        "memi workflow baseline",
+      ],
+      cwd: workspaceRoot,
+      timeoutMs: 30_000,
+    });
+    const workflowBaselineRevision = (await requireSuccessfulProcess({
+      command: "git",
+      args: ["rev-parse", "HEAD"],
+      cwd: workspaceRoot,
+      timeoutMs: 30_000,
+    })).stdout.trim();
+    events.push(event("workflow.baseline.captured", {
+      workflowBaselineRevision,
+      fixtureHash,
+    }));
 
     const prompt = buildWorkflowPrompt({
       task,
@@ -212,6 +246,31 @@ export async function runWorkflowTrial(input: {
       durationMs: Math.round(performance.now() - adapterStarted),
       usage: adapterResult.usage,
       tools: adapterResult.tools,
+    }));
+
+    await runProcess({
+      command: "git",
+      args: ["add", "-N", "--", "."],
+      cwd: workspaceRoot,
+      timeoutMs: 30_000,
+    });
+    const patch = (await runProcess({
+      command: "git",
+      args: [
+        "diff",
+        "--binary",
+        "--no-ext-diff",
+        workflowBaselineRevision,
+        "--",
+        ".",
+      ],
+      cwd: workspaceRoot,
+      timeoutMs: 30_000,
+    })).stdout;
+    const fixturesUnchanged = await verifyFixtures(workspaceRoot, task.fixtures);
+    events.push(event("workflow.patch.captured", {
+      patchBytes: Buffer.byteLength(patch),
+      fixturesUnchanged,
     }));
 
     const verification: WorkflowVerificationResult[] = [];
@@ -241,19 +300,8 @@ export async function runWorkflowTrial(input: {
       events.push(event("workflow.verification.completed", { ...result }));
     }
 
-    await runProcess({
-      command: "git",
-      args: ["add", "-N", "--", "."],
-      cwd: workspaceRoot,
-      timeoutMs: 30_000,
-    });
-    const patch = (await runProcess({
-      command: "git",
-      args: ["diff", "--binary", "--no-ext-diff"],
-      cwd: workspaceRoot,
-      timeoutMs: 30_000,
-    })).stdout;
     const accepted = adapterResult.exitCode === 0
+      && fixturesUnchanged
       && verification.every((entry) => entry.passed)
       && task.requiredArtifacts.every((artifact) =>
         ["git.patch", "verification.json", "events.jsonl"].includes(artifact));
@@ -305,6 +353,18 @@ export async function runWorkflowTrial(input: {
   } finally {
     await rm(workspaceParent, { recursive: true, force: true });
   }
+}
+
+async function verifyFixtures(
+  workspaceRoot: string,
+  fixtures: WorkflowTask["fixtures"],
+): Promise<boolean> {
+  const checks = await Promise.all(fixtures.map(async (fixture) => {
+    const target = path.resolve(workspaceRoot, fixture.path);
+    const content = await readFile(target, "utf8").catch(() => null);
+    return content === fixture.content;
+  }));
+  return checks.every(Boolean);
 }
 
 interface ProcessResult {

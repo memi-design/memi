@@ -44,7 +44,10 @@ describe("workflow trial runner", () => {
         {
           kind: "rendered-flow",
           command: process.execPath,
-          args: ["-e", "if(require('fs').readFileSync('implemented.txt','utf8')!=='ready\\n')process.exit(1)"],
+          args: [
+            "-e",
+            "const fs=require('fs');if(fs.readFileSync('implemented.txt','utf8')!=='ready\\n')process.exit(1);fs.writeFileSync('verification-generated.txt','runtime\\n')",
+          ],
           timeoutMs: 60_000,
         },
       ],
@@ -91,6 +94,9 @@ describe("workflow trial runner", () => {
     expect(result.fixtureHash).toMatch(/^sha256:/);
     expect(result.verification.every((entry) => entry.passed)).toBe(true);
     expect(result.patch).toContain("implemented.txt");
+    expect(result.patch).not.toContain("contracts/expected.txt");
+    expect(result.patch).not.toContain("prepared.txt");
+    expect(result.patch).not.toContain("verification-generated.txt");
     await expect(readFile(path.join(source, "implemented.txt"), "utf8")).rejects.toThrow();
     expect(await readFile(path.join(result.evidenceDirectory, "verification.json"), "utf8"))
       .toContain("\"passed\": true");
