@@ -176,6 +176,25 @@ export async function resolveRoutedSkills(
   return deepFreeze({ route, skills });
 }
 
+export function formatRoutedSkillContext(
+  routed: ResolvedSkillRoute,
+): string {
+  const receipt = JSON.stringify(routed.route, null, 2);
+  const skills = routed.skills.map((skill) =>
+    `## ${skill.skillName} (${skill.noteId})\n\n${skill.content}`).join("\n\n---\n\n");
+  return [
+    "# Memi deterministic routing receipt",
+    "",
+    "```json",
+    receipt,
+    "```",
+    "",
+    "# Routed skill stack",
+    "",
+    skills || "No skill was selected. Follow repository evidence only.",
+  ].join("\n");
+}
+
 export function searchCatalogSkills(input: {
   readonly query: string;
   readonly entries: readonly SkillSearchEntry[];

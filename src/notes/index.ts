@@ -30,6 +30,7 @@ export {
 
 export {
   SKILL_ROUTER_VERSION,
+  formatRoutedSkillContext,
   resolveRoutedSkills,
   routeInstalledSkills,
   searchCatalogSkills,
