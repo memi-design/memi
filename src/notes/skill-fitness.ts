@@ -1,9 +1,21 @@
+import { createHash } from "node:crypto";
 import { appendFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
+import type { BenchmarkRunRecord } from "../efficiency/contracts.js";
 
 const sha256Schema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
 const ratioSchema = z.number().finite().min(-100).max(1);
+
+export const SkillFitnessRouteSchema = z.object({
+  routerVersion: z.string().min(1),
+  repositoryFingerprintHash: sha256Schema.nullable(),
+  selected: z.array(z.object({
+    id: z.string().regex(/^[a-z][a-z0-9-]*$/),
+    contentHash: sha256Schema,
+  }).passthrough()).min(1).max(4),
+}).passthrough();
+export type SkillFitnessRoute = z.infer<typeof SkillFitnessRouteSchema>;
 
 export const SkillFitnessEventSchema = z.object({
   schemaVersion: z.literal(1),
@@ -45,6 +57,69 @@ export interface SkillFitnessProjection {
     readonly medianToolCallSavingsRatio: number;
     readonly recommendation: "promote" | "observe" | "quarantine";
   }[];
+}
+
+export interface BuildSkillFitnessEventInput {
+  readonly baseline: BenchmarkRunRecord;
+  readonly memi: BenchmarkRunRecord;
+  readonly route: SkillFitnessRoute;
+  readonly taskClass: string;
+}
+
+export function buildSkillFitnessEvent(
+  input: BuildSkillFitnessEventInput,
+): Readonly<SkillFitnessEvent> {
+  const route = SkillFitnessRouteSchema.parse(input.route);
+  validatePair(input.baseline, input.memi);
+  if (!route.repositoryFingerprintHash) {
+    throw new Error("skill route is missing a repository fingerprint hash");
+  }
+  const identity = JSON.stringify({
+    baselineRunId: input.baseline.runId,
+    memiRunId: input.memi.runId,
+    repositoryFingerprintHash: route.repositoryFingerprintHash,
+    routerVersion: route.routerVersion,
+    skills: route.selected.map(({ id, contentHash }) => ({ id, contentHash })),
+  });
+  return deepFreeze(SkillFitnessEventSchema.parse({
+    schemaVersion: 1,
+    eventId: `fitness:${createHash("sha256").update(identity).digest("hex")}`,
+    createdAt: input.memi.timing.completedAt,
+    routerVersion: route.routerVersion,
+    repositoryFingerprintHash: route.repositoryFingerprintHash,
+    taskClass: input.taskClass,
+    harness: {
+      provider: input.memi.harness.id,
+      modelId: input.memi.harness.modelId,
+      reasoningEffort: input.memi.harness.reasoningEffort,
+    },
+    pair: {
+      baselineRunId: input.baseline.runId,
+      memiRunId: input.memi.runId,
+    },
+    skills: route.selected.map(({ id, contentHash }) => ({
+      skillId: id,
+      contentHash,
+    })),
+    qualityParity: passed(input.baseline)
+      && passed(input.memi)
+      && input.memi.outcome.qualityScore >= input.baseline.outcome.qualityScore
+      && input.memi.outcome.defects <= input.baseline.outcome.defects
+      && input.memi.outcome.humanInterventions
+        <= input.baseline.outcome.humanInterventions,
+    tokenSavingsRatio: saving(
+      totalTokens(input.baseline),
+      totalTokens(input.memi),
+    ),
+    latencySavingsRatio: saving(
+      input.baseline.timing.wallTimeMs,
+      input.memi.timing.wallTimeMs,
+    ),
+    toolCallSavingsRatio: saving(
+      input.baseline.tools.calls,
+      input.memi.tools.calls,
+    ),
+  }));
 }
 
 export async function appendSkillFitnessEvent(
@@ -166,6 +241,52 @@ function median(values: readonly number[]): number {
   const midpoint = Math.floor(ordered.length / 2);
   if (ordered.length % 2 === 1) return ordered[midpoint] ?? 0;
   return ((ordered[midpoint - 1] ?? 0) + (ordered[midpoint] ?? 0)) / 2;
+}
+
+function validatePair(
+  baseline: BenchmarkRunRecord,
+  memi: BenchmarkRunRecord,
+): void {
+  if (baseline.condition !== "baseline" || memi.condition !== "memi") {
+    throw new Error("fitness pair must contain baseline then memi conditions");
+  }
+  const identityFields = [
+    ["suite", baseline.suiteId, memi.suiteId],
+    ["experiment", baseline.experimentId, memi.experimentId],
+    ["task", baseline.taskId, memi.taskId],
+    ["repeat", baseline.repeat, memi.repeat],
+  ] as const;
+  for (const [label, left, right] of identityFields) {
+    if (left !== right) throw new Error(`${label} mismatch`);
+  }
+  if (baseline.repository.pathHash !== memi.repository.pathHash) {
+    throw new Error("repository path mismatch");
+  }
+  if (baseline.repository.revision !== memi.repository.revision) {
+    throw new Error("repository revision mismatch");
+  }
+  if (baseline.repository.dirty !== memi.repository.dirty) {
+    throw new Error("repository dirty-state mismatch");
+  }
+  if (baseline.harness.id !== memi.harness.id) throw new Error("harness mismatch");
+  if (baseline.harness.modelId !== memi.harness.modelId) {
+    throw new Error("model mismatch");
+  }
+  if (baseline.harness.reasoningEffort !== memi.harness.reasoningEffort) {
+    throw new Error("reasoning effort mismatch");
+  }
+}
+
+function totalTokens(run: BenchmarkRunRecord): number {
+  return run.usage.inputTokens + run.usage.outputTokens + run.usage.reasoningTokens;
+}
+
+function passed(run: BenchmarkRunRecord): boolean {
+  return run.outcome.accepted && run.outcome.testsPassed;
+}
+
+function saving(baseline: number, memi: number): number {
+  return baseline <= 0 ? 0 : 1 - memi / baseline;
 }
 
 function isMissingFile(error: unknown): boolean {

@@ -8,6 +8,7 @@ import {
   benchmarkRunRecordSchema,
   benchmarkTaskSchema,
   codexCaseStudyTaskSchema,
+  type BenchmarkRunRecord,
 } from "../efficiency/contracts.js";
 import {
   benchmarkRepositoryRevision,
@@ -37,6 +38,11 @@ import {
   NoteLoader,
   resolveRoutedSkills,
   buildRepositoryFingerprint,
+  SkillFitnessRouteSchema,
+  appendSkillFitnessEvent,
+  buildSkillFitnessEvent,
+  loadSkillFitnessEvents,
+  projectSkillFitness,
 } from "../notes/index.js";
 import { ui } from "../tui/format.js";
 
@@ -318,6 +324,65 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     });
 
   benchmark
+    .command("fitness-record")
+    .description("Append skill fitness evidence from one exact paired workflow")
+    .requiredOption("--baseline <run-id>", "Baseline run id")
+    .requiredOption("--memi <run-id>", "Memi run id")
+    .requiredOption("--route <path>", "Memi skill-route.json receipt")
+    .requiredOption("--task-class <id>", "Stable task class")
+    .requiredOption("--store-root <path>", "External immutable run store root")
+    .option("--json", "Output JSON")
+    .action(async (opts: {
+      baseline: string;
+      memi: string;
+      route: string;
+      taskClass: string;
+      storeRoot: string;
+      json?: boolean;
+    }) => {
+      const storeRoot = resolve(opts.storeRoot);
+      const store = new EfficiencyRunStore(storeRoot);
+      const runs = await store.list();
+      const baseline = uniqueRun(runs, opts.baseline, "baseline");
+      const memi = uniqueRun(runs, opts.memi, "memi");
+      const route = SkillFitnessRouteSchema.parse(
+        JSON.parse(await readFile(resolve(opts.route), "utf8")),
+      );
+      const event = buildSkillFitnessEvent({
+        baseline,
+        memi,
+        route,
+        taskClass: opts.taskClass,
+      });
+      const path = skillFitnessPath(storeRoot);
+      await appendSkillFitnessEvent(path, event);
+      const projection = projectSkillFitness(await loadSkillFitnessEvents(path));
+      const payload = { status: "recorded", path, event, projection };
+      if (opts.json) console.log(JSON.stringify(payload, null, 2));
+      else {
+        console.log(ui.ok(`Recorded fitness evidence ${event.eventId}`));
+        console.log(ui.dots("Fitness store", path));
+      }
+    });
+
+  benchmark
+    .command("fitness")
+    .description("Project content-addressed skill fitness recommendations")
+    .requiredOption("--store-root <path>", "External immutable run store root")
+    .option("--json", "Output JSON")
+    .action(async (opts: { storeRoot: string; json?: boolean }) => {
+      const path = skillFitnessPath(resolve(opts.storeRoot));
+      const projection = projectSkillFitness(await loadSkillFitnessEvents(path));
+      const payload = { status: "projected", path, projection };
+      if (opts.json) console.log(JSON.stringify(payload, null, 2));
+      else {
+        console.log(ui.section("MEMI SKILL FITNESS"));
+        console.log(ui.dots("Events", String(projection.events)));
+        console.log(ui.dots("Skills", String(projection.skills.length)));
+      }
+    });
+
+  benchmark
     .command("codex-run <task>")
     .description("Execute one isolated read-only Codex case-study trial and record its trace")
     .requiredOption("--condition <condition>", "baseline or memi")
@@ -573,6 +638,22 @@ function ratio(value: string, label: string): number {
 
 function csv(value: string): string[] {
   return value.split(",").map((entry) => entry.trim()).filter(Boolean);
+}
+
+function skillFitnessPath(storeRoot: string): string {
+  return join(storeRoot, ".memoire", "efficiency", "skill-fitness.jsonl");
+}
+
+function uniqueRun(
+  runs: readonly BenchmarkRunRecord[],
+  runId: string,
+  label: string,
+): BenchmarkRunRecord {
+  const matches = runs.filter((run) => run.runId === runId);
+  if (matches.length !== 1) {
+    throw new Error(`${label} run ${runId} was found ${matches.length} times`);
+  }
+  return matches[0];
 }
 
 function providers(value: string): WorkflowProvider[] {
