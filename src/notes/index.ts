@@ -30,8 +30,10 @@ export {
 
 export {
   SKILL_ROUTER_VERSION,
+  resolveRoutedSkills,
   routeInstalledSkills,
   searchCatalogSkills,
+  type ResolvedSkillRoute,
   type RouteInstalledSkillsInput,
   type SkillRouteResult,
   type SkillSearchEntry,

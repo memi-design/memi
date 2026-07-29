@@ -49,6 +49,7 @@ export interface AgentPlan {
   category: IntentCategory;
   subTasks: SubTask[];
   context: AgentContext;
+  skillRoute?: import("../notes/skill-router.js").SkillRouteResult;
   createdAt: string;
 }
 

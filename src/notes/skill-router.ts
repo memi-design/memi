@@ -1,7 +1,11 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import type { InstalledNote, NoteManifest } from "./types.js";
+import type {
+  InstalledNote,
+  NoteManifest,
+  ResolvedSkill,
+} from "./types.js";
 
 export const SKILL_ROUTER_VERSION = "skill-router-v1";
 
@@ -75,6 +79,11 @@ export interface SkillRouteResult {
   readonly maximumContextBytes: number;
 }
 
+export interface ResolvedSkillRoute {
+  readonly route: Readonly<SkillRouteResult>;
+  readonly skills: readonly ResolvedSkill[];
+}
+
 export async function routeInstalledSkills(
   input: RouteInstalledSkillsInput,
 ): Promise<Readonly<SkillRouteResult>> {
@@ -140,6 +149,31 @@ export async function routeInstalledSkills(
     contextBytes,
     maximumContextBytes,
   });
+}
+
+export async function resolveRoutedSkills(
+  input: RouteInstalledSkillsInput,
+): Promise<Readonly<ResolvedSkillRoute>> {
+  const route = await routeInstalledSkills(input);
+  const noteById = new Map(input.notes.map((note) => [note.manifest.name, note]));
+  const skills = await Promise.all(route.selected.map(async (selected) => {
+    const note = noteById.get(selected.id);
+    const manifestSkill = note?.manifest.skills.find((skill) =>
+      path.resolve(note.path, skill.file) === selected.file);
+    if (!note || !manifestSkill) {
+      throw new Error(`Routed skill ${selected.id}:${selected.skillName} is no longer installed`);
+    }
+    const content = await readFile(selected.file, "utf8");
+    return deepFreeze({
+      noteId: note.manifest.name,
+      skillName: manifestSkill.name,
+      file: selected.file,
+      content,
+      activateOn: manifestSkill.activateOn,
+      freedomLevel: manifestSkill.freedomLevel,
+    });
+  }));
+  return deepFreeze({ route, skills });
 }
 
 export function searchCatalogSkills(input: {

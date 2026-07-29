@@ -23,7 +23,12 @@ import type { MemoireEngine } from "../engine/core.js";
 import type { AgentBoxState } from "../plugin/shared/contracts.js";
 import { AGENT_PROMPTS } from "./prompts.js";
 import { getAI } from "../ai/index.js";
-import { resolveForIntent, wrapWithNotes, type ResolvedSkill } from "../notes/index.js";
+import {
+  resolveRoutedSkills,
+  wrapWithNotes,
+  type ResolvedSkill,
+  type SkillRouteResult,
+} from "../notes/index.js";
 import { formatAgentBoxLines, formatAgentBoxName, getAgentBoxKey, sortAgentBoxUpdates, type AgentBoxUpdate, type AgentBoxVisualStatus } from "./agent-box.js";
 
 // ── Re-export types & functions from extracted modules ───
@@ -77,16 +82,33 @@ export class AgentOrchestrator {
     const category = classifyIntent(intent);
     log.info({ intent, category }, "Classified design intent");
 
-    // Resolve Memoire Notes for this intent
-    const resolvedNotes = this.engine.notes.loaded
-      ? await resolveForIntent(category, this.engine.notes.notes)
-      : [];
+    const context = options?.context ?? await this.buildContext();
+    const routed = this.engine.notes.loaded
+      ? await resolveRoutedSkills({
+        intent,
+        notes: this.engine.notes.notes,
+        capabilities: context.figmaConnected ? ["figma"] : [],
+        platforms: context.projectFramework ? [context.projectFramework] : [],
+        maximumSkills: 2,
+        maximumContextBytes: 8_000,
+      })
+      : null;
+    const resolvedNotes = routed?.skills ?? [];
     if (resolvedNotes.length > 0) {
-      log.info({ notes: resolvedNotes.map((n) => n.noteId), category }, "Notes activated for intent");
+      log.info({
+        route: routed?.route,
+        notes: resolvedNotes.map((note) => note.noteId),
+        category,
+      }, "Notes deterministically routed for intent");
     }
 
-    const context = options?.context ?? await this.buildContext();
-    const plan = this.buildPlan(intent, category, context, resolvedNotes);
+    const plan = this.buildPlan(
+      intent,
+      category,
+      context,
+      resolvedNotes,
+      routed?.route,
+    );
 
     log.info({ planId: plan.id, tasks: plan.subTasks.length }, "Execution plan ready");
     this.onUpdate?.(plan);
@@ -118,7 +140,13 @@ export class AgentOrchestrator {
 
   // ── Plan Building ──────────────────────────────────────
 
-  buildPlan(intent: string, category: IntentCategory, context: AgentContext, resolvedNotes: ResolvedSkill[] = []): AgentPlan {
+  buildPlan(
+    intent: string,
+    category: IntentCategory,
+    context: AgentContext,
+    resolvedNotes: readonly ResolvedSkill[] = [],
+    skillRoute?: SkillRouteResult,
+  ): AgentPlan {
     const planId = `plan-${++this.planCounter}-${Date.now()}`;
 
     const subTasks = this.planBuilder.decompose(intent, category, context);
@@ -134,6 +162,7 @@ export class AgentOrchestrator {
       category,
       subTasks,
       context,
+      skillRoute,
       createdAt: new Date().toISOString(),
     };
   }

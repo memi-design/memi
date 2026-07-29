@@ -47,6 +47,7 @@ export interface ComposePlanPayload {
   category: string;
   createdAt: string;
   totalTasks: number;
+  skillRoute: AgentPlan["skillRoute"] | null;
   tasks: ComposeTaskPayload[];
 }
 
@@ -220,6 +221,7 @@ function serializePlan(plan: AgentPlan): ComposePlanPayload {
     category: plan.category,
     createdAt: plan.createdAt,
     totalTasks: plan.subTasks.length,
+    skillRoute: plan.skillRoute ?? null,
     tasks: plan.subTasks.map(serializeTask),
   };
 }
@@ -299,6 +301,7 @@ function emptyPlanPayload(intent: string, category: string): ComposePlanPayload 
     category,
     createdAt: new Date().toISOString(),
     totalTasks: 0,
+    skillRoute: null,
     tasks: [],
   };
 }

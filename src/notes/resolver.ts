@@ -75,7 +75,7 @@ export async function resolveForIntent(
  * Build a prompt injection block from resolved skills.
  * Truncates if the combined content exceeds MAX_SKILL_CHARS.
  */
-export function buildSkillPromptBlock(resolved: ResolvedSkill[]): string {
+export function buildSkillPromptBlock(resolved: readonly ResolvedSkill[]): string {
   if (resolved.length === 0) return "";
 
   const sections: string[] = [];
@@ -100,7 +100,7 @@ export function buildSkillPromptBlock(resolved: ResolvedSkill[]): string {
  * Wrap a base prompt with resolved skill content.
  * Used by the agent prompt system to inject Note knowledge.
  */
-export function wrapWithNotes(basePrompt: string, resolved: ResolvedSkill[]): string {
+export function wrapWithNotes(basePrompt: string, resolved: readonly ResolvedSkill[]): string {
   const block = buildSkillPromptBlock(resolved);
   if (!block) return basePrompt;
   return `${block}\n\n---\n\n${basePrompt}`;
