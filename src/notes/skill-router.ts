@@ -375,6 +375,18 @@ export function formatRoutedSkillContext(
     maximumContextBytes: routed.route.maximumContextBytes,
     candidateCount: routed.route.candidates.length,
     excludedCount: routed.route.excluded.length,
+    optimizationPolicy: {
+      primaryObjectives: [
+        "cost",
+        "latency",
+        "quality",
+      ],
+      toolCallRole: "diagnostic_only",
+      costEvidencePreference: [
+        "measured_usd",
+        "token_proxy",
+      ],
+    },
   };
   const receipt = JSON.stringify(portableReceipt, null, 2);
   const skills = routed.skills.map((skill) =>
@@ -398,6 +410,9 @@ export function formatRoutedSkillContext(
     "Do not broaden scope, inventory the whole repository, or add adjacent improvements when direct task evidence is available.",
     "Start with paths, component names, and tests named by the task, then inspect only their direct dependencies.",
     "Run only the manifest verification commands and the narrow checks required to repair a failure. Do not add a full suite or extra platform journey unless the task requires it.",
+    "Optimize total cost, elapsed time, and correctness rather than minimizing tool calls in isolation.",
+    "Extra narrow tool calls are allowed when they reduce total cost, avoid loading broad context, or increase confidence without expanding task scope.",
+    "Batch related reads when that is cheaper, but do not trade away accuracy or repository-specific evidence to hit an arbitrary call count.",
     "When skill prose conflicts with installed versions or nearby repository patterns, follow the repository and record the divergence.",
     "",
     "# Routed skill stack",

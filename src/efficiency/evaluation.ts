@@ -51,6 +51,15 @@ export interface EfficiencyReport {
     readonly latencySavings: SavingsInterval;
     readonly toolCallSavings: SavingsInterval;
   };
+  readonly decision: {
+    readonly primaryCostEvidence: "measured_usd" | "token_proxy";
+    readonly toolCallRole: "diagnostic_only";
+    readonly gates: {
+      readonly costEfficiencyPassed: boolean;
+      readonly latencyPassed: boolean;
+      readonly qualityPassed: boolean;
+    };
+  };
   readonly quality: {
     readonly baselinePassRate: number;
     readonly memiPassRate: number;
@@ -103,6 +112,15 @@ export const efficiencyReportSchema = z.object({
     costSavings: costSavingsMetricSchema,
     latencySavings: savingsIntervalSchema,
     toolCallSavings: savingsIntervalSchema,
+  }).strict(),
+  decision: z.object({
+    primaryCostEvidence: z.enum(["measured_usd", "token_proxy"]),
+    toolCallRole: z.literal("diagnostic_only"),
+    gates: z.object({
+      costEfficiencyPassed: z.boolean(),
+      latencyPassed: z.boolean(),
+      qualityPassed: z.boolean(),
+    }).strict(),
   }).strict(),
   quality: z.object({
     baselinePassRate: z.number().min(0).max(1),
@@ -237,10 +255,28 @@ export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<Ef
     latencySavings: confidenceInterval(latencySavings, input.bootstrapSamples, input.seed + 3),
     toolCallSavings: confidenceInterval(toolCallSavings, input.bootstrapSamples, input.seed + 4),
   };
+  const primaryCostEvidence = costSavings.length > 0
+    && costSavings.length === pairs.length
+    ? "measured_usd" as const
+    : "token_proxy" as const;
+  const primaryCostMetric = primaryCostEvidence === "measured_usd"
+    ? metrics.costSavings.status === "assessed"
+      ? metrics.costSavings
+      : metrics.tokenSavings
+    : metrics.tokenSavings;
+  const decision = {
+    primaryCostEvidence,
+    toolCallRole: "diagnostic_only" as const,
+    gates: {
+      costEfficiencyPassed: primaryCostMetric.lower95 > input.targetImprovement,
+      latencyPassed: metrics.latencySavings.lower95 > input.targetImprovement,
+      qualityPassed,
+    },
+  };
   const claimPassed = enoughEvidence
-    && metrics.tokenSavings.lower95 > input.targetImprovement
-    && metrics.latencySavings.lower95 > input.targetImprovement
-    && qualityPassed;
+    && decision.gates.costEfficiencyPassed
+    && decision.gates.latencyPassed
+    && decision.gates.qualityPassed;
 
   return deepFreeze(efficiencyReportSchema.parse({
     schemaVersion: 1,
@@ -259,6 +295,7 @@ export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<Ef
       excluded,
     },
     metrics,
+    decision,
     quality: {
       baselinePassRate,
       memiPassRate,

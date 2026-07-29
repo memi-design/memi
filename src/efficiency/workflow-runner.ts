@@ -16,6 +16,10 @@ import {
   workflowTaskSchema,
   type WorkflowTask,
 } from "./workflow.js";
+import {
+  profileWorkflowTools,
+  type WorkflowToolProfile,
+} from "./tool-profile.js";
 
 const MAX_PROCESS_OUTPUT_BYTES = 2 * 1024 * 1024;
 
@@ -84,6 +88,7 @@ export interface WorkflowTrialResult {
   readonly evidenceDirectory: string;
   readonly patch: string;
   readonly adapter: Readonly<WorkflowAdapterResult>;
+  readonly toolProfile: Readonly<WorkflowToolProfile>;
   readonly preparation: readonly WorkflowPreparationResult[];
   readonly verification: readonly WorkflowVerificationResult[];
   readonly durationMs: number;
@@ -241,11 +246,15 @@ export async function runWorkflowTrial(input: {
       task.maximumDurationMs,
       `workflow adapter ${input.adapter.id}`,
     );
+    const toolProfile = profileWorkflowTools(input.adapter.id, adapterResult.stdout);
     events.push(event("workflow.adapter.completed", {
       exitCode: adapterResult.exitCode,
       durationMs: Math.round(performance.now() - adapterStarted),
       usage: adapterResult.usage,
       tools: adapterResult.tools,
+    }));
+    events.push(event("workflow.tools.profiled", {
+      ...toolProfile,
     }));
 
     await runProcess({
@@ -341,6 +350,11 @@ export async function runWorkflowTrial(input: {
       writeFile(path.join(evidenceDirectory, "adapter.stderr.log"), adapterResult.stderr, {
         mode: 0o600,
       }),
+      writeFile(
+        path.join(evidenceDirectory, "tool-profile.json"),
+        `${JSON.stringify(toolProfile, null, 2)}\n`,
+        { mode: 0o600 },
+      ),
     ]);
     return deepFreeze({
       schemaVersion: 1,
@@ -353,6 +367,7 @@ export async function runWorkflowTrial(input: {
       evidenceDirectory,
       patch,
       adapter: adapterResult,
+      toolProfile,
       preparation,
       verification,
       durationMs,

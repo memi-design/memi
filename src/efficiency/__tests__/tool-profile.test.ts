@@ -4,7 +4,7 @@ import { profileWorkflowTools } from "../tool-profile.js";
 describe("privacy-safe workflow tool profiles", () => {
   it("profiles Codex discovery and verification without retaining commands or paths", () => {
     const trace = [
-      codexCommand("pwd && rg --files"),
+      codexCommand("/bin/zsh -lc \"pwd && rg --files | sed -n '1,120p'\""),
       codexCommand(
         "sed -n '1,120p' app/secret/CustomTabBar.tsx\n"
           + "sed -n '1,120p' app/secret/CustomTabBar.test.tsx",
@@ -13,8 +13,8 @@ describe("privacy-safe workflow tool profiles", () => {
         type: "item.completed",
         item: { type: "file_change", changes: [{ path: "app/secret/CustomTabBar.tsx" }] },
       }),
-      codexCommand("npm test -- CustomTabBar"),
-      codexCommand("npm test -- CustomTabBar"),
+      codexCommand("/bin/zsh -lc 'npm test -- CustomTabBar'"),
+      codexCommand("/bin/zsh -lc 'npm test -- CustomTabBar'"),
       codexCommand("git status --short"),
     ].join("\n");
 
@@ -47,7 +47,7 @@ describe("privacy-safe workflow tool profiles", () => {
       claudeTool("Glob", { pattern: "app/**/*.tsx" }),
       claudeTool("Read", { file_path: "app/private.tsx" }),
       claudeTool("Edit", { file_path: "app/private.tsx" }),
-      claudeTool("Bash", { command: "npm test -- private" }),
+      claudeTool("Bash", { command: "/bin/zsh -lc 'npm test -- private'" }),
     ].join("\n");
 
     const profile = profileWorkflowTools("claude:sonnet:medium", trace);
