@@ -147,6 +147,65 @@ describe("deterministic skill router", () => {
     expect(context).toContain(routed.route.selected[0].contentHash);
   });
 
+  it("formats portable skill paths and records references that exceed the context budget", async () => {
+    const installed = await note("accessibility-audit", {
+      description: "Audit WCAG accessibility and keyboard behavior.",
+      intents: ["accessibility-audit"],
+      body: "# accessibility-audit\n\nRead [the guide](references/guide.md) before auditing.",
+    });
+    await mkdir(path.join(installed.path, "references"), { recursive: true });
+    await writeFile(
+      path.join(installed.path, "references", "guide.md"),
+      `# Full guide\n\n${"Detailed accessibility evidence. ".repeat(100)}`,
+    );
+
+    const routed = await resolveRoutedSkills({
+      intent: "Audit WCAG accessibility",
+      notes: [installed],
+      capabilities: [],
+      maximumContextBytes: 500,
+    });
+    const context = formatRoutedSkillContext(routed);
+
+    expect(context).not.toContain(installed.path);
+    expect(context).toContain("\"skillPath\": \"accessibility-audit/SKILL.md\"");
+    expect(context).toContain("references/guide.md");
+    expect(context).toContain("context-budget-exceeded");
+    expect(context).toContain("Do not attempt to read omitted resources outside the disposable workspace.");
+  });
+
+  it("embeds small directly referenced markdown resources within the same context budget", async () => {
+    const installed = await note("motion-performance", {
+      description: "Review interface motion performance and reduced motion.",
+      intents: ["motion-performance"],
+      body: "# motion-performance\n\nFollow [the checklist](references/checklist.md).",
+    });
+    await mkdir(path.join(installed.path, "references"), { recursive: true });
+    await writeFile(
+      path.join(installed.path, "references", "checklist.md"),
+      "# Motion checklist\n\nMeasure frame pacing and verify reduced motion.",
+    );
+
+    const routed = await resolveRoutedSkills({
+      intent: "Review motion performance",
+      notes: [installed],
+      capabilities: [],
+      maximumContextBytes: 1_000,
+    });
+    const context = formatRoutedSkillContext(routed);
+
+    expect(routed.resources).toEqual([
+      expect.objectContaining({
+        noteId: "motion-performance",
+        relativePath: "references/checklist.md",
+        status: "embedded",
+      }),
+    ]);
+    expect(context).toContain("# Motion checklist");
+    expect(routed.contextBytes).toBeGreaterThan(routed.route.contextBytes);
+    expect(routed.contextBytes).toBeLessThanOrEqual(1_000);
+  });
+
   it("does not route a compound intent from one generic matching word", async () => {
     const result = await routeInstalledSkills({
       intent: "Build and test a trustworthy clinical dashboard navigation",

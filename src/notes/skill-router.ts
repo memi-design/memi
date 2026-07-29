@@ -82,6 +82,21 @@ export interface SkillRouteResult {
 export interface ResolvedSkillRoute {
   readonly route: Readonly<SkillRouteResult>;
   readonly skills: readonly ResolvedSkill[];
+  readonly resources: readonly RoutedSkillResource[];
+  readonly contextBytes: number;
+}
+
+export interface RoutedSkillResource {
+  readonly noteId: string;
+  readonly relativePath: string;
+  readonly contentHash: string | null;
+  readonly contextBytes: number;
+  readonly status:
+    | "embedded"
+    | "context-budget-exceeded"
+    | "unreadable"
+    | "unsafe-path";
+  readonly content?: string;
 }
 
 export async function routeInstalledSkills(
@@ -185,15 +200,85 @@ export async function resolveRoutedSkills(
       freedomLevel: manifestSkill.freedomLevel,
     });
   }));
-  return deepFreeze({ route, skills });
+  const resources: RoutedSkillResource[] = [];
+  const seenResources = new Set<string>();
+  let contextBytes = route.contextBytes;
+  for (const skill of skills) {
+    const note = noteById.get(skill.noteId);
+    if (!note) continue;
+    for (const relativePath of markdownReferences(skill.content)) {
+      const key = `${skill.noteId}:${relativePath}`;
+      if (seenResources.has(key)) continue;
+      seenResources.add(key);
+      const resolvedPath = path.resolve(path.dirname(skill.file), relativePath);
+      const noteRoot = path.resolve(note.path);
+      if (resolvedPath !== noteRoot && !resolvedPath.startsWith(`${noteRoot}${path.sep}`)) {
+        resources.push({
+          noteId: skill.noteId,
+          relativePath,
+          contentHash: null,
+          contextBytes: 0,
+          status: "unsafe-path",
+        });
+        continue;
+      }
+      const content = await readFile(resolvedPath, "utf8").catch(() => null);
+      if (content === null) {
+        resources.push({
+          noteId: skill.noteId,
+          relativePath,
+          contentHash: null,
+          contextBytes: 0,
+          status: "unreadable",
+        });
+        continue;
+      }
+      const bytes = Buffer.byteLength(content, "utf8");
+      const contentHash = `sha256:${createHash("sha256").update(content).digest("hex")}`;
+      if (contextBytes + bytes > route.maximumContextBytes) {
+        resources.push({
+          noteId: skill.noteId,
+          relativePath,
+          contentHash,
+          contextBytes: bytes,
+          status: "context-budget-exceeded",
+        });
+        continue;
+      }
+      resources.push({
+        noteId: skill.noteId,
+        relativePath,
+        contentHash,
+        contextBytes: bytes,
+        status: "embedded",
+        content,
+      });
+      contextBytes += bytes;
+    }
+  }
+  return deepFreeze({ route, skills, resources, contextBytes });
 }
 
 export function formatRoutedSkillContext(
   routed: ResolvedSkillRoute,
 ): string {
-  const receipt = JSON.stringify(routed.route, null, 2);
+  const portableReceipt = {
+    ...routed.route,
+    selected: routed.route.selected.map(({ file: _file, ...selected }) => ({
+      ...selected,
+      skillPath: `${selected.id}/${path.basename(_file)}`,
+    })),
+    resources: routed.resources.map(({ content: _content, ...resource }) => resource),
+    contextBytes: routed.contextBytes,
+  };
+  const receipt = JSON.stringify(portableReceipt, null, 2);
   const skills = routed.skills.map((skill) =>
     `## ${skill.skillName} (${skill.noteId})\n\n${skill.content}`).join("\n\n---\n\n");
+  const resources = routed.resources
+    .filter((resource) => resource.status === "embedded")
+    .map((resource) =>
+      `## ${resource.noteId}/${resource.relativePath}\n\n${resource.content ?? ""}`)
+    .join("\n\n---\n\n");
   return [
     "# Memi deterministic routing receipt",
     "",
@@ -204,6 +289,12 @@ export function formatRoutedSkillContext(
     "# Routed skill stack",
     "",
     skills || "No skill was selected. Follow repository evidence only.",
+    "",
+    "# Embedded routed resources",
+    "",
+    resources || "No referenced resources were embedded.",
+    "",
+    "Do not attempt to read omitted resources outside the disposable workspace.",
   ].join("\n");
 }
 
@@ -355,6 +446,16 @@ function tokenize(value: string): ReadonlySet<string> {
   return new Set(rawTokens(value)
     .filter((token) => !STOP_WORDS.has(token))
     .map(normalizeToken));
+}
+
+function markdownReferences(content: string): readonly string[] {
+  const references = new Set<string>();
+  const pattern = /\]\((?![a-z]+:|#)([^)\s]+\.md)(?:#[^)]*)?\)/gi;
+  for (const match of content.matchAll(pattern)) {
+    const value = match[1]?.replaceAll("\\", "/");
+    if (value) references.add(value);
+  }
+  return [...references].sort((left, right) => left.localeCompare(right));
 }
 
 function normalizeToken(token: string): string {

@@ -20,6 +20,16 @@
         "--frozen-lockfile"
       ],
       "timeoutMs": 600000
+    },
+    {
+      "command": "pnpm",
+      "args": [
+        "exec",
+        "playwright",
+        "install",
+        "chromium"
+      ],
+      "timeoutMs": 900000
     }
   ],
   "fixtures": [
