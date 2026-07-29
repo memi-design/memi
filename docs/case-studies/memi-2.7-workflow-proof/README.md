@@ -2,23 +2,24 @@
 
 ## Release decision
 
-The 2.7 efficiency release gate remains closed.
+The five-pair evidence gate is complete. The greater-than-25% efficiency claim
+and the 2.7 publish gate remain closed.
 
-Three canonical, writable, multi-minute Codex workflow pairs completed against
+Five canonical, writable, multi-minute Codex workflow pairs completed against
 clean pinned revisions. Every included baseline and Memi run passed its real
 build and rendered-product contract at quality 100 with zero defects. The
-aggregate release status is `insufficient_evidence`, and the observed metrics
-do not support the efficiency claim:
+aggregate evidence status is `verified`, while the claim is `not_verified`:
 
-- Mean total-token savings: -23.04%; 95% bootstrap interval -98.33% to 21.90%.
-- Mean latency savings: -8.20%; 95% bootstrap interval -49.06% to 23.47%.
-- Mean tool-call savings: -51.96%; 95% bootstrap interval -105.88% to -25.00%.
+- Mean total-token savings: 0.55%; 95% bootstrap interval -51.23% to 37.30%.
+- Mean latency savings: 5.66%; 95% bootstrap interval -24.30% to 25.86%.
+- Mean tool-call savings: -15.69%; 95% bootstrap interval -61.86% to 28.14%.
 - USD cost: unassessed because the Codex subscription trace exposes no
   defensible per-run dollar cost.
 
 Positive savings mean Memi used less. Negative savings mean Memi regressed.
-The aggregate is negative because the Buzzr routed condition used substantially
-more context and time. That negative case remains first-class release evidence.
+Strong Paraform and positive dorii results offset some of Buzzr's regression,
+but the aggregate remains too small and uncertain to support a universal
+efficiency claim. The negative case remains first-class release evidence.
 
 ## Canonical cases
 
@@ -27,13 +28,17 @@ more context and time. That negative case remains first-class release evidence.
 | DoriOS | Next.js build plus Playwright desktop and mobile keyboard-dialog journeys | `motion-performance` | 1.00% | 7.31% | 39.75% | -105.88% | 100 / 100 |
 | Buzzr | Expo web export plus rendered React Native bottom-tab unread badge contract | `react-native-gen` | -49.06% | -98.33% | -40.67% | -25.00% | 100 / 100 |
 | Nate the Bait | Xcode build plus real SwiftUI Options journey on pinned iPhone Simulator | `swiftui-design-engineering` | 23.47% | 21.90% | 37.58% | -25.00% | 100 / 100 |
+| Paraform | Vite production build plus recruiter command-menu keyboard and reduced-motion journeys | `emil-design-eng` + `interaction-design` | 28.26% | 52.43% | 26.98% | 44.12% | 100 / 100 |
+| dorii public site | Next.js production build plus mobile navigation, route, focus, and reduced-motion journeys | `emil-design-eng` + `interaction-design` | 24.65% | 19.43% | 20.68% | 33.33% | 100 / 100 |
 
-Nate demonstrates a bounded real benefit: the routed run was 98.8 seconds
-faster and used 547,691 fewer input tokens while producing the same accepted
-native result. Dori demonstrates lower uncached discovery and reasoning with
-similar elapsed time, but more tool calls. Buzzr demonstrates that one relevant
-skill can still make an agent slower and more expensive. Routing relevance by
-itself is not proof of efficiency.
+Paraform demonstrates a concrete stacked-skill benefit: the routed run was
+109.3 seconds faster, used 780,622 fewer counted tokens, and made 15 fewer tool
+calls while producing the same accepted result. dorii shows a second positive
+stacked-skill case across a production mobile web journey. Nate demonstrates a
+bounded native benefit. Dori demonstrates lower uncached discovery with similar
+elapsed time but more tool calls. Buzzr demonstrates that one relevant skill can
+still make an agent slower and more expensive. Routing relevance by itself is
+not proof of efficiency.
 
 Exact run IDs and metric values are in [results.json](results.json).
 
@@ -77,6 +82,10 @@ The harness rejected evidence instead of silently repairing it:
    The adapter now recognizes provider-declared errors, returns a failed
    execution, and skips expensive product verification. The machine's current
    Claude OAuth credential is revoked, so no Claude efficiency pair is claimed.
+4. Paraform v1 collided with a pre-existing unrelated local port, and v2
+   exposed an invalid accessible-name assumption in the acceptance fixture.
+   Both traces remain immutable and excluded. The v3 contract uses a verified
+   isolated port and Paraform's actual existing search semantics.
 
 The Claude adapter is implemented and covered by deterministic tests, but live
 model-agnostic proof remains blocked until the user reauthenticates Claude Code.
@@ -94,7 +103,7 @@ Generate the canonical report from the immutable external run store:
 ```bash
 node dist/index.js benchmark report \
   --suite memi-2.7-workflow-pilot \
-  --experiments 'dori-atlas-shortcuts-v5,buzzr-tab-unread-badge-v2,nate-options-reduce-motion-v1' \
+  --experiments 'dori-atlas-shortcuts-v5,buzzr-tab-unread-badge-v2,nate-options-reduce-motion-v1,paraform-command-menu-v3,dorii-mobile-navigation-v1' \
   --minimum-pairs 5 \
   --bootstrap-samples 10000 \
   --seed 270729 \
@@ -105,21 +114,20 @@ node dist/index.js benchmark report \
 ```
 
 The report SHA-256 is
-`a3fdcd2393c4b8c28b65be3560aef655eb4cc7d21c614d58dc528ae24fe8f413`.
+`c4565fc818387a45ad04d79f0d7569a4ac866d34c84de504af936422de153fdb`.
 Raw prompts, provider streams, patches, preparation receipts, verification
 logs, events, routes, and run records remain in the external evidence root.
 
 ## What unlocks 2.7
 
-The release claim does not unlock from these three pairs. A publishable claim
-requires:
+The five-pair evidence minimum is satisfied. A publishable greater-than-25%
+claim still requires:
 
-1. At least five canonical revision-matched pairs.
-2. Repeats sufficient to separate routing effects from run variance.
-3. Token and latency lower 95% confidence bounds above 25%.
-4. No worse pass rate, defects, or human interventions.
-5. A live second-provider pair after Claude authentication is repaired.
-6. Defensible price evidence before making a USD cost claim.
+1. Repeats sufficient to separate routing effects from run variance.
+2. Token and latency lower 95% confidence bounds above 25%.
+3. No worse pass rate, defects, or human interventions.
+4. A live second-provider pair after Claude authentication is repaired.
+5. Defensible price evidence before making a USD cost claim.
 
 Until then the truthful position is:
 
@@ -135,8 +143,8 @@ Until then the truthful position is:
 - Whole-repository coverage: 64.59% statements, 66.30% lines, 72.76%
   functions, and 53.41% branches.
 - Production dependency audit: zero vulnerabilities.
-- Candidate tarball: 557,380 bytes compressed, 1,976,940 bytes unpacked,
-  50 files before the coverage-provider manifest update.
+- Candidate tarball: 558,843 bytes compressed, 1,982,183 bytes unpacked,
+  50 files, including all five reproducible workflow manifests.
 - Release consistency: passed locally.
 
 The whole-repository coverage result is below the project's stated 80% target.

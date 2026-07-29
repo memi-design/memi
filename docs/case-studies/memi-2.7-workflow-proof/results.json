@@ -1,34 +1,36 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-29T20:57:39.650Z",
+  "generatedAt": "2026-07-29T21:44:57.657Z",
   "suiteId": "memi-2.7-workflow-pilot",
   "canonicalExperiments": [
     "buzzr-tab-unread-badge-v2",
     "dori-atlas-shortcuts-v5",
-    "nate-options-reduce-motion-v1"
+    "dorii-mobile-navigation-v1",
+    "nate-options-reduce-motion-v1",
+    "paraform-command-menu-v3"
   ],
   "gate": {
-    "status": "insufficient_evidence",
-    "claim": "insufficient_evidence",
+    "status": "verified",
+    "claim": "not_verified",
     "targetImprovement": 0.25,
-    "includedPairs": 3,
+    "includedPairs": 5,
     "qualityPassed": true
   },
   "aggregate": {
     "totalTokenSavings": {
-      "mean": -0.2304,
-      "lower95": -0.9833,
-      "upper95": 0.219
+      "mean": 0.0055,
+      "lower95": -0.5123,
+      "upper95": 0.373
     },
     "latencySavings": {
-      "mean": -0.082,
-      "lower95": -0.4906,
-      "upper95": 0.2347
+      "mean": 0.0566,
+      "lower95": -0.243,
+      "upper95": 0.2586
     },
     "toolCallSavings": {
-      "mean": -0.5196,
-      "lower95": -1.0588,
-      "upper95": -0.25
+      "mean": -0.1569,
+      "lower95": -0.6186,
+      "upper95": 0.2814
     },
     "costSavings": {
       "status": "unassessed",
@@ -167,6 +169,96 @@
         "reasoningTokens": -1.68,
         "toolCalls": -25
       }
+    },
+    {
+      "case": "Paraform",
+      "experimentId": "paraform-command-menu-v3",
+      "revision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+      "skillIds": [
+        "emil-design-eng",
+        "interaction-design"
+      ],
+      "skillContextBytes": 5668,
+      "baselineRunId": "paraform-command-menu-codex:gpt-5.6-sol:medium-baseline-4153b64b-9930-4cfd-b86b-c2698df7c9d6",
+      "memiRunId": "paraform-command-menu-codex:gpt-5.6-sol:medium-memi-74fdf6cf-86cd-45ab-83ed-cb65a8c9e423",
+      "baseline": {
+        "wallTimeMs": 386614,
+        "inputTokens": 1469061,
+        "cachedInputTokens": 1374976,
+        "uncachedInputTokens": 94085,
+        "outputTokens": 14328,
+        "reasoningTokens": 5592,
+        "toolCalls": 34,
+        "toolErrors": 5,
+        "retries": 1,
+        "qualityScore": 100
+      },
+      "memi": {
+        "wallTimeMs": 277363,
+        "inputTokens": 694361,
+        "cachedInputTokens": 625664,
+        "uncachedInputTokens": 68697,
+        "outputTokens": 10316,
+        "reasoningTokens": 3682,
+        "toolCalls": 19,
+        "toolErrors": 3,
+        "retries": 2,
+        "qualityScore": 100
+      },
+      "savingsPercent": {
+        "wallTime": 28.26,
+        "totalTokens": 52.43,
+        "inputTokens": 52.73,
+        "uncachedInputTokens": 26.98,
+        "outputTokens": 28,
+        "reasoningTokens": 34.16,
+        "toolCalls": 44.12
+      }
+    },
+    {
+      "case": "dorii public site",
+      "experimentId": "dorii-mobile-navigation-v1",
+      "revision": "973afcc1404d2b4c2385d9f7de47eeb90573bbba",
+      "skillIds": [
+        "emil-design-eng",
+        "interaction-design"
+      ],
+      "skillContextBytes": 5668,
+      "baselineRunId": "dorii-mobile-navigation-codex:gpt-5.6-sol:medium-baseline-9d31f528-a768-45b7-b2c7-c8a15c0c04e4",
+      "memiRunId": "dorii-mobile-navigation-codex:gpt-5.6-sol:medium-memi-65907005-18f5-49e9-90f3-a664d213e2c1",
+      "baseline": {
+        "wallTimeMs": 559119,
+        "inputTokens": 2559090,
+        "cachedInputTokens": 2438656,
+        "uncachedInputTokens": 120434,
+        "outputTokens": 17240,
+        "reasoningTokens": 6196,
+        "toolCalls": 39,
+        "toolErrors": 8,
+        "retries": 5,
+        "qualityScore": 100
+      },
+      "memi": {
+        "wallTimeMs": 421288,
+        "inputTokens": 2060583,
+        "cachedInputTokens": 1965056,
+        "uncachedInputTokens": 95527,
+        "outputTokens": 13559,
+        "reasoningTokens": 6471,
+        "toolCalls": 26,
+        "toolErrors": 10,
+        "retries": 3,
+        "qualityScore": 100
+      },
+      "savingsPercent": {
+        "wallTime": 24.65,
+        "totalTokens": 19.43,
+        "inputTokens": 19.48,
+        "uncachedInputTokens": 20.68,
+        "outputTokens": 21.35,
+        "reasoningTokens": -4.44,
+        "toolCalls": 33.33
+      }
     }
   ],
   "rejectedEvidence": [
@@ -183,12 +275,22 @@
       "experimentId": "nate-options-reduce-motion-claude-v2",
       "provider": "claude",
       "reason": "The machine OAuth credential is revoked. Verification was skipped after provider failure."
+    },
+    {
+      "experimentId": "paraform-command-menu-v1",
+      "reason": "The fixed browser port was already occupied by an unrelated pre-existing local process."
+    },
+    {
+      "experimentId": "paraform-command-menu-v2",
+      "reason": "The acceptance fixture assumed an accessible name that the existing candidate search does not expose."
     }
   ],
   "artifacts": {
-    "canonicalReportSha256": "a3fdcd2393c4b8c28b65be3560aef655eb4cc7d21c614d58dc528ae24fe8f413",
+    "canonicalReportSha256": "c4565fc818387a45ad04d79f0d7569a4ac866d34c84de504af936422de153fdb",
     "doriTaskSha256": "0f3898600d00a3d36ca851f4ecdac29ad65c4ecea2907b41c8ecaab058b8539c",
     "buzzrTaskSha256": "ba8662fb8aaeda426dcf52090706750d1220fa4cf43d128a893fd9968c5b3962",
-    "nateTaskSha256": "ca20e1119a97f003b4d034a428067f988967252e996725e2628af5445b652a23"
+    "nateTaskSha256": "ca20e1119a97f003b4d034a428067f988967252e996725e2628af5445b652a23",
+    "paraformTaskSha256": "a5ff256e3408f5727f2d7074131ed0d2f1b63f6c178772caa042939a4885ccd6",
+    "doriiTaskSha256": "8f6655679a5dc90af4e72ccc4b8ba222ca9cddadcc1ba07d53f859a0453dd640"
   }
 }
