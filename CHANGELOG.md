@@ -12,6 +12,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Reproducible agent-efficiency evidence
 
+- `3e724cb5` feat: project immutable skill fitness evidence
+- `05ed03e7` test: define immutable skill fitness evidence
 - `af2c7b08` feat: support exclusive niche skill routes
 - `724f8074` test: define exclusive niche route policy
 - `36a58918` feat: route skills with repository fingerprints
@@ -55,6 +57,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 #### Architectural decisions
 
+- Keep per-skill fitness evidence append-only and content-addressed. Project
+  promote, observe, or quarantine recommendations from quality-parity paired
+  runs without deleting negative samples or automatically hiding a case.
 - Fingerprint the checked-out repository before routing and require bounded,
   safe-regex eligibility evidence for niche skills. Include the exact matched
   dependency, file, import, script, framework, or language in the immutable
