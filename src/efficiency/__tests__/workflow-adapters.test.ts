@@ -3,6 +3,7 @@ import {
   buildPreparedToolEnvironment,
   buildClaudeWorkflowArgs,
   buildCodexWorkflowArgs,
+  parseClaudeOAuthCredential,
   parseClaudeStreamJson,
 } from "../workflow-adapters.js";
 
@@ -92,5 +93,45 @@ describe("model-agnostic workflow adapters", () => {
       estimatedCostUsd: 0.42,
     });
     expect(parsed.tools).toEqual({ calls: 2, errors: 1, retries: 0 });
+    expect(parsed.failed).toBe(false);
+  });
+
+  it("recognizes Claude structured authentication failures even when the CLI exits zero", () => {
+    const parsed = parseClaudeStreamJson([
+      JSON.stringify({
+        type: "assistant",
+        error: "authentication_failed",
+        message: { content: [{ type: "text", text: "Not logged in" }] },
+      }),
+      JSON.stringify({
+        type: "result",
+        subtype: "success",
+        is_error: true,
+        result: "Not logged in",
+        usage: {},
+      }),
+    ].join("\n"));
+
+    expect(parsed.failed).toBe(true);
+    expect(parsed.failure).toBe("authentication_failed");
+  });
+
+  it("accepts only unexpired Claude OAuth credentials", () => {
+    const now = Date.parse("2026-07-29T20:00:00.000Z");
+    const valid = JSON.stringify({
+      claudeAiOauth: {
+        accessToken: "test-oauth-token",
+        expiresAt: now + 60_000,
+      },
+    });
+    const expired = JSON.stringify({
+      claudeAiOauth: {
+        accessToken: "expired-token",
+        expiresAt: now - 1,
+      },
+    });
+
+    expect(parseClaudeOAuthCredential(valid, now)).toBe("test-oauth-token");
+    expect(parseClaudeOAuthCredential(expired, now)).toBeNull();
   });
 });

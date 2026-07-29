@@ -158,6 +158,63 @@ describe("workflow trial runner", () => {
     expect(result.accepted).toBe(false);
     expect(result.verification.map((entry) => entry.passed)).toEqual([true, false]);
   });
+
+  it("does not spend verification time after the provider itself fails", async () => {
+    const source = await fixtureRepository();
+    const evidenceRoot = await temporaryDirectory("memi-workflow-evidence-");
+    const task = workflowTaskSchema.parse({
+      schemaVersion: 1,
+      id: "provider-failure",
+      intent: "Implement and verify a rendered product feature end to end",
+      maximumDurationMs: 10 * 60_000,
+      steps: ["inspect", "implement", "build", "launch", "verify"],
+      verification: [
+        {
+          kind: "build",
+          command: process.execPath,
+          args: ["-e", "process.exit(0)"],
+          timeoutMs: 60_000,
+        },
+        {
+          kind: "rendered-flow",
+          command: process.execPath,
+          args: ["-e", "process.exit(0)"],
+          timeoutMs: 60_000,
+        },
+      ],
+      requiredArtifacts: ["git.patch", "verification.json", "events.jsonl"],
+    });
+    const adapter: WorkflowAdapter = {
+      id: "failed-provider",
+      async execute() {
+        return {
+          exitCode: 1,
+          stdout: "authentication_failed",
+          stderr: "",
+          usage: {
+            inputTokens: 0,
+            cachedInputTokens: 0,
+            outputTokens: 0,
+            reasoningTokens: 0,
+            estimatedCostUsd: null,
+          },
+          tools: { calls: 0, errors: 1, retries: 0 },
+        };
+      },
+    };
+
+    const result = await runWorkflowTrial({
+      sourceRepository: source,
+      evidenceRoot,
+      task,
+      condition: "baseline",
+      routedContext: "",
+      adapter,
+    });
+
+    expect(result.accepted).toBe(false);
+    expect(result.verification).toEqual([]);
+  });
 });
 
 async function fixtureRepository(): Promise<string> {

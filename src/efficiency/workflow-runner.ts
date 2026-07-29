@@ -274,30 +274,37 @@ export async function runWorkflowTrial(input: {
     }));
 
     const verification: WorkflowVerificationResult[] = [];
-    for (const check of task.verification) {
-      const checkStartedAt = new Date();
-      const checkStart = performance.now();
-      const processResult = await runProcess({
-        command: check.command,
-        args: [...check.args],
-        cwd: workspaceRoot,
-        timeoutMs: check.timeoutMs,
-      });
-      const result: WorkflowVerificationResult = {
-        kind: check.kind,
-        command: check.command,
-        args: [...check.args],
-        startedAt: checkStartedAt.toISOString(),
-        completedAt: new Date().toISOString(),
-        durationMs: Math.round(performance.now() - checkStart),
-        exitCode: processResult.exitCode,
-        passed: processResult.exitCode === 0 && !processResult.timedOut,
-        timedOut: processResult.timedOut,
-        stdout: processResult.stdout,
-        stderr: processResult.stderr,
-      };
-      verification.push(result);
-      events.push(event("workflow.verification.completed", { ...result }));
+    if (adapterResult.exitCode === 0) {
+      for (const check of task.verification) {
+        const checkStartedAt = new Date();
+        const checkStart = performance.now();
+        const processResult = await runProcess({
+          command: check.command,
+          args: [...check.args],
+          cwd: workspaceRoot,
+          timeoutMs: check.timeoutMs,
+        });
+        const result: WorkflowVerificationResult = {
+          kind: check.kind,
+          command: check.command,
+          args: [...check.args],
+          startedAt: checkStartedAt.toISOString(),
+          completedAt: new Date().toISOString(),
+          durationMs: Math.round(performance.now() - checkStart),
+          exitCode: processResult.exitCode,
+          passed: processResult.exitCode === 0 && !processResult.timedOut,
+          timedOut: processResult.timedOut,
+          stdout: processResult.stdout,
+          stderr: processResult.stderr,
+        };
+        verification.push(result);
+        events.push(event("workflow.verification.completed", { ...result }));
+      }
+    } else {
+      events.push(event("workflow.verification.skipped", {
+        reason: "provider-execution-failed",
+        providerExitCode: adapterResult.exitCode,
+      }));
     }
 
     const accepted = adapterResult.exitCode === 0

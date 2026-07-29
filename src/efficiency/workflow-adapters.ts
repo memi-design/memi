@@ -4,6 +4,7 @@ import {
   copyFile,
   mkdir,
   mkdtemp,
+  readFile,
   rm,
 } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
@@ -93,6 +94,7 @@ export function createClaudeWorkflowAdapter(
           path.join(authHome, ".credentials.json"),
           path.join(isolatedHome, ".claude", ".credentials.json"),
         );
+        const oauthToken = await resolveClaudeOAuthToken(authHome);
         const execution = await executeProcess({
           command: options.executable,
           args: buildClaudeWorkflowArgs({
@@ -103,13 +105,16 @@ export function createClaudeWorkflowAdapter(
           env: {
             ...buildPreparedToolEnvironment(process.env, isolatedHome),
             CLAUDE_CONFIG_DIR: path.join(isolatedHome, ".claude"),
+            ...(oauthToken ? { CLAUDE_CODE_OAUTH_TOKEN: oauthToken } : {}),
           },
           stdin: input.prompt,
           timeoutMs: input.timeoutMs,
         });
         const trace = parseClaudeStreamJson(execution.stdout);
         return freeze({
-          exitCode: execution.exitCode,
+          exitCode: execution.exitCode === 0 && trace.failed
+            ? 1
+            : execution.exitCode,
           stdout: execution.stdout,
           stderr: execution.stderr,
           usage: trace.usage,
@@ -203,10 +208,13 @@ export function buildClaudeWorkflowArgs(input: {
 
 export function parseClaudeStreamJson(jsonl: string): Readonly<{
   finalResponse: string;
+  failed: boolean;
+  failure: string | null;
   usage: WorkflowAdapterResult["usage"];
   tools: WorkflowAdapterResult["tools"];
 }> {
   let finalResponse = "";
+  let failure: string | null = null;
   let usage: WorkflowAdapterResult["usage"] = {
     inputTokens: 0,
     cachedInputTokens: 0,
@@ -223,6 +231,9 @@ export function parseClaudeStreamJson(jsonl: string): Readonly<{
       event = JSON.parse(line) as Record<string, unknown>;
     } catch {
       continue;
+    }
+    if (typeof event.error === "string") {
+      failure = event.error;
     }
     if (event.type === "assistant") {
       const message = asRecord(event.message);
@@ -242,6 +253,11 @@ export function parseClaudeStreamJson(jsonl: string): Readonly<{
     }
     if (event.type === "result") {
       finalResponse = typeof event.result === "string" ? event.result : finalResponse;
+      if (event.is_error === true) {
+        failure ??= typeof event.subtype === "string"
+          ? event.subtype
+          : "provider-error";
+      }
       const rawUsage = asRecord(event.usage);
       usage = {
         inputTokens: numberOrZero(rawUsage?.input_tokens),
@@ -256,6 +272,8 @@ export function parseClaudeStreamJson(jsonl: string): Readonly<{
   }
   return freeze({
     finalResponse,
+    failed: failure !== null,
+    failure,
     usage,
     tools: {
       calls: toolNames.length,
@@ -263,6 +281,55 @@ export function parseClaudeStreamJson(jsonl: string): Readonly<{
       retries: 0,
     },
   });
+}
+
+export function parseClaudeOAuthCredential(
+  serialized: string,
+  now: number = Date.now(),
+): string | null {
+  try {
+    const root = JSON.parse(serialized) as Record<string, unknown>;
+    const oauth = asRecord(root.claudeAiOauth);
+    const accessToken = typeof oauth?.accessToken === "string"
+      ? oauth.accessToken.trim()
+      : "";
+    const expiresAt = typeof oauth?.expiresAt === "number"
+      ? oauth.expiresAt
+      : 0;
+    return accessToken && expiresAt > now ? accessToken : null;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveClaudeOAuthToken(authHome: string): Promise<string | null> {
+  const environmentToken = process.env.CLAUDE_CODE_OAUTH_TOKEN?.trim();
+  if (environmentToken) return environmentToken;
+  const fileCredential = await readFile(
+    path.join(authHome, ".credentials.json"),
+    "utf8",
+  ).catch(() => null);
+  const fileToken = fileCredential
+    ? parseClaudeOAuthCredential(fileCredential)
+    : null;
+  if (fileToken) return fileToken;
+  if (process.platform !== "darwin") return null;
+  const keychain = await executeProcess({
+    command: "/usr/bin/security",
+    args: [
+      "find-generic-password",
+      "-s",
+      "Claude Code-credentials",
+      "-w",
+    ],
+    cwd: homedir(),
+    env: process.env,
+    stdin: "",
+    timeoutMs: 10_000,
+  }).catch(() => null);
+  return keychain?.exitCode === 0
+    ? parseClaudeOAuthCredential(keychain.stdout)
+    : null;
 }
 
 async function copyPrivateFile(source: string, target: string): Promise<void> {
