@@ -56,6 +56,11 @@ configurations remain in the immutable run store. Content-addressed fitness
 events recommend `observe` for both Expo skill revisions until each revision
 has sufficient repeated evidence.
 
+The isolated calibration report has SHA-256
+`0abdaa3dbbe4b3556e4b801e1143befe4f4f294d70b2985e83f4d39dc09aedd0`.
+It includes exactly one environment-matched pair, reports the claim as
+`not_verified`, and leaves subscription USD cost unassessed.
+
 Paraform demonstrates a concrete stacked-skill benefit: the routed run was
 109.3 seconds faster, used 780,622 fewer counted tokens, and made 15 fewer tool
 calls while producing the same accepted result. dorii shows a second positive
@@ -165,8 +170,8 @@ Until then the truthful position is:
 - Full suite: 282 files, 2,018 tests passed.
 - Focused router and workflow coverage: 80.25% statements, 82.92% lines,
   81.15% functions, and 73.51% branches across the new critical modules.
-- Whole-repository coverage: 64.59% statements, 66.30% lines, 72.76%
-  functions, and 53.41% branches.
+- Whole-repository coverage: 64.80% statements, 66.50% lines, 73.01%
+  functions, and 53.60% branches.
 - Production dependency audit: zero vulnerabilities.
 - Candidate tarball: approximately 559 KB compressed and 1.983 MB unpacked,
   with 50 files including all five reproducible workflow manifests.
