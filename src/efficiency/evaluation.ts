@@ -3,6 +3,7 @@ import { z } from "zod";
 
 export interface EfficiencyReportInput {
   readonly suiteId: string;
+  readonly experimentIds?: readonly string[];
   readonly runs: readonly BenchmarkRunRecord[];
   readonly minimumPairs: number;
   readonly bootstrapSamples: number;
@@ -34,6 +35,9 @@ export interface EfficiencyReport {
   readonly status: "verified" | "insufficient_evidence";
   readonly claim: "verified_gt_25" | "not_verified" | "insufficient_evidence";
   readonly targetImprovement: number;
+  readonly scope: {
+    readonly experimentIds: readonly string[] | null;
+  };
   readonly pairs: {
     readonly included: number;
     readonly excluded: readonly {
@@ -84,6 +88,9 @@ export const efficiencyReportSchema = z.object({
   status: z.enum(["verified", "insufficient_evidence"]),
   claim: z.enum(["verified_gt_25", "not_verified", "insufficient_evidence"]),
   targetImprovement: z.number().min(0).max(1),
+  scope: z.object({
+    experimentIds: z.array(z.string().min(1)).nullable(),
+  }).strict(),
   pairs: z.object({
     included: z.number().int().nonnegative(),
     excluded: z.array(z.object({
@@ -116,8 +123,17 @@ interface Pair {
 
 export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<EfficiencyReport> {
   const grouped = new Map<string, BenchmarkRunRecord[]>();
+  const experimentIds = input.experimentIds
+    ? [...new Set(input.experimentIds)].sort()
+    : null;
+  const experimentAllowlist = experimentIds
+    ? new Set(experimentIds)
+    : null;
   for (const run of resolveRunAmendments(
-    input.runs.filter((candidate) => candidate.suiteId === input.suiteId),
+    input.runs.filter((candidate) =>
+      candidate.suiteId === input.suiteId
+      && (experimentAllowlist === null
+        || experimentAllowlist.has(candidate.experimentId))),
   )) {
     const key = [
       run.experimentId,
@@ -235,6 +251,9 @@ export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<Ef
       ? "insufficient_evidence"
       : claimPassed ? "verified_gt_25" : "not_verified",
     targetImprovement: input.targetImprovement,
+    scope: {
+      experimentIds,
+    },
     pairs: {
       included: pairs.length,
       excluded,

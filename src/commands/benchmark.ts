@@ -478,6 +478,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .option("--bootstrap-samples <count>", "Bootstrap samples", "2000")
     .option("--seed <number>", "Deterministic bootstrap seed", "42")
     .option("--target <ratio>", "Required lower confidence bound", "0.25")
+    .option("--experiments <ids>", "Comma-separated canonical experiment allowlist")
     .option("--store-root <path>", "External root containing immutable run records")
     .option("--out <path>", "Report output path")
     .option("--json", "Output JSON")
@@ -487,6 +488,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       bootstrapSamples: string;
       seed: string;
       target: string;
+      experiments?: string;
       storeRoot?: string;
       out?: string;
       json?: boolean;
@@ -496,6 +498,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       const store = new EfficiencyRunStore(storeRoot);
       const report = buildEfficiencyReport({
         suiteId: opts.suite,
+        experimentIds: opts.experiments ? csv(opts.experiments) : undefined,
         runs: await store.list(),
         minimumPairs: positiveInteger(opts.minimumPairs, "minimum-pairs"),
         bootstrapSamples: positiveInteger(opts.bootstrapSamples, "bootstrap-samples"),

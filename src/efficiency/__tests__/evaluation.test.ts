@@ -214,6 +214,31 @@ describe("efficiency evaluation", () => {
     expect(report.pairs.included).toBe(2);
     expect(report.pairs.excluded).toEqual([]);
   });
+
+  it("reports only an explicit canonical experiment allowlist", () => {
+    const canonical = [
+      { ...run("baseline", 1, { tokens: 1_000, cost: null, wallTimeMs: 100_000 }), experimentId: "canonical-v2" },
+      { ...run("memi", 1, { tokens: 700, cost: null, wallTimeMs: 70_000 }), experimentId: "canonical-v2" },
+    ];
+    const exploratory = [
+      { ...run("baseline", 1, { tokens: 1_000, cost: null, wallTimeMs: 100_000 }), experimentId: "exploratory-v1" },
+      { ...run("memi", 1, { tokens: 2_000, cost: null, wallTimeMs: 200_000 }), experimentId: "exploratory-v1" },
+    ];
+
+    const report = buildEfficiencyReport({
+      suiteId: "ios-product-design-v1",
+      experimentIds: ["canonical-v2"],
+      runs: [...canonical, ...exploratory],
+      minimumPairs: 1,
+      bootstrapSamples: 100,
+      seed: 7,
+      targetImprovement: 0.25,
+    });
+
+    expect(report.scope.experimentIds).toEqual(["canonical-v2"]);
+    expect(report.pairs.included).toBe(1);
+    expect(report.metrics.tokenSavings.mean).toBe(0.3);
+  });
 });
 
 function run(
