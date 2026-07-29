@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "dori-atlas-shortcuts",
+  "intent": "Implement an accessible keyboard-shortcuts help dialog in the responsive Next.js Dorii Atlas dock. Add a compact help trigger to the existing dock, open the dialog with the question-mark key only when focus is outside editable controls, close it with Escape, restore focus to the opener, preserve the existing visual system, and respect reduced-motion preferences.",
+  "maximumDurationMs": 1200000,
+  "steps": [
+    "Inspect the Atlas dock, existing overlay patterns, tokens, keyboard handling, and tests before editing.",
+    "Implement the smallest reusable shortcuts-help surface that follows existing component boundaries.",
+    "Add a visible, keyboard-reachable trigger with an accessible name and stable test identifier.",
+    "Implement question-mark open, Escape close, focus restoration, and editable-control guards.",
+    "Use existing design tokens and reduced-motion behavior without adding a new dependency.",
+    "Add focused unit coverage when a separable keyboard-state helper is introduced.",
+    "Run the complete build and rendered Playwright contract and repair every failure."
+  ],
+  "preparation": [
+    {
+      "command": "pnpm",
+      "args": [
+        "install",
+        "--frozen-lockfile"
+      ],
+      "timeoutMs": 600000
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "tests/e2e/memi-atlas-shortcuts.spec.ts",
+      "content": "import { expect, test } from \"@playwright/test\";\n\ntest(\"Atlas shortcuts help supports pointer and keyboard flows\", async ({ page }) => {\n  await page.goto(\"/?z=1.60&mapLat=20.000&mapLng=0.000\");\n  const trigger = page.getByTestId(\"atlas-shortcuts-trigger\");\n  await expect(trigger).toBeVisible();\n  await expect(trigger).toHaveAccessibleName(/keyboard shortcuts|shortcuts help/i);\n\n  await trigger.click();\n  const dialog = page.getByRole(\"dialog\", { name: /keyboard shortcuts/i });\n  await expect(dialog).toBeVisible();\n  await expect(dialog).toContainText(/escape/i);\n  await page.keyboard.press(\"Escape\");\n  await expect(dialog).toBeHidden();\n  await expect(trigger).toBeFocused();\n\n  await page.keyboard.press(\"?\");\n  await expect(dialog).toBeVisible();\n  await page.keyboard.press(\"Escape\");\n\n  const input = page.getByTestId(\"launcher-input\");\n  await input.focus();\n  await input.fill(\"?\");\n  await expect(dialog).toBeHidden();\n  await expect(input).toHaveValue(\"?\");\n});\n\ntest(\"Atlas shortcuts help remains usable at mobile width\", async ({ page }) => {\n  await page.setViewportSize({ width: 390, height: 844 });\n  await page.goto(\"/?z=1.60&mapLat=20.000&mapLng=0.000\");\n  await page.getByTestId(\"atlas-shortcuts-trigger\").click();\n  const dialog = page.getByRole(\"dialog\", { name: /keyboard shortcuts/i });\n  await expect(dialog).toBeVisible();\n  const bounds = await dialog.boundingBox();\n  expect(bounds).not.toBeNull();\n  expect(bounds!.x).toBeGreaterThanOrEqual(0);\n  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);\n});\n"
+    }
+  ],
+  "verification": [
+    {
+      "kind": "build",
+      "command": "pnpm",
+      "args": [
+        "build"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "kind": "rendered-flow",
+      "command": "pnpm",
+      "args": [
+        "exec",
+        "playwright",
+        "test",
+        "tests/e2e/memi-atlas-shortcuts.spec.ts"
+      ],
+      "timeoutMs": 900000
+    }
+  ],
+  "requiredArtifacts": [
+    "git.patch",
+    "verification.json",
+    "events.jsonl"
+  ]
+}
