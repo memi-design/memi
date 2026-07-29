@@ -16,6 +16,17 @@ export interface SavingsInterval {
   readonly upper95: number;
 }
 
+export type CostSavingsMetric =
+  | (SavingsInterval & {
+    readonly status: "assessed";
+    readonly includedPairs: number;
+  })
+  | {
+    readonly status: "unassessed";
+    readonly includedPairs: 0;
+    readonly reason: string;
+  };
+
 export interface EfficiencyReport {
   readonly schemaVersion: 1;
   readonly suiteId: string;
@@ -32,7 +43,7 @@ export interface EfficiencyReport {
   };
   readonly metrics: {
     readonly tokenSavings: SavingsInterval;
-    readonly costSavings: SavingsInterval;
+    readonly costSavings: CostSavingsMetric;
     readonly latencySavings: SavingsInterval;
     readonly toolCallSavings: SavingsInterval;
   };
@@ -54,6 +65,18 @@ const savingsIntervalSchema = z.object({
   upper95: z.number(),
 }).strict();
 
+const costSavingsMetricSchema = z.discriminatedUnion("status", [
+  savingsIntervalSchema.extend({
+    status: z.literal("assessed"),
+    includedPairs: z.number().int().positive(),
+  }).strict(),
+  z.object({
+    status: z.literal("unassessed"),
+    includedPairs: z.literal(0),
+    reason: z.string().min(1),
+  }).strict(),
+]);
+
 export const efficiencyReportSchema = z.object({
   schemaVersion: z.literal(1),
   suiteId: z.string().min(1),
@@ -70,7 +93,7 @@ export const efficiencyReportSchema = z.object({
   }).strict(),
   metrics: z.object({
     tokenSavings: savingsIntervalSchema,
-    costSavings: savingsIntervalSchema,
+    costSavings: costSavingsMetricSchema,
     latencySavings: savingsIntervalSchema,
     toolCallSavings: savingsIntervalSchema,
   }).strict(),
@@ -92,42 +115,74 @@ interface Pair {
 }
 
 export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<EfficiencyReport> {
-  const grouped = new Map<string, {
-    baseline?: BenchmarkRunRecord;
-    memi?: BenchmarkRunRecord;
-    duplicate?: boolean;
-  }>();
-  for (const run of input.runs.filter((candidate) => candidate.suiteId === input.suiteId)) {
-    const key = `${run.experimentId}:${run.taskId}:${run.repeat}`;
-    const group = grouped.get(key) ?? {};
-    if (group[run.condition]) group.duplicate = true;
-    group[run.condition] = run;
-    grouped.set(key, group);
+  const grouped = new Map<string, BenchmarkRunRecord[]>();
+  for (const run of resolveRunAmendments(
+    input.runs.filter((candidate) => candidate.suiteId === input.suiteId),
+  )) {
+    const key = [
+      run.experimentId,
+      run.taskId,
+      String(run.repeat),
+    ].join(":");
+    grouped.set(key, [...(grouped.get(key) ?? []), run]);
   }
 
   const pairs: Pair[] = [];
   const excluded: { key: string; reason: string }[] = [];
-  for (const [key, group] of grouped) {
-    if (group.duplicate) {
-      excluded.push({ key, reason: "duplicate condition run" });
-      continue;
+  for (const [baseKey, runs] of grouped) {
+    const baselineRuns = runs.filter((run) => run.condition === "baseline");
+    const memiRuns = runs.filter((run) => run.condition === "memi");
+    if (baselineRuns.length === 1 && memiRuns.length === 1) {
+      const mismatch = environmentMismatch(baselineRuns[0], memiRuns[0]);
+      if (mismatch) {
+        excluded.push({ key: baseKey, reason: mismatch });
+        continue;
+      }
     }
-    if (!group.baseline || !group.memi) {
-      excluded.push({ key, reason: "missing baseline or memi condition" });
-      continue;
+    const environments = new Map<string, {
+      baseline?: BenchmarkRunRecord;
+      memi?: BenchmarkRunRecord;
+      duplicate?: boolean;
+    }>();
+    for (const run of runs) {
+      const environmentKey = [
+        run.harness.id,
+        run.harness.modelId,
+        run.harness.reasoningEffort,
+      ].join(":");
+      const group = environments.get(environmentKey) ?? {};
+      if (group[run.condition]) group.duplicate = true;
+      group[run.condition] = run;
+      environments.set(environmentKey, group);
     }
-    const mismatch = environmentMismatch(group.baseline, group.memi);
-    if (mismatch) {
-      excluded.push({ key, reason: mismatch });
-      continue;
+    for (const [environmentKey, group] of environments) {
+      const key = `${baseKey}:${environmentKey}`;
+      if (group.duplicate) {
+        excluded.push({ key, reason: "duplicate condition run" });
+        continue;
+      }
+      if (!group.baseline || !group.memi) {
+        excluded.push({ key, reason: "missing baseline or memi condition" });
+        continue;
+      }
+      const mismatch = environmentMismatch(group.baseline, group.memi);
+      if (mismatch) {
+        excluded.push({ key, reason: mismatch });
+        continue;
+      }
+      pairs.push({ baseline: group.baseline, memi: group.memi });
     }
-    pairs.push({ baseline: group.baseline, memi: group.memi });
   }
 
   const tokenSavings = pairs.map((pair) =>
     saving(totalTokens(pair.baseline), totalTokens(pair.memi)));
-  const costSavings = pairs.map((pair) =>
-    saving(pair.baseline.usage.estimatedCostUsd, pair.memi.usage.estimatedCostUsd));
+  const costSavings = pairs.flatMap((pair) => {
+    const baselineCost = assessedCost(pair.baseline);
+    const memiCost = assessedCost(pair.memi);
+    return baselineCost === null || memiCost === null
+      ? []
+      : [saving(baselineCost, memiCost)];
+  });
   const latencySavings = pairs.map((pair) =>
     saving(pair.baseline.timing.wallTimeMs, pair.memi.timing.wallTimeMs));
   const toolCallSavings = pairs.map((pair) =>
@@ -152,7 +207,17 @@ export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<Ef
 
   const metrics = {
     tokenSavings: confidenceInterval(tokenSavings, input.bootstrapSamples, input.seed + 1),
-    costSavings: confidenceInterval(costSavings, input.bootstrapSamples, input.seed + 2),
+    costSavings: costSavings.length > 0
+      ? {
+        status: "assessed" as const,
+        includedPairs: costSavings.length,
+        ...confidenceInterval(costSavings, input.bootstrapSamples, input.seed + 2),
+      }
+      : {
+        status: "unassessed" as const,
+        includedPairs: 0 as const,
+        reason: "No paired run exposed defensible USD cost evidence",
+      },
     latencySavings: confidenceInterval(latencySavings, input.bootstrapSamples, input.seed + 3),
     toolCallSavings: confidenceInterval(toolCallSavings, input.bootstrapSamples, input.seed + 4),
   };
@@ -186,6 +251,43 @@ export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<Ef
       passed: qualityPassed,
     },
   })) as Readonly<EfficiencyReport>;
+}
+
+function assessedCost(run: BenchmarkRunRecord): number | null {
+  if (run.evidenceRefs.some((reference) =>
+    reference.startsWith("estimatedCostUsd:unassessed"))) {
+    return null;
+  }
+  return run.usage.estimatedCostUsd;
+}
+
+function resolveRunAmendments(
+  runs: readonly BenchmarkRunRecord[],
+): BenchmarkRunRecord[] {
+  const byId = new Map(runs.map((run) => [run.runId, run]));
+  const superseded = new Set<string>();
+  for (const amendment of runs) {
+    if (!amendment.amendsRunId) continue;
+    const original = byId.get(amendment.amendsRunId);
+    if (!original || !sameRunIdentity(original, amendment)) continue;
+    superseded.add(original.runId);
+  }
+  return runs.filter((run) => !superseded.has(run.runId));
+}
+
+function sameRunIdentity(
+  original: BenchmarkRunRecord,
+  amendment: BenchmarkRunRecord,
+): boolean {
+  return original.suiteId === amendment.suiteId
+    && original.experimentId === amendment.experimentId
+    && original.taskId === amendment.taskId
+    && original.repeat === amendment.repeat
+    && original.condition === amendment.condition
+    && original.repository.revision === amendment.repository.revision
+    && original.harness.id === amendment.harness.id
+    && original.harness.modelId === amendment.harness.modelId
+    && original.harness.reasoningEffort === amendment.harness.reasoningEffort;
 }
 
 function environmentMismatch(
