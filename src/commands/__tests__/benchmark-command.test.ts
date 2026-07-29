@@ -98,28 +98,33 @@ describe("benchmark command", () => {
     }
     const routePath = join(projectRoot, "skill-route.json");
     await writeFile(routePath, JSON.stringify({
-      schemaVersion: 2,
-      routerVersion: "skill-router-v2",
-      decision: "single",
-      intentHash: `sha256:${"d".repeat(64)}`,
-      repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
-      selected: [{
-        id: "expo-router-navigation",
-        skillName: "expo-router-navigation",
-        file: "/skills/expo-router-navigation/SKILL.md",
-        score: 120,
-        matchedTerms: ["bottom-tab-badge"],
-        contentHash: `sha256:${"a".repeat(64)}`,
+      route: {
+        schemaVersion: 2,
+        routerVersion: "skill-router-v2",
+        decision: "single",
+        intentHash: `sha256:${"d".repeat(64)}`,
+        repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+        selected: [{
+          id: "expo-router-navigation",
+          skillName: "expo-router-navigation",
+          file: "/skills/expo-router-navigation/SKILL.md",
+          score: 120,
+          matchedTerms: ["bottom-tab-badge"],
+          contentHash: `sha256:${"a".repeat(64)}`,
+          contextBytes: 1_920,
+          explanation: {
+            intentEvidence: ["bottom-tab-badge"],
+            repositoryEvidence: ["dependency:expo-router"],
+          },
+        }],
+        excluded: [],
+        candidates: [],
         contextBytes: 1_920,
-        explanation: {
-          intentEvidence: ["bottom-tab-badge"],
-          repositoryEvidence: ["dependency:expo-router"],
-        },
-      }],
-      excluded: [],
-      candidates: [],
+        maximumContextBytes: 8_000,
+      },
+      skills: [],
+      resources: [],
       contextBytes: 1_920,
-      maximumContextBytes: 8_000,
     }));
 
     const logs = captureLogs();
