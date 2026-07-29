@@ -75,6 +75,7 @@ export interface SkillRouteResult {
   readonly routerVersion: typeof SKILL_ROUTER_VERSION;
   readonly decision: "single" | "stack" | "abstain";
   readonly intentHash: string;
+  readonly repositoryFingerprintHash: string | null;
   readonly selected: readonly {
     readonly id: string;
     readonly skillName: string;
@@ -244,6 +245,11 @@ export async function routeInstalledSkills(
     routerVersion: SKILL_ROUTER_VERSION,
     decision,
     intentHash: `sha256:${createHash("sha256").update(input.intent).digest("hex")}`,
+    repositoryFingerprintHash: repositoryFingerprint
+      ? `sha256:${createHash("sha256")
+        .update(JSON.stringify(canonicalRepositoryFingerprint(repositoryFingerprint)))
+        .digest("hex")}`
+      : null,
     selected,
     excluded: excluded.sort((left, right) =>
       left.id.localeCompare(right.id) || left.reason.localeCompare(right.reason)),
@@ -255,6 +261,20 @@ export async function routeInstalledSkills(
     contextBytes,
     maximumContextBytes,
   });
+}
+
+function canonicalRepositoryFingerprint(
+  fingerprint: RepositoryFingerprint,
+): RepositoryFingerprint {
+  return {
+    schemaVersion: 1,
+    languages: [...fingerprint.languages].sort(),
+    frameworks: [...fingerprint.frameworks].sort(),
+    dependencies: [...fingerprint.dependencies].sort(),
+    files: [...fingerprint.files].sort(),
+    imports: [...fingerprint.imports].sort(),
+    scripts: [...fingerprint.scripts].sort(),
+  };
 }
 
 export async function resolveRoutedSkills(
