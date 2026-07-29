@@ -1,0 +1,14 @@
+[
+  {
+    "id": "routing-quality",
+    "intent": "Verify deterministic routing accuracy and abstention behavior for the public design skill catalog."
+  },
+  {
+    "id": "instruction-quality",
+    "intent": "Verify that every public skill has an executable procedure, decision rationale, evidence gate, or explicit router handoff."
+  },
+  {
+    "id": "distribution-integrity",
+    "intent": "Verify provenance, installability, collection membership, generated catalog parity, and coverage gates for every public skill."
+  }
+]

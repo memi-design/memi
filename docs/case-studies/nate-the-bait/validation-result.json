@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-29",
+  "repository": {
+    "name": "nate-the-bait",
+    "revision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+    "dirty": false
+  },
+  "memi": {
+    "version": "2.7.0",
+    "audit": {
+      "wallTimeMs": 360,
+      "scannedFiles": 211,
+      "findingCount": 1,
+      "highFindings": 1,
+      "confidence": 0.13,
+      "scoreScope": "none",
+      "verdict": "unassessed — SwiftUI coverage is partial"
+    },
+    "efficiency": {
+      "plannedTrials": 18,
+      "recordedPairs": 0,
+      "claim": "insufficient_evidence"
+    }
+  },
+  "xcode": {
+    "scheme": "NateTheBait",
+    "simulator": "Nate QA iPhone 17",
+    "simulatorRuntime": "iOS 26.5",
+    "build": {
+      "status": "passed",
+      "durationMs": 17334,
+      "warnings": 0,
+      "errors": 0
+    },
+    "tests": {
+      "status": "failed",
+      "durationMs": 1008971,
+      "passed": 976,
+      "failed": 7,
+      "skipped": 0,
+      "failedTestNames": [
+        "testAnimatedNateSkinRendersThroughAPlayableRun",
+        "testCaughtSpecimenAndMasterySurviveNamespacedTerminateAndRelaunch",
+        "testColaEndsRunWithTenPearlConsolation",
+        "testRealExpeditionTargetCollisionBanksTargetAndCannotContinue",
+        "testReduceMotionGameplayAndCriticalSurfacesPassAccessibilityAudit",
+        "testResultsCanReturnToTheIslandHome",
+        "testTouchSteeringDescendsThenReturnsToDepthZeroSurface"
+      ]
+    }
+  }
+}

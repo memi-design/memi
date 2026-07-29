@@ -4,33 +4,32 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const currentVersion = "2.6.4";
-const sourceCommit = "ec4d804220bfbf08be810ceb692a338cf186e794";
-const releaseRecordPath = "release-artifacts/npm/2.6.4.release.json";
-const releaseRecordSha256 =
-  "405cca4d4d1c45f4725d98f4219f22704cc203fd09afca0c82969d78e23b5a0b";
+const candidateVersion = "2.7.0";
+const publicVersion = "2.6.4";
+const publicSourceCommit = "ec4d804220bfbf08be810ceb692a338cf186e794";
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.6.4 published release surfaces", () => {
-  it("binds the published release to its immutable source and release record", async () => {
+describe("2.7.0 candidate release surfaces", () => {
+  it("keeps the candidate unbound and preserves the immutable public release", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toEqual({
-      version: currentVersion,
-      state: "published",
-      sourceCommit,
-      releaseRecord: {
-        path: releaseRecordPath,
-        sha256: releaseRecordSha256,
+      version: candidateVersion,
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+      previousPublicRelease: {
+        version: publicVersion,
+        sourceCommit: publicSourceCommit,
       },
       verification: {
         eligibleForParity: false,
-        reason: "2.6.4 is published; independent public-surface parity verification is pending",
+        reason: "2.7.0 is a local candidate; publish provenance and independent public-surface parity verification are pending",
       },
     });
-    expect(manifest.surfaces.githubRelease.url.endsWith("/v2.6.4")).toBe(true);
+    expect(manifest.surfaces.githubRelease.url.endsWith("/v2.7.0")).toBe(true);
   });
 
   it("aligns every executable and packaged version surface", async () => {
@@ -69,14 +68,14 @@ describe("2.6.4 published release surfaces", () => {
       widget.packageVersion,
       skillRegistry.version,
       agentMirror.version,
-    ]).toEqual(Array(12).fill(currentVersion));
-    expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${currentVersion}.mcpb`);
-    expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${currentVersion}.mcpb`);
+    ]).toEqual(Array(12).fill(candidateVersion));
+    expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${candidateVersion}.mcpb`);
+    expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${candidateVersion}.mcpb`);
     expect(await readFile(join(root, "mcpb/server/index.cjs"), "utf8"))
-      .toContain(`@memi-design/cli@${currentVersion}`);
+      .toContain(`@memi-design/cli@${candidateVersion}`);
     const action = await readFile(join(root, "action.yml"), "utf8");
-    expect(action).toContain(`default: "${currentVersion}"`);
-    expect(action).toContain(`reviewed ${currentVersion} pin`);
+    expect(action).toContain(`default: "${candidateVersion}"`);
+    expect(action).toContain(`reviewed ${candidateVersion} pin`);
   });
 
   it("keeps packaged skills, generated examples, and changelog aligned", async () => {
@@ -96,22 +95,23 @@ describe("2.6.4 published release surfaces", () => {
     ];
     for (const path of skillPaths) {
       expect(await readFile(join(root, path), "utf8"), path)
-        .toContain(`@memi-design/cli@${currentVersion}`);
+        .toContain(`@memi-design/cli@${candidateVersion}`);
     }
 
     const preset = await readJson("examples/presets/starter/registry.json");
-    expect(preset.meta.memoireVersion).toBe(currentVersion);
+    expect(preset.meta.memoireVersion).toBe(candidateVersion);
     expect(await readFile(join(root, "examples/presets/starter/README.md"), "utf8"))
-      .toContain(`Memoire v${currentVersion}`);
+      .toContain(`Memoire v${candidateVersion}`);
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
-    expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(currentVersion);
+    expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
   });
 
-  it("labels 2.6.4 as published and exposes only its verified activation command", async () => {
+  it("labels 2.7.0 as unreleased and exposes only the verified public activation", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Release state: `published`");
-    expect(currentRelease).toContain(`Source commit: \`${sourceCommit}\``);
-    expect(currentRelease).toContain("npx -y @memi-design/cli@2.6.4");
+    expect(currentRelease).toContain("Release state: `candidate`");
+    expect(currentRelease).toContain("Source commit: Not assigned.");
+    expect(currentRelease).toContain(`npx -y @memi-design/cli@${publicVersion}`);
+    expect(currentRelease).not.toContain(`npx -y @memi-design/cli@${candidateVersion}`);
     expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.3");
   });
 });

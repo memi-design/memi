@@ -1,7 +1,8 @@
 import { spawn } from "node:child_process";
-import { access, readdir, rm, copyFile, mkdir } from "node:fs/promises";
+import { access, cp, readdir, rm, copyFile, mkdir } from "node:fs/promises";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { build } from "esbuild";
 import { buildPluginBundle } from "./build-plugin.mjs";
 import { syncChangelogPreview } from "./build-changelog-preview.mjs";
 
@@ -72,6 +73,7 @@ await syncChangelogPreview({
   changelogPath: resolve(root, "CHANGELOG.md"),
   outputPath: resolve(root, "preview", "changelog.html"),
 });
+await bundlePublishedRuntime(distDir);
 
 process.exit(0);
 
@@ -99,4 +101,36 @@ async function removeMapFiles(dir) {
       await rm(fullPath, { force: true });
     }
   }));
+}
+
+async function bundlePublishedRuntime(dir) {
+  const stage = resolve(root, ".dist", "npm-runtime");
+  const bundlePath = join(stage, "index.js");
+  await rm(stage, { recursive: true, force: true });
+  await mkdir(stage, { recursive: true });
+  await copyFile(join(dir, "index.d.ts"), join(stage, "index.d.ts"));
+  const previewAssets = (await readdir(templateSrc))
+    .filter((file) => file.endsWith(".css") || file.endsWith(".client.js"));
+  await mkdir(join(stage, "preview", "templates"), { recursive: true });
+  await Promise.all(previewAssets.map((file) => copyFile(
+    join(templateSrc, file),
+    join(stage, "preview", "templates", file),
+  )));
+  await mkdir(join(stage, "studio"), { recursive: true });
+  await copyFile(
+    join(dir, "studio", "harness-manifest.json"),
+    join(stage, "studio", "harness-manifest.json"),
+  );
+  await build({
+    entryPoints: [resolve(root, "src", "index.ts")],
+    outfile: bundlePath,
+    bundle: true,
+    platform: "node",
+    packages: "external",
+    format: "esm",
+    target: "node20",
+    minify: true,
+  });
+  await rm(dir, { recursive: true, force: true });
+  await cp(stage, dir, { recursive: true });
 }

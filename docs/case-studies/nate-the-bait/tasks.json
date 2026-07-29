@@ -1,0 +1,14 @@
+[
+  {
+    "id": "reduced-motion-audit",
+    "intent": "Audit the Nate the Bait SwiftUI source for motion that lacks a directly gated reduced-motion behavior. Return file and line evidence without modifying the repository."
+  },
+  {
+    "id": "design-system-inventory",
+    "intent": "Map Nate the Bait typography, chrome, palette, motion tokens, and reusable SwiftUI components from repository evidence. Do not infer rendered quality from source alone."
+  },
+  {
+    "id": "release-readiness",
+    "intent": "Prepare a compact verification plan for Nate the Bait covering project discovery, build, tests, accessibility, runtime behavior, and evidence handoff."
+  }
+]

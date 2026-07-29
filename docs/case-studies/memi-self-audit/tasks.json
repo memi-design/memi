@@ -1,0 +1,14 @@
+[
+  {
+    "id": "raw-color-audit",
+    "intent": "Find raw UI colors in the Memi repository and return file evidence without changing the source."
+  },
+  {
+    "id": "responsive-coverage",
+    "intent": "Assess responsive rule coverage in the Memi web surfaces and separate checked evidence from unassessed behavior."
+  },
+  {
+    "id": "release-surface-parity",
+    "intent": "Verify that npm, GitHub, Action, MCP, plugins, package docs, and the release artifact derive from one candidate manifest."
+  }
+]

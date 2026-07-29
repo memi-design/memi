@@ -12,7 +12,7 @@ const manifest = JSON.parse(
       version: string;
       state?: string;
       sourceCommit?: string | null;
-      previousPublicRelease?: { version: string };
+      previousPublicRelease?: { version: string; sourceCommit: string };
     };
     studio: { version: string };
   };
@@ -27,7 +27,7 @@ if (!publicEngineVersion) {
 }
 const studioVersion = manifest.releaseGroups.studio.version;
 const publicEngineSourceCommit = manifest.releaseGroups.engine.state === "candidate"
-  ? "0f89cbf1b9972c779dbf14cc09f6c91485a1182b"
+  ? manifest.releaseGroups.engine.previousPublicRelease?.sourceCommit
   : manifest.releaseGroups.engine.sourceCommit;
 if (!publicEngineSourceCommit) {
   throw new Error("Published manifest must identify its immutable source commit");

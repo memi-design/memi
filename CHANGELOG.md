@@ -8,6 +8,24 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+## v2.7.0
+
+### Reproducible agent-efficiency evidence
+
+- `7cc5570d` chore: stage memi 2.7.0 candidate manifest
+- `d482d1fb` feat: expose paired benchmarks and trace receipts
+- `3aa8a9fb` test: require live benchmark and trace receipts
+- `7852ac57` feat: add immutable efficiency evidence engine
+- `d9bde8be` test: define measurable efficiency evidence contract
+
+#### Architectural decisions
+
+- Feed Studio usage from the canonical provider-runtime event bus and replace mutable rollups and prototype patching with frozen reducer snapshots.
+- Require revision, worktree, harness, model, and reasoning parity before baseline and Memi runs can form a statistical pair.
+- Keep trace receipts metadata-only and bind them to a SHA-256 digest instead of retaining prompts, source, hidden reasoning, or secrets.
+- Withhold the 25% claim until token and latency lower 95% confidence bounds exceed the target and quality guardrails pass.
+- Track successful first audits, repeat audit projects, and CI reuse separately from npm downloads.
+
 ## v2.6.4
 
 ### Provider-neutral model harness and tracing foundation

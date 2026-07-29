@@ -1,4 +1,4 @@
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 let cached: string | undefined;
@@ -27,7 +27,10 @@ export function packageRoot(): string {
   const virtual = url.includes("$bunfs") || url.startsWith("embedded:") || url.startsWith("compiled:");
   if (virtual) return (cached = dirname(process.execPath));
 
-  return (cached = join(dirname(fileURLToPath(url)), "..", ".."));
+  const moduleDir = dirname(fileURLToPath(url));
+  return (cached = basename(moduleDir) === "dist"
+    ? join(moduleDir, "..")
+    : join(moduleDir, "..", ".."));
 }
 
 /** Resolve a path relative to the package root. */

@@ -67,6 +67,7 @@ export function getHarnessManifest(): StudioHarnessManifest {
 function resolveHarnessManifestPath(): string {
   const candidates = [
     packagePath("studio", "harness-manifest.json"),
+    packagePath("dist", "studio", "harness-manifest.json"),
     packagePath("src", "studio", "harness-manifest.json"),
     fileURLToPath(new URL("./harness-manifest.json", import.meta.url)),
   ];

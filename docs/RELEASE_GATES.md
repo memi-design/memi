@@ -50,7 +50,7 @@ and both pull requests must merge before the public-site gate is complete.
   GitHub OIDC instead of a local token.
 - `package.json`, `package-lock.json`, `server.json`, Codex plugin metadata, examples, and package docs use the same version.
 - Local version is newer than npm `latest`.
-- `server.json`, `dist/index.js`, `README.md`, `NOTICE`, Agent Skills, agent kits, and selected docs are present in the package tarball.
+- `server.json`, the bundled `dist/index.js`, `README.md`, `NOTICE`, focused Agent Skills, runtime schemas, case studies, and selected docs are present in the npm tarball. Notes, harness-specific kits, marketplace plugins, Figma plugin assets, and website assets ship from their dedicated GitHub or catalog surfaces instead of inflating every CLI install.
 - The git worktree is clean.
 
 ```bash

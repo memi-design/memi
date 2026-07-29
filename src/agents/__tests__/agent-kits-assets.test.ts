@@ -165,10 +165,22 @@ describe("packaged agent kits", () => {
     expect(openClawSkill).toContain("\"openclaw\"");
   });
 
-  it("includes agent-kits in the npm package allowlist", async () => {
+  it("keeps the npm runtime focused while retaining core skills and evidence", async () => {
     const pkg = JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf-8"));
-    expect(pkg.files).toContain("agent-kits");
-    expect(pkg.files).toContain("plugins");
+    expect(pkg.files).toEqual(expect.arrayContaining([
+      "dist",
+      "skills",
+      "mcpb",
+      "schemas/memi-runtime-trace-v1.schema.json",
+      "docs/case-studies",
+    ]));
+    expect(pkg.files).not.toEqual(expect.arrayContaining([
+      "agent-kits",
+      "plugins",
+      "notes",
+      "plugin",
+      "assets",
+    ]));
   });
 
   it("ships registry-safe MCP config templates", async () => {
@@ -283,7 +295,7 @@ describe("packaged agent kits", () => {
     });
   });
 
-  it("includes agent kit files in npm pack dry-run output", () => {
+  it("excludes repository-only integration assets from npm pack output", () => {
     const npmCache = mkdtempSync(join(tmpdir(), "memoire-npm-cache-"));
     const pack = spawnSync("npm", ["pack", "--dry-run", "--json"], {
       cwd: process.cwd(),
@@ -305,14 +317,10 @@ describe("packaged agent kits", () => {
       files: Array<{ path: string }>;
     }>;
     const paths = new Set(packageInfo.files.map((file) => file.path));
-    expect(paths).toContain("agent-kits/manifest.json");
     expect(paths).toContain("skills/memoire-design-tooling/SKILL.md");
-    expect(paths).toContain("agent-kits/hermes/memoire-design-tooling/SKILL.md");
-    expect(paths).toContain("agent-kits/openclaw/memoire-design-tooling/SKILL.md");
-    expect(paths).toContain("agent-kits/mirror/README.md");
-    expect(paths).toContain("plugins/memoire/.codex-plugin/plugin.json");
-    expect(paths).toContain("plugins/memoire/.mcp.json");
-    expect(paths).toContain("plugins/memoire/skills/memoire-design-tooling/SKILL.md");
-    expect([...paths].filter((path) => /^plugins\/memoire\/.*\.(png|jpe?g|gif|webp|ico)$/i.test(path))).toEqual([]);
+    expect(paths).toContain("schemas/memi-runtime-trace-v1.schema.json");
+    expect(paths).toContain("docs/case-studies/README.md");
+    expect(paths).toContain("mcpb/manifest.json");
+    expect([...paths].filter((path) => /^(agent-kits|plugins|notes|plugin|assets)\//.test(path))).toEqual([]);
   });
 });

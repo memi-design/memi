@@ -161,6 +161,7 @@ codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugin
 - [design-sandbox](https://github.com/memi-design/design-sandbox) - runnable Next.js, Tailwind, shadcn, MCP, and Agent Skills integration.
 - [Release gates](docs/RELEASE_GATES.md) - package, provenance, clean install, MCP, plugin, binary, and public-surface checks.
 - [Current release truth](docs/CURRENT_RELEASE.md) - one source for npm, GitHub, Action, Studio, and website versions.
+- [Reproducible case studies](docs/case-studies/README.md) - pinned evidence, abstentions, and paired benchmark protocols.
 - [Audit reports](docs/audits/) - timestamped findings, evidence gaps, score caps, and owners.
 - [`llms.txt`](llms.txt) - compact machine-readable product map.
 
