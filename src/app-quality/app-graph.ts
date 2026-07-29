@@ -169,7 +169,7 @@ export async function buildAppGraph(options: BuildAppGraphOptions): Promise<AppG
 function analyzeGraphFile(path: string, content: string): AppGraphFile {
   return {
     path,
-    kind: classifyGraphFile(path, content),
+    kind: classifyAppGraphFile(path, content),
     imports: extractImports(content),
     importedBy: [],
     shadcnImports: extractShadcnImports(content),
@@ -180,7 +180,7 @@ function analyzeGraphFile(path: string, content: string): AppGraphFile {
   };
 }
 
-function classifyGraphFile(path: string, content: string): AppGraphFileKind {
+export function classifyAppGraphFile(path: string, content: string): AppGraphFileKind {
   if (/\.(test|spec)\.(tsx?|jsx?)$/.test(path)) return "test";
   if (/\.swift$/.test(path)) {
     if (/(^|\/)(Tests?|UITests?)\//.test(path) || /Tests?\.swift$/.test(path)) return "test";
@@ -190,10 +190,25 @@ function classifyGraphFile(path: string, content: string): AppGraphFileKind {
   }
   if (/(\.css|tailwind\.config|components\.json)$/.test(path)) return "style";
   if (/\.html$/.test(path)) return "markup";
-  if (/(^|\/)(app|pages|routes)\//.test(path) || /(^|\/)(page|layout)\.(tsx|jsx|ts|js|mdx)$/.test(path)) return "route";
+  if (
+    /(^|\/)(pages|routes)\//.test(path)
+    || /(^|\/)(page|layout)\.(tsx|jsx|ts|js|mdx)$/.test(path)
+  ) return "route";
+  if (declaresReactComponent(path, content)) return "component";
   if (/(^|\/)components\//.test(path)) return "component";
   if ([".ts", ".tsx", ".js", ".jsx", ".mdx"].includes(extname(path))) return "config";
   return "other";
+}
+
+function declaresReactComponent(path: string, content: string): boolean {
+  if (![".tsx", ".jsx", ".mdx"].includes(extname(path))) return false;
+  const declaration = /\b(?:export\s+(?:default\s+)?)?(?:async\s+)?function\s+[A-Z][A-Za-z0-9_]*\b/
+    .test(content)
+    || /\b(?:export\s+)?(?:const|let)\s+[A-Z][A-Za-z0-9_]*\s*(?::[^=]+)?=\s*(?:\([^)]*\)|[A-Za-z_][A-Za-z0-9_]*)\s*=>/
+      .test(content)
+    || /\bclass\s+[A-Z][A-Za-z0-9_]*\s+extends\s+(?:React\.)?(?:Component|PureComponent)\b/
+      .test(content);
+  return declaration && /<[A-Za-z][A-Za-z0-9]*(?:\s|>|\/)/.test(content);
 }
 
 function extractImports(content: string): string[] {

@@ -3,7 +3,11 @@ import { isAbsolute, join, relative, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { scanSources, type ScannedSourceFile } from "../utils/source-scanner.js";
 import { markdownCodeSpan } from "../utils/output-sanitization.js";
-import { buildAppGraph, type AppGraph } from "./app-graph.js";
+import {
+  buildAppGraph,
+  classifyAppGraphFile,
+  type AppGraph,
+} from "./app-graph.js";
 import { analyzeSwiftUiSources } from "./swiftui-static.js";
 import { buildUxAuditReport, type UxAuditReport } from "../ux/tenets-traps.js";
 import { checkSkillCompliance, type ComplianceReport } from "../ux/skill-compliance.js";
@@ -485,17 +489,8 @@ function analyzeFile(file: RawFile): AppQualityFileSignal {
 }
 
 function classifyFile(path: string, content: string): AppQualityFileSignal["kind"] {
-  if (/\.(test|spec)\.(tsx?|jsx?)$/.test(path) || path.includes("/__tests__/")) return "config";
-  if (/\.swift$/.test(path)) {
-    if (/\bstruct\s+[A-Za-z_][A-Za-z0-9_]*\s*:\s*App\b/.test(content)) return "route";
-    if (/\b(?:struct|extension)\s+[A-Za-z_][A-Za-z0-9_]*[\s\S]{0,120}:\s*(?:View|ViewModifier)\b/.test(content)) return "component";
-    return "config";
-  }
-  if (/(\.css|tailwind\.config|components\.json)$/.test(path)) return "style";
-  if (/(^|\/)(app|pages|routes)\//.test(path) || /page\.(tsx|jsx|ts|js|html)$/.test(path)) return "route";
-  if (/(^|\/)components\//.test(path)) return "component";
-  if (/\.html$/.test(path)) return "markup";
-  return "config";
+  const kind = classifyAppGraphFile(path, content);
+  return kind === "test" || kind === "other" ? "config" : kind;
 }
 
 function buildSourceCoverage(

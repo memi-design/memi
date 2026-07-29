@@ -172,7 +172,8 @@ describe("packaged agent kits", () => {
       "skills",
       "mcpb",
       "schemas/memi-runtime-trace-v1.schema.json",
-      "docs/case-studies",
+      "docs/case-studies/memi-2.7-six-repo/README.md",
+      "docs/case-studies/memi-2.7-six-repo/results.json",
     ]));
     expect(pkg.files).not.toEqual(expect.arrayContaining([
       "agent-kits",
@@ -180,6 +181,7 @@ describe("packaged agent kits", () => {
       "notes",
       "plugin",
       "assets",
+      "docs/case-studies",
     ]));
   });
 

@@ -24,6 +24,44 @@ describe("app graph and fix planning", () => {
     }
   });
 
+  it("classifies generic src/app React modules as components instead of routes", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memoire-react-app-"));
+    await mkdir(join(projectRoot, "src", "app"), { recursive: true });
+    await writeFile(join(projectRoot, "package.json"), JSON.stringify({
+      name: "react-fixture",
+      dependencies: { react: "^19.0.0" },
+    }));
+    await writeFile(join(projectRoot, "src", "app", "Chrome.tsx"), `
+      export function Chrome() {
+        return <aside className="bg-surface">Navigation</aside>
+      }
+    `);
+    await writeFile(join(projectRoot, "src", "app", "Dashboard.tsx"), `
+      export function Dashboard() {
+        return <main className="grid gap-4">Dashboard</main>
+      }
+    `);
+
+    try {
+      const graph = await buildAppGraph({ projectRoot });
+      const diagnosis = await diagnoseAppQuality({
+        projectRoot,
+        write: false,
+      });
+
+      expect(graph.summary.routes).toBe(0);
+      expect(graph.summary.components).toBe(2);
+      expect(graph.components.map((component) => component.name)).toEqual([
+        "Chrome",
+        "Dashboard",
+      ]);
+      expect(diagnosis.summary.routes).toBe(0);
+      expect(diagnosis.summary.components).toBe(2);
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
   it("adds evidence fields to diagnosis issues", async () => {
     const projectRoot = await makeFixtureProject();
     try {

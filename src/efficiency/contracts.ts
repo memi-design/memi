@@ -10,6 +10,8 @@ export type BenchmarkCondition = z.infer<typeof benchmarkConditionSchema>;
 export const benchmarkRunRecordSchema = z.object({
   schemaVersion: z.literal(1),
   runId: z.string().min(1),
+  graderVersion: z.string().min(1).optional(),
+  amendsRunId: z.string().min(1).optional(),
   experimentId: z.string().min(1),
   suiteId: z.string().min(1),
   taskId: z.string().min(1),
@@ -37,7 +39,7 @@ export const benchmarkRunRecordSchema = z.object({
     cachedInputTokens: z.number().int().nonnegative(),
     outputTokens: z.number().int().nonnegative(),
     reasoningTokens: z.number().int().nonnegative(),
-    estimatedCostUsd: z.number().nonnegative(),
+    estimatedCostUsd: z.number().nonnegative().nullable(),
   }).strict(),
   tools: z.object({
     calls: z.number().int().nonnegative(),
@@ -60,6 +62,17 @@ export const benchmarkTaskSchema = z.object({
   id: z.string().min(1),
   intent: z.string().min(1),
 }).strict();
+
+export type BenchmarkTask = z.infer<typeof benchmarkTaskSchema>;
+
+export const codexCaseStudyTaskSchema = benchmarkTaskSchema.extend({
+  rubric: z.object({
+    minimumValidCitations: z.number().int().positive(),
+    requiredTerms: z.array(z.string().min(1)).min(1),
+  }).strict(),
+}).strict();
+
+export type CodexCaseStudyTask = z.infer<typeof codexCaseStudyTaskSchema>;
 
 export const benchmarkSuiteSchema = z.object({
   schemaVersion: z.literal(1),

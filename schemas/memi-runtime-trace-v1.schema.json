@@ -3480,6 +3480,14 @@
           "type": "string",
           "minLength": 1
         },
+        "graderVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amendsRunId": {
+          "type": "string",
+          "minLength": 1
+        },
         "experimentId": {
           "type": "string",
           "minLength": 1
@@ -3602,8 +3610,15 @@
               "minimum": 0
             },
             "estimatedCostUsd": {
-              "type": "number",
-              "minimum": 0
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "required": [
@@ -3800,6 +3815,29 @@
           "minimum": 0,
           "maximum": 1
         },
+        "scope": {
+          "type": "object",
+          "properties": {
+            "experimentIds": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "experimentIds"
+          ],
+          "additionalProperties": false
+        },
         "pairs": {
           "type": "object",
           "properties": {
@@ -3857,24 +3895,62 @@
               "additionalProperties": false
             },
             "costSavings": {
-              "type": "object",
-              "properties": {
-                "mean": {
-                  "type": "number"
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "mean": {
+                      "type": "number"
+                    },
+                    "lower95": {
+                      "type": "number"
+                    },
+                    "upper95": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string",
+                      "const": "assessed"
+                    },
+                    "includedPairs": {
+                      "type": "integer",
+                      "exclusiveMinimum": true,
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "mean",
+                    "lower95",
+                    "upper95",
+                    "status",
+                    "includedPairs"
+                  ],
+                  "additionalProperties": false
                 },
-                "lower95": {
-                  "type": "number"
-                },
-                "upper95": {
-                  "type": "number"
+                {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "const": "unassessed"
+                    },
+                    "includedPairs": {
+                      "type": "number",
+                      "const": 0
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "includedPairs",
+                    "reason"
+                  ],
+                  "additionalProperties": false
                 }
-              },
-              "required": [
-                "mean",
-                "lower95",
-                "upper95"
-              ],
-              "additionalProperties": false
+              ]
             },
             "latencySavings": {
               "type": "object",
@@ -3983,6 +4059,7 @@
         "status",
         "claim",
         "targetImprovement",
+        "scope",
         "pairs",
         "metrics",
         "quality"

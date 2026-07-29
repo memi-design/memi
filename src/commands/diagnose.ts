@@ -5,6 +5,7 @@ import { loadPolicy } from "../app-quality/policy.js";
 import { filterWithBaseline, readBaseline } from "../app-quality/baseline.js";
 import { ui } from "../tui/format.js";
 import { sanitizeDisplayText } from "../utils/output-sanitization.js";
+import { buildRepositoryAgentAuditContext } from "../app-quality/agent-context.js";
 
 interface DiagnoseOptions {
   json?: boolean;
@@ -18,6 +19,10 @@ interface DiagnoseOptions {
   expandImports?: boolean;
   trend?: boolean;
   failOnRegression?: string | boolean;
+  agentContext?: boolean;
+  contextFiles?: string;
+  contextIssues?: string;
+  contextRouting?: string;
 }
 
 const SEVERITY_RANK: Record<AppQualitySeverity, number> = { critical: 4, high: 3, medium: 2, low: 1 };
@@ -40,6 +45,10 @@ export function registerDiagnoseCommand(program: Command, engine: MemoireEngine)
     .command("diagnose [target]")
     .description("Run a read-only design engineering audit on web or SwiftUI source, or a web URL")
     .option("--json", "Output the diagnosis as JSON")
+    .option("--agent-context", "Emit bounded repository intelligence for a coding agent (implies JSON)")
+    .option("--context-files <count>", "Maximum high-signal files in --agent-context", "40")
+    .option("--context-issues <count>", "Maximum findings in --agent-context", "20")
+    .option("--context-routing <mode>", "Agent-context routing: auto, full, index-only, or abstain", "auto")
     .option("--max-files <count>", "Maximum source files to scan", "500")
     .option("--no-write", "Do not write .memoire/app-quality reports")
     .option("--fail-on <severity>", "Exit non-zero when any issue is at or above this severity: critical, high, medium, low, or none. Defaults to the policy's gates.failOn (high without a policy).")
@@ -114,6 +123,24 @@ export function registerDiagnoseCommand(program: Command, engine: MemoireEngine)
         }
         const regressionFailed = regression?.comparable === true && regression.regressed === true;
 
+        if (opts.agentContext) {
+          const context = await buildRepositoryAgentAuditContext(
+            engine.config.projectRoot,
+            diagnosis,
+            {
+              maxFiles: positiveInteger(opts.contextFiles ?? "40", "context-files"),
+              maxIssues: positiveInteger(opts.contextIssues ?? "20", "context-issues"),
+              routingMode: contextRoutingMode(opts.contextRouting ?? "auto"),
+            },
+          );
+          console.log(JSON.stringify({
+            ...context,
+            gate: { failOn, failed, baselineApplied: Boolean(opts.baseline), gatingIssues: gatingIssues.length, suppressedByBaseline: suppressedCount, regression },
+          }, null, 2));
+          if (failed || regressionFailed) process.exitCode = 1;
+          return;
+        }
+
         if (opts.json) {
           console.log(JSON.stringify({
             ...diagnosis,
@@ -145,7 +172,7 @@ export function registerDiagnoseCommand(program: Command, engine: MemoireEngine)
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        if (opts.json) {
+        if (opts.json || opts.agentContext) {
           console.log(JSON.stringify({ status: "failed", error: message }));
         } else {
           console.log(ui.fail(message));
@@ -153,6 +180,26 @@ export function registerDiagnoseCommand(program: Command, engine: MemoireEngine)
         process.exitCode = 1;
       }
     });
+}
+
+function contextRoutingMode(
+  value: string,
+): "full" | "index-only" | "abstain" | undefined {
+  if (value === "auto") return undefined;
+  if (value === "full" || value === "index-only" || value === "abstain") {
+    return value;
+  }
+  throw new Error(
+    "context-routing must be auto, full, index-only, or abstain",
+  );
+}
+
+function positiveInteger(value: string, label: string): number {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`${label} must be positive`);
+  }
+  return parsed;
 }
 
 function printDiagnosis(diagnosis: AppQualityDiagnosis, wroteReports: boolean): void {

@@ -206,11 +206,10 @@ function checkMotionTokens(file: SourceFile): ComplianceFinding[] {
 }
 
 /**
- * Read-only lookup into DESIGN_SYSTEM_REFERENCE.md's catalog — informational
- * only, never contributes to ComplianceReport.summary and never gates
- * anything. The doc has no checkable rules; this exists so a report can
- * optionally note "N systems catalogued for this component type" alongside
- * real findings, without pretending the catalog itself is enforceable.
+ * Read-only lookup into the external design-skills reference catalog.
+ * Informational only, never contributes to ComplianceReport.summary and never
+ * gates anything. The npm package omits the 56 KB source catalog; agents can
+ * search and pull the governed catalog only when this evidence is relevant.
  */
 const REFERENCE_COMPONENT_COUNTS: Record<string, number> = {
   accordion: 18, alert: 22, avatar: 19, badge: 17, breadcrumbs: 12,
@@ -223,11 +222,11 @@ export function getReferenceCoverage(componentKind: string): ReferenceCoverageNo
   const key = componentKind.trim().toLowerCase();
   const count = REFERENCE_COMPONENT_COUNTS[key];
   if (count === undefined) {
-    return [{ component: componentKind, systemsCatalogued: 0, note: "Not indexed in DESIGN_SYSTEM_REFERENCE.md." }];
+    return [{ component: componentKind, systemsCatalogued: 0, note: "Not indexed in the external design-skills reference catalog." }];
   }
   return [{
     component: componentKind,
     systemsCatalogued: count,
-    note: `${count} external design systems document a "${componentKind}" pattern in skills/DESIGN_SYSTEM_REFERENCE.md — informational only, not a compliance input.`,
+    note: `${count} external design systems document a "${componentKind}" pattern in the design-skills reference catalog. This is informational only, not a compliance input.`,
   }];
 }
