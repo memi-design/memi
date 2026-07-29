@@ -134,7 +134,7 @@ export type RateLimitEvent = ProviderRuntimeEventBase &
 
 export type UsageEvent = ProviderRuntimeEventBase &
   (
-    | { type: "usage.updated"; inputTokens: number; outputTokens: number; reasoningTokens?: number; estimatedCostUsd?: number }
+    | { type: "usage.updated"; inputTokens: number; cachedInputTokens?: number; outputTokens: number; reasoningTokens?: number; estimatedCostUsd?: number }
   );
 
 export type ModelRef = {
@@ -330,6 +330,7 @@ export const providerRuntimeEventSchema = z.discriminatedUnion("type", [
   }),
   event("usage.updated", {
     inputTokens: z.number().nonnegative(),
+    cachedInputTokens: z.number().nonnegative().optional(),
     outputTokens: z.number().nonnegative(),
     reasoningTokens: z.number().nonnegative().optional(),
     estimatedCostUsd: z.number().nonnegative().optional(),

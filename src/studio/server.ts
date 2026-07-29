@@ -1831,6 +1831,7 @@ export class StudioRuntimeServer {
         ...base,
         type: "usage.updated",
         inputTokens: numberField(data.inputTokens) ?? numberField(data.input_tokens) ?? 0,
+        cachedInputTokens: numberField(data.cachedInputTokens) ?? numberField(data.cached_input_tokens) ?? undefined,
         outputTokens: numberField(data.outputTokens) ?? numberField(data.output_tokens) ?? 0,
         reasoningTokens: numberField(data.reasoningTokens) ?? numberField(data.reasoning_tokens) ?? undefined,
         estimatedCostUsd: numberField(data.estimatedCostUsd) ?? numberField(data.estimated_cost_usd) ?? undefined,

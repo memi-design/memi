@@ -292,6 +292,7 @@ export const codexShapedEmit = {
       ...self["envelope"](),
       type: "usage.updated",
       inputTokens: Number(raw["inputTokens"] ?? 0),
+      cachedInputTokens: raw["cachedInputTokens"] !== undefined ? Number(raw["cachedInputTokens"]) : undefined,
       outputTokens: Number(raw["outputTokens"] ?? 0),
       reasoningTokens: raw["reasoningTokens"] !== undefined ? Number(raw["reasoningTokens"]) : undefined,
       estimatedCostUsd: raw["estimatedCostUsd"] !== undefined ? Number(raw["estimatedCostUsd"]) : undefined,

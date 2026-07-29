@@ -242,6 +242,7 @@ export class ClaudeCodeDriver extends BaseHarnessDriver {
           ...this.envelope(),
           type: "usage.updated",
           inputTokens: Number(obj["inputTokens"] ?? 0),
+          cachedInputTokens: obj["cachedInputTokens"] !== undefined ? Number(obj["cachedInputTokens"]) : undefined,
           outputTokens: Number(obj["outputTokens"] ?? 0),
           reasoningTokens: obj["reasoningTokens"] !== undefined ? Number(obj["reasoningTokens"]) : undefined,
           estimatedCostUsd: obj["estimatedCostUsd"] !== undefined ? Number(obj["estimatedCostUsd"]) : undefined,

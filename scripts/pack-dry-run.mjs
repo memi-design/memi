@@ -10,7 +10,9 @@ import { evaluatePackageSizeBudget } from "./lib/package-size-budget.mjs";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Security and evidence-contract code is intentionally shipped in the CLI.
 // Keep at least 10% operational headroom below the hard public-package budget.
-const maxSizeBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_BYTES || "1500000", 10);
+const maxSizeBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_BYTES || "750000", 10);
+const maxUnpackedBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_UNPACKED_BYTES || "2000000", 10);
+const maxFiles = Number.parseInt(process.env.MEMOIRE_PACK_MAX_FILES || "250", 10);
 const maxUtilization = Number.parseFloat(process.env.MEMOIRE_PACK_MAX_UTILIZATION || "0.9");
 const npmCommand = "npm";
 const tempRoot = await mkdtemp(join(tmpdir(), "memoire-pack-"));
@@ -40,7 +42,10 @@ try {
   const size = Number(summary?.size ?? 0);
   const unpackedSize = Number(summary?.unpackedSize ?? 0);
   const files = Array.isArray(summary?.files) ? summary.files.length : 0;
-  const budget = evaluatePackageSizeBudget(size, { maxSizeBytes, maxUtilization });
+  const budget = evaluatePackageSizeBudget(
+    { size, unpackedSize, files },
+    { maxSizeBytes, maxUnpackedBytes, maxFiles, maxUtilization },
+  );
 
   const result = {
     name: summary?.name ?? packageJson.name,

@@ -63,6 +63,9 @@ export function projectRuntimeEventToOpenTelemetry(
     attributes["memi.model.selection.reason"] = event.reason;
   } else if (event.type === "usage.updated") {
     attributes["gen_ai.usage.input_tokens"] = event.inputTokens;
+    if (event.cachedInputTokens !== undefined) {
+      attributes["gen_ai.usage.cached_input_tokens"] = event.cachedInputTokens;
+    }
     attributes["gen_ai.usage.output_tokens"] = event.outputTokens;
     if (event.reasoningTokens !== undefined) {
       attributes["gen_ai.usage.reasoning_tokens"] = event.reasoningTokens;

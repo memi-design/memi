@@ -2227,6 +2227,10 @@
               "type": "number",
               "minimum": 0
             },
+            "cachedInputTokens": {
+              "type": "number",
+              "minimum": 0
+            },
             "outputTokens": {
               "type": "number",
               "minimum": 0
