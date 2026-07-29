@@ -320,6 +320,31 @@ describe("deterministic skill router", () => {
     expect(result.decision).toBe("abstain");
   });
 
+  it("does not confuse a generic iOS app interface with App Intents", async () => {
+    const appIntents = await note("ios-app-intents", {
+      description: "Design and implement iOS App Intents, Siri, Shortcuts, and Spotlight actions.",
+      intents: ["ios-app-intents"],
+      actions: ["create"],
+    });
+    const swiftUI = await note("swiftui-design-engineering", {
+      description: "Build and verify accessible SwiftUI interfaces on iOS Simulator.",
+      intents: ["swiftui-design-engineering"],
+      actions: ["create"],
+    });
+
+    const result = await routeInstalledSkills({
+      intent: "Implement an accessible SwiftUI settings row in the existing iOS app and verify it on Simulator",
+      notes: [appIntents, swiftUI],
+      capabilities: [],
+      platforms: ["swiftui"],
+      maximumSkills: 1,
+    });
+
+    expect(result.selected.map((skill) => skill.id)).toEqual([
+      "swiftui-design-engineering",
+    ]);
+  });
+
   it("does not treat one shared word as an exact routing exclusion", async () => {
     const candidate = await note("swiftui-design-engineering", {
       description: "Build and repair accessible SwiftUI interfaces.",

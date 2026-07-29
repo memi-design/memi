@@ -22,9 +22,10 @@ const TOKEN_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   wcag: "accessibility",
 });
 const STOP_WORDS = new Set([
-  "a", "add", "adding", "an", "and", "as", "at", "be", "by", "existing",
-  "for", "from", "in", "into", "is", "it", "of", "on", "only", "or", "the",
-  "this", "to", "use", "when", "with",
+  "a", "add", "adding", "an", "and", "app", "as", "at", "be", "by", "existing",
+  "for", "from", "implement", "implementing", "in", "into", "is", "it", "of",
+  "on", "only", "or", "stable", "the", "this", "to", "use", "verify", "when",
+  "with",
 ]);
 
 export interface RouteInstalledSkillsInput {
