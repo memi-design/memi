@@ -29,6 +29,16 @@ export {
 } from "./resolver.js";
 
 export {
+  SKILL_ROUTER_VERSION,
+  routeInstalledSkills,
+  searchCatalogSkills,
+  type RouteInstalledSkillsInput,
+  type SkillRouteResult,
+  type SkillSearchEntry,
+  type SkillSearchResult,
+} from "./skill-router.js";
+
+export {
   installNote,
   removeNote,
   scaffoldNote,

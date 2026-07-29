@@ -17,6 +17,8 @@ import {
   findCatalogNote,
   installNote,
   loadNotesCatalog,
+  routeInstalledSkills,
+  searchCatalogSkills,
   removeNote,
   scaffoldNote,
   getNoteInfo,
@@ -180,11 +182,34 @@ export function registerNotesCommand(program: Command, engine: MemoireEngine) {
     .option("--json", "Output search result as JSON")
     .action(async (query: string | undefined, opts: { catalog?: string; json?: boolean }) => {
       try {
-        const normalized = (query ?? "").trim().toLowerCase();
         const catalog = await loadNotesCatalog({ catalogUrl: opts.catalog });
-        const notes = catalog.notes
-          .filter((note) => !normalized || `${note.name} ${note.title} ${note.description} ${note.tags.join(" ")}`.toLowerCase().includes(normalized))
-          .map((note) => ({
+        const ranked = query?.trim()
+          ? searchCatalogSkills({
+            query,
+            entries: catalog.notes.map((note) => ({
+              id: note.id,
+              name: note.name,
+              title: note.title,
+              description: note.description,
+              tags: note.tags,
+              intents: note.manifest?.memoire?.routing?.intents
+                ?? note.manifest?.skills.flatMap((skill) =>
+                  skill.activateOn.split(",").map((value) => value.trim()))
+                ?? [],
+            })),
+          })
+          : catalog.notes.map((note) => ({
+            id: note.id,
+            name: note.name,
+            title: note.title,
+            description: note.description,
+            score: 0,
+            matchedTerms: [] as string[],
+          }));
+        const byId = new Map(catalog.notes.map((note) => [note.id, note]));
+        const foundNotes = ranked.flatMap((result) => {
+          const note = byId.get(result.id);
+          return note ? [{
             name: note.name,
             title: note.title,
             version: note.version,
@@ -193,12 +218,23 @@ export function registerNotesCommand(program: Command, engine: MemoireEngine) {
             tags: note.tags,
             sourceUrls: note.sourceUrls,
             archiveUrl: note.archive.url,
-          }));
+            score: result.score,
+            matchedTerms: result.matchedTerms,
+          }] : [];
+        });
         if (opts.json) {
-          console.log(JSON.stringify({ status: "completed", query: query ?? "", catalogUrl: opts.catalog, notes }, null, 2));
+          console.log(JSON.stringify({
+            status: "completed",
+            query: query ?? "",
+            catalogUrl: opts.catalog,
+            notes: foundNotes,
+          }, null, 2));
           return;
         }
-        for (const note of notes) console.log(`${note.name}@${note.version} — ${note.description}`);
+        for (const note of foundNotes) {
+          const score = query?.trim() ? ` [${note.score}]` : "";
+          console.log(`${note.name}@${note.version}${score} — ${note.description}`);
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         if (opts.json) {
@@ -208,6 +244,46 @@ export function registerNotesCommand(program: Command, engine: MemoireEngine) {
         }
         console.log(ui.fail(message));
         process.exitCode = 1;
+      }
+    });
+
+  notes
+    .command("route <intent...>")
+    .description("Deterministically select a bounded installed skill stack")
+    .option("--capabilities <values>", "Comma-separated available capabilities", "")
+    .option("--platforms <values>", "Comma-separated repository platforms", "")
+    .option("--max-skills <count>", "Maximum stacked skills", "2")
+    .option("--max-context-bytes <count>", "Maximum injected skill bytes", "8000")
+    .option("--json", "Output routing receipt as JSON")
+    .action(async (intentParts: string[], opts: {
+      capabilities?: string;
+      platforms?: string;
+      maxSkills: string;
+      maxContextBytes: string;
+      json?: boolean;
+    }) => {
+      if (!engine.notes.loaded) await engine.notes.loadAll();
+      const route = await routeInstalledSkills({
+        intent: intentParts.join(" "),
+        notes: engine.notes.notes,
+        capabilities: csv(opts.capabilities),
+        platforms: csv(opts.platforms),
+        maximumSkills: positiveInteger(opts.maxSkills, "max-skills"),
+        maximumContextBytes: positiveInteger(
+          opts.maxContextBytes,
+          "max-context-bytes",
+        ),
+      });
+      if (opts.json) {
+        console.log(JSON.stringify({ status: "completed", route }, null, 2));
+        return;
+      }
+      if (route.decision === "abstain") {
+        console.log("No skill met the deterministic routing threshold.");
+        return;
+      }
+      for (const skill of route.selected) {
+        console.log(`${skill.id} [${skill.score}] ${skill.contentHash}`);
       }
     });
 
@@ -594,4 +670,19 @@ function emptyNotesSummary() {
       generate: 0,
     },
   };
+}
+
+function csv(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function positiveInteger(value: string, label: string): number {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`${label} must be a positive integer`);
+  }
+  return parsed;
 }
