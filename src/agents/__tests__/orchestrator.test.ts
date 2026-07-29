@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { AgentOrchestrator } from "../orchestrator.js";
 import type { AnySpec, ComponentSpec, DesignSystem, PageSpec } from "../../specs/types.js";
+import type { AgentPlan } from "../plan-builder.js";
+import type { InstalledNote } from "../../notes/types.js";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 
 function makeComponentSpec(name: string): ComponentSpec {
   const now = new Date().toISOString();
@@ -24,7 +29,7 @@ function makeComponentSpec(name: string): ComponentSpec {
   };
 }
 
-function makeEngine(initialSpecs: AnySpec[]) {
+function makeEngine(initialSpecs: AnySpec[], notes: InstalledNote[] = []) {
   const specs = [...initialSpecs];
   const generated: string[] = [];
   const saved: AnySpec[] = [];
@@ -58,7 +63,7 @@ function makeEngine(initialSpecs: AnySpec[]) {
   return {
     engine: {
       registry,
-      notes: { loaded: false, notes: [] },
+      notes: { loaded: notes.length > 0, notes },
       figma: { isConnected: false, publishAgentStatus() {} },
       project: { framework: "vite" },
       agentRegistry: { getAvailableAgent() { return null; } },
@@ -72,6 +77,49 @@ function makeEngine(initialSpecs: AnySpec[]) {
     },
     generated,
     saved,
+  };
+}
+
+async function makeNote(
+  root: string,
+  name: string,
+  description: string,
+  intents: string[],
+): Promise<InstalledNote> {
+  const notePath = path.join(root, name);
+  await mkdir(notePath, { recursive: true });
+  await writeFile(path.join(notePath, "SKILL.md"), `# ${name}\n\n${description}`);
+  return {
+    path: notePath,
+    builtIn: false,
+    enabled: true,
+    manifest: {
+      name,
+      version: "1.0.0",
+      description,
+      category: "craft",
+      tags: intents,
+      sourceUrls: [],
+      skills: [{
+        file: "SKILL.md",
+        name,
+        activateOn: intents.join(","),
+        freedomLevel: "read-only",
+      }],
+      dependencies: [],
+      memoire: {
+        harnessExtensions: [],
+        routing: {
+          intents,
+          excludes: [],
+          capabilities: [],
+          platforms: [],
+          priority: 0,
+        },
+      },
+      createdAt: "2026-07-29T00:00:00.000Z",
+      updatedAt: "2026-07-29T00:00:00.000Z",
+    },
   };
 }
 
@@ -100,5 +148,40 @@ describe("AgentOrchestrator compose targeting", () => {
 
     expect(result.status).toBe("completed");
     expect(generated).toEqual(["MetricCard", "TrendBadge"]);
+  });
+
+  it("routes a bounded skill stack from the full task and preserves the receipt", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-routing-"));
+    const notes = await Promise.all([
+      makeNote(root, "accessibility-audit", "Audit WCAG and VoiceOver behavior.", [
+        "accessibility-audit",
+        "wcag-review",
+      ]),
+      makeNote(root, "better-typography", "Improve responsive typography and type scale.", [
+        "typography-system",
+        "responsive-typography",
+      ]),
+      makeNote(root, "docker", "Configure Docker containers and images.", ["docker-environment"]),
+    ]);
+    const { engine } = makeEngine([], notes);
+    let plan: AgentPlan | undefined;
+    const orchestrator = new AgentOrchestrator(engine as never, (nextPlan) => {
+      plan = nextPlan;
+    });
+
+    await orchestrator.execute(
+      "Audit the responsive typography for WCAG and VoiceOver issues",
+      { dryRun: true },
+    );
+
+    expect(plan?.skillRoute?.decision).toBe("stack");
+    expect(plan?.skillRoute?.selected.map((skill) => skill.id).sort()).toEqual([
+      "accessibility-audit",
+      "better-typography",
+    ]);
+    expect(plan?.skillRoute?.selected).toHaveLength(2);
+    expect(plan?.subTasks[0].prompt).toContain("accessibility-audit");
+    expect(plan?.subTasks[0].prompt).toContain("better-typography");
+    expect(plan?.subTasks[0].prompt).not.toContain("# docker");
   });
 });
