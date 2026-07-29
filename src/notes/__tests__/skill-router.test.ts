@@ -146,6 +146,9 @@ describe("deterministic skill router", () => {
     expect(context).toContain("\"routerVersion\": \"skill-router-v2\"");
     expect(context).toContain("# accessibility-audit");
     expect(context).toContain(routed.route.selected[0].contentHash);
+    expect(context).toContain("The task manifest and closest repository evidence are authoritative.");
+    expect(context).toContain("Do not broaden scope, inventory the whole repository");
+    expect(context).toContain("Run only the manifest verification commands");
     expect(context).not.toContain("\"candidates\"");
     expect(context).not.toContain("\"excluded\"");
   });
