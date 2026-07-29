@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { InstalledNote } from "../types.js";
 import {
+  compileSafeRoutingPattern,
   formatRoutedSkillContext,
   resolveRoutedSkills,
   routeInstalledSkills,
@@ -365,6 +366,99 @@ describe("deterministic skill router", () => {
     }));
     expect(result.selected[0]?.id).toBe("swiftui-design-engineering");
   });
+
+  it("uses repository fingerprints to choose a niche Expo route over generic mobile guidance", async () => {
+    const expo = await note("expo-router-bottom-tabs", {
+      description: "Implement Expo Router bottom tabs, badges, and accessible tab state.",
+      intents: ["expo-router-bottom-tabs", "bottom-tab-badge"],
+      platforms: ["react-native"],
+      repository: {
+        dependenciesAny: ["^expo-router$"],
+        filesAny: ["^app/\\(tabs\\)/_layout\\.tsx$"],
+      },
+    });
+    const generic = await note("mobile-craft", {
+      description: "Review general mobile interaction craft.",
+      intents: ["mobile-craft"],
+    });
+
+    const result = await routeInstalledSkills({
+      intent: "Add an unread badge to the bottom tab and verify the navigation state",
+      notes: [generic, expo],
+      capabilities: [],
+      platforms: ["react-native"],
+      repositoryFingerprint: {
+        schemaVersion: 1,
+        languages: ["typescript"],
+        frameworks: ["expo", "react-native"],
+        dependencies: ["expo", "expo-router", "react-native"],
+        files: ["app/(tabs)/_layout.tsx", "package.json"],
+        imports: ["expo-router"],
+        scripts: ["test", "ios"],
+      },
+      maximumSkills: 1,
+    });
+
+    expect(result.selected.map((skill) => skill.id)).toEqual([
+      "expo-router-bottom-tabs",
+    ]);
+    expect(result.selected[0]?.explanation.repositoryEvidence).toEqual([
+      "dependency:expo-router",
+      "file:app/(tabs)/_layout.tsx",
+    ]);
+  });
+
+  it("rejects an otherwise relevant route when its repository eligibility does not match", async () => {
+    const expo = await note("expo-router-bottom-tabs", {
+      description: "Implement Expo Router bottom tabs and badges.",
+      intents: ["expo-router-bottom-tabs", "bottom-tab-badge"],
+      repository: {
+        dependenciesAny: ["^expo-router$"],
+      },
+    });
+
+    const result = await routeInstalledSkills({
+      intent: "Add a bottom tab badge",
+      notes: [expo],
+      capabilities: [],
+      repositoryFingerprint: {
+        schemaVersion: 1,
+        languages: ["swift"],
+        frameworks: ["swiftui"],
+        dependencies: [],
+        files: ["NateTheBait/App.swift"],
+        imports: ["SwiftUI"],
+        scripts: [],
+      },
+    });
+
+    expect(result.decision).toBe("abstain");
+    expect(result.excluded).toContainEqual({
+      id: "expo-router-bottom-tabs",
+      reason: "repository-mismatch:dependenciesAny",
+    });
+  });
+
+  it("compiles bounded routing regexes and rejects catastrophic or stateful patterns", () => {
+    expect(compileSafeRoutingPattern("^expo-router$").test("expo-router")).toBe(true);
+    expect(() => compileSafeRoutingPattern("(a+)+$")).toThrow(/unsafe routing pattern/);
+    expect(() => compileSafeRoutingPattern("(foo)\\1")).toThrow(/unsafe routing pattern/);
+    expect(() => compileSafeRoutingPattern("expo", "g")).toThrow(/unsupported routing flags/);
+  });
+
+  it("does not route on one-character or generic procedural token noise", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Apply the current production fix after tests",
+      notes: [await note("shader-design-engineering", {
+        description: "Build stable shader effects and production rendering.",
+        intents: ["shader-design-engineering"],
+      })],
+      capabilities: [],
+    });
+
+    expect(result.decision).toBe("abstain");
+    expect(result.candidates).toEqual([]);
+  });
 });
 
 async function note(
@@ -375,6 +469,16 @@ async function note(
     capabilities?: string[];
     body?: string;
     actions?: string[];
+    platforms?: string[];
+    repository?: {
+      dependenciesAny?: string[];
+      filesAny?: string[];
+      importsAny?: string[];
+      scriptsAny?: string[];
+      frameworksAny?: string[];
+      languagesAny?: string[];
+      excludeFilesAny?: string[];
+    };
   },
 ): Promise<InstalledNote> {
   const root = await mkdtemp(path.join(tmpdir(), `memi-skill-router-${name}-`));
@@ -409,10 +513,11 @@ async function note(
           intents: options.intents,
           excludes: [],
           capabilities: options.capabilities ?? [],
-          platforms: [],
+          platforms: options.platforms ?? [],
           priority: 0,
           actions: options.actions ?? [],
           lifecycle: [],
+          repository: options.repository,
         },
       },
       createdAt: "2026-07-29T00:00:00.000Z",
