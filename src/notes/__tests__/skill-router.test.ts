@@ -4,6 +4,8 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { InstalledNote } from "../types.js";
 import {
+  formatRoutedSkillContext,
+  resolveRoutedSkills,
   routeInstalledSkills,
   searchCatalogSkills,
 } from "../skill-router.js";
@@ -126,6 +128,23 @@ describe("deterministic skill router", () => {
       matchedTerms: expect.arrayContaining(["swiftui", "accessible"]),
     });
     expect(results[0].score).toBeGreaterThan(results[1].score);
+  });
+
+  it("formats the exact selected skill stack with its trace receipt", async () => {
+    const routed = await resolveRoutedSkills({
+      intent: "Audit WCAG accessibility",
+      notes: [await note("accessibility-audit", {
+        description: "Audit WCAG accessibility and keyboard behavior.",
+        intents: ["accessibility-audit"],
+      })],
+      capabilities: [],
+    });
+
+    const context = formatRoutedSkillContext(routed);
+
+    expect(context).toContain("\"routerVersion\": \"skill-router-v1\"");
+    expect(context).toContain("# accessibility-audit");
+    expect(context).toContain(routed.route.selected[0].contentHash);
   });
 });
 

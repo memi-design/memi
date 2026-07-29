@@ -85,6 +85,69 @@ describe("benchmark command", () => {
       pairs: { included: 1 },
     });
   });
+
+  it("creates a deterministic multi-provider workflow plan", async () => {
+    const taskPath = join(projectRoot, "workflow-task.json");
+    const outPath = join(projectRoot, "workflow-plan.json");
+    await writeFile(taskPath, JSON.stringify(workflowTask()));
+    const logs = captureLogs();
+    const program = new Command();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await program.parseAsync([
+      "benchmark",
+      "workflow-plan",
+      taskPath,
+      "--suite",
+      "product-flow-v1",
+      "--experiment",
+      "checkout-flow",
+      "--providers",
+      "codex,claude",
+      "--repeats",
+      "3",
+      "--out",
+      outPath,
+      "--json",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload.status).toBe("planned");
+    expect(payload.plan.trials).toHaveLength(12);
+    expect(payload.plan.providers).toEqual(["codex", "claude"]);
+  });
+
+  it("refuses to invoke a workflow provider without explicit execution consent", async () => {
+    const taskPath = join(projectRoot, "workflow-task.json");
+    await writeFile(taskPath, JSON.stringify(workflowTask()));
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await expect(program.parseAsync([
+      "benchmark",
+      "workflow-run",
+      taskPath,
+      "--condition",
+      "baseline",
+      "--provider",
+      "codex",
+      "--repository",
+      projectRoot,
+      "--evidence-root",
+      join(projectRoot, "evidence"),
+      "--store-root",
+      join(projectRoot, "store"),
+      "--suite",
+      "product-flow-v1",
+      "--experiment",
+      "checkout-flow",
+      "--repeat",
+      "1",
+    ], { from: "user" })).rejects.toThrow(
+      "workflow-run requires --execute",
+    );
+  });
 });
 
 function engine() {
@@ -132,5 +195,32 @@ function run(
       humanInterventions: 0,
     },
     evidenceRefs: [`sha256:${condition}`],
+  };
+}
+
+function workflowTask() {
+  return {
+    schemaVersion: 1,
+    id: "checkout-flow",
+    intent: "Repair and verify the complete rendered checkout flow",
+    maximumDurationMs: 10 * 60_000,
+    steps: ["inspect", "implement", "build", "launch", "verify"],
+    preparation: [],
+    fixtures: [],
+    verification: [
+      {
+        kind: "build",
+        command: "npm",
+        args: ["run", "build"],
+        timeoutMs: 300_000,
+      },
+      {
+        kind: "rendered-flow",
+        command: "npm",
+        args: ["run", "test:e2e"],
+        timeoutMs: 600_000,
+      },
+    ],
+    requiredArtifacts: ["git.patch", "verification.json", "events.jsonl"],
   };
 }
