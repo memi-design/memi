@@ -33,4 +33,50 @@ describe("package size budget", () => {
       maxUtilization: 1,
     })).toThrow("maxUtilization");
   });
+
+  it("gates compressed bytes, unpacked bytes, and file count together", () => {
+    expect(evaluatePackageSizeBudget({
+      size: 420_000,
+      unpackedSize: 1_480_000,
+      files: 230,
+    }, {
+      maxSizeBytes: 750_000,
+      maxUnpackedBytes: 2_000_000,
+      maxFiles: 250,
+      maxUtilization: 0.9,
+    })).toMatchObject({
+      passed: true,
+      size: 420_000,
+      unpackedSize: 1_480_000,
+      files: 230,
+    });
+
+    expect(evaluatePackageSizeBudget({
+      size: 420_000,
+      unpackedSize: 2_000_001,
+      files: 230,
+    }, {
+      maxSizeBytes: 750_000,
+      maxUnpackedBytes: 2_000_000,
+      maxFiles: 250,
+      maxUtilization: 0.9,
+    })).toMatchObject({
+      passed: false,
+      reason: expect.stringContaining("unpacked"),
+    });
+
+    expect(evaluatePackageSizeBudget({
+      size: 420_000,
+      unpackedSize: 1_480_000,
+      files: 251,
+    }, {
+      maxSizeBytes: 750_000,
+      maxUnpackedBytes: 2_000_000,
+      maxFiles: 250,
+      maxUtilization: 0.9,
+    })).toMatchObject({
+      passed: false,
+      reason: expect.stringContaining("files"),
+    });
+  });
 });

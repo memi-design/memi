@@ -300,4 +300,56 @@ describe("usage-rollup", () => {
     );
     expect(rollup.all().length).toBe(2);
   });
+
+  it("accounts for cached input tokens without counting them twice", () => {
+    const rollup = new UsageRollup();
+    const sessionId = asId("SessionId", "ses_cached");
+    rollup.consume(
+      makeEvent({
+        type: "usage.updated",
+        sessionId,
+        inputTokens: 120,
+        cachedInputTokens: 80,
+        outputTokens: 30,
+        reasoningTokens: 10,
+      } as Partial<ProviderRuntimeEvent>),
+    );
+
+    expect(rollup.sessionUsage(sessionId)).toMatchObject({
+      inputTokens: 120,
+      cachedInputTokens: 80,
+      outputTokens: 30,
+      reasoningTokens: 10,
+      totalTokens: 160,
+    });
+  });
+
+  it("returns immutable copies so consumers cannot corrupt accumulated usage", () => {
+    const rollup = new UsageRollup();
+    const sessionId = asId("SessionId", "ses_immutable");
+    rollup.consume(
+      makeEvent({
+        type: "usage.updated",
+        sessionId,
+        inputTokens: 40,
+        outputTokens: 2,
+      } as Partial<ProviderRuntimeEvent>),
+    );
+
+    const snapshot = rollup.sessionUsage(sessionId);
+    const all = rollup.all();
+    expect(Object.isFrozen(snapshot)).toBe(true);
+    expect(Object.isFrozen(all)).toBe(true);
+    expect(Object.isFrozen(all[0])).toBe(true);
+
+    expect(() => {
+      (snapshot as { inputTokens: number }).inputTokens = 999;
+    }).toThrow();
+    expect(rollup.sessionUsage(sessionId)?.inputTokens).toBe(40);
+  });
+
+  it("captures tool names without patching the class prototype", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(UsageRollup.prototype, "consume");
+    expect(descriptor?.value?.name).toBe("consume");
+  });
 });
