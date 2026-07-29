@@ -143,8 +143,8 @@ Until then the truthful position is:
 - Whole-repository coverage: 64.59% statements, 66.30% lines, 72.76%
   functions, and 53.41% branches.
 - Production dependency audit: zero vulnerabilities.
-- Candidate tarball: 558,843 bytes compressed, 1,982,183 bytes unpacked,
-  50 files, including all five reproducible workflow manifests.
+- Candidate tarball: approximately 559 KB compressed and 1.983 MB unpacked,
+  with 50 files including all five reproducible workflow manifests.
 - Release consistency: passed locally.
 
 The whole-repository coverage result is below the project's stated 80% target.
