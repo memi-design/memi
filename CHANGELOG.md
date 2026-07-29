@@ -12,6 +12,10 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Reproducible agent-efficiency evidence
 
+- `9effdea8` perf: constrain routed discovery and verification
+- `3dfccbc1` test: require routed execution budget
+- `13d38ce8` fix: unwrap workflow routes for fitness evidence
+- `00d4eaf0` test: accept workflow route receipts for fitness
 - `ec554c62` feat: record paired skill fitness evidence
 - `aa65cc7a` test: define paired skill fitness workflow
 - `3314fd44` feat: hash routed repository fingerprints
@@ -67,6 +71,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Bind every fitness event to the exact baseline run, Memi run, skill content
   hashes, repository fingerprint, router version, model, and reasoning setting.
   Refuse mismatched pairs at the CLI boundary.
+- Treat routed skills as bounded information advantages, not permission to
+  broaden the task. Prefer task-named files and exact manifest verification;
+  expand discovery only when a concrete failure identifies the next boundary.
 - Fingerprint the checked-out repository before routing and require bounded,
   safe-regex eligibility evidence for niche skills. Include the exact matched
   dependency, file, import, script, framework, or language in the immutable
