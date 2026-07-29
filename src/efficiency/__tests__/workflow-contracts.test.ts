@@ -157,4 +157,33 @@ describe("multi-minute workflow benchmark contracts", () => {
     expect(memi).toContain(common.routedContext);
     expect(memi.replace(common.routedContext, "")).toContain(common.task.intent);
   });
+
+  it("names immutable acceptance fixtures in every provider prompt", () => {
+    const common = {
+      task: {
+        schemaVersion: 1 as const,
+        id: "protected-contract",
+        intent: "Implement and verify a rendered product behavior without changing its acceptance contract",
+        maximumDurationMs: 20 * 60_000,
+        steps: ["inspect", "implement", "build", "launch", "verify"],
+        fixtures: [{
+          path: "e2e/memi-acceptance.spec.ts",
+          content: "test('immutable acceptance', async () => {});\n",
+        }],
+        verification: [
+          { kind: "build" as const, command: "npm", args: ["run", "build"], timeoutMs: 300_000 },
+          { kind: "rendered-flow" as const, command: "npm", args: ["run", "test:e2e"], timeoutMs: 600_000 },
+        ],
+        requiredArtifacts: ["git.patch", "verification.json", "events.jsonl"],
+      },
+      routedContext: "Use the bounded routed skill.",
+    };
+
+    for (const condition of ["baseline", "memi"] as const) {
+      const prompt = buildWorkflowPrompt({ ...common, condition });
+      expect(prompt).toContain("Harness acceptance fixtures are immutable");
+      expect(prompt).toContain("Do not modify, delete, rename, move, replace, or weaken them");
+      expect(prompt).toContain("- e2e/memi-acceptance.spec.ts");
+    }
+  });
 });

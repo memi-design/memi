@@ -144,6 +144,14 @@ export function buildWorkflowPrompt(input: {
   readonly routedContext: string;
 }): string {
   const task = workflowTaskSchema.parse(input.task);
+  const fixtureContract = task.fixtures.length === 0
+    ? []
+    : [
+      "Harness acceptance fixtures are immutable.",
+      "Do not modify, delete, rename, move, replace, or weaken them:",
+      ...task.fixtures.map((fixture) => `- ${fixture.path}`),
+      "Any fixture change invalidates the benchmark even when verification passes.",
+    ];
   const shared = [
     "Work in the disposable benchmark checkout only.",
     "Do not delegate or load personal skills, plugins, memory, or unrelated instructions.",
@@ -153,6 +161,7 @@ export function buildWorkflowPrompt(input: {
     ...task.steps.map((step, index) => `${index + 1}. ${step}`),
     "Run every verification command from the task manifest.",
     "Preserve failures and unresolved gaps in the final report.",
+    ...fixtureContract,
   ].join("\n");
   const condition = benchmarkConditionSchema.parse(input.condition);
   const conditionBlock = condition === "baseline"
