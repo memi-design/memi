@@ -16,6 +16,11 @@ export const SkillFitnessRouteSchema = z.object({
   }).passthrough()).min(1).max(4),
 }).passthrough();
 export type SkillFitnessRoute = z.infer<typeof SkillFitnessRouteSchema>;
+export const SkillFitnessRouteReceiptSchema = z.union([
+  SkillFitnessRouteSchema,
+  z.object({ route: SkillFitnessRouteSchema }).passthrough()
+    .transform((receipt) => receipt.route),
+]);
 
 export const SkillFitnessEventSchema = z.object({
   schemaVersion: z.literal(1),

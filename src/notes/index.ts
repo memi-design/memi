@@ -44,6 +44,7 @@ export { buildRepositoryFingerprint } from "./repository-fingerprint.js";
 export {
   SkillFitnessEventSchema,
   SkillFitnessRouteSchema,
+  SkillFitnessRouteReceiptSchema,
   appendSkillFitnessEvent,
   buildSkillFitnessEvent,
   loadSkillFitnessEvents,

@@ -38,7 +38,7 @@ import {
   NoteLoader,
   resolveRoutedSkills,
   buildRepositoryFingerprint,
-  SkillFitnessRouteSchema,
+  SkillFitnessRouteReceiptSchema,
   appendSkillFitnessEvent,
   buildSkillFitnessEvent,
   loadSkillFitnessEvents,
@@ -345,7 +345,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       const runs = await store.list();
       const baseline = uniqueRun(runs, opts.baseline, "baseline");
       const memi = uniqueRun(runs, opts.memi, "memi");
-      const route = SkillFitnessRouteSchema.parse(
+      const route = SkillFitnessRouteReceiptSchema.parse(
         JSON.parse(await readFile(resolve(opts.route), "utf8")),
       );
       const event = buildSkillFitnessEvent({
