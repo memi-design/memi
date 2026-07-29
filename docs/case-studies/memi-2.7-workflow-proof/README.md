@@ -7,7 +7,8 @@ The 2.7 efficiency release gate remains closed.
 Three canonical, writable, multi-minute Codex workflow pairs completed against
 clean pinned revisions. Every included baseline and Memi run passed its real
 build and rendered-product contract at quality 100 with zero defects. The
-aggregate efficiency claim is still `not_verified`:
+aggregate release status is `insufficient_evidence`, and the observed metrics
+do not support the efficiency claim:
 
 - Mean total-token savings: -23.04%; 95% bootstrap interval -98.33% to 21.90%.
 - Mean latency savings: -8.20%; 95% bootstrap interval -49.06% to 23.47%.
@@ -94,7 +95,7 @@ Generate the canonical report from the immutable external run store:
 node dist/index.js benchmark report \
   --suite memi-2.7-workflow-pilot \
   --experiments 'dori-atlas-shortcuts-v5,buzzr-tab-unread-badge-v2,nate-options-reduce-motion-v1' \
-  --minimum-pairs 3 \
+  --minimum-pairs 5 \
   --bootstrap-samples 10000 \
   --seed 270729 \
   --target 0.25 \
@@ -104,7 +105,7 @@ node dist/index.js benchmark report \
 ```
 
 The report SHA-256 is
-`6ffc0eb14501d7c3cbb99c45037938f398a71493e7a8603e29f782967ca02b66`.
+`a3fdcd2393c4b8c28b65be3560aef655eb4cc7d21c614d58dc528ae24fe8f413`.
 Raw prompts, provider streams, patches, preparation receipts, verification
 logs, events, routes, and run records remain in the external evidence root.
 
