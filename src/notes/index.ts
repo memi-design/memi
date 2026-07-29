@@ -41,6 +41,14 @@ export {
   type SkillSearchResult,
 } from "./skill-router.js";
 export { buildRepositoryFingerprint } from "./repository-fingerprint.js";
+export {
+  SkillFitnessEventSchema,
+  appendSkillFitnessEvent,
+  loadSkillFitnessEvents,
+  projectSkillFitness,
+  type SkillFitnessEvent,
+  type SkillFitnessProjection,
+} from "./skill-fitness.js";
 
 export {
   installNote,
