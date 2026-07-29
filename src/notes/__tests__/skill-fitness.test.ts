@@ -4,10 +4,13 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   appendSkillFitnessEvent,
+  buildSkillFitnessEvent,
   loadSkillFitnessEvents,
   projectSkillFitness,
   type SkillFitnessEvent,
 } from "../skill-fitness.js";
+import type { BenchmarkRunRecord } from "../../efficiency/contracts.js";
+import type { SkillRouteResult } from "../skill-router.js";
 
 const tempDirs: string[] = [];
 
@@ -64,6 +67,41 @@ describe("append-only skill fitness evidence", () => {
     expect(mature.skills[0].recommendation).toBe("quarantine");
     expect(mature.skills[0].samples).toBe(6);
   });
+
+  it("derives a fitness event only from an environment-matched immutable pair", () => {
+    const baseline = run("baseline", 2_000, 120_000, 20);
+    const memi = run("memi", 1_000, 90_000, 15);
+
+    const result = buildSkillFitnessEvent({
+      baseline,
+      memi,
+      route: skillRoute(),
+      taskClass: "expo-bottom-tab-badge",
+    });
+
+    expect(result).toMatchObject({
+      repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+      qualityParity: true,
+      tokenSavingsRatio: 0.5,
+      latencySavingsRatio: 0.25,
+      toolCallSavingsRatio: 0.25,
+      skills: [{
+        skillId: "expo-router-navigation",
+        contentHash: `sha256:${"a".repeat(64)}`,
+      }],
+    });
+    expect(result.eventId).toMatch(/^fitness:[a-f0-9]{64}$/);
+
+    expect(() => buildSkillFitnessEvent({
+      baseline,
+      memi: {
+        ...memi,
+        repository: { ...memi.repository, revision: "different" },
+      },
+      route: skillRoute(),
+      taskClass: "expo-bottom-tab-badge",
+    })).toThrow(/repository revision mismatch/);
+  });
 });
 
 function event(
@@ -95,5 +133,85 @@ function event(
     tokenSavingsRatio,
     latencySavingsRatio,
     toolCallSavingsRatio: 0.1,
+  };
+}
+
+function run(
+  condition: "baseline" | "memi",
+  totalTokens: number,
+  wallTimeMs: number,
+  calls: number,
+): BenchmarkRunRecord {
+  return {
+    schemaVersion: 1,
+    runId: `run-${condition}`,
+    experimentId: "buzzr-router-v2",
+    suiteId: "product-flow-v1",
+    taskId: "buzzr-tab-unread-badge",
+    repeat: 1,
+    condition,
+    repository: {
+      pathHash: `sha256:${"c".repeat(64)}`,
+      revision: "7583ab4",
+      dirty: false,
+    },
+    harness: {
+      id: "codex",
+      modelId: "gpt-5.6-sol",
+      reasoningEffort: "medium",
+    },
+    timing: {
+      startedAt: "2026-07-29T00:00:00.000Z",
+      completedAt: "2026-07-29T00:05:00.000Z",
+      wallTimeMs,
+      toolTimeMs: 10_000,
+    },
+    usage: {
+      inputTokens: totalTokens - 200,
+      cachedInputTokens: 0,
+      outputTokens: 150,
+      reasoningTokens: 50,
+      estimatedCostUsd: null,
+    },
+    tools: { calls, errors: 0, retries: 0 },
+    outcome: {
+      accepted: true,
+      testsPassed: true,
+      qualityScore: 100,
+      defects: 0,
+      humanInterventions: 0,
+    },
+    evidenceRefs: [],
+  };
+}
+
+function skillRoute(): SkillRouteResult {
+  return {
+    schemaVersion: 2,
+    routerVersion: "skill-router-v2",
+    decision: "single",
+    intentHash: `sha256:${"d".repeat(64)}`,
+    repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+    selected: [{
+      id: "expo-router-navigation",
+      skillName: "expo-router-navigation",
+      file: "/skills/expo-router-navigation/SKILL.md",
+      score: 120,
+      matchedTerms: ["bottom-tab-badge"],
+      contentHash: `sha256:${"a".repeat(64)}`,
+      contextBytes: 1_920,
+      explanation: {
+        intentEvidence: ["bottom-tab-badge"],
+        repositoryEvidence: ["dependency:expo-router"],
+      },
+    }],
+    excluded: [],
+    candidates: [{
+      id: "expo-router-navigation",
+      score: 120,
+      matchedTerms: ["bottom-tab-badge"],
+    }],
+    contextBytes: 1_920,
+    maximumContextBytes: 8_000,
   };
 }

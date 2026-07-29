@@ -86,6 +86,86 @@ describe("benchmark command", () => {
     });
   });
 
+  it("records and projects routed skill fitness from an exact paired run", async () => {
+    const program = new Command();
+    registerBenchmarkCommand(program, engine() as never);
+    const baseline = run("baseline", 1, 1_000, 100_000);
+    const memi = run("memi", 1, 500, 50_000);
+    for (const record of [baseline, memi]) {
+      const path = join(projectRoot, `${record.runId}.json`);
+      await writeFile(path, JSON.stringify(record));
+      await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
+    }
+    const routePath = join(projectRoot, "skill-route.json");
+    await writeFile(routePath, JSON.stringify({
+      schemaVersion: 2,
+      routerVersion: "skill-router-v2",
+      decision: "single",
+      intentHash: `sha256:${"d".repeat(64)}`,
+      repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+      selected: [{
+        id: "expo-router-navigation",
+        skillName: "expo-router-navigation",
+        file: "/skills/expo-router-navigation/SKILL.md",
+        score: 120,
+        matchedTerms: ["bottom-tab-badge"],
+        contentHash: `sha256:${"a".repeat(64)}`,
+        contextBytes: 1_920,
+        explanation: {
+          intentEvidence: ["bottom-tab-badge"],
+          repositoryEvidence: ["dependency:expo-router"],
+        },
+      }],
+      excluded: [],
+      candidates: [],
+      contextBytes: 1_920,
+      maximumContextBytes: 8_000,
+    }));
+
+    const logs = captureLogs();
+    await program.parseAsync([
+      "benchmark",
+      "fitness-record",
+      "--baseline",
+      baseline.runId,
+      "--memi",
+      memi.runId,
+      "--route",
+      routePath,
+      "--task-class",
+      "expo-bottom-tab-badge",
+      "--store-root",
+      projectRoot,
+      "--json",
+    ], { from: "user" });
+    expect(JSON.parse(lastLog(logs))).toMatchObject({
+      status: "recorded",
+      event: {
+        pair: {
+          baselineRunId: baseline.runId,
+          memiRunId: memi.runId,
+        },
+        tokenSavingsRatio: 0.5,
+      },
+      projection: {
+        events: 1,
+        skills: [{
+          skillId: "expo-router-navigation",
+          recommendation: "observe",
+        }],
+      },
+    });
+
+    await program.parseAsync([
+      "benchmark",
+      "fitness",
+      "--store-root",
+      projectRoot,
+      "--json",
+    ], { from: "user" });
+    expect(JSON.parse(lastLog(logs)).projection.events).toBe(1);
+  });
+
   it("creates a deterministic multi-provider workflow plan", async () => {
     const taskPath = join(projectRoot, "workflow-task.json");
     const outPath = join(projectRoot, "workflow-plan.json");
