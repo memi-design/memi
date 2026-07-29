@@ -106,4 +106,58 @@ Workspace skill body.
     expect(note?.manifest.skills[0].file).toBe("SKILL.md");
     expect(note?.path).toBe(join(testDir, "skills", "clawhub-mobile-craft"));
   });
+
+  it("applies canonical registry routing and disables deprecated aliases", async () => {
+    await mkdir(join(testDir, "skills", "current-skill"), { recursive: true });
+    await mkdir(join(testDir, "skills", "old-alias"), { recursive: true });
+    await mkdir(join(testDir, "registry"), { recursive: true });
+    await writeFile(
+      join(testDir, "skills", "current-skill", "SKILL.md"),
+      "---\nname: current-skill\ndescription: Current skill.\n---\n# Current\n",
+    );
+    await writeFile(
+      join(testDir, "skills", "old-alias", "SKILL.md"),
+      "---\nname: old-alias\ndescription: Deprecated alias.\n---\n# Old\n",
+    );
+    await writeFile(join(testDir, "registry", "skills.json"), JSON.stringify({
+      version: "2.0.0",
+      skills: [
+        {
+          name: "current-skill",
+          displayName: "Current Skill",
+          status: "canonical",
+          legacyCategory: "craft",
+          tags: ["web", "accessibility"],
+          routing: {
+            intents: ["accessible-web-interface"],
+            excludes: ["native-only"],
+            role: "primary",
+          },
+          runtime: { requires: [] },
+        },
+        {
+          name: "old-alias",
+          displayName: "Old Alias",
+          status: "deprecated",
+          legacyCategory: "craft",
+          tags: ["web"],
+          routing: { intents: ["old-alias"], excludes: [], role: "reference" },
+          runtime: { requires: [] },
+        },
+      ],
+    }));
+
+    const loader = new NoteLoader(testDir);
+    await loader.loadAll();
+
+    const current = loader.getNote("current-skill");
+    expect(current?.enabled).toBe(true);
+    expect(current?.manifest.memoire?.routing).toMatchObject({
+      intents: ["accessible-web-interface"],
+      excludes: ["native-only"],
+      platforms: ["web"],
+      priority: 3,
+    });
+    expect(loader.getNote("old-alias")?.enabled).toBe(false);
+  });
 });

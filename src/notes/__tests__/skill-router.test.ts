@@ -146,6 +146,19 @@ describe("deterministic skill router", () => {
     expect(context).toContain("# accessibility-audit");
     expect(context).toContain(routed.route.selected[0].contentHash);
   });
+
+  it("does not route a compound intent from one generic matching word", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Build and test a trustworthy clinical dashboard navigation",
+      notes: [await note("dashboard-from-research", {
+        description: "Transform research data into interactive dashboards.",
+        intents: ["dashboard-from-research"],
+      })],
+      capabilities: [],
+    });
+
+    expect(result.decision).toBe("abstain");
+  });
 });
 
 async function note(
