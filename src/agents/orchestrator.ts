@@ -25,6 +25,7 @@ import { AGENT_PROMPTS } from "./prompts.js";
 import { getAI } from "../ai/index.js";
 import {
   resolveRoutedSkills,
+  buildRepositoryFingerprint,
   wrapWithNotes,
   type ResolvedSkill,
   type SkillRouteResult,
@@ -83,12 +84,16 @@ export class AgentOrchestrator {
     log.info({ intent, category }, "Classified design intent");
 
     const context = options?.context ?? await this.buildContext();
+    const repositoryFingerprint = this.engine.notes.loaded
+      ? await buildRepositoryFingerprint(this.engine.config.projectRoot)
+      : undefined;
     const routed = this.engine.notes.loaded
       ? await resolveRoutedSkills({
         intent,
         notes: this.engine.notes.notes,
         capabilities: context.figmaConnected ? ["figma"] : [],
         platforms: context.projectFramework ? [context.projectFramework] : [],
+        repositoryFingerprint,
         maximumSkills: 2,
         maximumContextBytes: 8_000,
       })

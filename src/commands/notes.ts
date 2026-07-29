@@ -22,6 +22,7 @@ import {
   removeNote,
   scaffoldNote,
   getNoteInfo,
+  buildRepositoryFingerprint,
   type NoteCategory,
 } from "../notes/index.js";
 import { validateCommunityNoteDir } from "../notes/community.js";
@@ -263,11 +264,15 @@ export function registerNotesCommand(program: Command, engine: MemoireEngine) {
       json?: boolean;
     }) => {
       if (!engine.notes.loaded) await engine.notes.loadAll();
+      const repositoryFingerprint = await buildRepositoryFingerprint(
+        engine.config.projectRoot,
+      );
       const route = await routeInstalledSkills({
         intent: intentParts.join(" "),
         notes: engine.notes.notes,
         capabilities: csv(opts.capabilities),
         platforms: csv(opts.platforms),
+        repositoryFingerprint,
         maximumSkills: positiveInteger(opts.maxSkills, "max-skills"),
         maximumContextBytes: positiveInteger(
           opts.maxContextBytes,

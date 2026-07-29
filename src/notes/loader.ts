@@ -83,6 +83,15 @@ interface WorkspaceRegistrySkill {
     readonly intents?: string[];
     readonly excludes?: string[];
     readonly role?: string;
+    readonly repository?: {
+      readonly dependenciesAny?: string[];
+      readonly filesAny?: string[];
+      readonly importsAny?: string[];
+      readonly scriptsAny?: string[];
+      readonly frameworksAny?: string[];
+      readonly languagesAny?: string[];
+      readonly excludeFilesAny?: string[];
+    };
   };
   readonly runtime?: {
     readonly requires?: string[];
@@ -424,6 +433,7 @@ function applyWorkspaceRegistryMetadata(
         priority: rolePriority[metadata.routing?.role ?? ""] ?? 0,
         actions: stringArray(metadata.actions),
         lifecycle: stringArray(metadata.lifecycle),
+        repository: metadata.routing?.repository,
       },
     },
   });

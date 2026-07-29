@@ -1,14 +1,17 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { z } from "zod";
 import type {
   InstalledNote,
   NoteManifest,
   ResolvedSkill,
 } from "./types.js";
 
-export const SKILL_ROUTER_VERSION = "skill-router-v1";
+export const SKILL_ROUTER_VERSION = "skill-router-v2";
 const MINIMUM_STACK_SCORE_RATIO = 0.65;
+const ROUTING_PATTERN_MAX_LENGTH = 160;
+const ROUTING_PATTERN_MAX_ALTERNATIONS = 12;
 
 const TOKEN_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   a11y: "accessibility",
@@ -22,11 +25,22 @@ const TOKEN_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   wcag: "accessibility",
 });
 const STOP_WORDS = new Set([
-  "a", "add", "adding", "an", "and", "app", "as", "at", "be", "by", "existing",
+  "a", "add", "adding", "after", "an", "and", "app", "apply", "as", "at", "be", "by", "current", "existing",
   "for", "from", "implement", "implementing", "in", "into", "is", "it", "of",
-  "on", "only", "or", "stable", "the", "this", "to", "use", "verify", "when",
+  "on", "only", "or", "production", "stable", "test", "tests", "the", "this", "to", "use", "verify", "when",
   "with",
 ]);
+
+export const RepositoryFingerprintSchema = z.object({
+  schemaVersion: z.literal(1),
+  languages: z.array(z.string().min(1)).max(100),
+  frameworks: z.array(z.string().min(1)).max(100),
+  dependencies: z.array(z.string().min(1)).max(10_000),
+  files: z.array(z.string().min(1)).max(100_000),
+  imports: z.array(z.string().min(1)).max(100_000),
+  scripts: z.array(z.string().min(1)).max(1_000),
+}).strict();
+export type RepositoryFingerprint = z.infer<typeof RepositoryFingerprintSchema>;
 
 export interface RouteInstalledSkillsInput {
   readonly intent: string;
@@ -35,6 +49,7 @@ export interface RouteInstalledSkillsInput {
   readonly platforms?: readonly string[];
   readonly maximumSkills?: number;
   readonly maximumContextBytes?: number;
+  readonly repositoryFingerprint?: RepositoryFingerprint;
 }
 
 export interface SkillSearchEntry {
@@ -56,7 +71,7 @@ export interface SkillSearchResult {
 }
 
 export interface SkillRouteResult {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
   readonly routerVersion: typeof SKILL_ROUTER_VERSION;
   readonly decision: "single" | "stack" | "abstain";
   readonly intentHash: string;
@@ -68,6 +83,10 @@ export interface SkillRouteResult {
     readonly matchedTerms: readonly string[];
     readonly contentHash: string;
     readonly contextBytes: number;
+    readonly explanation: {
+      readonly intentEvidence: readonly string[];
+      readonly repositoryEvidence: readonly string[];
+    };
   }[];
   readonly excluded: readonly {
     readonly id: string;
@@ -116,6 +135,9 @@ export async function routeInstalledSkills(
   const requestedAction = inferRequestedAction(input.intent);
   const capabilities = new Set(input.capabilities.map(normalizeToken));
   const platforms = new Set((input.platforms ?? []).map(normalizeToken));
+  const repositoryFingerprint = input.repositoryFingerprint
+    ? RepositoryFingerprintSchema.parse(input.repositoryFingerprint)
+    : undefined;
   const excluded: Array<{ id: string; reason: string }> = [];
   const ranked = input.notes
     .filter((note) => note.enabled)
@@ -125,6 +147,7 @@ export async function routeInstalledSkills(
       requestedAction,
       capabilities,
       platforms,
+      repositoryFingerprint,
       excluded,
     ))
     .filter((candidate) => candidate.score >= 8)
@@ -186,6 +209,10 @@ export async function routeInstalledSkills(
       matchedTerms: candidate.matchedTerms,
       contentHash: `sha256:${createHash("sha256").update(content).digest("hex")}`,
       contextBytes: bytes,
+      explanation: {
+        intentEvidence: candidate.matchedTerms,
+        repositoryEvidence: candidate.repositoryEvidence,
+      },
     });
     selectedCandidates.push(candidate);
     for (const term of candidateEvidence) coveredEvidence.add(term);
@@ -196,7 +223,7 @@ export async function routeInstalledSkills(
     ? "abstain"
     : selected.length === 1 ? "single" : "stack";
   return deepFreeze({
-    schemaVersion: 1,
+    schemaVersion: 2,
     routerVersion: SKILL_ROUTER_VERSION,
     decision,
     intentHash: `sha256:${createHash("sha256").update(input.intent).digest("hex")}`,
@@ -379,6 +406,7 @@ interface RankedRouteCandidate {
   readonly priority: number;
   readonly matchedTerms: readonly string[];
   readonly excludes: readonly string[];
+  readonly repositoryEvidence: readonly string[];
 }
 
 function routeCandidates(
@@ -387,6 +415,7 @@ function routeCandidates(
   requestedAction: "create" | "validate" | null,
   capabilities: ReadonlySet<string>,
   platforms: ReadonlySet<string>,
+  repositoryFingerprint: RepositoryFingerprint | undefined,
   excluded: Array<{ id: string; reason: string }>,
 ): RankedRouteCandidate[] {
   const routing = note.manifest.memoire?.routing;
@@ -420,6 +449,18 @@ function routeCandidates(
     });
     return [];
   }
+  const repositoryMatch = matchRepositoryEligibility(
+    note.manifest.name,
+    routing?.repository,
+    repositoryFingerprint,
+  );
+  if (!repositoryMatch.eligible) {
+    excluded.push({
+      id: note.manifest.name,
+      reason: repositoryMatch.reason,
+    });
+    return [];
+  }
   return note.manifest.skills.map((skill) => {
     const intents = routing?.intents.length
       ? routing.intents
@@ -436,12 +477,121 @@ function routeCandidates(
       id: note.manifest.name,
       skillName: skill.name,
       file: path.resolve(note.path, skill.file),
-      score: evidence.score + (routing?.priority ?? 0),
+      score: evidence.score + repositoryMatch.evidence.length * 6 + (routing?.priority ?? 0),
       priority: routing?.priority ?? 0,
       matchedTerms: evidence.matchedTerms,
       excludes: routing?.excludes ?? [],
+      repositoryEvidence: repositoryMatch.evidence,
     };
   });
+}
+
+type RepositoryRules = NonNullable<
+  NonNullable<NoteManifest["memoire"]>["routing"]
+>["repository"];
+
+function matchRepositoryEligibility(
+  noteId: string,
+  rules: RepositoryRules,
+  fingerprint: RepositoryFingerprint | undefined,
+): { eligible: true; evidence: readonly string[] } | {
+  eligible: false;
+  reason: string;
+  evidence: readonly string[];
+} {
+  if (!rules || Object.keys(rules).length === 0) {
+    return { eligible: true, evidence: [] };
+  }
+  if (!fingerprint) {
+    return {
+      eligible: false,
+      reason: "repository-fingerprint-missing",
+      evidence: [],
+    };
+  }
+  const fields = [
+    ["dependenciesAny", "dependency", fingerprint.dependencies],
+    ["filesAny", "file", fingerprint.files],
+    ["importsAny", "import", fingerprint.imports],
+    ["scriptsAny", "script", fingerprint.scripts],
+    ["frameworksAny", "framework", fingerprint.frameworks],
+    ["languagesAny", "language", fingerprint.languages],
+  ] as const;
+  const evidence: string[] = [];
+  try {
+    for (const [ruleName, evidenceName, values] of fields) {
+      const patterns = rules[ruleName] ?? [];
+      if (patterns.length === 0) continue;
+      const match = firstPatternMatch(patterns, values);
+      if (!match) {
+        return {
+          eligible: false,
+          reason: `repository-mismatch:${ruleName}`,
+          evidence: [],
+        };
+      }
+      evidence.push(`${evidenceName}:${match}`);
+    }
+    const excludedFile = firstPatternMatch(rules.excludeFilesAny ?? [], fingerprint.files);
+    if (excludedFile) {
+      return {
+        eligible: false,
+        reason: `repository-excluded:file:${excludedFile}`,
+        evidence: [],
+      };
+    }
+  } catch (error) {
+    return {
+      eligible: false,
+      reason: `invalid-routing-pattern:${noteId}:${error instanceof Error ? error.message : "unknown"}`,
+      evidence: [],
+    };
+  }
+  return { eligible: true, evidence };
+}
+
+function firstPatternMatch(
+  patterns: readonly string[],
+  values: readonly string[],
+): string | null {
+  for (const pattern of patterns) {
+    const matcher = compileSafeRoutingPattern(pattern);
+    const value = values.find((candidate) => matcher.test(candidate));
+    if (value) return value;
+  }
+  return null;
+}
+
+export function compileSafeRoutingPattern(
+  pattern: string,
+  flags = "i",
+): RegExp {
+  if (!/^(?:i|u|iu|ui)?$/.test(flags)) {
+    throw new Error(`unsupported routing flags: ${flags}`);
+  }
+  if (pattern.length === 0 || pattern.length > ROUTING_PATTERN_MAX_LENGTH) {
+    throw new Error("unsafe routing pattern: invalid length");
+  }
+  if ((pattern.match(/\|/g) ?? []).length > ROUTING_PATTERN_MAX_ALTERNATIONS) {
+    throw new Error("unsafe routing pattern: too many alternatives");
+  }
+  const unsafe = [
+    /\\[1-9]/,
+    /\\k</,
+    /\(\?<[=!]/,
+    /\([^)]*[+*][^)]*\)[+*{]/,
+    /(?:\+|\*|\?|\{\d+(?:,\d*)?\})(?:\+|\*|\?|\{)/,
+  ];
+  if (unsafe.some((guard) => guard.test(pattern))) {
+    throw new Error("unsafe routing pattern: unsupported backtracking construct");
+  }
+  try {
+    return new RegExp(pattern, flags);
+  } catch (error) {
+    throw new Error(
+      `unsafe routing pattern: ${error instanceof Error ? error.message : "invalid regex"}`,
+    );
+  }
 }
 
 function scoreMetadata(
@@ -498,8 +648,9 @@ function rawTokens(value: string): string[] {
 
 function tokenize(value: string): ReadonlySet<string> {
   return new Set(rawTokens(value)
-    .filter((token) => !STOP_WORDS.has(token))
-    .map(normalizeToken));
+    .filter((token) => token.length >= 2 && !STOP_WORDS.has(token))
+    .map(normalizeToken)
+    .filter((token) => token.length >= 2 && !STOP_WORDS.has(token)));
 }
 
 function routableIntent(value: string): string {

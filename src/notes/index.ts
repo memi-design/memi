@@ -40,6 +40,7 @@ export {
   type SkillSearchEntry,
   type SkillSearchResult,
 } from "./skill-router.js";
+export { buildRepositoryFingerprint } from "./repository-fingerprint.js";
 
 export {
   installNote,

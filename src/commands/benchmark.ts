@@ -36,6 +36,7 @@ import {
   formatRoutedSkillContext,
   NoteLoader,
   resolveRoutedSkills,
+  buildRepositoryFingerprint,
 } from "../notes/index.js";
 import { ui } from "../tui/format.js";
 
@@ -193,11 +194,15 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           ? new NoteLoader(resolve(opts.skillsRoot))
           : engine.notes;
         if (!loader.loaded) await loader.loadAll();
+        const repositoryFingerprint = await buildRepositoryFingerprint(
+          resolve(opts.repository),
+        );
         route = await resolveRoutedSkills({
           intent: task.intent,
           notes: loader.notes,
           capabilities: csv(opts.capabilities),
           platforms: csv(opts.platforms),
+          repositoryFingerprint,
           maximumSkills: 2,
           maximumContextBytes: 8_000,
         });
