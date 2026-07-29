@@ -62,6 +62,9 @@ function makeEngine(initialSpecs: AnySpec[], notes: InstalledNote[] = []) {
 
   return {
     engine: {
+      config: {
+        projectRoot: notes[0] ? path.dirname(notes[0].path) : process.cwd(),
+      },
       registry,
       notes: { loaded: notes.length > 0, notes },
       figma: { isConnected: false, publishAgentStatus() {} },
