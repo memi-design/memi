@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "buzzr-tab-unread-badge",
+  "intent": "Implement a compact React Native and Expo unread-count badge for Buzzr's existing icon-only chat bottom tab. Preserve the current Buzzr design system and selected indicator, show exact counts from 1 through 99 and 99+ above that, keep the visual badge hidden from screen readers because the tab's accessibility label already announces the full count, preserve the pulse activity dot, and add focused component coverage without adding a dependency.",
+  "maximumDurationMs": 1200000,
+  "steps": [
+    "Inspect CustomTabBar, its component tests, theme tokens, and existing unread semantics before editing.",
+    "Implement the smallest reusable unread-count presentation inside the existing tab item.",
+    "Render no numeric badge for zero or undefined counts and preserve the pulse activity-dot behavior.",
+    "Expose stable test identifiers while keeping decorative badge content out of the accessibility tree.",
+    "Use existing spacing, color, radius, and typography tokens without adding dependencies or visible text labels.",
+    "Add or update focused unit coverage for exact counts, the 99+ cap, selected state, and accessible full-count labels.",
+    "Run the complete Expo web export and rendered React Native component contract and repair every failure."
+  ],
+  "preparation": [
+    {
+      "command": "npm",
+      "args": [
+        "ci"
+      ],
+      "timeoutMs": 900000
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "tests/components/ui/memi-custom-tab-bar-unread.test.tsx",
+      "content": "import React from 'react';\nimport { render } from '@testing-library/react-native';\n\njest.mock('@/src/lib/haptics', () => ({ haptic: { selection: jest.fn() } }));\njest.mock('@expo/vector-icons/Feather', () => {\n  const React = require('react');\n  const { Text } = require('react-native');\n  return ({ name }: { name: string }) => React.createElement(Text, null, `feather:${name}`);\n});\njest.mock('@expo/vector-icons/MaterialCommunityIcons', () => {\n  const React = require('react');\n  const { Text } = require('react-native');\n  return ({ name }: { name: string }) => React.createElement(Text, null, `mci:${name}`);\n});\n\nimport { CustomTabBar, VISIBLE_TAB_NAMES } from '@/components/ui/CustomTabBar';\nimport { getAppPalette } from '@/src/theme/palette';\n\nconst routes = VISIBLE_TAB_NAMES.map((name) => ({ key: `${name}-key`, name, params: undefined, path: undefined }));\n\nfunction renderTabs(chatUnreadCount?: number, hasUnreadFeed = false) {\n  const descriptors = Object.fromEntries(routes.map((route) => [route.key, { options: { title: route.name } }]));\n  return render(\n    <CustomTabBar\n      chatUnreadCount={chatUnreadCount}\n      descriptors={descriptors as any}\n      dynamicDockGradient={['transparent', 'transparent', 'transparent']}\n      feedUnreadIndicatorEnabled\n      glossColor=\"transparent\"\n      hasUnreadFeed={hasUnreadFeed}\n      insets={{ bottom: 0, left: 0, right: 0, top: 0 }}\n      navigation={{ emit: jest.fn(() => ({ defaultPrevented: false })), navigate: jest.fn() } as any}\n      palette={getAppPalette()}\n      responsiveMaxContentWidth={480}\n      selectedVisibleRoute=\"chat\"\n      state={{ history: [], index: 4, key: 'tabs', routeNames: [...VISIBLE_TAB_NAMES], routes, stale: false, type: 'tab' } as any}\n      tabBarHeight={72}\n      bottomPadding={8}\n    />,\n  );\n}\n\ndescribe('Buzzr chat unread badge contract', () => {\n  it('shows exact unread counts and announces the full count on the tab', () => {\n    const screen = renderTabs(7);\n    expect(screen.getByTestId('tab-unread-count-chat')).toHaveTextContent('7');\n    expect(screen.getByLabelText('chat, 7 unread')).toBeTruthy();\n    expect(screen.getByTestId('tab-button-chat').props.accessibilityState).toEqual({ selected: true });\n  });\n\n  it('caps only the visual badge while preserving the full accessible count', () => {\n    const screen = renderTabs(120);\n    expect(screen.getByTestId('tab-unread-count-chat')).toHaveTextContent('99+');\n    expect(screen.getByLabelText('chat, 120 unread')).toBeTruthy();\n    expect(screen.getByTestId('tab-unread-count-chat').props.accessibilityElementsHidden).toBe(true);\n  });\n\n  it('renders no chat count for zero and preserves the pulse activity dot', () => {\n    const screen = renderTabs(0, true);\n    expect(screen.queryByTestId('tab-unread-count-chat')).toBeNull();\n    expect(screen.getByTestId('tab-unread-dot-pulse')).toBeTruthy();\n  });\n});\n"
+    }
+  ],
+  "verification": [
+    {
+      "kind": "build",
+      "command": "npm",
+      "args": [
+        "run",
+        "web:export"
+      ],
+      "timeoutMs": 900000
+    },
+    {
+      "kind": "rendered-flow",
+      "command": "npm",
+      "args": [
+        "test",
+        "--",
+        "--runInBand",
+        "tests/components/ui/memi-custom-tab-bar-unread.test.tsx"
+      ],
+      "timeoutMs": 300000
+    }
+  ],
+  "requiredArtifacts": [
+    "git.patch",
+    "verification.json",
+    "events.jsonl"
+  ]
+}
