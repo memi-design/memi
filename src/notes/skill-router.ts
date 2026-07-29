@@ -104,10 +104,21 @@ export async function routeInstalledSkills(
     .filter((candidate) => candidate.score >= 8)
     .sort(compareRouteCandidates);
   const selected: SkillRouteResult["selected"][number][] = [];
+  const selectedCandidates: RankedRouteCandidate[] = [];
   let contextBytes = 0;
 
   for (const candidate of ranked) {
     if (selected.length >= maximumSkills) break;
+    const conflict = selectedCandidates.find((existing) =>
+      existing.excludes.includes(candidate.id)
+      || candidate.excludes.includes(existing.id));
+    if (conflict) {
+      excluded.push({
+        id: candidate.id,
+        reason: `mutually-exclusive:${conflict.id}`,
+      });
+      continue;
+    }
     const content = await readFile(candidate.file, "utf8").catch(() => null);
     if (content === null) {
       excluded.push({ id: candidate.id, reason: "skill-file-unreadable" });
@@ -127,6 +138,7 @@ export async function routeInstalledSkills(
       contentHash: `sha256:${createHash("sha256").update(content).digest("hex")}`,
       contextBytes: bytes,
     });
+    selectedCandidates.push(candidate);
     contextBytes += bytes;
   }
 
@@ -234,6 +246,7 @@ interface RankedRouteCandidate {
   readonly score: number;
   readonly priority: number;
   readonly matchedTerms: readonly string[];
+  readonly excludes: readonly string[];
 }
 
 function routeCandidates(
@@ -262,11 +275,6 @@ function routeCandidates(
     });
     return [];
   }
-  const excludedTerms = new Set((routing?.excludes ?? []).flatMap((value) => [...tokenize(value)]));
-  if ([...queryTokens].some((token) => excludedTerms.has(token))) {
-    excluded.push({ id: note.manifest.name, reason: "routing-exclusion" });
-    return [];
-  }
   return note.manifest.skills.map((skill) => {
     const intents = routing?.intents.length
       ? routing.intents
@@ -286,6 +294,7 @@ function routeCandidates(
       score: evidence.score + (routing?.priority ?? 0),
       priority: routing?.priority ?? 0,
       matchedTerms: evidence.matchedTerms,
+      excludes: routing?.excludes ?? [],
     };
   });
 }
