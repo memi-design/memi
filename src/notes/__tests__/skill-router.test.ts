@@ -459,6 +459,46 @@ describe("deterministic skill router", () => {
     expect(result.decision).toBe("abstain");
     expect(result.candidates).toEqual([]);
   });
+
+  it("honors an eligible exclusive route instead of stacking broader platform guidance", async () => {
+    const expo = await note("expo-router-navigation", {
+      description: "Implement Expo Router bottom tabs, badges, and accessible tab state.",
+      intents: ["expo-bottom-tab-badge"],
+      priority: 20,
+      stackPolicy: "exclusive",
+      repository: { dependenciesAny: ["^expo-router$"] },
+    });
+    const accessibility = await note("react-native-accessibility", {
+      description: "Implement React Native screen-reader semantics and accessible state.",
+      intents: ["react-native-accessibility", "native-screen-reader-flow"],
+      repository: { dependenciesAny: ["^(?:react-native|expo)$"] },
+    });
+
+    const result = await routeInstalledSkills({
+      intent: "Implement an accessible Expo bottom-tab unread badge with a screen-reader label",
+      notes: [accessibility, expo],
+      capabilities: [],
+      repositoryFingerprint: {
+        schemaVersion: 1,
+        languages: ["typescript"],
+        frameworks: ["expo", "expo-router", "react-native"],
+        dependencies: ["expo", "expo-router", "react-native"],
+        files: ["app/(tabs)/_layout.tsx"],
+        imports: ["expo-router"],
+        scripts: ["test"],
+      },
+      maximumSkills: 2,
+    });
+
+    expect(result.decision).toBe("single");
+    expect(result.selected.map((skill) => skill.id)).toEqual([
+      "expo-router-navigation",
+    ]);
+    expect(result.excluded).toContainEqual({
+      id: "react-native-accessibility",
+      reason: "exclusive-selection:expo-router-navigation",
+    });
+  });
 });
 
 async function note(
@@ -479,6 +519,8 @@ async function note(
       languagesAny?: string[];
       excludeFilesAny?: string[];
     };
+    priority?: number;
+    stackPolicy?: "compatible" | "exclusive";
   },
 ): Promise<InstalledNote> {
   const root = await mkdtemp(path.join(tmpdir(), `memi-skill-router-${name}-`));
@@ -514,10 +556,11 @@ async function note(
           excludes: [],
           capabilities: options.capabilities ?? [],
           platforms: options.platforms ?? [],
-          priority: 0,
+          priority: options.priority ?? 0,
           actions: options.actions ?? [],
           lifecycle: [],
           repository: options.repository,
+          stackPolicy: options.stackPolicy,
         },
       },
       createdAt: "2026-07-29T00:00:00.000Z",
