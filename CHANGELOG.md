@@ -12,6 +12,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Reproducible agent-efficiency evidence
 
+- `af2c7b08` feat: support exclusive niche skill routes
+- `724f8074` test: define exclusive niche route policy
 - `36a58918` feat: route skills with repository fingerprints
 - `db6e72f7` test: define repository fingerprint contract
 - `b84524cd` test: define repository-aware routing contract
@@ -57,6 +59,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   safe-regex eligibility evidence for niche skills. Include the exact matched
   dependency, file, import, script, framework, or language in the immutable
   routing receipt.
+- Allow a repository-specific workflow to declare an exclusive route after it
+  clears eligibility and governed priority, preventing broader platform
+  guidance from spending context on a task the niche workflow fully covers.
 - Feed Studio usage from the canonical provider-runtime event bus and replace mutable rollups and prototype patching with frozen reducer snapshots.
 - Require revision, worktree, harness, model, and reasoning parity before baseline and Memi runs can form a statistical pair.
 - Keep trace receipts metadata-only and bind them to a SHA-256 digest instead of retaining prompts, source, hidden reasoning, or secrets.
