@@ -11,11 +11,23 @@ const verificationKindSchema = z.enum([
   "accessibility",
 ]);
 
-export const workflowVerificationSchema = z.object({
-  kind: verificationKindSchema,
+const workflowProcessSchema = z.object({
   command: z.string().min(1),
   args: z.array(z.string()),
   timeoutMs: z.number().int().min(30_000).max(30 * 60_000),
+}).strict();
+
+const workflowFixtureSchema = z.object({
+  path: z.string().min(1).refine(isSafeRelativePath, {
+    message: "fixture path must remain inside the disposable checkout",
+  }),
+  content: z.string().max(1_000_000),
+  executable: z.boolean().default(false),
+}).strict();
+
+export const workflowVerificationSchema = z.object({
+  kind: verificationKindSchema,
+  ...workflowProcessSchema.shape,
 }).strict();
 
 export const workflowTaskSchema = z.object({
@@ -24,6 +36,8 @@ export const workflowTaskSchema = z.object({
   intent: z.string().min(20),
   maximumDurationMs: z.number().int().min(2 * 60_000).max(60 * 60_000),
   steps: z.array(z.string().min(3)).min(5),
+  preparation: z.array(workflowProcessSchema).max(10).default([]),
+  fixtures: z.array(workflowFixtureSchema).max(50).default([]),
   verification: z.array(workflowVerificationSchema).min(2).superRefine((entries, context) => {
     if (!entries.some((entry) => entry.kind === "build")) {
       context.addIssue({
@@ -155,4 +169,11 @@ function deepFreeze<T>(value: T): Readonly<T> {
     Object.freeze(value);
   }
   return value;
+}
+
+function isSafeRelativePath(value: string): boolean {
+  const normalized = value.replaceAll("\\", "/");
+  if (normalized.startsWith("/") || /^[a-z]:\//i.test(normalized)) return false;
+  const segments = normalized.split("/");
+  return segments.every((segment) => segment !== "" && segment !== "." && segment !== "..");
 }

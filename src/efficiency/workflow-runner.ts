@@ -1,9 +1,10 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import {
   mkdir,
   mkdtemp,
   rm,
+  chmod,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -58,6 +59,19 @@ export interface WorkflowVerificationResult {
   readonly stderr: string;
 }
 
+export interface WorkflowPreparationResult {
+  readonly command: string;
+  readonly args: readonly string[];
+  readonly startedAt: string;
+  readonly completedAt: string;
+  readonly durationMs: number;
+  readonly exitCode: number;
+  readonly passed: boolean;
+  readonly timedOut: boolean;
+  readonly stdout: string;
+  readonly stderr: string;
+}
+
 export interface WorkflowTrialResult {
   readonly schemaVersion: 1;
   readonly runId: string;
@@ -65,9 +79,11 @@ export interface WorkflowTrialResult {
   readonly adapterId: string;
   readonly accepted: boolean;
   readonly sourceRevision: string;
+  readonly fixtureHash: string;
   readonly evidenceDirectory: string;
   readonly patch: string;
   readonly adapter: Readonly<WorkflowAdapterResult>;
+  readonly preparation: readonly WorkflowPreparationResult[];
   readonly verification: readonly WorkflowVerificationResult[];
   readonly durationMs: number;
 }
@@ -127,6 +143,54 @@ export async function runWorkflowTrial(input: {
       cwd: workspaceRoot,
       timeoutMs: 30_000,
     });
+    for (const fixture of task.fixtures) {
+      const target = path.resolve(workspaceRoot, fixture.path);
+      const relative = path.relative(workspaceRoot, target);
+      if (relative.startsWith("..") || path.isAbsolute(relative)) {
+        throw new Error(`fixture escapes disposable checkout: ${fixture.path}`);
+      }
+      await mkdir(path.dirname(target), { recursive: true });
+      await writeFile(target, fixture.content, { mode: fixture.executable ? 0o700 : 0o600 });
+      if (fixture.executable) await chmod(target, 0o700);
+    }
+    const fixtureHash = `sha256:${createHash("sha256")
+      .update(JSON.stringify(task.fixtures))
+      .digest("hex")}`;
+    events.push(event("workflow.fixtures.applied", {
+      fixtureHash,
+      fixtureCount: task.fixtures.length,
+    }));
+
+    const preparation: WorkflowPreparationResult[] = [];
+    for (const command of task.preparation) {
+      const commandStartedAt = new Date();
+      const commandStart = performance.now();
+      const processResult = await runProcess({
+        command: command.command,
+        args: command.args,
+        cwd: workspaceRoot,
+        timeoutMs: command.timeoutMs,
+      });
+      const result: WorkflowPreparationResult = {
+        command: command.command,
+        args: [...command.args],
+        startedAt: commandStartedAt.toISOString(),
+        completedAt: new Date().toISOString(),
+        durationMs: Math.round(performance.now() - commandStart),
+        exitCode: processResult.exitCode,
+        passed: processResult.exitCode === 0 && !processResult.timedOut,
+        timedOut: processResult.timedOut,
+        stdout: processResult.stdout,
+        stderr: processResult.stderr,
+      };
+      preparation.push(result);
+      events.push(event("workflow.preparation.completed", { ...result }));
+      if (!result.passed) {
+        throw new Error(
+          `workflow preparation failed: ${command.command} ${command.args.join(" ")}`,
+        );
+      }
+    }
 
     const prompt = buildWorkflowPrompt({
       task,
@@ -202,6 +266,11 @@ export async function runWorkflowTrial(input: {
     await Promise.all([
       writeFile(path.join(evidenceDirectory, "git.patch"), patch, { mode: 0o600 }),
       writeFile(
+        path.join(evidenceDirectory, "preparation.json"),
+        `${JSON.stringify(preparation, null, 2)}\n`,
+        { mode: 0o600 },
+      ),
+      writeFile(
         path.join(evidenceDirectory, "verification.json"),
         `${JSON.stringify(verification, null, 2)}\n`,
         { mode: 0o600 },
@@ -225,9 +294,11 @@ export async function runWorkflowTrial(input: {
       adapterId: input.adapter.id,
       accepted,
       sourceRevision,
+      fixtureHash,
       evidenceDirectory,
       patch,
       adapter: adapterResult,
+      preparation,
       verification,
       durationMs,
     });
