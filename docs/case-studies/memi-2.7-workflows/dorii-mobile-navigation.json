@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "dorii-mobile-navigation",
+  "intent": "Apply emil-design-eng and interaction-design craft to replace dorii's horizontally scrolling mobile publication links with a compact accessible navigation disclosure. Preserve the existing desktop navigation and dorii design tokens, expose Research, Docs, and Changelog on mobile, identify the active route, close with Escape or after navigation, restore focus to the trigger, prevent background interaction while open, and respect reduced-motion preferences without adding a dependency.",
+  "maximumDurationMs": 1200000,
+  "steps": [
+    "Inspect SiteNav, shared site chrome, theme behavior, motion tokens, route-active logic, and existing Playwright coverage before editing.",
+    "Implement the smallest reusable mobile navigation disclosure inside the existing SiteNav boundary.",
+    "Keep the desktop navigation and Open cockpit action unchanged.",
+    "Expose an Open navigation menu trigger only on mobile and a Site navigation dialog containing Research, Docs, and Changelog.",
+    "Identify the active route, close on Escape and after a destination is selected, restore focus to the opener, and prevent background interaction while the dialog is open.",
+    "Use the existing dorii tokens and remove decorative transition movement when reduced motion is requested.",
+    "Run the complete production build and the rendered mobile navigation journey and repair every failure."
+  ],
+  "preparation": [
+    {
+      "command": "npm",
+      "args": [
+        "ci"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "command": "npx",
+      "args": [
+        "playwright",
+        "install",
+        "chromium"
+      ],
+      "timeoutMs": 900000
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "tests/e2e/memi-mobile-navigation.spec.ts",
+      "content": "import { expect, test } from '@playwright/test';\n\ntest.use({ viewport: { width: 390, height: 844 } });\n\ntest('mobile navigation supports pointer, route, Escape, and focus flows', async ({ page }) => {\n  await page.goto('/');\n  const trigger = page.getByTestId('mobile-navigation-trigger');\n  await expect(trigger).toBeVisible();\n  await expect(trigger).toHaveAccessibleName('Open navigation menu');\n\n  await trigger.click();\n  const dialog = page.getByRole('dialog', { name: 'Site navigation' });\n  await expect(dialog).toBeVisible();\n  await expect(dialog.getByRole('link', { name: 'Research' })).toHaveAttribute('href', '/research');\n  await expect(dialog.getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '/docs');\n  await expect(dialog.getByRole('link', { name: 'Changelog' })).toHaveAttribute('href', '/changelog');\n\n  await page.keyboard.press('Escape');\n  await expect(dialog).toBeHidden();\n  await expect(trigger).toBeFocused();\n\n  await trigger.click();\n  await dialog.getByRole('link', { name: 'Docs' }).click();\n  await expect(page).toHaveURL(/\\/docs$/);\n  await expect(page.getByRole('heading', { name: 'Docs' })).toBeVisible();\n  await expect(page.getByRole('dialog', { name: 'Site navigation' })).toBeHidden();\n  await expect(page.getByTestId('mobile-navigation-trigger')).toBeVisible();\n\n  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);\n  expect(overflow).toBe(false);\n});\n\ntest('mobile navigation remains usable with reduced motion', async ({ page }) => {\n  await page.emulateMedia({ reducedMotion: 'reduce' });\n  await page.goto('/research');\n  await page.getByTestId('mobile-navigation-trigger').click();\n  const dialog = page.getByRole('dialog', { name: 'Site navigation' });\n  await expect(dialog).toBeVisible();\n  await expect(dialog.getByRole('link', { name: 'Research' })).toHaveAttribute('aria-current', 'page');\n});\n"
+    }
+  ],
+  "verification": [
+    {
+      "kind": "build",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "kind": "rendered-flow",
+      "command": "npx",
+      "args": [
+        "playwright",
+        "test",
+        "tests/e2e/memi-mobile-navigation.spec.ts",
+        "--project=mobile-chromium"
+      ],
+      "timeoutMs": 900000
+    }
+  ],
+  "requiredArtifacts": [
+    "git.patch",
+    "verification.json",
+    "events.jsonl"
+  ]
+}
