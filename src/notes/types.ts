@@ -66,6 +66,7 @@ export const NoteManifestSchema = z.object({
       priority: z.number().int().default(0),
       actions: z.array(z.string().min(1)).optional(),
       lifecycle: z.array(z.string().min(1)).optional(),
+      stackPolicy: z.enum(["compatible", "exclusive"]).optional(),
       repository: z.object({
         dependenciesAny: z.array(z.string().min(1).max(160)).max(24).optional(),
         filesAny: z.array(z.string().min(1).max(160)).max(24).optional(),

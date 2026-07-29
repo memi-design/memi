@@ -159,6 +159,23 @@ export async function routeInstalledSkills(
 
   for (const candidate of ranked) {
     if (selected.length >= maximumSkills) break;
+    const exclusiveSelection = selectedCandidates.find(
+      (existing) => existing.stackPolicy === "exclusive",
+    );
+    if (exclusiveSelection) {
+      excluded.push({
+        id: candidate.id,
+        reason: `exclusive-selection:${exclusiveSelection.id}`,
+      });
+      continue;
+    }
+    if (candidate.stackPolicy === "exclusive" && selected.length > 0) {
+      excluded.push({
+        id: candidate.id,
+        reason: "exclusive-route-ranked-below-selection",
+      });
+      continue;
+    }
     const conflict = selectedCandidates.find((existing) =>
       existing.excludes.includes(candidate.id)
       || candidate.excludes.includes(existing.id));
@@ -407,6 +424,7 @@ interface RankedRouteCandidate {
   readonly matchedTerms: readonly string[];
   readonly excludes: readonly string[];
   readonly repositoryEvidence: readonly string[];
+  readonly stackPolicy: "compatible" | "exclusive";
 }
 
 function routeCandidates(
@@ -482,6 +500,7 @@ function routeCandidates(
       matchedTerms: evidence.matchedTerms,
       excludes: routing?.excludes ?? [],
       repositoryEvidence: repositoryMatch.evidence,
+      stackPolicy: routing?.stackPolicy ?? "compatible",
     };
   });
 }

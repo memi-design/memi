@@ -83,6 +83,8 @@ interface WorkspaceRegistrySkill {
     readonly intents?: string[];
     readonly excludes?: string[];
     readonly role?: string;
+    readonly priority?: number;
+    readonly stackPolicy?: "compatible" | "exclusive";
     readonly repository?: {
       readonly dependenciesAny?: string[];
       readonly filesAny?: string[];
@@ -430,10 +432,14 @@ function applyWorkspaceRegistryMetadata(
         excludes: stringArray(metadata.routing?.excludes),
         capabilities,
         platforms,
-        priority: rolePriority[metadata.routing?.role ?? ""] ?? 0,
+        priority: (rolePriority[metadata.routing?.role ?? ""] ?? 0)
+          + (Number.isInteger(metadata.routing?.priority)
+            ? metadata.routing?.priority ?? 0
+            : 0),
         actions: stringArray(metadata.actions),
         lifecycle: stringArray(metadata.lifecycle),
         repository: metadata.routing?.repository,
+        stackPolicy: metadata.routing?.stackPolicy,
       },
     },
   });
