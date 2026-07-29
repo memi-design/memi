@@ -402,6 +402,7 @@ describe("deterministic skill router", () => {
     expect(result.selected.map((skill) => skill.id)).toEqual([
       "expo-router-bottom-tabs",
     ]);
+    expect(result.repositoryFingerprintHash).toMatch(/^sha256:[a-f0-9]{64}$/);
     expect(result.selected[0]?.explanation.repositoryEvidence).toEqual([
       "dependency:expo-router",
       "file:app/(tabs)/_layout.tsx",
