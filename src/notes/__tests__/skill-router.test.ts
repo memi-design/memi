@@ -159,6 +159,27 @@ describe("deterministic skill router", () => {
 
     expect(result.decision).toBe("abstain");
   });
+
+  it("does not treat one shared word as an exact routing exclusion", async () => {
+    const candidate = await note("swiftui-design-engineering", {
+      description: "Build and repair accessible SwiftUI interfaces.",
+      intents: ["swiftui-interface", "ios-interface"],
+    });
+    candidate.manifest.memoire!.routing!.excludes = ["creative-rendering-audit"];
+
+    const result = await routeInstalledSkills({
+      intent: "Audit and repair a SwiftUI game HUD",
+      notes: [candidate],
+      capabilities: [],
+      platforms: ["swiftui"],
+    });
+
+    expect(result.excluded).not.toContainEqual(expect.objectContaining({
+      id: "swiftui-design-engineering",
+      reason: "routing-exclusion",
+    }));
+    expect(result.selected[0]?.id).toBe("swiftui-design-engineering");
+  });
 });
 
 async function note(
