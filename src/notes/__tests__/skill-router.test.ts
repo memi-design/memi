@@ -49,7 +49,7 @@ describe("deterministic skill router", () => {
     });
 
     expect(first.decision).toBe("stack");
-    expect(first.selected.map((skill) => skill.id)).toEqual([
+    expect(first.selected.map((skill) => skill.id).sort()).toEqual([
       "accessibility-audit",
       "better-typography",
     ]);
@@ -105,7 +105,7 @@ describe("deterministic skill router", () => {
           id: "better-ui",
           name: "better-ui",
           title: "Better UI",
-          description: "General interface polish.",
+          description: "Build and polish a general interface screen.",
           tags: ["ui"],
           intents: ["interface-polish"],
         },

@@ -58,6 +58,13 @@ export const NoteManifestSchema = z.object({
   }).optional(),
   memoire: z.object({
     harnessExtensions: z.array(z.unknown()).default([]),
+    routing: z.object({
+      intents: z.array(z.string().min(1)).default([]),
+      excludes: z.array(z.string().min(1)).default([]),
+      capabilities: z.array(z.string().min(1)).default([]),
+      platforms: z.array(z.string().min(1)).default([]),
+      priority: z.number().int().default(0),
+    }).strict().optional(),
   }).optional(),
   reviewStatus: z.enum(["draft", "submitted", "approved", "rejected"]).optional(),
   forkOf: z.object({
