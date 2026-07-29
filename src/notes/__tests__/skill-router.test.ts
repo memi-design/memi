@@ -149,6 +149,9 @@ describe("deterministic skill router", () => {
     expect(context).toContain("The task manifest and closest repository evidence are authoritative.");
     expect(context).toContain("Do not broaden scope, inventory the whole repository");
     expect(context).toContain("Run only the manifest verification commands");
+    expect(context).toContain("\"toolCallRole\": \"diagnostic_only\"");
+    expect(context).toContain("\"primaryObjectives\"");
+    expect(context).toContain("Extra narrow tool calls are allowed when they reduce total cost");
     expect(context).not.toContain("\"candidates\"");
     expect(context).not.toContain("\"excluded\"");
   });

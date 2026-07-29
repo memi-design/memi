@@ -100,6 +100,14 @@ describe("workflow trial runner", () => {
     await expect(readFile(path.join(source, "implemented.txt"), "utf8")).rejects.toThrow();
     expect(await readFile(path.join(result.evidenceDirectory, "verification.json"), "utf8"))
       .toContain("\"passed\": true");
+    const toolProfile = JSON.parse(
+      await readFile(path.join(result.evidenceDirectory, "tool-profile.json"), "utf8"),
+    ) as Record<string, unknown>;
+    expect(toolProfile).toMatchObject({
+      schemaVersion: 1,
+      provider: "unknown",
+      totalCalls: 0,
+    });
   });
 
   it("records a failed rendered flow without hiding the build result", async () => {

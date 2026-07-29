@@ -32,6 +32,60 @@ describe("efficiency evaluation", () => {
     expect(report.metrics.tokenSavings.lower95).toBeGreaterThan(0.25);
     expect(report.metrics.latencySavings.lower95).toBeGreaterThan(0.25);
     expect(report.quality.passRateDelta).toBeGreaterThanOrEqual(-0.02);
+    expect(report.decision).toEqual({
+      primaryCostEvidence: "measured_usd",
+      toolCallRole: "diagnostic_only",
+      gates: {
+        costEfficiencyPassed: true,
+        latencyPassed: true,
+        qualityPassed: true,
+      },
+    });
+  });
+
+  it("accepts more tool calls when measured cost, latency, and quality improve", () => {
+    const baseline = {
+      ...run("baseline", 1, {
+        tokens: 1_000,
+        cost: 1,
+        wallTimeMs: 100_000,
+      }),
+      tools: { calls: 10, errors: 0, retries: 1 },
+    };
+    const memi = {
+      ...run("memi", 1, {
+        tokens: 1_100,
+        cost: 0.6,
+        wallTimeMs: 60_000,
+      }),
+      tools: { calls: 30, errors: 0, retries: 0 },
+    };
+
+    const report = buildEfficiencyReport({
+      suiteId: "ios-product-design-v1",
+      runs: [baseline, memi],
+      minimumPairs: 1,
+      bootstrapSamples: 100,
+      seed: 7,
+      targetImprovement: 0.25,
+    });
+
+    expect(report.claim).toBe("verified_gt_25");
+    expect(report.metrics.tokenSavings.mean).toBeLessThan(0);
+    expect(report.metrics.costSavings).toMatchObject({
+      status: "assessed",
+      mean: 0.4,
+    });
+    expect(report.metrics.toolCallSavings.mean).toBe(-2);
+    expect(report.decision).toEqual({
+      primaryCostEvidence: "measured_usd",
+      toolCallRole: "diagnostic_only",
+      gates: {
+        costEfficiencyPassed: true,
+        latencyPassed: true,
+        qualityPassed: true,
+      },
+    });
   });
 
   it("refuses the claim when quality regresses even if token savings are large", () => {
@@ -162,6 +216,7 @@ describe("efficiency evaluation", () => {
       includedPairs: 0,
       reason: "No paired run exposed defensible USD cost evidence",
     });
+    expect(report.decision.primaryCostEvidence).toBe("token_proxy");
   });
 
   it("pairs the same task and repeat independently for each provider harness", () => {
