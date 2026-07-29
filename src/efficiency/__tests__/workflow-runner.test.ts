@@ -25,6 +25,15 @@ describe("workflow trial runner", () => {
       intent: "Implement and verify a rendered product feature end to end",
       maximumDurationMs: 10 * 60_000,
       steps: ["inspect", "implement", "build", "launch", "verify"],
+      preparation: [{
+        command: process.execPath,
+        args: ["-e", "require('fs').writeFileSync('prepared.txt','yes\\n')"],
+        timeoutMs: 60_000,
+      }],
+      fixtures: [{
+        path: "contracts/expected.txt",
+        content: "ready\n",
+      }],
       verification: [
         {
           kind: "build",
@@ -44,6 +53,12 @@ describe("workflow trial runner", () => {
     const adapter: WorkflowAdapter = {
       id: "fixture",
       async execute(input) {
+        expect(await readFile(path.join(input.workspaceRoot, "prepared.txt"), "utf8"))
+          .toBe("yes\n");
+        expect(await readFile(
+          path.join(input.workspaceRoot, "contracts/expected.txt"),
+          "utf8",
+        )).toBe("ready\n");
         await writeFile(path.join(input.workspaceRoot, "implemented.txt"), "ready\n");
         return {
           exitCode: 0,
@@ -72,6 +87,8 @@ describe("workflow trial runner", () => {
 
     expect(result.accepted).toBe(true);
     expect(result.verification).toHaveLength(2);
+    expect(result.preparation).toHaveLength(1);
+    expect(result.fixtureHash).toMatch(/^sha256:/);
     expect(result.verification.every((entry) => entry.passed)).toBe(true);
     expect(result.patch).toContain("implemented.txt");
     await expect(readFile(path.join(source, "implemented.txt"), "utf8")).rejects.toThrow();

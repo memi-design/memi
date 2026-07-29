@@ -32,6 +32,15 @@ describe("multi-minute workflow benchmark contracts", () => {
         "launch the rendered application",
         "complete and verify the user journey",
       ],
+      preparation: [{
+        command: "npm",
+        args: ["ci", "--ignore-scripts"],
+        timeoutMs: 10 * 60_000,
+      }],
+      fixtures: [{
+        path: "e2e/memi-contract.spec.ts",
+        content: "test('contract', async () => {});\n",
+      }],
       verification: [
         {
           kind: "build",
@@ -53,6 +62,27 @@ describe("multi-minute workflow benchmark contracts", () => {
       "build",
       "rendered-flow",
     ]);
+    expect(task.preparation).toHaveLength(1);
+    expect(task.fixtures[0].path).toBe("e2e/memi-contract.spec.ts");
+  });
+
+  it("rejects fixture paths that escape the disposable checkout", () => {
+    const result = workflowTaskSchema.safeParse({
+      schemaVersion: 1,
+      id: "unsafe-fixture",
+      intent: "Repair and verify a rendered product flow end to end",
+      maximumDurationMs: 20 * 60_000,
+      steps: ["inspect", "implement", "build", "launch", "verify"],
+      preparation: [],
+      fixtures: [{ path: "../outside.test.ts", content: "unsafe" }],
+      verification: [
+        { kind: "build", command: "npm", args: ["run", "build"], timeoutMs: 300_000 },
+        { kind: "rendered-flow", command: "npm", args: ["run", "test:e2e"], timeoutMs: 600_000 },
+      ],
+      requiredArtifacts: ["git.patch", "verification.json", "events.jsonl"],
+    });
+
+    expect(result.success).toBe(false);
   });
 
   it("creates deterministic alternating baseline and Memi trials", () => {
