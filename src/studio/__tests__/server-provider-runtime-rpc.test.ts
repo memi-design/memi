@@ -87,7 +87,7 @@ describe("studio provider runtime RPC", () => {
         telemetrySink,
       });
       servers.push(server);
-      await server.start();
+      const runtime = await server.start();
       const session = await server.startSession({
         harness: "shell",
         cwd: root,
@@ -103,6 +103,23 @@ describe("studio provider runtime RPC", () => {
       expect(telemetrySink.projections.every((projection) =>
         /^[0-9a-f]{32}$/.test(projection.traceId)
         && /^[0-9a-f]{16}$/.test(projection.spanId))).toBe(true);
+
+      const status = await fetch(`${runtime.url}/api/status`).then((res) => res.json());
+      expect(status.metrics.runtimeEvents).toMatchObject({
+        subscriberCount: expect.any(Number),
+        publishedCount: expect.any(Number),
+        droppedDueToErrorCount: 0,
+      });
+      expect(status.metrics.runtimeEvents.subscriberCount).toBeGreaterThanOrEqual(1);
+      expect(status.metrics.runtimeEvents.publishedCount).toBeGreaterThan(0);
+
+      const usage = await fetch(`${runtime.url}/api/usage`).then((res) => res.json());
+      expect(usage.usage.sessions).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          id: session.id,
+          source: "provider-runtime",
+        }),
+      ]));
     } finally {
       await rm(root, { recursive: true, force: true });
     }

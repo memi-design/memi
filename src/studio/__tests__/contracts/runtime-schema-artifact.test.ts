@@ -14,5 +14,8 @@ describe("runtime schema artifact", () => {
     expect(schema.$defs).toHaveProperty("RunRecord");
     expect(schema.$defs).toHaveProperty("SpanRecord");
     expect(schema.$defs).toHaveProperty("CanvasProjection");
+    expect(schema.$defs).toHaveProperty("BenchmarkRunRecord");
+    expect(schema.$defs).toHaveProperty("BenchmarkSuite");
+    expect(schema.$defs).toHaveProperty("EfficiencyReport");
   });
 });
