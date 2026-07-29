@@ -4001,6 +4001,48 @@
           ],
           "additionalProperties": false
         },
+        "decision": {
+          "type": "object",
+          "properties": {
+            "primaryCostEvidence": {
+              "type": "string",
+              "enum": [
+                "measured_usd",
+                "token_proxy"
+              ]
+            },
+            "toolCallRole": {
+              "type": "string",
+              "const": "diagnostic_only"
+            },
+            "gates": {
+              "type": "object",
+              "properties": {
+                "costEfficiencyPassed": {
+                  "type": "boolean"
+                },
+                "latencyPassed": {
+                  "type": "boolean"
+                },
+                "qualityPassed": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "costEfficiencyPassed",
+                "latencyPassed",
+                "qualityPassed"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "primaryCostEvidence",
+            "toolCallRole",
+            "gates"
+          ],
+          "additionalProperties": false
+        },
         "quality": {
           "type": "object",
           "properties": {
@@ -4062,6 +4104,7 @@
         "scope",
         "pairs",
         "metrics",
+        "decision",
         "quality"
       ],
       "additionalProperties": false

@@ -104,8 +104,6 @@
     "docs/CURRENT_RELEASE.md",
     "docs/case-studies/memi-2.7-six-repo/README.md",
     "docs/case-studies/memi-2.7-six-repo/results.json",
-    "docs/case-studies/memi-2.7-workflow-proof/README.md",
-    "docs/case-studies/memi-2.7-workflow-proof/results.json",
     "docs/case-studies/memi-2.7-workflows/*.json",
     "!assets/demo.gif",
     "!assets/noche-moon.svg",

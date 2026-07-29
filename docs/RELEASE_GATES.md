@@ -10,6 +10,28 @@ Current verified engine release: `2.6.4`.
 
 Use these checks before announcing, tagging, or publishing a public release.
 
+## Efficiency Claim Gate
+
+Efficiency evidence uses paired runs with the same pinned revision, task,
+harness, model, and reasoning setting. The evaluator ranks decision evidence as
+follows:
+
+1. Measured paired USD cost when every included pair exposes trustworthy cost.
+2. Total-token savings as a labeled cost proxy when billed USD is unavailable.
+3. Paired wall time and quality non-inferiority as independent hard gates.
+
+Tool-call count is diagnostic-only. More narrow calls are allowed when the
+result is cheaper, faster, and at least as accurate. Every workflow stores a
+privacy-safe `tool-profile.json` so discovery, edits, verification, batching,
+and repeats can be analyzed without retaining raw commands or paths.
+
+For the 2.7 claim, every canonical case must preserve quality and show positive
+cost-proxy and latency results on the current candidate. The aggregate lower
+95% confidence bounds for both cost evidence and latency must exceed the
+declared 25% target. Failed, negative, and exploratory runs remain immutable.
+Neither a positive single pair nor a lower tool-call count can unlock the
+release by itself.
+
 ## Canonical Release Manifest
 
 `release-manifest.json` is the machine-readable source for the public engine,

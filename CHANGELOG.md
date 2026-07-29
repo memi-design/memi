@@ -12,6 +12,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Reproducible agent-efficiency evidence
 
+- `c451c205` feat: optimize efficiency for cost and quality
+- `6a48e6a9` test: define cost-aware efficiency evidence
 - `9effdea8` perf: constrain routed discovery and verification
 - `3dfccbc1` test: require routed execution budget
 - `13d38ce8` fix: unwrap workflow routes for fitness evidence
@@ -65,6 +67,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 #### Architectural decisions
 
+- Treat measured paired USD as the primary cost evidence when complete, and
+  total tokens as an explicitly labeled proxy otherwise. Keep latency and
+  quality as hard gates while reporting tool-call count as diagnostic-only.
+- Emit a privacy-safe tool profile for every workflow. Record category and
+  pre-edit/post-edit counts, batching, repeated verification, and a SHA-256
+  sequence commitment without persisting raw commands or repository paths.
+- Keep the detailed workflow research and raw derived report in the GitHub
+  source tree and external evidence store instead of charging every npm install
+  for proof-only documentation. Ship the compact six-repository summary and
+  executable workflow manifests in the CLI package.
 - Keep per-skill fitness evidence append-only and content-addressed. Project
   promote, observe, or quarantine recommendations from quality-parity paired
   runs without deleting negative samples or automatically hiding a case.

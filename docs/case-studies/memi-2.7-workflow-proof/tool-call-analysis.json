@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "analysisId": "buzzr-router-v2-budget-tool-profile-v1",
+  "generatedFrom": {
+    "experimentId": "buzzr-tab-unread-badge-router-v2-budget-v1",
+    "reportSha256": "0abdaa3dbbe4b3556e4b801e1143befe4f4f294d70b2985e83f4d39dc09aedd0",
+    "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-sol:medium-baseline-b1ebc5af-0f42-4dc8-bb00-3a5b2ef302ce",
+    "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-sol:medium-memi-1b461d62-85a3-456d-bf7d-c3e0db418b65"
+  },
+  "outcomes": {
+    "wallTimeSavings": 0.2508,
+    "totalTokenSavings": 0.1415,
+    "toolCallSavings": -0.5789,
+    "baselineQuality": 100,
+    "memiQuality": 100,
+    "baselineRetries": 3,
+    "memiRetries": 2,
+    "usdCostStatus": "unassessed",
+    "costProxy": "total_tokens"
+  },
+  "profiles": {
+    "baseline": {
+      "schemaVersion": 1,
+      "provider": "codex",
+      "totalCalls": 19,
+      "preEditCalls": 6,
+      "postEditCalls": 13,
+      "categories": {
+        "search": 4,
+        "read": 5,
+        "verification": 8,
+        "status": 2,
+        "other": 0
+      },
+      "batchedReadCalls": 8,
+      "repeatedVerificationCalls": 3,
+      "commandSequenceHash": "sha256:4c1deb47daf29e8c09711bc1668f84b6ad18829e1fd2698fc48d77d9afe5782a"
+    },
+    "memi": {
+      "schemaVersion": 1,
+      "provider": "codex",
+      "totalCalls": 30,
+      "preEditCalls": 18,
+      "postEditCalls": 12,
+      "categories": {
+        "search": 8,
+        "read": 15,
+        "verification": 5,
+        "status": 2,
+        "other": 0
+      },
+      "batchedReadCalls": 3,
+      "repeatedVerificationCalls": 2,
+      "commandSequenceHash": "sha256:b18325d0f16eb200216b39bfd4f3ba1a3145a20305305bfe5ea22ee9f1b50279"
+    }
+  },
+  "decisionPolicy": {
+    "primaryCostEvidenceOrder": [
+      "measured_usd",
+      "token_proxy"
+    ],
+    "hardGates": [
+      "cost_efficiency",
+      "latency",
+      "quality"
+    ],
+    "toolCallRole": "diagnostic_only"
+  },
+  "findings": [
+    "The eleven-call increase came from pre-edit discovery, not post-edit repair.",
+    "The Memi run made fewer verification calls and fewer repeated verification calls.",
+    "More narrow calls were compatible with lower total tokens, lower wall time, fewer retries, and quality parity."
+  ],
+  "limitations": [
+    "This is one environment-matched pair and cannot establish a confidence claim.",
+    "The provider trace exposes no defensible billed USD for this subscription run.",
+    "Tool categories are deterministic trace classifications, not claims about hidden model reasoning."
+  ],
+  "releaseDecision": {
+    "approved": false,
+    "reason": "One calibration pair does not satisfy the homogeneous repeat or multi-case release gate."
+  }
+}

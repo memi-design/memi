@@ -61,6 +61,67 @@ The isolated calibration report has SHA-256
 It includes exactly one environment-matched pair, reports the claim as
 `not_verified`, and leaves subscription USD cost unassessed.
 
+### Why more tool calls can still be better
+
+Tool-call count is a diagnostic, not a release gate. A narrow file read and a
+large repository scan each count as one call, even though their token cost,
+latency, and risk are different. Optimizing the raw count can therefore
+encourage agents to load more context than they need.
+
+The privacy-safe profile of the latest Buzzr pair found:
+
+| Phase or category | Baseline | Memi |
+|---|---:|---:|
+| Total calls | 19 | 30 |
+| Calls before the first edit | 6 | 18 |
+| Calls after the first edit | 13 | 12 |
+| Search calls | 4 | 8 |
+| Read calls | 5 | 15 |
+| Verification calls | 8 | 5 |
+| Status calls | 2 | 2 |
+| Batched-read calls | 8 | 3 |
+| Repeated verification calls | 3 | 2 |
+
+This separates observation from interpretation:
+
+1. **Observed:** Memi made 11 more calls, almost entirely before the first edit.
+   It used 10 more read calls and 4 more search calls, but 3 fewer verification
+   calls.
+2. **Observed:** The same Memi run used 14.15% fewer counted tokens, completed
+   25.08% faster, reduced retries from 3 to 2, and retained quality 100.
+3. **Interpretation:** the additional calls were narrower discovery steps. They
+   increased call count without increasing total token consumption or elapsed
+   time.
+4. **Decision:** preserve those calls when they reduce cost, time, or
+   uncertainty. Continue to batch related reads when doing so is cheaper, but
+   never impose an arbitrary tool-call ceiling.
+5. **Limitation:** the subscription trace does not expose defensible billed USD.
+   “Cheaper” in this pair means the same model consumed fewer input, output, and
+   reasoning tokens. It is a token-cost proxy, not a dollar invoice.
+
+The machine-readable analysis is in
+[tool-call-analysis.json](tool-call-analysis.json). Future workflow runs emit a
+`tool-profile.json` beside the patch, verification, events, and provider logs.
+The profile records only counts, categories, edit phase, repeat counts, and a
+SHA-256 sequence commitment. It does not retain commands or file paths.
+
+### Cost-aware decision policy
+
+The evaluator now records its decision basis directly:
+
+- Use paired measured USD cost when every included pair exposes trustworthy
+  provider cost evidence.
+- Otherwise use total tokens as the explicitly labeled cost proxy.
+- Require the selected cost metric, latency, and quality to clear the configured
+  confidence threshold.
+- Report tool-call savings as `diagnostic_only`; more calls do not fail a run
+  that is cheaper, faster, and equally accurate.
+
+The greater-than-25% public claim is still locked. This calibration has one
+pair, not enough homogeneous repeats, and the five-case canonical suite still
+contains negative cost and latency cases. The new policy clarifies the decision;
+it does not convert incomplete evidence into proof.
+
 Paraform demonstrates a concrete stacked-skill benefit: the routed run was
 109.3 seconds faster, used 780,622 fewer counted tokens, and made 15 fewer tool
 calls while producing the same accepted result. dorii shows a second positive
@@ -146,7 +207,8 @@ node dist/index.js benchmark report \
 The report SHA-256 is
 `c4565fc818387a45ad04d79f0d7569a4ac866d34c84de504af936422de153fdb`.
 Raw prompts, provider streams, patches, preparation receipts, verification
-logs, events, routes, and run records remain in the external evidence root.
+logs, privacy-safe tool profiles, events, routes, and run records remain in the
+external evidence root.
 
 ## What unlocks 2.7
 
@@ -167,14 +229,15 @@ Until then the truthful position is:
 
 ## Candidate verification
 
-- Full suite: 282 files, 2,018 tests passed.
-- Focused router and workflow coverage: 80.25% statements, 82.92% lines,
-  81.15% functions, and 73.51% branches across the new critical modules.
-- Whole-repository coverage: 64.80% statements, 66.50% lines, 73.01%
-  functions, and 53.60% branches.
+- Full suite: 285 files, 2,033 tests passed.
+- Cost-aware evaluation, routing receipt, workflow evidence, and tool-profile
+  contract: 32 focused tests passed.
+- Whole-repository coverage: 64.91% statements, 66.62% lines, 73.11%
+  functions, and 53.73% branches.
 - Production dependency audit: zero vulnerabilities.
-- Candidate tarball: approximately 559 KB compressed and 1.983 MB unpacked,
-  with 50 files including all five reproducible workflow manifests.
+- Candidate tarball: 560 KB compressed and 1.986 MB unpacked, with 48 files
+  including all five reproducible workflow manifests. Detailed workflow research
+  stays in GitHub instead of inflating every CLI install.
 - Release consistency: passed locally.
 
 The whole-repository coverage result is below the project's stated 80% target.
