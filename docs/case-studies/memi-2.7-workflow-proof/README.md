@@ -31,6 +31,31 @@ efficiency claim. The negative case remains first-class release evidence.
 | Paraform | Vite production build plus recruiter command-menu keyboard and reduced-motion journeys | `emil-design-eng` + `interaction-design` | 28.26% | 52.43% | 26.98% | 44.12% | 100 / 100 |
 | dorii public site | Next.js production build plus mobile navigation, route, focus, and reduced-motion journeys | `emil-design-eng` + `interaction-design` | 24.65% | 19.43% | 20.68% | 33.33% | 100 / 100 |
 
+### Buzzr Router v2 calibration
+
+Post-canonical traces tested progressively narrower Expo routing without
+rewriting the original negative case:
+
+| Configuration | Context | Wall savings | Total-token savings | Tool-call savings | Quality |
+|---|---:|---:|---:|---:|---:|
+| Two repository-matched skills | 3,797 bytes | -4.35% | -11.11% | -5.26% | 100 / 100 |
+| Exclusive Expo skill | 1,920 bytes | -57.68% | -65.54% | -16.67% | 100 / 100 |
+| Exclusive Expo skill plus execution budget | 1,429 bytes | 25.08% | 14.15% | -57.89% | 100 / 100 |
+
+The third configuration is a real improvement in tokens and time, but not a
+release proof. Trace comparison showed that the earlier routed agent broadened
+repository discovery and ran full-suite and extra-platform checks beyond the
+task contract. Router v2 now states that the task manifest and closest
+repository evidence are authoritative, and the Expo skill forbids broad
+inventory or extra verification unless a concrete failure identifies that
+boundary.
+
+The three rows are different router configurations, not homogeneous repeats,
+so they must not be averaged into a confidence claim. Both negative
+configurations remain in the immutable run store. Content-addressed fitness
+events recommend `observe` for both Expo skill revisions until each revision
+has sufficient repeated evidence.
+
 Paraform demonstrates a concrete stacked-skill benefit: the routed run was
 109.3 seconds faster, used 780,622 fewer counted tokens, and made 15 fewer tool
 calls while producing the same accepted result. dorii shows a second positive
