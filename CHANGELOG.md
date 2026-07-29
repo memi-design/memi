@@ -12,6 +12,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Reproducible agent-efficiency evidence
 
+- `36a58918` feat: route skills with repository fingerprints
+- `db6e72f7` test: define repository fingerprint contract
+- `b84524cd` test: define repository-aware routing contract
 - `7cc5570d` chore: stage memi 2.7.0 candidate manifest
 - `d482d1fb` feat: expose paired benchmarks and trace receipts
 - `3aa8a9fb` test: require live benchmark and trace receipts
@@ -50,6 +53,10 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 #### Architectural decisions
 
+- Fingerprint the checked-out repository before routing and require bounded,
+  safe-regex eligibility evidence for niche skills. Include the exact matched
+  dependency, file, import, script, framework, or language in the immutable
+  routing receipt.
 - Feed Studio usage from the canonical provider-runtime event bus and replace mutable rollups and prototype patching with frozen reducer snapshots.
 - Require revision, worktree, harness, model, and reasoning parity before baseline and Memi runs can form a statistical pair.
 - Keep trace receipts metadata-only and bind them to a SHA-256 digest instead of retaining prompts, source, hidden reasoning, or secrets.
