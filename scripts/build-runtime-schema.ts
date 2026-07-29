@@ -9,6 +9,11 @@ import {
   runRecordSchema,
   spanRecordSchema,
 } from "../src/studio/tracing/contracts.js";
+import {
+  benchmarkRunRecordSchema,
+  benchmarkSuiteSchema,
+} from "../src/efficiency/contracts.js";
+import { efficiencyReportSchema } from "../src/efficiency/evaluation.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputPath = resolve(root, "schemas", "memi-runtime-trace-v1.schema.json");
@@ -33,6 +38,9 @@ const output = {
     { $ref: "#/$defs/RuntimeEvent" },
     { $ref: "#/$defs/DesignHarnessEvaluation" },
     { $ref: "#/$defs/CanvasProjection" },
+    { $ref: "#/$defs/BenchmarkRunRecord" },
+    { $ref: "#/$defs/BenchmarkSuite" },
+    { $ref: "#/$defs/EfficiencyReport" },
   ],
   $defs: {
     RunRecord: definition(runRecordSchema),
@@ -40,6 +48,9 @@ const output = {
     RuntimeEvent: definition(providerRuntimeEventSchema),
     DesignHarnessEvaluation: definition(designHarnessEvaluationSchema),
     CanvasProjection: definition(canvasProjectionSchema),
+    BenchmarkRunRecord: definition(benchmarkRunRecordSchema),
+    BenchmarkSuite: definition(benchmarkSuiteSchema),
+    EfficiencyReport: definition(efficiencyReportSchema),
   },
 };
 

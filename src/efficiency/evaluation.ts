@@ -1,4 +1,5 @@
 import type { BenchmarkRunRecord } from "./contracts.js";
+import { z } from "zod";
 
 export interface EfficiencyReportInput {
   readonly suiteId: string;
@@ -46,6 +47,44 @@ export interface EfficiencyReport {
     readonly passed: boolean;
   };
 }
+
+const savingsIntervalSchema = z.object({
+  mean: z.number(),
+  lower95: z.number(),
+  upper95: z.number(),
+}).strict();
+
+export const efficiencyReportSchema = z.object({
+  schemaVersion: z.literal(1),
+  suiteId: z.string().min(1),
+  generatedAt: z.string(),
+  status: z.enum(["verified", "insufficient_evidence"]),
+  claim: z.enum(["verified_gt_25", "not_verified", "insufficient_evidence"]),
+  targetImprovement: z.number().min(0).max(1),
+  pairs: z.object({
+    included: z.number().int().nonnegative(),
+    excluded: z.array(z.object({
+      key: z.string(),
+      reason: z.string(),
+    }).strict()),
+  }).strict(),
+  metrics: z.object({
+    tokenSavings: savingsIntervalSchema,
+    costSavings: savingsIntervalSchema,
+    latencySavings: savingsIntervalSchema,
+    toolCallSavings: savingsIntervalSchema,
+  }).strict(),
+  quality: z.object({
+    baselinePassRate: z.number().min(0).max(1),
+    memiPassRate: z.number().min(0).max(1),
+    passRateDelta: z.number().min(-1).max(1),
+    baselineDefects: z.number().nonnegative(),
+    memiDefects: z.number().nonnegative(),
+    baselineHumanInterventions: z.number().nonnegative(),
+    memiHumanInterventions: z.number().nonnegative(),
+    passed: z.boolean(),
+  }).strict(),
+}).strict();
 
 interface Pair {
   readonly baseline: BenchmarkRunRecord;
@@ -122,7 +161,7 @@ export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<Ef
     && metrics.latencySavings.lower95 > input.targetImprovement
     && qualityPassed;
 
-  return deepFreeze({
+  return deepFreeze(efficiencyReportSchema.parse({
     schemaVersion: 1,
     suiteId: input.suiteId,
     generatedAt: new Date().toISOString(),
@@ -146,7 +185,7 @@ export function buildEfficiencyReport(input: EfficiencyReportInput): Readonly<Ef
       memiHumanInterventions,
       passed: qualityPassed,
     },
-  });
+  })) as Readonly<EfficiencyReport>;
 }
 
 function environmentMismatch(

@@ -95,6 +95,8 @@ const FAST_COMMANDS: Record<string, () => Promise<RegisterFn>> = {
   "report": async () => (await import("./commands/report.js")).registerReportCommand,
   "ci": async () => (await import("./commands/ci.js")).registerCiCommand,
   "studio": async () => (await import("./commands/studio.js")).registerStudioCommand,
+  "benchmark": async () => (await import("./commands/benchmark.js")).registerBenchmarkCommand,
+  "trace": async () => (await import("./commands/trace.js")).registerTraceCommand,
 };
 
 async function registerAllCommands(program: CliProgram, engine: CliEngine): Promise<void> {
@@ -151,6 +153,8 @@ async function registerAllCommands(program: CliProgram, engine: CliEngine): Prom
     { registerMermaidJamCommand },
     { registerVideoCommand },
     { registerSelfUpdateCommand },
+    { registerBenchmarkCommand },
+    { registerTraceCommand },
   ] = await Promise.all([
     import("./commands/connect.js"),
     import("./commands/pull.js"),
@@ -204,6 +208,8 @@ async function registerAllCommands(program: CliProgram, engine: CliEngine): Prom
     import("./commands/mermaid-jam.js"),
     import("./commands/video.js"),
     import("./commands/self-update.js"),
+    import("./commands/benchmark.js"),
+    import("./commands/trace.js"),
   ]);
 
   // Register all commands. Put the code-native design-quality workflow first so
@@ -212,6 +218,8 @@ async function registerAllCommands(program: CliProgram, engine: CliEngine): Prom
   registerUxCommand(program, engine);
   registerCraftCommand(program, engine);
   registerStudioCommand(program, engine);
+  registerBenchmarkCommand(program, engine);
+  registerTraceCommand(program, engine);
   registerMermaidJamCommand(program, engine);
   registerVideoCommand(program, engine);
   registerInitCommand(program, engine);

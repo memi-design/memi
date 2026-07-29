@@ -15,6 +15,7 @@ export const benchmarkRunRecordSchema = z.object({
   taskId: z.string().min(1),
   repeat: z.number().int().positive(),
   condition: benchmarkConditionSchema,
+  invocation: z.enum(["interactive", "ci"]).optional(),
   repository: z.object({
     pathHash: z.string().startsWith("sha256:"),
     revision: z.string().min(1),

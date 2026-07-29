@@ -81,6 +81,7 @@ import type { RuntimeTraceContext } from "./contracts/provider-runtime.js";
 import { FileEventJournal } from "./journal/event-journal.js";
 import { RpcServer } from "./rpc/server.js";
 import { EventBus } from "./event-bus.js";
+import { UsageRollup } from "./usage-rollup.js";
 import { createChildTraceContext, createRuntimeTraceContext } from "./tracing/context.js";
 import { sanitizeRuntimeEvent } from "./tracing/privacy.js";
 import {
@@ -181,6 +182,7 @@ export class StudioRuntimeServer {
   private readonly downloads: StudioDownloadStore;
   private readonly eventJournal: FileEventJournal;
   private readonly providerEventBus = new EventBus();
+  private readonly usageRollup = new UsageRollup();
   private readonly telemetrySink: TelemetrySink;
   private readonly providerTraceContexts = new Map<string, RuntimeTraceContext>();
   private readonly providerToolTraceContexts = new Map<string, RuntimeTraceContext>();
@@ -220,6 +222,7 @@ export class StudioRuntimeServer {
 
   async start(): Promise<StudioRuntimeInfo> {
     if (this.server) return this.runtimeInfo();
+    this.usageRollup.subscribe(this.providerEventBus);
     this.config = await loadStudioConfig(this.projectRoot);
     this.sessionStore.init();
     await this.downloads.init();
@@ -248,6 +251,7 @@ export class StudioRuntimeServer {
     for (const client of this.clients) client.res.end();
     this.clients.clear();
     this.providerEventBus.clear();
+    this.usageRollup.detach();
     this.providerTraceContexts.clear();
     this.providerToolTraceContexts.clear();
     if (!this.server) return;
@@ -2061,6 +2065,7 @@ export class StudioRuntimeServer {
       enabledHarnesses: config.harnesses.filter((harness) => harness.enabled).length,
       catalogCacheAgeMs: studioCatalogCache.ageMs,
       downloads: this.downloads.metrics(),
+      runtimeEvents: this.providerEventBus.stats(),
     };
   }
 
@@ -2079,14 +2084,23 @@ export class StudioRuntimeServer {
     const byProvider: Record<string, ReturnType<typeof emptyTotals>> = {};
     const sessions = this.listSessionSummaries().map((session) => {
       const sessionTotals = emptyTotals();
-      for (const event of this.readSessionRecord(session.id)?.events ?? []) {
-        if (event.type !== "token_usage" || !event.data || typeof event.data !== "object") continue;
-        const data = event.data as Record<string, unknown>;
-        sessionTotals.inputTokens += numberField(data.inputTokens) ?? numberField(data.input_tokens) ?? 0;
-        sessionTotals.outputTokens += numberField(data.outputTokens) ?? numberField(data.output_tokens) ?? 0;
-        sessionTotals.cachedInputTokens += numberField(data.cachedInputTokens) ?? numberField(data.cached_input_tokens) ?? 0;
-        sessionTotals.reasoningTokens += numberField(data.reasoningTokens) ?? numberField(data.reasoning_tokens) ?? 0;
-        sessionTotals.estimatedCostUsd += numberField(data.estimatedCostUsd) ?? numberField(data.estimated_cost_usd) ?? 0;
+      const canonical = this.usageRollup.sessionUsage(providerRuntimeId("SessionId", session.id));
+      if (canonical) {
+        sessionTotals.inputTokens = canonical.inputTokens;
+        sessionTotals.outputTokens = canonical.outputTokens;
+        sessionTotals.cachedInputTokens = canonical.cachedInputTokens;
+        sessionTotals.reasoningTokens = canonical.reasoningTokens;
+        sessionTotals.estimatedCostUsd = canonical.estimatedCostUsd;
+      } else {
+        for (const event of this.readSessionRecord(session.id)?.events ?? []) {
+          if (event.type !== "token_usage" || !event.data || typeof event.data !== "object") continue;
+          const data = event.data as Record<string, unknown>;
+          sessionTotals.inputTokens += numberField(data.inputTokens) ?? numberField(data.input_tokens) ?? 0;
+          sessionTotals.outputTokens += numberField(data.outputTokens) ?? numberField(data.output_tokens) ?? 0;
+          sessionTotals.cachedInputTokens += numberField(data.cachedInputTokens) ?? numberField(data.cached_input_tokens) ?? 0;
+          sessionTotals.reasoningTokens += numberField(data.reasoningTokens) ?? numberField(data.reasoning_tokens) ?? 0;
+          sessionTotals.estimatedCostUsd += numberField(data.estimatedCostUsd) ?? numberField(data.estimated_cost_usd) ?? 0;
+        }
       }
       sessionTotals.totalTokens = sessionTotals.inputTokens + sessionTotals.outputTokens + sessionTotals.reasoningTokens;
       addUsageTotals(totals, sessionTotals);
@@ -2102,6 +2116,7 @@ export class StudioRuntimeServer {
         status: session.status,
         startedAt: session.startedAt,
         completedAt: session.completedAt ?? null,
+        source: canonical ? "provider-runtime" : "legacy-session-events",
         totals: sessionTotals,
       };
     });

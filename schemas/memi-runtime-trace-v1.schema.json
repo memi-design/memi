@@ -18,6 +18,15 @@
     },
     {
       "$ref": "#/$defs/CanvasProjection"
+    },
+    {
+      "$ref": "#/$defs/BenchmarkRunRecord"
+    },
+    {
+      "$ref": "#/$defs/BenchmarkSuite"
+    },
+    {
+      "$ref": "#/$defs/EfficiencyReport"
     }
   ],
   "$defs": {
@@ -3457,6 +3466,526 @@
         "traceId",
         "nodes",
         "edges"
+      ],
+      "additionalProperties": false
+    },
+    "BenchmarkRunRecord": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "runId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "experimentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "suiteId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "taskId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repeat": {
+          "type": "integer",
+          "exclusiveMinimum": true,
+          "minimum": 0
+        },
+        "condition": {
+          "type": "string",
+          "enum": [
+            "baseline",
+            "memi"
+          ]
+        },
+        "invocation": {
+          "type": "string",
+          "enum": [
+            "interactive",
+            "ci"
+          ]
+        },
+        "repository": {
+          "type": "object",
+          "properties": {
+            "pathHash": {
+              "type": "string",
+              "pattern": "^sha256\\:"
+            },
+            "revision": {
+              "type": "string",
+              "minLength": 1
+            },
+            "dirty": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pathHash",
+            "revision",
+            "dirty"
+          ],
+          "additionalProperties": false
+        },
+        "harness": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "modelId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reasoningEffort": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id",
+            "modelId",
+            "reasoningEffort"
+          ],
+          "additionalProperties": false
+        },
+        "timing": {
+          "type": "object",
+          "properties": {
+            "startedAt": {
+              "type": "string"
+            },
+            "completedAt": {
+              "type": "string"
+            },
+            "wallTimeMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "toolTimeMs": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "startedAt",
+            "completedAt",
+            "wallTimeMs",
+            "toolTimeMs"
+          ],
+          "additionalProperties": false
+        },
+        "usage": {
+          "type": "object",
+          "properties": {
+            "inputTokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cachedInputTokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "outputTokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reasoningTokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "estimatedCostUsd": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "inputTokens",
+            "cachedInputTokens",
+            "outputTokens",
+            "reasoningTokens",
+            "estimatedCostUsd"
+          ],
+          "additionalProperties": false
+        },
+        "tools": {
+          "type": "object",
+          "properties": {
+            "calls": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "errors": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "retries": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "calls",
+            "errors",
+            "retries"
+          ],
+          "additionalProperties": false
+        },
+        "outcome": {
+          "type": "object",
+          "properties": {
+            "accepted": {
+              "type": "boolean"
+            },
+            "testsPassed": {
+              "type": "boolean"
+            },
+            "qualityScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "defects": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "humanInterventions": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "accepted",
+            "testsPassed",
+            "qualityScore",
+            "defects",
+            "humanInterventions"
+          ],
+          "additionalProperties": false
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "runId",
+        "experimentId",
+        "suiteId",
+        "taskId",
+        "repeat",
+        "condition",
+        "repository",
+        "harness",
+        "timing",
+        "usage",
+        "tools",
+        "outcome",
+        "evidenceRefs"
+      ],
+      "additionalProperties": false
+    },
+    "BenchmarkSuite": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "suiteId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "experimentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "repeats": {
+          "type": "integer",
+          "exclusiveMinimum": true,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "baseline",
+              "memi"
+            ]
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "intent": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "intent"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "suiteId",
+        "experimentId",
+        "seed",
+        "repeats",
+        "conditions",
+        "tasks"
+      ],
+      "additionalProperties": false
+    },
+    "EfficiencyReport": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "suiteId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "verified",
+            "insufficient_evidence"
+          ]
+        },
+        "claim": {
+          "type": "string",
+          "enum": [
+            "verified_gt_25",
+            "not_verified",
+            "insufficient_evidence"
+          ]
+        },
+        "targetImprovement": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "pairs": {
+          "type": "object",
+          "properties": {
+            "included": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "excluded": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "included",
+            "excluded"
+          ],
+          "additionalProperties": false
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "tokenSavings": {
+              "type": "object",
+              "properties": {
+                "mean": {
+                  "type": "number"
+                },
+                "lower95": {
+                  "type": "number"
+                },
+                "upper95": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "mean",
+                "lower95",
+                "upper95"
+              ],
+              "additionalProperties": false
+            },
+            "costSavings": {
+              "type": "object",
+              "properties": {
+                "mean": {
+                  "type": "number"
+                },
+                "lower95": {
+                  "type": "number"
+                },
+                "upper95": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "mean",
+                "lower95",
+                "upper95"
+              ],
+              "additionalProperties": false
+            },
+            "latencySavings": {
+              "type": "object",
+              "properties": {
+                "mean": {
+                  "type": "number"
+                },
+                "lower95": {
+                  "type": "number"
+                },
+                "upper95": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "mean",
+                "lower95",
+                "upper95"
+              ],
+              "additionalProperties": false
+            },
+            "toolCallSavings": {
+              "type": "object",
+              "properties": {
+                "mean": {
+                  "type": "number"
+                },
+                "lower95": {
+                  "type": "number"
+                },
+                "upper95": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "mean",
+                "lower95",
+                "upper95"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "tokenSavings",
+            "costSavings",
+            "latencySavings",
+            "toolCallSavings"
+          ],
+          "additionalProperties": false
+        },
+        "quality": {
+          "type": "object",
+          "properties": {
+            "baselinePassRate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "memiPassRate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "passRateDelta": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "baselineDefects": {
+              "type": "number",
+              "minimum": 0
+            },
+            "memiDefects": {
+              "type": "number",
+              "minimum": 0
+            },
+            "baselineHumanInterventions": {
+              "type": "number",
+              "minimum": 0
+            },
+            "memiHumanInterventions": {
+              "type": "number",
+              "minimum": 0
+            },
+            "passed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "baselinePassRate",
+            "memiPassRate",
+            "passRateDelta",
+            "baselineDefects",
+            "memiDefects",
+            "baselineHumanInterventions",
+            "memiHumanInterventions",
+            "passed"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "suiteId",
+        "generatedAt",
+        "status",
+        "claim",
+        "targetImprovement",
+        "pairs",
+        "metrics",
+        "quality"
       ],
       "additionalProperties": false
     }

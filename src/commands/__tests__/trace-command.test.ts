@@ -21,14 +21,14 @@ afterEach(async () => {
 
 describe("trace command", () => {
   it("inspects and exports a metadata-only reproducible receipt", async () => {
-    const sessionId = asId("SessionId", "ses-nate");
+    const sessionId = asId("SessionId", "ses_nate");
     const journal = new FileEventJournal(projectRoot);
     await journal.append(sessionId, {
       schemaVersion: 1,
-      eventId: asId("EventId", "evt-1"),
+      eventId: asId("EventId", "evt_1"),
       seq: 1,
-      harnessId: asId("HarnessId", "hns-codex"),
-      providerInstanceId: asId("ProviderInstanceId", "prv-1"),
+      harnessId: asId("HarnessId", "hns_codex"),
+      providerInstanceId: asId("ProviderInstanceId", "prv_1"),
       sessionId,
       createdAt: "2026-07-29T12:00:00.000Z",
       type: "message.user",
@@ -36,10 +36,10 @@ describe("trace command", () => {
     });
     await journal.append(sessionId, {
       schemaVersion: 1,
-      eventId: asId("EventId", "evt-2"),
+      eventId: asId("EventId", "evt_2"),
       seq: 2,
-      harnessId: asId("HarnessId", "hns-codex"),
-      providerInstanceId: asId("ProviderInstanceId", "prv-1"),
+      harnessId: asId("HarnessId", "hns_codex"),
+      providerInstanceId: asId("ProviderInstanceId", "prv_1"),
       sessionId,
       createdAt: "2026-07-29T12:00:01.000Z",
       type: "usage.updated",
