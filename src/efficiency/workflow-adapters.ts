@@ -52,7 +52,10 @@ export function createCodexWorkflowAdapter(
             reasoningEffort: options.reasoningEffort,
           }),
           cwd: input.workspaceRoot,
-          env: buildIsolatedCodexEnvironment(process.env, isolatedHome),
+          env: buildPreparedToolEnvironment(
+            buildIsolatedCodexEnvironment(process.env, isolatedHome),
+            isolatedHome,
+          ),
           stdin: input.prompt,
           timeoutMs: input.timeoutMs,
         });
@@ -98,8 +101,7 @@ export function createClaudeWorkflowAdapter(
           }),
           cwd: input.workspaceRoot,
           env: {
-            ...process.env,
-            HOME: isolatedHome,
+            ...buildPreparedToolEnvironment(process.env, isolatedHome),
             CLAUDE_CONFIG_DIR: path.join(isolatedHome, ".claude"),
           },
           stdin: input.prompt,
@@ -117,6 +119,20 @@ export function createClaudeWorkflowAdapter(
         await rm(isolatedHome, { recursive: true, force: true });
       }
     },
+  };
+}
+
+export function buildPreparedToolEnvironment(
+  base: Readonly<NodeJS.ProcessEnv>,
+  isolatedHome: string,
+  hostHome: string = homedir(),
+  platform: NodeJS.Platform = process.platform,
+): NodeJS.ProcessEnv {
+  return {
+    ...base,
+    HOME: isolatedHome,
+    PLAYWRIGHT_BROWSERS_PATH: base.PLAYWRIGHT_BROWSERS_PATH
+      ?? defaultPlaywrightBrowsersPath(base, hostHome, platform),
   };
 }
 
@@ -140,6 +156,23 @@ export function buildCodexWorkflowArgs(input: {
     input.workspaceRoot,
     "-",
   ];
+}
+
+function defaultPlaywrightBrowsersPath(
+  environment: Readonly<NodeJS.ProcessEnv>,
+  hostHome: string,
+  platform: NodeJS.Platform,
+): string {
+  if (platform === "darwin") {
+    return path.join(hostHome, "Library", "Caches", "ms-playwright");
+  }
+  if (platform === "win32") {
+    return path.join(
+      environment.LOCALAPPDATA ?? path.join(hostHome, "AppData", "Local"),
+      "ms-playwright",
+    );
+  }
+  return path.join(hostHome, ".cache", "ms-playwright");
 }
 
 export function buildClaudeWorkflowArgs(input: {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildPreparedToolEnvironment,
   buildClaudeWorkflowArgs,
   buildCodexWorkflowArgs,
   parseClaudeStreamJson,
@@ -30,6 +31,22 @@ describe("model-agnostic workflow adapters", () => {
     expect(args).toContain("--no-session-persistence");
     expect(args).toContain("acceptEdits");
     expect(args).not.toContain("--dangerously-skip-permissions");
+  });
+
+  it("shares only the prepared Playwright browser cache with an isolated agent home", () => {
+    const environment = buildPreparedToolEnvironment(
+      { PATH: "/usr/bin" },
+      "/tmp/isolated-home",
+      "/Users/tester",
+      "darwin",
+    );
+
+    expect(environment).toMatchObject({
+      HOME: "/tmp/isolated-home",
+      PATH: "/usr/bin",
+      PLAYWRIGHT_BROWSERS_PATH: "/Users/tester/Library/Caches/ms-playwright",
+    });
+    expect(environment.CODEX_HOME).toBeUndefined();
   });
 
   it("normalizes Claude usage, cost, tool calls, and failed tools", () => {
