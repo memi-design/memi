@@ -69,6 +69,24 @@ interface SkillRegistry {
   skills: SkillRegistryEntry[];
 }
 
+interface WorkspaceRegistrySkill {
+  readonly name?: string;
+  readonly id?: string;
+  readonly description?: string;
+  readonly status?: string;
+  readonly legacyCategory?: string;
+  readonly tags?: string[];
+  readonly surfaces?: string[];
+  readonly routing?: {
+    readonly intents?: string[];
+    readonly excludes?: string[];
+    readonly role?: string;
+  };
+  readonly runtime?: {
+    readonly requires?: string[];
+  };
+}
+
 function inferCategory(skill: SkillRegistryEntry): NoteCategory {
   if (skill.id.startsWith("figma-") || skill.id === "multi-agent" || skill.id === "atomic-design") return "craft";
   if (skill.id === "superpower") return "craft";
@@ -247,6 +265,7 @@ export class NoteLoader {
   async loadWorkspaceSkillNotes(): Promise<InstalledNote[]> {
     const skillsDir = join(this.projectRoot, "skills");
     const notes: InstalledNote[] = [];
+    const registry = await loadWorkspaceRegistry(this.projectRoot);
 
     try {
       const entries = await readdir(skillsDir, { withFileTypes: true });
@@ -262,11 +281,15 @@ export class NoteLoader {
           if (!fileStat.isFile()) continue;
 
           const markdown = await readFile(skillPath, "utf-8");
-          notes.push(buildWorkspaceSkillNote(markdown, {
+          const note = buildWorkspaceSkillNote(markdown, {
             noteDir,
             fallbackName: entry.name,
             skillFileName: "SKILL.md",
-          }));
+          });
+          notes.push(applyWorkspaceRegistryMetadata(
+            note,
+            registry.get(note.manifest.name),
+          ));
         } catch {
           // Skip directories without a valid SKILL.md file
         }
@@ -341,4 +364,96 @@ export class NoteLoader {
     this._loaded = false;
     return this.loadAll();
   }
+}
+
+async function loadWorkspaceRegistry(
+  projectRoot: string,
+): Promise<ReadonlyMap<string, WorkspaceRegistrySkill>> {
+  try {
+    const raw = JSON.parse(
+      await readFile(join(projectRoot, "registry", "skills.json"), "utf8"),
+    ) as { skills?: unknown };
+    if (!Array.isArray(raw.skills)) return new Map();
+    const entries = raw.skills.filter((entry): entry is WorkspaceRegistrySkill =>
+      Boolean(entry) && typeof entry === "object" && !Array.isArray(entry));
+    return new Map(entries.flatMap((entry) => {
+      const id = entry.name ?? entry.id;
+      return id ? [[id, entry] as const] : [];
+    }));
+  } catch {
+    return new Map();
+  }
+}
+
+function applyWorkspaceRegistryMetadata(
+  note: InstalledNote,
+  metadata: WorkspaceRegistrySkill | undefined,
+): InstalledNote {
+  if (!metadata) return note;
+  const category = isNoteCategory(metadata.legacyCategory)
+    ? metadata.legacyCategory
+    : note.manifest.category;
+  const tags = stringArray(metadata.tags);
+  const platforms = inferPlatforms([...tags, ...stringArray(metadata.surfaces)]);
+  const capabilities = stringArray(metadata.runtime?.requires)
+    .map((requirement) => requirement.split(".")[0])
+    .filter((value, index, values) => value && values.indexOf(value) === index);
+  const rolePriority: Readonly<Record<string, number>> = {
+    primary: 3,
+    supporting: 1,
+    reference: -2,
+  };
+  const manifest = NoteManifestSchema.parse({
+    ...note.manifest,
+    description: metadata.description ?? note.manifest.description,
+    category,
+    tags: tags.length > 0 ? tags : note.manifest.tags,
+    memoire: {
+      ...note.manifest.memoire,
+      harnessExtensions: note.manifest.memoire?.harnessExtensions ?? [],
+      routing: {
+        intents: stringArray(metadata.routing?.intents).length > 0
+          ? stringArray(metadata.routing?.intents)
+          : note.manifest.skills.flatMap((skill) =>
+            skill.activateOn.split(",").map((entry) => entry.trim()).filter(Boolean)),
+        excludes: stringArray(metadata.routing?.excludes),
+        capabilities,
+        platforms,
+        priority: rolePriority[metadata.routing?.role ?? ""] ?? 0,
+      },
+    },
+  });
+  return {
+    ...note,
+    manifest,
+    enabled: note.enabled && metadata.status !== "deprecated",
+  };
+}
+
+function inferPlatforms(values: readonly string[]): string[] {
+  const normalized = new Set(values.map((value) => value.toLowerCase()));
+  const platforms = [
+    ["flutter", ["flutter", "dart"]],
+    ["react-native", ["react-native", "expo"]],
+    ["swiftui", ["swiftui"]],
+    ["ios", ["ios", "apple"]],
+    ["android", ["android", "kotlin"]],
+    ["web", ["web", "nextjs", "react", "browser"]],
+  ] as const;
+  return platforms
+    .filter(([, signals]) => signals.some((signal) => normalized.has(signal)))
+    .map(([platform]) => platform);
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function isNoteCategory(value: unknown): value is NoteCategory {
+  return value === "craft"
+    || value === "research"
+    || value === "connect"
+    || value === "generate";
 }

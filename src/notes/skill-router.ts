@@ -295,7 +295,6 @@ function scoreMetadata(
   queryTokens: ReadonlySet<string>,
 ): { score: number; matchedTerms: readonly string[] } {
   const fields = [
-    { values: entry.intents ?? [], weight: 7 },
     { values: [entry.id, entry.name, entry.title], weight: 5 },
     { values: entry.tags, weight: 4 },
     { values: [entry.description], weight: 2 },
@@ -303,6 +302,15 @@ function scoreMetadata(
   const matchedRaw = new Set<string>();
   const matchedNormalized = new Set<string>();
   let score = 0;
+  for (const intent of entry.intents ?? []) {
+    const tokens = [...tokenize(intent)];
+    const matches = tokens.filter((token) => queryTokens.has(token));
+    if (tokens.length === 0 || matches.length / tokens.length < 0.6) continue;
+    for (const token of matches) {
+      score += 7;
+      matchedRaw.add(token);
+    }
+  }
   for (const field of fields) {
     for (const value of field.values) {
       for (const raw of rawTokens(value)) {
