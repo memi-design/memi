@@ -8,6 +8,7 @@ import type {
 } from "./types.js";
 
 export const SKILL_ROUTER_VERSION = "skill-router-v1";
+const MINIMUM_STACK_SCORE_RATIO = 0.65;
 
 const TOKEN_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   a11y: "accessibility",
@@ -21,8 +22,9 @@ const TOKEN_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   wcag: "accessibility",
 });
 const STOP_WORDS = new Set([
-  "a", "an", "and", "as", "at", "be", "by", "for", "from", "in", "into",
-  "is", "it", "of", "on", "or", "the", "this", "to", "use", "with",
+  "a", "add", "adding", "an", "and", "as", "at", "be", "by", "existing",
+  "for", "from", "in", "into", "is", "it", "of", "on", "only", "or", "the",
+  "this", "to", "use", "when", "with",
 ]);
 
 export interface RouteInstalledSkillsInput {
@@ -120,6 +122,7 @@ export async function routeInstalledSkills(
     .sort(compareRouteCandidates);
   const selected: SkillRouteResult["selected"][number][] = [];
   const selectedCandidates: RankedRouteCandidate[] = [];
+  const coveredEvidence = new Set<string>();
   let contextBytes = 0;
 
   for (const candidate of ranked) {
@@ -131,6 +134,28 @@ export async function routeInstalledSkills(
       excluded.push({
         id: candidate.id,
         reason: `mutually-exclusive:${conflict.id}`,
+      });
+      continue;
+    }
+    const candidateEvidence = new Set(candidate.matchedTerms.map(normalizeToken));
+    if (
+      selected.length > 0
+      && [...candidateEvidence].every((term) => coveredEvidence.has(term))
+    ) {
+      excluded.push({
+        id: candidate.id,
+        reason: "redundant-evidence",
+      });
+      continue;
+    }
+    const leadingScore = selectedCandidates[0]?.score;
+    if (
+      leadingScore !== undefined
+      && candidate.score / leadingScore < MINIMUM_STACK_SCORE_RATIO
+    ) {
+      excluded.push({
+        id: candidate.id,
+        reason: "insufficient-stack-confidence",
       });
       continue;
     }
@@ -154,6 +179,7 @@ export async function routeInstalledSkills(
       contextBytes: bytes,
     });
     selectedCandidates.push(candidate);
+    for (const term of candidateEvidence) coveredEvidence.add(term);
     contextBytes += bytes;
   }
 
@@ -263,13 +289,19 @@ export function formatRoutedSkillContext(
   routed: ResolvedSkillRoute,
 ): string {
   const portableReceipt = {
-    ...routed.route,
+    schemaVersion: routed.route.schemaVersion,
+    routerVersion: routed.route.routerVersion,
+    decision: routed.route.decision,
+    intentHash: routed.route.intentHash,
     selected: routed.route.selected.map(({ file: _file, ...selected }) => ({
       ...selected,
       skillPath: `${selected.id}/${path.basename(_file)}`,
     })),
     resources: routed.resources.map(({ content: _content, ...resource }) => resource),
     contextBytes: routed.contextBytes,
+    maximumContextBytes: routed.route.maximumContextBytes,
+    candidateCount: routed.route.candidates.length,
+    excludedCount: routed.route.excluded.length,
   };
   const receipt = JSON.stringify(portableReceipt, null, 2);
   const skills = routed.skills.map((skill) =>

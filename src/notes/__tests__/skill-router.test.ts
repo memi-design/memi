@@ -145,6 +145,64 @@ describe("deterministic skill router", () => {
     expect(context).toContain("\"routerVersion\": \"skill-router-v1\"");
     expect(context).toContain("# accessibility-audit");
     expect(context).toContain(routed.route.selected[0].contentHash);
+    expect(context).not.toContain("\"candidates\"");
+    expect(context).not.toContain("\"excluded\"");
+  });
+
+  it("does not stack a second skill that adds no novel routing evidence", async () => {
+    const notes = await Promise.all([
+      note("accessibility-audit", {
+        description: "Audit accessibility, keyboard focus, and reduced motion.",
+        intents: ["accessibility-audit", "keyboard-focus", "reduced-motion"],
+      }),
+      note("motion-performance", {
+        description: "Audit accessibility and reduced motion performance.",
+        intents: ["reduced-motion", "motion-performance"],
+      }),
+    ]);
+
+    const routed = await routeInstalledSkills({
+      intent: "Audit keyboard focus accessibility and reduced motion",
+      notes,
+      capabilities: [],
+      maximumSkills: 2,
+    });
+
+    expect(routed.selected.map((skill) => skill.id)).toEqual(["accessibility-audit"]);
+    expect(routed.excluded).toContainEqual({
+      id: "motion-performance",
+      reason: "redundant-evidence",
+    });
+  });
+
+  it("does not fill a stack with a weakly related fallback after pruning redundancy", async () => {
+    const notes = await Promise.all([
+      note("accessibility-audit", {
+        description: "Audit accessibility, keyboard focus, and reduced motion.",
+        intents: ["accessibility-audit", "keyboard-focus", "reduced-motion"],
+      }),
+      note("motion-performance", {
+        description: "Audit accessibility and reduced motion performance.",
+        intents: ["reduced-motion", "motion-performance"],
+      }),
+      note("creative-rendering-audit", {
+        description: "Review visual rendering quality.",
+        intents: ["creative-rendering-audit"],
+      }),
+    ]);
+
+    const routed = await routeInstalledSkills({
+      intent: "Audit keyboard focus accessibility, reduced motion, and visual quality",
+      notes,
+      capabilities: [],
+      maximumSkills: 2,
+    });
+
+    expect(routed.selected.map((skill) => skill.id)).toEqual(["accessibility-audit"]);
+    expect(routed.excluded).toContainEqual({
+      id: "creative-rendering-audit",
+      reason: "insufficient-stack-confidence",
+    });
   });
 
   it("formats portable skill paths and records references that exceed the context budget", async () => {
