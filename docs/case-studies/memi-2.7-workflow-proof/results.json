@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-29T20:47:01.119Z",
+  "suiteId": "memi-2.7-workflow-pilot",
+  "canonicalExperiments": [
+    "buzzr-tab-unread-badge-v2",
+    "dori-atlas-shortcuts-v5",
+    "nate-options-reduce-motion-v1"
+  ],
+  "gate": {
+    "status": "verified",
+    "claim": "not_verified",
+    "targetImprovement": 0.25,
+    "includedPairs": 3,
+    "qualityPassed": true
+  },
+  "aggregate": {
+    "totalTokenSavings": {
+      "mean": -0.2304,
+      "lower95": -0.9833,
+      "upper95": 0.219
+    },
+    "latencySavings": {
+      "mean": -0.082,
+      "lower95": -0.4906,
+      "upper95": 0.2347
+    },
+    "toolCallSavings": {
+      "mean": -0.5196,
+      "lower95": -1.0588,
+      "upper95": -0.25
+    },
+    "costSavings": {
+      "status": "unassessed",
+      "reason": "No paired run exposed defensible USD cost evidence"
+    }
+  },
+  "pairs": [
+    {
+      "case": "DoriOS",
+      "experimentId": "dori-atlas-shortcuts-v5",
+      "revision": "18698932e45878a3eab1f5b114dfa5f9c2f58744",
+      "skillIds": [
+        "motion-performance"
+      ],
+      "skillContextBytes": 1993,
+      "baselineRunId": "dori-atlas-shortcuts-codex:gpt-5.6-sol:medium-baseline-896544b0-f753-482e-8649-48083172f6e2",
+      "memiRunId": "dori-atlas-shortcuts-codex:gpt-5.6-sol:medium-memi-09468c14-dd4d-4545-bb4b-a9353eb67dd7",
+      "baseline": {
+        "wallTimeMs": 477087,
+        "inputTokens": 3737533,
+        "cachedInputTokens": 3527680,
+        "uncachedInputTokens": 209853,
+        "outputTokens": 11271,
+        "reasoningTokens": 4735,
+        "toolCalls": 17,
+        "toolErrors": 4,
+        "retries": 0,
+        "qualityScore": 100
+      },
+      "memi": {
+        "wallTimeMs": 472321,
+        "inputTokens": 3464679,
+        "cachedInputTokens": 3338240,
+        "uncachedInputTokens": 126439,
+        "outputTokens": 11753,
+        "reasoningTokens": 2896,
+        "toolCalls": 35,
+        "toolErrors": 4,
+        "retries": 2,
+        "qualityScore": 100
+      },
+      "savingsPercent": {
+        "wallTime": 1,
+        "totalTokens": 7.31,
+        "inputTokens": 7.3,
+        "uncachedInputTokens": 39.75,
+        "outputTokens": -4.28,
+        "reasoningTokens": 38.84,
+        "toolCalls": -105.88
+      }
+    },
+    {
+      "case": "Buzzr",
+      "experimentId": "buzzr-tab-unread-badge-v2",
+      "revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+      "skillIds": [
+        "react-native-gen"
+      ],
+      "skillContextBytes": 4612,
+      "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-sol:medium-baseline-22f0efa6-c188-47a6-a785-8d6758ad89ca",
+      "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-sol:medium-memi-c8e794ff-200e-41c1-94b2-4e60a6f0e01d",
+      "baseline": {
+        "wallTimeMs": 361924,
+        "inputTokens": 1583207,
+        "cachedInputTokens": 1451776,
+        "uncachedInputTokens": 131431,
+        "outputTokens": 11426,
+        "reasoningTokens": 4708,
+        "toolCalls": 16,
+        "toolErrors": 2,
+        "retries": 3,
+        "qualityScore": 100
+      },
+      "memi": {
+        "wallTimeMs": 539475,
+        "inputTokens": 3154485,
+        "cachedInputTokens": 2969600,
+        "uncachedInputTokens": 184885,
+        "outputTokens": 12887,
+        "reasoningTokens": 4635,
+        "toolCalls": 20,
+        "toolErrors": 4,
+        "retries": 3,
+        "qualityScore": 100
+      },
+      "savingsPercent": {
+        "wallTime": -49.06,
+        "totalTokens": -98.33,
+        "inputTokens": -99.25,
+        "uncachedInputTokens": -40.67,
+        "outputTokens": -12.79,
+        "reasoningTokens": 1.55,
+        "toolCalls": -25
+      }
+    },
+    {
+      "case": "Nate the Bait",
+      "experimentId": "nate-options-reduce-motion-v1",
+      "revision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+      "skillIds": [
+        "swiftui-design-engineering"
+      ],
+      "skillContextBytes": 5095,
+      "baselineRunId": "nate-options-reduce-motion-codex:gpt-5.6-sol:medium-baseline-7deedd5f-5d72-42d8-8ffa-7317beb73e2a",
+      "memiRunId": "nate-options-reduce-motion-codex:gpt-5.6-sol:medium-memi-4df4f280-0d73-4c9c-a505-0ef96d5c1df8",
+      "baseline": {
+        "wallTimeMs": 421052,
+        "inputTokens": 2493736,
+        "cachedInputTokens": 2300672,
+        "uncachedInputTokens": 193064,
+        "outputTokens": 7617,
+        "reasoningTokens": 2267,
+        "toolCalls": 16,
+        "toolErrors": 5,
+        "retries": 0,
+        "qualityScore": 100
+      },
+      "memi": {
+        "wallTimeMs": 322245,
+        "inputTokens": 1946045,
+        "cachedInputTokens": 1825536,
+        "uncachedInputTokens": 120509,
+        "outputTokens": 6946,
+        "reasoningTokens": 2305,
+        "toolCalls": 20,
+        "toolErrors": 6,
+        "retries": 0,
+        "qualityScore": 100
+      },
+      "savingsPercent": {
+        "wallTime": 23.47,
+        "totalTokens": 21.9,
+        "inputTokens": 21.96,
+        "uncachedInputTokens": 37.58,
+        "outputTokens": 8.81,
+        "reasoningTokens": -1.68,
+        "toolCalls": -25
+      }
+    }
+  ],
+  "rejectedEvidence": [
+    {
+      "experimentId": "buzzr-tab-unread-badge-v1",
+      "reason": "The provider modified an immutable acceptance fixture."
+    },
+    {
+      "experimentId": "nate-options-reduce-motion-v1",
+      "provider": "claude",
+      "reason": "Claude Code returned authentication_failed. No paired claim was formed."
+    },
+    {
+      "experimentId": "nate-options-reduce-motion-claude-v2",
+      "provider": "claude",
+      "reason": "The machine OAuth credential is revoked. Verification was skipped after provider failure."
+    }
+  ],
+  "artifacts": {
+    "canonicalReportSha256": "6ffc0eb14501d7c3cbb99c45037938f398a71493e7a8603e29f782967ca02b66",
+    "doriTaskSha256": "0f3898600d00a3d36ca851f4ecdac29ad65c4ecea2907b41c8ecaab058b8539c",
+    "buzzrTaskSha256": "ba8662fb8aaeda426dcf52090706750d1220fa4cf43d128a893fd9968c5b3962",
+    "nateTaskSha256": "ca20e1119a97f003b4d034a428067f988967252e996725e2628af5445b652a23"
+  }
+}

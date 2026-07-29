@@ -1,0 +1,16 @@
+{
+  "id": "nyra-landing-design-system-map",
+  "intent": "Map the real Nyra landing-site design system across global styles, CSS modules, brand assets, content surfaces, and shared React components. Identify canonical color, typography, spacing, radius, elevation, motion, and reusable component sources; classify representative elements with Atomic Design levels; and report exact file and line evidence.",
+  "rubric": {
+    "minimumValidCitations": 6,
+    "requiredTerms": [
+      "color",
+      "typography",
+      "spacing",
+      "radius",
+      "elevation",
+      "motion",
+      "component"
+    ]
+  }
+}

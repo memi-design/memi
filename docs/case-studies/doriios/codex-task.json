@@ -1,0 +1,16 @@
+{
+  "id": "doriios-design-system-map",
+  "intent": "Map the real DoriOS web, Tauri, and native design-system sources without treating data assets as UI. Identify canonical color, typography, spacing, radius, elevation, visualization, and reusable component sources; classify representative elements with Atomic Design levels; and report exact file and line evidence.",
+  "rubric": {
+    "minimumValidCitations": 6,
+    "requiredTerms": [
+      "color",
+      "typography",
+      "spacing",
+      "radius",
+      "elevation",
+      "visualization",
+      "component"
+    ]
+  }
+}

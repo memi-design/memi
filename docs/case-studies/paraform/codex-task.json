@@ -1,0 +1,15 @@
+{
+  "id": "paraform-design-system-map",
+  "intent": "Map the real Paraform product design system. Identify canonical color, typography, spacing, radius, elevation, and reusable component sources; distinguish primitives from feature components using Atomic Design levels; and report exact file and line evidence.",
+  "rubric": {
+    "minimumValidCitations": 6,
+    "requiredTerms": [
+      "color",
+      "typography",
+      "spacing",
+      "radius",
+      "elevation",
+      "component"
+    ]
+  }
+}

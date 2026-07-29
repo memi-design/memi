@@ -1,0 +1,16 @@
+{
+  "id": "nyra-design-system-map",
+  "intent": "Map the real Nyra patient and clinician product design-system sources while keeping clinical behavior outside the design claim. Identify canonical color, typography, spacing, radius, elevation, interaction, and reusable component sources; classify representative elements with Atomic Design levels; and report exact file and line evidence.",
+  "rubric": {
+    "minimumValidCitations": 6,
+    "requiredTerms": [
+      "color",
+      "typography",
+      "spacing",
+      "radius",
+      "elevation",
+      "interaction",
+      "component"
+    ]
+  }
+}

@@ -8,7 +8,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
-## v2.7.0
+## v2.7.0 — 2026-07-29
 
 ### Reproducible agent-efficiency evidence
 
@@ -17,6 +17,36 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `3aa8a9fb` test: require live benchmark and trace receipts
 - `7852ac57` feat: add immutable efficiency evidence engine
 - `d9bde8be` test: define measurable efficiency evidence contract
+- `c53d2668` feat: complete memi 2.7 evidence release candidate
+- `cfffe564` test: define routed skill and workflow harness contracts
+- `e3707d8f` feat: add deterministic skill routing contracts
+- `12ac23f3` test: define executable workflow and route CLI behavior
+- `f07d50d5` feat: execute traced workflow benchmarks
+- `dcaad15e` test: require live skill routing receipts
+- `85e26a4d` feat: route bounded skills in live orchestration
+- `fe1a0770` test: define isolated provider workflow harness
+- `749b1096` feat: isolate model-agnostic workflow adapters
+- `65eb3ecf` test: define executable workflow benchmark CLI
+- `067b07d1` feat: expose reproducible workflow benchmark commands
+- `bd3f1f34` test: require provider-specific benchmark pairing
+- `79cddaa7` fix: pair workflow evidence per provider
+- `7b782233` test: require governed catalog routing metadata
+- `4a91be16` feat: honor governed skill catalog routing
+- `e61a041f` test: define exact routing exclusions
+- `b01fbae6` fix: apply skill exclusions between routed candidates
+- `6e04382b` test: add Dori rendered workflow case
+- `e00baa3e` fix: make routed skill context portable
+- `fea94503` fix: isolate workflow evidence from verification
+- `929b849c` perf: prune redundant skill stacks
+- `2896a15e` perf: reuse prepared browser cache in workflows
+- `baa38953` fix: route skills by task action and intent polarity
+- `f4ee902a` test: add Buzzr rendered workflow case
+- `265dd5b1` fix: protect workflow acceptance fixtures
+- `84ddc70c` fix: ignore generic action terms in skill routing
+- `c89b3df5` test: add Nate iOS simulator workflow case
+- `ecc19f69` fix: authenticate and fail fast in Claude workflows
+- `355fe986` feat: scope benchmark reports to canonical experiments
+- `5b0ebd2d` feat: complete measured efficiency evidence surfaces
 
 #### Architectural decisions
 
@@ -25,6 +55,21 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Keep trace receipts metadata-only and bind them to a SHA-256 digest instead of retaining prompts, source, hidden reasoning, or secrets.
 - Withhold the 25% claim until token and latency lower 95% confidence bounds exceed the target and quality guardrails pass.
 - Track successful first audits, repeat audit projects, and CI reuse separately from npm downloads.
+- Route at most two non-redundant skills under a hard context budget, filter
+  by task action, platform, capability, intent polarity, and catalog
+  exclusions, and record the exact selected hashes and rejected candidates.
+- Execute writable product benchmarks only in clean disposable clones. Commit
+  harness preparation and immutable fixtures as the local baseline, capture
+  the agent patch before verification, and run real builds plus rendered or
+  Simulator flows independently of the model.
+- Keep failed and exploratory traces immutable while allowing canonical reports
+  to declare an explicit experiment allowlist. Never delete a negative run to
+  improve a release claim.
+- Treat structured provider errors as execution failures even when a vendor CLI
+  exits zero, and skip costly product verification after provider failure.
+- Keep the 2.7 release gate closed after the three canonical workflow pairs:
+  Dori and Nate showed bounded discovery benefits, Buzzr regressed, and the
+  aggregate greater-than-25-percent claim remains unverified.
 
 ## v2.6.4
 

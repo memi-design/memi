@@ -52,35 +52,21 @@ animated-skin, persistence, collision, results-navigation, and touch-steering
 flows. The complete `.xcresult` remains machine-local evidence; this case is a
 failed app-validation result, not a Memi release pass.
 
-## Paired efficiency experiment
+## Paired efficiency result
 
-`tasks.json` defines three repository-specific tasks. Generate the randomized
-18-trial plan with:
+The isolated revision-matched pair completed at 100/100 quality in both
+conditions:
 
-```sh
-memi benchmark plan docs/case-studies/nate-the-bait/tasks.json \
-  --suite nate-the-bait-2.7 \
-  --experiment memi-2.7-nate \
-  --repeats 3 \
-  --seed 270 \
-  --out /tmp/nate-the-bait-benchmark-plan.json \
-  --json
-```
+- Baseline: 682,967 counted tokens, 138.577 seconds, 12 tools.
+- Memi: 534,976 counted tokens, 157.449 seconds, 10 tools.
+- Savings: 21.7% tokens and 16.7% tools.
+- Regression: Memi was 13.6% slower.
 
-Run every trial on the same clean revision, harness, model, and reasoning
-setting. Record both baseline and Memi runs with `memi benchmark record`, then
-evaluate them with:
+The original baseline grade did not recognize standard relative GitHub
+`#Lx-Ly` anchors. Its raw trace and failed grade were preserved. An immutable
+`source-citations-v2` amendment regraded the same response at 31 valid
+citations, zero invalid citations, and 100/100 without rerunning the model or
+changing performance metrics.
 
-```sh
-memi benchmark report \
-  --suite nate-the-bait-2.7 \
-  --minimum-pairs 5 \
-  --bootstrap-samples 2000 \
-  --seed 270 \
-  --target 0.25 \
-  --out /tmp/nate-the-bait-efficiency-report.json \
-  --json
-```
-
-The current report is `insufficient_evidence`: zero paired agent runs have been
-recorded. No token, cost, latency, or quality saving is claimed.
+Nate does not support a greater-than-25% efficiency claim. See
+[the consolidated six-repository study](../memi-2.7-six-repo/README.md).
