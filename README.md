@@ -135,7 +135,10 @@ four qualified practitioners, five artifacts per practitioner, two blinded
 ratings per artifact, reliable graders, and measured private plus holdout
 results. See the current
 [readiness report](docs/audits/memi-designworkbench-v2-readiness.md) and
-[execution goal](docs/DESIGNWORKBENCH_V2_GOAL.md).
+[execution goal](docs/DESIGNWORKBENCH_V2_GOAL.md). Three of eight runner
+profiles now have reproducible, hash-bound evidence: browser/Playwright,
+motion rendering, and artifact/provenance validation. The remaining runners and
+all practitioner results remain blocked rather than inferred.
 
 ## Choose your integration
 

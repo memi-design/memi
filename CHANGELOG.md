@@ -8,6 +8,39 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+### DesignWorkBench v2 benchmark and evidence activation
+
+- `aab66e2d` feat: activate three benchmark evidence runners
+- `321cd65a` feat: render and inspect motion runner evidence
+- `685c61c1` test: require reproducible motion runner proof
+- `1c99ec60` test: require executable benchmark evidence workflow
+- `b6421a07` feat: capture traced browser runner evidence
+- `c540c42d` test: require traced browser runner proof
+- `0db4e8a1` feat: produce representative artifact runner receipts
+- `6c9448b5` test: require representative artifact runner proof
+- `253dccd6` feat: derive readiness from verified evidence receipts
+- `6371a3fa` test: require receipt-derived benchmark readiness
+- `156b07ac` feat: verify immutable benchmark evidence receipts
+- `f82bfdd0` test: define immutable benchmark evidence receipts
+- `8f45e92c` feat: enforce benchmark provenance and grader reliability
+- `0782dca6` test: harden benchmark provenance and reliability
+- `69545300` feat: gate designworkbench on practitioner proof
+- `061932b0` test: require benchmark release wiring
+- `63f456e3` test: define designworkbench readiness gate
+- `5f824c73` feat: implement designworkbench v2 foundation
+- `a4d7104b` test: define designworkbench v2 contract
+
+#### Architectural decisions
+
+- Derive benchmark readiness from immutable, candidate-bound receipts instead
+  of mutable manifest status fields.
+- Require every verified artifact to match its recorded hash and remain inside
+  the evidence root.
+- Count a runner only when all evidence kinds in its contract exist and verify.
+  Tool installation or capability detection alone does not clear a runner.
+- Keep calibration external and blinded. Synthetic practitioner identities or
+  ratings cannot clear the release gate.
+
 ## v2.7.0 — 2026-07-29
 
 ### Release hardening and executable coverage
