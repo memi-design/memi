@@ -12,6 +12,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Release hardening and executable coverage
 
+- `ac199dab` fix: exclude token sources from raw color debt
+- `79996e04` test: reproduce self-gate color false positives
 - `1239a091` fix: normalize sub-agent artifact names
 - `488fc922` test: cover sub-agent execution routes
 - `b99f678e` fix: preserve sub-agent sync invariants
@@ -46,6 +48,10 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Raise coverage through executable production contracts and real failure-path
   tests. Do not lower thresholds or exclude difficult release surfaces to make
   the candidate appear ready.
+- Exclude package-staging directories from source audits and distinguish
+  centralized CSS custom-property declarations from hardcoded color usage.
+  Generated copies and token definitions must not create false release failures,
+  while direct hex usage in rendered UI remains auditable.
 
 ### Reproducible agent-efficiency evidence
 
