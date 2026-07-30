@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -8,6 +8,9 @@ import {
   sha256File,
   validateDesignWorkEvidence,
 } from "../../../scripts/lib/designwork-evidence.mjs";
+import {
+  buildPublicFixtureCandidates,
+} from "../../../scripts/lib/designwork-fixtures.mjs";
 import {
   runArtifactValidatorProbe,
   runBrowserPlaywrightProbe,
@@ -71,6 +74,36 @@ describe("DesignWorkBench evidence receipts", () => {
     expect(result.failures).toEqual([]);
     expect(result.verifiedFixtureIds).toEqual([manifest.tasks[0].id]);
     expect(result.verifiedRunnerIds).toEqual(["artifact-validator"]);
+  });
+
+  it("validates all 60 public fixture candidates without promoting them", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const evidenceRoot = await mkdtemp(path.join(os.tmpdir(), "memi-designwork-candidates-"));
+    const candidates = buildPublicFixtureCandidates(manifest);
+    await mkdir(path.join(evidenceRoot, "public-fixtures"), { recursive: true });
+    const candidateFixtures = await Promise.all(candidates.map(async (candidate) => {
+      const filename = `public-fixtures/${candidate.taskId}.json`;
+      const candidatePath = path.join(evidenceRoot, filename);
+      await writeFile(candidatePath, `${JSON.stringify(candidate, null, 2)}\n`, "utf8");
+      return {
+        taskId: candidate.taskId,
+        path: filename,
+        sha256: await sha256File(candidatePath),
+      };
+    }));
+
+    const result = await validateDesignWorkEvidence(manifest, {
+      schemaVersion: 1,
+      benchmarkId: manifest.benchmarkId,
+      receipts: [],
+      candidateFixtures,
+      calibrationArtifacts: [],
+      results: null,
+    }, { root: evidenceRoot });
+
+    expect(result.passed).toBe(true);
+    expect(result.preparedFixtureIds).toHaveLength(60);
+    expect(result.verifiedFixtureIds).toEqual([]);
   });
 
   it("fails closed when an artifact changes after its receipt is sealed", async () => {
