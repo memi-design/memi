@@ -151,6 +151,24 @@ describe("Memi DesignWorkBench v2", () => {
       "practitioner calibration is pending",
     ]));
   });
+
+  it("wires benchmark integrity and practitioner proof into the release surface", async () => {
+    const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
+    const releaseGate = await readFile(path.join(root, "scripts", "check-release.mjs"), "utf8");
+    const readme = await readFile(path.join(root, "README.md"), "utf8");
+
+    expect(packageJson.scripts).toMatchObject({
+      "build:designwork-bench": "node scripts/generate-designwork-benchmark.mjs",
+      "check:designwork-bench": "node scripts/generate-designwork-benchmark.mjs --check",
+      "build:designwork-readiness": "node scripts/build-designwork-readiness.mjs",
+      "check:designwork-readiness": "node scripts/build-designwork-readiness.mjs --check",
+      "check:designwork-release": "node scripts/build-designwork-readiness.mjs --check --require-ready",
+    });
+    expect(releaseGate).toContain("check:designwork-release");
+    expect(readme).toContain("Memi DesignWorkBench v2");
+    expect(readme).toContain("300 task contracts");
+    expect(readme).toContain("practitioner calibration");
+  });
 });
 
 function practitionerRatings(trackId: string) {
