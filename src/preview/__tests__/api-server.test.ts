@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { EventEmitter } from "events";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   PREVIEW_BIND_HOST,
   PreviewApiServer,
@@ -9,6 +12,208 @@ import {
 } from "../api-server.js";
 
 describe("PreviewApiServer", () => {
+  it("serves the authenticated preview, registry, research, and agent APIs end to end", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-preview-api-"));
+    const staticDir = join(projectRoot, "preview");
+    await mkdir(staticDir, { recursive: true });
+    await writeFile(join(staticDir, "index.html"), "<h1>Memi preview</h1>");
+    const componentDir = join(projectRoot, "generated", "components", "ui", "Button");
+    await mkdir(componentDir, { recursive: true });
+    await writeFile(join(componentDir, "Button.tsx"), [
+      "import { cn } from \"clsx\";",
+      "import { Badge } from \"@/components/ui/Badge\";",
+      "export function Button() { return <button className={cn(\"button\")}><Badge /></button>; }",
+    ].join("\n"));
+
+    const figma = new EventEmitter() as EventEmitter & {
+      isConnected: boolean;
+      wsServer: {
+        activePort: number;
+        getStatus: () => {
+          running: boolean;
+          port: number;
+          clients: never[];
+        };
+        sendCommand: (command: string) => Promise<unknown>;
+      };
+      getSelection: () => Promise<unknown>;
+      getPageTree: () => Promise<unknown>;
+      extractStickies: () => Promise<unknown>;
+      extractDesignSystem: () => Promise<unknown>;
+    };
+    figma.isConnected = true;
+    figma.wsServer = {
+      activePort: 9223,
+      getStatus: () => ({ running: true, port: 9223, clients: [] }),
+      sendCommand: async (command) => ({ command }),
+    };
+    figma.getSelection = async () => ({ nodes: [{ id: "1:2", name: "Button" }] });
+    figma.getPageTree = async () => ({ pages: [{ id: "page-1", name: "Home" }] });
+    figma.extractStickies = async () => ({ stickies: [] });
+    figma.extractDesignSystem = async () => ({ tokens: 4, components: 1 });
+
+    const specs = [
+      { name: "Dashboard", researchBacking: ["finding-1"] },
+      { name: "Button" },
+    ];
+    const engine = new EventEmitter() as EventEmitter & Record<string, unknown>;
+    Object.assign(engine, {
+      config: { projectRoot },
+      registry: {
+        getAllSpecs: async () => specs,
+        designSystem: { tokens: [{ name: "color.ruby", value: "#ff5470" }] },
+      },
+      figma,
+      sync: {
+        getConflicts: () => [{ name: "color.ruby" }],
+        isGuarded: true,
+        resolveConflict: (name: string, resolution: string) =>
+          name === "color.ruby" && resolution === "code",
+      },
+      agentRegistry: {
+        getAll: () => [
+          { id: "agent-1", status: "online" },
+          { id: "agent-2", status: "busy" },
+        ],
+      },
+      taskQueue: {
+        getStats: () => ({ pending: 1, running: 1, completed: 2, failed: 0 }),
+      },
+      research: {
+        load: async () => undefined,
+        getStore: () => ({
+          version: 2,
+          sources: [],
+          observations: [],
+          findings: [{ id: "finding-1" }],
+          themes: [],
+        }),
+      },
+    });
+
+    const server = new PreviewApiServer(engine as never, staticDir, 0);
+    server.setPipeline({
+      getStats: () => ({ pullCount: 1, specCount: 2, generateCount: 3, errorCount: 0, queueDepth: 1 }),
+      getRecentEvents: () => [{ type: "generate", timestamp: "2026-07-29T00:00:00.000Z", detail: "Button" }],
+    });
+
+    try {
+      const port = await server.start();
+      const baseUrl = `http://${PREVIEW_BIND_HOST}:${port}`;
+      const firstResponse = await fetch(`${baseUrl}/api/specs`);
+      const cookie = firstResponse.headers.get("set-cookie")?.split(";")[0];
+      expect(cookie).toContain("memoire_preview_session=");
+      expect(await firstResponse.json()).toEqual(specs);
+
+      await expect(fetchJson(`${baseUrl}/api/tokens`)).resolves.toMatchObject({
+        tokens: [{ name: "color.ruby" }],
+      });
+      await expect(fetchJson(`${baseUrl}/api/status`)).resolves.toMatchObject({
+        connected: true,
+        port: 9223,
+      });
+      await expect(fetchJson(`${baseUrl}/api/pipeline/stats`)).resolves.toMatchObject({
+        generateCount: 3,
+      });
+      await expect(fetchJson(`${baseUrl}/api/pipeline/events`)).resolves.toEqual([
+        expect.objectContaining({ type: "generate" }),
+      ]);
+      await expect(fetchJson(`${baseUrl}/api/sync/state`)).resolves.toMatchObject({
+        conflictCount: 1,
+        isGuarded: true,
+      });
+      await expect(fetchJson(`${baseUrl}/api/agents`)).resolves.toMatchObject({
+        agentCount: 2,
+        online: 1,
+        busy: 1,
+      });
+      await expect(fetchJson(`${baseUrl}/api/research`)).resolves.toMatchObject({
+        version: 2,
+        coverage: { covered: 1, total: 2, ratio: 0.5 },
+      });
+
+      const registry = await fetchJson(`${baseUrl}/r/registry.json`) as { items: unknown[] };
+      expect(registry.items).toHaveLength(1);
+      await expect(fetchJson(`${baseUrl}/r/Button.json`)).resolves.toMatchObject({
+        name: "Button",
+        dependencies: ["clsx"],
+        registryDependencies: ["Badge"],
+      });
+      const missingRegistryItem = await fetch(`${baseUrl}/r/Missing.json`);
+      expect(missingRegistryItem.status).toBe(404);
+      const invalidRegistryItem = await fetch(`${baseUrl}/r/%3Cscript%3E.json`);
+      expect(invalidRegistryItem.status).toBe(400);
+
+      const indexResponse = await fetch(baseUrl);
+      expect(await indexResponse.text()).toContain("Memi preview");
+      expect((await fetch(`${baseUrl}/missing.txt`)).status).toBe(404);
+      expect((await fetch(`${baseUrl}/api/missing`)).status).toBe(404);
+
+      const unauthorizedAction = await fetch(`${baseUrl}/api/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "inspect" }),
+      });
+      expect(unauthorizedAction.status).toBe(403);
+
+      const actionHeaders = {
+        "Content-Type": "application/json",
+        Origin: baseUrl,
+        Cookie: cookie ?? "",
+      };
+      const inspectAction = await fetch(`${baseUrl}/api/action`, {
+        method: "POST",
+        headers: actionHeaders,
+        body: JSON.stringify({ action: "inspect" }),
+      });
+      expect(inspectAction.status).toBe(200);
+      expect(await inspectAction.json()).toMatchObject({
+        ok: true,
+        result: { nodes: [{ id: "1:2" }] },
+      });
+      for (const action of ["pull-tokens", "pull-components", "page-tree", "stickies", "full-sync"]) {
+        const response = await fetch(`${baseUrl}/api/action`, {
+          method: "POST",
+          headers: actionHeaders,
+          body: JSON.stringify({ action }),
+        });
+        expect(response.status).toBe(200);
+      }
+
+      const unknownAction = await fetch(`${baseUrl}/api/action`, {
+        method: "POST",
+        headers: actionHeaders,
+        body: JSON.stringify({ action: "delete-project" }),
+      });
+      expect(unknownAction.status).toBe(400);
+
+      const resolveResponse = await fetch(`${baseUrl}/api/sync/resolve`, {
+        method: "POST",
+        headers: actionHeaders,
+        body: JSON.stringify({ name: "color.ruby", resolution: "code" }),
+      });
+      expect(await resolveResponse.json()).toEqual({
+        ok: true,
+        name: "color.ruby",
+        resolution: "code",
+      });
+
+      const preflight = await fetch(`${baseUrl}/api/action`, {
+        method: "OPTIONS",
+        headers: { Origin: baseUrl },
+      });
+      expect(preflight.status).toBe(204);
+      const blockedPreflight = await fetch(`${baseUrl}/api/action`, {
+        method: "OPTIONS",
+        headers: { Origin: "https://attacker.example" },
+      });
+      expect(blockedPreflight.status).toBe(403);
+    } finally {
+      server.stop();
+      await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
   it("returns the operating-system assigned port when started with port zero", async () => {
     const figma = new EventEmitter() as EventEmitter & {
       isConnected: boolean;
@@ -256,3 +461,9 @@ describe("PreviewApiServer", () => {
     });
   });
 });
+
+async function fetchJson(url: string): Promise<unknown> {
+  const response = await fetch(url);
+  expect(response.status).toBe(200);
+  return response.json();
+}
