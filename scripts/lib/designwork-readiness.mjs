@@ -62,6 +62,7 @@ export function buildDesignWorkReadiness(manifest, evidenceInput = []) {
     ? {
         verifiedFixtureIds: [],
         verifiedRunnerIds: [],
+        preparedFixtureIds: [],
         calibrationArtifacts: evidenceInput,
         results: null,
       }
@@ -73,6 +74,9 @@ export function buildDesignWorkReadiness(manifest, evidenceInput = []) {
   );
   const verifiedRunnerIds = new Set(
     (evidence.verifiedRunnerIds ?? []).filter((id) => runnerIds.has(id)),
+  );
+  const preparedFixtureIds = new Set(
+    (evidence.preparedFixtureIds ?? []).filter((id) => taskIds.has(id)),
   );
   const calibrationArtifacts = Array.isArray(evidence.calibrationArtifacts)
     ? evidence.calibrationArtifacts
@@ -118,6 +122,10 @@ export function buildDesignWorkReadiness(manifest, evidenceInput = []) {
       privateTasks: splitCounts.privateTest,
       holdoutTasks: splitCounts.rollingHoldout,
       runnerContracts: runners.length,
+    },
+    prepared: {
+      fixtures: preparedFixtureIds.size,
+      runners: verifiedRunnerIds.size,
     },
     verified: {
       fixtures: verifiedFixtureIds.size,

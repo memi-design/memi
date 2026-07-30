@@ -4,8 +4,12 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  sha256File,
   validateDesignWorkEvidence,
 } from "./lib/designwork-evidence.mjs";
+import {
+  buildPublicFixtureCandidates,
+} from "./lib/designwork-fixtures.mjs";
 import {
   runArtifactValidatorProbe,
   runBrowserPlaywrightProbe,
@@ -21,6 +25,7 @@ const manifest = JSON.parse(await readFile(benchmarkPath, "utf8"));
 
 if (!check) {
   await mkdir(evidenceRoot, { recursive: true, mode: 0o700 });
+  const candidateFixtures = await writePublicFixtureCandidates();
   const existing = await loadBundle();
   const receipts = await Promise.all([
     runArtifactValidatorProbe({ manifest, evidenceRoot, projectRoot: root }),
@@ -31,6 +36,7 @@ if (!check) {
     schemaVersion: 1,
     benchmarkId: manifest.benchmarkId,
     receipts,
+    candidateFixtures,
     calibrationArtifacts: existing?.calibrationArtifacts ?? [],
     results: existing?.results ?? null,
   };
@@ -50,6 +56,23 @@ if (!bundle) {
   });
   console.log(JSON.stringify(result, null, 2));
   if (!result.passed) process.exitCode = 1;
+}
+
+async function writePublicFixtureCandidates() {
+  const fixtureRoot = path.join(evidenceRoot, "public-fixtures");
+  await mkdir(fixtureRoot, { recursive: true, mode: 0o700 });
+  return Promise.all(buildPublicFixtureCandidates(manifest).map(async (candidate) => {
+    const candidatePath = path.join(fixtureRoot, `${candidate.taskId}.json`);
+    await writeFile(candidatePath, `${JSON.stringify(candidate, null, 2)}\n`, {
+      encoding: "utf8",
+      mode: 0o600,
+    });
+    return {
+      taskId: candidate.taskId,
+      path: path.relative(evidenceRoot, candidatePath),
+      sha256: await sha256File(candidatePath),
+    };
+  }));
 }
 
 async function loadBundle() {
