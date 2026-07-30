@@ -78,6 +78,29 @@ describe("audit scorecard release surfaces", () => {
     );
   });
 
+  it("uses URL-safe benchmark paths and repairs the immutable v2.7.0 Windows tag", async () => {
+    const validator = await readFile(
+      join(process.cwd(), "scripts", "validate-interface-benchmark.mjs"),
+      "utf8",
+    );
+    const workflow = await readFile(
+      join(process.cwd(), ".github", "workflows", "release-binaries.yml"),
+      "utf8",
+    );
+
+    expect(validator).toContain('fileURLToPath(new URL("..", import.meta.url))');
+    expect(validator).not.toContain('new URL("..", import.meta.url).pathname');
+    expect(workflow).toContain(
+      '[[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.7.0" ]]',
+    );
+    expect(workflow).toContain(
+      "v2.7.0 interface benchmark path compatibility precondition failed",
+    );
+    expect(workflow).toMatch(
+      /git archive --format=tar HEAD scripts\/validate-interface-benchmark\.mjs \| tar --extract --file=-/,
+    );
+  });
+
   it("executes npm audit through the Windows command shell", async () => {
     const releaseCheck = await readFile(
       join(process.cwd(), "scripts", "check-release.mjs"),
