@@ -1,6 +1,16 @@
 import { createHash } from "node:crypto";
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  buildCalibrationReadiness,
+  buildDesignWorkReadiness,
+} from "./designwork-readiness.mjs";
+
+export {
+  buildCalibrationReadiness,
+  buildDesignWorkReadiness,
+  krippendorffAlphaInterval,
+} from "./designwork-readiness.mjs";
 
 const SPLITS = new Set(["publicDevelopment", "privateTest", "rollingHoldout"]);
 const EVIDENCE_CAPS = Object.freeze({
@@ -345,133 +355,6 @@ export function geometricMean(scores) {
   ));
 }
 
-export function buildCalibrationReadiness(manifest, artifacts) {
-  const trackResults = (manifest.tracks ?? []).map((entry) => {
-    const trackArtifacts = artifacts.filter((artifact) => artifact.trackId === entry.id);
-    const qualified = trackArtifacts.filter((artifact) => artifact.qualified);
-    const practitioners = new Set(qualified.map((artifact) => artifact.practitionerId));
-    const external = new Set(qualified
-      .filter((artifact) => artifact.external)
-      .map((artifact) => artifact.practitionerId));
-    const counts = new Map();
-    for (const artifact of qualified) {
-      counts.set(artifact.practitionerId, (counts.get(artifact.practitionerId) ?? 0) + 1);
-    }
-    const minimumArtifacts = practitioners.size === 0
-      ? 0
-      : Math.min(...[...practitioners].map((id) => counts.get(id) ?? 0));
-    const ratingPairs = qualified.flatMap((artifact) => ratingPair(artifact.ratings));
-    const reliability = agreementCoefficient(ratingPairs);
-    const failures = [];
-    if (practitioners.size < 4) failures.push(`${entry.id} requires at least 4 qualified practitioners`);
-    if (external.size < 2) failures.push(`${entry.id} requires at least 2 external practitioners`);
-    if (practitioners.size > 0 && minimumArtifacts < 5) {
-      failures.push(`${entry.id} requires at least 5 artifacts per practitioner`);
-    }
-    if (qualified.some((artifact) => new Set(
-      (artifact.ratings ?? []).map((rating) => rating.graderId),
-    ).size < 2)) {
-      failures.push(`${entry.id} requires two independent ratings per artifact`);
-    }
-    if (ratingPairs.length > 0 && reliability < 0.67) {
-      failures.push(`${entry.id} reliability ${reliability} is below 0.67`);
-    }
-    return deepFreeze({
-      trackId: entry.id,
-      practitioners: practitioners.size,
-      externalPractitioners: external.size,
-      artifacts: qualified.length,
-      reliability,
-      ready: failures.length === 0,
-      failures,
-    });
-  });
-  const failures = trackResults.flatMap((entry) => entry.failures);
-  const overallReliability = weightedMean(
-    trackResults.filter((entry) => entry.artifacts > 0)
-      .map((entry) => ({ value: entry.reliability, weight: entry.artifacts })),
-  );
-  if (trackResults.length > 0
-    && trackResults.every((entry) => entry.ready)
-    && overallReliability < 0.8) {
-    failures.push(`overall reliability ${overallReliability} is below 0.8`);
-  }
-  return deepFreeze({
-    ready: trackResults.length > 0 && failures.length === 0,
-    overallReliability,
-    tracks: trackResults,
-    failures,
-  });
-}
-
-export function buildDesignWorkReadiness(manifest, calibrationArtifacts = []) {
-  const tasks = Array.isArray(manifest?.tasks) ? manifest.tasks : [];
-  const tracks = Array.isArray(manifest?.tracks) ? manifest.tracks : [];
-  const runners = Array.isArray(manifest?.runnerProfiles) ? manifest.runnerProfiles : [];
-  const splitCounts = {
-    publicDevelopment: tasks.filter((task) => task.split === "publicDevelopment").length,
-    privateTest: tasks.filter((task) => task.split === "privateTest").length,
-    rollingHoldout: tasks.filter((task) => task.split === "rollingHoldout").length,
-  };
-  const verifiedFixtures = tasks.filter((task) => task.fixture?.status === "verified").length;
-  const contractFixtures = tasks.filter(
-    (task) => task.fixture?.status === "contract_defined",
-  ).length;
-  const verifiedRunners = runners.filter((runner) => runner.status === "verified").length;
-  const contractRunners = runners.filter(
-    (runner) => runner.status === "contract_defined",
-  ).length;
-  const calibration = buildCalibrationReadiness(manifest, calibrationArtifacts);
-  const practitioners = new Set(
-    calibrationArtifacts.filter((artifact) => artifact.qualified)
-      .map((artifact) => artifact.practitionerId),
-  ).size;
-  const calibratedTracks = calibration.tracks.filter((entry) => entry.ready).length;
-  const foundationReady = tracks.length === 15
-    && tasks.length === 300
-    && splitCounts.publicDevelopment === 60
-    && splitCounts.privateTest === 180
-    && splitCounts.rollingHoldout === 60
-    && runners.length === 8;
-  const blockers = [];
-  if (contractFixtures > 0) {
-    blockers.push(`${contractFixtures} task fixtures remain contract_defined`);
-  }
-  if (contractRunners > 0) {
-    blockers.push(`${contractRunners} runner profiles remain contract_defined`);
-  }
-  if (!calibration.ready) blockers.push("practitioner calibration is pending");
-  if (manifest?.results === null || manifest?.results === undefined) {
-    blockers.push("private and holdout benchmark results are not measured");
-  }
-  return deepFreeze({
-    benchmarkId: manifest?.benchmarkId ?? null,
-    frozenCandidate: manifest?.frozenCandidate ?? null,
-    foundationReady,
-    releaseReady: foundationReady
-      && verifiedFixtures === tasks.length
-      && verifiedRunners === runners.length
-      && calibration.ready
-      && isRecord(manifest?.results),
-    completed: {
-      tracks: tracks.length,
-      taskContracts: tasks.length,
-      publicTasks: splitCounts.publicDevelopment,
-      privateTasks: splitCounts.privateTest,
-      holdoutTasks: splitCounts.rollingHoldout,
-      runnerContracts: runners.length,
-    },
-    verified: {
-      fixtures: verifiedFixtures,
-      runners: verifiedRunners,
-      practitioners,
-      calibratedTracks,
-    },
-    calibration,
-    blockers,
-  });
-}
-
 function track(input) {
   if (input.weights.reduce((sum, value) => sum + value, 0) !== 100) {
     throw new Error(`${input.id} weights must sum to 100`);
@@ -697,6 +580,20 @@ function validateTasks(manifest, failures) {
     if (task.split !== "publicDevelopment" && task.fixture?.public === true) {
       failures.push(`task ${task.id} private task fixture cannot be public`);
     }
+    if (task.fixture?.status === "verified") {
+      if (!Array.isArray(task.fixture.sourceRefs) || task.fixture.sourceRefs.length === 0) {
+        failures.push(`task ${task.id} verified fixture requires sourceRefs`);
+      }
+      if (!/^[a-f0-9]{64}$/.test(task.fixture.sha256 ?? "")) {
+        failures.push(`task ${task.id} verified fixture requires a sha256`);
+      }
+      if (!isRecord(task.fixture.provenance)
+        || typeof task.fixture.provenance.source !== "string"
+        || typeof task.fixture.provenance.license !== "string"
+        || typeof task.fixture.provenance.capturedAt !== "string") {
+        failures.push(`task ${task.id} verified fixture requires provenance`);
+      }
+    }
     if (!Array.isArray(task.negativeControlIds) || task.negativeControlIds.length < 3) {
       failures.push(`task ${task.id} requires negative controls`);
     } else {
@@ -789,31 +686,6 @@ function validationResult(manifest, failures) {
     calibrationStatus: manifest?.calibration?.status ?? "missing",
     failures,
   });
-}
-
-function ratingPair(ratings) {
-  if (!Array.isArray(ratings) || ratings.length < 2) return [];
-  const unique = [...new Map(ratings.map((rating) => [rating.graderId, rating])).values()];
-  if (unique.length < 2) return [];
-  return [[clampScore(unique[0].score), clampScore(unique[1].score)]];
-}
-
-function agreementCoefficient(pairs) {
-  if (pairs.length === 0) return 0;
-  const disagreement = pairs.reduce(
-    (sum, [left, right]) => sum + ((left - right) ** 2 / 10000),
-    0,
-  ) / pairs.length;
-  return round(Math.max(0, 1 - disagreement));
-}
-
-function weightedMean(entries) {
-  const totalWeight = entries.reduce((sum, entry) => sum + entry.weight, 0);
-  if (totalWeight === 0) return 0;
-  return round(entries.reduce(
-    (sum, entry) => sum + entry.value * entry.weight,
-    0,
-  ) / totalWeight);
 }
 
 function canonicalJson(value) {
