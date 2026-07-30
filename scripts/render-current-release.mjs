@@ -46,7 +46,9 @@ function renderCurrentRelease(value) {
   }
   const engineLabel = isCandidate
     ? "Engine candidate (unreleased)"
-    : "CLI, npm, MCP, and Action";
+    : engine.verification?.eligibleForParity
+      ? "CLI, npm, MCP, and Action"
+      : "Engine published (parity pending)";
   const releaseNotice = isCandidate
     ? `\n> Engine ${engine.version} is not the current public release. The public activation path remains ${publicEngine.version} until independent live-release verification passes.\n`
     : "";

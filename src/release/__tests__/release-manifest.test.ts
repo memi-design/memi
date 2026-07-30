@@ -14,7 +14,7 @@ import {
 const root = join(import.meta.dirname, "..", "..", "..");
 const manifestPath = join(root, "release-manifest.json");
 const webArtifactPath = join(root, "release-artifacts", "memoire-web.release.json");
-const publicEngineSourceCommit = "ec4d804220bfbf08be810ceb692a338cf186e794";
+const publicEngineSourceCommit = "00be64b9bd49fab57f4f54f678550a2021f6d1ae";
 
 describe("release manifest", () => {
   it("is the canonical source for every public release surface", async () => {
@@ -25,16 +25,15 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.7.0",
-          state: "candidate",
-          sourceCommit: null,
-          releaseRecord: null,
-          previousPublicRelease: {
-            version: "2.6.4",
-            sourceCommit: publicEngineSourceCommit,
+          state: "published",
+          sourceCommit: publicEngineSourceCommit,
+          releaseRecord: {
+            path: "release-artifacts/npm/2.7.0.release.json",
+            sha256: "1975911a27a9e148a4d12e644e88a8968a1f466c8d5724a80738015260916ca9",
           },
           verification: {
             eligibleForParity: false,
-            reason: "2.7.0 is a local candidate; publish provenance and independent public-surface parity verification are pending",
+            reason: "npm, GitHub release, Action channel, binaries, checksums, container, and pinned Studio assets are verified; MCP Registry and deployed website parity are pending",
           },
         },
         studio: { version: "2.5.0" },
@@ -70,33 +69,35 @@ describe("release manifest", () => {
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
     expect(artifact.publicTruth).toEqual({
-      source: "previousPublicRelease",
+      source: "currentRelease",
       engine: {
-        version: "2.6.4",
+        version: "2.7.0",
         sourceCommit: publicEngineSourceCommit,
         packageName: "@memi-design/cli",
         npmUrl: "https://www.npmjs.com/package/@memi-design/cli",
-        githubReleaseUrl: "https://github.com/memi-design/memi/releases/tag/v2.6.4",
+        githubReleaseUrl: "https://github.com/memi-design/memi/releases/tag/v2.7.0",
       },
     });
     expect(artifact.release).toMatchObject({
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.6.4",
-          state: "historical",
+          version: "2.7.0",
+          state: "published",
           sourceCommit: publicEngineSourceCommit,
-          releaseRecord: null,
+          releaseRecord: {
+            path: "release-artifacts/npm/2.7.0.release.json",
+            sha256: "1975911a27a9e148a4d12e644e88a8968a1f466c8d5724a80738015260916ca9",
+          },
           verification: {
             eligibleForParity: false,
-            reason: "2.6.4 remains public while 2.7.0 is an unpublished candidate",
+            reason: "npm, GitHub release, Action channel, binaries, checksums, container, and pinned Studio assets are verified; MCP Registry and deployed website parity are pending",
           },
-          plannedSuccessor: "2.7.0",
         },
       },
       surfaces: {
         githubRelease: {
-          url: "https://github.com/memi-design/memi/releases/tag/v2.6.4",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.0",
         },
       },
     });
@@ -147,9 +148,30 @@ describe("release manifest", () => {
         await mkdir(dirname(target), { recursive: true });
         await copyFile(join(root, relativePath), target);
       }
-      const candidateManifest = JSON.parse(
+      const currentManifest = JSON.parse(
         await readFile(join(fixtureRoot, "release-manifest.json"), "utf8"),
       );
+      const candidateManifest = {
+        ...currentManifest,
+        releaseGroups: {
+          ...currentManifest.releaseGroups,
+          engine: {
+            version: currentManifest.releaseGroups.engine.version,
+            state: "candidate",
+            sourceCommit: null,
+            releaseRecord: null,
+            previousPublicRelease: {
+              version: "2.6.4",
+              sourceCommit: "ec4d804220bfbf08be810ceb692a338cf186e794",
+            },
+            verification: {
+              eligibleForParity: false,
+              reason:
+                "fixture candidate; publish provenance and public parity are pending",
+            },
+          },
+        },
+      };
       await writeFile(
         join(fixtureRoot, "release-manifest.json"),
         serializeJson(candidateManifest),

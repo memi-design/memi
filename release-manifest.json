@@ -1,19 +1,18 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-29",
+  "updatedAt": "2026-07-30",
   "releaseGroups": {
     "engine": {
       "version": "2.7.0",
-      "state": "candidate",
-      "sourceCommit": null,
-      "releaseRecord": null,
-      "previousPublicRelease": {
-        "version": "2.6.4",
-        "sourceCommit": "ec4d804220bfbf08be810ceb692a338cf186e794"
+      "state": "published",
+      "sourceCommit": "00be64b9bd49fab57f4f54f678550a2021f6d1ae",
+      "releaseRecord": {
+        "path": "release-artifacts/npm/2.7.0.release.json",
+        "sha256": "1975911a27a9e148a4d12e644e88a8968a1f466c8d5724a80738015260916ca9"
       },
       "verification": {
         "eligibleForParity": false,
-        "reason": "2.7.0 is a local candidate; publish provenance and independent public-surface parity verification are pending"
+        "reason": "npm, GitHub release, Action channel, binaries, checksums, container, and pinned Studio assets are verified; MCP Registry and deployed website parity are pending"
       }
     },
     "studio": {
