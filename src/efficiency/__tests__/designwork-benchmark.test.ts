@@ -231,6 +231,8 @@ describe("Memi DesignWorkBench v2", () => {
       "build:designwork-readiness": "node scripts/build-designwork-readiness.mjs",
       "check:designwork-readiness": "node scripts/build-designwork-readiness.mjs --check",
       "check:designwork-release": "node scripts/build-designwork-readiness.mjs --check --require-ready",
+      "build:designwork-evidence": "node scripts/build-designwork-evidence.mjs",
+      "check:designwork-evidence": "node scripts/build-designwork-evidence.mjs --check",
     });
     expect(releaseGate).toContain("check:designwork-release");
     expect(readme).toContain("Memi DesignWorkBench v2");
