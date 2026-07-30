@@ -108,6 +108,68 @@ describe("DesignWorkBench evidence receipts", () => {
     ]));
   });
 
+  it("rejects missing, escaping, absolute, and untyped evidence artifacts", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const evidenceRoot = await mkdtemp(path.join(os.tmpdir(), "memi-designwork-invalid-"));
+    const base = {
+      schemaVersion: 1,
+      kind: "fixture",
+      subjectId: manifest.tasks[0].id,
+      ...binding(manifest),
+      status: "verified",
+      sourceRefs: ["benchmark-owned:fixture-001"],
+      provenance: {
+        source: "Memi DesignWorkBench",
+        license: "MIT",
+        capturedAt: "2026-07-30T00:00:00.000Z",
+      },
+    };
+    const receipts = [
+      sealDesignWorkReceipt({
+        ...base,
+        subjectId: manifest.tasks[0].id,
+        artifacts: [{ kind: "", path: "unknown.json", sha256: "a".repeat(64) }],
+      }),
+      sealDesignWorkReceipt({
+        ...base,
+        subjectId: manifest.tasks[1].id,
+        artifacts: [{ kind: "source", path: "../outside.json", sha256: "a".repeat(64) }],
+      }),
+      sealDesignWorkReceipt({
+        ...base,
+        subjectId: manifest.tasks[2].id,
+        artifacts: [{ kind: "source", path: path.join(evidenceRoot, "absolute.json"), sha256: "a".repeat(64) }],
+      }),
+      sealDesignWorkReceipt({
+        ...base,
+        subjectId: manifest.tasks[3].id,
+        artifacts: [{ kind: "source", path: "missing.json", sha256: "a".repeat(64) }],
+      }),
+      sealDesignWorkReceipt({
+        ...base,
+        subjectId: manifest.tasks[4].id,
+        artifacts: [{ kind: "source", path: "missing-hash.json", sha256: "invalid" }],
+      }),
+    ];
+
+    const result = await validateDesignWorkEvidence(manifest, {
+      schemaVersion: 1,
+      benchmarkId: manifest.benchmarkId,
+      receipts,
+      calibrationArtifacts: [],
+      results: null,
+    }, { root: evidenceRoot });
+
+    expect(result.passed).toBe(false);
+    expect(result.failures).toEqual(expect.arrayContaining([
+      expect.stringContaining("without a kind"),
+      expect.stringContaining("escapes the evidence root"),
+      expect.stringContaining("path must be relative"),
+      expect.stringContaining("artifact is missing"),
+      expect.stringContaining("requires a sha256"),
+    ]));
+  });
+
   it("rejects receipts copied from another task bank or candidate", async () => {
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
     const evidenceRoot = await mkdtemp(path.join(os.tmpdir(), "memi-designwork-binding-"));
