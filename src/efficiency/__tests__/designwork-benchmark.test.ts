@@ -258,6 +258,7 @@ describe("Memi DesignWorkBench v2", () => {
       "check:designwork-release": "node scripts/build-designwork-readiness.mjs --check --require-ready",
       "build:designwork-evidence": "node scripts/build-designwork-evidence.mjs",
       "check:designwork-evidence": "node scripts/build-designwork-evidence.mjs --check",
+      "approve:designwork-fixture": "node scripts/approve-designwork-fixture.mjs",
     });
     expect(releaseGate).toContain("check:designwork-release");
     expect(evidenceBuilder).toContain("buildPublicFixtureCandidates");
