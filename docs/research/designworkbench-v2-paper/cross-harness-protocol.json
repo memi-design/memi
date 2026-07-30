@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "designworkbench-v2-cross-harness",
+  "status": "preregistered_unexecuted",
+  "frozenAt": "2026-07-29",
+  "purpose": "Compare repository-specific design harnesses without changing the model, task, repository, runtime, or grading contract between conditions.",
+  "conditions": [
+    {
+      "id": "baseline",
+      "label": "No repository design harness",
+      "allowedContext": "Repository instructions and task fixture only"
+    },
+    {
+      "id": "memi",
+      "label": "Memi 2.7",
+      "allowedContext": "Pinned Memi release with deterministic routing and trace receipts"
+    },
+    {
+      "id": "superpowers",
+      "label": "Superpowers",
+      "allowedContext": "Pinned public release and its documented activation workflow"
+    },
+    {
+      "id": "ecc",
+      "label": "Everything Claude Code",
+      "allowedContext": "Pinned public release and its documented activation workflow"
+    }
+  ],
+  "distributionControl": {
+    "id": "skills-cli",
+    "role": "Installer and discovery transport only",
+    "excludedFromPerformanceRanking": true
+  },
+  "controlledVariables": [
+    "repositoryRevision",
+    "taskRevision",
+    "fixtureHash",
+    "model",
+    "provider",
+    "reasoningEffort",
+    "contextWindow",
+    "toolPermissions",
+    "networkPolicy",
+    "runtimeImage",
+    "timeLimit",
+    "acceptanceContract",
+    "graderBlinding"
+  ],
+  "execution": {
+    "minimumIndependentRuns": 3,
+    "releaseCriticalRuns": 5,
+    "conditionOrder": "balanced_latin_square",
+    "cleanEnvironmentPerRun": true,
+    "isolatedAgentHome": true,
+    "fixedTimeLimit": true,
+    "recordStructuredFailures": true,
+    "excludeAuthenticationFailuresFromPerformance": true
+  },
+  "outcomes": {
+    "primary": [
+      "acceptancePass",
+      "seniorPractitionerWorkProductScore",
+      "sourceTrustScore",
+      "criticalDefectCount"
+    ],
+    "secondary": [
+      "totalTokens",
+      "uncachedInputTokens",
+      "wallTimeMs",
+      "toolCalls",
+      "retries",
+      "humanInterventions",
+      "verificationCoverage"
+    ],
+    "efficiencyRule": "Report only among quality-non-inferior conditions; never trade an unbounded quality loss for lower cost."
+  },
+  "analysis": {
+    "unit": "task-repository-model-repeat",
+    "paired": true,
+    "stratifyByTrack": true,
+    "reportEveryTrack": true,
+    "uncertainty": "paired bootstrap confidence intervals plus exact sign tests",
+    "qualityGate": "lower confidence bound is non-inferior to baseline",
+    "rankingGate": "no cross-harness rank until all admitted conditions complete the same frozen cells",
+    "missingness": "report by cause; do not encode missing or failed runs as zero-quality wins for another condition"
+  },
+  "admission": {
+    "taskFixtureVerified": true,
+    "requiredRunnerEvidenceComplete": true,
+    "artifactHashVerified": true,
+    "traceSchemaValid": true,
+    "graderBlind": true,
+    "conditionRevisionPinned": true
+  },
+  "results": []
+}

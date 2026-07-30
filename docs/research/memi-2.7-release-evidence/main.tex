@@ -22,6 +22,7 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage[numbers,sort&compress]{natbib}
+\usepackage{xurl}
 \usepackage{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
 \usepackage{fancyhdr}
@@ -115,8 +116,8 @@ by \SixRepoMeanTokens\% on average (95\% bootstrap interval
 \SixRepoTokenWins/\SixRepoPairs repositories. In five multi-minute writable
 workflows, mean token savings were \WorkflowMeanTokens\% (95\% interval
 \WorkflowTokenLower\% to \WorkflowTokenUpper\%), with four wins and one large
-regression. A single post-hoc Buzzr router calibration reduced tokens by
-\BuzzrCalibrationTokens\% and wall time by \BuzzrCalibrationWall\%, but is not
+regression. A single post-hoc Example 2 router calibration reduced tokens by
+\ExampleTwoCalibrationTokens\% and wall time by \ExampleTwoCalibrationWall\%, but is not
 treated as confirmatory evidence. Engineering release checks passed
 \FinalTests\ tests across \FinalTestFiles\ files and nine OS/runtime
 combinations. The evidence supports publication of the software artifact, but
@@ -388,7 +389,7 @@ evidence. Immutable historical records are not rewritten.
   bar width=7pt,
   ymin=-35,ymax=70,
   ylabel={savings (\%)},
-  symbolic x coords={Nate,Buzzr,DoriOS,Nyra,Paraform,NyraLanding},
+  symbolic x coords={Example1,Example2,Example3,Example4,Example5,Example6},
   xtick=data,
   axis x line*=bottom,
   axis y line*=left,
@@ -405,8 +406,8 @@ table[x=case,y=latency,col sep=comma]{generated/six_repo.csv};
 \legend{counted tokens,wall time}
 \end{axis}
 \end{tikzpicture}
-\caption{Revision-matched read-only pilot. Positive values favor Memi. The
-negative Nyra result is retained.}
+\caption{Revision-matched read-only pilot using presentation-safe identifiers.
+Positive values favor Memi. Negative results are retained.}
 \label{fig:sixrepo}
 \end{figure*}
 
@@ -415,26 +416,27 @@ Across \SixRepoPairs\ repositories, mean token savings were
 \SixRepoTokenUpper\%); the interval crosses zero. Median savings were
 \SixRepoMedianTokens\%, weighted savings were \SixRepoWeightedTokens\%, and
 \SixRepoTokenWins/\SixRepoPairs cases were positive. Mean latency savings were
-\SixRepoMeanLatency\%. DoriOS was the only repository to clear 25\% on tokens,
-latency, and tool calls. Nyra regressed on all three metrics; Buzzr used more
-tokens despite completing faster. The study therefore rejected the universal
-25\% claim \cite{memi2026sixrepo}.
+\SixRepoMeanLatency\%. Example 3 was the only repository to clear 25\% on
+tokens, latency, and tool calls. Example 4 regressed on all three metrics;
+Example 2 used more tokens despite completing faster. The study therefore
+rejected the universal 25\% claim \cite{memi2026sixrepo}.
 
 \begin{table}[t]
 \centering
-\caption{Six-repository token and latency savings.}
+\caption{Six-repository token and latency savings. Names are anonymized in the
+reader-facing report; immutable source records retain repository identities.}
 \label{tab:sixrepo}
 \scriptsize
 \begin{tabular}{lrr}
 \toprule
 Repository & Tokens & Wall time \\
 \midrule
-Nate the Bait & 21.7\% & $-13.6$\% \\
-Buzzr & $-3.7$\% & 13.4\% \\
-DoriOS & 60.1\% & 28.2\% \\
-Nyra & $-18.7$\% & $-16.7$\% \\
-Paraform & 33.3\% & $-14.3$\% \\
-Nyra Landing & 26.8\% & 6.0\% \\
+Example 1 (native iOS) & 21.7\% & $-13.6$\% \\
+Example 2 (mobile) & $-3.7$\% & 13.4\% \\
+Example 3 (multi-surface) & 60.1\% & 28.2\% \\
+Example 4 (product UI) & $-18.7$\% & $-16.7$\% \\
+Example 5 (web product) & 33.3\% & $-14.3$\% \\
+Example 6 (web landing) & 26.8\% & 6.0\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -451,7 +453,7 @@ Nyra Landing & 26.8\% & 6.0\% \\
   bar width=9pt,
   ymin=-110,ymax=65,
   ylabel={savings (\%)},
-  symbolic x coords={DoriOS,Buzzr,Nate,Paraform,DoriiWeb},
+  symbolic x coords={Example3,Example2,Example1,Example5,Example7},
   xtick=data,
   axis x line*=bottom,
   axis y line*=left,
@@ -469,7 +471,7 @@ table[x=case,y=latency,col sep=comma]{generated/workflow.csv};
 \end{axis}
 \end{tikzpicture}
 \caption{Canonical writable product workflows. Each condition passed its
-automated acceptance contract; Buzzr nevertheless regressed substantially.}
+automated acceptance contract; Example 2 nevertheless regressed substantially.}
 \label{fig:workflow}
 \end{figure*}
 
@@ -478,30 +480,30 @@ savings were \WorkflowMeanTokens\% (95\% interval \WorkflowTokenLower\% to
 \WorkflowTokenUpper\%), median savings were \WorkflowMedianTokens\%, and
 weighted savings were \WorkflowWeightedTokens\%. Mean latency savings were
 \WorkflowMeanLatency\% (95\% interval \WorkflowLatencyLower\% to
-\WorkflowLatencyUpper\%). Four of five tasks used fewer tokens, but Buzzr used
-98.33\% more. The wide intervals and negative case prevent a general claim
+\WorkflowLatencyUpper\%). Four of five tasks used fewer tokens, but Example 2
+used 98.33\% more. The wide intervals and negative case prevent a general claim
 \cite{memi2026workflow}.
 
-Paraform was the strongest stacked-skill result: 52.43\% fewer tokens, 28.26\%
-less wall time, and 44.12\% fewer tool calls under the same accepted product
-contract. Nate provided bounded native evidence with 21.90\% fewer tokens and
-23.47\% less wall time. DoriOS used 39.75\% fewer uncached input tokens but
+Example 5 was the strongest stacked-skill result: 52.43\% fewer tokens,
+28.26\% less wall time, and 44.12\% fewer tool calls under the same accepted
+product contract. Example 1 provided bounded native evidence with 21.90\%
+fewer tokens and 23.47\% less wall time. Example 3 used 39.75\% fewer uncached input tokens but
 doubled its tool calls. Relevant context was beneficial in some tasks and
 harmful in another; relevance alone is insufficient.
 
 \subsection{Router failure analysis}
 
-The canonical Buzzr run routed a React Native skill but broadened repository
+The canonical Example 2 run routed a React Native skill but broadened repository
 discovery and extra-platform verification. It used 98.33\% more tokens and
 took 49.06\% longer. Two subsequent narrower configurations still regressed.
 A third calibration made the task manifest and closest repository evidence
 authoritative, reduced injected context to 1,429 bytes, and forbade broad
 inventory unless a concrete failure justified expansion.
 
-That single matched calibration used \BuzzrCalibrationTokens\% fewer tokens,
-completed \BuzzrCalibrationWall\% faster, and reduced retries from
-\BuzzrBaselineRetries\ to \BuzzrMemiRetries. Tool-call ``savings'' were
-\BuzzrCalibrationToolCalls\%, meaning Memi made more calls. The trace separated
+That single matched calibration used \ExampleTwoCalibrationTokens\% fewer tokens,
+completed \ExampleTwoCalibrationWall\% faster, and reduced retries from
+\ExampleTwoBaselineRetries\ to \ExampleTwoMemiRetries. Tool-call ``savings'' were
+\ExampleTwoCalibrationToolCalls\%, meaning Memi made more calls. The trace separated
 19 baseline calls from 30 Memi calls: the difference occurred before the first
 edit through narrower search and read steps; Memi made fewer verification and
 repeated-verification calls afterward.
@@ -530,13 +532,25 @@ table[x=category,y=memi,col sep=comma]{generated/tool_profile.csv};
 \legend{baseline,Memi}
 \end{axis}
 \end{tikzpicture}
-\caption{Privacy-safe Buzzr calibration tool profile. Call count is diagnostic,
+\caption{Privacy-safe Example 2 calibration tool profile. Call count is diagnostic,
 not a cost metric.}
 \label{fig:toolprofile}
 \end{figure}
 
 This result demonstrates a plausible mechanism, not a stable effect. The three
 router configurations are not homogeneous repeats and must not be averaged.
+
+\subsection{Robustness and sensitivity}
+
+The positive case count alone is weak evidence. Under an exact two-sided sign
+test with a null win probability of 0.5, the read-only pilot yields
+$p=\SixRepoSignP$ and the writable workflows yield $p=\WorkflowSignP$. Neither
+rejects the null. Leave-one-out mean token savings range from
+\SixRepoLooMin\% to \SixRepoLooMax\% in the six-repository pilot and from
+\WorkflowLooMin\% to \WorkflowLooMax\% in the writable study. The latter range
+changes sign, showing that the writable average is highly dependent on which
+example is omitted. These analyses strengthen the audit trail but do not add
+independent runs or increase the evidentiary grade.
 
 \section{Quality and Benchmark Readiness}
 
@@ -591,9 +605,12 @@ Broad harness support & Core install surface \\
 \end{tabularx}
 \end{table*}
 
-No baseline, Memi, Superpowers, ECC, and Skills CLI runs were executed under one
-matched protocol. RQ5 is therefore \blocked. The paper reports no cross-harness
-performance rank.
+No baseline, Memi, Superpowers, and ECC runs were executed under one matched
+protocol. Skills CLI is a distribution surface rather than an execution
+condition. RQ5 is therefore \blocked. The paper reports no cross-harness
+performance rank. A preregistered multi-harness protocol is specified in the
+separate DesignWorkBench construction paper; its result cells remain empty
+until equivalent runs exist.
 
 \section{Release Execution and Incident Audit}
 
@@ -650,7 +667,7 @@ while preventing npm success from being advertised as universal parity.
 pair. Bootstrap intervals quantify observed variability but cannot compensate
 for limited coverage or repository selection.
 
-\textbf{Post-hoc calibration.} Router v2 was informed by the Buzzr failure.
+\textbf{Post-hoc calibration.} Router v2 was informed by the Example 2 failure.
 Its positive result requires prospective homogeneous repeats.
 
 \textbf{Cost proxy.} Subscription traces exposed tokens but not defensible
@@ -740,15 +757,15 @@ pair \\
 \toprule
 Case & Wall & Tokens & Uncached & Tools & Routed skill(s) \\
 \midrule
-DoriOS & 1.00\% & 7.31\% & 39.75\% & $-105.88$\% &
+Example 3 & 1.00\% & 7.31\% & 39.75\% & $-105.88$\% &
 \code{motion-performance} \\
-Buzzr & $-49.06$\% & $-98.33$\% & $-40.67$\% & $-25.00$\% &
+Example 2 & $-49.06$\% & $-98.33$\% & $-40.67$\% & $-25.00$\% &
 \code{react-native-gen} \\
-Nate the Bait & 23.47\% & 21.90\% & 37.58\% & $-25.00$\% &
+Example 1 & 23.47\% & 21.90\% & 37.58\% & $-25.00$\% &
 \code{swiftui-design-engineering} \\
-Paraform & 28.26\% & 52.43\% & 26.98\% & 44.12\% &
+Example 5 & 28.26\% & 52.43\% & 26.98\% & 44.12\% &
 \code{emil-design-eng}, \code{interaction-design} \\
-Dorii public site & 24.65\% & 19.43\% & 20.68\% & 33.33\% &
+Example 7 & 24.65\% & 19.43\% & 20.68\% & 33.33\% &
 \code{emil-design-eng}, \code{interaction-design} \\
 \bottomrule
 \end{tabularx}

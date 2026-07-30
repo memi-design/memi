@@ -7,6 +7,12 @@ This folder contains two related but distinct artifacts:
   Memi's v2.0–v2.7 evolution, paired benchmark evidence, routing failures,
   quality-measurement corrections, public release incidents, limitations, and
   reproducibility commitments.
+- `../designworkbench-v2-paper/designworkbench-v2-benchmark-paper.pdf`: the
+  separate ORCID-ready benchmark-construction paper and preregistered
+  cross-harness protocol.
+
+Reader-facing reports use neutral Example 1--7 identifiers. Immutable source
+JSON retains repository names and revision hashes for reproducibility.
 
 Both artifacts separate questions that must not be collapsed into one score:
 

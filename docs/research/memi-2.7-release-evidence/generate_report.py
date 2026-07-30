@@ -28,6 +28,22 @@ WORKFLOW_PATH = ROOT / "docs/case-studies/memi-2.7-workflow-proof/results.json"
 TOOLS_PATH = ROOT / "docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json"
 READINESS_PATH = ROOT / "docs/audits/memi-designworkbench-v2-readiness.json"
 
+SIX_EXAMPLE_LABELS = [
+    "Example 1",
+    "Example 2",
+    "Example 3",
+    "Example 4",
+    "Example 5",
+    "Example 6",
+]
+WORKFLOW_EXAMPLE_LABELS = [
+    "Example 3",
+    "Example 2",
+    "Example 1",
+    "Example 5",
+    "Example 7",
+]
+
 PAGE_W, PAGE_H = letter
 MARGIN = 48
 RUBY = HexColor("#e5385d")
@@ -328,7 +344,7 @@ def build_report(analysis: dict) -> None:
     y -= 20
     y = report.bullet("Observed evidence is promising but heterogeneous: four of six pilot tasks and four of five long workflows used fewer tokens with Memi.", MARGIN, y, 500)
     y = report.bullet("The long-workflow mean is 0.6%, with a 95% bootstrap interval from -51.2% to 37.3%. It does not establish a universal benefit.", MARGIN, y - 8, 500)
-    y = report.bullet("One Router v2 Buzzr calibration improved tokens by 14.2% and wall time by 25.1%, but one pair is calibration evidence, not a release claim.", MARGIN, y - 8, 500)
+    y = report.bullet("One Router v2 Example 2 calibration improved tokens by 14.2% and wall time by 25.1%, but one pair is calibration evidence, not a release claim.", MARGIN, y - 8, 500)
     report.text("Prepared from immutable paired traces and public source documentation.", MARGIN, 72, 8, MUTED)
 
     report.new_page("The claim firewall", "Release decision")
@@ -366,11 +382,11 @@ def build_report(analysis: dict) -> None:
     report.new_page("Six-repository observed pilot", "With vs without Memi")
     rows = [
         {
-            "label": row["id"].replace("-", " ").title(),
+            "label": label,
             "tokens": row["savings"]["tokens"] * 100,
             "latency": row["savings"]["latency"] * 100,
         }
-        for row in six["cases"]
+        for label, row in zip(SIX_EXAMPLE_LABELS, six["cases"], strict=True)
     ]
     report.bar_chart(rows, MARGIN, PAGE_H - 135, 510, 285, [
         ("tokens", "Total tokens", RUBY),
@@ -393,11 +409,11 @@ def build_report(analysis: dict) -> None:
     report.new_page("Canonical multi-minute workflows", "With vs without Memi")
     rows = [
         {
-            "label": row["case"],
+            "label": label,
             "tokens": row["savingsPercent"]["totalTokens"],
             "latency": row["savingsPercent"]["wallTime"],
         }
-        for row in workflow["pairs"]
+        for label, row in zip(WORKFLOW_EXAMPLE_LABELS, workflow["pairs"], strict=True)
     ]
     report.bar_chart(rows, MARGIN, PAGE_H - 135, 510, 260, [
         ("tokens", "Total tokens", RUBY),
@@ -408,7 +424,7 @@ def build_report(analysis: dict) -> None:
     report.metric(MARGIN + 164, 320, 150, pct(a["medianTokenSavings"]), "median token savings", GREEN)
     report.metric(MARGIN + 328, 320, 150, f'{a["tokenWins"]} / {a["pairs"]}', "token win count", GREEN)
     report.wrap(
-        f'Token mean 95% interval: {pct(a["tokenSavings95"][0])} to {pct(a["tokenSavings95"][1])}. Latency mean: {pct(a["meanLatencySavings"])} with interval {pct(a["latencySavings95"][0])} to {pct(a["latencySavings95"][1])}. The median is positive because one large Buzzr regression pulls the arithmetic mean down.',
+        f'Token mean 95% interval: {pct(a["tokenSavings95"][0])} to {pct(a["tokenSavings95"][1])}. Latency mean: {pct(a["meanLatencySavings"])} with interval {pct(a["latencySavings95"][0])} to {pct(a["latencySavings95"][1])}. The median is positive because one large Example 2 regression pulls the arithmetic mean down.',
         MARGIN, 230, 500, 9.5, 14,
     )
     report.wrap(
@@ -418,8 +434,8 @@ def build_report(analysis: dict) -> None:
 
     report.new_page("Error anatomy and Router v2", "What changed")
     outcome = analysis["buzzrCalibration"]
-    report.metric(MARGIN, PAGE_H - 120, 150, pct(outcome["totalTokenSavings"]), "Buzzr token savings", GREEN)
-    report.metric(MARGIN + 164, PAGE_H - 120, 150, pct(outcome["wallTimeSavings"]), "Buzzr wall savings", GREEN)
+    report.metric(MARGIN, PAGE_H - 120, 150, pct(outcome["totalTokenSavings"]), "Example 2 token savings", GREEN)
+    report.metric(MARGIN + 164, PAGE_H - 120, 150, pct(outcome["wallTimeSavings"]), "Example 2 wall savings", GREEN)
     report.metric(MARGIN + 328, PAGE_H - 120, 150, f'{outcome["baselineRetries"]} → {outcome["memiRetries"]}', "retries", GREEN)
     categories = ["search", "read", "verification", "status"]
     x0, y0 = MARGIN, PAGE_H - 260
