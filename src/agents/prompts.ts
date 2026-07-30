@@ -22,6 +22,7 @@ function tokenSummary(tokens: DesignToken[]): string {
 }
 
 function specSummary(specs: AnySpec[]): string {
+  if (specs.length === 0) return "(none)";
   const byType = new Map<string, string[]>();
   for (const s of specs) {
     if (!byType.has(s.type)) byType.set(s.type, []);
