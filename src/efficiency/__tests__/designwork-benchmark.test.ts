@@ -6,6 +6,7 @@ import {
   buildCalibrationReadiness,
   buildDesignWorkReadiness,
   geometricMean,
+  krippendorffAlphaInterval,
   scoreProfessionalArtifact,
   validateDesignWorkBenchmark,
 } from "../../../scripts/lib/designwork-benchmark.mjs";
@@ -72,6 +73,22 @@ describe("Memi DesignWorkBench v2", () => {
     expect(geometricMean([70, 70, 0])).toBe(0);
   });
 
+  it("uses interval-scale Krippendorff alpha for grader reliability", () => {
+    expect(krippendorffAlphaInterval([
+      [70, 70],
+      [75, 75],
+      [80, 80],
+      [85, 85],
+    ])).toBe(1);
+    expect(krippendorffAlphaInterval([
+      [10, 90],
+      [90, 10],
+      [20, 80],
+      [80, 20],
+    ])).toBeLessThan(0.67);
+    expect(krippendorffAlphaInterval([])).toBe(0);
+  });
+
   it("fails calibration readiness without real practitioners and reliable graders", () => {
     const manifest = {
       tracks: [
@@ -122,6 +139,36 @@ describe("Memi DesignWorkBench v2", () => {
       expect.stringContaining("private task fixture cannot be public"),
       expect.stringContaining("requires negative controls"),
       "complete calibration requires an evidence file",
+    ]));
+  });
+
+  it("rejects verified fixtures and practitioner records without provenance", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const invalidFixture = {
+      ...manifest,
+      tasks: manifest.tasks.map((task, index) => index === 0
+        ? { ...task, fixture: { ...task.fixture, status: "verified" } }
+        : task),
+    };
+    const validation = await validateDesignWorkBenchmark(invalidFixture, { root });
+    expect(validation.failures).toEqual(expect.arrayContaining([
+      expect.stringContaining("verified fixture requires sourceRefs"),
+      expect.stringContaining("verified fixture requires a sha256"),
+      expect.stringContaining("verified fixture requires provenance"),
+    ]));
+
+    const fake = practitionerRatings("product-design").map((artifact) => ({
+      ...artifact,
+      consentRef: undefined,
+      qualificationRef: undefined,
+    }));
+    const readiness = buildCalibrationReadiness(
+      { tracks: [{ id: "product-design" }] },
+      fake,
+    );
+    expect(readiness.ready).toBe(false);
+    expect(readiness.failures).toEqual(expect.arrayContaining([
+      "product-design has practitioner artifacts without consent or qualification provenance",
     ]));
   });
 
@@ -179,9 +226,22 @@ function practitionerRatings(trackId: string) {
       artifactId: `${trackId}-artifact-${practitionerIndex + 1}-${artifactIndex + 1}`,
       qualified: true,
       external: practitionerIndex < 2,
+      consentRef: `consent:${practitionerIndex + 1}`,
+      qualificationRef: `qualification:${practitionerIndex + 1}`,
+      artifactSha256: "a".repeat(64),
       ratings: [
-        { graderId: "grader-a", score: 72 + artifactIndex },
-        { graderId: "grader-b", score: 72 + artifactIndex },
+        {
+          graderId: "grader-a",
+          score: 72 + artifactIndex,
+          blinded: true,
+          receiptRef: `receipt:a:${artifactIndex + 1}`,
+        },
+        {
+          graderId: "grader-b",
+          score: 72 + artifactIndex,
+          blinded: true,
+          receiptRef: `receipt:b:${artifactIndex + 1}`,
+        },
       ],
     }))).flat();
 }
