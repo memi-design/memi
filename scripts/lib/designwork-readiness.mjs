@@ -54,23 +54,35 @@ export function buildCalibrationReadiness(manifest, artifacts) {
   });
 }
 
-export function buildDesignWorkReadiness(manifest, calibrationArtifacts = []) {
+export function buildDesignWorkReadiness(manifest, evidenceInput = []) {
   const tasks = Array.isArray(manifest?.tasks) ? manifest.tasks : [];
   const tracks = Array.isArray(manifest?.tracks) ? manifest.tracks : [];
   const runners = Array.isArray(manifest?.runnerProfiles) ? manifest.runnerProfiles : [];
+  const evidence = Array.isArray(evidenceInput)
+    ? {
+        verifiedFixtureIds: [],
+        verifiedRunnerIds: [],
+        calibrationArtifacts: evidenceInput,
+        results: null,
+      }
+    : evidenceInput ?? {};
+  const taskIds = new Set(tasks.map((task) => task.id));
+  const runnerIds = new Set(runners.map((runner) => runner.id));
+  const verifiedFixtureIds = new Set(
+    (evidence.verifiedFixtureIds ?? []).filter((id) => taskIds.has(id)),
+  );
+  const verifiedRunnerIds = new Set(
+    (evidence.verifiedRunnerIds ?? []).filter((id) => runnerIds.has(id)),
+  );
+  const calibrationArtifacts = Array.isArray(evidence.calibrationArtifacts)
+    ? evidence.calibrationArtifacts
+    : [];
+  const results = isRecord(evidence.results) ? evidence.results : manifest?.results;
   const splitCounts = {
     publicDevelopment: tasks.filter((task) => task.split === "publicDevelopment").length,
     privateTest: tasks.filter((task) => task.split === "privateTest").length,
     rollingHoldout: tasks.filter((task) => task.split === "rollingHoldout").length,
   };
-  const verifiedFixtures = tasks.filter((task) => task.fixture?.status === "verified").length;
-  const contractFixtures = tasks.filter(
-    (task) => task.fixture?.status === "contract_defined",
-  ).length;
-  const verifiedRunners = runners.filter((runner) => runner.status === "verified").length;
-  const contractRunners = runners.filter(
-    (runner) => runner.status === "contract_defined",
-  ).length;
   const calibration = buildCalibrationReadiness(manifest, calibrationArtifacts);
   const practitioners = new Set(
     calibrationArtifacts.filter((artifact) => artifact.qualified)
@@ -84,20 +96,21 @@ export function buildDesignWorkReadiness(manifest, calibrationArtifacts = []) {
     && splitCounts.rollingHoldout === 60
     && runners.length === 8;
   const blockers = readinessBlockers(
-    contractFixtures,
-    contractRunners,
+    tasks.length - verifiedFixtureIds.size,
+    runners.length - verifiedRunnerIds.size,
     calibration.ready,
-    manifest?.results,
+    results,
+    verifiedFixtureIds.size === 0 && verifiedRunnerIds.size === 0,
   );
   return deepFreeze({
     benchmarkId: manifest?.benchmarkId ?? null,
     frozenCandidate: manifest?.frozenCandidate ?? null,
     foundationReady,
     releaseReady: foundationReady
-      && verifiedFixtures === tasks.length
-      && verifiedRunners === runners.length
+      && verifiedFixtureIds.size === tasks.length
+      && verifiedRunnerIds.size === runners.length
       && calibration.ready
-      && isRecord(manifest?.results),
+      && isRecord(results),
     completed: {
       tracks: tracks.length,
       taskContracts: tasks.length,
@@ -107,8 +120,8 @@ export function buildDesignWorkReadiness(manifest, calibrationArtifacts = []) {
       runnerContracts: runners.length,
     },
     verified: {
-      fixtures: verifiedFixtures,
-      runners: verifiedRunners,
+      fixtures: verifiedFixtureIds.size,
+      runners: verifiedRunnerIds.size,
       practitioners,
       calibratedTracks,
     },
@@ -172,13 +185,23 @@ function calibrationFailures(
   return failures;
 }
 
-function readinessBlockers(contractFixtures, contractRunners, calibrationReady, results) {
+function readinessBlockers(
+  missingFixtures,
+  missingRunners,
+  calibrationReady,
+  results,
+  noReceipts,
+) {
   const blockers = [];
-  if (contractFixtures > 0) {
-    blockers.push(`${contractFixtures} task fixtures remain contract_defined`);
+  if (missingFixtures > 0) {
+    blockers.push(noReceipts
+      ? `${missingFixtures} task fixtures remain contract_defined`
+      : `${missingFixtures} task fixtures require verified receipts`);
   }
-  if (contractRunners > 0) {
-    blockers.push(`${contractRunners} runner profiles remain contract_defined`);
+  if (missingRunners > 0) {
+    blockers.push(noReceipts
+      ? `${missingRunners} runner profiles remain contract_defined`
+      : `${missingRunners} runner profiles require verified receipts`);
   }
   if (!calibrationReady) blockers.push("practitioner calibration is pending");
   if (results === null || results === undefined) {
