@@ -220,9 +220,34 @@ describe("Memi DesignWorkBench v2", () => {
     ]));
   });
 
+  it("reports prepared public fixtures separately from independent verification", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const preparedFixtureIds = manifest.tasks
+      .filter((task) => task.split === "publicDevelopment")
+      .map((task) => task.id);
+    const report = buildDesignWorkReadiness(manifest, {
+      preparedFixtureIds,
+      verifiedFixtureIds: [],
+      verifiedRunnerIds: ["artifact-validator", "browser-playwright", "motion-render"],
+      calibrationArtifacts: [],
+      results: null,
+    });
+
+    expect(report.prepared).toEqual({
+      fixtures: 60,
+      runners: 3,
+    });
+    expect(report.verified.fixtures).toBe(0);
+    expect(report.releaseReady).toBe(false);
+  });
+
   it("wires benchmark integrity and practitioner proof into the release surface", async () => {
     const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
     const releaseGate = await readFile(path.join(root, "scripts", "check-release.mjs"), "utf8");
+    const evidenceBuilder = await readFile(
+      path.join(root, "scripts", "build-designwork-evidence.mjs"),
+      "utf8",
+    );
     const readme = await readFile(path.join(root, "README.md"), "utf8");
 
     expect(packageJson.scripts).toMatchObject({
@@ -235,6 +260,7 @@ describe("Memi DesignWorkBench v2", () => {
       "check:designwork-evidence": "node scripts/build-designwork-evidence.mjs --check",
     });
     expect(releaseGate).toContain("check:designwork-release");
+    expect(evidenceBuilder).toContain("buildPublicFixtureCandidates");
     expect(readme).toContain("Memi DesignWorkBench v2");
     expect(readme).toContain("300 task contracts");
     expect(readme).toContain("practitioner calibration");
