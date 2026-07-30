@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildCalibrationReadiness,
+  buildDesignWorkReadiness,
   geometricMean,
   scoreProfessionalArtifact,
   validateDesignWorkBenchmark,
@@ -121,6 +122,33 @@ describe("Memi DesignWorkBench v2", () => {
       expect.stringContaining("private task fixture cannot be public"),
       expect.stringContaining("requires negative controls"),
       "complete calibration requires an evidence file",
+    ]));
+  });
+
+  it("reports benchmark-foundation progress without fabricating release readiness", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const report = buildDesignWorkReadiness(manifest, []);
+
+    expect(report.foundationReady).toBe(true);
+    expect(report.releaseReady).toBe(false);
+    expect(report.completed).toMatchObject({
+      tracks: 15,
+      taskContracts: 300,
+      publicTasks: 60,
+      privateTasks: 180,
+      holdoutTasks: 60,
+      runnerContracts: 8,
+    });
+    expect(report.verified).toMatchObject({
+      fixtures: 0,
+      runners: 0,
+      practitioners: 0,
+      calibratedTracks: 0,
+    });
+    expect(report.blockers).toEqual(expect.arrayContaining([
+      "300 task fixtures remain contract_defined",
+      "8 runner profiles remain contract_defined",
+      "practitioner calibration is pending",
     ]));
   });
 });
