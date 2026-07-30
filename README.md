@@ -137,8 +137,11 @@ results. See the current
 [readiness report](docs/audits/memi-designworkbench-v2-readiness.md) and
 [execution goal](docs/DESIGNWORKBENCH_V2_GOAL.md). Three of eight runner
 profiles now have reproducible, hash-bound evidence: browser/Playwright,
-motion rendering, and artifact/provenance validation. The remaining runners and
-all practitioner results remain blocked rather than inferred.
+motion rendering, and artifact/provenance validation. All 60 public development
+tasks now also have deterministic, hash-bound candidate fixture packs. Those
+packs are explicitly benchmark-authored synthetic material: **60 prepared,
+0 independently verified**. The remaining runners, all 300 verified fixtures,
+and all practitioner results remain blocked rather than inferred.
 
 ## Choose your integration
 

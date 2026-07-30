@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "motion-design-12-fixture",
+  "taskId": "motion-design-12",
+  "trackId": "motion-design",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Modify the existing product without collateral redesign, preserving its authentic system and behavior for a interaction motion language. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "People following temporal information with varied motion tolerance",
+      "mode": "modify-in-context",
+      "complexity": "system",
+      "durationMinutes": 120,
+      "successMeasures": [
+        "comprehension",
+        "frame continuity",
+        "reduced-motion parity"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 2,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "People following temporal information with varied motion tolerance lose confidence when the modify-in-context flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "frame continuity is below the scenario target",
+          "value": 49,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "web video and mobile playback share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Motion must not obscure warnings or trigger unsafe flashing",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "emerging",
+        "supportedPlatforms": [
+          "web video",
+          "mobile playback"
+        ],
+        "knownDebt": "Motion design behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "web video",
+        "mobile playback"
+      ],
+      "accessibility": [
+        "reduced-motion equivalent",
+        "captioned temporal cues"
+      ],
+      "safety": [
+        "Motion must not obscure warnings or trigger unsafe flashing"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "storyboard",
+        "motion-spec",
+        "editable-timeline",
+        "rendered-video",
+        "reduced-motion-alternative",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "motion-render",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "unsafe-motion"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "02a9398ed57d6e456f80e971218d26aa83f6655f33a26435ddd7c9b25aac6d8d"
+}

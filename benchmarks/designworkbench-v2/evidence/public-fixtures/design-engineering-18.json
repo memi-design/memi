@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "design-engineering-18-fixture",
+  "taskId": "design-engineering-18",
+  "trackId": "design-engineering",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Complete the end-to-end assignment, respond to an interruption and changed constraint, then recover without discarding valid work for a production command interface. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "People using a production interface under realistic data load",
+      "mode": "capstone-recovery",
+      "complexity": "long-horizon",
+      "durationMinutes": 135,
+      "successMeasures": [
+        "task completion",
+        "visual-regression rate",
+        "interaction latency"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 4,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "People using a production interface under realistic data load lose confidence when the capstone-recovery flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "task completion is below the scenario target",
+          "value": 63,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "responsive browser and desktop shell share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Source, runtime behavior, and visual evidence must agree",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "legacy",
+        "supportedPlatforms": [
+          "responsive browser",
+          "desktop shell"
+        ],
+        "knownDebt": "Design engineering behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "responsive browser",
+        "desktop shell"
+      ],
+      "accessibility": [
+        "keyboard completion",
+        "zoom at 200 percent"
+      ],
+      "safety": [
+        "Source, runtime behavior, and visual evidence must agree"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "production-source",
+        "runtime-build",
+        "e2e-results",
+        "visual-regression",
+        "performance-report",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "browser-playwright",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "frontend-backend-decoupling"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "3a039f8c0fa1c6a96e9b361d9b421b0a5b6f52143fb5faab9e05f6ac44238a54"
+}

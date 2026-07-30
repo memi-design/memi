@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "native-design-kits-15-fixture",
+  "taskId": "native-design-kits-15",
+  "trackId": "native-design-kits",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Validate the work end to end, repair material defects, and prepare a handoff another practitioner can continue for a desktop productivity kit. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "Product teams implementing platform-specific component behavior",
+      "mode": "validate-handoff",
+      "complexity": "cross-functional",
+      "durationMinutes": 90,
+      "successMeasures": [
+        "component adoption",
+        "platform conformance",
+        "override debt"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 3,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "Product teams implementing platform-specific component behavior lose confidence when the validate-handoff flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "override debt is below the scenario target",
+          "value": 56,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "Apple platforms and Material 3 and desktop share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Shared tokens must not flatten platform safety conventions",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "governed",
+        "supportedPlatforms": [
+          "Apple platforms",
+          "Material 3",
+          "desktop"
+        ],
+        "knownDebt": "Native design kits behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "Apple platforms",
+        "Material 3",
+        "desktop"
+      ],
+      "accessibility": [
+        "native focus semantics",
+        "high-contrast variants"
+      ],
+      "safety": [
+        "Shared tokens must not flatten platform safety conventions"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "component-library",
+        "token-library",
+        "behavior-spec",
+        "platform-mapping",
+        "adoption-guide",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "figma-editable",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "platform-pattern-flattening"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "da8b425a3f49bcd0c4c60dba3d852334e42015c7c553fba8e86806b6ab45e1dd"
+}

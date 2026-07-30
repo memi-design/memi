@@ -1,6 +1,6 @@
 # Memi DesignWorkBench v2 readiness
 
-Generated: 2026-07-30T02:34:17.348Z
+Generated: 2026-07-30T02:48:24.521Z
 
 Release status: **BLOCKED**
 
@@ -18,6 +18,11 @@ Release status: **BLOCKED**
 - Private test tasks: 180/180
 - Rolling holdout tasks: 60/60
 - Runner contracts: 8/8
+
+## Prepared evidence
+
+- Public fixture candidate packs: 60/60
+- Reproducible runner evidence packs: 3/8
 
 ## Independently verified
 

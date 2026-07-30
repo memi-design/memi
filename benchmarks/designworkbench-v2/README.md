@@ -15,8 +15,14 @@ The frozen foundation contains:
 - 8 runtime and artifact-runner contracts
 - discipline-specific rubrics and negative controls
 
-The first evidence activation verifies three runner profiles with committed,
-hash-bound artifacts:
+The public development corpus now has 60 deterministic, hash-bound candidate
+fixture packs, four for each professional track. These are benchmark-owned
+synthetic inputs for development and reproducibility. They are not practitioner
+work, independently verified fixtures, private tests, holdouts, or proof of
+Memi quality.
+
+The first runtime evidence activation separately verifies three runner profiles
+with committed, hash-bound artifacts:
 
 - browser and Playwright runtime, including interaction, accessibility, and trace evidence
 - motion rendering, including frame analysis and a reduced-motion output
@@ -34,10 +40,19 @@ npm run build:designwork-bench
 npm run check:designwork-bench
 npm run build:designwork-evidence
 npm run check:designwork-evidence
+npm run approve:designwork-fixture -- \
+  --candidate benchmarks/designworkbench-v2/evidence/public-fixtures/product-design-01.json \
+  --review path/to/independent-review.json
 npm run build:designwork-readiness
 npm run check:designwork-readiness
 npm run check:designwork-release
 ```
+
+Fixture approval recomputes the candidate hash and requires an independent
+reviewer, qualification evidence, an immutable review receipt, and a matching
+task/hash decision. Start from
+[public-fixture-review-template.json](public-fixture-review-template.json).
+Memi authors cannot self-approve these candidates.
 
 `check:designwork-release` fails until all fixtures and runners are verified,
 practitioner calibration passes, and private plus holdout results exist.

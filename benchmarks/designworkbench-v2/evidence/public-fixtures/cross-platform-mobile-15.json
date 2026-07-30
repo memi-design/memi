@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "cross-platform-mobile-15-fixture",
+  "taskId": "cross-platform-mobile-15",
+  "trackId": "cross-platform-mobile",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Validate the work end to end, repair material defects, and prepare a handoff another practitioner can continue for a offline event companion. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "iOS and Android users sharing one product model",
+      "mode": "validate-handoff",
+      "complexity": "cross-functional",
+      "durationMinutes": 90,
+      "successMeasures": [
+        "platform parity",
+        "offline recovery",
+        "navigation reliability"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 3,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "iOS and Android users sharing one product model lose confidence when the validate-handoff flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "navigation reliability is below the scenario target",
+          "value": 56,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "Expo iOS and Expo Android share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Platform-specific permissions cannot silently diverge",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "governed",
+        "supportedPlatforms": [
+          "Expo iOS",
+          "Expo Android"
+        ],
+        "knownDebt": "Cross-platform mobile and Expo behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "Expo iOS",
+        "Expo Android"
+      ],
+      "accessibility": [
+        "screen-reader labels on both platforms",
+        "large-text reflow"
+      ],
+      "safety": [
+        "Platform-specific permissions cannot silently diverge"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "expo-source",
+        "ios-runtime-capture",
+        "android-runtime-capture",
+        "e2e-results",
+        "release-notes",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "expo-device",
+        "android-emulator",
+        "ios-simulator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "single-platform-proof"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "d093dd3d820b9dc3dbd02a9175fe9a7006da4e2101161e07f88e349fa5c1922d"
+}

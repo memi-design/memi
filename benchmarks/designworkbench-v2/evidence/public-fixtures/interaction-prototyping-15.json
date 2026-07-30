@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "interaction-prototyping-15-fixture",
+  "taskId": "interaction-prototyping-15",
+  "trackId": "interaction-prototyping",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Validate the work end to end, repair material defects, and prepare a handoff another practitioner can continue for a multi-step error recovery. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "People completing keyboard, pointer, touch, and recovery flows",
+      "mode": "validate-handoff",
+      "complexity": "cross-functional",
+      "durationMinutes": 90,
+      "successMeasures": [
+        "state coverage",
+        "input parity",
+        "error recovery"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 3,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "People completing keyboard, pointer, touch, and recovery flows lose confidence when the validate-handoff flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "error recovery is below the scenario target",
+          "value": 56,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "interactive prototype and browser runtime share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Prototype behavior must cover interruption and destructive actions",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "governed",
+        "supportedPlatforms": [
+          "interactive prototype",
+          "browser runtime"
+        ],
+        "knownDebt": "Interaction design and prototyping behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "interactive prototype",
+        "browser runtime"
+      ],
+      "accessibility": [
+        "keyboard-only flow",
+        "touch target compliance"
+      ],
+      "safety": [
+        "Prototype behavior must cover interruption and destructive actions"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "state-model",
+        "interactive-prototype",
+        "input-map",
+        "usability-findings",
+        "handoff-spec",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "browser-playwright",
+        "figma-editable",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "happy-path-only-prototype"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "4808e88d4eaad9d1b7f32d7d723a4d9824f21f44862f3f22be1d7c0ab83cc01b"
+}

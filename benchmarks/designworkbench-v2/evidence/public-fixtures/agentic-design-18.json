@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "agentic-design-18-fixture",
+  "taskId": "agentic-design-18",
+  "trackId": "agentic-design",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Complete the end-to-end assignment, respond to an interruption and changed constraint, then recover without discarding valid work for a delegated design-system repair. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "People delegating work while retaining meaningful control",
+      "mode": "capstone-recovery",
+      "complexity": "long-horizon",
+      "durationMinutes": 135,
+      "successMeasures": [
+        "approval accuracy",
+        "intervention rate",
+        "recovery success"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 4,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "People delegating work while retaining meaningful control lose confidence when the capstone-recovery flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "approval accuracy is below the scenario target",
+          "value": 63,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "agent desktop and browser review share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Irreversible or privileged actions require explicit approval",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "legacy",
+        "supportedPlatforms": [
+          "agent desktop",
+          "browser review"
+        ],
+        "knownDebt": "Agentic design behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "agent desktop",
+        "browser review"
+      ],
+      "accessibility": [
+        "keyboard approval flow",
+        "plain-language trace"
+      ],
+      "safety": [
+        "Irreversible or privileged actions require explicit approval"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "control-model",
+        "permission-policy",
+        "reviewable-patch",
+        "agent-trace",
+        "recovery-report",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "browser-playwright",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "silent-agent-overwrite"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "2515c60b3367bddf3ea4ab35eb1a78f745a7959e95ae90c724fc3668b0961e25"
+}

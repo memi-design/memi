@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "motion-design-01-fixture",
+  "taskId": "motion-design-01",
+  "trackId": "motion-design",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Diagnose the supplied work, identify the highest-risk failures, and produce a prioritized correction plan for a product onboarding sequence. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "People following temporal information with varied motion tolerance",
+      "mode": "critique-diagnose",
+      "complexity": "scoped",
+      "durationMinutes": 30,
+      "successMeasures": [
+        "comprehension",
+        "frame continuity",
+        "reduced-motion parity"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 1,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "People following temporal information with varied motion tolerance lose confidence when the critique-diagnose flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "comprehension is below the scenario target",
+          "value": 42,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "web video and mobile playback share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Motion must not obscure warnings or trigger unsafe flashing",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "fragmented",
+        "supportedPlatforms": [
+          "web video",
+          "mobile playback"
+        ],
+        "knownDebt": "Motion design behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "web video",
+        "mobile playback"
+      ],
+      "accessibility": [
+        "reduced-motion equivalent",
+        "captioned temporal cues"
+      ],
+      "safety": [
+        "Motion must not obscure warnings or trigger unsafe flashing"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "storyboard",
+        "motion-spec",
+        "editable-timeline",
+        "rendered-video",
+        "reduced-motion-alternative",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "motion-render",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "unsafe-motion"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "302a28597d3cf4ab56c7c9a61ed1fa281dc4658d4504807819b6d843513d1b7b"
+}

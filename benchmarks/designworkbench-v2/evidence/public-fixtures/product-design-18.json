@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "product-design-18-fixture",
+  "taskId": "product-design-18",
+  "trackId": "product-design",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Complete the end-to-end assignment, respond to an interruption and changed constraint, then recover without discarding valid work for a complex account workflow. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "People completing an unfamiliar, consequential workflow",
+      "mode": "capstone-recovery",
+      "complexity": "long-horizon",
+      "durationMinutes": 135,
+      "successMeasures": [
+        "completion rate",
+        "time to confidence",
+        "recovery rate"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 4,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "People completing an unfamiliar, consequential workflow lose confidence when the capstone-recovery flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "completion rate is below the scenario target",
+          "value": 63,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "browser and mobile share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Incorrect decisions must remain reversible and explainable",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "legacy",
+        "supportedPlatforms": [
+          "browser",
+          "mobile"
+        ],
+        "knownDebt": "Product design behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "browser",
+        "mobile"
+      ],
+      "accessibility": [
+        "screen-reader task completion",
+        "keyboard-only recovery"
+      ],
+      "safety": [
+        "Incorrect decisions must remain reversible and explainable"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "research-synthesis",
+        "journey-map",
+        "information-architecture",
+        "interactive-prototype",
+        "success-metrics",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "browser-playwright",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "unsupported-user-need"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "a62331e572c77c3fa6fd63e1de170eec11a4c4b67ecd1f9e78d234174278052e"
+}

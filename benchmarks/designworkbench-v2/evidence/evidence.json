@@ -63,7 +63,7 @@
         {
           "kind": "playwright-e2e",
           "path": "browser-playwright/playwright-e2e.json",
-          "sha256": "8e2820bda84789909aa2537740540ae90f1f8a5a3c12962d9c2c4546d231f469"
+          "sha256": "7ed63a8b4ff11f1a925b8cb6ae0a2fad447e1133977eb870ed0125ea8404e11f"
         },
         {
           "kind": "accessibility-tree",
@@ -73,10 +73,10 @@
         {
           "kind": "performance-trace",
           "path": "browser-playwright/performance-trace.zip",
-          "sha256": "ed2d1af39de9d8e57eb03162ac44c0caa509a5fc619d039111f945aa394df8f2"
+          "sha256": "985d65e48ae8597809afc9c258f0d66a5d14bcdd315571726876c6c7f20be6fb"
         }
       ],
-      "receiptSha256": "1cead8d2c42897a02bd400c90ee3ec12435ad21812a09c11c43933315eeeeafa"
+      "receiptSha256": "a0f2c6719ec1d4f7d96d313dcf139690d2a7afd2ab42e635abba21bec8b4b4d2"
     },
     {
       "schemaVersion": 1,
@@ -115,6 +115,308 @@
         }
       ],
       "receiptSha256": "4b9e0bff327c15e2ea0608745b25df537990800a840327a710349edeeed3bde5"
+    }
+  ],
+  "candidateFixtures": [
+    {
+      "taskId": "product-design-01",
+      "path": "public-fixtures/product-design-01.json",
+      "sha256": "0dcb1c32faec2f83112184c9044b58debef2130899f24b85f1a798b6a72fdd43"
+    },
+    {
+      "taskId": "product-design-12",
+      "path": "public-fixtures/product-design-12.json",
+      "sha256": "68a8e312511a598b43b6408fe144dfcc8361ad8c65d6f6405431eb8c798b655b"
+    },
+    {
+      "taskId": "product-design-15",
+      "path": "public-fixtures/product-design-15.json",
+      "sha256": "b7b2df3c29f7b0bdeecd879da5439af52a6b0d4305566cfdaf8213e2461afce4"
+    },
+    {
+      "taskId": "product-design-18",
+      "path": "public-fixtures/product-design-18.json",
+      "sha256": "f44c7936ce69b866ea99e3a277a5040b9566c90587b8c07fe98cc8ac79c1ff72"
+    },
+    {
+      "taskId": "graphic-brand-design-01",
+      "path": "public-fixtures/graphic-brand-design-01.json",
+      "sha256": "d13350ce88fa799ce79ace161cc033f1fe56243b89970468996a989f5bd691a8"
+    },
+    {
+      "taskId": "graphic-brand-design-12",
+      "path": "public-fixtures/graphic-brand-design-12.json",
+      "sha256": "6d4d824bec7d5dec61670ed883e76e5b4b3436ef9186452954feec886265659a"
+    },
+    {
+      "taskId": "graphic-brand-design-15",
+      "path": "public-fixtures/graphic-brand-design-15.json",
+      "sha256": "020eef51d37d4df9e05fa5d6c295a92ced14ef1b9dd6fab295ddc0b75caaf596"
+    },
+    {
+      "taskId": "graphic-brand-design-18",
+      "path": "public-fixtures/graphic-brand-design-18.json",
+      "sha256": "eee31502deaf52e6c50c6f040350c36966211f3249e2da0d1ea7d4a24a1e4c9a"
+    },
+    {
+      "taskId": "motion-design-01",
+      "path": "public-fixtures/motion-design-01.json",
+      "sha256": "df0271f15d609e6b7bef7354fbc5f14341510f4daabe27b2732f2eee025c3e41"
+    },
+    {
+      "taskId": "motion-design-12",
+      "path": "public-fixtures/motion-design-12.json",
+      "sha256": "c22e5099e8bec2bba8b3c108213d519dca2fb944a63f9bd994dde3c92cbe6251"
+    },
+    {
+      "taskId": "motion-design-15",
+      "path": "public-fixtures/motion-design-15.json",
+      "sha256": "91aafcec73f97945f09fb868ad3042f2d5c92d673ff3c425f717aa0f1edb241f"
+    },
+    {
+      "taskId": "motion-design-18",
+      "path": "public-fixtures/motion-design-18.json",
+      "sha256": "79a4fced32316cb9b76222839312fc40df9837aac451a45c9a600ff5333efb18"
+    },
+    {
+      "taskId": "spatial-xr-01",
+      "path": "public-fixtures/spatial-xr-01.json",
+      "sha256": "38a4df059857fa6e0c11cd2d6cbeba464bd86835930910e6e8896167491a7cf6"
+    },
+    {
+      "taskId": "spatial-xr-12",
+      "path": "public-fixtures/spatial-xr-12.json",
+      "sha256": "9b60af2d1e2d0882bc3880eadbd5524f39c7443a5658cc308af63a3a39c06670"
+    },
+    {
+      "taskId": "spatial-xr-15",
+      "path": "public-fixtures/spatial-xr-15.json",
+      "sha256": "9afb0e49df7f3f0c807391e37cd10e46f2403626eef8b5462b2c9c49bbcb67d3"
+    },
+    {
+      "taskId": "spatial-xr-18",
+      "path": "public-fixtures/spatial-xr-18.json",
+      "sha256": "45634dc61f8bfbd79486e9d4d8770310702cb174c66e39d538f6a7424e81e2e5"
+    },
+    {
+      "taskId": "agentic-design-01",
+      "path": "public-fixtures/agentic-design-01.json",
+      "sha256": "ffc988c77c06d46db2ad702ed30732792827703e02fe0f8ce1b7c68dabce063b"
+    },
+    {
+      "taskId": "agentic-design-12",
+      "path": "public-fixtures/agentic-design-12.json",
+      "sha256": "d736a8c2a16ca556cf4bb3efa59e9ebe71eedb199c4300d730bf25dd703d86a4"
+    },
+    {
+      "taskId": "agentic-design-15",
+      "path": "public-fixtures/agentic-design-15.json",
+      "sha256": "8cb163c4a2b8aa22d29b73c7e18cf7f222956afc20bc52fcd4c8f3b04471dcb3"
+    },
+    {
+      "taskId": "agentic-design-18",
+      "path": "public-fixtures/agentic-design-18.json",
+      "sha256": "fb7a24285f9c937e70ce79801f5880bbe39b729aaf47f05905ea60ac87fa1948"
+    },
+    {
+      "taskId": "ios-swiftui-01",
+      "path": "public-fixtures/ios-swiftui-01.json",
+      "sha256": "f41c9c8cebe970f10a731bebc853bdce9e76d9b5fb07d1a32ac090065fd239ad"
+    },
+    {
+      "taskId": "ios-swiftui-12",
+      "path": "public-fixtures/ios-swiftui-12.json",
+      "sha256": "84462f19fdf7e1468058d99231eed76fbc4b10f5d3ea69d3507efcaf3a39ae34"
+    },
+    {
+      "taskId": "ios-swiftui-15",
+      "path": "public-fixtures/ios-swiftui-15.json",
+      "sha256": "3de7b76f2979fa6a4300aa787d28b9c6d7896b44d7de8b240e574df37b4593a9"
+    },
+    {
+      "taskId": "ios-swiftui-18",
+      "path": "public-fixtures/ios-swiftui-18.json",
+      "sha256": "e7cac320759903e39d212f6f10c9d34cfb016fc10a856ab15d086424293015de"
+    },
+    {
+      "taskId": "cross-platform-mobile-01",
+      "path": "public-fixtures/cross-platform-mobile-01.json",
+      "sha256": "d00f917c80bbff0665db97aa69a025a9df44ff8c62f7ff6a0a46634a462b0f0e"
+    },
+    {
+      "taskId": "cross-platform-mobile-12",
+      "path": "public-fixtures/cross-platform-mobile-12.json",
+      "sha256": "a4a07e514d76958b5f38c02986a5b534995b6228ddbab80bd0e68d887f670de9"
+    },
+    {
+      "taskId": "cross-platform-mobile-15",
+      "path": "public-fixtures/cross-platform-mobile-15.json",
+      "sha256": "82af04ba3a695f5d67d74899e7ed6ad1cdb21522a479bac53e0d044a8b35eef4"
+    },
+    {
+      "taskId": "cross-platform-mobile-18",
+      "path": "public-fixtures/cross-platform-mobile-18.json",
+      "sha256": "01ebb37255807ebcafbfea638651a77816f16c638ec7bf93a9eee5178630c009"
+    },
+    {
+      "taskId": "android-compose-01",
+      "path": "public-fixtures/android-compose-01.json",
+      "sha256": "e50c19a2176b6c3b1de4734841f26977db7d0761dddf5c6dcae11e909738b90f"
+    },
+    {
+      "taskId": "android-compose-12",
+      "path": "public-fixtures/android-compose-12.json",
+      "sha256": "638290b53053d4e0714d4f5c5002cf5d79bc0612acd7817843afac630466a203"
+    },
+    {
+      "taskId": "android-compose-15",
+      "path": "public-fixtures/android-compose-15.json",
+      "sha256": "8e9906f649ba766e2057ce856a5e842e2388fd2315bba4bd04d3839aedf2b9e3"
+    },
+    {
+      "taskId": "android-compose-18",
+      "path": "public-fixtures/android-compose-18.json",
+      "sha256": "1c90bcdab486576365940d9444801a4f60b1a8126ed062e59323c1c6713b19d3"
+    },
+    {
+      "taskId": "native-design-kits-01",
+      "path": "public-fixtures/native-design-kits-01.json",
+      "sha256": "ea87d5174cfd0f3286af37a1a3b4113603aaa14395f99d5c0633915526f06a88"
+    },
+    {
+      "taskId": "native-design-kits-12",
+      "path": "public-fixtures/native-design-kits-12.json",
+      "sha256": "27d7af5b87015b8702564d8d36420f161bc2b166d261325b41080d0fdc1e8e4e"
+    },
+    {
+      "taskId": "native-design-kits-15",
+      "path": "public-fixtures/native-design-kits-15.json",
+      "sha256": "a54f47a0efe5721faa0a0b330d75136025641896e206f4069fed720162a43af2"
+    },
+    {
+      "taskId": "native-design-kits-18",
+      "path": "public-fixtures/native-design-kits-18.json",
+      "sha256": "871a3a4504897239d4ad56b11c37347cf0cdbbed3668f01a62d64c57b9ded7fc"
+    },
+    {
+      "taskId": "design-systems-01",
+      "path": "public-fixtures/design-systems-01.json",
+      "sha256": "dea66cbac9c6278ec12517b700f996f83064b8a98cffcdeeb5e92ab19d160d9e"
+    },
+    {
+      "taskId": "design-systems-12",
+      "path": "public-fixtures/design-systems-12.json",
+      "sha256": "0ac91cb40f2485edf24b34d67be51950b42b4b301138de7923f3bbef5738faac"
+    },
+    {
+      "taskId": "design-systems-15",
+      "path": "public-fixtures/design-systems-15.json",
+      "sha256": "75049e422d704203586fc25bc68d840436bc01d34992eefe00f3f2fa242015de"
+    },
+    {
+      "taskId": "design-systems-18",
+      "path": "public-fixtures/design-systems-18.json",
+      "sha256": "ad3a45699dc92336da651ba9915c451aa2a980bad817ac1941a81cd6b5f28de3"
+    },
+    {
+      "taskId": "design-engineering-01",
+      "path": "public-fixtures/design-engineering-01.json",
+      "sha256": "139c172f78003a9210971587f642a9f61e14aa07d4ed20d0624c82d91ce3fde1"
+    },
+    {
+      "taskId": "design-engineering-12",
+      "path": "public-fixtures/design-engineering-12.json",
+      "sha256": "618a1747c0e014e064069bb61d2a2add453ca39ee78b7d3e32f6a45533f24cd7"
+    },
+    {
+      "taskId": "design-engineering-15",
+      "path": "public-fixtures/design-engineering-15.json",
+      "sha256": "8681a4ca3222004fe6d695e6b323e1b258472a132089ba533b64985eb026be54"
+    },
+    {
+      "taskId": "design-engineering-18",
+      "path": "public-fixtures/design-engineering-18.json",
+      "sha256": "f4edfd902570e57350c232ea60971745afcb79476a9eae1286f4f9d235da2364"
+    },
+    {
+      "taskId": "service-design-01",
+      "path": "public-fixtures/service-design-01.json",
+      "sha256": "0a169942a074469cc4ed59603185b2a3816a63966d0f16d1d64c39e1c2a5a647"
+    },
+    {
+      "taskId": "service-design-12",
+      "path": "public-fixtures/service-design-12.json",
+      "sha256": "5f16fd1472edc70751973e2ee2b50a6e27952d2b989d19442c58b5642bcf1730"
+    },
+    {
+      "taskId": "service-design-15",
+      "path": "public-fixtures/service-design-15.json",
+      "sha256": "9633ae8c203c74f8f6a7e5bf095405cdbf3ab3ae00b8d0c28bdaaed99d11e0ed"
+    },
+    {
+      "taskId": "service-design-18",
+      "path": "public-fixtures/service-design-18.json",
+      "sha256": "1c9d1fc158dfaf0a511a77ca1b5c2eaf78f29bf89c913d571153a943035d56f8"
+    },
+    {
+      "taskId": "content-design-01",
+      "path": "public-fixtures/content-design-01.json",
+      "sha256": "bc83d4ffe726077756eab5f4898c2fc3506e665cb916d8a113b05336e019fb02"
+    },
+    {
+      "taskId": "content-design-12",
+      "path": "public-fixtures/content-design-12.json",
+      "sha256": "5a88884187f31e7b8aea834b80ccb98dc5b12615965133edfa1454c87f36e1ae"
+    },
+    {
+      "taskId": "content-design-15",
+      "path": "public-fixtures/content-design-15.json",
+      "sha256": "e94a965eca2e7256939335a680d740e5a234d517b730b77b445e936e1cf2d217"
+    },
+    {
+      "taskId": "content-design-18",
+      "path": "public-fixtures/content-design-18.json",
+      "sha256": "8c4d8a1745674630bb017930a2a42bde3a556e6c2f51c8333db0ee337e44c830"
+    },
+    {
+      "taskId": "interaction-prototyping-01",
+      "path": "public-fixtures/interaction-prototyping-01.json",
+      "sha256": "a392008c5c72fcde7caa2eb74de197f7a45a00cdb642865c838090f1119406b0"
+    },
+    {
+      "taskId": "interaction-prototyping-12",
+      "path": "public-fixtures/interaction-prototyping-12.json",
+      "sha256": "a188e9e53a7c6574a6f68a4da4c5490debdebf3cb28f7a65acb9b5a38b5a8911"
+    },
+    {
+      "taskId": "interaction-prototyping-15",
+      "path": "public-fixtures/interaction-prototyping-15.json",
+      "sha256": "057df7ff6b23b7df4335c926c9d0c9ac123c31eca7e234a6b38e9f9c2f7933b3"
+    },
+    {
+      "taskId": "interaction-prototyping-18",
+      "path": "public-fixtures/interaction-prototyping-18.json",
+      "sha256": "39e110bc657ac969bbbd1f404f7d6f939b8615042bd576d69d64226520ef0a37"
+    },
+    {
+      "taskId": "research-evidence-01",
+      "path": "public-fixtures/research-evidence-01.json",
+      "sha256": "e8895b020a27f6054735c2c9c1ac26cbb0a31b063d7bfe57267a6ca240741110"
+    },
+    {
+      "taskId": "research-evidence-12",
+      "path": "public-fixtures/research-evidence-12.json",
+      "sha256": "c38e206da9d997f9e5be618c35cf847a89ebe2e976c20617467dfa2f063f5193"
+    },
+    {
+      "taskId": "research-evidence-15",
+      "path": "public-fixtures/research-evidence-15.json",
+      "sha256": "3e414622916634288922626168d59d2d7c1a73c52217b166b2d6ddfbb3baba03"
+    },
+    {
+      "taskId": "research-evidence-18",
+      "path": "public-fixtures/research-evidence-18.json",
+      "sha256": "9388f8779e85975a3b2ae348c26b069c57b2349919a69e957eb05095568c4f19"
     }
   ],
   "calibrationArtifacts": [],

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "taskId": "<public-task-id>",
+  "candidateSha256": "<candidate-sha256>",
+  "reviewerId": "<stable-reviewer-id>",
+  "independent": true,
+  "qualificationRef": "<qualification-evidence-ref>",
+  "reviewReceiptRef": "<immutable-review-receipt-ref>",
+  "decision": "approved",
+  "reviewedAt": "<ISO-8601-timestamp>"
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "android-compose-01-fixture",
+  "taskId": "android-compose-01",
+  "trackId": "android-compose",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Diagnose the supplied work, identify the highest-risk failures, and produce a prioritized correction plan for a Material 3 account flow. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "Android users across phones, tablets, and foldables",
+      "mode": "critique-diagnose",
+      "complexity": "scoped",
+      "durationMinutes": 30,
+      "successMeasures": [
+        "predictive-back success",
+        "adaptive-layout completion",
+        "jank rate"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 1,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "Android users across phones, tablets, and foldables lose confidence when the critique-diagnose flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "predictive-back success is below the scenario target",
+          "value": 42,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "Android emulator and foldable emulator share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Back navigation and offline state must never discard work",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "fragmented",
+        "supportedPlatforms": [
+          "Android emulator",
+          "foldable emulator"
+        ],
+        "knownDebt": "Android and Jetpack Compose behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "Android emulator",
+        "foldable emulator"
+      ],
+      "accessibility": [
+        "TalkBack order",
+        "font-scale 200 percent"
+      ],
+      "safety": [
+        "Back navigation and offline state must never discard work"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "android-studio-source",
+        "emulator-build",
+        "compose-ui-tests",
+        "accessibility-capture",
+        "performance-trace",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "android-emulator",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "non-native-web-substitution"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "e2f0aeb7f47d922f4b95a80eee727d8803b766c98a8f402477fd2aeefc9df286"
+}

@@ -10,6 +10,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### DesignWorkBench v2 benchmark and evidence activation
 
+- `6959b243` feat: report prepared fixture evidence
+- `4f9a4f9a` feat: require independent public fixture approval
+- `e14fa674` test: require independent fixture approval workflow
+- `6b4e2df9` feat: produce public fixture candidate evidence
+- `eb955e58` test: require public fixture production workflow
+- `fc60687f` feat: validate public fixture candidate evidence
+- `c3f1e1fe` test: require validated public fixture candidates
+- `61567ac6` feat: author public benchmark fixture candidates
+- `91fa7066` test: define public fixture production contract
+- `7e086e97` docs: publish benchmark calibration runbook
 - `aab66e2d` feat: activate three benchmark evidence runners
 - `321cd65a` feat: render and inspect motion runner evidence
 - `685c61c1` test: require reproducible motion runner proof
@@ -40,6 +50,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   Tool installation or capability detection alone does not clear a runner.
 - Keep calibration external and blinded. Synthetic practitioner identities or
   ratings cannot clear the release gate.
+- Keep public candidate preparation separate from independent fixture
+  verification. Candidate approval recomputes the authored hash and requires
+  reviewer qualification plus an immutable review receipt.
 
 ## v2.7.0 — 2026-07-29
 

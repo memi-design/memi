@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "design-systems-18-fixture",
+  "taskId": "design-systems-18",
+  "trackId": "design-systems",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Complete the end-to-end assignment, respond to an interruption and changed constraint, then recover without discarding valid work for a component-variant consolidation. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "Multiple product teams migrating a governed component system",
+      "mode": "capstone-recovery",
+      "complexity": "long-horizon",
+      "durationMinutes": 135,
+      "successMeasures": [
+        "token adoption",
+        "duplicate reduction",
+        "accessibility compliance"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 4,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "Multiple product teams migrating a governed component system lose confidence when the capstone-recovery flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "token adoption is below the scenario target",
+          "value": 63,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "Figma library and web components and native mappings share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Migration must preserve production behavior and rollback",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "legacy",
+        "supportedPlatforms": [
+          "Figma library",
+          "web components",
+          "native mappings"
+        ],
+        "knownDebt": "Design systems behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "Figma library",
+        "web components",
+        "native mappings"
+      ],
+      "accessibility": [
+        "semantic token coverage",
+        "component-state accessibility"
+      ],
+      "safety": [
+        "Migration must preserve production behavior and rollback"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "token-graph",
+        "component-library",
+        "migration-plan",
+        "code-connect-map",
+        "governance-report",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "figma-editable",
+        "browser-playwright",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "duplicate-component-debt"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "e25c069325a55b9351af235298e9c11a55cac9ad8ecd6b0a1ae5e3228d74434f"
+}

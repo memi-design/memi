@@ -77,10 +77,17 @@ tasks before private and holdout material is collected.
 
 ## Current activation state
 
+- prepared public candidate packs: 60/60
 - verified task fixtures: 0/300
 - verified runner profiles: 3/8
 - qualified practitioners: 0
 - calibrated tracks: 0/15
+
+Prepared candidate packs are benchmark-owned synthetic development material.
+They establish reproducible briefs, source evidence, constraints, required
+artifacts, runners, negative controls, and deterministic checks. They do not
+become verified fixtures until an independent reviewer signs the exact
+candidate hash with qualification and review-receipt references.
 
 The remaining runner profiles are iOS or visionOS simulator, Expo device,
 Android emulator, editable Figma artifact, and spatial/XR runtime. A tool being

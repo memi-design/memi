@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "product-design-01-fixture",
+  "taskId": "product-design-01",
+  "trackId": "product-design",
+  "split": "publicDevelopment",
+  "status": "candidate",
+  "disclosure": "This is benchmark-authored synthetic source material, not observed user or production evidence.",
+  "provenance": {
+    "source": "Memi DesignWorkBench v2",
+    "owner": "Memi Design",
+    "license": "MIT",
+    "sourceType": "benchmark_owned_synthetic",
+    "capturedAt": "2026-07-30T00:00:00.000Z"
+  },
+  "inputs": {
+    "brief": {
+      "taskPrompt": "Diagnose the supplied work, identify the highest-risk failures, and produce a prioritized correction plan for a activation journey. Show the evidence behind material decisions, preserve editable source, validate the real runtime where applicable, and document critique, revision, and handoff.",
+      "audience": "People completing an unfamiliar, consequential workflow",
+      "mode": "critique-diagnose",
+      "complexity": "scoped",
+      "durationMinutes": 30,
+      "successMeasures": [
+        "completion rate",
+        "time to confidence",
+        "recovery rate"
+      ]
+    },
+    "sourceMaterial": {
+      "scenarioVariant": 1,
+      "evidence": [
+        {
+          "id": "qualitative-observation",
+          "type": "benchmark-authored interview synthesis",
+          "finding": "People completing an unfamiliar, consequential workflow lose confidence when the critique-diagnose flow hides system status",
+          "confidence": "candidate"
+        },
+        {
+          "id": "quantitative-baseline",
+          "type": "benchmark-authored baseline",
+          "finding": "completion rate is below the scenario target",
+          "value": 42,
+          "unit": "scenario index",
+          "confidence": "candidate"
+        },
+        {
+          "id": "system-inventory",
+          "type": "benchmark-authored system inventory",
+          "finding": "browser and mobile share structure but diverge at error recovery",
+          "confidence": "candidate"
+        },
+        {
+          "id": "edge-case",
+          "type": "benchmark-authored risk review",
+          "finding": "Incorrect decisions must remain reversible and explainable",
+          "confidence": "candidate"
+        }
+      ],
+      "existingSystem": {
+        "maturity": "fragmented",
+        "supportedPlatforms": [
+          "browser",
+          "mobile"
+        ],
+        "knownDebt": "Product design behavior is inconsistent at the interruption and recovery boundary"
+      }
+    },
+    "constraints": {
+      "platforms": [
+        "browser",
+        "mobile"
+      ],
+      "accessibility": [
+        "screen-reader task completion",
+        "keyboard-only recovery"
+      ],
+      "safety": [
+        "Incorrect decisions must remain reversible and explainable"
+      ],
+      "scope": [
+        "Preserve evidence that remains valid",
+        "Do not substitute a different product or platform",
+        "Keep editable source and a decision log"
+      ]
+    },
+    "acceptanceFixtures": {
+      "requiredArtifactKinds": [
+        "research-synthesis",
+        "journey-map",
+        "information-architecture",
+        "interactive-prototype",
+        "success-metrics",
+        "decision-log",
+        "execution-trace",
+        "handoff-note"
+      ],
+      "runnerProfileIds": [
+        "browser-playwright",
+        "artifact-validator"
+      ],
+      "negativeControlIds": [
+        "fixture-tampering",
+        "fabricated-evidence",
+        "scope-substitution",
+        "unsupported-user-need"
+      ],
+      "deterministicChecks": [
+        "all required artifacts are present",
+        "artifact references resolve",
+        "runtime evidence matches the claimed platform",
+        "handoff reopens without hidden dependencies"
+      ]
+    }
+  },
+  "candidateSha256": "48d4bf04c80040cecde6292994cf3c60733c0b5b6d5c3930282d812b2e31a76b"
+}
