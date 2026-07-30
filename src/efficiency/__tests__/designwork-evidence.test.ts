@@ -26,6 +26,13 @@ const manifestPath = path.join(
 );
 
 describe("DesignWorkBench evidence receipts", () => {
+  it("installs the real browser and motion runner dependencies in CI", async () => {
+    const workflow = await readFile(path.join(root, ".github", "workflows", "ci.yml"), "utf8");
+
+    expect(workflow).toContain("npx playwright install --with-deps chromium");
+    expect(workflow).toContain("sudo apt-get install -y ffmpeg");
+  });
+
   it("accepts benchmark-bound fixture and runner receipts with complete artifacts", async () => {
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
     const evidenceRoot = await mkdtemp(path.join(os.tmpdir(), "memi-designwork-evidence-"));

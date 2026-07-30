@@ -106,7 +106,7 @@ These results predate the full 100-task InterfaceBench run. They are reported as
 
 Candidate verification currently records:
 
-- 2,152/2,152 tests passing across 300 files.
+- 2,153/2,153 tests passing across 300 files.
 - 70.57% statements, 58.87% branches, 79.82% functions, and 72.35% lines. This is a measured improvement from 64.91%, 53.73%, 73.11%, and 66.62%, respectively, but remains below the 80% repository target.
 - Zero production dependency vulnerabilities.
 - A 48-file npm candidate measuring about 562 KB compressed and 1.99 MB unpacked, within the 750 KB compressed and 2 MB unpacked release budgets.
