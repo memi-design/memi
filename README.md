@@ -75,6 +75,45 @@ The first command is deliberately read-only. Write-capable scaffolds and Figma o
 
 No LLM is used in the deterministic CI enforcement path.
 
+## Memi InterfaceBench
+
+[Memi InterfaceBench](benchmarks/interfacebench-v1.json) is the release benchmark for professional product design, frontend engineering, and native design engineering. It measures whether an agent can understand an existing product, make a scoped interface change, preserve its system, and prove the result. The benchmark is currently a **specification with `results: null`**, not a published Memi score.
+
+| Benchmark contract | Value |
+| --- | --- |
+| Target corpus | 100 target tasks |
+| Evaluation split | 20 public development, 60 private test, 20 rolling holdout |
+| Coverage | 10 task families across React Web, React Native/Expo, SwiftUI, desktop canvas, and cross-platform work |
+| Initial reproducible slice | 5 pinned seed tasks: Buzzr, Nate the Bait, Paraform, DoriOS, and dorii |
+| Repetitions | At least 3 independent paired runs per condition |
+| Quality | 75% work-product score and 25% source-trust score after hard gates |
+| Efficiency | Measured cost, latency, tokens, retries, and interventions; tool-call count is diagnostic only |
+| Release rule | Quality non-inferiority plus positive cost and latency evidence with 95% confidence |
+
+The work-product score covers functional correctness (22%), visual fidelity and craft (14%), product judgment (12%), interaction and state quality (10%), accessibility (10%), responsive behavior (9%), design-system integrity (9%), maintainability (7%), performance (4%), and platform fidelity (3%). Source trust separately scores evidence provenance (30%), fixture integrity (25%), decision trace (20%), source alignment (15%), and uncertainty honesty (10%).
+
+The protocol adapts the professional-work-unit and bespoke-rubric approach from [Harvey BigLaw Bench](https://www.harvey.ai/blog/introducing-biglaw-bench), pinned real-repository tasks from [SWE-bench Verified](https://openai.com/index/introducing-swe-bench-verified/), rendered visual evaluation from [Design2Code](https://arxiv.org/abs/2403.03163), functional journeys from [WebArena](https://webarena.dev/), and blinded pairwise preference from [WebDev Arena](https://arena.ai/blog/webdev-arena). Accessibility and performance gates follow [WCAG 2.2](https://www.w3.org/TR/WCAG22/) and [Core Web Vitals](https://web.dev/articles/vitals).
+
+### Measured 2.7 candidate evidence
+
+These results predate the full 100-task InterfaceBench run. They are reported as release evidence, not converted into an InterfaceBench score.
+
+| Evidence set | Scope | Quality guardrail | Token savings | Wall-time savings | Decision |
+| --- | --- | ---: | ---: | ---: | --- |
+| Writable product workflows | 5 paired, multi-minute E2E runs | 100/100 in every case | 0.55% mean, 95% CI -51.23% to 37.30% | 5.66% mean, 95% CI -24.30% to 25.86% | Claim not verified |
+| Six-repository read-only suite | 6 paired runs | 100% pass rate in both conditions | 19.92% mean, 95% CI -0.23% to 40.07% | 0.50% mean, 95% CI -11.72% to 14.55% | Claim not verified |
+| Latest Buzzr Router v2 calibration | 1 paired Expo run | 100/100 in both conditions | 14.15% | 25.08% | Calibration only |
+
+Candidate verification currently records:
+
+- 2,033/2,033 tests passing across 285 files.
+- 64.91% statements, 53.73% branches, 73.11% functions, and 66.62% lines. This remains below the 80% repository target.
+- Zero production dependency vulnerabilities.
+- A 560 KB compressed, 1.986 MB unpacked npm candidate with 48 files.
+- No defensible per-run USD cost from the available subscription traces, so total tokens are explicitly labeled as the cost proxy.
+
+The greater-than-25% claim remains **not verified**. Inspect the [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Buzzr tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
+
 ## Choose your integration
 
 | Surface | Start here | Best for |
