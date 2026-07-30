@@ -57,6 +57,12 @@ jobs:
 
       - run: npm ci --ignore-scripts
 
+      - name: Install DesignWorkBench runner dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          npx playwright install --with-deps chromium
+
       - name: Resolve publish source
         if: inputs.mode == 'publish'
         run: |

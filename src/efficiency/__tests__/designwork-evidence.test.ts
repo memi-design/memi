@@ -27,10 +27,15 @@ const manifestPath = path.join(
 
 describe("DesignWorkBench evidence receipts", () => {
   it("installs the real browser and motion runner dependencies in CI", async () => {
-    const workflow = await readFile(path.join(root, ".github", "workflows", "ci.yml"), "utf8");
+    const workflows = await Promise.all([
+      "ci.yml",
+      "publish.yml",
+    ].map((file) => readFile(path.join(root, ".github", "workflows", file), "utf8")));
 
-    expect(workflow).toContain("npx playwright install --with-deps chromium");
-    expect(workflow).toContain("sudo apt-get install -y ffmpeg");
+    for (const workflow of workflows) {
+      expect(workflow).toContain("npx playwright install --with-deps chromium");
+      expect(workflow).toContain("sudo apt-get install -y ffmpeg");
+    }
   });
 
   it("accepts benchmark-bound fixture and runner receipts with complete artifacts", async () => {
