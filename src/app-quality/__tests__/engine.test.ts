@@ -87,6 +87,7 @@ export default function Dashboard() {
     const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-scope-"));
     try {
       await mkdir(join(root, "src", "app"), { recursive: true });
+      await mkdir(join(root, ".dist", "npm-runtime", "preview"), { recursive: true });
       await mkdir(join(root, ".astro"), { recursive: true });
       await mkdir(join(root, ".superpowers", "brainstorm", "session"), { recursive: true });
       await mkdir(join(root, "docs", "audits", "artifacts", "visual-parity"), { recursive: true });
@@ -105,6 +106,7 @@ export default function Page() {
   return <main className="p-4 text-base">Clean scoped app</main>;
 }
 `, "utf-8");
+      await writeFile(join(root, ".dist", "npm-runtime", "preview", "index.html"), `<div style="color:#fedcba" class="text-[74px]">package staging</div>`, "utf-8");
       await writeFile(join(root, ".astro", "types.d.ts"), `declare const color = "#123456";`, "utf-8");
       await writeFile(join(root, ".superpowers", "brainstorm", "session", "scratch.html"), `<div style="color:#ff0000" class="text-[72px]">scratch</div>`, "utf-8");
       await writeFile(join(root, "docs", "audits", "artifacts", "visual-parity", "dashboard-preview.html"), `<main style="color:#1188ff" class="text-[80px]">audit artifact</main>`, "utf-8");
@@ -121,6 +123,36 @@ export default function Page() {
       const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
 
       expect(diagnosis.files.map((file) => file.path)).toEqual(["src/app/page.tsx"]);
+      expect(diagnosis.summary.hexColors).toBe(0);
+      expect(diagnosis.issues.map((issue) => issue.id)).not.toContain("color.raw-hex");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("treats CSS custom-property declarations as the color token source, not raw-color leakage", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memoire-app-quality-color-tokens-"));
+    try {
+      await mkdir(join(root, "src", "app"), { recursive: true });
+      await mkdir(join(root, "src", "styles"), { recursive: true });
+      await writeFile(join(root, "src", "app", "page.tsx"), `
+export default function Page() {
+  return <main className="p-4 text-base bg-background text-foreground">Tokenized UI</main>;
+}
+`, "utf-8");
+      await writeFile(join(root, "src", "styles", "tokens.css"), `
+:root {
+  --background: #08090a;
+  --surface: #161718;
+  --foreground: #f7f8f8;
+  --muted: #8a8f98;
+  --border: #383b3f;
+  --accent: #ff5470;
+}
+`, "utf-8");
+
+      const diagnosis = await diagnoseAppQuality({ projectRoot: root, write: false });
+
       expect(diagnosis.summary.hexColors).toBe(0);
       expect(diagnosis.issues.map((issue) => issue.id)).not.toContain("color.raw-hex");
     } finally {
