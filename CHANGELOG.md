@@ -8,6 +8,21 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+### 2.7 longitudinal research paper
+
+- Added a reproducible, academic-style LaTeX manuscript covering the v2.0 to
+  v2.7 error history, paired read-only and writable workflow studies, router
+  failure analysis, quality-score correction, release incidents, public
+  harness capability comparison, threats to validity, and evidence hashes.
+- Bound manuscript metrics and figures to committed JSON sources through a
+  deterministic asset generator instead of manually retyping benchmark values.
+- Preserved the universal 25% claim, practitioner certification, USD-cost
+  claim, and cross-harness performance ranking as explicitly unverified.
+- Corrected npm payload documentation to the published artifact's exact 54
+  files, 570,048 compressed bytes, and 2,019,418 unpacked bytes.
+- Added an ORCID field without inventing an identifier; it remains marked
+  `not supplied` until the author provides one.
+
 ### 2.7 claim firewall and release evidence
 
 - `d4bc7cc5` feat: separate 2.7 evidence and release gates

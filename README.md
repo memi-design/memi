@@ -109,12 +109,12 @@ Candidate verification currently records:
 - 2,154/2,154 tests passing across 300 files.
 - 70.57% statements, 58.87% branches, 79.82% functions, and 72.35% lines. This is a measured improvement from 64.91%, 53.73%, 73.11%, and 66.62%, respectively, but remains below the 80% repository target.
 - Zero production dependency vulnerabilities.
-- A 48-file npm candidate measuring about 562 KB compressed and 1.99 MB unpacked, within the 750 KB compressed and 2 MB unpacked release budgets.
+- The published 54-file npm artifact measures exactly 570,048 bytes compressed and 2,019,418 bytes unpacked, within the 750,000-byte and 2 MiB release budgets.
 - No defensible per-run USD cost from the available subscription traces, so total tokens are explicitly labeled as the cost proxy.
 
 Historical `qualityScore: 100` workflow records mean automated acceptance passed, not senior-practitioner quality. New records label that evidence, cap it at 80, and reserve higher scores for calibrated practitioner review.
 
-The greater-than-25% claim remains **not verified**. Inspect the [technical PDF report](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-release-evidence/memi-2.7-release-evidence.pdf), [reproducible report source](https://github.com/memi-design/memi/tree/main/docs/research/memi-2.7-release-evidence), [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Buzzr tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
+The greater-than-25% claim remains **not verified**. Inspect the [LaTeX research paper](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-release-evidence/memi-2.7-research-paper.pdf), [technical release brief](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-release-evidence/memi-2.7-release-evidence.pdf), [reproducible paper source](https://github.com/memi-design/memi/tree/main/docs/research/memi-2.7-release-evidence), [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Buzzr tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
 
 ## Memi DesignWorkBench v2
 

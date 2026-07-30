@@ -1,0 +1,756 @@
+% !TEX program = pdflatex
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[letterpaper,margin=0.68in,columnsep=0.24in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{courier}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{siunitx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{balance}
+\usepackage{listings}
+
+\definecolor{MemiRuby}{HTML}{E5385D}
+\definecolor{MemiInk}{HTML}{16171A}
+\definecolor{MemiMuted}{HTML}{5D626C}
+\definecolor{MemiGrid}{HTML}{D9DCE1}
+\definecolor{MemiGreen}{HTML}{15845D}
+\definecolor{MemiAmber}{HTML}{B87503}
+\definecolor{MemiBlue}{HTML}{3469C7}
+\definecolor{MemiRed}{HTML}{BD304B}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=MemiBlue,
+  citecolor=MemiBlue,
+  urlcolor=MemiBlue,
+  pdftitle={Memi 2.7: A Longitudinal Engineering Audit and Paired-Workflow Evaluation},
+  pdfauthor={Sarvesh Chidambaram},
+  pdfsubject={Repository-specific design intelligence, routing, tracing, and efficiency evidence}
+}
+\captionsetup{font=small,labelfont=bf}
+\setlist{leftmargin=*,nosep}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0pt}
+\titleformat{\section}{\large\sffamily\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalsize\sffamily\bfseries}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\small\sffamily\bfseries}{\thesubsubsection}{0.5em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\scriptsize Memi 2.7 Research Report}
+\fancyhead[R]{\scriptsize Chidambaram, 2026}
+\fancyfoot[C]{\scriptsize\thepage}
+\renewcommand{\headrulewidth}{0.2pt}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\pass}{\textcolor{MemiGreen}{\textbf{PASS}}}
+\newcommand{\blocked}{\textcolor{MemiRed}{\textbf{BLOCKED}}}
+\newcommand{\partialstatus}{\textcolor{MemiAmber}{\textbf{PARTIAL}}}
+\newcommand{\AuthorORCID}{not supplied}
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  rulecolor=\color{MemiGrid},
+  backgroundcolor=\color{black!2},
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+\input{generated/metrics.tex}
+
+\begin{document}
+
+\twocolumn[
+\begin{@twocolumnfalse}
+\begin{center}
+{\sffamily\bfseries\LARGE Memi 2.7: Evidence-Scoped Design Intelligence\\[0.15em]
+\Large A Longitudinal Engineering Audit and Paired-Workflow Evaluation\par}
+\vspace{0.8em}
+{\large Sarvesh Chidambaram}\\
+{\small Memi Design, United States}\\
+{\small ORCID: \AuthorORCID\quad$\vert$\quad Correspondence through
+\href{https://github.com/memi-design/memi}{memi-design/memi}}\\
+\vspace{0.6em}
+{\small Research artifact version 1.0 \quad$\vert$\quad \PaperDate \quad$\vert$\quad
+Memi \EngineVersion}
+\end{center}
+
+\begin{abstract}
+Coding-agent skill systems promise lower context cost and better repository
+decisions, yet most public claims are not based on revision-matched tasks,
+immutable traces, or independent product verification. We report the
+longitudinal engineering history and preliminary evaluation of Memi 2.7, a
+repository-specific design-intelligence and skill-routing layer for coding
+agents. The audit traces failure modes from versions 2.0 through 2.7, including
+invalid tool schemas, non-blocking quality gates, optimistic treatment of
+unassessed evidence, release-surface drift, unsafe no-write behavior, and
+routing strategies that increased context on relevant but poorly bounded
+tasks. In a six-repository read-only paired pilot, Memi reduced counted tokens
+by \SixRepoMeanTokens\% on average (95\% bootstrap interval
+\SixRepoTokenLower\% to \SixRepoTokenUpper\%) with wins on
+\SixRepoTokenWins/\SixRepoPairs repositories. In five multi-minute writable
+workflows, mean token savings were \WorkflowMeanTokens\% (95\% interval
+\WorkflowTokenLower\% to \WorkflowTokenUpper\%), with four wins and one large
+regression. A single post-hoc Buzzr router calibration reduced tokens by
+\BuzzrCalibrationTokens\% and wall time by \BuzzrCalibrationWall\%, but is not
+treated as confirmatory evidence. Engineering release checks passed
+\FinalTests\ tests across \FinalTestFiles\ files and nine OS/runtime
+combinations. The evidence supports publication of the software artifact, but
+not a universal 25\% efficiency claim, cross-harness performance superiority,
+or senior-practitioner design-quality certification.
+\end{abstract}
+
+\noindent\textbf{Keywords:} coding agents; skill routing; design engineering;
+agent harness; paired evaluation; trace provenance; human--agent collaboration
+
+\vspace{0.8em}
+\hrule
+\vspace{1em}
+\end{@twocolumnfalse}
+]
+
+\section{Introduction}
+
+General-purpose coding agents must infer local architecture, conventions,
+design-system rules, and validation requirements before editing a repository.
+Skill frameworks can reduce this uncertainty by supplying task-specific
+procedures, but irrelevant or excessive context can make the same agent slower
+and more expensive. The useful research question is therefore not whether a
+skill appears relevant. It is whether an evidence-bounded routing policy
+improves a matched task without lowering work-product quality.
+
+Memi is an open-source design-intelligence layer distributed as a command-line
+tool, Model Context Protocol (MCP) server, Agent Skills package, GitHub Action,
+and companion Studio application. It fingerprints a repository, produces
+read-only design evidence, selects a bounded skill stack, and records
+privacy-safe execution receipts. The design follows the Agent Skills and MCP
+tool contracts \cite{agentskills2026spec,mcp2025tools}; trace identifiers are
+compatible with W3C Trace Context \cite{w3c2021trace}.
+
+This paper makes four contributions:
+
+\begin{enumerate}
+  \item a longitudinal error audit explaining how Memi progressed from a
+  capability bundle to an evidence-scoped harness;
+  \item a paired evaluation across six repositories and five multi-minute
+  product workflows, including negative results;
+  \item a failure analysis of routing, tool calls, retries, quality scoring,
+  and release promotion; and
+  \item a reproducible artifact that binds tables and figures to committed
+  JSON evidence by SHA-256.
+\end{enumerate}
+
+\section{Research Questions and Claim Policy}
+
+We separate questions that earlier versions incorrectly collapsed:
+
+\begin{description}[style=nextline]
+  \item[RQ1: Engineering readiness.] Does the exact 2.7 artifact pass its
+  tests, type checks, supply-chain checks, installation smoke tests, and
+  platform matrix?
+  \item[RQ2: Efficiency.] Under matched conditions, does repository-specific
+  Memi context reduce total tokens or wall time?
+  \item[RQ3: Mechanism.] When routing fails, can traces identify whether the
+  cost came from injected context, discovery, verification, retries, or
+  fixture error?
+  \item[RQ4: Quality.] Does automated product acceptance establish
+  senior-practitioner design quality?
+  \item[RQ5: Comparative performance.] Does Memi outperform other public
+  harnesses under equivalent tasks and environments?
+\end{description}
+
+RQ1 is a software-release gate. RQ2 and RQ3 are empirical evaluation questions.
+RQ4 requires blinded practitioner calibration. RQ5 requires running other
+harnesses, not reading their feature lists. This \emph{claim firewall} allows
+the package to ship without promoting incomplete research findings.
+
+\section{System and Trace Model}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=4.5mm,
+  box/.style={draw=MemiGrid,rounded corners=1.5pt,fill=black!2,
+    minimum width=0.93\columnwidth,minimum height=6.4mm,
+    font=\sffamily\scriptsize,align=center},
+  arrow/.style={-{Latex[length=1.5mm]},draw=MemiMuted}
+]
+\node[box] (intent) {task intent + repository revision + model contract};
+\node[box,below=of intent] (fingerprint) {bounded repository fingerprint};
+\node[box,below=of fingerprint] (router) {eligibility, exclusions, fitness, and context budget};
+\node[box,below=of router] (execution) {provider-neutral execution adapter};
+\node[box,below=of execution] (verify) {independent build, rendered flow, or Simulator contract};
+\node[box,below=of verify] (receipt) {immutable metrics, patch, route, and trace receipts};
+\draw[arrow] (intent) -- (fingerprint);
+\draw[arrow] (fingerprint) -- (router);
+\draw[arrow] (router) -- (execution);
+\draw[arrow] (execution) -- (verify);
+\draw[arrow] (verify) -- (receipt);
+\end{tikzpicture}
+\caption{Memi 2.7 evaluation boundary. The model does not grade its own output;
+verification runs after the patch is captured.}
+\label{fig:pipeline}
+\end{figure}
+
+The router selects no more than two non-redundant skills under an 8\,KB
+resource budget. Eligibility uses repository fingerprints and bounded regular
+expressions over dependencies, files, imports, scripts, frameworks, languages,
+task actions, platforms, and intent polarity. A high-priority niche skill may
+be exclusive. Content-addressed fitness events bind the selected skill
+revision to a baseline run, Memi run, model, reasoning setting, repository
+revision, and result. The system may promote, observe, quarantine, or abstain;
+negative evidence is not deleted.
+
+Each run emits metadata-only events, tool-category counts, timing, token
+counts, verification status, and SHA-256 commitments. Raw prompts, hidden
+reasoning, absolute project paths, and secrets are excluded from durable public
+receipts. The model adapter fails closed when a provider reports a structured
+error even if its process exits with status zero.
+
+\section{Longitudinal Error Audit}
+
+The changelog was audited from v2.0.0 through v2.7.0
+\cite{memi2026changelog}. \Cref{tab:history} lists errors that changed the
+research design. It is not a comprehensive feature history.
+
+\begin{table*}[t]
+\centering
+\caption{Longitudinal defect-to-control audit. ``Observed error'' denotes a
+documented behavior, not a hypothetical risk.}
+\label{tab:history}
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.08\textwidth}p{0.37\textwidth}X@{}}
+\toprule
+Version & Observed error or invalid inference & Control introduced \\
+\midrule
+2.0 & The package bundled many surfaces but lacked a measured routing
+contract; feature presence was easy to confuse with agent benefit. &
+Separate install surfaces from task evidence and require repository-valid
+citations and verification commands. \\
+2.1 & Tailwind v4 color syntaxes were skipped; the codegen cache fingerprinted
+token count rather than token values; dotted MCP tool names were rejected by
+strict clients; the MCP version and root command were stale. &
+Shared color parsing, full-token fingerprints, protocol-valid tool names,
+structured errors, and executable MCP smoke tests. \\
+2.1.1 & Static MCP descriptions consumed about 26\,KB per session. &
+Contract-preserving description reduction to about 13.5\,KB, approximately
+3,000 fewer context tokens before task work. \\
+2.2 & The quality gate emitted warnings without blocking writes; compliance
+guidance was prose without deterministic enforcement. &
+Severity-bearing findings, non-zero exits, blocked writes, and post-generation
+skill-compliance checks. \\
+2.3 & The CI gate required a critical severity the engine never emitted; JSON
+mode bypassed the gate; unassessed dimensions and fabricated screenshot
+evidence inflated scores. &
+Reachable severity gates, schema-v2 provenance, explicit
+\texttt{not-assessed}, removal of fabricated findings, and policy-hashed
+baselines. \\
+2.3.1--2.4.1 & History was appended twice; release binaries omitted optional
+native packages on Windows/Intel macOS; Marketplace metadata exceeded a hard
+length limit. &
+Route regression tests, clean packed installs, platform-matrix builds, and
+metadata contract tests. \\
+2.6.1--2.6.2 & Fresh installs exposed deprecated dependency chains;
+\texttt{--no-write} still wrote audit artifacts. &
+Dependency replacement, zero-finding production audit, and command-level
+no-write filesystem assertions. \\
+2.6.3--2.6.4 & Audit scores could outpace immutable proof; archive/network and
+shallow-clone boundaries were unsafe; provider tracing existed without full
+public release parity. &
+Fail-closed scorecards, source-bound release manifests, OIDC provenance,
+metadata-only runtime schemas, capability negotiation, and parity-specific
+gates. \\
+2.7 & Relevant skills could broaden discovery and verification; historical
+\texttt{qualityScore=100} was interpreted as professional quality; release
+promotion found Windows path, container-authentication, tag-permission, MCP
+namespace, and website drift errors. &
+Hard routing budgets, abstention, independent acceptance, an automated-quality
+ceiling, immutable incident evidence, and separate package, efficiency,
+certification, and parity decisions. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{Test and package growth}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\columnwidth,
+  height=4.5cm,
+  ymin=1400,ymax=2250,
+  ylabel={tests},
+  xlabel={release},
+  symbolic x coords={2.0,2.6.1,2.6.4,2.7},
+  xtick=data,
+  grid=major,
+  grid style={draw=MemiGrid},
+  tick label style={font=\scriptsize},
+  label style={font=\scriptsize},
+  line width=0.9pt
+]
+\addplot[color=MemiRuby,mark=*,mark options={fill=MemiRuby}]
+table[x=version,y=tests,col sep=comma]{generated/test_growth.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Documented test-count growth. Test count is engineering evidence, not
+a proxy for task quality.}
+\label{fig:testgrowth}
+\end{figure}
+
+The v2.0 release reported 1,572 tests across 205 files. The final 2.7 tree
+passed \FinalTests\ tests across \FinalTestFiles\ files. The published npm
+artifact contains \PackageFileCount\ files and measures exactly
+\PackageCompressedBytes\ bytes compressed (\PackageCompressedKiB\,KiB) and
+\PackageUnpackedBytes\ bytes unpacked (\PackageUnpackedMiB\,MiB). Production
+dependency auditing found no known vulnerabilities. These measurements answer
+only RQ1.
+
+\section{Evaluation Method}
+
+\subsection{Paired conditions}
+
+For each experiment, baseline and Memi conditions used the same pinned
+repository revision, task, model, reasoning effort, fixtures, sandbox, and
+external verification contract. Personal skills, memory, plugins, and MCP
+servers were disabled. The Memi condition differed by receiving a deterministic
+repository preflight or routed skill context. Writable workflows ran in clean
+disposable clones. The patch was captured before verification to prevent test
+output from contaminating the measured change.
+
+Total tokens are input, output, and reasoning tokens. For metric $m$, savings
+for pair $i$ are
+
+\begin{equation}
+s_i(m)=\frac{B_i(m)-M_i(m)}{B_i(m)}\times 100,
+\end{equation}
+
+where $B_i$ is baseline and $M_i$ is Memi. Positive values mean Memi used less.
+Arithmetic means describe an average task; medians describe the typical
+observed direction; weighted totals emphasize larger traces and are reported
+separately.
+
+\subsection{Uncertainty and preregistration}
+
+The committed reports use 10,000 nonparametric bootstrap samples
+\cite{efron1994bootstrap}. The read-only study used seed 270; the writable
+workflow study used seed 270729. Wilson intervals describe win proportions
+\cite{wilson1927probable}. The preregistered public claim required the lower
+95\% confidence bounds for token and latency savings to exceed 25\%, with no
+quality regression. One pair per heterogeneous task is exploratory evidence,
+not a population estimate.
+
+\subsection{Quality measurement}
+
+Automated acceptance required real builds plus rendered browser flows or a
+pinned iOS Simulator journey. The historical runner stored passing acceptance
+as \texttt{qualityScore: 100}. Version 2.7 corrects the interpretation:
+automated acceptance can establish functional parity but is capped at 80.
+Scores above 80 require blinded senior-practitioner scoring and reliability
+evidence. Immutable historical records are not rewritten.
+
+\section{Results}
+
+\subsection{Six-repository read-only pilot}
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.96\textwidth,
+  height=6.2cm,
+  ybar=0pt,
+  bar width=7pt,
+  ymin=-35,ymax=70,
+  ylabel={savings (\%)},
+  symbolic x coords={Nate,Buzzr,DoriOS,Nyra,Paraform,NyraLanding},
+  xtick=data,
+  axis x line*=bottom,
+  axis y line*=left,
+  ymajorgrids,
+  grid style={draw=MemiGrid},
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=-1,draw=none},
+  tick label style={font=\small},
+  label style={font=\small}
+]
+\addplot[fill=MemiRuby,draw=MemiRuby]
+table[x=case,y=tokens,col sep=comma]{generated/six_repo.csv};
+\addplot[fill=MemiBlue,draw=MemiBlue]
+table[x=case,y=latency,col sep=comma]{generated/six_repo.csv};
+\legend{counted tokens,wall time}
+\end{axis}
+\end{tikzpicture}
+\caption{Revision-matched read-only pilot. Positive values favor Memi. The
+negative Nyra result is retained.}
+\label{fig:sixrepo}
+\end{figure*}
+
+Across \SixRepoPairs\ repositories, mean token savings were
+\SixRepoMeanTokens\% (95\% interval \SixRepoTokenLower\% to
+\SixRepoTokenUpper\%); the interval crosses zero. Median savings were
+\SixRepoMedianTokens\%, weighted savings were \SixRepoWeightedTokens\%, and
+\SixRepoTokenWins/\SixRepoPairs cases were positive. Mean latency savings were
+\SixRepoMeanLatency\%. DoriOS was the only repository to clear 25\% on tokens,
+latency, and tool calls. Nyra regressed on all three metrics; Buzzr used more
+tokens despite completing faster. The study therefore rejected the universal
+25\% claim \cite{memi2026sixrepo}.
+
+\begin{table}[t]
+\centering
+\caption{Six-repository token and latency savings.}
+\label{tab:sixrepo}
+\scriptsize
+\begin{tabular}{lrr}
+\toprule
+Repository & Tokens & Wall time \\
+\midrule
+Nate the Bait & 21.7\% & $-13.6$\% \\
+Buzzr & $-3.7$\% & 13.4\% \\
+DoriOS & 60.1\% & 28.2\% \\
+Nyra & $-18.7$\% & $-16.7$\% \\
+Paraform & 33.3\% & $-14.3$\% \\
+Nyra Landing & 26.8\% & 6.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Multi-minute writable workflows}
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.96\textwidth,
+  height=6.2cm,
+  ybar=0pt,
+  bar width=9pt,
+  ymin=-110,ymax=65,
+  ylabel={savings (\%)},
+  symbolic x coords={DoriOS,Buzzr,Nate,Paraform,DoriiWeb},
+  xtick=data,
+  axis x line*=bottom,
+  axis y line*=left,
+  ymajorgrids,
+  grid style={draw=MemiGrid},
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=-1,draw=none},
+  tick label style={font=\small},
+  label style={font=\small}
+]
+\addplot[fill=MemiRuby,draw=MemiRuby]
+table[x=case,y=tokens,col sep=comma]{generated/workflow.csv};
+\addplot[fill=MemiBlue,draw=MemiBlue]
+table[x=case,y=latency,col sep=comma]{generated/workflow.csv};
+\legend{counted tokens,wall time}
+\end{axis}
+\end{tikzpicture}
+\caption{Canonical writable product workflows. Each condition passed its
+automated acceptance contract; Buzzr nevertheless regressed substantially.}
+\label{fig:workflow}
+\end{figure*}
+
+The five workflows lasted approximately 4.6 to 9.3 minutes per run. Mean token
+savings were \WorkflowMeanTokens\% (95\% interval \WorkflowTokenLower\% to
+\WorkflowTokenUpper\%), median savings were \WorkflowMedianTokens\%, and
+weighted savings were \WorkflowWeightedTokens\%. Mean latency savings were
+\WorkflowMeanLatency\% (95\% interval \WorkflowLatencyLower\% to
+\WorkflowLatencyUpper\%). Four of five tasks used fewer tokens, but Buzzr used
+98.33\% more. The wide intervals and negative case prevent a general claim
+\cite{memi2026workflow}.
+
+Paraform was the strongest stacked-skill result: 52.43\% fewer tokens, 28.26\%
+less wall time, and 44.12\% fewer tool calls under the same accepted product
+contract. Nate provided bounded native evidence with 21.90\% fewer tokens and
+23.47\% less wall time. DoriOS used 39.75\% fewer uncached input tokens but
+doubled its tool calls. Relevant context was beneficial in some tasks and
+harmful in another; relevance alone is insufficient.
+
+\subsection{Router failure analysis}
+
+The canonical Buzzr run routed a React Native skill but broadened repository
+discovery and extra-platform verification. It used 98.33\% more tokens and
+took 49.06\% longer. Two subsequent narrower configurations still regressed.
+A third calibration made the task manifest and closest repository evidence
+authoritative, reduced injected context to 1,429 bytes, and forbade broad
+inventory unless a concrete failure justified expansion.
+
+That single matched calibration used \BuzzrCalibrationTokens\% fewer tokens,
+completed \BuzzrCalibrationWall\% faster, and reduced retries from
+\BuzzrBaselineRetries\ to \BuzzrMemiRetries. Tool-call ``savings'' were
+\BuzzrCalibrationToolCalls\%, meaning Memi made more calls. The trace separated
+19 baseline calls from 30 Memi calls: the difference occurred before the first
+edit through narrower search and read steps; Memi made fewer verification and
+repeated-verification calls afterward.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\columnwidth,
+  height=4.8cm,
+  ybar=0pt,
+  bar width=7pt,
+  ymin=0,ymax=17,
+  ylabel={calls},
+  symbolic x coords={search,read,verification,status},
+  xtick=data,
+  x tick label style={rotate=24,anchor=east,font=\scriptsize},
+  ymajorgrids,
+  grid style={draw=MemiGrid},
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=-1,draw=none,font=\scriptsize}
+]
+\addplot[fill=MemiGrid,draw=MemiMuted]
+table[x=category,y=baseline,col sep=comma]{generated/tool_profile.csv};
+\addplot[fill=MemiRuby,draw=MemiRuby]
+table[x=category,y=memi,col sep=comma]{generated/tool_profile.csv};
+\legend{baseline,Memi}
+\end{axis}
+\end{tikzpicture}
+\caption{Privacy-safe Buzzr calibration tool profile. Call count is diagnostic,
+not a cost metric.}
+\label{fig:toolprofile}
+\end{figure}
+
+This result demonstrates a plausible mechanism, not a stable effect. The three
+router configurations are not homogeneous repeats and must not be averaged.
+
+\section{Quality and Benchmark Readiness}
+
+All canonical workflow artifacts passed automated acceptance, but no blinded
+practitioner participated. DesignWorkBench v2 defines \BenchmarkTracks\
+disciplinary tracks and \BenchmarkTaskContracts\ task contracts, including
+product, graphic, motion, spatial/XR, agentic, iOS, cross-platform mobile,
+Android, native kits, systems, design engineering, service, content,
+interaction, and research. Only \BenchmarkPreparedFixtures\ fixtures are
+prepared; \BenchmarkVerifiedFixtures\ are independently verified.
+\BenchmarkVerifiedRunners\ of \BenchmarkRequiredRunners\ runners have receipts,
+and \BenchmarkPractitioners\ practitioners are calibrated
+\cite{memi2026designworkbench}.
+
+Consequently, professional certification is \blocked. A score of 100 in the
+historical workflow JSON means the automated contract passed. It does not mean
+the artifact matched a senior product designer, design engineer, motion
+designer, or native-platform specialist. New records identify the evidence
+source and cap automated acceptance at 80.
+
+\section{Comparison with Other Harnesses}
+
+Public documentation describes Superpowers as a composable, multi-harness
+software-development methodology \cite{superpowers2026}; ECC as a broad agent
+harness optimization system \cite{ecc2026}; and Vercel's Skills CLI as a
+cross-agent skill discovery and installation tool \cite{skillscli2026}.
+\Cref{tab:landscape} compares documented capability, not speed or quality.
+
+\begin{table*}[t]
+\centering
+\caption{Documentation-scoped capability comparison as inspected 29 July 2026.
+``Not documented'' does not prove absence.}
+\label{tab:landscape}
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.23\textwidth}XXXX@{}}
+\toprule
+Capability & Memi 2.7 & Superpowers & ECC & Skills CLI \\
+\midrule
+Repository fingerprint routing & Built in & Not documented & Profile and
+context controls & Distribution, not routing \\
+Hard context budget and abstention & Built in & Composable activation &
+Context-management guidance & Not documented \\
+Content-addressed per-skill fitness & Built in & Eval framework documented &
+Learning/eval surfaces documented & Not documented \\
+Paired cost/latency trace receipts & Built in & Skill behavior evals
+documented & Harness/eval tooling documented & Not documented \\
+Design-specific professional benchmark & 15-track foundation, not calibrated &
+Not documented & Not documented & Not documented \\
+Cross-agent distribution & Skills, MCP, Action, plugins & Broad plugin support &
+Broad harness support & Core install surface \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+No baseline, Memi, Superpowers, ECC, and Skills CLI runs were executed under one
+matched protocol. RQ5 is therefore \blocked. The paper reports no cross-harness
+performance rank.
+
+\section{Release Execution and Incident Audit}
+
+Memi 2.7.0 was published from source commit
+\code{00be64b9} with npm signature, SLSA provenance, SBOM, four
+native binaries, per-asset checksums, a combined checksum manifest, an
+immutable container image, and a floating \code{v2} Action tag
+\cite{memi2026release}. The full PR matrix passed Linux, macOS, and Windows on
+Node 20, 22, and 24.
+
+\begin{table}[t]
+\centering
+\caption{Public release-surface status on 30 July 2026.}
+\label{tab:release}
+\scriptsize
+\begin{tabularx}{\columnwidth}{@{}p{0.29\columnwidth}p{0.18\columnwidth}X@{}}
+\toprule
+Surface & Status & Evidence \\
+\midrule
+npm + provenance & \pass & 2.7.0 latest; signature, attestation, SBOM \\
+GitHub release & \pass & tag, release, binaries, checksums \\
+Action + container & \pass & \code{v2} source pin; GHCR image \\
+Studio assets & \pass & pinned 2.5.0 artifacts verified \\
+MCP Registry & \blocked & publisher namespace mismatch \\
+Website parity & \partialstatus & stale docs; release endpoint returned 404 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Release execution exposed four additional defects:
+
+\begin{enumerate}
+  \item Windows binary startup duplicated the drive prefix
+  (\code{D:\textbackslash D:\textbackslash...}); URL path conversion was
+  replaced with \code{fileURLToPath} and tag-scoped repair tests.
+  \item The promotion workflow inspected private GHCR content before
+  authentication; login now precedes immutable-image verification.
+  \item A GitHub App token could not move \code{v2} across workflow-file
+  changes; the exact source SHA was verified before authenticated Git moved
+  the alias.
+  \item MCP publication returned 403 because the artifact declares
+  \code{io.github.sarveshsea/memi} while the publisher is authorized for
+  \code{io.github.memi-design/*}. The mismatch remains visible instead of
+  rewriting immutable 2.7.0 package bytes.
+\end{enumerate}
+
+The engine is published; cross-surface parity remains false. This distinction
+prevents an external promotion failure from erasing valid package evidence,
+while preventing npm success from being advertised as universal parity.
+
+\section{Threats to Validity}
+
+\textbf{Sample size and heterogeneity.} Each canonical task has one matched
+pair. Bootstrap intervals quantify observed variability but cannot compensate
+for limited coverage or repository selection.
+
+\textbf{Post-hoc calibration.} Router v2 was informed by the Buzzr failure.
+Its positive result requires prospective homogeneous repeats.
+
+\textbf{Cost proxy.} Subscription traces exposed tokens but not defensible
+billed USD. ``Cheaper'' means fewer counted tokens, not a dollar invoice.
+
+\textbf{Quality construct.} Automated builds and rendered flows test
+functionality and selected accessibility behavior, not holistic design craft.
+Practitioner calibration is absent.
+
+\textbf{Provider coverage.} The canonical runs use Codex CLI 0.145.0,
+\code{gpt-5.6-sol}, and medium reasoning. Claude Code returned a structured
+authentication failure under a revoked credential, so no second-provider
+performance result is claimed.
+
+\textbf{Researcher involvement.} The system author designed parts of the
+harness and analyzed the results. Immutable negative traces and predeclared
+gates reduce, but do not eliminate, researcher bias.
+
+\section{Reproducibility and Data Availability}
+
+The paper source, generator, summary JSON, benchmark summaries, readiness
+artifact, and release manifest are versioned in the public repository. Raw
+provider streams and patches remain outside the public tree because they may
+contain proprietary source or machine paths. Public summaries retain pinned
+revisions, run identifiers, model configuration, fixture contracts, aggregate
+methods, and content hashes.
+
+Rebuild from the repository root:
+
+\begin{lstlisting}
+python3 docs/research/memi-2.7-release-evidence/
+  generate_paper_assets.py
+python3 .../latex-compile/scripts/compile_latex.py
+  docs/research/memi-2.7-release-evidence/main.tex
+\end{lstlisting}
+
+The PDF is a research artifact, not a peer-reviewed publication. The ORCID
+field remains explicitly ``not supplied'' because no identifier was present in
+the repository or supplied by the author at build time.
+
+\section{Conclusion}
+
+Memi 2.7 is a materially stronger engineering artifact than its earlier
+versions because its claims can now fail independently. The package passed its
+release gates; repository-specific context reduced tokens on most observed
+tasks; and traces explained both wins and regressions. The evidence does not
+support universal 25\% savings, cross-harness superiority, or senior-level
+design certification. The next research milestone is not a larger marketing
+number. It is repeated, prospective, provider-diverse evaluation with blinded
+practitioner scoring and externally verified fixtures.
+
+\balance
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\clearpage
+\onecolumn
+\appendix
+\section{Evidence Commitments}
+\small
+\input{generated/source_hashes.tex}
+
+\section{Release Decision Matrix}
+
+\begin{tabularx}{\textwidth}{@{}p{0.26\textwidth}p{0.18\textwidth}X@{}}
+\toprule
+Claim & Decision & Required evidence \\
+\midrule
+Memi 2.7 software artifact & Supported & Passed engineering, supply-chain,
+installation, and platform evidence \\
+Mean savings on observed six-repo pilot & Descriptive only & Existing paired
+summary and interval \\
+Universal savings above 25\% & Rejected by current evidence & Lower 95\%
+bounds above 25\% for cost proxy and latency \\
+Senior-practitioner quality & Unassessed & Blinded calibrated practitioners
+and verified private/holdout fixtures \\
+Cross-harness superiority & Unassessed & Equivalent revisions, tasks, models,
+effort, fixtures, and acceptance contracts \\
+USD cost savings & Unassessed & Provider billing evidence for every included
+pair \\
+\bottomrule
+\end{tabularx}
+
+\section{Per-Workflow Metrics}
+
+\begin{tabularx}{\textwidth}{@{}lrrrrX@{}}
+\toprule
+Case & Wall & Tokens & Uncached & Tools & Routed skill(s) \\
+\midrule
+DoriOS & 1.00\% & 7.31\% & 39.75\% & $-105.88$\% &
+\code{motion-performance} \\
+Buzzr & $-49.06$\% & $-98.33$\% & $-40.67$\% & $-25.00$\% &
+\code{react-native-gen} \\
+Nate the Bait & 23.47\% & 21.90\% & 37.58\% & $-25.00$\% &
+\code{swiftui-design-engineering} \\
+Paraform & 28.26\% & 52.43\% & 26.98\% & 44.12\% &
+\code{emil-design-eng}, \code{interaction-design} \\
+Dorii public site & 24.65\% & 19.43\% & 20.68\% & 33.33\% &
+\code{emil-design-eng}, \code{interaction-design} \\
+\bottomrule
+\end{tabularx}
+
+\end{document}
