@@ -68,6 +68,14 @@ const designWorkBenchmark = spawnSync("npm", ["run", "check:designwork-bench"], 
 if (designWorkBenchmark.status !== 0) {
   fail(`DesignWorkBench integrity gate failed: ${spawnFailureMessage(designWorkBenchmark, "failed")}`);
 }
+const designWorkEvidence = spawnSync("npm", ["run", "check:designwork-evidence"], {
+  shell: process.platform === "win32",
+  cwd: root,
+  encoding: "utf-8",
+});
+if (designWorkEvidence.status !== 0) {
+  fail(`DesignWorkBench evidence gate failed: ${spawnFailureMessage(designWorkEvidence, "failed")}`);
+}
 const designWorkRelease = spawnSync("npm", ["run", "check:designwork-release"], {
   shell: process.platform === "win32",
   cwd: root,

@@ -1,0 +1,4 @@
+- main:
+  - heading "Representative interaction" [level=1]
+  - button "Verify interaction"
+  - status: Verified

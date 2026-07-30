@@ -7,6 +7,9 @@ import {
   buildDesignWorkReadiness,
   validateDesignWorkBenchmark,
 } from "./lib/designwork-benchmark.mjs";
+import {
+  validateDesignWorkEvidence,
+} from "./lib/designwork-evidence.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const benchmarkPath = path.join(root, "benchmarks", "designworkbench-v2", "benchmark.json");
@@ -16,14 +19,20 @@ const check = process.argv.includes("--check");
 const requireReady = process.argv.includes("--require-ready");
 const manifest = JSON.parse(await readFile(benchmarkPath, "utf8"));
 const validation = await validateDesignWorkBenchmark(manifest, { root });
-const artifacts = await loadCalibrationArtifacts(root, manifest);
-const readiness = buildDesignWorkReadiness(manifest, artifacts);
+const evidence = await loadEvidence(root, manifest);
+const readiness = buildDesignWorkReadiness(manifest, evidence);
 const report = {
   schemaVersion: 1,
   generatedAt: process.env.SOURCE_DATE_EPOCH
     ? new Date(Number(process.env.SOURCE_DATE_EPOCH) * 1000).toISOString()
     : new Date().toISOString(),
   validation,
+  evidence: {
+    passed: evidence.passed ?? false,
+    failures: evidence.failures ?? ["DesignWorkBench evidence bundle is missing"],
+    verifiedFixtureIds: evidence.verifiedFixtureIds ?? [],
+    verifiedRunnerIds: evidence.verifiedRunnerIds ?? [],
+  },
   readiness,
 };
 const json = `${JSON.stringify(report, null, 2)}\n`;
@@ -46,13 +55,33 @@ if (check) {
 }
 
 console.log(JSON.stringify(report, null, 2));
-if (!validation.passed || (requireReady && !readiness.releaseReady)) process.exitCode = 1;
+if (!validation.passed
+  || evidence.passed !== true
+  || (requireReady && !readiness.releaseReady)) {
+  process.exitCode = 1;
+}
 
-async function loadCalibrationArtifacts(projectRoot, benchmark) {
-  const evidenceFile = benchmark.calibration?.evidenceFile;
-  if (typeof evidenceFile !== "string" || evidenceFile.length === 0) return [];
-  const payload = JSON.parse(await readFile(path.resolve(projectRoot, evidenceFile), "utf8"));
-  return Array.isArray(payload.artifacts) ? payload.artifacts : [];
+async function loadEvidence(projectRoot, benchmark) {
+  const evidenceRoot = path.join(
+    projectRoot,
+    "benchmarks",
+    "designworkbench-v2",
+    "evidence",
+  );
+  const bundlePath = path.join(evidenceRoot, "evidence.json");
+  try {
+    const bundle = JSON.parse(await readFile(bundlePath, "utf8"));
+    return await validateDesignWorkEvidence(benchmark, bundle, {
+      root: evidenceRoot,
+    });
+  } catch {
+    return {
+      verifiedFixtureIds: [],
+      verifiedRunnerIds: [],
+      calibrationArtifacts: [],
+      results: null,
+    };
+  }
 }
 
 function renderMarkdown(report) {

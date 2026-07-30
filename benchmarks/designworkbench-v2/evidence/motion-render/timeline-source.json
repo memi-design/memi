@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "durationSeconds": 1,
+  "frameRate": 30,
+  "dimensions": {
+    "width": 320,
+    "height": 180
+  },
+  "source": "ffmpeg testsrc2",
+  "reducedMotion": "static one-frame video"
+}

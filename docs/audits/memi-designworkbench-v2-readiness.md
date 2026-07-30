@@ -1,6 +1,6 @@
 # Memi DesignWorkBench v2 readiness
 
-Generated: 2026-07-30T02:05:29.557Z
+Generated: 2026-07-30T02:34:17.348Z
 
 Release status: **BLOCKED**
 
@@ -22,14 +22,14 @@ Release status: **BLOCKED**
 ## Independently verified
 
 - Real task fixtures: 0/300
-- Runtime runners: 0/8
+- Runtime runners: 3/8
 - Qualified practitioners: 0
 - Calibrated tracks: 0/15
 
 ## Release blockers
 
-- 300 task fixtures remain contract_defined
-- 8 runner profiles remain contract_defined
+- 300 task fixtures require verified receipts
+- 5 runner profiles require verified receipts
 - practitioner calibration is pending
 - private and holdout benchmark results are not measured
 

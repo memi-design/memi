@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DesignWorkBench browser runner</title>
+  </head>
+  <body>
+    <main>
+      <h1>Representative interaction</h1>
+      <button id="verify" type="button">Verify interaction</button>
+      <p id="status" role="status" aria-live="polite">Ready</p>
+    </main>
+    <script>
+      document.querySelector("#verify").addEventListener("click", () => {
+        document.querySelector("#status").textContent = "Verified";
+      });
+    </script>
+  </body>
+</html>

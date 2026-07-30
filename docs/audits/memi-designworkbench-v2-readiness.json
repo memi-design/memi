@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-30T02:05:29.557Z",
+  "generatedAt": "2026-07-30T02:34:17.348Z",
   "validation": {
     "passed": true,
     "benchmarkId": "memi-designworkbench-v2",
@@ -13,6 +13,16 @@
     },
     "calibrationStatus": "pending_external_practitioners",
     "failures": []
+  },
+  "evidence": {
+    "passed": true,
+    "failures": [],
+    "verifiedFixtureIds": [],
+    "verifiedRunnerIds": [
+      "artifact-validator",
+      "browser-playwright",
+      "motion-render"
+    ]
   },
   "readiness": {
     "benchmarkId": "memi-designworkbench-v2",
@@ -33,7 +43,7 @@
     },
     "verified": {
       "fixtures": 0,
-      "runners": 0,
+      "runners": 3,
       "practitioners": 0,
       "calibratedTracks": 0
     },
@@ -256,8 +266,8 @@
       ]
     },
     "blockers": [
-      "300 task fixtures remain contract_defined",
-      "8 runner profiles remain contract_defined",
+      "300 task fixtures require verified receipts",
+      "5 runner profiles require verified receipts",
       "practitioner calibration is pending",
       "private and holdout benchmark results are not measured"
     ]

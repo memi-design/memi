@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "memi-designworkbench-v2",
+  "receipts": [
+    {
+      "schemaVersion": 1,
+      "kind": "runner",
+      "subjectId": "artifact-validator",
+      "benchmarkId": "memi-designworkbench-v2",
+      "taskBankSha256": "85719f192a2a981143f3fb97fe48ce2b8bf5fb511f6aa774c1ee66d00bd31f62",
+      "frozenCandidateSha256": "c88dbbf78f93529f1eb407c7a173f2fc2752017e348ee611d3fe8ed5109d4fcf",
+      "status": "verified",
+      "environment": {
+        "os": "darwin",
+        "architecture": "arm64",
+        "runtime": "v22.22.3",
+        "hostnameHash": "fnv1a:462cc3d1"
+      },
+      "artifacts": [
+        {
+          "kind": "schema-validation",
+          "path": "artifact-validator/schema-validation.json",
+          "sha256": "db5ef1d8e1f73350b45c0fc73c596c3390b559d099b8baa905ece710dfba53c9"
+        },
+        {
+          "kind": "hash-verification",
+          "path": "artifact-validator/hash-verification.json",
+          "sha256": "5ed1a49cd24acdcad45f2321c0eefd0217a0b700a307df4284876af1b9a28e07"
+        },
+        {
+          "kind": "source-provenance",
+          "path": "artifact-validator/source-provenance.json",
+          "sha256": "b946991ddbc58719df810b3aa7876f9c39b415aa93590233c4a57e8b9b7573d2"
+        },
+        {
+          "kind": "handoff-reopen",
+          "path": "artifact-validator/handoff-reopen.json",
+          "sha256": "e0340da5dc882516010f1eb82700ecd5c8c2876d0b9af0ffec3c4920aec4a504"
+        }
+      ],
+      "receiptSha256": "ae7c7dcf47ea14b73d723009bf760fd924e1dbb79b0ecb670641fda8fa119f26"
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "runner",
+      "subjectId": "browser-playwright",
+      "benchmarkId": "memi-designworkbench-v2",
+      "taskBankSha256": "85719f192a2a981143f3fb97fe48ce2b8bf5fb511f6aa774c1ee66d00bd31f62",
+      "frozenCandidateSha256": "c88dbbf78f93529f1eb407c7a173f2fc2752017e348ee611d3fe8ed5109d4fcf",
+      "status": "verified",
+      "environment": {
+        "os": "darwin",
+        "architecture": "arm64",
+        "runtime": "playwright:147.0.7727.15",
+        "hostnameHash": "fnv1a:462cc3d1"
+      },
+      "artifacts": [
+        {
+          "kind": "browser-build",
+          "path": "browser-playwright/browser-build.html",
+          "sha256": "84b9b5a7944d58110d6b78cffdd35d74dfb96281f550164417c1058de169c907"
+        },
+        {
+          "kind": "playwright-e2e",
+          "path": "browser-playwright/playwright-e2e.json",
+          "sha256": "8e2820bda84789909aa2537740540ae90f1f8a5a3c12962d9c2c4546d231f469"
+        },
+        {
+          "kind": "accessibility-tree",
+          "path": "browser-playwright/accessibility-tree.yml",
+          "sha256": "564e035b713d18a1a08491f105d9b41eead247118158a8c4fe100f0f8587cf7a"
+        },
+        {
+          "kind": "performance-trace",
+          "path": "browser-playwright/performance-trace.zip",
+          "sha256": "ed2d1af39de9d8e57eb03162ac44c0caa509a5fc619d039111f945aa394df8f2"
+        }
+      ],
+      "receiptSha256": "1cead8d2c42897a02bd400c90ee3ec12435ad21812a09c11c43933315eeeeafa"
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "runner",
+      "subjectId": "motion-render",
+      "benchmarkId": "memi-designworkbench-v2",
+      "taskBankSha256": "85719f192a2a981143f3fb97fe48ce2b8bf5fb511f6aa774c1ee66d00bd31f62",
+      "frozenCandidateSha256": "c88dbbf78f93529f1eb407c7a173f2fc2752017e348ee611d3fe8ed5109d4fcf",
+      "status": "verified",
+      "environment": {
+        "os": "darwin",
+        "architecture": "arm64",
+        "runtime": "ffmpeg version 8.1 Copyright (c) 2000-2026 the FFmpeg developers",
+        "hostnameHash": "fnv1a:462cc3d1"
+      },
+      "artifacts": [
+        {
+          "kind": "timeline-source",
+          "path": "motion-render/timeline-source.json",
+          "sha256": "e92aa2ce3783bc8c41e20c00c03dc93ab687f8d88b12415545df739e080fecdd"
+        },
+        {
+          "kind": "render",
+          "path": "motion-render/render.mp4",
+          "sha256": "dd31c19cdda413a048c24c17a5b85deb36cc3bd9fbaef0018bdb501c46dbf6e6"
+        },
+        {
+          "kind": "frame-analysis",
+          "path": "motion-render/frame-analysis.json",
+          "sha256": "ca2c1e920c054b656105a49a72d6913529e3a8860fec1b55d19a2d541554b705"
+        },
+        {
+          "kind": "reduced-motion-output",
+          "path": "motion-render/reduced-motion.mp4",
+          "sha256": "cc616ea13da5d97d89c1cd30c6027337dcda55e3f9799dcde9697ce39e9ab2ea"
+        }
+      ],
+      "receiptSha256": "4b9e0bff327c15e2ea0608745b25df537990800a840327a710349edeeed3bde5"
+    }
+  ],
+  "calibrationArtifacts": [],
+  "results": null
+}
