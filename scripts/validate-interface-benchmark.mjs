@@ -2,9 +2,10 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { validateInterfaceBenchmark } from "./lib/interface-benchmark.mjs";
 
-const root = path.resolve(new URL("..", import.meta.url).pathname);
+const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const manifestPath = path.resolve(
   process.argv[2] ?? path.join(root, "benchmarks", "interfacebench-v1.json"),
 );

@@ -146,6 +146,9 @@ jobs:
             elif [[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.6.4" ]]; then
               git archive --format=tar HEAD scripts/check-release.mjs | tar --extract --file=-
               git diff --exit-code
+            elif [[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.7.0" ]]; then
+              git archive --format=tar HEAD scripts/validate-interface-benchmark.mjs | tar --extract --file=-
+              git diff --exit-code
             fi
           }
           trap restore_compatibility_files EXIT
@@ -187,6 +190,30 @@ jobs:
           await writeFile(
             releaseCheckPath,
             releaseCheck.replace(runtimeSchema, windowsRuntimeSchema),
+            "utf8",
+          );
+          NODE
+          fi
+          if [[ "${RUNNER_OS}" == "Windows" && "${RELEASE_TAG}" == "v2.7.0" ]]; then
+            node --input-type=module <<'NODE'
+          import { readFile, writeFile } from "node:fs/promises";
+          const validatorPath = "scripts/validate-interface-benchmark.mjs";
+          const validator = await readFile(validatorPath, "utf8");
+          const oldImport = 'import path from "node:path";';
+          const newImport = 'import path from "node:path";\nimport { fileURLToPath } from "node:url";';
+          const oldRoot = 'const root = path.resolve(new URL("..", import.meta.url).pathname);';
+          const newRoot = 'const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));';
+          if (
+            !validator.includes(oldImport) ||
+            validator.includes(newImport) ||
+            !validator.includes(oldRoot) ||
+            validator.includes(newRoot)
+          ) {
+            throw new Error("v2.7.0 interface benchmark path compatibility precondition failed");
+          }
+          await writeFile(
+            validatorPath,
+            validator.replace(oldImport, newImport).replace(oldRoot, newRoot),
             "utf8",
           );
           NODE
