@@ -183,6 +183,9 @@ describe("audit scorecard release surfaces", () => {
     expect(workflow).toContain(
       'test "$(npm view @memi-design/cli version)" = "${RELEASE_TAG#v}"',
     );
+    expect(workflow.indexOf("docker/login-action")).toBeLessThan(
+      workflow.indexOf("Verify current immutable release"),
+    );
     expect(workflow).toContain("gh release download");
     expect(workflow).toContain("sha256sum --check SHA256SUMS.txt");
     expect(workflow).toContain(
