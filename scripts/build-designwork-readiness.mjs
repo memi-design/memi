@@ -30,6 +30,7 @@ const report = {
   evidence: {
     passed: evidence.passed ?? false,
     failures: evidence.failures ?? ["DesignWorkBench evidence bundle is missing"],
+    preparedFixtureIds: evidence.preparedFixtureIds ?? [],
     verifiedFixtureIds: evidence.verifiedFixtureIds ?? [],
     verifiedRunnerIds: evidence.verifiedRunnerIds ?? [],
   },
@@ -78,6 +79,7 @@ async function loadEvidence(projectRoot, benchmark) {
     return {
       verifiedFixtureIds: [],
       verifiedRunnerIds: [],
+      preparedFixtureIds: [],
       calibrationArtifacts: [],
       results: null,
     };
@@ -110,6 +112,11 @@ Release status: **${status}**
 - Private test tasks: ${readiness.completed.privateTasks}/180
 - Rolling holdout tasks: ${readiness.completed.holdoutTasks}/60
 - Runner contracts: ${readiness.completed.runnerContracts}/8
+
+## Prepared evidence
+
+- Public fixture candidate packs: ${readiness.prepared.fixtures}/60
+- Reproducible runner evidence packs: ${readiness.prepared.runners}/8
 
 ## Independently verified
 
