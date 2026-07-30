@@ -241,7 +241,7 @@ describe("Memi DesignWorkBench v2", () => {
     expect(report.releaseReady).toBe(false);
   });
 
-  it("wires benchmark integrity and practitioner proof into the release surface", async () => {
+  it("keeps benchmark integrity in the package gate and practitioner proof in certification", async () => {
     const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
     const releaseGate = await readFile(path.join(root, "scripts", "check-release.mjs"), "utf8");
     const evidenceBuilder = await readFile(
@@ -259,8 +259,10 @@ describe("Memi DesignWorkBench v2", () => {
       "build:designwork-evidence": "node scripts/build-designwork-evidence.mjs",
       "check:designwork-evidence": "node scripts/build-designwork-evidence.mjs --check",
       "approve:designwork-fixture": "node scripts/approve-designwork-fixture.mjs",
+      "check:certification": "npm run check:designwork-release",
     });
-    expect(releaseGate).toContain("check:designwork-release");
+    expect(releaseGate).not.toContain('["run", "check:designwork-release"]');
+    expect(releaseGate).toContain("check:designwork-readiness");
     expect(evidenceBuilder).toContain("buildPublicFixtureCandidates");
     expect(readme).toContain("Memi DesignWorkBench v2");
     expect(readme).toContain("300 task contracts");

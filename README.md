@@ -100,19 +100,21 @@ These results predate the full 100-task InterfaceBench run. They are reported as
 
 | Evidence set | Scope | Quality guardrail | Token savings | Wall-time savings | Decision |
 | --- | --- | ---: | ---: | ---: | --- |
-| Writable product workflows | 5 paired, multi-minute E2E runs | 100/100 in every case | 0.55% mean, 95% CI -51.23% to 37.30% | 5.66% mean, 95% CI -24.30% to 25.86% | Claim not verified |
+| Writable product workflows | 5 paired, multi-minute E2E runs | Automated acceptance passed in every case; professional quality unscored | 0.55% mean, 95% CI -51.23% to 37.30% | 5.66% mean, 95% CI -24.30% to 25.86% | Claim not verified |
 | Six-repository read-only suite | 6 paired runs | 100% pass rate in both conditions | 19.92% mean, 95% CI -0.23% to 40.07% | 0.50% mean, 95% CI -11.72% to 14.55% | Claim not verified |
-| Latest Buzzr Router v2 calibration | 1 paired Expo run | 100/100 in both conditions | 14.15% | 25.08% | Calibration only |
+| Latest Buzzr Router v2 calibration | 1 paired Expo run | Automated acceptance passed in both conditions | 14.15% | 25.08% | Calibration only |
 
 Candidate verification currently records:
 
-- 2,127/2,127 tests passing across 296 files.
+- 2,152/2,152 tests passing across 300 files.
 - 70.57% statements, 58.87% branches, 79.82% functions, and 72.35% lines. This is a measured improvement from 64.91%, 53.73%, 73.11%, and 66.62%, respectively, but remains below the 80% repository target.
 - Zero production dependency vulnerabilities.
 - A 48-file npm candidate measuring about 562 KB compressed and 1.99 MB unpacked, within the 750 KB compressed and 2 MB unpacked release budgets.
 - No defensible per-run USD cost from the available subscription traces, so total tokens are explicitly labeled as the cost proxy.
 
-The greater-than-25% claim remains **not verified**. Inspect the [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Buzzr tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
+Historical `qualityScore: 100` workflow records mean automated acceptance passed, not senior-practitioner quality. New records label that evidence, cap it at 80, and reserve higher scores for calibrated practitioner review.
+
+The greater-than-25% claim remains **not verified**. Inspect the [technical PDF report](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-release-evidence/memi-2.7-release-evidence.pdf), [reproducible report source](https://github.com/memi-design/memi/tree/main/docs/research/memi-2.7-release-evidence), [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Buzzr tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
 
 ## Memi DesignWorkBench v2
 
@@ -142,6 +144,10 @@ tasks now also have deterministic, hash-bound candidate fixture packs. Those
 packs are explicitly benchmark-authored synthetic material: **60 prepared,
 0 independently verified**. The remaining runners, all 300 verified fixtures,
 and all practitioner results remain blocked rather than inferred.
+
+DesignWorkBench certification is separate from package publication:
+`check:release` verifies integrity and readiness, while `check:certification`
+requires external practitioners, private tests, and holdouts.
 
 ## Choose your integration
 

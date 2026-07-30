@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.dist/
 dist-bin/
 dist-runtime-resources/
 target/
@@ -19,6 +20,7 @@ apps/studio/src-tauri/gen/
 preview/dist/
 preview/generated/
 preview/standalone/
+output/
 
 # Generated atomic output is workspace state, not product source
 generated/components/ui/

@@ -76,13 +76,13 @@ const designWorkEvidence = spawnSync("npm", ["run", "check:designwork-evidence"]
 if (designWorkEvidence.status !== 0) {
   fail(`DesignWorkBench evidence gate failed: ${spawnFailureMessage(designWorkEvidence, "failed")}`);
 }
-const designWorkRelease = spawnSync("npm", ["run", "check:designwork-release"], {
+const designWorkReadiness = spawnSync("npm", ["run", "check:designwork-readiness"], {
   shell: process.platform === "win32",
   cwd: root,
   encoding: "utf-8",
 });
-if (designWorkRelease.status !== 0) {
-  fail(`DesignWorkBench practitioner-proof gate failed: ${spawnFailureMessage(designWorkRelease, "failed")}`);
+if (designWorkReadiness.status !== 0) {
+  fail(`DesignWorkBench readiness artifact gate failed: ${spawnFailureMessage(designWorkReadiness, "failed")}`);
 }
 const version = packageJson.version;
 const expectedMcpName = "io.github.sarveshsea/memi";

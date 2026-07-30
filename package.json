@@ -50,6 +50,7 @@
     "build:designwork-readiness": "node scripts/build-designwork-readiness.mjs",
     "check:designwork-readiness": "node scripts/build-designwork-readiness.mjs --check",
     "check:designwork-release": "node scripts/build-designwork-readiness.mjs --check --require-ready",
+    "check:certification": "npm run check:designwork-release",
     "check:site-bundle": "node scripts/check-site-bundle-urls.mjs",
     "check:community-notes": "node scripts/check-community-notes.mjs",
     "check:public-release": "node scripts/check-public-release-gate.mjs",

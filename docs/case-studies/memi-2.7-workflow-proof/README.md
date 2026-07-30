@@ -7,7 +7,7 @@ and the 2.7 publish gate remain closed.
 
 Five canonical, writable, multi-minute Codex workflow pairs completed against
 clean pinned revisions. Every included baseline and Memi run passed its real
-build and rendered-product contract at quality 100 with zero defects. The
+build and rendered-product contract with zero detected acceptance defects. The
 aggregate evidence status is `verified`, while the claim is `not_verified`:
 
 - Mean total-token savings: 0.55%; 95% bootstrap interval -51.23% to 37.30%.
@@ -25,11 +25,11 @@ efficiency claim. The negative case remains first-class release evidence.
 
 | Case | Real product contract | Routed skill | Wall savings | Total-token savings | Uncached-input savings | Tool-call savings | Quality |
 |---|---|---|---:|---:|---:|---:|---:|
-| DoriOS | Next.js build plus Playwright desktop and mobile keyboard-dialog journeys | `motion-performance` | 1.00% | 7.31% | 39.75% | -105.88% | 100 / 100 |
-| Buzzr | Expo web export plus rendered React Native bottom-tab unread badge contract | `react-native-gen` | -49.06% | -98.33% | -40.67% | -25.00% | 100 / 100 |
-| Nate the Bait | Xcode build plus real SwiftUI Options journey on pinned iPhone Simulator | `swiftui-design-engineering` | 23.47% | 21.90% | 37.58% | -25.00% | 100 / 100 |
-| Paraform | Vite production build plus recruiter command-menu keyboard and reduced-motion journeys | `emil-design-eng` + `interaction-design` | 28.26% | 52.43% | 26.98% | 44.12% | 100 / 100 |
-| dorii public site | Next.js production build plus mobile navigation, route, focus, and reduced-motion journeys | `emil-design-eng` + `interaction-design` | 24.65% | 19.43% | 20.68% | 33.33% | 100 / 100 |
+| DoriOS | Next.js build plus Playwright desktop and mobile keyboard-dialog journeys | `motion-performance` | 1.00% | 7.31% | 39.75% | -105.88% | Automated acceptance passed |
+| Buzzr | Expo web export plus rendered React Native bottom-tab unread badge contract | `react-native-gen` | -49.06% | -98.33% | -40.67% | -25.00% | Automated acceptance passed |
+| Nate the Bait | Xcode build plus real SwiftUI Options journey on pinned iPhone Simulator | `swiftui-design-engineering` | 23.47% | 21.90% | 37.58% | -25.00% | Automated acceptance passed |
+| Paraform | Vite production build plus recruiter command-menu keyboard and reduced-motion journeys | `emil-design-eng` + `interaction-design` | 28.26% | 52.43% | 26.98% | 44.12% | Automated acceptance passed |
+| dorii public site | Next.js production build plus mobile navigation, route, focus, and reduced-motion journeys | `emil-design-eng` + `interaction-design` | 24.65% | 19.43% | 20.68% | 33.33% | Automated acceptance passed |
 
 ### Buzzr Router v2 calibration
 
@@ -38,9 +38,9 @@ rewriting the original negative case:
 
 | Configuration | Context | Wall savings | Total-token savings | Tool-call savings | Quality |
 |---|---:|---:|---:|---:|---:|
-| Two repository-matched skills | 3,797 bytes | -4.35% | -11.11% | -5.26% | 100 / 100 |
-| Exclusive Expo skill | 1,920 bytes | -57.68% | -65.54% | -16.67% | 100 / 100 |
-| Exclusive Expo skill plus execution budget | 1,429 bytes | 25.08% | 14.15% | -57.89% | 100 / 100 |
+| Two repository-matched skills | 3,797 bytes | -4.35% | -11.11% | -5.26% | Automated acceptance passed |
+| Exclusive Expo skill | 1,920 bytes | -57.68% | -65.54% | -16.67% | Automated acceptance passed |
+| Exclusive Expo skill plus execution budget | 1,429 bytes | 25.08% | 14.15% | -57.89% | Automated acceptance passed |
 
 The third configuration is a real improvement in tokens and time, but not a
 release proof. Trace comparison showed that the earlier routed agent broadened
@@ -88,7 +88,8 @@ This separates observation from interpretation:
    It used 10 more read calls and 4 more search calls, but 3 fewer verification
    calls.
 2. **Observed:** The same Memi run used 14.15% fewer counted tokens, completed
-   25.08% faster, reduced retries from 3 to 2, and retained quality 100.
+   25.08% faster, reduced retries from 3 to 2, and retained automated
+   acceptance.
 3. **Interpretation:** the additional calls were narrower discovery steps. They
    increased call count without increasing total token consumption or elapsed
    time.
@@ -130,6 +131,12 @@ bounded native benefit. Dori demonstrates lower uncached discovery with similar
 elapsed time but more tool calls. Buzzr demonstrates that one relevant skill can
 still make an agent slower and more expensive. Routing relevance by itself is
 not proof of efficiency.
+
+The immutable JSON records retain their historical `qualityScore: 100` field.
+That field meant the automated verification contract passed; it was not a
+senior-practitioner score. New workflow records identify the evidence as
+`automated_acceptance` and cap it at 80. DesignWorkBench practitioner scoring
+remains a separate, blocked gate.
 
 Exact run IDs and metric values are in [results.json](results.json).
 

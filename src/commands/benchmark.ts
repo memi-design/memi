@@ -10,6 +10,7 @@ import {
   codexCaseStudyTaskSchema,
   type BenchmarkRunRecord,
 } from "../efficiency/contracts.js";
+import { gradeAutomatedAcceptance } from "../efficiency/automated-acceptance.js";
 import {
   benchmarkRepositoryRevision,
   benchmarkRepositoryStatus,
@@ -240,8 +241,13 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         : null;
       if (routePath && route) await writeJson(routePath, route);
       const repositoryRoot = resolve(opts.repository);
-      const failures = result.verification.filter((check) => !check.passed).length
-        + (result.adapter.exitCode === 0 ? 0 : 1);
+      const failedChecks = result.verification.filter((check) => !check.passed).length;
+      const grade = gradeAutomatedAcceptance({
+        accepted: result.accepted,
+        verificationChecks: result.verification.length,
+        failedChecks,
+        adapterFailed: result.adapter.exitCode !== 0,
+      });
       const record = benchmarkRunRecordSchema.parse({
         schemaVersion: 1,
         runId: result.runId,
@@ -275,8 +281,10 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         outcome: {
           accepted: result.accepted,
           testsPassed: result.verification.every((check) => check.passed),
-          qualityScore: result.accepted ? 100 : Math.max(0, 100 - failures * 25),
-          defects: failures,
+          qualityScore: grade.qualityScore,
+          qualityEvidence: grade.qualityEvidence,
+          qualityCeiling: grade.qualityCeiling,
+          defects: grade.defects,
           humanInterventions: 0,
         },
         evidenceRefs: [

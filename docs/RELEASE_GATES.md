@@ -10,6 +10,20 @@ Current verified engine release: `2.6.4`.
 
 Use these checks before announcing, tagging, or publishing a public release.
 
+## Package Release vs Practitioner Certification
+
+Memi uses two explicit gates:
+
+- `npm run check:release` validates the package, generated release surfaces,
+  benchmark integrity, and the current DesignWorkBench readiness artifact.
+- `npm run check:certification` requires the complete blinded practitioner,
+  private-test, and holdout evidence.
+
+The CLI can publish when the package release gate passes. That publication does
+not imply that the greater-than-25% efficiency claim or senior-practitioner
+quality certification passed. Those claims remain machine-blocked until their
+own evidence gates are green.
+
 ## Efficiency Claim Gate
 
 Efficiency evidence uses paired runs with the same pinned revision, task,

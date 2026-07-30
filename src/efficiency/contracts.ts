@@ -50,6 +50,8 @@ export const benchmarkRunRecordSchema = z.object({
     accepted: z.boolean(),
     testsPassed: z.boolean(),
     qualityScore: z.number().min(0).max(100),
+    qualityEvidence: z.enum(["automated_acceptance", "practitioner_rubric"]).optional(),
+    qualityCeiling: z.number().min(0).max(100).optional(),
     defects: z.number().int().nonnegative(),
     humanInterventions: z.number().int().nonnegative(),
   }).strict(),
