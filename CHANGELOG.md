@@ -10,6 +10,43 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## v2.7.0 — 2026-07-29
 
+### Release hardening and executable coverage
+
+- `1239a091` fix: normalize sub-agent artifact names
+- `488fc922` test: cover sub-agent execution routes
+- `b99f678e` fix: preserve sub-agent sync invariants
+- `0fddb3dc` test: expose sub-agent release contract failures
+- `90275075` test: cover agent transport and worker lifecycle
+- `579331f4` fix: normalize routed artifact names
+- `7b2f41e8` test: cover every plan decomposition route
+- `10f4a5e4` fix: stabilize audit scope and research entities
+- `877d0d66` test: cover token research badge and git scope utilities
+- `c9b51313` test: cover Vue and Svelte generators
+- `3022f130` fix: label unavailable prompt context
+- `299de4c9` test: require honest empty prompt context
+- `481d033b` test: cover research and preview workflows
+- `c44a86d3` fix: return assigned preview port
+- `c926684a` test: reproduce ephemeral preview port failure
+
+#### Architectural decisions
+
+- Return the operating system assigned preview port when the caller requests an
+  ephemeral port so local browser and integration clients receive a usable
+  address.
+- Keep pull-request dependent-file expansion exactly one hop and independent of
+  source iteration order.
+- Treat missing prompt context as explicit unavailable evidence instead of
+  rendering a blank section.
+- Normalize optional articles atomically when deriving routed artifact names so
+  component, page, and chart identities remain stable across planner and
+  sub-agent execution paths.
+- Release every Figma sync guard through a `finally` boundary, including empty
+  and rejected token payloads, and report the post-mutation token count without
+  double counting.
+- Raise coverage through executable production contracts and real failure-path
+  tests. Do not lower thresholds or exclude difficult release surfaces to make
+  the candidate appear ready.
+
 ### Reproducible agent-efficiency evidence
 
 - `184cae18` docs: publish InterfaceBench candidate evidence
