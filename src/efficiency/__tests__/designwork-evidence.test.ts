@@ -8,6 +8,9 @@ import {
   sha256File,
   validateDesignWorkEvidence,
 } from "../../../scripts/lib/designwork-evidence.mjs";
+import {
+  runArtifactValidatorProbe,
+} from "../../../scripts/lib/designwork-runner-probes.mjs";
 
 const root = process.cwd();
 const manifestPath = path.join(
@@ -135,6 +138,30 @@ describe("DesignWorkBench evidence receipts", () => {
     expect(result.failures).toContain(
       `${receipt.kind}:${receipt.subjectId} task-bank binding does not match`,
     );
+  });
+
+  it("runs the artifact validator against a representative handoff", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const evidenceRoot = await mkdtemp(path.join(os.tmpdir(), "memi-designwork-probe-"));
+
+    const receipt = await runArtifactValidatorProbe({ manifest, evidenceRoot });
+    const result = await validateDesignWorkEvidence(manifest, {
+      schemaVersion: 1,
+      benchmarkId: manifest.benchmarkId,
+      receipts: [receipt],
+      calibrationArtifacts: [],
+      results: null,
+    }, { root: evidenceRoot });
+
+    expect(receipt.subjectId).toBe("artifact-validator");
+    expect(receipt.artifacts.map((entry) => entry.kind)).toEqual([
+      "schema-validation",
+      "hash-verification",
+      "source-provenance",
+      "handoff-reopen",
+    ]);
+    expect(result.passed).toBe(true);
+    expect(result.verifiedRunnerIds).toEqual(["artifact-validator"]);
   });
 });
 
