@@ -31,7 +31,10 @@ describe("current public release documentation", () => {
       );
       expect(markdown).toContain(`GitHub tag: \`v${engine.version}\``);
     } else {
-      expect(markdown).toContain(`CLI, npm, MCP, and Action | \`${engine.version}\``);
+      const engineLabel = engine.verification.eligibleForParity
+        ? "CLI, npm, MCP, and Action"
+        : "Engine published (parity pending)";
+      expect(markdown).toContain(`${engineLabel} | \`${engine.version}\``);
       expect(markdown).toContain(`\`${engine.sourceCommit}\``);
       expect(markdown).toContain(manifest.surfaces.githubRelease.url);
     }

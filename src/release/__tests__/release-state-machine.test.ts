@@ -384,6 +384,11 @@ describe("verified engine release state machine", () => {
         path: recordPath,
         sha256: createHash("sha256").update(recordBytes).digest("hex"),
       },
+      verification: {
+        eligibleForParity: false,
+        reason:
+          "npm publish provenance is recorded; independent public-surface parity verification is pending",
+      },
     });
     expect(published.updatedAt).toBe("2026-07-28");
   });

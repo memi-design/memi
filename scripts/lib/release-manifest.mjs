@@ -435,6 +435,11 @@ export function stagePublishedEngineManifest({
           path: releaseRecordPath,
           sha256: createHash("sha256").update(releaseRecordBytes).digest("hex"),
         },
+        verification: {
+          eligibleForParity: false,
+          reason:
+            "npm publish provenance is recorded; independent public-surface parity verification is pending",
+        },
       },
     },
   };
