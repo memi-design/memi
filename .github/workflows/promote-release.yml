@@ -32,6 +32,13 @@ jobs:
 
       - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
+      - name: Authenticate container registry
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Verify current immutable release
         shell: bash
         env:
@@ -70,13 +77,6 @@ jobs:
 
           docker buildx imagetools inspect "ghcr.io/memi-design/memi:${RELEASE_TAG}"
           echo "RELEASE_COMMIT=${release_commit}" >> "${GITHUB_ENV}"
-
-      - name: Promote container latest
-        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Point container latest at the verified image
         run: |
