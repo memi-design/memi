@@ -41,6 +41,7 @@
     "pack:dry-run": "node scripts/pack-dry-run.mjs",
     "publish:ready": "node scripts/publish-ready.mjs",
     "check:release": "node scripts/check-release.mjs",
+    "check:interface-bench": "node scripts/validate-interface-benchmark.mjs",
     "check:site-bundle": "node scripts/check-site-bundle-urls.mjs",
     "check:community-notes": "node scripts/check-community-notes.mjs",
     "check:public-release": "node scripts/check-public-release-gate.mjs",

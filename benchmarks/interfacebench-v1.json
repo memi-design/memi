@@ -1,0 +1,638 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "memi-interfacebench-v1",
+  "title": "Memi InterfaceBench: Professional Product Design and Design Engineering",
+  "status": "specification",
+  "results": null,
+  "purpose": "Measure whether an agent can turn real product-design work into a trustworthy, production-ready interface while preserving quality, source integrity, cost, and speed.",
+  "protocol": {
+    "targetTasks": 100,
+    "taskSplit": {
+      "publicDevelopment": 20,
+      "privateTest": 60,
+      "rollingHoldout": 20
+    },
+    "conditions": [
+      "baseline",
+      "memi"
+    ],
+    "minimumIndependentRuns": 3,
+    "pairing": "Same pinned repository revision, task, fixtures, harness, model, reasoning level, preparation, and independent verification.",
+    "randomization": "Condition order is seeded and counterbalanced within provider, task, and repeat.",
+    "judgeBlinding": "Expert, visual, and model graders receive artifacts without condition, product, provider, or model labels.",
+    "contaminationControl": "Private tests never enter routed context. Twenty percent of tasks rotate quarterly and any public leakage moves a task out of scored test splits.",
+    "confidence": "Report stratified means and paired bootstrap 95% intervals with 10000 samples. Never average rejected, mismatched, or incomplete pairs.",
+    "platformQuotas": {
+      "reactWeb": 35,
+      "reactNativeExpo": 20,
+      "swiftUI": 20,
+      "desktopCanvas": 10,
+      "crossPlatform": 15
+    }
+  },
+  "taskFamilies": [
+    {
+      "id": "existing-product-modification",
+      "title": "Modify an existing product without collateral redesign",
+      "weight": 18
+    },
+    {
+      "id": "build-from-brief",
+      "title": "Turn a product brief into a complete interface",
+      "weight": 14
+    },
+    {
+      "id": "reference-to-code",
+      "title": "Reproduce a reference with semantic, editable code",
+      "weight": 10
+    },
+    {
+      "id": "design-system-application",
+      "title": "Recover and correctly apply the local design system",
+      "weight": 10
+    },
+    {
+      "id": "interaction-and-state",
+      "title": "Implement complex interaction, navigation, and product states",
+      "weight": 12
+    },
+    {
+      "id": "responsive-adaptive",
+      "title": "Adapt layouts and behavior across realistic viewports",
+      "weight": 10
+    },
+    {
+      "id": "accessibility-remediation",
+      "title": "Repair accessibility without degrading product behavior",
+      "weight": 8
+    },
+    {
+      "id": "native-mobile",
+      "title": "Implement platform-native mobile product work",
+      "weight": 8
+    },
+    {
+      "id": "data-dense-visualization",
+      "title": "Design accurate, readable data-dense interfaces",
+      "weight": 5
+    },
+    {
+      "id": "regression-debugging",
+      "title": "Diagnose and repair visual or interaction regressions",
+      "weight": 5
+    }
+  ],
+  "scorecards": {
+    "workProduct": {
+      "role": "primary_quality_score",
+      "dimensions": [
+        {
+          "id": "functional-correctness",
+          "weight": 22,
+          "grader": "deterministic",
+          "description": "Required journeys, states, data, and error behavior work end to end."
+        },
+        {
+          "id": "product-judgment",
+          "weight": 12,
+          "grader": "blinded_expert",
+          "description": "The result solves the actual user problem without inventing adjacent scope."
+        },
+        {
+          "id": "visual-quality",
+          "weight": 14,
+          "grader": "visual_plus_expert",
+          "description": "Hierarchy, composition, typography, spacing, color, density, and polish are professionally coherent."
+        },
+        {
+          "id": "interaction-quality",
+          "weight": 10,
+          "grader": "deterministic_plus_expert",
+          "description": "Keyboard, pointer, touch, focus, motion, feedback, and state transitions are complete."
+        },
+        {
+          "id": "responsive-adaptation",
+          "weight": 9,
+          "grader": "deterministic_visual",
+          "description": "Behavior and information hierarchy remain correct across specified viewports and input modes."
+        },
+        {
+          "id": "accessibility",
+          "weight": 10,
+          "grader": "deterministic_plus_manual",
+          "description": "WCAG 2.2 AA automation, keyboard, focus, semantics, contrast, motion, and manual checks pass."
+        },
+        {
+          "id": "design-system-fit",
+          "weight": 9,
+          "grader": "deterministic_plus_expert",
+          "description": "Existing components, tokens, conventions, and platform patterns are reused correctly."
+        },
+        {
+          "id": "maintainability",
+          "weight": 7,
+          "grader": "deterministic_plus_expert",
+          "description": "The patch is scoped, typed, testable, readable, and avoids unnecessary dependencies or duplication."
+        },
+        {
+          "id": "runtime-performance",
+          "weight": 4,
+          "grader": "deterministic",
+          "description": "Interaction latency, frame pacing, layout stability, loading, and bundle effects remain within task budgets."
+        },
+        {
+          "id": "platform-fidelity",
+          "weight": 3,
+          "grader": "deterministic_plus_expert",
+          "description": "Web, iOS, Android, and desktop conventions are respected where applicable."
+        }
+      ]
+    },
+    "sourceTrust": {
+      "role": "independent_trust_score",
+      "dimensions": [
+        {
+          "id": "evidence-provenance",
+          "weight": 30,
+          "description": "Claims resolve to patches, screenshots, traces, source files, tests, or runtime artifacts."
+        },
+        {
+          "id": "fixture-integrity",
+          "weight": 25,
+          "description": "Acceptance fixtures, graders, references, and hidden tests remain unchanged."
+        },
+        {
+          "id": "decision-trace",
+          "weight": 20,
+          "description": "The run records selected skills, repository evidence, changed surfaces, commands, timing, and failures."
+        },
+        {
+          "id": "source-alignment",
+          "weight": 15,
+          "description": "The implementation follows the pinned repository and authentic product source rather than guessed conventions."
+        },
+        {
+          "id": "uncertainty-honesty",
+          "weight": 10,
+          "description": "Missing evidence, partial coverage, rejected runs, and unassessed metrics are reported explicitly."
+        }
+      ]
+    },
+    "efficiency": {
+      "role": "pareto_metric",
+      "primaryCostEvidenceOrder": [
+        "measured_usd",
+        "total_token_proxy"
+      ],
+      "metrics": [
+        "wall_time_ms",
+        "input_tokens",
+        "cached_input_tokens",
+        "output_tokens",
+        "reasoning_tokens",
+        "human_interventions",
+        "defects",
+        "retries"
+      ],
+      "toolCallRole": "diagnostic_only",
+      "policy": "Rank systems on the quality-cost-latency Pareto frontier. Never blend efficiency into quality or reward a cheap failed run."
+    }
+  },
+  "grading": {
+    "order": [
+      "integrity_and_disqualifiers",
+      "deterministic_build_and_journeys",
+      "accessibility_and_performance",
+      "rendered_visual_comparison",
+      "blinded_expert_rubric",
+      "blinded_pairwise_preference"
+    ],
+    "taskScoreFormula": "max(0, positive_points_minus_penalties) / total_positive_points * 100",
+    "aggregateQualityFormula": "0.75 * workProduct + 0.25 * sourceTrust after hard gates",
+    "humanAdjudication": "Two independent senior product design or design-engineering graders; a third resolves differences greater than 10 points.",
+    "visualEvaluation": "Render deterministic screenshots at declared viewports, mask dynamic content, measure structure and geometry, then use blinded expert comparison. Pixel or embedding similarity never stands alone.",
+    "preferenceEvaluation": "Collect blinded pairwise preference after functional hard gates and report Bradley-Terry estimates separately from rubric scores."
+  },
+  "globalDisqualifiers": [
+    {
+      "id": "fixture-tampering",
+      "effect": "task_score_zero",
+      "description": "The agent modified, deleted, bypassed, or weakened a benchmark fixture or grader."
+    },
+    {
+      "id": "fabricated-evidence",
+      "effect": "task_score_zero",
+      "description": "The agent fabricated screenshots, traces, metrics, citations, or successful verification."
+    },
+    {
+      "id": "build-failure",
+      "effect": "task_score_zero",
+      "description": "The required production build or native build does not complete."
+    },
+    {
+      "id": "critical-journey-failure",
+      "effect": "work_product_cap_49",
+      "description": "A required user journey cannot be completed."
+    },
+    {
+      "id": "critical-accessibility-failure",
+      "effect": "work_product_cap_59",
+      "description": "The result introduces a blocker affecting keyboard, screen-reader, contrast, target size, or motion safety."
+    },
+    {
+      "id": "scope-substitution",
+      "effect": "penalty_20",
+      "description": "The agent replaces the requested product work with a mock, static placeholder, unrelated redesign, or unsupported platform."
+    }
+  ],
+  "releaseGates": [
+    {
+      "id": "quality-non-inferiority",
+      "requirement": "Memi work-product and source-trust lower 95% bounds are no worse than baseline, with no increase in critical defects."
+    },
+    {
+      "id": "positive-cost-evidence",
+      "requirement": "Every canonical task family is non-negative and the aggregate paired cost-evidence lower 95% bound is positive."
+    },
+    {
+      "id": "positive-latency",
+      "requirement": "Every canonical task family is non-negative and the aggregate paired latency lower 95% bound is positive."
+    },
+    {
+      "id": "repeat-stability",
+      "requirement": "Release-critical tasks achieve pass^3 and the suite includes at least three independent paired runs per task."
+    },
+    {
+      "id": "coverage",
+      "requirement": "All task families, platform quotas, complexity tiers, and public/private/holdout splits meet the manifest."
+    },
+    {
+      "id": "second-provider",
+      "requirement": "At least two independent provider harnesses complete valid paired runs."
+    }
+  ],
+  "seedTasks": [
+    {
+      "id": "buzzr-unread-navigation",
+      "family": "existing-product-modification",
+      "platform": "reactNativeExpo",
+      "workflowFile": "docs/case-studies/memi-2.7-workflows/buzzr-tab-unread-badge.json",
+      "repository": {
+        "name": "Buzzr",
+        "revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba"
+      },
+      "rubric": {
+        "positiveCriteria": [
+          {
+            "id": "unread-semantics",
+            "weight": 25,
+            "dimension": "functional-correctness",
+            "grader": "deterministic"
+          },
+          {
+            "id": "zero-count-and-cap-states",
+            "weight": 20,
+            "dimension": "interaction-quality",
+            "grader": "deterministic"
+          },
+          {
+            "id": "tab-design-system-fit",
+            "weight": 15,
+            "dimension": "design-system-fit",
+            "grader": "deterministic_plus_expert"
+          },
+          {
+            "id": "accessibility-tree",
+            "weight": 15,
+            "dimension": "accessibility",
+            "grader": "deterministic"
+          },
+          {
+            "id": "mobile-layout-fidelity",
+            "weight": 15,
+            "dimension": "visual-quality",
+            "grader": "visual_plus_expert"
+          },
+          {
+            "id": "scoped-maintainable-patch",
+            "weight": 10,
+            "dimension": "maintainability",
+            "grader": "deterministic_plus_expert"
+          }
+        ],
+        "negativeCriteria": [
+          {
+            "id": "marketing-artwork-substitution",
+            "penalty": 30
+          },
+          {
+            "id": "fixture-or-test-weakening",
+            "penalty": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "nate-options-motion",
+      "family": "native-mobile",
+      "platform": "swiftUI",
+      "workflowFile": "docs/case-studies/memi-2.7-workflows/nate-options-reduce-motion.json",
+      "repository": {
+        "name": "Nate the Bait",
+        "revision": "9cde918e309d74943457ad6def8a9c14db7ea01b"
+      },
+      "rubric": {
+        "positiveCriteria": [
+          {
+            "id": "options-journey",
+            "weight": 25,
+            "dimension": "functional-correctness",
+            "grader": "deterministic"
+          },
+          {
+            "id": "reduce-motion-behavior",
+            "weight": 20,
+            "dimension": "interaction-quality",
+            "grader": "deterministic"
+          },
+          {
+            "id": "swiftui-conventions",
+            "weight": 15,
+            "dimension": "platform-fidelity",
+            "grader": "deterministic_plus_expert"
+          },
+          {
+            "id": "native-accessibility",
+            "weight": 15,
+            "dimension": "accessibility",
+            "grader": "deterministic_plus_manual"
+          },
+          {
+            "id": "visual-quality",
+            "weight": 15,
+            "dimension": "visual-quality",
+            "grader": "visual_plus_expert"
+          },
+          {
+            "id": "scoped-maintainable-patch",
+            "weight": 10,
+            "dimension": "maintainability",
+            "grader": "deterministic_plus_expert"
+          }
+        ],
+        "negativeCriteria": [
+          {
+            "id": "non-native-web-substitution",
+            "penalty": 40
+          },
+          {
+            "id": "simulator-evidence-fabrication",
+            "penalty": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "paraform-command-menu",
+      "family": "interaction-and-state",
+      "platform": "reactWeb",
+      "workflowFile": "docs/case-studies/memi-2.7-workflows/paraform-command-menu.json",
+      "repository": {
+        "name": "Paraform",
+        "revision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b"
+      },
+      "rubric": {
+        "positiveCriteria": [
+          {
+            "id": "keyboard-and-focus",
+            "weight": 25,
+            "dimension": "interaction-quality",
+            "grader": "deterministic"
+          },
+          {
+            "id": "command-execution",
+            "weight": 20,
+            "dimension": "functional-correctness",
+            "grader": "deterministic"
+          },
+          {
+            "id": "reduced-motion",
+            "weight": 10,
+            "dimension": "accessibility",
+            "grader": "deterministic"
+          },
+          {
+            "id": "responsive-dialog",
+            "weight": 15,
+            "dimension": "responsive-adaptation",
+            "grader": "deterministic_visual"
+          },
+          {
+            "id": "product-system-fit",
+            "weight": 20,
+            "dimension": "design-system-fit",
+            "grader": "visual_plus_expert"
+          },
+          {
+            "id": "scoped-maintainable-patch",
+            "weight": 10,
+            "dimension": "maintainability",
+            "grader": "deterministic_plus_expert"
+          }
+        ],
+        "negativeCriteria": [
+          {
+            "id": "mouse-only-flow",
+            "penalty": 35
+          },
+          {
+            "id": "unrelated-redesign",
+            "penalty": 20
+          }
+        ]
+      }
+    },
+    {
+      "id": "dori-atlas-shortcuts",
+      "family": "responsive-adaptive",
+      "platform": "reactWeb",
+      "workflowFile": "docs/case-studies/memi-2.7-workflows/dori-atlas-shortcuts.json",
+      "repository": {
+        "name": "DoriOS",
+        "revision": "18698932e45878a3eab1f5b114dfa5f9c2f58744"
+      },
+      "rubric": {
+        "positiveCriteria": [
+          {
+            "id": "shortcut-journey",
+            "weight": 25,
+            "dimension": "functional-correctness",
+            "grader": "deterministic"
+          },
+          {
+            "id": "keyboard-dialog-behavior",
+            "weight": 20,
+            "dimension": "interaction-quality",
+            "grader": "deterministic"
+          },
+          {
+            "id": "desktop-mobile-adaptation",
+            "weight": 15,
+            "dimension": "responsive-adaptation",
+            "grader": "deterministic_visual"
+          },
+          {
+            "id": "focus-and-semantics",
+            "weight": 15,
+            "dimension": "accessibility",
+            "grader": "deterministic_plus_manual"
+          },
+          {
+            "id": "atlas-visual-fit",
+            "weight": 15,
+            "dimension": "visual-quality",
+            "grader": "visual_plus_expert"
+          },
+          {
+            "id": "scoped-maintainable-patch",
+            "weight": 10,
+            "dimension": "maintainability",
+            "grader": "deterministic_plus_expert"
+          }
+        ],
+        "negativeCriteria": [
+          {
+            "id": "broken-existing-shortcut",
+            "penalty": 30
+          },
+          {
+            "id": "viewport-overflow",
+            "penalty": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "dorii-mobile-navigation",
+      "family": "accessibility-remediation",
+      "platform": "reactWeb",
+      "workflowFile": "docs/case-studies/memi-2.7-workflows/dorii-mobile-navigation.json",
+      "repository": {
+        "name": "dorii public site",
+        "revision": "973afcc1404d2b4c2385d9f7de47eeb90573bbba"
+      },
+      "rubric": {
+        "positiveCriteria": [
+          {
+            "id": "mobile-navigation",
+            "weight": 20,
+            "dimension": "functional-correctness",
+            "grader": "deterministic"
+          },
+          {
+            "id": "route-and-state-correctness",
+            "weight": 20,
+            "dimension": "functional-correctness",
+            "grader": "deterministic"
+          },
+          {
+            "id": "focus-restoration",
+            "weight": 15,
+            "dimension": "accessibility",
+            "grader": "deterministic"
+          },
+          {
+            "id": "reduced-motion",
+            "weight": 10,
+            "dimension": "accessibility",
+            "grader": "deterministic"
+          },
+          {
+            "id": "responsive-information-hierarchy",
+            "weight": 15,
+            "dimension": "responsive-adaptation",
+            "grader": "deterministic_visual"
+          },
+          {
+            "id": "visual-design-fit",
+            "weight": 10,
+            "dimension": "visual-quality",
+            "grader": "visual_plus_expert"
+          },
+          {
+            "id": "scoped-maintainable-patch",
+            "weight": 10,
+            "dimension": "maintainability",
+            "grader": "deterministic_plus_expert"
+          }
+        ],
+        "negativeCriteria": [
+          {
+            "id": "focus-loss",
+            "penalty": 30
+          },
+          {
+            "id": "desktop-regression",
+            "penalty": 20
+          }
+        ]
+      }
+    }
+  ],
+  "references": [
+    {
+      "id": "harvey-biglaw-bench",
+      "title": "Introducing BigLaw Bench",
+      "url": "https://www.harvey.ai/blog/introducing-biglaw-bench",
+      "adoptedPattern": "Real professional work units, bespoke positive and negative rubrics, and separate answer and source scores."
+    },
+    {
+      "id": "swe-bench-verified",
+      "title": "Introducing SWE-bench Verified",
+      "url": "https://openai.com/index/introducing-swe-bench-verified/",
+      "adoptedPattern": "Pinned real repositories, issue-level tasks, executable acceptance, and human validation."
+    },
+    {
+      "id": "design2code",
+      "title": "Design2Code",
+      "url": "https://arxiv.org/abs/2403.03163",
+      "adoptedPattern": "Rendered reference comparison with fine-grained layout and content evaluation."
+    },
+    {
+      "id": "webarena",
+      "title": "WebArena",
+      "url": "https://webarena.dev/",
+      "adoptedPattern": "Realistic self-hosted products and end-to-end functional task success."
+    },
+    {
+      "id": "webdev-arena",
+      "title": "WebDev Arena",
+      "url": "https://arena.ai/blog/webdev-arena",
+      "adoptedPattern": "Blinded pairwise human preference and Bradley-Terry ranking."
+    },
+    {
+      "id": "wcag-22",
+      "title": "Web Content Accessibility Guidelines 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "adoptedPattern": "Testable accessibility requirements and AA conformance targets."
+    },
+    {
+      "id": "core-web-vitals",
+      "title": "Core Web Vitals",
+      "url": "https://web.dev/articles/vitals",
+      "adoptedPattern": "Loading, interaction, and visual-stability performance signals."
+    },
+    {
+      "id": "playwright-accessibility",
+      "title": "Playwright accessibility testing",
+      "url": "https://playwright.dev/docs/accessibility-testing",
+      "adoptedPattern": "Automated axe checks combined with explicit manual assessment."
+    },
+    {
+      "id": "agencybench",
+      "title": "AgencyBench",
+      "url": "https://github.com/GAIR-NLP/AgencyBench",
+      "adoptedPattern": "Long-horizon frontend tasks with rule, visual, and model graders inside an isolated environment."
+    }
+  ]
+}

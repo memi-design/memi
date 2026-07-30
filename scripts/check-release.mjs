@@ -52,6 +52,14 @@ const runtimeSchema = spawnSync("npm", ["run", "check:runtime-schema"], {
 if (runtimeSchema.status !== 0) {
   fail(`runtime schema drift gate failed: ${spawnFailureMessage(runtimeSchema, "failed")}`);
 }
+const interfaceBenchmark = spawnSync("npm", ["run", "check:interface-bench"], {
+  shell: process.platform === "win32",
+  cwd: root,
+  encoding: "utf-8",
+});
+if (interfaceBenchmark.status !== 0) {
+  fail(`InterfaceBench gate failed: ${spawnFailureMessage(interfaceBenchmark, "failed")}`);
+}
 const version = packageJson.version;
 const expectedMcpName = "io.github.sarveshsea/memi";
 if (packageJson.mcpName !== expectedMcpName) {
