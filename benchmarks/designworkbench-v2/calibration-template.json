@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "memi-designworkbench-v2",
+  "collectionStatus": "not_started",
+  "practitionerConsent": {
+    "required": true,
+    "artifactUse": "benchmark calibration and blinded evaluation",
+    "publicRelease": "explicit opt-in only"
+  },
+  "artifacts": []
+}

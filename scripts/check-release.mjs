@@ -60,6 +60,22 @@ const interfaceBenchmark = spawnSync("npm", ["run", "check:interface-bench"], {
 if (interfaceBenchmark.status !== 0) {
   fail(`InterfaceBench gate failed: ${spawnFailureMessage(interfaceBenchmark, "failed")}`);
 }
+const designWorkBenchmark = spawnSync("npm", ["run", "check:designwork-bench"], {
+  shell: process.platform === "win32",
+  cwd: root,
+  encoding: "utf-8",
+});
+if (designWorkBenchmark.status !== 0) {
+  fail(`DesignWorkBench integrity gate failed: ${spawnFailureMessage(designWorkBenchmark, "failed")}`);
+}
+const designWorkRelease = spawnSync("npm", ["run", "check:designwork-release"], {
+  shell: process.platform === "win32",
+  cwd: root,
+  encoding: "utf-8",
+});
+if (designWorkRelease.status !== 0) {
+  fail(`DesignWorkBench practitioner-proof gate failed: ${spawnFailureMessage(designWorkRelease, "failed")}`);
+}
 const version = packageJson.version;
 const expectedMcpName = "io.github.sarveshsea/memi";
 if (packageJson.mcpName !== expectedMcpName) {

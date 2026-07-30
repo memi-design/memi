@@ -404,6 +404,74 @@ export function buildCalibrationReadiness(manifest, artifacts) {
   });
 }
 
+export function buildDesignWorkReadiness(manifest, calibrationArtifacts = []) {
+  const tasks = Array.isArray(manifest?.tasks) ? manifest.tasks : [];
+  const tracks = Array.isArray(manifest?.tracks) ? manifest.tracks : [];
+  const runners = Array.isArray(manifest?.runnerProfiles) ? manifest.runnerProfiles : [];
+  const splitCounts = {
+    publicDevelopment: tasks.filter((task) => task.split === "publicDevelopment").length,
+    privateTest: tasks.filter((task) => task.split === "privateTest").length,
+    rollingHoldout: tasks.filter((task) => task.split === "rollingHoldout").length,
+  };
+  const verifiedFixtures = tasks.filter((task) => task.fixture?.status === "verified").length;
+  const contractFixtures = tasks.filter(
+    (task) => task.fixture?.status === "contract_defined",
+  ).length;
+  const verifiedRunners = runners.filter((runner) => runner.status === "verified").length;
+  const contractRunners = runners.filter(
+    (runner) => runner.status === "contract_defined",
+  ).length;
+  const calibration = buildCalibrationReadiness(manifest, calibrationArtifacts);
+  const practitioners = new Set(
+    calibrationArtifacts.filter((artifact) => artifact.qualified)
+      .map((artifact) => artifact.practitionerId),
+  ).size;
+  const calibratedTracks = calibration.tracks.filter((entry) => entry.ready).length;
+  const foundationReady = tracks.length === 15
+    && tasks.length === 300
+    && splitCounts.publicDevelopment === 60
+    && splitCounts.privateTest === 180
+    && splitCounts.rollingHoldout === 60
+    && runners.length === 8;
+  const blockers = [];
+  if (contractFixtures > 0) {
+    blockers.push(`${contractFixtures} task fixtures remain contract_defined`);
+  }
+  if (contractRunners > 0) {
+    blockers.push(`${contractRunners} runner profiles remain contract_defined`);
+  }
+  if (!calibration.ready) blockers.push("practitioner calibration is pending");
+  if (manifest?.results === null || manifest?.results === undefined) {
+    blockers.push("private and holdout benchmark results are not measured");
+  }
+  return deepFreeze({
+    benchmarkId: manifest?.benchmarkId ?? null,
+    frozenCandidate: manifest?.frozenCandidate ?? null,
+    foundationReady,
+    releaseReady: foundationReady
+      && verifiedFixtures === tasks.length
+      && verifiedRunners === runners.length
+      && calibration.ready
+      && isRecord(manifest?.results),
+    completed: {
+      tracks: tracks.length,
+      taskContracts: tasks.length,
+      publicTasks: splitCounts.publicDevelopment,
+      privateTasks: splitCounts.privateTest,
+      holdoutTasks: splitCounts.rollingHoldout,
+      runnerContracts: runners.length,
+    },
+    verified: {
+      fixtures: verifiedFixtures,
+      runners: verifiedRunners,
+      practitioners,
+      calibratedTracks,
+    },
+    calibration,
+    blockers,
+  });
+}
+
 function track(input) {
   if (input.weights.reduce((sum, value) => sum + value, 0) !== 100) {
     throw new Error(`${input.id} weights must sum to 100`);

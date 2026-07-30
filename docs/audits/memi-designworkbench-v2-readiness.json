@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-30T02:05:29.557Z",
+  "validation": {
+    "passed": true,
+    "benchmarkId": "memi-designworkbench-v2",
+    "trackCount": 15,
+    "taskCount": 300,
+    "splitCounts": {
+      "publicDevelopment": 60,
+      "privateTest": 180,
+      "rollingHoldout": 60
+    },
+    "calibrationStatus": "pending_external_practitioners",
+    "failures": []
+  },
+  "readiness": {
+    "benchmarkId": "memi-designworkbench-v2",
+    "frozenCandidate": {
+      "version": "2.7.0",
+      "commit": "925deb1b23a2211743bcadaba70e1c1db5966375",
+      "claim": "Memi provides repository-specific design intelligence; multidisciplinary senior performance remains unverified until calibration and private evaluation complete."
+    },
+    "foundationReady": true,
+    "releaseReady": false,
+    "completed": {
+      "tracks": 15,
+      "taskContracts": 300,
+      "publicTasks": 60,
+      "privateTasks": 180,
+      "holdoutTasks": 60,
+      "runnerContracts": 8
+    },
+    "verified": {
+      "fixtures": 0,
+      "runners": 0,
+      "practitioners": 0,
+      "calibratedTracks": 0
+    },
+    "calibration": {
+      "ready": false,
+      "overallReliability": 0,
+      "tracks": [
+        {
+          "trackId": "product-design",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "product-design requires at least 4 qualified practitioners",
+            "product-design requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "graphic-brand-design",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "graphic-brand-design requires at least 4 qualified practitioners",
+            "graphic-brand-design requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "motion-design",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "motion-design requires at least 4 qualified practitioners",
+            "motion-design requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "spatial-xr",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "spatial-xr requires at least 4 qualified practitioners",
+            "spatial-xr requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "agentic-design",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "agentic-design requires at least 4 qualified practitioners",
+            "agentic-design requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "ios-swiftui",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "ios-swiftui requires at least 4 qualified practitioners",
+            "ios-swiftui requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "cross-platform-mobile",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "cross-platform-mobile requires at least 4 qualified practitioners",
+            "cross-platform-mobile requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "android-compose",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "android-compose requires at least 4 qualified practitioners",
+            "android-compose requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "native-design-kits",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "native-design-kits requires at least 4 qualified practitioners",
+            "native-design-kits requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "design-systems",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "design-systems requires at least 4 qualified practitioners",
+            "design-systems requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "design-engineering",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "design-engineering requires at least 4 qualified practitioners",
+            "design-engineering requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "service-design",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "service-design requires at least 4 qualified practitioners",
+            "service-design requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "content-design",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "content-design requires at least 4 qualified practitioners",
+            "content-design requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "interaction-prototyping",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "interaction-prototyping requires at least 4 qualified practitioners",
+            "interaction-prototyping requires at least 2 external practitioners"
+          ]
+        },
+        {
+          "trackId": "research-evidence",
+          "practitioners": 0,
+          "externalPractitioners": 0,
+          "artifacts": 0,
+          "reliability": 0,
+          "ready": false,
+          "failures": [
+            "research-evidence requires at least 4 qualified practitioners",
+            "research-evidence requires at least 2 external practitioners"
+          ]
+        }
+      ],
+      "failures": [
+        "product-design requires at least 4 qualified practitioners",
+        "product-design requires at least 2 external practitioners",
+        "graphic-brand-design requires at least 4 qualified practitioners",
+        "graphic-brand-design requires at least 2 external practitioners",
+        "motion-design requires at least 4 qualified practitioners",
+        "motion-design requires at least 2 external practitioners",
+        "spatial-xr requires at least 4 qualified practitioners",
+        "spatial-xr requires at least 2 external practitioners",
+        "agentic-design requires at least 4 qualified practitioners",
+        "agentic-design requires at least 2 external practitioners",
+        "ios-swiftui requires at least 4 qualified practitioners",
+        "ios-swiftui requires at least 2 external practitioners",
+        "cross-platform-mobile requires at least 4 qualified practitioners",
+        "cross-platform-mobile requires at least 2 external practitioners",
+        "android-compose requires at least 4 qualified practitioners",
+        "android-compose requires at least 2 external practitioners",
+        "native-design-kits requires at least 4 qualified practitioners",
+        "native-design-kits requires at least 2 external practitioners",
+        "design-systems requires at least 4 qualified practitioners",
+        "design-systems requires at least 2 external practitioners",
+        "design-engineering requires at least 4 qualified practitioners",
+        "design-engineering requires at least 2 external practitioners",
+        "service-design requires at least 4 qualified practitioners",
+        "service-design requires at least 2 external practitioners",
+        "content-design requires at least 4 qualified practitioners",
+        "content-design requires at least 2 external practitioners",
+        "interaction-prototyping requires at least 4 qualified practitioners",
+        "interaction-prototyping requires at least 2 external practitioners",
+        "research-evidence requires at least 4 qualified practitioners",
+        "research-evidence requires at least 2 external practitioners"
+      ]
+    },
+    "blockers": [
+      "300 task fixtures remain contract_defined",
+      "8 runner profiles remain contract_defined",
+      "practitioner calibration is pending",
+      "private and holdout benchmark results are not measured"
+    ]
+  }
+}

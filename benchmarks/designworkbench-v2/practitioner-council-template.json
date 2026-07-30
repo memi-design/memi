@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "memi-designworkbench-v2",
+  "minimumPractitionersPerTrack": 4,
+  "minimumExternalPractitionersPerTrack": 2,
+  "minimumArtifactsPerPractitioner": 5,
+  "members": []
+}

@@ -114,6 +114,29 @@ Candidate verification currently records:
 
 The greater-than-25% claim remains **not verified**. Inspect the [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Buzzr tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
 
+## Memi DesignWorkBench v2
+
+[Memi DesignWorkBench v2](benchmarks/designworkbench-v2/README.md) expands the
+quality benchmark from interface implementation to complete professional design
+practice. The frozen foundation contains **300 task contracts** across product,
+graphic, motion, spatial/XR, agentic, iOS, Expo, Android, native kits, design
+systems, design engineering, service, content, interaction, and research work.
+
+The corpus is split into 60 public development tasks, 180 private test tasks,
+and 60 rolling holdouts. Acceptance, professional quality, source trust, and
+efficiency are separate outputs. Track scores use a geometric composite so a
+strong design-system result cannot conceal an unsupported native or spatial
+track.
+
+The foundation is not a release score. Real fixtures, device runners, and
+practitioner calibration remain mandatory. Synthetic practitioner ratings are
+prohibited, and the release gate fails until every claimed track has at least
+four qualified practitioners, five artifacts per practitioner, two blinded
+ratings per artifact, reliable graders, and measured private plus holdout
+results. See the current
+[readiness report](docs/audits/memi-designworkbench-v2-readiness.md) and
+[execution goal](docs/DESIGNWORKBENCH_V2_GOAL.md).
+
 ## Choose your integration
 
 | Surface | Start here | Best for |
