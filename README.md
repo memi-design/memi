@@ -109,7 +109,7 @@ Candidate verification currently records:
 - 2,126/2,126 tests passing across 296 files.
 - 70.57% statements, 58.87% branches, 79.82% functions, and 72.35% lines. This is a measured improvement from 64.91%, 53.73%, 73.11%, and 66.62%, respectively, but remains below the 80% repository target.
 - Zero production dependency vulnerabilities.
-- A 561,536-byte compressed, 1,990,236-byte unpacked npm candidate with 48 files.
+- A 48-file npm candidate measuring about 562 KB compressed and 1.99 MB unpacked, within the 750 KB compressed and 2 MB unpacked release budgets.
 - No defensible per-run USD cost from the available subscription traces, so total tokens are explicitly labeled as the cost proxy.
 
 The greater-than-25% claim remains **not verified**. Inspect the [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Buzzr tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
