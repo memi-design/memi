@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { chromium } from "playwright";
@@ -190,6 +191,95 @@ export async function runBrowserPlaywrightProbe(input) {
   }
 }
 
+export async function runMotionRenderProbe(input) {
+  const evidenceRoot = path.resolve(input.evidenceRoot);
+  const outputDirectory = path.join(evidenceRoot, "motion-render");
+  await mkdir(outputDirectory, { recursive: true, mode: 0o700 });
+  const timelineArtifact = await writeEvidenceArtifact(
+    evidenceRoot,
+    outputDirectory,
+    "timeline-source",
+    {
+      schemaVersion: 1,
+      durationSeconds: 1,
+      frameRate: 30,
+      dimensions: { width: 320, height: 180 },
+      source: "ffmpeg testsrc2",
+      reducedMotion: "static one-frame video",
+    },
+  );
+  const renderPath = path.join(outputDirectory, "render.mp4");
+  runCommand("ffmpeg", [
+    "-y",
+    "-f", "lavfi",
+    "-i", "testsrc2=size=320x180:rate=30:duration=1",
+    "-pix_fmt", "yuv420p",
+    "-movflags", "+faststart",
+    renderPath,
+  ]);
+  const inspection = JSON.parse(runCommand("ffprobe", [
+    "-v", "error",
+    "-select_streams", "v:0",
+    "-count_frames",
+    "-show_entries", "stream=codec_name,width,height,r_frame_rate,nb_read_frames,duration",
+    "-of", "json",
+    renderPath,
+  ]));
+  const stream = inspection.streams?.[0];
+  if (Number(stream?.nb_read_frames) !== 30
+    || stream?.width !== 320
+    || stream?.height !== 180) {
+    throw new Error("motion render frame analysis did not match the timeline contract");
+  }
+  const analysisArtifact = await writeEvidenceArtifact(
+    evidenceRoot,
+    outputDirectory,
+    "frame-analysis",
+    inspection,
+  );
+  const reducedMotionPath = path.join(outputDirectory, "reduced-motion.mp4");
+  runCommand("ffmpeg", [
+    "-y",
+    "-f", "lavfi",
+    "-i", "color=c=0x111111:size=320x180:rate=1:duration=1",
+    "-pix_fmt", "yuv420p",
+    "-movflags", "+faststart",
+    reducedMotionPath,
+  ]);
+  const renderArtifact = await existingArtifact(
+    evidenceRoot,
+    renderPath,
+    "render",
+  );
+  const reducedMotionArtifact = await existingArtifact(
+    evidenceRoot,
+    reducedMotionPath,
+    "reduced-motion-output",
+  );
+  const ffmpegVersion = runCommand("ffmpeg", ["-version"]).split("\n")[0];
+  return sealDesignWorkReceipt({
+    schemaVersion: 1,
+    kind: "runner",
+    subjectId: "motion-render",
+    benchmarkId: input.manifest.benchmarkId,
+    taskBankSha256: input.manifest.integrity.taskBankSha256,
+    frozenCandidateSha256: input.manifest.integrity.frozenCandidateSha256,
+    status: "verified",
+    environment: {
+      os: process.platform,
+      architecture: process.arch,
+      runtime: ffmpegVersion,
+      hostnameHash: hashHostname(os.hostname()),
+    },
+    artifacts: [
+      timelineArtifact,
+      renderArtifact,
+      analysisArtifact,
+      reducedMotionArtifact,
+    ],
+  });
+}
+
 async function writeEvidenceArtifact(root, directory, kind, payload) {
   const filePath = path.join(directory, `${kind}.json`);
   await writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, {
@@ -214,6 +304,27 @@ async function writeRawEvidenceArtifact(root, directory, kind, filename, content
     path: path.relative(root, filePath),
     sha256: await sha256File(filePath),
   };
+}
+
+async function existingArtifact(root, filePath, kind) {
+  return {
+    kind,
+    path: path.relative(root, filePath),
+    sha256: await sha256File(filePath),
+  };
+}
+
+function runCommand(command, args) {
+  const result = spawnSync(command, args, {
+    encoding: "utf8",
+    maxBuffer: 4 * 1024 * 1024,
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `${command} failed: ${(result.stderr || result.stdout || result.error?.message || "unknown error").trim()}`,
+    );
+  }
+  return result.stdout;
 }
 
 function hashHostname(hostname) {
