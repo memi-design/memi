@@ -8,6 +8,20 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+### 2.7 claim firewall and release evidence
+
+- `d4bc7cc5` feat: separate 2.7 evidence and release gates
+
+#### Architectural decisions
+
+- Keep package publication, paired efficiency claims, and blinded
+  practitioner certification as separate gates.
+- Treat historical workflow `qualityScore: 100` values as automated acceptance,
+  not senior-practitioner quality. Cap new automated acceptance evidence at 80
+  and require calibrated practitioner evidence above that ceiling.
+- Preserve negative benchmark cases and unmeasured competitor performance in
+  the report rather than manufacturing a universal or comparative claim.
+
 ### DesignWorkBench v2 benchmark and evidence activation
 
 - `6959b243` feat: report prepared fixture evidence
