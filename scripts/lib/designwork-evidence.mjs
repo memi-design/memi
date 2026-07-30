@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  validatePublicFixtureCandidates,
+} from "./designwork-fixtures.mjs";
 
 const HASH_PATTERN = /^[a-f0-9]{64}$/;
 const RECEIPT_KINDS = new Set(["fixture", "runner"]);
@@ -21,6 +24,12 @@ export async function sha256File(filePath) {
 export async function validateDesignWorkEvidence(manifest, bundle, options = {}) {
   const root = path.resolve(options.root ?? process.cwd());
   const failures = [];
+  const candidateResult = await validateCandidateFixtures(
+    manifest,
+    bundle?.candidateFixtures,
+    root,
+  );
+  failures.push(...candidateResult.failures);
   const verifiedFixtureIds = [];
   const verifiedRunnerIds = [];
   const taskIds = new Set((manifest?.tasks ?? []).map((task) => task.id));
@@ -52,6 +61,7 @@ export async function validateDesignWorkEvidence(manifest, bundle, options = {})
   return deepFreeze({
     passed: failures.length === 0,
     failures,
+    preparedFixtureIds: candidateResult.preparedFixtureIds,
     verifiedFixtureIds: [...verifiedFixtureIds].sort(),
     verifiedRunnerIds: [...verifiedRunnerIds].sort(),
     calibrationArtifacts: Array.isArray(bundle?.calibrationArtifacts)
@@ -59,6 +69,55 @@ export async function validateDesignWorkEvidence(manifest, bundle, options = {})
       : [],
     results: isRecord(bundle?.results) ? bundle.results : null,
   });
+}
+
+async function validateCandidateFixtures(manifest, entries, root) {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return { preparedFixtureIds: [], failures: [] };
+  }
+  const failures = [];
+  const candidates = [];
+  const preparedFixtureIds = [];
+  const seen = new Set();
+  for (const entry of entries) {
+    const label = `candidate:${entry?.taskId ?? "unknown"}`;
+    if (seen.has(entry?.taskId)) failures.push(`${label} is duplicated`);
+    seen.add(entry?.taskId);
+    if (!nonEmpty(entry?.path) || path.isAbsolute(entry.path)) {
+      failures.push(`${label} path must be relative`);
+      continue;
+    }
+    const candidatePath = path.resolve(root, entry.path);
+    if (!insideRoot(root, candidatePath)) {
+      failures.push(`${label} escapes the evidence root`);
+      continue;
+    }
+    if (!HASH_PATTERN.test(entry?.sha256 ?? "")) {
+      failures.push(`${label} requires a sha256`);
+      continue;
+    }
+    try {
+      if (await sha256File(candidatePath) !== entry.sha256) {
+        failures.push(`${label} file hash does not match`);
+        continue;
+      }
+      const candidate = JSON.parse(await readFile(candidatePath, "utf8"));
+      if (candidate.taskId !== entry.taskId) {
+        failures.push(`${label} file task does not match`);
+        continue;
+      }
+      candidates.push(candidate);
+      preparedFixtureIds.push(entry.taskId);
+    } catch {
+      failures.push(`${label} file is missing or invalid`);
+    }
+  }
+  const validation = validatePublicFixtureCandidates(manifest, candidates);
+  failures.push(...validation.failures.map((failure) => `candidate fixtures: ${failure}`));
+  return {
+    preparedFixtureIds: [...preparedFixtureIds].sort(),
+    failures,
+  };
 }
 
 async function validateReceipt(manifest, receipt, root, taskIds, runnerProfiles) {
