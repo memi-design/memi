@@ -12,6 +12,11 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Reproducible agent-efficiency evidence
 
+- `184cae18` docs: publish InterfaceBench candidate evidence
+- `52f61c85` test: require honest benchmark stats in readme
+- `6e72e642` feat: add professional InterfaceBench specification
+- `3a0c281a` test: define professional interface benchmark
+- `bc5c8541` docs: explain cost-aware efficiency evidence
 - `c451c205` feat: optimize efficiency for cost and quality
 - `6a48e6a9` test: define cost-aware efficiency evidence
 - `9effdea8` perf: constrain routed discovery and verification
@@ -67,6 +72,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 #### Architectural decisions
 
+- Keep InterfaceBench quality, source trust, and efficiency separate. Require
+  functional, integrity, accessibility, and product-journey hard gates before
+  aggregating the 75% work-product and 25% source-trust score, then evaluate
+  cost and latency on the Pareto frontier instead of purchasing speed with
+  lower quality.
+- Build the benchmark toward 100 real professional tasks split into 20 public
+  development tasks, 60 private test tasks, and a quarterly rotating 20-task
+  holdout. Pin repository revisions and fixtures, require at least three paired
+  runs, blind expert judges, and publish negative outcomes without converting
+  the five-task seed suite into a benchmark score.
 - Treat measured paired USD as the primary cost evidence when complete, and
   total tokens as an explicitly labeled proxy otherwise. Keep latency and
   quality as hard gates while reporting tool-call count as diagnostic-only.
