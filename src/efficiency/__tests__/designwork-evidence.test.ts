@@ -10,6 +10,7 @@ import {
 } from "../../../scripts/lib/designwork-evidence.mjs";
 import {
   runArtifactValidatorProbe,
+  runBrowserPlaywrightProbe,
 } from "../../../scripts/lib/designwork-runner-probes.mjs";
 
 const root = process.cwd();
@@ -162,6 +163,30 @@ describe("DesignWorkBench evidence receipts", () => {
     ]);
     expect(result.passed).toBe(true);
     expect(result.verifiedRunnerIds).toEqual(["artifact-validator"]);
+  });
+
+  it("runs an accessible browser interaction with a Playwright trace", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const evidenceRoot = await mkdtemp(path.join(os.tmpdir(), "memi-designwork-browser-"));
+
+    const receipt = await runBrowserPlaywrightProbe({ manifest, evidenceRoot });
+    const result = await validateDesignWorkEvidence(manifest, {
+      schemaVersion: 1,
+      benchmarkId: manifest.benchmarkId,
+      receipts: [receipt],
+      calibrationArtifacts: [],
+      results: null,
+    }, { root: evidenceRoot });
+
+    expect(receipt.subjectId).toBe("browser-playwright");
+    expect(receipt.artifacts.map((entry) => entry.kind)).toEqual([
+      "browser-build",
+      "playwright-e2e",
+      "accessibility-tree",
+      "performance-trace",
+    ]);
+    expect(result.passed).toBe(true);
+    expect(result.verifiedRunnerIds).toEqual(["browser-playwright"]);
   });
 });
 
