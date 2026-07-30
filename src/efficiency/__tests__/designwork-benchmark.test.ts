@@ -199,6 +199,27 @@ describe("Memi DesignWorkBench v2", () => {
     ]));
   });
 
+  it("derives readiness from validated receipts instead of mutable manifest status", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const report = buildDesignWorkReadiness(manifest, {
+      verifiedFixtureIds: [manifest.tasks[0].id],
+      verifiedRunnerIds: ["artifact-validator"],
+      calibrationArtifacts: [],
+      results: null,
+    });
+
+    expect(report.verified).toMatchObject({
+      fixtures: 1,
+      runners: 1,
+      practitioners: 0,
+      calibratedTracks: 0,
+    });
+    expect(report.blockers).toEqual(expect.arrayContaining([
+      "299 task fixtures require verified receipts",
+      "7 runner profiles require verified receipts",
+    ]));
+  });
+
   it("wires benchmark integrity and practitioner proof into the release surface", async () => {
     const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
     const releaseGate = await readFile(path.join(root, "scripts", "check-release.mjs"), "utf8");
