@@ -115,5 +115,9 @@ describe("DesignWorkBench public fixture production", () => {
       ...review,
       candidateSha256: "0".repeat(64),
     })).toThrow("fixture approval does not match the candidate hash");
+    expect(() => approvePublicFixtureCandidate({
+      ...candidate,
+      disclosure: "tampered after hashing",
+    }, review)).toThrow("fixture candidate hash is invalid");
   });
 });

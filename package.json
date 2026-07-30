@@ -46,6 +46,7 @@
     "check:designwork-bench": "node scripts/generate-designwork-benchmark.mjs --check",
     "build:designwork-evidence": "node scripts/build-designwork-evidence.mjs",
     "check:designwork-evidence": "node scripts/build-designwork-evidence.mjs --check",
+    "approve:designwork-fixture": "node scripts/approve-designwork-fixture.mjs",
     "build:designwork-readiness": "node scripts/build-designwork-readiness.mjs",
     "check:designwork-readiness": "node scripts/build-designwork-readiness.mjs --check",
     "check:designwork-release": "node scripts/build-designwork-readiness.mjs --check --require-ready",

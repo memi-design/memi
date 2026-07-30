@@ -189,6 +189,9 @@ export function validatePublicFixtureCandidates(manifest, candidates) {
 }
 
 export function approvePublicFixtureCandidate(candidate, review) {
+  if (candidateHash(candidate) !== candidate?.candidateSha256) {
+    throw new Error("fixture candidate hash is invalid");
+  }
   if (review?.independent !== true) {
     throw new Error("fixture approval requires an independent reviewer");
   }
