@@ -9,6 +9,57 @@ import {
 } from "../api-server.js";
 
 describe("PreviewApiServer", () => {
+  it("returns the operating-system assigned port when started with port zero", async () => {
+    const figma = new EventEmitter() as EventEmitter & {
+      isConnected: boolean;
+      wsServer: {
+        activePort: number;
+        getStatus: () => {
+          running: boolean;
+          port: number;
+          clients: never[];
+        };
+      };
+    };
+    figma.isConnected = false;
+    figma.wsServer = {
+      activePort: 0,
+      getStatus: () => ({ running: false, port: 0, clients: [] }),
+    };
+
+    const engine = new EventEmitter() as EventEmitter & {
+      config: { projectRoot: string };
+      registry: {
+        getAllSpecs: () => Promise<unknown[]>;
+        designSystem: unknown;
+      };
+      figma: typeof figma;
+      on: EventEmitter["on"];
+      off: EventEmitter["off"];
+    };
+    engine.config = { projectRoot: "/tmp/memoire-preview-port-test" };
+    engine.registry = {
+      getAllSpecs: async () => [],
+      designSystem: { tokens: [] },
+    };
+    engine.figma = figma;
+
+    const server = new PreviewApiServer(engine as never, "/tmp/memoire-preview-port-test", 0);
+    try {
+      const port = await server.start();
+      expect(port).toBeGreaterThan(0);
+
+      const response = await fetch(`http://${PREVIEW_BIND_HOST}:${port}/api/status`);
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({
+        connected: false,
+        port: null,
+      });
+    } finally {
+      server.stop();
+    }
+  });
+
   it("binds the local preview control plane to loopback", () => {
     expect(PREVIEW_BIND_HOST).toBe("127.0.0.1");
   });
