@@ -11,6 +11,7 @@ import {
 import {
   runArtifactValidatorProbe,
   runBrowserPlaywrightProbe,
+  runMotionRenderProbe,
 } from "../../../scripts/lib/designwork-runner-probes.mjs";
 
 const root = process.cwd();
@@ -187,6 +188,30 @@ describe("DesignWorkBench evidence receipts", () => {
     ]);
     expect(result.passed).toBe(true);
     expect(result.verifiedRunnerIds).toEqual(["browser-playwright"]);
+  });
+
+  it("renders and inspects motion with a reduced-motion alternative", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const evidenceRoot = await mkdtemp(path.join(os.tmpdir(), "memi-designwork-motion-"));
+
+    const receipt = await runMotionRenderProbe({ manifest, evidenceRoot });
+    const result = await validateDesignWorkEvidence(manifest, {
+      schemaVersion: 1,
+      benchmarkId: manifest.benchmarkId,
+      receipts: [receipt],
+      calibrationArtifacts: [],
+      results: null,
+    }, { root: evidenceRoot });
+
+    expect(receipt.subjectId).toBe("motion-render");
+    expect(receipt.artifacts.map((entry) => entry.kind)).toEqual([
+      "timeline-source",
+      "render",
+      "frame-analysis",
+      "reduced-motion-output",
+    ]);
+    expect(result.passed).toBe(true);
+    expect(result.verifiedRunnerIds).toEqual(["motion-render"]);
   });
 });
 
