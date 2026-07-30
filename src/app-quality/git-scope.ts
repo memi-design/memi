@@ -87,8 +87,9 @@ export function expandScopeWithDependents(
   graphFiles: Array<{ path: string; importedBy: string[] }>,
 ): string[] {
   const scope = new Set(scopeFiles);
+  const originalScope = new Set(scopeFiles);
   for (const file of graphFiles) {
-    if (!scope.has(file.path)) continue;
+    if (!originalScope.has(file.path)) continue;
     for (const dependent of file.importedBy) scope.add(dependent);
   }
   return [...scope].sort();

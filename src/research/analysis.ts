@@ -64,7 +64,7 @@ const ENTITY_PATTERNS = [
   /\b(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/g,
   /\b(?:React|Vue|Angular|Svelte|Next\.?js|Tailwind|Figma|Linear|Supabase|Vercel|Notion|Slack)\b/g,
   /\b(?:WCAG|ARIA|GDPR|ADA|HIPAA|SOC\s*2)\b/g,
-  /\b\d+(?:\.\d+)?%\b/g,
+  /\b\d+(?:\.\d+)?%/g,
   /\$[\d,.]+[BMK]?\b/g,
 ];
 
