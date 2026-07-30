@@ -533,6 +533,41 @@ def build_report(analysis: dict) -> None:
         MARGIN, 100, 500, 10, 14, INK, "Helvetica-Bold",
     )
 
+    report.new_page("2.7.0 release execution record", "Observed 30 July 2026")
+    release_rows = [
+        ("npm + provenance", "PASS", "2.7.0 is latest; signature, SLSA attestation, SBOM, and release record verified."),
+        ("GitHub release", "PASS", "Immutable v2.7.0 tag and release bind source commit 00be64b9."),
+        ("Native binaries", "PASS", "macOS arm64/x64, Linux x64, and Windows x64 built and smoke-tested."),
+        ("Checksums + container", "PASS", "SHA256SUMS verified; immutable and latest GHCR images published."),
+        ("Action v2 channel", "PASS", "Floating v2 alias moved to the reviewed v2.7.0 source commit."),
+        ("MCP Registry", "BLOCKED", "Registry OIDC permits io.github.memi-design/*, but 2.7.0 declares io.github.sarveshsea/memi."),
+        ("Studio + website parity", "PARTIAL", "Pinned Studio 2.5.0 assets verified; website artifact is 404 and docs/changelog remain stale."),
+    ]
+    y = PAGE_H - 120
+    for surface, status, evidence in release_rows:
+        color = GREEN if status == "PASS" else RED if status == "BLOCKED" else AMBER
+        report.text(surface, MARGIN, y, 9.5, INK, "Helvetica-Bold")
+        report.text(status, MARGIN + 155, y, 8.5, color, "Helvetica-Bold")
+        report.wrap(evidence, MARGIN + 225, y + 3, 310, 7.8, 10.5, MUTED, max_lines=3)
+        report.c.setStrokeColor(LIGHT)
+        report.c.line(MARGIN, y - 18, PAGE_W - MARGIN, y - 18)
+        y -= 58
+    report.text("Failures converted into release controls", MARGIN, y - 2, 12, INK, "Helvetica-Bold")
+    y -= 28
+    incident_lines = [
+        "Windows path duplication (D:\\D:\\...) → fileURLToPath conversion plus a tag-scoped immutable-release repair test.",
+        "Private GHCR inspection before login → authentication reordered ahead of immutable image verification.",
+        "Workflow token could not move v2 across workflow-file changes → exact source SHA verified, then alias moved through authenticated Git transport.",
+        "MCP namespace 403 remains fail-closed → public parity and MCP claims remain blocked rather than rewritten after npm publication.",
+    ]
+    for line in incident_lines:
+        y = report.bullet(line, MARGIN, y, 500)
+        y -= 8
+    report.wrap(
+        "Release publication and practitioner certification remain separate. The package is published; the >25% universal efficiency claim, cross-harness performance ranking, and senior-practitioner quality claim remain unapproved.",
+        MARGIN, 92, 500, 9.5, 13.5, RED, "Helvetica-Bold",
+    )
+
     report.new_page("Methodology, limitations, and sources", "Appendix")
     report.text("Method", MARGIN, PAGE_H - 120, 12, INK, "Helvetica-Bold")
     y = report.wrap(

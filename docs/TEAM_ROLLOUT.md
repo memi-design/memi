@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: { fetch-depth: 0 }
-      - uses: memi-design/memi@ec4d804220bfbf08be810ceb692a338cf186e794 # v2.6.4
+      - uses: memi-design/memi@00be64b9bd49fab57f4f54f678550a2021f6d1ae # v2.7.0
 ```
 
 PRs now get SARIF annotations on the exact changed lines, a step-summary scorecard, and a design-health report artifact. Whole-tree stats are always computed (thresholds stay valid); the PR is only blamed for files it touched.

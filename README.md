@@ -27,7 +27,7 @@ Memi reads the product you already have, identifies accessibility, hierarchy, st
 Run one audit in any frontend repository:
 
 ```bash
-npx -y @memi-design/cli@2.6.4 diagnose . --json --no-write --fail-on none
+npx -y @memi-design/cli@2.7.0 diagnose . --json --no-write --fail-on none
 ```
 
 You get a score, normalized finding IDs, confidence, provenance, and `file:line` evidence. No account, API key, Figma file, global install, or daemon is required.
@@ -106,7 +106,7 @@ These results predate the full 100-task InterfaceBench run. They are reported as
 
 Candidate verification currently records:
 
-- 2,153/2,153 tests passing across 300 files.
+- 2,154/2,154 tests passing across 300 files.
 - 70.57% statements, 58.87% branches, 79.82% functions, and 72.35% lines. This is a measured improvement from 64.91%, 53.73%, 73.11%, and 66.62%, respectively, but remains below the 80% repository target.
 - Zero production dependency vulnerabilities.
 - A 48-file npm candidate measuring about 562 KB compressed and 1.99 MB unpacked, within the 750 KB compressed and 2 MB unpacked release budgets.
@@ -153,10 +153,10 @@ requires external practitioners, private tests, and holdouts.
 
 | Surface | Start here | Best for |
 | --- | --- | --- |
-| One-time CLI audit | `npx -y @memi-design/cli@2.6.4 diagnose . --no-write` | Trying Memi without installing |
+| One-time CLI audit | `npx -y @memi-design/cli@2.7.0 diagnose . --no-write` | Trying Memi without installing |
 | Global CLI | `npm i -g @memi-design/cli` | Daily local use |
 | Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude, Cursor, and compatible agents |
-| GitHub Action | `uses: memi-design/memi@ec4d804220bfbf08be810ceb692a338cf186e794` | Pull-request design CI |
+| GitHub Action | `uses: memi-design/memi@00be64b9bd49fab57f4f54f678550a2021f6d1ae` | Pull-request design CI |
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
 | Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
 
@@ -183,9 +183,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: memi-design/memi@ec4d804220bfbf08be810ceb692a338cf186e794 # v2.6.4
+      - uses: memi-design/memi@00be64b9bd49fab57f4f54f678550a2021f6d1ae # v2.7.0
         with:
-          version: "2.6.4"
+          version: "2.7.0"
           report: true
           upload-sarif: true
 ```
