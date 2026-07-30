@@ -544,7 +544,7 @@ export class SubAgentRunner {
     }
 
     log.info({ task: task.name, mutations: mutations.length }, "Theme builder completed");
-    return { status: "completed", mutations, tokenCount: ds.tokens.length + mutations.length };
+    return { status: "completed", mutations, tokenCount: ds.tokens.length };
   }
 
   // ── Responsive Specialist Sub-Agent ────────────────────
@@ -762,55 +762,54 @@ export class SubAgentRunner {
     // Enable sync guard to prevent echo loops
     this.engine.sync.enableGuard();
 
-    const value = Object.values(token.values)[0];
-    if (!value) {
-      this.engine.sync.disableGuard();
-      return;
-    }
+    try {
+      const value = Object.values(token.values)[0];
+      if (!value) {
+        return;
+      }
 
-    // Validate token name to prevent code injection
-    if (!/^[A-Za-z0-9/_\- .]+$/.test(token.name)) {
-      log.warn({ token: token.name }, "Skipping Figma push — unsafe token name");
-      return;
-    }
+      // Validate token name to prevent code injection
+      if (!/^[A-Za-z0-9/_\- .]+$/.test(token.name)) {
+        log.warn({ token: token.name }, "Skipping Figma push — unsafe token name");
+        return;
+      }
 
-    // Pass data as serialized JSON payload, not inline template interpolation
-    const tokenData = {
-      name: String(token.name),
-      value: String(value),
-      isColor: token.type === "color",
-    };
+      // Pass data as serialized JSON payload, not inline template interpolation
+      const tokenData = {
+        name: String(token.name),
+        value: String(value),
+        isColor: token.type === "color",
+      };
 
-    const code = `
-      (async () => {
-        const tokenData = JSON.parse(${JSON.stringify(JSON.stringify(tokenData))});
-        const collections = await figma.variables.getLocalVariableCollectionsAsync();
-        for (const col of collections) {
-          const varIds = col.variableIds;
-          for (const vid of varIds) {
-            const v = await figma.variables.getVariableByIdAsync(vid);
-            if (v && v.name === tokenData.name) {
-              const modeId = col.modes[0]?.modeId;
-              if (modeId) {
-                if (tokenData.isColor) {
-                  const hex = tokenData.value;
-                  const r = parseInt(hex.slice(1,3), 16) / 255;
-                  const g = parseInt(hex.slice(3,5), 16) / 255;
-                  const b = parseInt(hex.slice(5,7), 16) / 255;
-                  v.setValueForMode(modeId, { r, g, b, a: 1 });
-                } else {
-                  v.setValueForMode(modeId, tokenData.value);
+      const code = `
+        (async () => {
+          const tokenData = JSON.parse(${JSON.stringify(JSON.stringify(tokenData))});
+          const collections = await figma.variables.getLocalVariableCollectionsAsync();
+          for (const col of collections) {
+            const varIds = col.variableIds;
+            for (const vid of varIds) {
+              const v = await figma.variables.getVariableByIdAsync(vid);
+              if (v && v.name === tokenData.name) {
+                const modeId = col.modes[0]?.modeId;
+                if (modeId) {
+                  if (tokenData.isColor) {
+                    const hex = tokenData.value;
+                    const r = parseInt(hex.slice(1,3), 16) / 255;
+                    const g = parseInt(hex.slice(3,5), 16) / 255;
+                    const b = parseInt(hex.slice(5,7), 16) / 255;
+                    v.setValueForMode(modeId, { r, g, b, a: 1 });
+                  } else {
+                    v.setValueForMode(modeId, tokenData.value);
+                  }
                 }
+                return { updated: true, variable: v.name };
               }
-              return { updated: true, variable: v.name };
             }
           }
-        }
-        return { updated: false };
-      })()
-    `;
+          return { updated: false };
+        })()
+      `;
 
-    try {
       await this.engine.figma.execute(code);
     } finally {
       this.engine.sync.disableGuard();
