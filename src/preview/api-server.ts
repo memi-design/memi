@@ -481,6 +481,10 @@ export class PreviewApiServer {
       };
 
       this.server.on("listening", () => {
+        const address = this.server?.address();
+        if (address && typeof address === "object") {
+          this.port = address.port;
+        }
         setupWebSocketServer();
         resolved = true;
         resolve(this.port);
