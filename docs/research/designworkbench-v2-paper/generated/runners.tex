@@ -1,0 +1,14 @@
+\begin{tabularx}{\textwidth}{@{}p{0.19\textwidth}p{0.19\textwidth}X@{}}
+\toprule
+Runner & Current evidence & Required evidence contract \\
+\midrule
+Browser and desktop web runtime & verified & browser-build, playwright-e2e, accessibility-tree, performance-trace \\
+iOS or visionOS simulator runtime & pending & xcode-build, simulator-capture, accessibility-capture, performance-trace \\
+Expo development and production runtime & pending & expo-build, ios-capture, android-capture, navigation-e2e \\
+Android emulator and Compose instrumentation & pending & gradle-build, compose-ui-test, emulator-capture, accessibility-capture \\
+Editable design artifact runtime & pending & layer-tree, component-graph, token-bindings, editable-export \\
+Frame-accurate motion and video runtime & verified & timeline-source, render, frame-analysis, reduced-motion-output \\
+Spatial simulator or OpenXR-compatible runtime & pending & scene-build, interactive-scenario, input-profile, comfort-safety-check \\
+Cross-discipline artifact and provenance validator & verified & schema-validation, hash-verification, source-provenance, handoff-reopen \\
+\bottomrule
+\end{tabularx}

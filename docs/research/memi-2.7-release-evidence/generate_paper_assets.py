@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from math import comb
 from pathlib import Path
 from statistics import mean, median
 
@@ -36,6 +37,18 @@ def sha256(path: Path) -> str:
 
 def pct(value: float, digits: int = 2) -> str:
     return f"{value * 100:.{digits}f}"
+
+
+def exact_two_sided_sign_p(wins: int, trials: int) -> float:
+    """Return the exact two-sided binomial sign-test p-value under p=0.5."""
+    extreme = min(wins, trials - wins)
+    tail = sum(comb(trials, k) for k in range(extreme + 1)) / (2**trials)
+    return min(1.0, 2 * tail)
+
+
+def leave_one_out_means(values: list[float]) -> list[float]:
+    total = sum(values)
+    return [(total - value) / (len(values) - 1) for value in values]
 
 
 def workflow_tokens(row: dict, condition: str) -> int:
@@ -74,6 +87,10 @@ def main() -> None:
     workflow_weighted = (
         workflow_baseline_tokens - workflow_memi_tokens
     ) / workflow_baseline_tokens
+    six_wins = sum(value > 0 for value in six_tokens)
+    workflow_wins = sum(value > 0 for value in workflow_tokens_savings)
+    six_loo = leave_one_out_means(six_tokens)
+    workflow_loo = leave_one_out_means(workflow_tokens_savings)
 
     macros = {
         "PaperDate": "30 July 2026",
@@ -92,7 +109,10 @@ def main() -> None:
         "SixRepoTokenLower": pct(six["aggregate"]["tokenSavings"]["lower95"]),
         "SixRepoTokenUpper": pct(six["aggregate"]["tokenSavings"]["upper95"]),
         "SixRepoMeanLatency": pct(mean(six_latency)),
-        "SixRepoTokenWins": sum(value > 0 for value in six_tokens),
+        "SixRepoTokenWins": six_wins,
+        "SixRepoSignP": f"{exact_two_sided_sign_p(six_wins, len(six_tokens)):.3f}",
+        "SixRepoLooMin": pct(min(six_loo)),
+        "SixRepoLooMax": pct(max(six_loo)),
         "WorkflowPairs": len(workflow["pairs"]),
         "WorkflowMeanTokens": pct(mean(workflow_tokens_savings)),
         "WorkflowMedianTokens": pct(median(workflow_tokens_savings)),
@@ -110,12 +130,17 @@ def main() -> None:
         "WorkflowLatencyUpper": pct(
             workflow["aggregate"]["latencySavings"]["upper95"]
         ),
-        "WorkflowTokenWins": sum(value > 0 for value in workflow_tokens_savings),
-        "BuzzrCalibrationTokens": pct(tools["outcomes"]["totalTokenSavings"]),
-        "BuzzrCalibrationWall": pct(tools["outcomes"]["wallTimeSavings"]),
-        "BuzzrCalibrationToolCalls": pct(tools["outcomes"]["toolCallSavings"]),
-        "BuzzrBaselineRetries": tools["outcomes"]["baselineRetries"],
-        "BuzzrMemiRetries": tools["outcomes"]["memiRetries"],
+        "WorkflowTokenWins": workflow_wins,
+        "WorkflowSignP": (
+            f"{exact_two_sided_sign_p(workflow_wins, len(workflow_tokens_savings)):.3f}"
+        ),
+        "WorkflowLooMin": pct(min(workflow_loo)),
+        "WorkflowLooMax": pct(max(workflow_loo)),
+        "ExampleTwoCalibrationTokens": pct(tools["outcomes"]["totalTokenSavings"]),
+        "ExampleTwoCalibrationWall": pct(tools["outcomes"]["wallTimeSavings"]),
+        "ExampleTwoCalibrationToolCalls": pct(tools["outcomes"]["toolCallSavings"]),
+        "ExampleTwoBaselineRetries": tools["outcomes"]["baselineRetries"],
+        "ExampleTwoMemiRetries": tools["outcomes"]["memiRetries"],
         "BenchmarkTracks": readiness["completed"]["tracks"],
         "BenchmarkTaskContracts": readiness["completed"]["taskContracts"],
         "BenchmarkPreparedFixtures": readiness["prepared"]["fixtures"],
@@ -139,46 +164,40 @@ def main() -> None:
     )
     (GENERATED / "metrics.tex").write_text("\n".join(macro_lines) + "\n")
 
-    six_labels = {
-        "nate-the-bait": "Nate",
-        "buzzr": "Buzzr",
-        "doriios": "DoriOS",
-        "nyra": "Nyra",
-        "paraform": "Paraform",
-        "nyra-landing": "NyraLanding",
-    }
+    six_labels = [
+        "Example1",
+        "Example2",
+        "Example3",
+        "Example4",
+        "Example5",
+        "Example6",
+    ]
     write_csv(
         GENERATED / "six_repo.csv",
         ["case", "tokens", "latency", "tools"],
         [
             [
-                six_labels[case["id"]],
+                label,
                 round(case["savings"]["tokens"] * 100, 2),
                 round(case["savings"]["latency"] * 100, 2),
                 round(case["savings"]["tools"] * 100, 2),
             ]
-            for case in six["cases"]
+            for label, case in zip(six_labels, six["cases"], strict=True)
         ],
     )
 
-    workflow_labels = {
-        "DoriOS": "DoriOS",
-        "Buzzr": "Buzzr",
-        "Nate the Bait": "Nate",
-        "Paraform": "Paraform",
-        "dorii public site": "DoriiWeb",
-    }
+    workflow_labels = ["Example3", "Example2", "Example1", "Example5", "Example7"]
     write_csv(
         GENERATED / "workflow.csv",
         ["case", "tokens", "latency", "tools"],
         [
             [
-                workflow_labels[pair["case"]],
+                label,
                 pair["savingsPercent"]["totalTokens"],
                 pair["savingsPercent"]["wallTime"],
                 pair["savingsPercent"]["toolCalls"],
             ]
-            for pair in workflow["pairs"]
+            for label, pair in zip(workflow_labels, workflow["pairs"], strict=True)
         ],
     )
 

@@ -8,6 +8,22 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+### DesignWorkBench v2 benchmark-construction paper
+
+- Added a separate ORCID-ready LaTeX paper documenting the 15-track,
+  300-task benchmark construction, split policy, artifact contracts, negative
+  controls, runner evidence, fixture promotion, practitioner calibration,
+  leakage controls, governance, and current blocked state.
+- Added a preregistered, unexecuted baseline/Memi/Superpowers/ECC comparison
+  protocol with fixed models, revisions, runtimes, graders, quality-first
+  admission, paired analysis, and explicit missing-result handling.
+- Replaced reader-facing application names with neutral Example 1--7
+  identifiers while preserving original repository identities and hashes in
+  immutable evidence.
+- Added exact sign tests and leave-one-out sensitivity ranges to the Memi 2.7
+  paper. The additional analyses increase auditability without upgrading the
+  evidence grade or manufacturing cross-harness results.
+
 ### 2.7 longitudinal research paper
 
 - Added a reproducible, academic-style LaTeX manuscript covering the v2.0 to

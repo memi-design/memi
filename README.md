@@ -84,7 +84,7 @@ No LLM is used in the deterministic CI enforcement path.
 | Target corpus | 100 target tasks |
 | Evaluation split | 20 public development, 60 private test, 20 rolling holdout |
 | Coverage | 10 task families across React Web, React Native/Expo, SwiftUI, desktop canvas, and cross-platform work |
-| Initial reproducible slice | 5 pinned seed tasks: Buzzr, Nate the Bait, Paraform, DoriOS, and dorii |
+| Initial reproducible slice | 5 pinned seed tasks, presented as Examples 1, 2, 3, 5, and 7 |
 | Repetitions | At least 3 independent paired runs per condition |
 | Quality | 75% work-product score and 25% source-trust score after hard gates |
 | Efficiency | Measured cost, latency, tokens, retries, and interventions; tool-call count is diagnostic only |
@@ -102,7 +102,7 @@ These results predate the full 100-task InterfaceBench run. They are reported as
 | --- | --- | ---: | ---: | ---: | --- |
 | Writable product workflows | 5 paired, multi-minute E2E runs | Automated acceptance passed in every case; professional quality unscored | 0.55% mean, 95% CI -51.23% to 37.30% | 5.66% mean, 95% CI -24.30% to 25.86% | Claim not verified |
 | Six-repository read-only suite | 6 paired runs | 100% pass rate in both conditions | 19.92% mean, 95% CI -0.23% to 40.07% | 0.50% mean, 95% CI -11.72% to 14.55% | Claim not verified |
-| Latest Buzzr Router v2 calibration | 1 paired Expo run | Automated acceptance passed in both conditions | 14.15% | 25.08% | Calibration only |
+| Latest Example 2 Router v2 calibration | 1 paired Expo run | Automated acceptance passed in both conditions | 14.15% | 25.08% | Calibration only |
 
 Candidate verification currently records:
 
@@ -114,7 +114,7 @@ Candidate verification currently records:
 
 Historical `qualityScore: 100` workflow records mean automated acceptance passed, not senior-practitioner quality. New records label that evidence, cap it at 80, and reserve higher scores for calibrated practitioner review.
 
-The greater-than-25% claim remains **not verified**. Inspect the [LaTeX research paper](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-release-evidence/memi-2.7-research-paper.pdf), [technical release brief](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-release-evidence/memi-2.7-release-evidence.pdf), [reproducible paper source](https://github.com/memi-design/memi/tree/main/docs/research/memi-2.7-release-evidence), [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Buzzr tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
+The greater-than-25% claim remains **not verified**. Inspect the [LaTeX research paper](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-release-evidence/memi-2.7-research-paper.pdf), [technical release brief](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-release-evidence/memi-2.7-release-evidence.pdf), [reproducible paper source](https://github.com/memi-design/memi/tree/main/docs/research/memi-2.7-release-evidence), [writable workflow report](docs/case-studies/memi-2.7-workflow-proof/results.json), [six-repository report](docs/case-studies/memi-2.7-six-repo/results.json), [Example 2 tool profile](docs/case-studies/memi-2.7-workflow-proof/tool-call-analysis.json), and the complete [InterfaceBench contract](benchmarks/interfacebench-v1.json).
 
 ## Memi DesignWorkBench v2
 
@@ -148,6 +148,9 @@ and all practitioner results remain blocked rather than inferred.
 DesignWorkBench certification is separate from package publication:
 `check:release` verifies integrity and readiness, while `check:certification`
 requires external practitioners, private tests, and holdouts.
+
+See the [ORCID-ready benchmark paper](docs/research/designworkbench-v2-paper/designworkbench-v2-benchmark-paper.pdf)
+and its [unexecuted cross-harness protocol](docs/research/designworkbench-v2-paper/cross-harness-protocol.json).
 
 ## Choose your integration
 

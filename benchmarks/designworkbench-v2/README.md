@@ -63,3 +63,9 @@ the mathematics, but cannot be imported as calibration evidence.
 See [PRACTITIONER_CALIBRATION.md](PRACTITIONER_CALIBRATION.md) for the
 qualification, consent, blinding, receipt, and adjudication workflow required
 to collect real calibration evidence.
+
+See the separate
+[benchmark-construction paper](../../docs/research/designworkbench-v2-paper/designworkbench-v2-benchmark-paper.pdf)
+for the research rationale, task-bank methodology, threat model, governance,
+and the preregistered cross-harness comparison. The comparison is unexecuted;
+its empty result cells are intentional.
