@@ -210,6 +210,7 @@ const IGNORE_DIRS = new Set([
   ".turbo",
   ".vite",
   ".build",
+  ".dist",
   "agent-kits",
   "Carthage",
   "coverage",
@@ -475,7 +476,11 @@ function analyzeFile(file: RawFile): AppQualityFileSignal {
   const classTokens = extractClassTokens(file.content);
   const shadcnImports = [...file.content.matchAll(/from\s+["'][^"']*components\/ui\/([^"']+)["']/g)]
     .map((match) => match[1].replace(/\.(tsx?|jsx?)$/, ""));
-  const hexColors = [...file.content.matchAll(/#[0-9a-fA-F]{3,8}\b/g)].map((match) => match[0]);
+  const colorUsageContent = file.content.replace(
+    /--[a-zA-Z0-9-_]+\s*:\s*[^;}{]+[;}]/g,
+    "",
+  );
+  const hexColors = [...colorUsageContent.matchAll(/#[0-9a-fA-F]{3,8}\b/g)].map((match) => match[0]);
   const cssVariables = [...file.content.matchAll(/--[a-zA-Z0-9-_]+/g)].map((match) => match[0]);
 
   return {
