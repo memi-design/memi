@@ -149,14 +149,14 @@ export class PlanBuilder {
   private extractNameFromIntent(intent: string, kind: "component" | "page" | "dataviz"): string | null {
     const patterns: Record<typeof kind, RegExp[]> = {
       component: [
-        /\b(?:create|add|build|design|new)\s+(?:a|an|the)?\s*([a-z0-9][a-z0-9\s-]*?)\s+(?:component|widget|element)\b/i,
-        /\b(?:create|add|build|design|new)\s+(?:a|an|the)?\s*([a-z0-9][a-z0-9\s-]*?)\s+(button|card|input|form|modal|dialog|table|nav|header|footer|sidebar)\b/i,
+        /\b(?:create|add|build|design|new)\s+(?:(?:an|a|the)\s+)?([a-z0-9][a-z0-9\s-]*?)\s+(?:component|widget|element)\b/i,
+        /\b(?:create|add|build|design|new)\s+(?:(?:an|a|the)\s+)?([a-z0-9][a-z0-9\s-]*?)\s+(button|card|input|form|modal|dialog|table|nav|header|footer|sidebar)\b/i,
       ],
       page: [
-        /\b(?:create|add|build|design|compose|new)\s+(?:a|an|the)?\s*([a-z0-9][a-z0-9\s-]*?)\s+(page|screen|view|layout)\b/i,
+        /\b(?:create|add|build|design|compose|new)\s+(?:(?:an|a|the)\s+)?([a-z0-9][a-z0-9\s-]*?)\s+(page|screen|view|layout)\b/i,
       ],
       dataviz: [
-        /\b(?:create|add|build|design|new)\s+(?:a|an|the)?\s*([a-z0-9][a-z0-9\s-]*?)\s+(chart|graph|visualization|viz)\b/i,
+        /\b(?:create|add|build|design|new)\s+(?:(?:an|a|the)\s+)?([a-z0-9][a-z0-9\s-]*?)\s+(chart|graph|visualization|viz)\b/i,
       ],
     };
 
