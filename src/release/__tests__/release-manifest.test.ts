@@ -31,6 +31,10 @@ describe("release manifest", () => {
           previousPublicRelease: {
             version: "2.7.3",
             sourceCommit: publicEngineSourceCommit,
+            releaseRecord: {
+              path: "release-artifacts/npm/2.7.3.release.json",
+              sha256: "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02",
+            },
           },
           verification: {
             eligibleForParity: false,
@@ -86,7 +90,10 @@ describe("release manifest", () => {
           version: "2.7.3",
           state: "historical",
           sourceCommit: publicEngineSourceCommit,
-          releaseRecord: null,
+          releaseRecord: {
+            path: "release-artifacts/npm/2.7.3.release.json",
+            sha256: "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02",
+          },
           verification: {
             eligibleForParity: false,
             reason: "2.7.3 remains public while 2.7.4 is an unpublished candidate",
