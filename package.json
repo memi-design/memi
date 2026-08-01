@@ -1,6 +1,6 @@
 {
   "name": "@memi-design/cli",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "mcpName": "io.github.sarveshsea/memi",
   "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
   "type": "module",

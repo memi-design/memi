@@ -107,6 +107,44 @@ describe("efficiency contracts", () => {
     expect(run.usage.estimatedCostUsd).toBeNull();
   });
 
+  it("accepts measured tool output volume in durable workflow receipts", () => {
+    const result = benchmarkRunRecordSchema.safeParse({
+      schemaVersion: 1,
+      runId: "run-tool-output-volume",
+      experimentId: "workflow-v1",
+      suiteId: "workflow-receipts-v1",
+      taskId: "receipt-compatibility",
+      repeat: 1,
+      condition: "baseline",
+      repository: { pathHash: "sha256:repo", revision: "abc", dirty: false },
+      harness: { id: "external-adapter", modelId: "model", reasoningEffort: "low" },
+      timing: {
+        startedAt: "2026-07-31T12:00:00.000Z",
+        completedAt: "2026-07-31T12:01:00.000Z",
+        wallTimeMs: 60_000,
+        toolTimeMs: 0,
+      },
+      usage: {
+        inputTokens: 1,
+        cachedInputTokens: 0,
+        outputTokens: 1,
+        reasoningTokens: 0,
+        estimatedCostUsd: null,
+      },
+      tools: { calls: 1, outputBytes: 48_547, errors: 0, retries: 0 },
+      outcome: {
+        accepted: true,
+        testsPassed: true,
+        qualityScore: 80,
+        defects: 0,
+        humanInterventions: 0,
+      },
+      evidenceRefs: ["sha256:trace"],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it("rejects raw prompts and source content at the durable boundary", () => {
     const result = benchmarkRunRecordSchema.safeParse({
       schemaVersion: 1,
