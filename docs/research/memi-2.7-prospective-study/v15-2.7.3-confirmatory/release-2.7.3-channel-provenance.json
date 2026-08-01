@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "auditedAt": "2026-08-01T10:17:30.854Z",
+  "auditedAt": "2026-08-01T10:19:49.157Z",
   "auditDate": "2026-08-01",
   "generator": {
     "script": "docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/verify-release-2.7.3-channels.mjs",
     "command": "node docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/verify-release-2.7.3-channels.mjs",
     "wrote": "docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/release-2.7.3-channel-provenance.json",
-    "workspaceHead": "d456fde5553d3782006f56cb03a451b78190e81e"
+    "workspaceHead": "340c340e0f3ca9ac06fdd3d4b9ced0dc38a9516b"
   },
   "subject": {
     "packageName": "@memi-design/cli",
@@ -78,7 +78,7 @@
         "GET https://registry.npmjs.org/@memi-design/cli/-/cli-2.7.3.tgz",
         "GET https://registry.npmjs.org/-/npm/v1/attestations/@memi-design%2fcli@2.7.3"
       ],
-      "observedAt": "2026-08-01T10:17:30.854Z",
+      "observedAt": "2026-08-01T10:19:49.157Z",
       "observations": {
         "latest": "2.7.3",
         "modified": "2026-08-01T04:50:48.843Z",
@@ -150,7 +150,7 @@
         "GET https://api.github.com/repos/memi-design/memi/git/ref/tags/v2",
         "GET https://github.com/memi-design/memi/releases/download/v2.7.3/SHA256SUMS.txt"
       ],
-      "observedAt": "2026-08-01T10:17:30.854Z",
+      "observedAt": "2026-08-01T10:19:49.157Z",
       "observations": {
         "releaseId": 363433943,
         "createdAt": "2026-08-01T05:00:23Z",
@@ -258,7 +258,7 @@
       "commands": [
         "GET https://api.github.com/repos/memi-design/memi/git/ref/tags/v2"
       ],
-      "observedAt": "2026-08-01T10:17:30.854Z",
+      "observedAt": "2026-08-01T10:19:49.157Z",
       "observations": {
         "objectType": "commit",
         "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1"
@@ -274,7 +274,7 @@
         "GET https://raw.githubusercontent.com/memi-design/homebrew-memi/main/Formula/memoire.rb",
         "GET https://formulae.brew.sh/api/formula/memoire.json"
       ],
-      "observedAt": "2026-08-01T10:17:30.854Z",
+      "observedAt": "2026-08-01T10:19:49.157Z",
       "observations": {
         "formulaSha256": "5dc3a95d4a54021f8983742fa29a7f79ba3896ab07e92b9adec8606004f86c12",
         "formulaVersion": "2.7.3",
@@ -302,7 +302,7 @@
         "docker manifest inspect ghcr.io/memi-design/memi:2.7.3",
         "docker manifest inspect ghcr.io/memi-design/memi:latest"
       ],
-      "observedAt": "2026-08-01T10:17:30.854Z",
+      "observedAt": "2026-08-01T10:19:49.157Z",
       "observations": {
         "expectedRepository": "ghcr.io/memi-design/memi",
         "workflowEvidence": {
@@ -360,7 +360,7 @@
       "commands": [
         "GET https://raw.githubusercontent.com/toolsdk-ai/toolsdk-mcp-registry/main/packages/developer-tools/memi.json"
       ],
-      "observedAt": "2026-08-01T10:17:30.854Z",
+      "observedAt": "2026-08-01T10:19:49.157Z",
       "observations": {
         "registrySha256": "72edff1062983d2b578b23f15b4bb1e64c18a993d657674fd33027f43bf028ba",
         "name": "memi",
@@ -390,7 +390,7 @@
         "GET https://www.memoire.cv/release/memi-release.json",
         "GET https://raw.githubusercontent.com/memi-design/memi/be69d04164749fc92893a9108ded4f7ddb674f0f/release-manifest.json"
       ],
-      "observedAt": "2026-08-01T10:17:30.854Z",
+      "observedAt": "2026-08-01T10:19:49.157Z",
       "observations": {
         "rootHeaders": {
           "status": 200,
@@ -399,7 +399,7 @@
           "lastModified": "Sat, 01 Aug 2026 10:04:41 GMT",
           "server": "Vercel",
           "xVercelCache": "HIT",
-          "xVercelId": "cle1::7qr8w-1785579453549-d23144d3f3c0"
+          "xVercelId": "cle1::r7gh2-1785579592192-1e54b172b759"
         },
         "releaseArtifactHeaders": {
           "status": 200,
@@ -408,7 +408,7 @@
           "lastModified": "Sat, 01 Aug 2026 05:36:33 GMT",
           "server": "Vercel",
           "xVercelCache": "HIT",
-          "xVercelId": "cle1::xjs7r-1785579453368-1c61fc68d4c9"
+          "xVercelId": "cle1::pjd76-1785579591995-f50f7f0340e3"
         },
         "publicTruth": {
           "source": "currentRelease",
@@ -447,7 +447,7 @@
       "commands": [
         "node scripts/check-public-release-gate.mjs"
       ],
-      "observedAt": "2026-08-01T10:17:30.854Z",
+      "observedAt": "2026-08-01T10:19:49.157Z",
       "observed": {
         "packageName": "@memi-design/cli",
         "expectedVersion": "2.7.3",
