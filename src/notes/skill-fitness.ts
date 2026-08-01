@@ -1,5 +1,15 @@
-import { createHash } from "node:crypto";
-import { appendFile, lstat, mkdir, readFile } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
+import { constants } from "node:fs";
+import {
+  lstat,
+  mkdir,
+  open,
+  readFile,
+  rename,
+  rmdir,
+  unlink,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 import type { BenchmarkRunRecord } from "../efficiency/contracts.js";
@@ -7,6 +17,12 @@ import type { BenchmarkRunRecord } from "../efficiency/contracts.js";
 const sha256Schema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
 const ratioSchema = z.number().finite().min(-100).max(1);
 const timestampSchema = z.string().datetime();
+const fitnessLockOwnerSchema = z.object({
+  schemaVersion: z.literal(1),
+  token: z.string().min(1).max(128).regex(/^[a-zA-Z0-9-]+$/),
+  pid: z.number().int().positive(),
+  createdAt: timestampSchema,
+}).strict();
 const skillIdentitySchema = z.object({
   skillId: z.string().regex(/^[a-z][a-z0-9-]*$/),
   contentHash: sha256Schema,
@@ -307,18 +323,261 @@ export function resolveSkillRouteExecutionMode(input: {
 export async function appendSkillFitnessEvent(
   file: string,
   input: SkillFitnessEvent,
+  options: {
+    readonly lockWaitMs?: number;
+    readonly lockRetryMs?: number;
+    readonly staleLockMs?: number;
+  } = {},
 ): Promise<void> {
   const event = SkillFitnessEventSchema.parse(input);
-  const existing = await loadSkillFitnessEvents(file);
-  if (existing.some((candidate) => candidate.eventId === event.eventId)) {
-    throw new Error(`Skill fitness event ${event.eventId} already exists`);
+  const lockOptions = fitnessLockOptions(options);
+  await mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
+  const lock = await acquireSkillFitnessLock(file, lockOptions);
+  try {
+    const existing = await loadSkillFitnessEvents(file);
+    if (existing.some((candidate) => candidate.eventId === event.eventId)) {
+      throw new Error(`Skill fitness event ${event.eventId} already exists`);
+    }
+    assertUniqueRouteEvidence([...existing, event]);
+    await appendPrivateLine(file, `${JSON.stringify(event)}\n`);
+  } finally {
+    await releaseSkillFitnessLock(lock);
   }
-  assertUniqueRouteEvidence([...existing, event]);
-  await mkdir(path.dirname(file), { recursive: true });
-  await appendFile(file, `${JSON.stringify(event)}\n`, {
-    encoding: "utf8",
-    flag: "a",
+}
+
+interface SkillFitnessLockOptions {
+  readonly lockWaitMs: number;
+  readonly lockRetryMs: number;
+  readonly staleLockMs: number;
+}
+
+interface HeldSkillFitnessLock {
+  readonly path: string;
+  readonly ownerPath: string;
+  readonly token: string;
+}
+
+function fitnessLockOptions(input: {
+  readonly lockWaitMs?: number;
+  readonly lockRetryMs?: number;
+  readonly staleLockMs?: number;
+}): SkillFitnessLockOptions {
+  return {
+    lockWaitMs: boundedPositiveInteger(input.lockWaitMs ?? 5_000, "lockWaitMs", 60_000),
+    lockRetryMs: boundedPositiveInteger(input.lockRetryMs ?? 25, "lockRetryMs", 1_000),
+    staleLockMs: boundedPositiveInteger(
+      input.staleLockMs ?? 30_000,
+      "staleLockMs",
+      3_600_000,
+    ),
+  };
+}
+
+async function acquireSkillFitnessLock(
+  file: string,
+  options: SkillFitnessLockOptions,
+): Promise<HeldSkillFitnessLock> {
+  const lockPath = `${file}.lock`;
+  const ownerPath = path.join(lockPath, "owner.json");
+  const deadline = Date.now() + options.lockWaitMs;
+  for (;;) {
+    try {
+      await mkdir(lockPath, { mode: 0o700 });
+      const token = randomUUID();
+      try {
+        await writeFile(ownerPath, `${JSON.stringify({
+          schemaVersion: 1,
+          token,
+          pid: process.pid,
+          createdAt: new Date().toISOString(),
+        })}\n`, { encoding: "utf8", flag: "wx", mode: 0o600 });
+      } catch (error) {
+        await rmdir(lockPath).catch(() => undefined);
+        throw error;
+      }
+      return { path: lockPath, ownerPath, token };
+    } catch (error) {
+      if (!isAlreadyExists(error)) throw error;
+    }
+    const recovered = await recoverStaleSkillFitnessLock(lockPath, options.staleLockMs);
+    if (recovered) continue;
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      throw new Error(`Timed out waiting for skill fitness lock ${lockPath}`);
+    }
+    await delay(Math.min(options.lockRetryMs, remaining));
+  }
+}
+
+async function recoverStaleSkillFitnessLock(
+  lockPath: string,
+  staleLockMs: number,
+): Promise<boolean> {
+  const lockMetadata = await lstat(lockPath).catch((error: unknown) => {
+    if (isMissingFile(error)) return null;
+    throw error;
   });
+  if (!lockMetadata) return true;
+  if (lockMetadata.isSymbolicLink() || !lockMetadata.isDirectory()) {
+    throw new Error("skill fitness lock must be a regular non-symlink directory");
+  }
+  const ownerPath = path.join(lockPath, "owner.json");
+  const initial = await readFitnessLockOwner(ownerPath, lockMetadata.mtimeMs);
+  if (!isStaleLockOwner(initial, staleLockMs)) return false;
+  const reaperPath = path.join(lockPath, ".reaper");
+  try {
+    await writeFile(reaperPath, "reaping\n", {
+      encoding: "utf8",
+      flag: "wx",
+      mode: 0o600,
+    });
+  } catch (error) {
+    if (isAlreadyExists(error)) return false;
+    throw error;
+  }
+  let recovered = false;
+  try {
+    const refreshed = await readFitnessLockOwner(ownerPath, lockMetadata.mtimeMs);
+    if (!isStaleLockOwner(refreshed, staleLockMs)) return false;
+    const quarantinePath = `${lockPath}.stale-${randomUUID()}`;
+    try {
+      await rename(lockPath, quarantinePath);
+    } catch (error) {
+      if (isMissingFile(error)) return true;
+      throw new Error(
+        `Cannot safely recover skill fitness lock: ${
+          error instanceof Error ? error.message : "unknown error"
+        }`,
+      );
+    }
+    const quarantinedOwnerPath = path.join(quarantinePath, "owner.json");
+    const quarantinedReaperPath = path.join(quarantinePath, ".reaper");
+    if (refreshed.ownerPresent) await unlink(quarantinedOwnerPath);
+    await unlink(quarantinedReaperPath);
+    await rmdir(quarantinePath).catch(() => undefined);
+    recovered = true;
+    return true;
+  } finally {
+    if (!recovered) await unlink(reaperPath).catch(() => undefined);
+  }
+}
+
+async function readFitnessLockOwner(
+  ownerPath: string,
+  fallbackCreatedAtMs: number,
+): Promise<{
+  readonly owner: z.infer<typeof fitnessLockOwnerSchema> | null;
+  readonly ownerPresent: boolean;
+  readonly createdAtMs: number;
+}> {
+  const metadata = await lstat(ownerPath).catch((error: unknown) => {
+    if (isMissingFile(error)) return null;
+    throw error;
+  });
+  if (!metadata) {
+    return { owner: null, ownerPresent: false, createdAtMs: fallbackCreatedAtMs };
+  }
+  if (metadata.isSymbolicLink() || !metadata.isFile()) {
+    throw new Error("skill fitness lock owner must be a regular non-symlink file");
+  }
+  if (metadata.size > 4_096) {
+    throw new Error("skill fitness lock owner exceeds the 4096-byte safety limit");
+  }
+  const rawOwner = await readFile(ownerPath, "utf8");
+  try {
+    const owner = fitnessLockOwnerSchema.parse(JSON.parse(rawOwner));
+    return {
+      owner,
+      ownerPresent: true,
+      createdAtMs: new Date(owner.createdAt).getTime(),
+    };
+  } catch {
+    return { owner: null, ownerPresent: true, createdAtMs: metadata.mtimeMs };
+  }
+}
+
+function isStaleLockOwner(
+  input: {
+    readonly owner: z.infer<typeof fitnessLockOwnerSchema> | null;
+    readonly createdAtMs: number;
+  },
+  staleLockMs: number,
+): boolean {
+  if (Date.now() - input.createdAtMs < staleLockMs) return false;
+  return input.owner === null || !processIsAlive(input.owner.pid);
+}
+
+function processIsAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return Boolean(
+      error
+      && typeof error === "object"
+      && "code" in error
+      && error.code === "EPERM",
+    );
+  }
+}
+
+async function releaseSkillFitnessLock(lock: HeldSkillFitnessLock): Promise<void> {
+  const current = await readFitnessLockOwner(lock.ownerPath, Date.now());
+  if (!current.owner || current.owner.token !== lock.token) {
+    throw new Error("skill fitness lock ownership changed before release");
+  }
+  await unlink(lock.ownerPath);
+  await rmdir(lock.path);
+}
+
+async function appendPrivateLine(file: string, line: string): Promise<void> {
+  const noFollow = typeof constants.O_NOFOLLOW === "number" ? constants.O_NOFOLLOW : 0;
+  const handle = await open(
+    file,
+    constants.O_APPEND | constants.O_CREAT | constants.O_WRONLY | noFollow,
+    0o600,
+  );
+  try {
+    const metadata = await handle.stat();
+    if (!metadata.isFile()) throw new Error("skill fitness store must be a regular file");
+    const pathMetadata = await lstat(file);
+    if (
+      pathMetadata.isSymbolicLink()
+      || !pathMetadata.isFile()
+      || (
+        metadata.ino !== 0
+        && pathMetadata.ino !== 0
+        && (metadata.dev !== pathMetadata.dev || metadata.ino !== pathMetadata.ino)
+      )
+    ) {
+      throw new Error("skill fitness store changed during secure append");
+    }
+    await handle.chmod(0o600);
+    await handle.write(line, null, "utf8");
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+}
+
+function boundedPositiveInteger(value: number, label: string, maximum: number): number {
+  if (!Number.isInteger(value) || value <= 0 || value > maximum) {
+    throw new Error(`${label} must be a positive integer no greater than ${maximum}`);
+  }
+  return value;
+}
+
+function isAlreadyExists(error: unknown): boolean {
+  return Boolean(
+    error
+    && typeof error === "object"
+    && "code" in error
+    && error.code === "EEXIST",
+  );
+}
+
+async function delay(milliseconds: number): Promise<void> {
+  await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 }
 
 export async function loadSkillFitnessEvents(
