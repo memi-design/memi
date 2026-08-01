@@ -42,6 +42,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `093fb537` — test: bind V2 fixtures to repository origins
 - `445f3430` — feat: verify V2 fixture repository origins
 - `e7357fe0` — research: clarify V16 claim support gates
+- `6d54a9a1` — test: stabilize harness auth cache coverage
+- `56042961` — fix: cache injected harness auth probes
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -77,6 +79,8 @@ any checkout whose origin differs from the preregistered fixture identity.
 The V16 protocol now separates the evidentiary gates for preserved quality,
 task-specific superiority, runtime, measured USD cost, and practitioner-grade
 design claims so an engineering safeguard is never mistaken for an outcome.
+Studio's injectable auth-probe seam now shares the same TTL cache as the real
+CLI probe, making cache behavior deterministic and directly testable.
 
 ## v2.7.4 — 2026-08-01
 
