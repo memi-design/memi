@@ -140,6 +140,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `7570fc0b` | fix: align published 2.7.4 release truth |
 | `bb7ad3a7` | docs: record 2.7.4 release-truth repair |
 | `c6d4fee2` | feat: admit fail-closed live release evidence |
+| `dac2dd9c` | chore: clear Memi 2.7.4 parity cap |
+| `9b92653a` | fix: bind parity clearance to live receipt |
 
 ### Exact-match fail-closed route fitness
 
@@ -166,6 +168,10 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   promote or recover a route.
 - **Evidence hash boundary** — Treat evidence hashes as tamper checks inside
   the file-owner trust boundary, not as third-party authorship proof.
+- **One-way parity clearance** — Permit a published manifest to advance only
+  from parity-pending to parity-verified after the independent live gate; keep
+  the published version, source commit, release record, and reverse transition
+  immutable.
 
 ## v2.7.3 — 2026-07-31
 

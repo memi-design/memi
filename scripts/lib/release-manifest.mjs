@@ -10,6 +10,7 @@ const SHA512 = /^[a-f0-9]{128}$/;
 const SHASUM = /^[a-f0-9]{40}$/;
 const ENGINE_STATES = new Set(["candidate", "published", "historical"]);
 const RELEASE_RECORD_PATH = /^release-artifacts\/npm\/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\.release\.json$/;
+const PUBLIC_GATE_RECEIPT_PATH = /^release-artifacts\/public-gate\/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\.parity\.json$/;
 const PUBLISH_REPOSITORY = "memi-design/memi";
 const LEGACY_PUBLISH_PROVENANCE = Object.freeze({
   repository: "sarveshsea/memi",
@@ -151,6 +152,14 @@ function validateEngineManifestState(engine) {
       engine.version,
       "published engine",
     ));
+    if (engine.verification?.eligibleForParity === true) {
+      failures.push(...validatePublicGateReceiptPointer(
+        engine.verification.publicGate,
+        engine.version,
+      ));
+    } else if (engine.verification?.publicGate !== undefined) {
+      failures.push("parity-pending published engine must not claim a public gate receipt");
+    }
   } else {
     if (engine.releaseRecord !== null) {
       failures.push(...validateReleaseRecordPointer(
@@ -306,6 +315,8 @@ export function validateEngineReleaseTransition({
   currentManifest,
   releaseRecord,
   releaseRecordBytes,
+  parityReceipt,
+  parityReceiptBytes,
   currentCommit,
   sourceIsAncestor,
   sourceSurfaceFailures = [],
@@ -315,7 +326,15 @@ export function validateEngineReleaseTransition({
   const current = currentManifest?.releaseGroups?.engine;
 
   if (previous?.state === "published") {
-    if (serializeJson(previous) !== serializeJson(current)) {
+    if (
+      serializeJson(previous) !== serializeJson(current)
+      && !isOneWayParityVerificationClearance({
+        previousManifest,
+        currentManifest,
+        parityReceipt,
+        parityReceiptBytes,
+      })
+    ) {
       failures.push("published engine release state is immutable");
     }
   } else if (previous?.state !== "candidate") {
@@ -350,6 +369,45 @@ export function validateEngineReleaseTransition({
   failures.push(...sourceSurfaceFailures);
 
   return failures;
+}
+
+function isOneWayParityVerificationClearance({
+  previousManifest,
+  currentManifest,
+  parityReceipt,
+  parityReceiptBytes,
+}) {
+  const previous = previousManifest?.releaseGroups?.engine;
+  const current = currentManifest?.releaseGroups?.engine;
+  const { verification: previousVerification, ...previousIdentity } = previous ?? {};
+  const { verification: currentVerification, ...currentIdentity } = current ?? {};
+  const pointer = currentVerification?.publicGate;
+  const expectedPath = `release-artifacts/public-gate/${current?.version}.parity.json`;
+  const canonicalReceiptBytes = parityReceipt ? serializeJson(parityReceipt) : "";
+  return serializeJson(previousIdentity) === serializeJson(currentIdentity)
+    && previousVerification?.eligibleForParity === false
+    && previousVerification?.publicGate === undefined
+    && currentVerification?.eligibleForParity === true
+    && typeof currentVerification.reason === "string"
+    && currentVerification.reason.trim().length > 0
+    && pointer?.path === expectedPath
+    && SHA256.test(pointer?.sha256 ?? "")
+    && typeof parityReceiptBytes === "string"
+    && parityReceiptBytes === canonicalReceiptBytes
+    && pointer.sha256 === createHash("sha256").update(parityReceiptBytes).digest("hex")
+    && parityReceipt?.schemaVersion === 1
+    && parityReceipt?.kind === "memi-public-release-parity-receipt"
+    && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(parityReceipt?.verifiedAt ?? "")
+    && parityReceipt?.gate?.expectedVersion === current?.version
+    && parityReceipt?.gate?.releaseState === "published"
+    && parityReceipt?.gate?.status === "passed"
+    && parityReceipt?.gate?.parityEligible === true
+    && Array.isArray(parityReceipt?.gate?.failures)
+    && parityReceipt.gate.failures.length === 0
+    && parityReceipt?.gate?.registrySmoke?.ok === true
+    && parityReceipt?.gate?.siteSmoke?.ok === true
+    && parityReceipt?.gate?.installSmoke?.ok === true
+    && canClearPublicParityCap(previousManifest, parityReceipt?.gate?.evidence);
 }
 
 export async function verifyPublishedEngineTransitionFromGit(root, manifest) {
@@ -408,12 +466,33 @@ export async function verifyPublishedEngineTransitionFromGit(root, manifest) {
   } catch {
     failures.push("published engine release record is missing or invalid JSON");
   }
+  let parityReceiptBytes = "";
+  let parityReceipt = null;
+  if (
+    previousManifest?.releaseGroups?.engine?.state === "published"
+    && previousManifest.releaseGroups.engine.verification?.eligibleForParity === false
+    && engine.verification?.eligibleForParity === true
+  ) {
+    try {
+      const parityReceiptPath = await resolvePublicGateReceiptPath(
+        root,
+        engine.verification?.publicGate?.path,
+        engine.version,
+      );
+      parityReceiptBytes = await readFile(parityReceiptPath, "utf8");
+      parityReceipt = JSON.parse(parityReceiptBytes);
+    } catch (error) {
+      failures.push(`public gate receipt is missing or invalid: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
   if (releaseRecord) {
     failures.push(...validateEngineReleaseTransition({
       previousManifest,
       currentManifest: manifest,
       releaseRecord,
       releaseRecordBytes,
+      parityReceipt,
+      parityReceiptBytes,
       currentCommit: transitionCommit,
       sourceIsAncestor,
       sourceSurfaceFailures,
@@ -758,6 +837,41 @@ export async function resolveReleaseRecordPath(root, relativePath) {
     throw new Error("release record real path must stay inside the checkout");
   }
   return realTarget;
+}
+
+export async function resolvePublicGateReceiptPath(root, relativePath, version) {
+  const expectedPath = `release-artifacts/public-gate/${version}.parity.json`;
+  if (relativePath !== expectedPath || !PUBLIC_GATE_RECEIPT_PATH.test(relativePath ?? "")) {
+    throw new Error(`public gate receipt path must be ${expectedPath}`);
+  }
+  const target = resolve(root, relativePath);
+  const fromRoot = relative(resolve(root), target);
+  if (!fromRoot || fromRoot === ".." || fromRoot.startsWith("../")) {
+    throw new Error("public gate receipt path must stay inside the checkout");
+  }
+  const targetStat = await lstat(target);
+  if (targetStat.isSymbolicLink()) {
+    throw new Error("public gate receipt path must not be a symlink");
+  }
+  if (!targetStat.isFile()) throw new Error("public gate receipt path must be a regular file");
+  const [realRoot, realTarget] = await Promise.all([realpath(root), realpath(target)]);
+  const realFromRoot = relative(realRoot, realTarget);
+  if (!realFromRoot || realFromRoot === ".." || realFromRoot.startsWith("../")) {
+    throw new Error("public gate receipt real path must stay inside the checkout");
+  }
+  return realTarget;
+}
+
+function validatePublicGateReceiptPointer(pointer, version) {
+  const failures = [];
+  const expectedPath = `release-artifacts/public-gate/${version}.parity.json`;
+  if (pointer?.path !== expectedPath) {
+    failures.push(`published engine public gate receipt path must be ${expectedPath}`);
+  }
+  if (!SHA256.test(pointer?.sha256 ?? "")) {
+    failures.push("published engine public gate receipt must include its SHA-256");
+  }
+  return failures;
 }
 
 async function verifyReleaseRecordPointerFromDisk(

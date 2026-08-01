@@ -144,6 +144,13 @@ function probeCliAuth(command: string, args: string[], label: string): HarnessAu
       LOGNAME: process.env.LOGNAME,
     },
   });
+  return classifyCliAuthResult(result, label);
+}
+
+export function classifyCliAuthResult(
+  result: { status: number | null; stdout?: string | null; stderr?: string | null },
+  label: string,
+): HarnessAuthProbeResult {
   const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`.trim();
   if (result.status === 0 && /logged in|authenticated|signed in|authorized|ok/i.test(output || "ok")) {
     return { authStatus: "signed_in", authMessage: output || `${label} signed in` };
