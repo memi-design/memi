@@ -1,10 +1,11 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync, realpathSync } from "node:fs";
 import { readdir, stat, readFile, writeFile } from "node:fs/promises";
 import { basename, join, relative, resolve, sep } from "node:path";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { spawnPortable } from "../utils/subprocess.js";
 import { buildHarnessCommand, clearHarnessProbeCaches, harnessProbeCacheAgeMs, listHarnesses } from "./harnesses.js";
 import { loadStudioConfig, saveStudioConfig } from "./config.js";
 import { redactSecrets } from "./redact.js";
@@ -368,7 +369,7 @@ export class StudioRuntimeServer {
       });
     }
 
-    const child = spawn(commandSpec.command, commandSpec.args, {
+    const child = spawnPortable(commandSpec.command, commandSpec.args, {
       cwd: commandSpec.cwd,
       env: commandSpec.env,
       shell: false,

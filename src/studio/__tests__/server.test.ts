@@ -1,5 +1,5 @@
 import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
 import { StudioRuntimeServer } from "../server.js";
@@ -139,7 +139,7 @@ describe("studio runtime server", () => {
           : "#!/bin/sh\necho '{\"type\":\"agent_message\",\"message\":\"done\"}'\n",
       );
       await chmod(codex, 0o755);
-      process.env.PATH = `${bin}:${oldPath ?? ""}`;
+      process.env.PATH = `${bin}${delimiter}${oldPath ?? ""}`;
 
       const server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
       servers.push(server);
