@@ -68,7 +68,13 @@ describe("shadcn registry installer", () => {
       expect(result.codePath).toBe(join(projectRoot, "components", "ui", "button.tsx"));
       expect(await readFile(result.codePath!, "utf8")).toContain("export function Button");
       expect(savedSpecs[0]?.name).toBe("Button");
-      expect(result.specPath).toContain(".memoire/specs/components/Button.json");
+      expect(result.specPath).toBe(join(
+        projectRoot,
+        ".memoire",
+        "specs",
+        "components",
+        "Button.json",
+      ));
     } finally {
       await rm(projectRoot, { recursive: true, force: true });
     }
