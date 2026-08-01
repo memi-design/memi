@@ -8,6 +8,24 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+## v2.7.2 — 2026-07-31
+
+### Sealed prospective workflow studies
+
+- Added a hash-verified prospective-study runner with frozen task revisions,
+  counterbalanced matched pairs, explicit resource budgets, and tamper-evident
+  evidence manifests.
+- Made the candidate package version an explicit freeze input so study
+  receipts record the released package under test rather than a hard-coded
+  historical version.
+- Bounded the three bundled workflow contracts and added deterministic
+  preflight expectations for their focused verification commands.
+
+#### Architectural decisions
+
+- Keep prospective routing deterministic and frozen per study; adaptive
+  historical routing must not alter treatment context during a matched run.
+
 ### DesignWorkBench v2 benchmark-construction paper
 
 - Added a separate ORCID-ready LaTeX paper documenting the 15-track,
