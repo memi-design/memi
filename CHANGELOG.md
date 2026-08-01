@@ -26,6 +26,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   path escapes.
 - Added strict regular-file, duplicate-row, schema, JSON, and byte-limit checks
   for benchmark and fitness JSONL stores.
+- Separated the exact candidate runtime from the hash-pinned admission harness
+  so older candidates remain testable while current fail-closed evidence checks
+  evaluate their immutable receipts.
 
 #### Architectural decisions
 
