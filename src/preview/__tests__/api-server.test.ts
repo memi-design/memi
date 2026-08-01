@@ -9,6 +9,7 @@ import {
   isAllowedPreviewHost,
   isAllowedPreviewOrigin,
   isAuthorizedPreviewMutation,
+  resolvePreviewStaticPath,
 } from "../api-server.js";
 
 describe("PreviewApiServer", () => {
@@ -267,6 +268,14 @@ describe("PreviewApiServer", () => {
 
   it("binds the local preview control plane to loopback", () => {
     expect(PREVIEW_BIND_HOST).toBe("127.0.0.1");
+  });
+
+  it("resolves Windows static files without weakening the traversal guard", () => {
+    const root = "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\memoire\\preview";
+
+    expect(resolvePreviewStaticPath(root, "/index.html")).toBe(`${root}\\index.html`);
+    expect(resolvePreviewStaticPath(root, "/../secret.txt")).toBeNull();
+    expect(resolvePreviewStaticPath(root, "D:\\secret.txt")).toBeNull();
   });
 
   it("rejects DNS-rebinding hosts and cross-origin mutation requests", () => {
