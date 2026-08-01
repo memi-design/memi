@@ -32,12 +32,18 @@ import {
   verifyEvidenceManifest,
 } from "../efficiency/prospective-files.js";
 import {
+  prospectiveEvidenceV2Artifacts,
+  prospectiveEvidenceV2Schema,
+  validateProspectiveEvidenceV2,
+} from "../efficiency/prospective-evidence-v2.js";
+import {
   buildProspectiveFreeze,
   evaluateProspectiveStudy,
   hashValue,
   prospectiveFreezeSchema,
   prospectiveStudyPlanSchema,
   selectProspectiveTrial,
+  type ProspectiveFreeze,
 } from "../efficiency/prospective-study.js";
 import {
   createWorkflowBenchmarkPlan,
@@ -244,6 +250,20 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
             runId: run.runId,
             trialId: run.prospective.trialId,
             reasons: ["store-run-mismatch"],
+          });
+          continue;
+        }
+        const v2Verification = await verifyProspectiveEvidenceV2Receipt({
+          evidenceDirectory,
+          run: sealedRun,
+          freeze,
+          evidenceRoot: resolve(opts.evidenceRoot),
+        });
+        if (!v2Verification.valid) {
+          evidenceFailures.push({
+            runId: run.runId,
+            trialId: run.prospective.trialId,
+            reasons: v2Verification.reasons,
           });
           continue;
         }
@@ -1414,6 +1434,74 @@ function stableTaskClass(value: string): string {
     throw new Error("task-class must use lowercase kebab-case");
   }
   return value;
+}
+
+async function verifyProspectiveEvidenceV2Receipt(input: {
+  readonly evidenceDirectory: string;
+  readonly evidenceRoot: string;
+  readonly freeze: ProspectiveFreeze;
+  readonly run: BenchmarkRunRecord;
+}): Promise<Readonly<{ valid: boolean; reasons: readonly string[] }>> {
+  if (!input.freeze.evidenceV2) return { valid: true, reasons: [] };
+  if (!input.run.prospective) {
+    return { valid: false, reasons: ["prospective-evidence-v2-run-missing"] };
+  }
+  const platform = input.freeze.taskNativePlatforms?.[input.run.taskId];
+  if (!platform) {
+    return { valid: false, reasons: ["prospective-evidence-v2-platform-missing"] };
+  }
+  let receipt;
+  try {
+    receipt = prospectiveEvidenceV2Schema.parse(JSON.parse(await readFile(
+      join(input.evidenceDirectory, "prospective-evidence-v2.json"),
+      "utf8",
+    )));
+  } catch {
+    return { valid: false, reasons: ["prospective-evidence-v2-invalid"] };
+  }
+  const binding = validateProspectiveEvidenceV2({
+    receipt,
+    expected: {
+      runId: input.run.runId,
+      trialId: input.run.prospective.trialId,
+      taskId: input.run.taskId,
+      repeat: input.run.repeat,
+      condition: input.run.condition,
+      repositoryRevision: input.run.repository.revision,
+      candidateArtifactSha256: input.freeze.candidate.artifactSha256,
+      platform,
+      requiredCaptureKinds: input.freeze.evidenceV2.requiredCaptureKinds,
+    },
+  });
+  if (!binding.valid) return binding;
+  const artifacts = prospectiveEvidenceV2Artifacts(receipt);
+  const manifest = await verifyEvidenceManifest({
+    evidenceDirectory: input.evidenceDirectory,
+    expectedManifestSha256: input.run.prospective.evidenceManifestSha256,
+    requiredArtifacts: [
+      ...input.freeze.requiredArtifacts,
+      ...artifacts.map((artifact) => artifact.name),
+    ],
+    expectedBinding: {
+      trialId: input.run.prospective.trialId,
+      taskId: input.run.taskId,
+      repeat: input.run.repeat,
+      condition: input.run.condition,
+      sequence: input.run.prospective.sequence,
+    },
+    allowedEvidenceRoot: input.evidenceRoot,
+  });
+  if (!manifest.valid) return manifest;
+  const mismatches: string[] = [];
+  for (const artifact of artifacts) {
+    const actual = await hashFile(join(input.evidenceDirectory, artifact.name)).catch(
+      () => null,
+    );
+    if (actual !== artifact.sha256) {
+      mismatches.push(`prospective-evidence-v2-artifact-hash-mismatch:${artifact.name}`);
+    }
+  }
+  return { valid: mismatches.length === 0, reasons: mismatches };
 }
 
 function integer(value: string, label: string): number {

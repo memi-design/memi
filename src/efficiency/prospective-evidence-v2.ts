@@ -95,6 +95,20 @@ export const prospectiveEvidenceV2Schema = evidenceContentSchema.superRefine(
         message: "capture kind and filename identities must be unique",
       });
   }
+    const artifactNames = [
+      ...receipt.native.captures.map((capture) => capture.name),
+      ...(receipt.billing.source === "unavailable" ? [] : [
+        receipt.billing.sourceArtifact.name,
+        receipt.billing.priceCardArtifact.name,
+      ]),
+    ];
+    if (new Set(artifactNames).size !== artifactNames.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["native", "captures"],
+        message: "evidence artifact filenames must be unique across capture and billing evidence",
+      });
+    }
     if (
       receipt.billing.source !== "unavailable"
       && (
@@ -111,6 +125,22 @@ export const prospectiveEvidenceV2Schema = evidenceContentSchema.superRefine(
   },
 );
 export type ProspectiveEvidenceV2 = z.infer<typeof prospectiveEvidenceV2Schema>;
+
+export function prospectiveEvidenceV2Artifacts(
+  input: ProspectiveEvidenceV2,
+): readonly Readonly<{ name: string; sha256: string }>[] {
+  const receipt = prospectiveEvidenceV2Schema.parse(input);
+  return deepFreeze([
+    ...receipt.native.captures.map((capture) => ({
+      name: capture.name,
+      sha256: capture.sha256,
+    })),
+    ...(receipt.billing.source === "unavailable" ? [] : [
+      receipt.billing.sourceArtifact,
+      receipt.billing.priceCardArtifact,
+    ]),
+  ]);
+}
 
 export interface ProspectiveEvidenceV2Expectation {
   readonly runId: string;
