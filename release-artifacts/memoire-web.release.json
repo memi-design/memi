@@ -3,25 +3,26 @@
   "provenance": {
     "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "430e557e03438a31be4ead95a934d00612775335",
-    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/430e557e03438a31be4ead95a934d00612775335/release-manifest.json",
-    "manifestSha256": "6fb78c0ca6891fae08f1088a2f1c3f5890e623c9d782bf62bccb7ad0a5b9e293"
+    "sourceCommit": "d4ac20b2244b107ace5ac2b56aff2684b1f2019a",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/d4ac20b2244b107ace5ac2b56aff2684b1f2019a/release-manifest.json",
+    "manifestSha256": "0ab05550a012a2ddfce92d18dfa3aee503a8bc94a6601a53fb313c1b45072f76"
   },
   "orchestration": {
     "schemaVersion": 1,
     "updatedAt": "2026-08-01",
     "releaseGroups": {
       "engine": {
-        "version": "2.7.1",
-        "state": "published",
-        "sourceCommit": "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f",
-        "releaseRecord": {
-          "path": "release-artifacts/npm/2.7.1.release.json",
-          "sha256": "9daa1a0008332654ffabec001b432693c09bda4a80a27bec29e272d126386129"
+        "version": "2.7.2",
+        "state": "candidate",
+        "sourceCommit": null,
+        "releaseRecord": null,
+        "previousPublicRelease": {
+          "version": "2.7.1",
+          "sourceCommit": "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f"
         },
         "verification": {
           "eligibleForParity": false,
-          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+          "reason": "2.7.1 remains public while 2.7.2 is an unpublished candidate"
         }
       },
       "studio": {
@@ -45,7 +46,7 @@
         "releaseGroup": "engine",
         "repository": "memi-design/memi",
         "tagPrefix": "v",
-        "url": "https://github.com/memi-design/memi/releases/tag/v2.7.1"
+        "url": "https://github.com/memi-design/memi/releases/tag/v2.7.2"
       },
       "githubAction": {
         "releaseGroup": "engine",
@@ -73,7 +74,7 @@
     }
   },
   "publicTruth": {
-    "source": "currentRelease",
+    "source": "previousPublicRelease",
     "engine": {
       "version": "2.7.1",
       "sourceCommit": "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f",
@@ -88,16 +89,14 @@
     "releaseGroups": {
       "engine": {
         "version": "2.7.1",
-        "state": "published",
+        "state": "historical",
         "sourceCommit": "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f",
-        "releaseRecord": {
-          "path": "release-artifacts/npm/2.7.1.release.json",
-          "sha256": "9daa1a0008332654ffabec001b432693c09bda4a80a27bec29e272d126386129"
-        },
+        "releaseRecord": null,
         "verification": {
           "eligibleForParity": false,
-          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
-        }
+          "reason": "2.7.1 remains public while 2.7.2 is an unpublished candidate"
+        },
+        "plannedSuccessor": "2.7.2"
       },
       "studio": {
         "version": "2.5.0",

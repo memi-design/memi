@@ -2,15 +2,28 @@
   "schemaVersion": 1,
   "id": "nate-options-reduce-motion",
   "intent": "Implement a read-only SwiftUI system-status row in Nate the Bait's existing Options sheet that reports whether the iOS Reduce Motion accessibility setting is On or Off. Read the real accessibilityReduceMotion environment value, do not pretend the app can toggle the system setting, preserve the LightWood visual system and existing settings, provide a stable identifier and a combined accessible label, meet a 44-point minimum target size, and verify the journey in the real iOS app on Simulator.",
-  "maximumDurationMs": 1800000,
+  "maximumDurationMs": 720000,
+  "focusPaths": [
+    "NateTheBait/App/GameRootView.swift",
+    "NateTheBaitUITests/MemiReduceMotionStatusUITests.swift",
+    "project.yml"
+  ],
+  "agentBudget": {
+    "maxToolCalls": 16,
+    "maxToolOutputBytes": 160000,
+    "maxInputTokens": 375000,
+    "maxOutputTokens": 10000,
+    "maxReasoningTokens": 4000
+  },
   "steps": [
-    "Inspect OptionsSheet, LightWood settings controls, typography, accessibility behavior, and existing UI tests before editing.",
+    "Inspect only OptionsSheet, the direct LightWood controls it uses, and the supplied UI contract before editing.",
     "Implement the smallest reusable read-only status row inside the existing SwiftUI component boundaries.",
     "Read the real accessibilityReduceMotion environment value and display a truthful On or Off status without adding a fake toggle.",
     "Use the existing LightWood palette, spacing, iconography, typography, and panel treatment without adding dependencies.",
     "Expose the options-reduce-motion-status identifier and one combined accessible label containing Reduce Motion and On or Off.",
-    "Preserve all existing settings, legal links, sheet behavior, and application navigation.",
-    "Build the generated Xcode project and complete the protected Options journey on the pinned iOS Simulator."
+    "Keep the production target at 44 points or more; the UI fixture uses a half-point XCTest accessibility-frame projection tolerance for simulator coordinate quantization.",
+    "Preserve existing settings, legal links, sheet behavior, and navigation.",
+    "Run only the generated Xcode build and protected Options journey on the pinned iOS Simulator."
   ],
   "preparation": [
     {
@@ -24,7 +37,7 @@
   "fixtures": [
     {
       "path": "NateTheBaitUITests/MemiReduceMotionStatusUITests.swift",
-      "content": "import XCTest\n\nfinal class MemiReduceMotionStatusUITests: XCTestCase {\n    @MainActor\n    func testOptionsExposeTruthfulSystemReduceMotionStatus() {\n        let app = XCUIApplication()\n        app.launchArguments = [\"-ui-testing\"]\n        app.launch()\n\n        let options = app.buttons[\"Options\"]\n        XCTAssertTrue(options.waitForExistence(timeout: 5))\n        options.tap()\n\n        let status = app.descendants(matching: .any)[\"options-reduce-motion-status\"]\n        XCTAssertTrue(status.waitForExistence(timeout: 3))\n        XCTAssertTrue(status.label.localizedCaseInsensitiveContains(\"Reduce Motion\"))\n        XCTAssertTrue(\n            status.label.localizedCaseInsensitiveContains(\"On\") ||\n            status.label.localizedCaseInsensitiveContains(\"Off\")\n        )\n        XCTAssertGreaterThanOrEqual(status.frame.height, 44)\n        XCTAssertTrue(status.isHittable)\n        XCTAssertGreaterThanOrEqual(status.frame.minX, 0)\n        XCTAssertLessThanOrEqual(status.frame.maxX, app.frame.maxX)\n\n        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())\n        attachment.name = \"Nate Options Reduce Motion status\"\n        attachment.lifetime = .keepAlways\n        add(attachment)\n    }\n}\n"
+      "content": "import XCTest\n\nfinal class MemiReduceMotionStatusUITests: XCTestCase {\n    @MainActor\n    func testOptionsExposeTruthfulSystemReduceMotionStatus() {\n        let app = XCUIApplication()\n        app.launchArguments = [\"-ui-testing\"]\n        app.launch()\n\n        let options = app.buttons[\"Options\"]\n        XCTAssertTrue(options.waitForExistence(timeout: 5))\n        options.tap()\n\n        let status = app.descendants(matching: .any)[\"options-reduce-motion-status\"]\n        XCTAssertTrue(status.waitForExistence(timeout: 3))\n        XCTAssertTrue(status.label.localizedCaseInsensitiveContains(\"Reduce Motion\"))\n        XCTAssertTrue(\n            status.label.localizedCaseInsensitiveContains(\"On\") ||\n            status.label.localizedCaseInsensitiveContains(\"Off\")\n        )\n        XCTAssertGreaterThanOrEqual(status.frame.height, 43.5)\n        XCTAssertTrue(status.isHittable)\n        XCTAssertGreaterThanOrEqual(status.frame.minX, 0)\n        XCTAssertLessThanOrEqual(status.frame.maxX, app.frame.maxX)\n\n        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())\n        attachment.name = \"Nate Options Reduce Motion status\"\n        attachment.lifetime = .keepAlways\n        add(attachment)\n    }\n}\n"
     }
   ],
   "verification": [
@@ -46,6 +59,7 @@
     },
     {
       "kind": "ios-simulator",
+      "preflightExpectedExitCode": 65,
       "command": "xcodebuild",
       "args": [
         "-project",

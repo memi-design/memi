@@ -2,21 +2,39 @@
   "schemaVersion": 1,
   "id": "paraform-command-menu",
   "intent": "Apply emil-design-eng and interaction-design craft to implement an accessible keyboard command menu in Paraform's existing React recruiter and hiring-manager workspaces. Preserve the current Paraform visual system, open the menu from a compact chrome trigger or Control/Command-K, filter destinations without mutating navigation state, support keyboard selection, close with Escape, restore focus to the opener, and respect reduced-motion preferences without adding a production dependency.",
-  "maximumDurationMs": 1200000,
+  "maximumDurationMs": 720000,
+  "focusPaths": [
+    "src/app/Chrome.tsx",
+    "src/app/recruiter/RecruiterApp.tsx",
+    "src/app/manager/ManagerApp.tsx",
+    "src/ui/kit.tsx",
+    "src/App.tsx",
+    "playwright.memi.config.ts"
+  ],
+  "agentBudget": {
+    "maxToolCalls": 16,
+    "maxToolOutputBytes": 160000,
+    "maxInputTokens": 375000,
+    "maxOutputTokens": 10000,
+    "maxReasoningTokens": 4000
+  },
   "steps": [
-    "Inspect Chrome, recruiter and manager navigation, shared UI primitives, motion tokens, and existing verification scripts before editing.",
+    "Inspect only Chrome, the direct recruiter and manager navigation it composes, shared UI primitives, and the supplied browser contract.",
     "Implement the smallest reusable command-menu component inside the existing application boundaries.",
     "Expose a compact chrome trigger named Open command menu and keep the existing sidebar navigation intact.",
     "Open the same menu with Control-K or Command-K only when focus is outside editable controls.",
     "Filter the destinations for the active role, support keyboard selection, navigate on Enter, and never expose a destination the current role cannot open.",
     "Close with Escape, restore focus to the opener, preserve the established Paraform tokens, and disable decorative motion when reduced motion is requested.",
-    "Run the production build and the rendered recruiter keyboard journey and repair every failure."
+    "Run only the production build and rendered recruiter keyboard journey; report unrelated failures without broadening scope."
   ],
   "preparation": [
     {
       "command": "npm",
       "args": [
-        "ci"
+        "ci",
+        "--prefer-offline",
+        "--no-audit",
+        "--no-fund"
       ],
       "timeoutMs": 600000
     },
@@ -26,6 +44,9 @@
         "install",
         "--no-save",
         "--package-lock=false",
+        "--prefer-offline",
+        "--no-audit",
+        "--no-fund",
         "@playwright/test@1.60.0"
       ],
       "timeoutMs": 300000
@@ -62,6 +83,7 @@
     },
     {
       "kind": "rendered-flow",
+      "preflightExpectedExitCode": 1,
       "command": "npx",
       "args": [
         "playwright",

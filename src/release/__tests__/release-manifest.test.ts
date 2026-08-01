@@ -15,10 +15,6 @@ const root = join(import.meta.dirname, "..", "..", "..");
 const manifestPath = join(root, "release-manifest.json");
 const webArtifactPath = join(root, "release-artifacts", "memoire-web.release.json");
 const publicEngineSourceCommit = "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f";
-const releaseRecord = {
-  path: "release-artifacts/npm/2.7.1.release.json",
-  sha256: "9daa1a0008332654ffabec001b432693c09bda4a80a27bec29e272d126386129",
-};
 
 describe("release manifest", () => {
   it("is the canonical source for every public release surface", async () => {
@@ -28,13 +24,17 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.1",
-          state: "published",
-          sourceCommit: publicEngineSourceCommit,
-          releaseRecord,
+          version: "2.7.2",
+          state: "candidate",
+          sourceCommit: null,
+          releaseRecord: null,
+          previousPublicRelease: {
+            version: "2.7.1",
+            sourceCommit: publicEngineSourceCommit,
+          },
           verification: {
             eligibleForParity: false,
-            reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
+            reason: "2.7.1 remains public while 2.7.2 is an unpublished candidate",
           },
         },
         studio: { version: "2.5.0" },
@@ -46,7 +46,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.1",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.2",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
@@ -70,7 +70,7 @@ describe("release manifest", () => {
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
     expect(artifact.publicTruth).toEqual({
-      source: "currentRelease",
+      source: "previousPublicRelease",
       engine: {
         version: "2.7.1",
         sourceCommit: publicEngineSourceCommit,
@@ -84,12 +84,12 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.7.1",
-          state: "published",
+          state: "historical",
           sourceCommit: publicEngineSourceCommit,
-          releaseRecord,
+          releaseRecord: null,
           verification: {
             eligibleForParity: false,
-            reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
+            reason: "2.7.1 remains public while 2.7.2 is an unpublished candidate",
           },
         },
       },

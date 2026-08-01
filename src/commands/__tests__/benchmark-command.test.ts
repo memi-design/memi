@@ -233,6 +233,71 @@ describe("benchmark command", () => {
       "workflow-run requires --execute",
     );
   });
+
+  it("freezes the prospective 40-point study before any scored run", async () => {
+    const planPath = join(projectRoot, "empirical-40-plan.json");
+    const environmentPath = join(projectRoot, "environment.json");
+    const artifactPath = join(projectRoot, "memi-2.7.1.tgz");
+    const taskRoot = join(projectRoot, "tasks");
+    const outPath = join(projectRoot, "freeze.json");
+    const plan = prospectivePlan();
+    await import("node:fs/promises").then(({ mkdir }) =>
+      mkdir(taskRoot, { recursive: true }));
+    await writeFile(planPath, JSON.stringify(plan));
+    await writeFile(environmentPath, JSON.stringify({
+      machine: "test-mac",
+      os: "macOS 26.0",
+      arch: "arm64",
+      node: "v22.22.3",
+      xcode: "26.6",
+      simulator: "iPhone 17 / iOS 26.5",
+      workspaceVolume: "external-ssd",
+      temporaryRoot: "/Volumes/External/evidence/tmp",
+    }));
+    await writeFile(artifactPath, "candidate");
+    for (const task of plan.tasks) {
+      await writeFile(join(taskRoot, `${task.id}.json`), JSON.stringify({
+        id: task.id,
+      }));
+    }
+    const logs = captureLogs();
+    const program = new Command();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await program.parseAsync([
+      "benchmark",
+      "prospective-freeze",
+      planPath,
+      "--candidate-artifact",
+      artifactPath,
+      "--candidate-version",
+      "2.7.1",
+      "--candidate-revision",
+      "d".repeat(40),
+      "--candidate-source-hash",
+      `sha256:${"e".repeat(64)}`,
+      "--candidate-source-state",
+      "content-addressed-dirty-snapshot",
+      "--candidate-dirty-files",
+      "12",
+      "--environment",
+      environmentPath,
+      "--task-root",
+      taskRoot,
+      "--out",
+      outPath,
+      "--frozen-at",
+      "2026-07-30T12:00:00.000Z",
+      "--json",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload.status).toBe("frozen");
+    expect(payload.freeze.freezeHash).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(payload.freeze.candidate.version).toBe("2.7.1");
+    expect(payload.freeze.trials).toHaveLength(18);
+    expect(payload.path).toBe(outPath);
+  });
 });
 
 function engine() {
@@ -307,5 +372,76 @@ function workflowTask() {
       },
     ],
     requiredArtifacts: ["git.patch", "verification.json", "events.jsonl"],
+  };
+}
+
+function prospectivePlan() {
+  const tasks = [
+    ["expo-task", "react-native-expo", "a"],
+    ["swift-task", "native-swiftui", "b"],
+    ["web-task", "web-design-engineering", "c"],
+  ].map(([id, platformFamily, revision]) => ({
+    id,
+    platformFamily,
+    revision: revision.repeat(40),
+    pairs: 3,
+    interimCredit: 2,
+    risk: "representative risk",
+  }));
+  return {
+    schemaVersion: 1,
+    planId: "memi-2.7-empirical-readiness-40",
+    status: "draft",
+    currentScore: 29,
+    targetScore: 40,
+    claimBoundary: "Interim evidence milestone only.",
+    scoreBudget: [
+      { dimension: "existing-evidence", currentCredit: 29, targetCredit: 29 },
+      {
+        dimension: "prospective-registration",
+        currentCredit: 0,
+        targetCredit: 5,
+        unlock: "Frozen before runs",
+      },
+      {
+        dimension: "independent-repeats",
+        currentCredit: 0,
+        targetCredit: 6,
+        maximumCredit: 12,
+        unlock: "Three platforms pass",
+      },
+    ],
+    tasks,
+    runContract: {
+      seed: 41,
+      matchedPairs: 9,
+      trials: 18,
+      conditions: ["baseline", "memi"],
+      freshClonePerTrial: true,
+      counterbalancedOrder: true,
+      requiredArtifacts: [
+        "git.patch",
+        "events.jsonl",
+        "verification.json",
+        "environment.json",
+        "run.json",
+      ],
+      acceptance: {
+        requiredValidPairsPerTask: 3,
+        requiredPassingPairsPerTask: 3,
+        fixtureMutationAllowed: false,
+        providerErrorAllowed: false,
+        missingOrDuplicateConditionAllowed: false,
+        postPatchIsolatedVerificationRequired: true,
+      },
+    },
+    creditPolicy: {
+      planningEarnsCredit: false,
+      manualCreditEditsAllowed: false,
+      prospectiveRegistrationCredit: "all-or-none",
+      independentRepeatInterimCreditPerQualifiedPlatform: 2,
+      independentRepeatInterimCreditCap: 6,
+      fullRepeatCreditRequiresAllReleaseCriticalTasks: true,
+    },
   };
 }

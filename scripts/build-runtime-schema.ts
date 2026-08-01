@@ -54,7 +54,9 @@ const output = {
   },
 };
 
-const serialized = `${JSON.stringify(output, null, 2)}\n`;
+// The schema ships in every npm package. Compact JSON preserves the exact
+// contract while keeping the public tarball within its enforced size budget.
+const serialized = `${JSON.stringify(output)}\n`;
 if (process.argv.includes("--check")) {
   const current = await readFile(outputPath, "utf-8").catch(() => "");
   if (current !== serialized) {

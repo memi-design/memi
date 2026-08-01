@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildWorkflowPrompt,
@@ -6,6 +8,93 @@ import {
 } from "../workflow.js";
 
 describe("multi-minute workflow benchmark contracts", () => {
+  it("freezes all v11 tasks to the same small discovery and execution envelope", async () => {
+    const manifestNames = [
+      "buzzr-tab-unread-badge.json",
+      "nate-options-reduce-motion.json",
+      "paraform-command-menu.json",
+    ];
+    const tasks = await Promise.all(manifestNames.map(async (manifestName) => {
+      const taskPath = path.join(
+        process.cwd(),
+        "docs/case-studies/memi-2.7-workflows",
+        manifestName,
+      );
+      return workflowTaskSchema.parse(JSON.parse(await readFile(taskPath, "utf8")));
+    }));
+
+    for (const task of tasks) {
+      expect(task.maximumDurationMs).toBe(12 * 60_000);
+      expect(task.focusPaths.length).toBeGreaterThan(0);
+      expect(task.agentBudget).toEqual({
+        maxToolCalls: 16,
+        maxToolOutputBytes: 160_000,
+        maxInputTokens: 375_000,
+        maxOutputTokens: 10_000,
+        maxReasoningTokens: 4_000,
+      });
+    }
+  });
+
+  it("terminates the Buzzr Jest verifier after its assertions complete", async () => {
+    const taskPath = path.join(
+      process.cwd(),
+      "docs/case-studies/memi-2.7-workflows/buzzr-tab-unread-badge.json",
+    );
+    const task = workflowTaskSchema.parse(
+      JSON.parse(await readFile(taskPath, "utf8")),
+    );
+    const renderedFlow = task.verification.find(
+      (entry) => entry.kind === "rendered-flow",
+    );
+
+    expect(renderedFlow?.args).toContain("--forceExit");
+  });
+
+  it("queries decorative Buzzr badges explicitly without changing global test semantics", async () => {
+    const taskPath = path.join(
+      process.cwd(),
+      "docs/case-studies/memi-2.7-workflows/buzzr-tab-unread-badge.json",
+    );
+    const task = workflowTaskSchema.parse(
+      JSON.parse(await readFile(taskPath, "utf8")),
+    );
+    const fixture = task.fixtures.find((entry) =>
+      entry.path.endsWith("memi-custom-tab-bar-unread.test.tsx")
+    );
+
+    expect(fixture?.content).toContain(
+      "getByTestId('tab-unread-count-chat', { includeHiddenElements: true })",
+    );
+    expect(fixture?.content).toContain(
+      "queryByTestId('tab-unread-count-chat', { includeHiddenElements: true })",
+    );
+    expect(task.steps.join("\n")).toContain(
+      "Do not change global Jest or React Native Testing Library configuration",
+    );
+  });
+
+  it("allows subpoint XCTest projection tolerance while preserving Nate's 44-point contract", async () => {
+    const taskPath = path.join(
+      process.cwd(),
+      "docs/case-studies/memi-2.7-workflows/nate-options-reduce-motion.json",
+    );
+    const task = workflowTaskSchema.parse(
+      JSON.parse(await readFile(taskPath, "utf8")),
+    );
+    const fixture = task.fixtures.find((entry) =>
+      entry.path.endsWith("MemiReduceMotionStatusUITests.swift")
+    );
+
+    expect(task.intent).toContain("44-point minimum target size");
+    expect(fixture?.content).toContain(
+      "XCTAssertGreaterThanOrEqual(status.frame.height, 43.5)",
+    );
+    expect(task.steps.join("\n")).toContain(
+      "half-point XCTest accessibility-frame projection tolerance",
+    );
+  });
+
   it("requires a real build and rendered-flow verification with a multi-minute budget", () => {
     const result = workflowTaskSchema.safeParse({
       schemaVersion: 1,
@@ -156,6 +245,41 @@ describe("multi-minute workflow benchmark contracts", () => {
     expect(baseline).not.toContain(common.routedContext);
     expect(memi).toContain(common.routedContext);
     expect(memi.replace(common.routedContext, "")).toContain(common.task.intent);
+  });
+
+  it("gives both conditions the same bounded discovery paths and execution budget", () => {
+    const task = workflowTaskSchema.parse({
+      schemaVersion: 1,
+      id: "focused-workflow",
+      intent: "Implement a small verified interface behavior in the existing product.",
+      maximumDurationMs: 12 * 60_000,
+      focusPaths: ["src/ui/CommandMenu.tsx", "tests/command-menu.spec.ts"],
+      agentBudget: {
+        maxToolCalls: 12,
+        maxInputTokens: 300_000,
+        maxOutputTokens: 8_000,
+        maxReasoningTokens: 4_000,
+      },
+      steps: ["inspect", "implement", "build", "launch", "verify"],
+      verification: [
+        { kind: "build", command: "npm", args: ["run", "build"], timeoutMs: 300_000 },
+        { kind: "rendered-flow", command: "npm", args: ["run", "test:e2e"], timeoutMs: 600_000 },
+      ],
+      requiredArtifacts: ["git.patch", "verification.json", "events.jsonl"],
+    });
+
+    for (const condition of ["baseline", "memi"] as const) {
+      const prompt = buildWorkflowPrompt({
+        task,
+        condition,
+        routedContext: "Memi-only bounded routing receipt.",
+      });
+      expect(prompt).toContain("src/ui/CommandMenu.tsx");
+      expect(prompt).toContain("tests/command-menu.spec.ts");
+      expect(prompt).toContain("Do not perform a repository-wide search");
+      expect(prompt).toContain("at most 12 tool calls");
+      expect(prompt).toContain("300000 input tokens");
+    }
   });
 
   it("names immutable acceptance fixtures in every provider prompt", () => {

@@ -19,6 +19,7 @@ import type {
 } from "./workflow-runner.js";
 
 const MAX_OUTPUT_BYTES = 8 * 1024 * 1024;
+const PROCESS_TERMINATION_GRACE_MS = 250;
 
 export interface WorkflowAdapterOptions {
   readonly executable: string;
@@ -59,6 +60,8 @@ export function createCodexWorkflowAdapter(
           ),
           stdin: input.prompt,
           timeoutMs: input.timeoutMs,
+          maximumToolCalls: input.maximumToolCalls,
+          maximumToolOutputBytes: input.maximumToolOutputBytes,
         });
         const trace = parseCodexJsonl(execution.stdout);
         return freeze({
@@ -69,7 +72,12 @@ export function createCodexWorkflowAdapter(
             ...trace.usage,
             estimatedCostUsd: null,
           },
-          tools: trace.tools,
+          tools: {
+            calls: Math.max(trace.tools.calls, execution.observedToolCalls),
+            outputBytes: execution.observedToolOutputBytes,
+            errors: trace.tools.errors + (execution.budgetExceeded ? 1 : 0),
+            retries: trace.tools.retries,
+          },
         });
       } finally {
         await rm(isolatedHome, { recursive: true, force: true });
@@ -109,6 +117,8 @@ export function createClaudeWorkflowAdapter(
           },
           stdin: input.prompt,
           timeoutMs: input.timeoutMs,
+          maximumToolCalls: input.maximumToolCalls,
+          maximumToolOutputBytes: input.maximumToolOutputBytes,
         });
         const trace = parseClaudeStreamJson(execution.stdout);
         return freeze({
@@ -118,7 +128,12 @@ export function createClaudeWorkflowAdapter(
           stdout: execution.stdout,
           stderr: execution.stderr,
           usage: trace.usage,
-          tools: trace.tools,
+          tools: {
+            calls: Math.max(trace.tools.calls, execution.observedToolCalls),
+            outputBytes: execution.observedToolOutputBytes,
+            errors: trace.tools.errors + (execution.budgetExceeded ? 1 : 0),
+            retries: trace.tools.retries,
+          },
         });
       } finally {
         await rm(isolatedHome, { recursive: true, force: true });
@@ -345,7 +360,16 @@ async function executeProcess(input: {
   readonly env: NodeJS.ProcessEnv;
   readonly stdin: string;
   readonly timeoutMs: number;
-}): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  readonly maximumToolCalls?: number;
+  readonly maximumToolOutputBytes?: number;
+}): Promise<{
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  observedToolCalls: number;
+  observedToolOutputBytes: number;
+  budgetExceeded: boolean;
+}> {
   return new Promise((resolve, reject) => {
     const child = spawn(input.command, [...input.args], {
       cwd: input.cwd,
@@ -354,32 +378,219 @@ async function executeProcess(input: {
     });
     let stdout = "";
     let stderr = "";
-    let timedOut = false;
-    const timeout = setTimeout(() => {
-      timedOut = true;
-      child.kill("SIGTERM");
-    }, input.timeoutMs);
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (chunk: string) => {
-      stdout = appendBounded(stdout, chunk);
+    let settled = false;
+    let terminationReason: "timeout" | "budget" | null = null;
+    let timeout: NodeJS.Timeout | undefined;
+    let killTimeout: NodeJS.Timeout | undefined;
+    const toolMonitor = createToolCallBudgetMonitor({
+      maximumToolCalls: input.maximumToolCalls,
+      maximumToolOutputBytes: input.maximumToolOutputBytes,
     });
-    child.stderr.on("data", (chunk: string) => {
-      stderr = appendBounded(stderr, chunk);
-    });
-    child.on("error", (error) => {
-      clearTimeout(timeout);
+
+    const cleanup = (): void => {
+      if (timeout) clearTimeout(timeout);
+      if (killTimeout) clearTimeout(killTimeout);
+      child.stdout.off("data", onStdoutData);
+      child.stderr.off("data", onStderrData);
+      child.off("error", onError);
+      child.off("close", onClose);
+    };
+    const rejectOnce = (error: Error): void => {
+      if (settled) return;
+      settled = true;
+      cleanup();
       reject(error);
-    });
-    child.on("close", (code) => {
-      clearTimeout(timeout);
-      if (timedOut) {
-        reject(new Error(`${input.command} timed out after ${input.timeoutMs}ms`));
+    };
+    const resolveOnce = (result: {
+      exitCode: number;
+      stdout: string;
+      stderr: string;
+      observedToolCalls: number;
+      observedToolOutputBytes: number;
+      budgetExceeded: boolean;
+    }): void => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(result);
+    };
+    const terminate = (reason: "timeout" | "budget"): void => {
+      if (settled || terminationReason !== null) return;
+      terminationReason = reason;
+      child.kill("SIGTERM");
+      killTimeout = setTimeout(() => {
+        if (settled || child.exitCode !== null || child.signalCode !== null) return;
+        child.kill("SIGKILL");
+      }, PROCESS_TERMINATION_GRACE_MS);
+    };
+    function onStdoutData(chunk: string): void {
+      stdout = appendBounded(stdout, chunk);
+      if (toolMonitor.ingest(chunk)) terminate("budget");
+    }
+    function onStderrData(chunk: string): void {
+      stderr = appendBounded(stderr, chunk);
+    }
+    function onError(error: Error): void {
+      rejectOnce(error);
+    }
+    function onClose(code: number | null): void {
+      toolMonitor.finish();
+      const budget = toolMonitor.snapshot();
+      const budgetReason = budget.exceededDimensions[0] ?? "max-tool-calls";
+      if (terminationReason === "timeout") {
+        resolveOnce({
+          exitCode: 1,
+          stdout,
+          stderr: `${stderr}\ntimeout-exhausted:${input.timeoutMs}ms`.trim(),
+          observedToolCalls: budget.observedToolCalls,
+          observedToolOutputBytes: budget.observedToolOutputBytes,
+          budgetExceeded: budget.exceeded,
+        });
         return;
       }
-      resolve({ exitCode: code ?? 1, stdout, stderr });
-    });
+      const exhaustedBudget = terminationReason === "budget" || budget.exceeded;
+      resolveOnce({
+        exitCode: exhaustedBudget ? 1 : code ?? 1,
+        stdout,
+        stderr: exhaustedBudget
+          ? `${stderr}\nbudget-exhausted:${budgetReason}`.trim()
+          : stderr,
+        observedToolCalls: budget.observedToolCalls,
+        observedToolOutputBytes: budget.observedToolOutputBytes,
+        budgetExceeded: budget.exceeded,
+      });
+    }
+
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", onStdoutData);
+    child.stderr.on("data", onStderrData);
+    child.on("error", onError);
+    child.on("close", onClose);
+    timeout = setTimeout(() => terminate("timeout"), input.timeoutMs);
     child.stdin.end(input.stdin);
+  });
+}
+
+export function createToolCallBudgetMonitor(input: number | Readonly<{
+  maximumToolCalls?: number;
+  maximumToolOutputBytes?: number;
+}>): {
+  ingest(chunk: string): boolean;
+  finish(): boolean;
+  snapshot(): Readonly<{
+    observedToolCalls: number;
+    observedToolOutputBytes: number;
+    exceeded: boolean;
+    exceededDimensions: readonly ("max-tool-calls" | "max-tool-output-bytes")[];
+  }>;
+} {
+  const limits = typeof input === "number"
+    ? { maximumToolCalls: input }
+    : input;
+  const seenToolIds = new Set<string>();
+  let remainder = "";
+  let observedToolCalls = 0;
+  let observedToolOutputBytes = 0;
+  const exceededDimensions = new Set<"max-tool-calls" | "max-tool-output-bytes">();
+  const processLine = (line: string): void => {
+    let event: Record<string, unknown> | null = null;
+    try {
+      event = JSON.parse(line) as Record<string, unknown>;
+    } catch {
+      event = null;
+    }
+    for (const toolId of event ? toolIds(event) : []) {
+      if (seenToolIds.has(toolId)) continue;
+      seenToolIds.add(toolId);
+      observedToolCalls += 1;
+    }
+    for (const output of toolOutputs(event)) {
+      observedToolOutputBytes += Buffer.byteLength(output);
+    }
+    if (
+      limits.maximumToolCalls !== undefined
+      && observedToolCalls > limits.maximumToolCalls
+    ) {
+      exceededDimensions.add("max-tool-calls");
+    }
+    if (
+      limits.maximumToolOutputBytes !== undefined
+      && observedToolOutputBytes > limits.maximumToolOutputBytes
+    ) {
+      exceededDimensions.add("max-tool-output-bytes");
+    }
+  };
+  return {
+    ingest(chunk) {
+      remainder += chunk;
+      let newline = remainder.indexOf("\n");
+      while (newline >= 0) {
+        const line = remainder.slice(0, newline).trim();
+        remainder = remainder.slice(newline + 1);
+        if (line) processLine(line);
+        newline = remainder.indexOf("\n");
+      }
+      return exceededDimensions.size > 0;
+    },
+    finish() {
+      const line = remainder.trim();
+      remainder = "";
+      if (line) processLine(line);
+      return exceededDimensions.size > 0;
+    },
+    snapshot() {
+      return freeze({
+        observedToolCalls,
+        observedToolOutputBytes,
+        exceeded: exceededDimensions.size > 0,
+        exceededDimensions: [...exceededDimensions],
+      });
+    },
+  };
+}
+
+function toolOutputs(event: Record<string, unknown> | null): readonly string[] {
+  const item = event ? asRecord(event.item) : null;
+  if (event?.type === "item.completed"
+    && item?.type === "command_execution"
+    && typeof item.aggregated_output === "string") {
+    return [item.aggregated_output];
+  }
+  if (event?.type !== "user") return [];
+  const message = asRecord(event.message);
+  const content = Array.isArray(message?.content) ? message.content : [];
+  return content.flatMap((block) => {
+    const result = asRecord(block);
+    if (result?.type !== "tool_result") return [];
+    const rawOutput = result.content ?? result.text ?? result.result;
+    if (typeof rawOutput === "string") return [rawOutput];
+    if (!Array.isArray(rawOutput)) return [];
+    return rawOutput.flatMap((entry) => {
+      if (typeof entry === "string") return [entry];
+      const output = asRecord(entry);
+      return typeof output?.text === "string" ? [output.text] : [];
+    });
+  });
+}
+
+function toolIds(event: Record<string, unknown>): readonly string[] {
+  const item = asRecord(event.item);
+  if (
+    event.type === "item.started"
+    && item?.type === "command_execution"
+    && typeof item.id === "string"
+  ) {
+    return [`codex:${item.id}`];
+  }
+  if (event.type !== "assistant") return [];
+  const message = asRecord(event.message);
+  const content = Array.isArray(message?.content) ? message.content : [];
+  return content.flatMap((block) => {
+    const item = asRecord(block);
+    return item?.type === "tool_use" && typeof item.id === "string"
+      ? [`claude:${item.id}`]
+      : [];
   });
 }
 

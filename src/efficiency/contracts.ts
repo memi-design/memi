@@ -57,6 +57,15 @@ export const benchmarkRunRecordSchema = z.object({
     humanInterventions: z.number().int().nonnegative(),
   }).strict(),
   evidenceRefs: z.array(z.string().min(1)),
+  prospective: z.object({
+    planHash: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+    freezeHash: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+    candidateArtifactSha256: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+    taskManifestSha256: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+    evidenceManifestSha256: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+    trialId: z.string().min(1),
+    sequence: z.number().int().nonnegative(),
+  }).strict().optional(),
 }).strict();
 
 export type BenchmarkRunRecord = z.infer<typeof benchmarkRunRecordSchema>;
