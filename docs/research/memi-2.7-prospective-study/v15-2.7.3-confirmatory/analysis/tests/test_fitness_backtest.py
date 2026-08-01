@@ -26,6 +26,7 @@ from analysis.fitness_backtest import (
     validate_frozen_provenance,
     validate_cli_event,
     verify_source_manifest,
+    _run_json_command,
 )
 
 
@@ -331,6 +332,18 @@ class FitnessBacktestTests(unittest.TestCase):
                 timeout_seconds=5,
                 max_output_bytes=128,
             )
+
+    def test_deeply_nested_engine_json_fails_as_a_bounded_input_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(BacktestInputError, "invalid JSON|must be an object"):
+                _run_json_command(
+                    [
+                        sys.executable,
+                        "-c",
+                        "print('[' * 2000 + '0' + ']' * 2000)",
+                    ],
+                    Path(directory),
+                )
 
 
 def _event_for(command: object) -> dict[str, object]:
