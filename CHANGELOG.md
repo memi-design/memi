@@ -42,6 +42,49 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `83535004` | fix: preserve 2.7.4 changelog provenance |
 | `9f80b0cf` | test: define immutable package documentation boundary |
 | `c6e72b3c` | fix: keep candidate state out of npm docs |
+| `9086a6ec` | docs: record route fitness implementation |
+| `60ef1843` | research: freeze V15 2.7.3 confirmatory protocol |
+| `64c25bd3` | docs: record admission harness correction |
+| `5d806ade` | research: disclose V15 admission harness deviation |
+| `debe9abe` | research: record failed SwiftUI pair without imputation |
+| `b0e771ee` | research: disclose stalled V15 provider attempt |
+| `e0fe87e3` | docs: record prospective resume correction |
+| `c7fcd074` | feat: add V15 confirmatory analysis pipeline |
+| `e8e620ef` | research: seal V15 evidence ledgers |
+| `770d9238` | fix: align V15 analysis with exclusion and receipt hashing rules |
+| `93914ddc` | research: validate blinded grading panel |
+| `d456fde5` | docs: add V15 confirmatory audit paper |
+| `ba9222da` | docs: record V15 import and platform gate |
+| `340c340e` | docs: add 2.7.3 channel provenance audit |
+| `08765bb2` | test: define V15 analysis artifact contract |
+| `96345c16` | feat: generate V15 statistical report artifacts |
+| `15059aaf` | test: add V15 fitness-policy artifact reproducer |
+| `a5d6d7b9` | fix: add V15 fitness-policy artifact builder |
+| `263fdf18` | test: define blinded grader bundle contract |
+| `46948632` | feat: build fail-closed blinded grader bundle |
+| `6e5f7915` | docs: refresh 2.7.3 live channel audit |
+| `63d99d49` | research: record controlled website before-after audit |
+| `68d88b7b` | fix: require phone-width grader evidence |
+| `f4eb4881` | docs: record fail-closed recovery hardening |
+| `b452cf9c` | docs: record fitness containment cleanup |
+| `f6e4a9e5` | test: cover deterministic V15 artifact execution |
+| `cb679f1c` | test: require LF-only generated V15 tables |
+| `d8d58e3b` | research: execute V15 confirmatory analysis |
+| `ffa3c108` | docs: record atomic fitness append hardening |
+| `9667833e` | test: cover V15 chronology edge cases |
+| `e7c0bf99` | test: define blinded defect and repeat traceability |
+| `853988bb` | fix: align V15 defects and sensitivity labels |
+| `32284f59` | fix: extend V15 fitness chronology coverage |
+| `05c83a8f` | test: define deterministic V15 report package contract |
+| `f986500e` | test: define V15 chronological fitness backtest |
+| `dda62026` | feat: build deterministic V15 report package |
+| `80f81e7f` | feat: execute V15 chronological fitness backtest |
+| `201e6bb0` | research: index V15 fitness backtest artifacts |
+| `4c3908f5` | docs: record immutable package documentation boundary |
+| `66b5abd4` | test: harden V15 fitness replay evidence |
+| `bf6ca42d` | docs: compact V15 report float layout |
+| `be8f1c74` | fix: harden V15 fitness evidence replay |
+| `260a662e` | merge: add V15 2.7.3 confirmatory audit |
 
 ### Exact-match fail-closed route fitness
 
