@@ -5,6 +5,10 @@ import {
   benchmarkRunRecordSchema,
   type BenchmarkRunRecord,
 } from "./contracts.js";
+import {
+  nativeCaptureKindSchema,
+  nativePlatformSchema,
+} from "./prospective-evidence-v2.js";
 
 const sha256Schema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
 const revisionSchema = z.string().regex(/^[a-f0-9]{40}$/);
@@ -30,11 +34,37 @@ const scoreBudgetItemSchema = z.object({
 const prospectiveTaskSchema = z.object({
   id: z.string().regex(/^[a-z][a-z0-9-]*$/),
   platformFamily: z.string().min(1),
+  nativePlatform: nativePlatformSchema.optional(),
   revision: revisionSchema,
   pairs: z.number().int().positive(),
   interimCredit: z.number().int().positive(),
   risk: z.string().min(1),
 }).strict();
+
+const evidenceV2ContractSchema = z.object({
+  required: z.literal(true),
+  requiredCaptureKinds: z.array(nativeCaptureKindSchema).min(3),
+  measuredBillingRequired: z.literal(true),
+  structuredStopReasonsRequired: z.literal(true),
+}).strict().superRefine((contract, context) => {
+  const required = new Set(contract.requiredCaptureKinds);
+  for (const kind of ["screenshot", "interaction-trace", "accessibility-tree"] as const) {
+    if (!required.has(kind)) {
+      context.addIssue({
+        code: "custom",
+        path: ["requiredCaptureKinds"],
+        message: `must include ${kind}`,
+      });
+    }
+  }
+  if (required.size !== contract.requiredCaptureKinds.length) {
+    context.addIssue({
+      code: "custom",
+      path: ["requiredCaptureKinds"],
+      message: "capture kinds must be unique",
+    });
+  }
+});
 
 export const prospectiveStudyPlanSchema = z.object({
   schemaVersion: z.literal(1),
@@ -57,6 +87,7 @@ export const prospectiveStudyPlanSchema = z.object({
     freshClonePerTrial: z.literal(true),
     counterbalancedOrder: z.literal(true),
     requiredArtifacts: z.array(z.string().min(1)).min(3),
+    evidenceV2: evidenceV2ContractSchema.optional(),
     acceptance: z.object({
       requiredValidPairsPerTask: z.number().int().positive(),
       requiredPassingPairsPerTask: z.number().int().positive(),
@@ -109,6 +140,24 @@ export const prospectiveStudyPlanSchema = z.object({
       path: ["creditPolicy", "independentRepeatInterimCreditCap"],
     });
   }
+  if (plan.runContract.evidenceV2) {
+    plan.tasks.forEach((task, index) => {
+      if (!task.nativePlatform) {
+        context.addIssue({
+          code: "custom",
+          path: ["tasks", index, "nativePlatform"],
+          message: "is required when evidenceV2 is enabled",
+        });
+      }
+    });
+    if (!plan.runContract.requiredArtifacts.includes("prospective-evidence-v2.json")) {
+      context.addIssue({
+        code: "custom",
+        path: ["runContract", "requiredArtifacts"],
+        message: "must include prospective-evidence-v2.json when evidenceV2 is enabled",
+      });
+    }
+  }
 });
 export type ProspectiveStudyPlan = z.infer<typeof prospectiveStudyPlanSchema>;
 
@@ -155,6 +204,8 @@ const freezeContentSchema = z.object({
   }).strict(),
   taskRevisions: z.record(z.string(), revisionSchema),
   taskManifestHashes: z.record(z.string(), sha256Schema),
+  taskNativePlatforms: z.record(z.string(), nativePlatformSchema).optional(),
+  evidenceV2: evidenceV2ContractSchema.optional(),
   requiredArtifacts: z.array(z.string().min(1)).min(3),
   trials: z.array(prospectiveTrialSchema).min(2),
 }).strict();
@@ -195,6 +246,15 @@ export function buildProspectiveFreeze(
       plan.tasks.map((task) => [task.id, task.revision]),
     ),
     taskManifestHashes,
+    ...(plan.runContract.evidenceV2
+      ? {
+        taskNativePlatforms: Object.fromEntries(plan.tasks.map((task) => [
+          task.id,
+          task.nativePlatform,
+        ])),
+        evidenceV2: plan.runContract.evidenceV2,
+      }
+      : {}),
     requiredArtifacts: plan.runContract.requiredArtifacts,
     trials,
   });
