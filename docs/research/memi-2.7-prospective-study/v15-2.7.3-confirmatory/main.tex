@@ -36,6 +36,9 @@
 \renewcommand{\arraystretch}{1.12}
 \emergencystretch=2em
 \raggedbottom
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
 
 \newcommand{\Memi}{Memi}
 \newcommand{\Candidate}{\texttt{@memi-design/cli@2.7.3}}
@@ -247,7 +250,6 @@ An excluded rendered pair reduces the quality-analysis sample for that task but
 does not erase its prespecified functional or resource outcome.  All exclusions
 must appear in \artifact{exclusions.json} with no imputation.
 
-\clearpage
 \begin{figure*}[t]
 \centering
 \QualityFigure
@@ -323,7 +325,6 @@ repository-only discovery.
 \InputOrPending{generated/tex/fitness-backtest-results.tex}{Insert the stable
 JSON replay result, route transitions, and final exact-route states.}
 
-\clearpage
 \begin{figure*}[t]
 \centering
 \BacktestFigure

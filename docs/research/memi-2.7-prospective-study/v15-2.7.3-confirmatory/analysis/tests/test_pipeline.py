@@ -401,6 +401,12 @@ class GeneratedArtifactTests(unittest.TestCase):
             self.assertIn(r"\renewcommand{\FreshCellStatus}", macros)
             self.assertIn("36 of 36", macros)
             self.assertNotIn(r"\renewcommand{\ReleaseGateStatus}", macros)
+            primary_tex = (paths.tex_root / "primary-task-summary.tex").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn(r"\begin{table}[ht]", primary_tex)
+            self.assertIn(r"\resizebox{\columnwidth}{!}", primary_tex)
+            self.assertNotIn(r"\begin{table*}", primary_tex)
             self.assertFalse((paths.tex_root / "fitness-backtest-results.tex").exists())
             self.assertFalse((paths.tex_root / "website-audit-results.tex").exists())
 

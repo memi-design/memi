@@ -892,10 +892,11 @@ def _write_tex_outputs(tex_root: Path, summary: dict[str, Any]) -> None:
     )
 
     primary_lines = [
-        "\\begin{table*}[ht]",
+        "\\begin{table}[ht]",
         "\\centering",
         "\\caption{Task-level blinded design-quality results generated from the executed analysis.}",
         "\\small",
+        "\\resizebox{\\columnwidth}{!}{%",
         "\\begin{tabular}{@{}lrrrrl@{}}",
         "\\toprule",
         "Task & Pairs & Mean $\\Delta$ & Median $\\Delta$ & One-sided 95\\% lower & NI gate \\\\",
@@ -911,7 +912,8 @@ def _write_tex_outputs(tex_root: Path, summary: dict[str, Any]) -> None:
     primary_lines.extend([
         "\\bottomrule",
         "\\end{tabular}",
-        "\\end{table*}",
+        "}%",
+        "\\end{table}",
         "",
     ])
     _write_tex(tex_root / "primary-task-summary.tex", "\n".join(primary_lines))
