@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-08-01T23:00:00.000Z",
+  "status": "not-ready-to-freeze",
+  "candidate": {
+    "requiredVersion": "2.7.5",
+    "observedWorkspaceVersion": "2.7.4",
+    "candidateTarballSha256": null,
+    "reason": "No exact 2.7.5 package artifact exists yet."
+  },
+  "fixtures": [
+    {
+      "id": "buzzr-tab-unread-badge",
+      "repository": "https://github.com/Buzzr-app/dfs-engine.git",
+      "observedRevision": "11819dda048fd720cd7a55478b81af3ba2fb5131",
+      "previousV15Revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+      "status": "repin-required",
+      "reason": "The active checkout has advanced from the previous frozen revision."
+    },
+    {
+      "id": "paraform-command-menu",
+      "repository": "https://github.com/sarveshsea/paraform.git",
+      "observedRevision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+      "previousV15Revision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+      "status": "available-to-reverify"
+    },
+    {
+      "id": "nate-options-reduce-motion",
+      "repository": "https://github.com/sarveshsea/nate-the-bait.git",
+      "observedRevision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+      "previousV15Revision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+      "status": "available-to-reverify"
+    }
+  ],
+  "remainingPrerequisites": [
+    "Build an exact 2.7.5 candidate tarball and record its SHA-256.",
+    "Choose and cleanly clone a new Buzzr revision, then hash its task manifest.",
+    "Commit a task-defined screenshot, interaction-trace, and accessibility collector for every fixture.",
+    "Perform one unscored native-capture calibration pair per fixture.",
+    "Retain per-cell provider usage exports or invoice allocations and price-card artifacts before scored execution."
+  ],
+  "claimDecision": "No claim is admitted; this is a readiness audit only."
+}

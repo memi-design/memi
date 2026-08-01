@@ -91,3 +91,7 @@ root. The receipt draft must use only those five files.
 The accompanying [protocol.json](protocol.json) is the source-of-record plan;
 it remains a draft until it includes the exact candidate SHA-256 and verified
 fixture revisions.
+
+The current [preflight audit](preflight-audit.json) records the observed local
+fixture revisions and the remaining freeze prerequisites. It is a readiness
+ledger, not a study result.
