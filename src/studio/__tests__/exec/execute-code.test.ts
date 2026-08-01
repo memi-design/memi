@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { executeCode } from "../../exec/execute-code.js";
+import { executeCode, resolveExecuteCodeCommand } from "../../exec/execute-code.js";
 import type { ToolRunner } from "../../exec/tools-rpc-server.js";
 
 function makeRunner(allowed: string[], handler: (tool: string, args: unknown) => unknown | Promise<unknown>): ToolRunner {
@@ -11,6 +11,14 @@ function makeRunner(allowed: string[], handler: (tool: string, args: unknown) =>
 
 describe("exec/executeCode", () => {
   const successTimeoutMs = 20_000;
+
+  it("launches the tsx module through Node instead of a platform shell shim", () => {
+    const resolved = resolveExecuteCodeCommand("tsx", "C:\\Temp\\script.mts");
+
+    expect(resolved.command).toBe(process.execPath);
+    expect(resolved.args[0]?.replaceAll("\\", "/")).toMatch(/\/tsx\/dist\/cli\.mjs$/);
+    expect(resolved.args[1]).toBe("C:\\Temp\\script.mts");
+  });
 
   it("happy path: script that calls one tool and exits ok", async () => {
     const runner = makeRunner(["Echo"], (_tool, args) => {
