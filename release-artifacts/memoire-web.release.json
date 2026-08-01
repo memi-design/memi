@@ -3,8 +3,8 @@
   "provenance": {
     "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "b6beb4649197c37f4eebfa5dd361d56b3284f70e",
-    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/b6beb4649197c37f4eebfa5dd361d56b3284f70e/release-manifest.json",
+    "sourceCommit": "a642d6c4b3ae41f0952549319b8aeeda287e6260",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/a642d6c4b3ae41f0952549319b8aeeda287e6260/release-manifest.json",
     "manifestSha256": "16b26cf6a16e59ac3c6b7dfd4103d8a56bd4e826a1e5e50a07907d237141eb11"
   },
   "orchestration": {
