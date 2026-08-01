@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import signal
 import sys
 import tempfile
 import unittest
 from collections import Counter
 from pathlib import Path
+from unittest.mock import patch
 
 from analysis.fitness_backtest import (
     BacktestInputError,
@@ -26,6 +28,9 @@ from analysis.fitness_backtest import (
     validate_frozen_provenance,
     validate_cli_event,
     verify_source_manifest,
+    _kill_process_group,
+    _read_json,
+    _read_jsonl,
     _run_json_command,
 )
 
@@ -335,15 +340,54 @@ class FitnessBacktestTests(unittest.TestCase):
 
     def test_deeply_nested_engine_json_fails_as_a_bounded_input_error(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            with self.assertRaisesRegex(BacktestInputError, "invalid JSON|must be an object"):
+            with self.assertRaisesRegex(BacktestInputError, "nesting"):
                 _run_json_command(
                     [
                         sys.executable,
                         "-c",
-                        "print('[' * 2000 + '0' + ']' * 2000)",
+                        "print('{\"child\":' * 150 + '{}' + '}' * 150)",
                     ],
                     Path(directory),
                 )
+
+    def test_deeply_nested_study_and_store_json_fail_as_bounded_input_errors(self) -> None:
+        deeply_nested = '{"child":' * 150 + '{}' + '}' * 150
+        recursion_bomb = '{"child":' * 2000 + '{}' + '}' * 2000
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            study_path = root / "study.json"
+            store_path = root / "runs.jsonl"
+            study_path.write_text(deeply_nested, encoding="utf-8")
+            store_path.write_text(recursion_bomb + "\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(BacktestInputError, "nesting"):
+                _read_json(study_path)
+            with self.assertRaisesRegex(BacktestInputError, "cannot read JSONL input"):
+                _read_jsonl(store_path)
+
+    def test_process_group_kill_is_attempted_after_leader_exit_and_leader_is_reaped(self) -> None:
+        class ExitedLeader:
+            pid = 12345
+
+            def __init__(self) -> None:
+                self.wait_calls = 0
+
+            def poll(self) -> int:
+                return 0
+
+            def wait(self, timeout: int) -> int:
+                self.wait_calls += 1
+                return 0
+
+            def kill(self) -> None:
+                self.fail("leader fallback kill should not be needed")
+
+        process = ExitedLeader()
+        with patch("analysis.fitness_backtest.os.killpg") as killpg:
+            _kill_process_group(process)  # type: ignore[arg-type]
+
+        killpg.assert_called_once_with(process.pid, signal.SIGKILL)
+        self.assertEqual(process.wait_calls, 1)
 
 
 def _event_for(command: object) -> dict[str, object]:
