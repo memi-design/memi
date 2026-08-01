@@ -93,15 +93,26 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `39dabf1e` | test: close residual V15 execution bounds |
 | `52107c8b` | fix: bound V15 JSON and process cleanup |
 | `5dc13ebb` | merge: close V15 process and JSON bounds |
+| `d56a0a19` | test: reproduce shallow clean-install ancestry failure |
+| `3c3c79aa` | ci: prepare full clean-install matrix |
+| `a72f4db3` | test: reproduce Windows path containment failures |
+| `1edc58b6` | fix: make path containment portable on Windows |
 | `aa4b39c5` | test: reproduce Windows tools RPC endpoint failure |
 | `15756b00` | fix: use named pipes for Windows tools RPC |
 | `de900a60` | test: reproduce Windows tsx shim execution failure |
 | `dd45ce31` | fix: launch execute-code portably on Windows |
+| `4ebaa668` | docs: record Windows tools RPC portability |
+| `cd670299` | docs: record Windows execute-code portability |
 | `0744774b` | fix: make Windows test contracts portable |
+| `d83ccfee` | docs: record Windows portability hardening |
 | `31f6257c` | test: reproduce residual Windows path failures |
 | `3aa7fc30` | fix: harden residual Windows path contracts |
+| `fa8e81ee` | docs: record residual Windows path hardening |
+| `3e3e5a31` | test: reproduce final Windows subprocess failures |
+| `0a71e765` | fix: launch Windows CLI shims portably |
 | `65520f72` | test: block symlink escapes and provenance overclaim |
 | `9d18f3cd` | fix: reject symlink escapes and clarify local provenance |
+| `75de171f` | docs: record symlink containment hardening |
 
 ### Exact-match fail-closed route fitness
 

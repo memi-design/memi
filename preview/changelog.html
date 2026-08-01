@@ -390,7 +390,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">330</span> commits</span>
+      <span><span class="n" id="stat-commits">341</span> commits</span>
       <span><span class="n" id="stat-versions">37</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-01</span> latest</span>
     </div>
@@ -408,7 +408,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v2.7.4</strong>
-            <div class="summary-caption">88 commits tracked in v2.7.4 from CHANGELOG.md.</div>
+            <div class="summary-caption">99 commits tracked in v2.7.4 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -761,6 +761,22 @@ const releases = [
         "merge: close V15 process and JSON bounds"
       ],
       [
+        "d56a0a19",
+        "test: reproduce shallow clean-install ancestry failure"
+      ],
+      [
+        "3c3c79aa",
+        "ci: prepare full clean-install matrix"
+      ],
+      [
+        "a72f4db3",
+        "test: reproduce Windows path containment failures"
+      ],
+      [
+        "1edc58b6",
+        "fix: make path containment portable on Windows"
+      ],
+      [
         "aa4b39c5",
         "test: reproduce Windows tools RPC endpoint failure"
       ],
@@ -777,8 +793,20 @@ const releases = [
         "fix: launch execute-code portably on Windows"
       ],
       [
+        "4ebaa668",
+        "docs: record Windows tools RPC portability"
+      ],
+      [
+        "cd670299",
+        "docs: record Windows execute-code portability"
+      ],
+      [
         "0744774b",
         "fix: make Windows test contracts portable"
+      ],
+      [
+        "d83ccfee",
+        "docs: record Windows portability hardening"
       ],
       [
         "31f6257c",
@@ -789,12 +817,28 @@ const releases = [
         "fix: harden residual Windows path contracts"
       ],
       [
+        "fa8e81ee",
+        "docs: record residual Windows path hardening"
+      ],
+      [
+        "3e3e5a31",
+        "test: reproduce final Windows subprocess failures"
+      ],
+      [
+        "0a71e765",
+        "fix: launch Windows CLI shims portably"
+      ],
+      [
         "65520f72",
         "test: block symlink escapes and provenance overclaim"
       ],
       [
         "9d18f3cd",
         "fix: reject symlink escapes and clarify local provenance"
+      ],
+      [
+        "75de171f",
+        "docs: record symlink containment hardening"
       ]
     ],
     "decisions": [
