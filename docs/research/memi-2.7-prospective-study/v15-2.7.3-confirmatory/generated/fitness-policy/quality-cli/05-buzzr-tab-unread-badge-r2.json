@@ -1,0 +1,18 @@
+{
+  "baseline": {
+    "criticalDefects": 0,
+    "score": 89.0
+  },
+  "blinded": true,
+  "evidenceSha256": "sha256:cdc961b5dca36f27234a88bb5e1cf23cf60828c4707d9a965ebeee680c93c4d9",
+  "graderCount": 3,
+  "memi": {
+    "criticalDefects": 0,
+    "score": 91.0
+  },
+  "pair": {
+    "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-baseline-0e923ccd-ff34-45c8-b7fa-90f774319b5e",
+    "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-memi-6f5cbe66-f378-44bd-9477-415fc0b0c104"
+  },
+  "rubricVersion": "memi-design-quality-v1"
+}

@@ -10,6 +10,7 @@ from analysis.fitness_backtest import (
     BacktestInputError,
     build_engine_quality_evidence,
     canonical_sha256,
+    engine_canonical_sha256,
     expected_replay_counts,
     load_backtest_inputs,
     render_backtest_artifacts,
@@ -86,7 +87,7 @@ class FitnessBacktestTests(unittest.TestCase):
         self.assertEqual(payload["graderCount"], 3)
         self.assertEqual(payload["baseline"], {"score": 88.0, "criticalDefects": 0})
         self.assertEqual(payload["memi"], {"score": 89.0, "criticalDefects": 0})
-        self.assertEqual(payload["evidenceSha256"], canonical_sha256(without_hash))
+        self.assertEqual(payload["evidenceSha256"], engine_canonical_sha256(without_hash))
         self.assertNotEqual(
             payload["evidenceSha256"],
             command.quality_entry["quality"]["qualityEvidenceSha256"],

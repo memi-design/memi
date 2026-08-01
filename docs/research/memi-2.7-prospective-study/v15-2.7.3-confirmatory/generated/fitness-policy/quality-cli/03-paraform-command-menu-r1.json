@@ -1,0 +1,18 @@
+{
+  "baseline": {
+    "criticalDefects": 0,
+    "score": 83.0
+  },
+  "blinded": true,
+  "evidenceSha256": "sha256:ac615c1585496ca37b97fd347a535efe0bb9d30dabeada453b6baa478b41e472",
+  "graderCount": 3,
+  "memi": {
+    "criticalDefects": 0,
+    "score": 80.0
+  },
+  "pair": {
+    "baselineRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-baseline-09426342-3c53-4a05-a171-e50d6538c0d2",
+    "memiRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-memi-a257bb18-2d44-4a49-9a6d-4f6f746d7fa0"
+  },
+  "rubricVersion": "memi-design-quality-v1"
+}
