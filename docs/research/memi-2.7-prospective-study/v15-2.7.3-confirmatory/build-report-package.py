@@ -16,17 +16,28 @@ def main() -> int:
     args = parser.parse_args()
 
     paths = study_report_paths(args.study_root)
+    release_verified = paths.live_release_verification_path.is_file()
     outputs = build_outputs(paths)
     if args.check:
         mismatches = verify_outputs(paths, outputs)
         if mismatches:
             detail = ", ".join(f"{item.path}: {item.reason}" for item in mismatches)
             raise SystemExit(f"stale report-package artifacts: {detail}")
-        print("Report-package artifacts are current and deterministic; release remains pending live verification.")
+        release_state = (
+            "public software channels verified"
+            if release_verified
+            else "release remains pending live verification"
+        )
+        print(f"Report-package artifacts are current and deterministic; {release_state}.")
         return 0
 
     write_outputs(paths, outputs)
-    print("Wrote deterministic report-package artifacts; pending live release verification.")
+    release_state = (
+        "public software channels verified"
+        if release_verified
+        else "pending live release verification"
+    )
+    print(f"Wrote deterministic report-package artifacts; {release_state}.")
     return 0
 
 

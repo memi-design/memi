@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "memoire.release-channel-evidence.v1",
+  "releaseVersion": "2.7.4",
+  "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+  "canonicalization": "UTF-8 JSON with lexicographically sorted keys and compact separators",
+  "records": [
+    {
+      "id": "npm",
+      "evidence": {
+        "status": "verified",
+        "version": "2.7.4",
+        "trustedPublisherRun": "https://github.com/memi-design/memi/actions/runs/30702420045",
+        "registryUrl": "https://registry.npmjs.org/@memi-design/cli",
+        "tarballUrl": "https://registry.npmjs.org/@memi-design/cli/-/cli-2.7.4.tgz",
+        "integrity": "sha512-6bksTLz+3YRV0QgH69lWPQ2EVPgKlvnTdrx9MH0F69GhRVfwLqDKf6na8D8qKcV5YafMF+cMdOS3DAX4xQEQvw==",
+        "shasum": "e16d4770b72e1323603f41188104fc02c0c6851d",
+        "tarballSha512": "e9b92c4cbcfedd8455d10807ebd9563d0d8454f80a96f9d376bc7d307d05ebd1a14557f02ea0ca7fa9daf03f2a29c57961a7cc17e70c74e4b70c05f8c50110bf",
+        "releaseRecordSha256": "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d"
+      }
+    },
+    {
+      "id": "node-installs",
+      "evidence": {
+        "status": "verified",
+        "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "workflowRun": "https://github.com/memi-design/memi/actions/runs/30702111964",
+        "workflowConclusion": "success",
+        "platforms": ["macos-latest", "ubuntu-latest", "windows-latest"],
+        "nodeVersions": [20, 22, 24],
+        "successfulCells": 9,
+        "failedCells": 0,
+        "contract": "pack, install, and invoke consumer binary"
+      }
+    },
+    {
+      "id": "github-release",
+      "evidence": {
+        "status": "verified",
+        "url": "https://github.com/memi-design/memi/releases/tag/v2.7.4",
+        "publishedAt": "2026-08-01T13:51:25Z",
+        "tag": "v2.7.4",
+        "tagPeeledCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "checksumsAssetSha256": "f0ff2f7af7e0d37b0efbab3d9eeea4c4bc8d8f2940efcc52979563f8fb07c242",
+        "reportAssetSha256": "7f89b93951cc6ee35ce5d38cc9c8009f4d607be9681190c18700bf2aeb7f2bc5",
+        "reportChecksumAssetSha256": "f0933a18145bcd0bb911477e0233063373dcb31824f595a981ce785caaa7317e",
+        "platformAssets": {
+          "memi-darwin-arm64.tar.gz": "72e7135e6c0b1236b8b9a2dcae68b6ac732f208d975be5d11da4491ac7a3f1c8",
+          "memi-darwin-x64.tar.gz": "39cc1d5661c1af5752da4cf8e7de39701ab15fceaf80a88b8d52d5c8486156a3",
+          "memi-linux-x64.tar.gz": "a78e4df6576c2aeb1403887476fc365845038919a1fc7ef00af9f7b43da1ace6",
+          "memi-win-x64.zip": "c88213ebb6ac5d72a8f72f05439dc9cc7d5280bdebcaa265cc7a1d74ea5cc27b"
+        }
+      }
+    },
+    {
+      "id": "github-action",
+      "evidence": {
+        "status": "verified",
+        "repository": "https://github.com/memi-design/memi",
+        "majorTag": "v2",
+        "majorTagCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "promotionRun": "https://github.com/memi-design/memi/actions/runs/30702692342"
+      }
+    },
+    {
+      "id": "homebrew",
+      "evidence": {
+        "status": "verified",
+        "formula": "memi-design/memi/memoire",
+        "formulaUrl": "https://github.com/memi-design/homebrew-memi/blob/main/Formula/memoire.rb",
+        "tapCommit": "baa7a8ca0a89899ad110cec7a8f617a24651a288",
+        "formulaSha256": "8ff3094d93fe15d095e3d75a10f6827399bd792d09ee96b62e23c2b859457d52",
+        "stableVersion": "2.7.4",
+        "installedVersion": "2.7.4",
+        "installedPath": "/opt/homebrew/Cellar/memoire/2.7.4",
+        "stableAssetSha256": "72e7135e6c0b1236b8b9a2dcae68b6ac732f208d975be5d11da4491ac7a3f1c8"
+      }
+    },
+    {
+      "id": "ghcr",
+      "evidence": {
+        "status": "verified-by-authenticated-workflow",
+        "image": "ghcr.io/memi-design/memi",
+        "versionTag": "v2.7.4",
+        "latestTag": "latest",
+        "ociIndexDigest": "sha256:25df2d3bbad868f1e6902027353169af92cd42f68d825a113aa352dc785ef12b",
+        "linuxAmd64Digest": "sha256:9a510fcf2daa0aa5d53d20b92a3c1b8848b4e02773909fd05f80a57be2e5fa4e",
+        "promotionRun": "https://github.com/memi-design/memi/actions/runs/30702692342",
+        "anonymousPullClaimed": false
+      }
+    },
+    {
+      "id": "mcp-registry",
+      "evidence": {
+        "status": "verified",
+        "registryUrl": "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.sarveshsea%2Fmemi",
+        "serverName": "io.github.sarveshsea/memi",
+        "version": "2.7.4",
+        "package": "@memi-design/cli@2.7.4",
+        "registryStatus": "active",
+        "isLatest": true,
+        "publishedAt": "2026-08-01T14:00:58.717778Z"
+      }
+    },
+    {
+      "id": "website-pdf",
+      "evidence": {
+        "status": "detached-post-build",
+        "artifactUrl": "https://www.memoire.cv/release/memi-release.json",
+        "pdfUrl": "https://www.memoire.cv/research/memi-2.7.3-confirmatory-audit.pdf",
+        "releaseUrl": "https://github.com/memi-design/memi/releases/tag/v2.7.4",
+        "releaseAssetUrl": "https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf",
+        "checksumAssetUrl": "https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf.sha256",
+        "pdfBytes": 560252,
+        "pdfSha256": "7f89b93951cc6ee35ce5d38cc9c8009f4d607be9681190c18700bf2aeb7f2bc5",
+        "checksumAssetSha256": "f0933a18145bcd0bb911477e0233063373dcb31824f595a981ce785caaa7317e",
+        "reason": "The PDF checksum was established after compilation and is intentionally excluded from the self-referential PDF."
+      }
+    },
+    {
+      "id": "public-gate",
+      "evidence": {
+        "status": "verified",
+        "receiptPath": "release-artifacts/public-gate/2.7.4.parity.json",
+        "receiptUrl": "https://github.com/memi-design/memi/blob/a72614562bdc54c11b4beb416987b635740713c5/release-artifacts/public-gate/2.7.4.parity.json",
+        "receiptSha256": "ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a",
+        "verifiedAt": "2026-08-01T15:00:46Z",
+        "failures": [],
+        "parityEligible": true,
+        "parityMergeCommit": "a72614562bdc54c11b4beb416987b635740713c5",
+        "finalVerifier": {
+          "status": "passed",
+          "failures": [],
+          "parityEligible": true,
+          "toolingMergeCommit": "09635d81d9fbd281a2b5b3a7fefb55f0156380b3",
+          "pullRequest": "https://github.com/memi-design/memi/pull/108",
+          "cleanInstallMatrixRun": "https://github.com/memi-design/memi/actions/runs/30707179725",
+          "websiteManifestSha256": "1ec702fa4a309158744640a3ae761427fc307436aac7ae0ef4ece40a575232e0",
+          "websiteSourceCommit": "dac2dd9cb7f74dec977b4cb4280676b0c6d9d2c9"
+        }
+      }
+    }
+  ]
+}

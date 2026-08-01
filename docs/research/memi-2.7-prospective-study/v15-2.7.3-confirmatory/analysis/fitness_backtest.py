@@ -126,7 +126,7 @@ def default_backtest_paths(
     return BacktestPaths(
         study_root=root,
         engine_cli=(engine_cli or Path(
-            "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js"
+            "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js"
         )).resolve(),
         source_store_root=(source_store_root or evidence_root / "store").resolve(),
         source_runs_root=(source_runs_root or evidence_root / "runs").resolve(),

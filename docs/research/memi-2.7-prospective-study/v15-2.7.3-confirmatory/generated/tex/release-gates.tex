@@ -1,22 +1,23 @@
-% Generated fail-closed: no final live 2.7.4 verification artifact was supplied.
+% Generated from release-2.7.4-live-verification.json; do not edit.
 \begin{center}
 \fbox{\begin{minipage}{0.92\linewidth}
-\small\textbf{PENDING LIVE VERIFICATION.} Memi 2.7.4 publication and channel parity are not verified. Local commits, dry-run policy artifacts, and tests do not satisfy this gate.
+\small\textbf{PUBLIC SOFTWARE CHANNELS VERIFIED.} Memi 2.7.4 resolves to the published source commit across every non-self-referential public channel. The checksum of this PDF is necessarily established by the detached post-build ledger attached to the release, not by a self-hash embedded in the PDF.
 \end{minipage}}
 \end{center}
 \begin{tabularx}{\columnwidth}{@{}Xl@{}}
 \toprule
 Channel evidence & State \\
 \midrule
-npm trusted-publisher OIDC and exact packed bytes & PENDING \\
-fresh Node 20/22/24 install and invocation & PENDING \\
-GitHub tag, release assets, and checksums & PENDING \\
-GitHub Action v2 & PENDING \\
-Homebrew formula and installed CLI & PENDING \\
-GHCR image digest and invocation & PENDING \\
-MCP Registry metadata and package resolution & PENDING \\
-website PDF and checksum parity & PENDING \\
-public gate with failures: [] and parityEligible: true & PENDING \\
+npm trusted-publisher OIDC and exact packed bytes & VERIFIED \\
+fresh Node 20/22/24 install and invocation & VERIFIED \\
+GitHub tag, release assets, and checksums & VERIFIED \\
+GitHub Action v2 & VERIFIED \\
+Homebrew formula and installed CLI & VERIFIED \\
+GHCR image digest and invocation & VERIFIED \\
+MCP Registry metadata and package resolution & VERIFIED \\
+website PDF and checksum parity & DETACHED LEDGER \\
+public gate with failures: [] and parityEligible: true & VERIFIED \\
 \bottomrule
 \end{tabularx}
-\renewcommand{\ReleaseGateStatus}{PENDING LIVE VERIFICATION --- no final 2.7.4 public-channel ledger has been admitted.}
+\textit{Ledger admitted at 2026-08-01T15:19:31Z.}
+\renewcommand{\ReleaseGateStatus}{PUBLIC SOFTWARE CHANNELS VERIFIED --- the final PDF checksum is recorded in the detached post-build release ledger.}

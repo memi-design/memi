@@ -282,9 +282,9 @@ class FitnessBacktestTests(unittest.TestCase):
                 ensure_safe_output_path(root / "generated" / "artifact.json", root)
 
     @unittest.skipUnless(
-        Path("/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js").is_file()
+        Path("/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js").is_file()
         and Path("/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/store").is_dir(),
-        "requires the sealed V15 evidence and rebuilt 2.7.4 CLI",
+        "requires the sealed V15 evidence and frozen prospective 2.7.4 CLI",
     )
     def test_real_cli_execution_authenticates_copy_and_exact_cutoff_prefixes(self) -> None:
         result = execute_backtest(default_backtest_paths(study_root=STUDY_ROOT))

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "memoire.release-live-verification.v1",
+  "releaseVersion": "2.7.4",
+  "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+  "tag": "v2.7.4",
+  "verifiedAt": "2026-08-01T15:19:31Z",
+  "channels": [
+    {
+      "id": "npm",
+      "status": "verified",
+      "version": "2.7.4",
+      "verificationMode": "direct",
+      "evidenceSha256": "sha256:362346ffdcdd0baaa88706fa72f78a9eed2fb9a511790f9698a7d9a0220fd293",
+      "evidenceUrls": [
+        "https://registry.npmjs.org/@memi-design/cli",
+        "https://github.com/memi-design/memi/actions/runs/30702420045"
+      ]
+    },
+    {
+      "id": "node-installs",
+      "status": "verified",
+      "version": "2.7.4",
+      "verificationMode": "direct",
+      "evidenceSha256": "sha256:196bd24ccdd2a11cad916bbf08b067789eea8532d51f23a7141c606869d343c2",
+      "evidenceUrls": [
+        "https://github.com/memi-design/memi/actions/runs/30702111964"
+      ]
+    },
+    {
+      "id": "github-release",
+      "status": "verified",
+      "version": "2.7.4",
+      "verificationMode": "direct",
+      "evidenceSha256": "sha256:5197f5a8fed8607ff53395609753cb54e44101b6f72adc9109943f74b6b93dfa",
+      "evidenceUrls": [
+        "https://github.com/memi-design/memi/releases/tag/v2.7.4"
+      ]
+    },
+    {
+      "id": "github-action",
+      "status": "verified",
+      "version": "2.7.4",
+      "verificationMode": "direct",
+      "evidenceSha256": "sha256:822156874bfb3470f5fd2c25ce849e146053599b05d27239ed65b955f7cadab9",
+      "evidenceUrls": [
+        "https://github.com/memi-design/memi/tree/v2",
+        "https://github.com/memi-design/memi/actions/runs/30702692342"
+      ]
+    },
+    {
+      "id": "homebrew",
+      "status": "verified",
+      "version": "2.7.4",
+      "verificationMode": "direct",
+      "evidenceSha256": "sha256:7080e4bf6c9458fa9ec7b45d3a1b4e7d368e51bc175664e48b588ff66791fb3b",
+      "evidenceUrls": [
+        "https://github.com/memi-design/homebrew-memi/blob/main/Formula/memoire.rb"
+      ]
+    },
+    {
+      "id": "ghcr",
+      "status": "verified",
+      "version": "2.7.4",
+      "verificationMode": "direct",
+      "evidenceSha256": "sha256:cdf7dc3cf8648f8868cee1a907125365e4abdf36927d1b3c5d8c4d028768d0b8",
+      "evidenceUrls": [
+        "https://github.com/memi-design/memi/actions/runs/30702692342"
+      ]
+    },
+    {
+      "id": "mcp-registry",
+      "status": "verified",
+      "version": "2.7.4",
+      "verificationMode": "direct",
+      "evidenceSha256": "sha256:c0c111f2aba4d87936932da555f2db73dbe92fce266061f8f7a97e4521faa260",
+      "evidenceUrls": [
+        "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.sarveshsea%2Fmemi"
+      ]
+    },
+    {
+      "id": "website-pdf",
+      "status": "detached",
+      "version": "2.7.4",
+      "verificationMode": "detached-post-build",
+      "evidenceSha256": "sha256:08cf95e0812741148b8aec0c0ef485831c276b689c53ef24be7786683673db7f",
+      "evidenceUrls": [
+        "https://www.memoire.cv/research/memi-2.7.3-confirmatory-audit.pdf",
+        "https://github.com/memi-design/memi/releases/tag/v2.7.4"
+      ]
+    },
+    {
+      "id": "public-gate",
+      "status": "verified",
+      "version": "2.7.4",
+      "verificationMode": "direct",
+      "evidenceSha256": "sha256:8f3616da081f34e4f064934b7788112f7d0dca3a2f58275d105ea4b6f9b0b84b",
+      "evidenceUrls": [
+        "https://github.com/memi-design/memi/blob/a72614562bdc54c11b4beb416987b635740713c5/release-artifacts/public-gate/2.7.4.parity.json"
+      ]
+    }
+  ],
+  "publicGate": {
+    "failures": [],
+    "parityEligible": true,
+    "evidenceSha256": "sha256:ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a",
+    "finalVerifier": {
+      "status": "passed",
+      "failures": [],
+      "parityEligible": true,
+      "toolingMergeCommit": "09635d81d9fbd281a2b5b3a7fefb55f0156380b3",
+      "pullRequest": "https://github.com/memi-design/memi/pull/108",
+      "cleanInstallMatrixRun": "https://github.com/memi-design/memi/actions/runs/30707179725",
+      "websiteManifestSha256": "1ec702fa4a309158744640a3ae761427fc307436aac7ae0ef4ece40a575232e0",
+      "websiteSourceCommit": "dac2dd9cb7f74dec977b4cb4280676b0c6d9d2c9"
+    }
+  }
+}
