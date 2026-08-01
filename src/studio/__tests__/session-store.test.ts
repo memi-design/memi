@@ -62,6 +62,7 @@ describe("studio session store", () => {
 
   it("persists events to jsonl, indexes sessions, and reports runtime metrics", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-store-"));
+    let server: StudioRuntimeServer | null = null;
     try {
       const config = defaultStudioConfig(root);
       await saveStudioConfig(root, {
@@ -72,7 +73,7 @@ describe("studio session store", () => {
         )),
       });
 
-      const server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
+      server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
       servers.push(server);
       const runtime = await server.start();
       const session = await server.startSession({
@@ -117,12 +118,14 @@ describe("studio session store", () => {
       expect(logs.events).toHaveLength(1);
       expect(logs.events[0].type).toBe("session_done");
     } finally {
-      await rm(root, { recursive: true, force: true });
+      await server?.stop();
+      await rm(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
     }
   });
 
   it("closes subprocess stdin so non-interactive harnesses do not hang waiting for input", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-stdin-"));
+    let server: StudioRuntimeServer | null = null;
     try {
       const config = defaultStudioConfig(root);
       await saveStudioConfig(root, {
@@ -133,7 +136,7 @@ describe("studio session store", () => {
         )),
       });
 
-      const server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
+      server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
       servers.push(server);
       await server.start();
       const session = await server.startSession({
@@ -147,7 +150,8 @@ describe("studio session store", () => {
       expect(finalSession.status).toBe("completed");
       expect(finalSession.events.some((event) => event.type === "stdout" && event.message.includes("stdin closed"))).toBe(true);
     } finally {
-      await rm(root, { recursive: true, force: true });
+      await server?.stop();
+      await rm(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
     }
   });
 });
