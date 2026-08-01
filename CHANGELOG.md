@@ -98,6 +98,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `de900a60` | test: reproduce Windows tsx shim execution failure |
 | `dd45ce31` | fix: launch execute-code portably on Windows |
 | `0744774b` | fix: make Windows test contracts portable |
+| `31f6257c` | test: reproduce residual Windows path failures |
+| `3aa7fc30` | fix: harden residual Windows path contracts |
 
 ### Exact-match fail-closed route fitness
 

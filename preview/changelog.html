@@ -390,7 +390,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">326</span> commits</span>
+      <span><span class="n" id="stat-commits">328</span> commits</span>
       <span><span class="n" id="stat-versions">37</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-01</span> latest</span>
     </div>
@@ -408,7 +408,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v2.7.4</strong>
-            <div class="summary-caption">84 commits tracked in v2.7.4 from CHANGELOG.md.</div>
+            <div class="summary-caption">86 commits tracked in v2.7.4 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -779,6 +779,14 @@ const releases = [
       [
         "0744774b",
         "fix: make Windows test contracts portable"
+      ],
+      [
+        "31f6257c",
+        "test: reproduce residual Windows path failures"
+      ],
+      [
+        "3aa7fc30",
+        "fix: harden residual Windows path contracts"
       ]
     ],
     "decisions": [
