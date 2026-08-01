@@ -225,7 +225,7 @@ def preflight_report(
         "duplicateTrials": duplicate_trial_ids,
         "extraTrials": extra_trial_ids,
         "gradeOnlyExclusions": excluded_grade_only,
-        "blindedGradingPath": str(paths.blinded_grading_path),
+        "blindedGradingPath": "analysis/blinded_grading.json",
         "blindedGradingPresent": grading_exists,
         "errors": errors,
     }

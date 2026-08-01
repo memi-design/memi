@@ -7,9 +7,9 @@
       "sha256": "sha256:be5e233a6a77ddbcff111494313ac8de89cdd92ab871caf9c89cb9cb6a2648b6"
     },
     {
-      "bytes": 5085,
+      "bytes": 4959,
       "path": "analysis.ipynb",
-      "sha256": "sha256:e370165062c6592e2782512107c1f8f7b79ec4479f422033541416c51ff4538d"
+      "sha256": "sha256:66c72e516713501c468e9464dccfd798ce2a4979112eb08759dad8b8f5e6a7fd"
     },
     {
       "bytes": 32,
@@ -37,9 +37,9 @@
       "sha256": "sha256:e5a03de011272996780860cf7465a597b34197a7f346fd07283e497511d0c0df"
     },
     {
-      "bytes": 35338,
+      "bytes": 45146,
       "path": "analysis/fitness_backtest.py",
-      "sha256": "sha256:64c5d94d63c0c6b57fcc3ad92cbf04685ff01b860c01e8a122055928b76d15f5"
+      "sha256": "sha256:34ab5148ddd603a6d49bed71cc2a669bdfb70288475a067243e0b443e1649759"
     },
     {
       "bytes": 26914,
@@ -59,7 +59,7 @@
     {
       "bytes": 49923,
       "path": "analysis/pipeline.py",
-      "sha256": "sha256:98835dd9fdfe8577d938059c83621d324d2f3fd552759557c61ea51cd0c7bd02"
+      "sha256": "sha256:9fa0959642d2a30525f016e0ea0ffcd317f95ff7b0271469cf6ff056b1e9bab5"
     },
     {
       "bytes": 28146,
@@ -77,9 +77,9 @@
       "sha256": "sha256:50624e98e225aa80f3d5b7b999045fbf39be6ab9b1f3a8d821b34d642b994f41"
     },
     {
-      "bytes": 13632,
+      "bytes": 14636,
       "path": "analysis/tests/test_fitness_backtest.py",
-      "sha256": "sha256:e85166d7d7c65c2d7e14bd221be32c1888eb8eb920822acd9a893869731b1a18"
+      "sha256": "sha256:5f815be9eed89d84758c772bc3a414dd2753c2542e2816a00175361210abec73"
     },
     {
       "bytes": 29108,
@@ -97,9 +97,9 @@
       "sha256": "sha256:fabdc15cd97b325c5c15b0fb074c8f32a9c32e6ce9f4665ea7b18e4647d484c0"
     },
     {
-      "bytes": 20926,
+      "bytes": 21881,
       "path": "analysis/tests/test_pipeline.py",
-      "sha256": "sha256:d9f9b3c38f12924f0b254672f2dfd95bcb4555b468a4bec393a7cd34d3437fca"
+      "sha256": "sha256:ccec7fb11389fd267f88b8b9e84e8dc641be7ff681de36d22d7e1ff1a5860bac"
     },
     {
       "bytes": 14924,
@@ -187,9 +187,9 @@
       "sha256": "sha256:4c361f5cce9376d30bf694ddf8fd0cd5c7ef7a227a51c4edb1485af25ce3b3fa"
     },
     {
-      "bytes": 29041,
+      "bytes": 29276,
       "path": "generated/fitness-policy/backtest-command-receipts.json",
-      "sha256": "sha256:33db4e1802d14782316c49feaee2b0e9e76dc55f4cf80de88ace6231ee9a4f79"
+      "sha256": "sha256:d0ff37cb2bbf21e777c12d0efd2eff51611f79337062fe8369240ccad03a5674"
     },
     {
       "bytes": 30303,
@@ -197,9 +197,9 @@
       "sha256": "sha256:1dea5d676b3c67fb801795ffbb5f75fb412a961339c26bd4fd19fe9942be6305"
     },
     {
-      "bytes": 101740,
+      "bytes": 101930,
       "path": "generated/fitness-policy/fitness-backtest-as-of.json",
-      "sha256": "sha256:79ec867d5ac148db87499920a0e1aaf6b72286b1b4c273a35b06d964cf222128"
+      "sha256": "sha256:32f68be396a9fea27091c849d5c16f2f8e083c7b99b64211f0e72f5e085dd5a5"
     },
     {
       "bytes": 1650,
@@ -377,36 +377,6 @@
       "sha256": "sha256:65a7a12c0f26376bf5a75f56102c03fcb865b26b955a3d1b8ee1af51fafc9976"
     },
     {
-      "bytes": 3586,
-      "path": "main.aux",
-      "sha256": "sha256:e57932cb05f3ae61144f2e52701fd0778bb8c957fcea750a92cd30a2304f16a4"
-    },
-    {
-      "bytes": 19393,
-      "path": "main.fdb_latexmk",
-      "sha256": "sha256:c34b51632ae3418ecc40163958a34500f3e9ed9bf1f63fb7401faf5f40406a2d"
-    },
-    {
-      "bytes": 20479,
-      "path": "main.fls",
-      "sha256": "sha256:11758a0d71623485c1d91689602c4546b5056d4e9008312ace3f014b42074b1e"
-    },
-    {
-      "bytes": 33644,
-      "path": "main.log",
-      "sha256": "sha256:457c7b5f6bbc720ca106886dfe0178f40859518c1d4b0938b2cea766df632ae4"
-    },
-    {
-      "bytes": 2232,
-      "path": "main.out",
-      "sha256": "sha256:01f808b8bc6f5f766190cca76c288c359460ab10344f7c21ab3de8d5cdca1ae9"
-    },
-    {
-      "bytes": 76237,
-      "path": "main.synctex.gz",
-      "sha256": "sha256:bc03f6e61c7219dc053182b3596dda10d20e4ca15d4236068ac4e817425c6830"
-    },
-    {
       "bytes": 19785,
       "path": "main.tex",
       "sha256": "sha256:032b7c79d11e38c149b72b4b4010fbe4eb74b399c92daf969e686d6800033d07"
@@ -452,9 +422,9 @@
       "sha256": "sha256:c55bfb34ee30a6974dc01230b240bd0057b38bda68d9b50ef49e4f34fbaa94bd"
     },
     {
-      "bytes": 2887,
+      "bytes": 2616,
       "path": "run-fitness-backtest.py",
-      "sha256": "sha256:7ef68f2072933e8fda09c81202470a18bd94ce99a49d27dfadaaef6f988dbba1"
+      "sha256": "sha256:15574c8e3afc8277845ab6f7e1d6753bad6016db08b5868eabf7f6dde59d242d"
     },
     {
       "bytes": 5977,
@@ -487,7 +457,7 @@
       "sha256": "sha256:1ccf198f211e3be7c14d0a09f28fc9483e22cd2421a400c12722e46180e2ceda"
     }
   ],
-  "entryCount": 97,
+  "entryCount": 91,
   "excluded": [
     "**/*.pdf",
     "generated/report-package-checksums.json"

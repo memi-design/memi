@@ -130,6 +130,29 @@ class EvidenceHashTests(unittest.TestCase):
 
 
 class PreflightTests(unittest.TestCase):
+    def test_preflight_serializes_study_relative_grading_path(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            runs_root = root / "runs"
+            analysis_root = root / "analysis"
+            runs_root.mkdir()
+            analysis_root.mkdir()
+            grading_path = analysis_root / "blinded_grading.json"
+            grading_path.write_text("{}\n", encoding="utf-8")
+
+            report = preflight_report(
+                protocol={"protocolId": "study", "design": {"agentCells": 0}},
+                freeze={"trials": []},
+                exclusions={"entries": []},
+                paths=SimpleNamespace(
+                    study_root=root,
+                    evidence_runs_root=runs_root,
+                    blinded_grading_path=grading_path,
+                ),
+            )
+
+            self.assertEqual(report["blindedGradingPath"], "analysis/blinded_grading.json")
+
     def test_preflight_reports_missing_evidence_and_grading(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
