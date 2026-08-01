@@ -3,9 +3,9 @@
   "provenance": {
     "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "22568695f3a59280a2464dcfd4192d2a2244a46e",
-    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/22568695f3a59280a2464dcfd4192d2a2244a46e/release-manifest.json",
-    "manifestSha256": "b0fc586e2078b26c71395f05e09d6bd1d2cac7dc4217b62190cb987caa755698"
+    "sourceCommit": "dac2dd9cb7f74dec977b4cb4280676b0c6d9d2c9",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/dac2dd9cb7f74dec977b4cb4280676b0c6d9d2c9/release-manifest.json",
+    "manifestSha256": "1ec702fa4a309158744640a3ae761427fc307436aac7ae0ef4ece40a575232e0"
   },
   "orchestration": {
     "schemaVersion": 1,
@@ -20,8 +20,12 @@
           "sha256": "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d"
         },
         "verification": {
-          "eligibleForParity": false,
-          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+          "eligibleForParity": true,
+          "reason": "independent public-release gate passed on 2026-08-01 across npm, GitHub release, Action v2, MCP Registry, Studio, website artifact, and fresh install",
+          "publicGate": {
+            "path": "release-artifacts/public-gate/2.7.4.parity.json",
+            "sha256": "ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a"
+          }
         }
       },
       "studio": {
@@ -95,8 +99,12 @@
           "sha256": "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d"
         },
         "verification": {
-          "eligibleForParity": false,
-          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+          "eligibleForParity": true,
+          "reason": "independent public-release gate passed on 2026-08-01 across npm, GitHub release, Action v2, MCP Registry, Studio, website artifact, and fresh install",
+          "publicGate": {
+            "path": "release-artifacts/public-gate/2.7.4.parity.json",
+            "sha256": "ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a"
+          }
         }
       },
       "studio": {

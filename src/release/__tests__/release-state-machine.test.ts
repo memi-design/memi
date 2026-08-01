@@ -524,6 +524,142 @@ describe("verified engine release state machine", () => {
     })).toContain("published engine release state is immutable");
   });
 
+  it("allows only a one-way published parity-verification clearance", () => {
+    const record = releaseRecord();
+    const recordBytes = serializeJson(record);
+    const recordSha256 = createHash("sha256").update(recordBytes).digest("hex");
+    const previous = manifestFor({
+      state: "published",
+      sourceCommit,
+      releaseRecord: { path: recordPath, sha256: recordSha256 },
+      verification: {
+        eligibleForParity: false,
+        reason: "independent public verification is pending",
+      },
+    });
+    const parityReceipt = {
+      schemaVersion: 1,
+      kind: "memi-public-release-parity-receipt",
+      verifiedAt: "2026-08-01T15:00:46Z",
+      gate: {
+        expectedVersion: "2.6.3",
+        registrySmoke: { ok: true },
+        siteSmoke: { ok: true },
+        installSmoke: { ok: true },
+        status: "passed",
+        failures: [],
+        releaseState: "published",
+        parityEligible: true,
+        evidence: {
+          transition: { verified: true, sourceCommit },
+          npm: { verified: true, sourceCommit },
+          githubRelease: { verified: true, sourceCommit, checksumsVerified: true },
+          githubAction: { verified: true, sourceCommit },
+          mcp: { verified: true, version: "2.6.3" },
+          studio: { verified: true, version: "2.5.0" },
+          website: {
+            verified: true,
+            manifestSha256: createHash("sha256").update(serializeJson(previous)).digest("hex"),
+          },
+        },
+      },
+    };
+    const parityReceiptBytes = serializeJson(parityReceipt);
+    const current = {
+      ...previous,
+      releaseGroups: {
+        ...previous.releaseGroups,
+        engine: {
+          ...previous.releaseGroups.engine,
+          verification: {
+            eligibleForParity: true,
+            reason: "independent public-release gate passed with zero failures",
+            publicGate: {
+              path: "release-artifacts/public-gate/2.6.3.parity.json",
+              sha256: createHash("sha256").update(parityReceiptBytes).digest("hex"),
+            },
+          },
+        },
+      },
+    };
+
+    expect(validateEngineReleaseTransition({
+      previousManifest: previous,
+      currentManifest: current,
+      releaseRecord: record,
+      releaseRecordBytes: recordBytes,
+      currentCommit: transitionCommit,
+      sourceIsAncestor: true,
+      sourceSurfaceFailures: [],
+    })).toContain("published engine release state is immutable");
+    expect(validateEngineReleaseTransition({
+      previousManifest: previous,
+      currentManifest: current,
+      releaseRecord: record,
+      releaseRecordBytes: recordBytes,
+      parityReceipt,
+      parityReceiptBytes,
+      currentCommit: transitionCommit,
+      sourceIsAncestor: true,
+      sourceSurfaceFailures: [],
+    })).toEqual([]);
+
+    expect(validateEngineReleaseTransition({
+      previousManifest: previous,
+      currentManifest: current,
+      releaseRecord: record,
+      releaseRecordBytes: recordBytes,
+      parityReceipt,
+      parityReceiptBytes: `${parityReceiptBytes} `,
+      currentCommit: transitionCommit,
+      sourceIsAncestor: true,
+      sourceSurfaceFailures: [],
+    })).toContain("published engine release state is immutable");
+
+    const reverted = {
+      ...current,
+      releaseGroups: {
+        ...current.releaseGroups,
+        engine: {
+          ...current.releaseGroups.engine,
+          verification: previous.releaseGroups.engine.verification,
+        },
+      },
+    };
+    expect(validateEngineReleaseTransition({
+      previousManifest: current,
+      currentManifest: reverted,
+      releaseRecord: record,
+      releaseRecordBytes: recordBytes,
+      currentCommit: transitionCommit,
+      sourceIsAncestor: true,
+      sourceSurfaceFailures: [],
+    })).toContain("published engine release state is immutable");
+
+    const rewrittenPendingReason = {
+      ...previous,
+      releaseGroups: {
+        ...previous.releaseGroups,
+        engine: {
+          ...previous.releaseGroups.engine,
+          verification: {
+            eligibleForParity: false,
+            reason: "pending for a different reason",
+          },
+        },
+      },
+    };
+    expect(validateEngineReleaseTransition({
+      previousManifest: previous,
+      currentManifest: rewrittenPendingReason,
+      releaseRecord: record,
+      releaseRecordBytes: recordBytes,
+      currentCommit: transitionCommit,
+      sourceIsAncestor: true,
+      sourceSurfaceFailures: [],
+    })).toContain("published engine release state is immutable");
+  });
+
   it("clears the cap only for a fully verified published transition", () => {
     const record = releaseRecord();
     const recordSha256 = createHash("sha256")

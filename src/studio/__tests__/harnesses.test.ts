@@ -2,7 +2,12 @@ import { mkdtemp, readFile, rm, writeFile, mkdir, chmod } from "node:fs/promises
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { beforeEach, describe, expect, it } from "vitest";
-import { buildHarnessCommand, clearHarnessProbeCaches, listHarnesses } from "../harnesses.js";
+import {
+  buildHarnessCommand,
+  classifyCliAuthResult,
+  clearHarnessProbeCaches,
+  listHarnesses,
+} from "../harnesses.js";
 import { defaultStudioConfig } from "../config.js";
 import type { StudioAgentContext, StudioConfig, StudioHarnessId } from "../types.js";
 
@@ -314,26 +319,18 @@ describe("studio harnesses", () => {
     }
   });
 
-  it("surfaces Codex config parse failures separately from login failures", async () => {
-    const root = await mkdtemp(join(tmpdir(), "memoire-studio-codex-config-error-"));
-    try {
-      const codexProbe = await writeCommandFixture(root, "codex", [
-        `console.error(${JSON.stringify(`Error loading configuration: ${root}/.codex/config.toml:38:16: unknown variant \`default\`, expected \`fast\` or \`flex\``)});`,
-        "process.exit(1);",
-      ]);
-      const config = defaultStudioConfig(root);
-      const harnesses = listHarnesses(config, {
-        resolveCommand: (command) => command === "codex" ? codexProbe : null,
-      });
+  it("surfaces Codex config parse failures separately from login failures", () => {
+    const result = classifyCliAuthResult({
+      status: 1,
+      stdout: "",
+      stderr: "Error loading configuration: /tmp/project/.codex/config.toml:38:16: unknown variant `default`, expected `fast` or `flex`",
+    }, "Codex");
 
-      expect(harnesses.find((harness) => harness.id === "codex")).toMatchObject({
-        authStatus: "config_error",
-        authMessage: expect.stringContaining("Fix Codex config"),
-      });
-      expect(harnesses.find((harness) => harness.id === "codex")?.authMessage).not.toMatch(/login/i);
-    } finally {
-      await rm(root, { recursive: true, force: true });
-    }
+    expect(result).toMatchObject({
+      authStatus: "config_error",
+      authMessage: expect.stringContaining("Fix Codex config"),
+    });
+    expect(result.authMessage).not.toMatch(/login/i);
   });
 });
 
