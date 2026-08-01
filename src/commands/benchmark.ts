@@ -14,6 +14,7 @@ import {
 import { gradeAutomatedAcceptance } from "../efficiency/automated-acceptance.js";
 import {
   benchmarkRepositoryRevision,
+  benchmarkRepositoryOrigin,
   benchmarkRepositoryStatus,
   runCodexCaseStudy,
 } from "../efficiency/codex-runner.js";
@@ -86,6 +87,7 @@ const prospectiveFixtureRootsSchema = z.object({
   fixtures: z.array(z.object({
     taskId: z.string().min(1),
     repository: z.string().min(1),
+    origin: z.string().url(),
   }).strict()).min(1),
 }).strict().superRefine((value, context) => {
   const ids = value.fixtures.map((fixture) => fixture.taskId);
@@ -245,6 +247,11 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         if (sourceStatus) {
           throw new Error(`fixture repository must be clean: ${task.id}`);
         }
+        const origin = await benchmarkRepositoryOrigin(repository);
+        if (canonicalRepositoryOrigin(origin) !== canonicalRepositoryOrigin(fixtureManifest.fixtures
+          .find((fixture) => fixture.taskId === task.id)?.origin ?? "")) {
+          throw new Error(`fixture origin mismatch for ${task.id}: received ${origin}`);
+        }
         const taskPath = join(taskRoot, `${task.id}.json`);
         const workflowTask = workflowTaskSchema.parse(JSON.parse(
           await readFile(taskPath, "utf8"),
@@ -264,6 +271,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         return {
           taskId: task.id,
           repository,
+          origin: canonicalRepositoryOrigin(origin),
           revision,
           taskManifestSha256: await hashFile(taskPath),
           nativeCaptureKinds,
@@ -294,7 +302,14 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           fixture.revision,
         )));
       }
-    });
+});
+
+function canonicalRepositoryOrigin(origin: string): string {
+  return origin.trim()
+    .replace(/^git@github\.com:/, "https://github.com/")
+    .replace(/\.git$/, "")
+    .replace(/\/$/, "");
+}
 
   benchmark
     .command("prospective-evaluate <plan> <freeze>")

@@ -221,6 +221,12 @@ export async function benchmarkRepositoryStatus(
   ).trim();
 }
 
+export async function benchmarkRepositoryOrigin(
+  repositoryRoot: string,
+): Promise<string> {
+  return (await git(repositoryRoot, ["config", "--get", "remote.origin.url"])).trim();
+}
+
 interface ExecuteCodexOptions {
   readonly codexPath: string;
   readonly repositoryRoot: string;
