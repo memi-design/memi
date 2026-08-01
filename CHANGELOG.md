@@ -95,6 +95,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `5dc13ebb` | merge: close V15 process and JSON bounds |
 | `aa4b39c5` | test: reproduce Windows tools RPC endpoint failure |
 | `15756b00` | fix: use named pipes for Windows tools RPC |
+| `0744774b` | fix: make Windows test contracts portable |
 
 ### Exact-match fail-closed route fitness
 
@@ -110,6 +111,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Added the manifest-sealed V15 confirmatory report and deterministic analysis
   artifacts. The report retains its stated scope and limitations and does not
   establish broader product or harness comparisons.
+- Made source checkouts LF-stable on every supported runner, isolated workflow
+  evidence from host Git newline policy, and normalized native path contracts
+  without weakening traversal, release, or package-boundary checks.
 
 ### Key Design Decisions
 
