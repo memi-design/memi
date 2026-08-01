@@ -498,6 +498,33 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         if (reservedArtifact) {
           throw new Error(`prospective evidence artifact name is reserved: ${reservedArtifact}`);
         }
+        const taskCaptureKeys = task.nativeCaptures.map((capture) =>
+          `${capture.kind}:${capture.artifactName}:${capture.artifactName}`,
+        ).sort();
+        const draftCaptureKeys = draft.native.captures.map((capture) =>
+          `${capture.kind}:${capture.name}:${capture.source}`,
+        ).sort();
+        if (
+          taskCaptureKeys.length === 0
+          || JSON.stringify(taskCaptureKeys) !== JSON.stringify(draftCaptureKeys)
+        ) {
+          throw new Error("prospective evidence V2 requires nativeCaptures matching the draft");
+        }
+        const preexistingCapture = await Promise.all(task.nativeCaptures.map(
+          async (capture) => ({
+            artifactName: capture.artifactName,
+            exists: await lstat(join(resolve(opts.artifactRoot), capture.artifactName)).then(
+              () => true,
+              () => false,
+            ),
+          }),
+        ));
+        const staleCapture = preexistingCapture.find((capture) => capture.exists);
+        if (staleCapture) {
+          throw new Error(
+            `prospective evidence V2 capture artifact already exists: ${staleCapture.artifactName}`,
+          );
+        }
         evidenceDraft = {
           draft,
           artifactRoot: resolve(opts.artifactRoot),
