@@ -36,6 +36,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `680df05f` — research: audit V16 freeze readiness
 - `8bc5fd4f` — test: define V2 prospective fixture preflight
 - `47c3b1a5` — feat: preflight pinned V2 study fixtures
+- `5ee13ea2` — test: seal V2 fixture preflight receipts
+- `b2d9508c` — feat: attest V2 fixture preflight state
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -60,6 +62,9 @@ fixture, collectors, calibration receipts, and measured billing artifacts exist.
 The harness now also provides a preflight gate which refuses to freeze unless
 each repository is clean at its preregistered revision and each task manifest
 contains the capture kinds required by the sealed V2 evidence contract.
+Each successful preflight can now persist a timestamped, content-addressed
+receipt with the plan hash, fixture revisions, task-manifest hashes, and
+admitted capture kinds for independent reconstruction.
 
 ## v2.7.4 — 2026-08-01
 
