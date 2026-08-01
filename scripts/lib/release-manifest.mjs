@@ -24,6 +24,18 @@ function isSupportedPublishProvenance(record) {
     && record?.sourceCommit === LEGACY_PUBLISH_PROVENANCE.sourceCommit;
 }
 
+function validateReleaseRecordPointer(record, version, label) {
+  const failures = [];
+  const expectedPath = `release-artifacts/npm/${version}.release.json`;
+  if (record?.path !== expectedPath) {
+    failures.push(`${label} release record path must be ${expectedPath}`);
+  }
+  if (!SHA256.test(record?.sha256 ?? "")) {
+    failures.push(`${label} release record must include its SHA-256`);
+  }
+  return failures;
+}
+
 export function serializeJson(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
@@ -118,6 +130,13 @@ function validateEngineManifestState(engine) {
       if (engine.previousPublicRelease?.version === engine.version) {
         failures.push("candidate previousPublicRelease must differ from the candidate version");
       }
+      if (engine.previousPublicRelease?.releaseRecord !== undefined) {
+        failures.push(...validateReleaseRecordPointer(
+          engine.previousPublicRelease.releaseRecord,
+          engine.previousPublicRelease.version,
+          "candidate previousPublicRelease",
+        ));
+      }
     }
     return failures;
   }
@@ -127,16 +146,22 @@ function validateEngineManifestState(engine) {
   }
 
   if (state === "published") {
-    if (!RELEASE_RECORD_PATH.test(engine.releaseRecord?.path ?? "")) {
-      failures.push("published engine release record path must be an immutable release-artifacts/npm version path");
+    failures.push(...validateReleaseRecordPointer(
+      engine.releaseRecord,
+      engine.version,
+      "published engine",
+    ));
+  } else {
+    if (engine.releaseRecord !== null) {
+      failures.push(...validateReleaseRecordPointer(
+        engine.releaseRecord,
+        engine.version,
+        "historical engine",
+      ));
     }
-    if (!SHA256.test(engine.releaseRecord?.sha256 ?? "")) {
-      failures.push("published engine release record must include its SHA-256");
+    if (engine.verification?.eligibleForParity !== false) {
+      failures.push("historical engine release must be explicitly ineligible for parity");
     }
-  } else if (engine.releaseRecord !== null) {
-    failures.push("historical engine release releaseRecord must be null");
-  } else if (engine.verification?.eligibleForParity !== false) {
-    failures.push("historical engine release must be explicitly ineligible for parity");
   }
 
   return failures;
@@ -789,7 +814,7 @@ export function buildPublicReleaseManifest(manifest) {
         version: previous.version,
         state: "historical",
         sourceCommit: previous.sourceCommit,
-        releaseRecord: null,
+        releaseRecord: previous.releaseRecord ?? null,
         verification: {
           eligibleForParity: false,
           reason:

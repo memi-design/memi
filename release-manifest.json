@@ -7,9 +7,13 @@
       "state": "candidate",
       "sourceCommit": null,
       "releaseRecord": null,
-      "previousPublicRelease": {
-        "version": "2.7.3",
-        "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1"
+    "previousPublicRelease": {
+      "version": "2.7.3",
+      "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1",
+      "releaseRecord": {
+        "path": "release-artifacts/npm/2.7.3.release.json",
+        "sha256": "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02"
+      }
       },
       "verification": {
         "eligibleForParity": false,
