@@ -25,6 +25,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `0dbd668f` test: bind fitness event execution mode
 - `ad97c0ab` fix: bind fitness execution provenance
 - `90e3f2e1` refactor: scope fitness evidence containment
+- `45cd891d` test: define atomic fitness append lock
+- `f81416a0` fix: serialize skill fitness appends
+- `e285a2b5` refactor: isolate fitness file locking
 - Added RED contract coverage for full-identity fitness isolation, blinded
   quality evidence v2, immediate regression suppression, prospective recovery,
   legacy v1 compatibility, and chronological no-look-ahead replay.
@@ -58,6 +61,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Required both paired runs and the bound route receipt to match sealed
   prospective manifests, and rejected reuse of any exact-route run or trial
   pair even when a caller supplies a different quality-evidence hash.
+- Serialized process-level fitness-store appends through a private exclusive
+  lock directory with bounded waiting, dead-owner quarantine recovery, secure
+  no-follow writes, and duplicate revalidation immediately before append.
 
 #### Architectural decisions
 
