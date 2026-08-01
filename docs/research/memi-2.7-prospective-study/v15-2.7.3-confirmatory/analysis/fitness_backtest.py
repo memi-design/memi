@@ -30,6 +30,7 @@ V1_NEGATIVE_DECISION = "record-v1-automation-only-negative"
 WRITE_DECISIONS = {V2_DECISION, V1_NEGATIVE_DECISION}
 SAFE_COMPONENT_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9:._-]{0,255}$")
 MAX_JSON_BYTES = 64 * 1024 * 1024
+MAX_JSON_NESTING = 100
 MAX_COMMAND_OUTPUT_BYTES = 10 * 1024 * 1024
 
 
@@ -999,12 +1000,11 @@ def _run_json_command(argv: list[str], isolated_root: Path) -> tuple[dict[str, A
         raise BacktestInputError(f"engine command emitted invalid JSON: {error}") from error
     if not isinstance(payload, dict):
         raise BacktestInputError("engine command JSON payload must be an object")
+    _validate_json_depth(payload)
     return _normalize_paths(payload, isolated_root), receipt
 
 
 def _kill_process_group(process: subprocess.Popen[bytes]) -> None:
-    if process.poll() is not None:
-        return
     try:
         os.killpg(process.pid, signal.SIGKILL)
     except ProcessLookupError:
@@ -1037,15 +1037,32 @@ def _quality_filename(command: WriteEntry) -> str:
     )
 
 
+def _validate_json_depth(
+    value: Any,
+    *,
+    depth: int = 0,
+    max_depth: int = MAX_JSON_NESTING,
+) -> None:
+    if depth > max_depth:
+        raise BacktestInputError(f"JSON nesting exceeds the safety limit of {max_depth}")
+    if isinstance(value, dict):
+        for item in value.values():
+            _validate_json_depth(item, depth=depth + 1, max_depth=max_depth)
+    elif isinstance(value, list):
+        for item in value:
+            _validate_json_depth(item, depth=depth + 1, max_depth=max_depth)
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     try:
         if path.stat().st_size > MAX_JSON_BYTES:
             raise BacktestInputError(f"JSON input exceeds the 64 MiB safety limit: {path}")
         value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
+    except (OSError, json.JSONDecodeError, RecursionError) as error:
         raise BacktestInputError(f"cannot read JSON input {path}: {error}") from error
     if not isinstance(value, dict):
         raise BacktestInputError(f"JSON input must be an object: {path}")
+    _validate_json_depth(value)
     return value
 
 
@@ -1055,10 +1072,12 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
             raise BacktestInputError(f"JSONL input exceeds the 64 MiB safety limit: {path}")
         lines = path.read_text(encoding="utf-8").splitlines()
         values = [json.loads(line) for line in lines if line.strip()]
-    except (OSError, json.JSONDecodeError) as error:
+    except (OSError, json.JSONDecodeError, RecursionError) as error:
         raise BacktestInputError(f"cannot read JSONL input {path}: {error}") from error
     if not all(isinstance(value, dict) for value in values):
         raise BacktestInputError(f"JSONL rows must be objects: {path}")
+    for value in values:
+        _validate_json_depth(value)
     return values
 
 

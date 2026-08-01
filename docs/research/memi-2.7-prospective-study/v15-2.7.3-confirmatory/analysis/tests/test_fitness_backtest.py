@@ -362,8 +362,17 @@ class FitnessBacktestTests(unittest.TestCase):
 
             with self.assertRaisesRegex(BacktestInputError, "nesting"):
                 _read_json(study_path)
-            with self.assertRaisesRegex(BacktestInputError, "cannot read JSONL input"):
+            with self.assertRaisesRegex(BacktestInputError, "nesting"):
                 _read_jsonl(store_path)
+
+            with patch(
+                "analysis.fitness_backtest.json.loads",
+                side_effect=RecursionError("decoder recursion limit"),
+            ):
+                with self.assertRaisesRegex(BacktestInputError, "cannot read JSON input"):
+                    _read_json(study_path)
+                with self.assertRaisesRegex(BacktestInputError, "cannot read JSONL input"):
+                    _read_jsonl(store_path)
 
     def test_process_group_kill_is_attempted_after_leader_exit_and_leader_is_reaped(self) -> None:
         class ExitedLeader:
