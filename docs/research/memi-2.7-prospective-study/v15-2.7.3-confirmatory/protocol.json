@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+  "status": "frozen-before-execution",
+  "candidate": "@memi-design/cli@2.7.3",
+  "design": {
+    "fixtures": 3,
+    "pairsPerFixture": 6,
+    "matchedPairs": 18,
+    "agentCells": 36,
+    "execution": "serial",
+    "conditionOrderSeed": 2715,
+    "provider": "codex",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "low",
+    "maximumInputTokensPerCell": 450000,
+    "cleanClonePerCell": true,
+    "immutableFixtureRevision": true,
+    "isolatedPostPatchVerification": true,
+    "contentAddressedEvidence": true,
+    "xcodeSimulatorExclusive": true
+  },
+  "primaryOutcome": {
+    "name": "blinded paired design-quality score",
+    "scale": [0, 100],
+    "nonInferiorityMarginPoints": -5,
+    "affirmativeRule": "one-sided 95 percent paired-bootstrap lower bound strictly greater than -5 within each task",
+    "bootstrapSamples": 10000
+  },
+  "secondaryOutcomes": [
+    "functional acceptance",
+    "critical defects",
+    "input tokens",
+    "output tokens",
+    "reasoning tokens",
+    "wall time",
+    "tool calls",
+    "retries",
+    "provider failures"
+  ],
+  "analysis": {
+    "unit": "matched pair within task",
+    "summaries": ["paired mean", "paired median", "exact sign test", "10000-sample paired bootstrap interval", "leave-one-pair-out sensitivity"],
+    "multiplicity": "Holm correction across task-level secondary tests",
+    "pooledCrossFixture": "descriptive only",
+    "missingData": "no imputation; every failure and exclusion is reported",
+    "dollarCost": "not estimated without measured billing data"
+  },
+  "grading": {
+    "panel": "three independent blinded model graders",
+    "label": "model-graded; not independent human practitioner evidence",
+    "aggregation": "panel median per rubric dimension and total",
+    "reliability": ["absolute disagreement", "intraclass correlation where estimable"]
+  },
+  "releaseClaimPolicy": "No superiority claim is permitted unless its corresponding preregistered gate passes."
+}

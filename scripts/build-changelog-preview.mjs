@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const rootDir = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const defaultChangelogPath = resolve(rootDir, "CHANGELOG.md");
 const defaultPreviewPath = resolve(rootDir, "preview", "changelog.html");
+const defaultReleaseManifestPath = resolve(rootDir, "release-manifest.json");
 
 const RELEASE_TAG_OVERRIDES = {
   "v0.0.1": "foundation",
@@ -18,13 +19,19 @@ export async function syncChangelogPreview(options = {}) {
   const changelogPath = options.changelogPath ? resolve(options.changelogPath) : defaultChangelogPath;
   const outputPath = options.outputPath ? resolve(options.outputPath) : defaultPreviewPath;
 
-  const [markdown, template] = await Promise.all([
+  const releaseManifestPath = options.releaseManifestPath
+    ? resolve(options.releaseManifestPath)
+    : defaultReleaseManifestPath;
+  const [markdown, template, releaseManifest] = await Promise.all([
     readFile(changelogPath, "utf-8"),
     readFile(outputPath, "utf-8"),
+    readFile(releaseManifestPath, "utf-8").then(JSON.parse),
   ]);
 
   const releases = parseChangelogMarkdown(markdown);
-  const html = applyChangelogData(template, releases);
+  const html = applyChangelogData(template, releases, {
+    releaseState: releaseManifest.releaseGroups.engine.state,
+  });
   await writeFile(outputPath, html, "utf-8");
 
   return {
@@ -36,6 +43,7 @@ export async function syncChangelogPreview(options = {}) {
 }
 
 export function parseChangelogMarkdown(markdown) {
+  markdown = markdown.replace(/\r\n/g, "\n");
   const releases = [];
   const releasePattern = /^##\s+(v[^\s]+)\s+—\s+(\d{4}-\d{2}-\d{2})$/gm;
   const matches = [...markdown.matchAll(releasePattern)];
@@ -66,17 +74,24 @@ export function parseChangelogMarkdown(markdown) {
   return releases;
 }
 
-export function applyChangelogData(template, releases) {
+export function applyChangelogData(template, releases, options = {}) {
   if (!releases.length) {
     throw new Error("Cannot generate preview changelog without releases");
   }
 
   const latest = releases[0];
+  const releaseLabel = options.releaseState === "candidate"
+    ? "Candidate release"
+    : "Current release";
   const totals = releases.reduce((acc, release) => acc + release.commits.length, 0);
   const currentReleaseCaption = `${latest.commits.length} commits tracked in ${latest.version} from CHANGELOG.md.`;
   const serializedReleases = JSON.stringify(releases, null, 2);
 
   return template
+    .replace(
+      /(<span class="summary-kicker">)(?:Candidate|Current) release(<\/span>)/,
+      `$1${releaseLabel}$2`,
+    )
     .replace(
       /(<span class="n" id="stat-commits">)([^<]+)(<\/span> commits)/,
       `$1${totals}$3`,

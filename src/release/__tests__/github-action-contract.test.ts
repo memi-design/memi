@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const action = readFileSync(join(process.cwd(), "action.yml"), "utf8");
+const action = readFileSync(join(process.cwd(), "action.yml"), "utf8")
+  .replace(/\r\n/g, "\n");
 const packageVersion = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")).version as string;
 
 function runBlocks(source: string): string[] {

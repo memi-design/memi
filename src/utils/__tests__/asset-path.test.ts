@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { __resetPackageRootCache, packagePath, packageRoot } from "../asset-path.js";
 import { getMemoirePackageVersion } from "../package-version.js";
 
@@ -24,7 +24,7 @@ describe("asset-path", () => {
   it("honors MEMOIRE_PACKAGE_ROOT override", () => {
     process.env.MEMOIRE_PACKAGE_ROOT = "/tmp/custom-memoire-root";
     __resetPackageRootCache();
-    expect(packageRoot()).toBe("/tmp/custom-memoire-root");
+    expect(packageRoot()).toBe(resolve("/tmp/custom-memoire-root"));
   });
 
   it("packagePath joins segments under the root", () => {

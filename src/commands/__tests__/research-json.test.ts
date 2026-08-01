@@ -43,11 +43,11 @@ describe("research --json", () => {
         quantitativeMetrics: 2,
       },
       artifacts: {
-        researchDir: "/workspace/research",
-        storePath: "/workspace/research/store.v2.json",
-        notesDir: "/workspace/research/notes",
-        reportMarkdownPath: "/workspace/research/reports/report.md",
-        reportJsonPath: "/workspace/research/reports/report.json",
+        researchDir: join("/workspace", "research"),
+        storePath: join("/workspace", "research", "store.v2.json"),
+        notesDir: join("/workspace", "research", "notes"),
+        reportMarkdownPath: join("/workspace", "research", "reports", "report.md"),
+        reportJsonPath: join("/workspace", "research", "reports", "report.json"),
       },
     });
   });
@@ -139,8 +139,8 @@ describe("research --json", () => {
       action: "report",
       status: "completed",
       report: {
-        markdownPath: "/workspace/research/reports/report.md",
-        jsonPath: "/workspace/research/reports/report.json",
+        markdownPath: join("/workspace", "research", "reports", "report.md"),
+        jsonPath: join("/workspace", "research", "reports", "report.json"),
         markdownBytes: Buffer.byteLength("# Report\nOne finding\n", "utf-8"),
         markdownLines: 3,
       },
@@ -202,7 +202,9 @@ describe("research --json", () => {
       const payload = JSON.parse(lastLog(logs));
       expect(savedSpecs.length).toBeGreaterThan(3);
       expect(payload.specWrite).toMatchObject({ written: expect.arrayContaining(["ResearchVibeDirection", "ProductDecisionPage"]) });
-      expect(payload.mermaidJam.exports[0]).toMatchObject({ outputPath: expect.stringContaining(".memoire/mermaid-jam") });
+      expect(payload.mermaidJam.exports[0]).toMatchObject({
+        outputPath: expect.stringContaining(join(".memoire", "mermaid-jam")),
+      });
       const artifact = await readFile(payload.mermaidJam.exports[0].outputPath, "utf-8");
       expect(artifact).toContain("journey");
     } finally {

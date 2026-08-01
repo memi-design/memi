@@ -1,0 +1,751 @@
+{
+  "schemaVersion": 1,
+  "kind": "memi-fitness-chronological-ingestion-plan",
+  "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+  "dryRun": true,
+  "storeWritePlanned": false,
+  "entryCount": 19,
+  "entries": [
+    {
+      "observedAt": "2026-07-29T21:44:57.657Z",
+      "sourceVersion": "v1",
+      "sourceKind": "legacy-workflow-proof",
+      "pairId": "buzzr-tab-unread-badge-v2",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "legacy-v1",
+      "skills": [
+        "react-native-gen"
+      ],
+      "ingestDecision": "record-v1-only-unmatched-negative",
+      "storeWriteEligible": false,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "legacy v1 evidence does not carry repository fingerprint or content-hash route identity",
+      "sequence": 1
+    },
+    {
+      "observedAt": "2026-08-01T07:04:45.834Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:6a8b9c789ab7bdf9230a9154972a50487d99514211b0ae80293c683911024063",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:23440a4ae7978e928369fc417f3d8d592bff56a801f17d3c08f5dc3af8e6bd40",
+      "eventSha256": "sha256:6a8b9c789ab7bdf9230a9154972a50487d99514211b0ae80293c683911024063",
+      "sequence": 2
+    },
+    {
+      "observedAt": "2026-08-01T07:13:46.792Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:1047a03ddd10d279a4658cf70fad600aec7348431f791226797d5459c370e5b5",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:1a12fbc712eb69d4ddab407806b319cea7657f1491f85c646ef95de125d37a93",
+      "eventSha256": "sha256:1047a03ddd10d279a4658cf70fad600aec7348431f791226797d5459c370e5b5",
+      "sequence": 3
+    },
+    {
+      "observedAt": "2026-08-01T07:17:28.371Z",
+      "sourceVersion": "v1",
+      "sourceKind": "v15-confirmatory",
+      "taskClass": "nate-options-reduce-motion",
+      "routeDecision": "abstain",
+      "skills": [],
+      "ingestDecision": "record-v1-abstain-chronology-only",
+      "storeWriteEligible": false,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "route abstained; preserve chronology but do not write an exact-route fitness event",
+      "pair": {
+        "taskId": "nate-options-reduce-motion",
+        "repeat": 1,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:memi",
+        "baselineRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-0af10457-a969-4a3e-a47d-7345b10bab28",
+        "memiRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-8db877c5-efd0-462d-a91d-ef41053f7a02"
+      },
+      "route": {
+        "decision": "abstain",
+        "repositoryFingerprintHash": "sha256:c0731c130608f1f8dd34e55be6fecb371e230f005266b8a6211de82fd3ff869a",
+        "skills": []
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:090770f6a6b2aae78886b470e8c32078a1d54dcfb733a6bdb483404d213d6030",
+        "memiEvidenceManifestSha256": "sha256:dfa6bb9c99cd48f447bf63518a7d4e75635f981cb22c5b81a1abdd90c7a37fcb",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:ba880a6bda858c8bd448aed561c4c816ade3a92e707aa53fd5fe871d3f1eb309"
+      },
+      "outcomes": {
+        "baseline": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        },
+        "memi": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        }
+      },
+      "blockingReasons": [
+        "baseline-not-accepted",
+        "baseline-tests-failed",
+        "baseline-excluded-from-rendered-frontend-grading-only",
+        "memi-not-accepted",
+        "memi-tests-failed",
+        "memi-excluded-from-rendered-frontend-grading-only",
+        "route-abstained"
+      ],
+      "pairId": "fitness-v1:a6a28b2d03a3b2f98c22a5e3a2a92e70b51a8eb29e8eb7b820d06a9c82b616ec",
+      "sequence": 4
+    },
+    {
+      "observedAt": "2026-08-01T07:32:05.739Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:465fd301fd1219d513713f0419314da9ef81de28be98ec457ec5d6769c51e5ed",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:a84b8a4e694fb250d8414932f4ff3b69087534c9b753f19091c13b68b151f0e1",
+      "eventSha256": "sha256:465fd301fd1219d513713f0419314da9ef81de28be98ec457ec5d6769c51e5ed",
+      "sequence": 5
+    },
+    {
+      "observedAt": "2026-08-01T07:37:20.225Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:c3dd98bafba7db434031fc69c7cf8470e90ac77dead76f57944cb6449daad181",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:80cc2dffa417c1bfccf191b386ace97613ed36150a732a3bb6a69c68a8bf018e",
+      "eventSha256": "sha256:c3dd98bafba7db434031fc69c7cf8470e90ac77dead76f57944cb6449daad181",
+      "sequence": 6
+    },
+    {
+      "observedAt": "2026-08-01T07:39:12.685Z",
+      "sourceVersion": "v1",
+      "sourceKind": "v15-confirmatory",
+      "taskClass": "nate-options-reduce-motion",
+      "routeDecision": "abstain",
+      "skills": [],
+      "ingestDecision": "record-v1-abstain-chronology-only",
+      "storeWriteEligible": false,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "route abstained; preserve chronology but do not write an exact-route fitness event",
+      "pair": {
+        "taskId": "nate-options-reduce-motion",
+        "repeat": 2,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r2:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r2:memi",
+        "baselineRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-7c95ca9d-2aab-48e2-b1fa-df6deb8f54d7",
+        "memiRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-b7303f86-5d26-4903-bba2-36f087605911"
+      },
+      "route": {
+        "decision": "abstain",
+        "repositoryFingerprintHash": "sha256:c0731c130608f1f8dd34e55be6fecb371e230f005266b8a6211de82fd3ff869a",
+        "skills": []
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:55d456403faecf4c35df9e494f17a43ad3b900b75c92f12ec9393bd4b98e3069",
+        "memiEvidenceManifestSha256": "sha256:602a2945e54cf7d21a7643b475ee74ea370647371062b5557c0f95d2599db19b",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:ba880a6bda858c8bd448aed561c4c816ade3a92e707aa53fd5fe871d3f1eb309"
+      },
+      "outcomes": {
+        "baseline": {
+          "accepted": false,
+          "testsPassed": true,
+          "qualityScore": 70.0,
+          "defects": 1
+        },
+        "memi": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        }
+      },
+      "blockingReasons": [
+        "baseline-not-accepted",
+        "baseline-excluded-from-rendered-frontend-grading-only",
+        "memi-not-accepted",
+        "memi-tests-failed",
+        "memi-excluded-from-rendered-frontend-grading-only",
+        "route-abstained"
+      ],
+      "pairId": "fitness-v1:7be6c43325e58f0ad35b4fa09f7dc231c10928fd6afa0eaf0b87b7464f045f92",
+      "sequence": 7
+    },
+    {
+      "observedAt": "2026-08-01T08:19:31.285Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:a9eef3a38f1808d89e3a6e815fa4c212cd32c191704b54b8ef6561ea02d8267c",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:5828e2f5494b6b62c5f8b2c51a1e3930cc041d4f746231e52d8d72bf96328d35",
+      "eventSha256": "sha256:a9eef3a38f1808d89e3a6e815fa4c212cd32c191704b54b8ef6561ea02d8267c",
+      "sequence": 8
+    },
+    {
+      "observedAt": "2026-08-01T08:25:45.087Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:190829d269d799983c180a5accf92e31414a5de921b615841cd398cd786e0732",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:ebbe552a7e15a7db41aa4a705282dc2c3c57ad966dc41ab25fdbe5e6a7e174be",
+      "eventSha256": "sha256:190829d269d799983c180a5accf92e31414a5de921b615841cd398cd786e0732",
+      "sequence": 9
+    },
+    {
+      "observedAt": "2026-08-01T08:30:57.922Z",
+      "sourceVersion": "v1",
+      "sourceKind": "v15-confirmatory",
+      "taskClass": "nate-options-reduce-motion",
+      "routeDecision": "abstain",
+      "skills": [],
+      "ingestDecision": "record-v1-abstain-chronology-only",
+      "storeWriteEligible": false,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "route abstained; preserve chronology but do not write an exact-route fitness event",
+      "pair": {
+        "taskId": "nate-options-reduce-motion",
+        "repeat": 3,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r3:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r3:memi",
+        "baselineRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-1aa2925d-67dd-48d4-8ccf-80a0fbe0dd5a",
+        "memiRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-aa86ec22-16b7-4dbc-86fb-d5a7e0bf964d"
+      },
+      "route": {
+        "decision": "abstain",
+        "repositoryFingerprintHash": "sha256:c0731c130608f1f8dd34e55be6fecb371e230f005266b8a6211de82fd3ff869a",
+        "skills": []
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:2440c3908a0b2cc1e89fb219e07fcfb7d1645aa51b2f92474cee3a99a0c60e98",
+        "memiEvidenceManifestSha256": "sha256:9591f3b66fb1a2e4593991876a5c675b06b34d48c352ba1b54546f9b946a7e80",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:ba880a6bda858c8bd448aed561c4c816ade3a92e707aa53fd5fe871d3f1eb309"
+      },
+      "outcomes": {
+        "baseline": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        },
+        "memi": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        }
+      },
+      "blockingReasons": [
+        "baseline-not-accepted",
+        "baseline-tests-failed",
+        "baseline-excluded-from-rendered-frontend-grading-only",
+        "memi-not-accepted",
+        "memi-tests-failed",
+        "memi-excluded-from-rendered-frontend-grading-only",
+        "route-abstained"
+      ],
+      "pairId": "fitness-v1:83f31a580f84e3b0001ad101aa2efe3f2ac943852c68cbbee3d61b9b62ecbd6e",
+      "sequence": 10
+    },
+    {
+      "observedAt": "2026-08-01T08:45:12.822Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:a486c49f8250ea7d938810d0bcacfbdb7ee5db3dd0eb67ff80ad2b772d6bf6e6",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:7a567e4183553f91fb1f9ceec0276657064f839095457325736ffe302e54cd60",
+      "eventSha256": "sha256:a486c49f8250ea7d938810d0bcacfbdb7ee5db3dd0eb67ff80ad2b772d6bf6e6",
+      "sequence": 11
+    },
+    {
+      "observedAt": "2026-08-01T08:52:13.928Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:5842a8aa2faeba16c557f95a5345d707b797666d9e507b266b6511885fa45c2b",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:c74ec2285069fe572148e1d8630cf5619c5674f802aeca76e26f96d50891381b",
+      "eventSha256": "sha256:5842a8aa2faeba16c557f95a5345d707b797666d9e507b266b6511885fa45c2b",
+      "sequence": 12
+    },
+    {
+      "observedAt": "2026-08-01T08:56:59.493Z",
+      "sourceVersion": "v1",
+      "sourceKind": "v15-confirmatory",
+      "taskClass": "nate-options-reduce-motion",
+      "routeDecision": "abstain",
+      "skills": [],
+      "ingestDecision": "record-v1-abstain-chronology-only",
+      "storeWriteEligible": false,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "route abstained; preserve chronology but do not write an exact-route fitness event",
+      "pair": {
+        "taskId": "nate-options-reduce-motion",
+        "repeat": 4,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r4:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r4:memi",
+        "baselineRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-a68af2aa-62db-4cf4-b99c-1c58e567dd4d",
+        "memiRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-cda5940c-03b8-42bf-9717-6ff044762d57"
+      },
+      "route": {
+        "decision": "abstain",
+        "repositoryFingerprintHash": "sha256:c0731c130608f1f8dd34e55be6fecb371e230f005266b8a6211de82fd3ff869a",
+        "skills": []
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:f754b48d19689b8a6fd6633020bcbbf7883e0b36814c5edcb4a17d2f29b2d63b",
+        "memiEvidenceManifestSha256": "sha256:284347307de2f15b6c00723adfb0dfd95e2b3c4211cd7c776d964932936848b8",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:ba880a6bda858c8bd448aed561c4c816ade3a92e707aa53fd5fe871d3f1eb309"
+      },
+      "outcomes": {
+        "baseline": {
+          "accepted": false,
+          "testsPassed": true,
+          "qualityScore": 70.0,
+          "defects": 1
+        },
+        "memi": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        }
+      },
+      "blockingReasons": [
+        "baseline-not-accepted",
+        "baseline-excluded-from-rendered-frontend-grading-only",
+        "memi-not-accepted",
+        "memi-tests-failed",
+        "memi-excluded-from-rendered-frontend-grading-only",
+        "route-abstained"
+      ],
+      "pairId": "fitness-v1:e3e9eb196aa77d69e32d618e699acc3722e666ba6faa6e5e4b176c522f0e4207",
+      "sequence": 13
+    },
+    {
+      "observedAt": "2026-08-01T09:11:49.375Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:56ff69236a003b344ccf0dc1046cd0094dc256cf861cc5214dd468fdc9926879",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:a6983ff3914a98c27675ad4d1361488a350dbd11eaafec7fcf521a7dbf068001",
+      "eventSha256": "sha256:56ff69236a003b344ccf0dc1046cd0094dc256cf861cc5214dd468fdc9926879",
+      "sequence": 14
+    },
+    {
+      "observedAt": "2026-08-01T09:17:36.434Z",
+      "sourceVersion": "v1",
+      "sourceKind": "v15-confirmatory",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v1-automation-only-negative",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route automation-only v1 evidence may suppress a route but may not promote or recover one",
+      "pair": {
+        "taskId": "paraform-command-menu",
+        "repeat": 5,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r5:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r5:memi",
+        "baselineRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-baseline-a250e48f-848b-4db8-bbb3-90c05919a165",
+        "memiRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-memi-264b960f-ece7-42c6-a53a-123590a6b4b6"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:ef98548e2139de0f2c7726bd0b612445103928ef15e296de1895e28dad193b12",
+        "skills": [
+          {
+            "skillId": "design-extract",
+            "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:0fa067580e3bbdc5e00b0b922cfbb19bb48314582c3b12511028d73647feefb0",
+        "memiEvidenceManifestSha256": "sha256:fafe22d55c14f82516d083a27848193ccc66876c75216b4d124841ef87e25ff6",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:47c6f494edf6baba34de8bb8bfe2c43c27f272dd0a02fb41e417e3dc44663f20"
+      },
+      "outcomes": {
+        "baseline": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 60.0,
+          "defects": 1
+        },
+        "memi": {
+          "accepted": true,
+          "testsPassed": true,
+          "qualityScore": 80.0,
+          "defects": 0
+        }
+      },
+      "blockingReasons": [
+        "baseline-not-accepted",
+        "baseline-tests-failed",
+        "baseline-excluded-from-rendered-frontend-grading-only"
+      ],
+      "pairId": "fitness-v1:0e17e434a146c1d2c5e40dc6cf7106d1fa0aafe29422836123f23ac43079e0fd",
+      "sequence": 15
+    },
+    {
+      "observedAt": "2026-08-01T09:21:23.225Z",
+      "sourceVersion": "v1",
+      "sourceKind": "v15-confirmatory",
+      "taskClass": "nate-options-reduce-motion",
+      "routeDecision": "abstain",
+      "skills": [],
+      "ingestDecision": "record-v1-abstain-chronology-only",
+      "storeWriteEligible": false,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "route abstained; preserve chronology but do not write an exact-route fitness event",
+      "pair": {
+        "taskId": "nate-options-reduce-motion",
+        "repeat": 5,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r5:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r5:memi",
+        "baselineRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-14718d9b-5db1-43bd-82d0-ff3353d55a08",
+        "memiRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-39439653-5d64-4b6a-9e76-9eea66090f5c"
+      },
+      "route": {
+        "decision": "abstain",
+        "repositoryFingerprintHash": "sha256:c0731c130608f1f8dd34e55be6fecb371e230f005266b8a6211de82fd3ff869a",
+        "skills": []
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:ce43338f9941d4da3d6c0f7f118380cf1c2f76b5aa8bcc69e2ab8f2e306448f3",
+        "memiEvidenceManifestSha256": "sha256:0b6686ec6803c1977ab1a4e2dd738f42305a3c7d7a70cd9c90b1c81c956a5f3a",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:ba880a6bda858c8bd448aed561c4c816ade3a92e707aa53fd5fe871d3f1eb309"
+      },
+      "outcomes": {
+        "baseline": {
+          "accepted": false,
+          "testsPassed": true,
+          "qualityScore": 70.0,
+          "defects": 1
+        },
+        "memi": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        }
+      },
+      "blockingReasons": [
+        "baseline-not-accepted",
+        "baseline-excluded-from-rendered-frontend-grading-only",
+        "memi-not-accepted",
+        "memi-tests-failed",
+        "memi-excluded-from-rendered-frontend-grading-only",
+        "route-abstained"
+      ],
+      "pairId": "fitness-v1:9667d673a2ced70ab615b7e3cc8c4e16a67058b64c9c4bd74eb160dbd7b9ba9f",
+      "sequence": 16
+    },
+    {
+      "observedAt": "2026-08-01T09:37:40.379Z",
+      "sourceVersion": "v1",
+      "sourceKind": "v15-confirmatory",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v1-automation-only-negative",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route automation-only v1 evidence may suppress a route but may not promote or recover one",
+      "pair": {
+        "taskId": "buzzr-tab-unread-badge",
+        "repeat": 6,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r6:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r6:memi",
+        "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-baseline-94ea7a54-38ae-47de-8e2e-8a7331832a4e",
+        "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-memi-201da0a9-a40b-4c48-bfb6-4a7331511488"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:dfa4386fbef2b154b8a5f276b67209c12e1d560db5ed7635b221f9ca52ef5cb0",
+        "skills": [
+          {
+            "skillId": "atomic-design",
+            "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:b195a4c2d6f4075c0bb8d266771869d36e0b81bb4e2fae95780a194a1885e177",
+        "memiEvidenceManifestSha256": "sha256:a13e0c62b98446e371dd41ee0635744c8fdfc60f06c972cfff9ee02a05e426c3",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:f34e375b6d61031d23addd2777c0ba34177422cbb2049bd3d3e59ded579fe8be"
+      },
+      "outcomes": {
+        "baseline": {
+          "accepted": true,
+          "testsPassed": true,
+          "qualityScore": 80.0,
+          "defects": 0
+        },
+        "memi": {
+          "accepted": false,
+          "testsPassed": true,
+          "qualityScore": 60.0,
+          "defects": 1
+        }
+      },
+      "blockingReasons": [
+        "memi-not-accepted",
+        "memi-excluded-from-rendered-frontend-grading-only"
+      ],
+      "pairId": "fitness-v1:696b571b51b392ac9b06ec683d43385436cd5cf38e90900279938ec4a5f996ff",
+      "sequence": 17
+    },
+    {
+      "observedAt": "2026-08-01T09:45:09.965Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:c7ed285c8cb415a3ad183e9e3de497f84703c1d20689a6c1be5575678ff01780",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:9e581e1592f2f4c95de99b66c9da7f79ffee7e86d6bd1e8d3b071ba08af15bbf",
+      "eventSha256": "sha256:c7ed285c8cb415a3ad183e9e3de497f84703c1d20689a6c1be5575678ff01780",
+      "sequence": 18
+    },
+    {
+      "observedAt": "2026-08-01T09:51:47.614Z",
+      "sourceVersion": "v1",
+      "sourceKind": "v15-confirmatory",
+      "taskClass": "nate-options-reduce-motion",
+      "routeDecision": "abstain",
+      "skills": [],
+      "ingestDecision": "record-v1-abstain-chronology-only",
+      "storeWriteEligible": false,
+      "promotionEligible": false,
+      "recoveryEligible": false,
+      "reason": "route abstained; preserve chronology but do not write an exact-route fitness event",
+      "pair": {
+        "taskId": "nate-options-reduce-motion",
+        "repeat": 6,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r6:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r6:memi",
+        "baselineRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-4c64939e-9bf5-4447-8d08-1d6f45f31ed8",
+        "memiRunId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-6c91443b-c172-475c-ba8c-a401dacc7ec6"
+      },
+      "route": {
+        "decision": "abstain",
+        "repositoryFingerprintHash": "sha256:c0731c130608f1f8dd34e55be6fecb371e230f005266b8a6211de82fd3ff869a",
+        "skills": []
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:c8a85fb840162414db4ded3ac1e4416cedd245d64f625afd8d540c3cc6d4ce53",
+        "memiEvidenceManifestSha256": "sha256:4a07591673af43e24043a29d6a91fcc1914e2404c2744df9c5351b0171530835",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:ba880a6bda858c8bd448aed561c4c816ade3a92e707aa53fd5fe871d3f1eb309"
+      },
+      "outcomes": {
+        "baseline": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        },
+        "memi": {
+          "accepted": false,
+          "testsPassed": false,
+          "qualityScore": 40.0,
+          "defects": 2
+        }
+      },
+      "blockingReasons": [
+        "baseline-not-accepted",
+        "baseline-tests-failed",
+        "baseline-excluded-from-rendered-frontend-grading-only",
+        "memi-not-accepted",
+        "memi-tests-failed",
+        "memi-excluded-from-rendered-frontend-grading-only",
+        "route-abstained"
+      ],
+      "pairId": "fitness-v1:773ccb3dae9518681d762081bd0b4a28ca60aea5149d39cfc34d33d159c193c1",
+      "sequence": 19
+    }
+  ]
+}

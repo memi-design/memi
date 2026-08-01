@@ -1,5 +1,5 @@
 import { access, readFile, readdir, stat } from "node:fs/promises";
-import { basename, extname, join, resolve } from "node:path";
+import { basename, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type {
   StudioDesignSystemArtifact,
   StudioDesignSystemResolvedAsset,
@@ -40,7 +40,7 @@ export async function readResolvedAsset(projectRoot: string, sourcePath: string)
   const allowedRoots = [resolve(projectRoot)];
   const parent = resolve(projectRoot, "..", "..", "..");
   allowedRoots.push(parent);
-  if (!allowedRoots.some((root) => path === root || path.startsWith(`${root}/`))) return null;
+  if (!allowedRoots.some((root) => isPathWithin(path, root))) return null;
   try {
     await access(path);
     return { bytes: await readFile(path), mimeType: mimeTypeForPath(path) };
@@ -182,7 +182,12 @@ function mimeTypeForPath(path: string): string {
 }
 
 function isPathWithin(path: string, root: string): boolean {
-  return path === root || path.startsWith(`${root}/`);
+  const relation = relative(resolve(root), resolve(path));
+  return relation === "" || (
+    !isAbsolute(relation)
+    && relation !== ".."
+    && !relation.startsWith(`..${sep}`)
+  );
 }
 
 function isString(value: unknown): value is string {

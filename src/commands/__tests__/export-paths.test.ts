@@ -66,12 +66,12 @@ describe("memi export path mapping", () => {
     const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
 
     expect(output).toContain("EXPORT");
-    expect(output).toContain("components/molecules/MetricCard.tsx");
-    expect(output).toContain("src/components/molecules/MetricCard.tsx");
-    expect(output).toContain("pages/Dashboard.tsx");
-    expect(output).toContain("src/pages/Dashboard.tsx");
-    expect(output).toContain("dataviz/ActivityChart.tsx");
-    expect(output).toContain("src/components/dataviz/ActivityChart.tsx");
+    expect(output).toContain(join("components", "molecules", "MetricCard.tsx"));
+    expect(output).toContain(join("src", "components", "molecules", "MetricCard.tsx"));
+    expect(output).toContain(join("pages", "Dashboard.tsx"));
+    expect(output).toContain(join("src", "pages", "Dashboard.tsx"));
+    expect(output).toContain(join("dataviz", "ActivityChart.tsx"));
+    expect(output).toContain(join("src", "components", "dataviz", "ActivityChart.tsx"));
     expect(output).not.toContain("components/components");
     expect(output).toContain("DRY RUN");
 

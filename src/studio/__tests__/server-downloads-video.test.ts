@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
-import { chmod, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { tmpdir } from "node:os";
@@ -18,7 +18,7 @@ describe("studio downloads and video runtime APIs", () => {
   it("keeps the runtime alive when the project download ledger is not writable", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-downloads-readonly-"));
     try {
-      await chmod(root, 0o555);
+      await writeFile(join(root, ".memoire"), "blocks ledger directory creation\n");
       const downloads = new StudioDownloadStore(root);
       await expect(downloads.init()).resolves.toBeUndefined();
       expect(downloads.list()).toEqual([]);
@@ -30,7 +30,6 @@ describe("studio downloads and video runtime APIs", () => {
       });
       expect(downloads.metrics().storageError).toContain(".memoire");
     } finally {
-      await chmod(root, 0o755).catch(() => {});
       await rm(root, { recursive: true, force: true });
     }
   });

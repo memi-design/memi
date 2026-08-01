@@ -390,9 +390,9 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">242</span> commits</span>
-      <span><span class="n" id="stat-versions">36</span> versions</span>
-      <span><span class="n" id="stat-latest">2026-07-31</span> latest</span>
+      <span><span class="n" id="stat-commits">363</span> commits</span>
+      <span><span class="n" id="stat-versions">37</span> versions</span>
+      <span><span class="n" id="stat-latest">2026-08-01</span> latest</span>
     </div>
   </header>
 
@@ -406,9 +406,9 @@ a:hover { text-decoration: underline; }
         </p>
         <div class="hero-kpis">
           <div class="summary-card">
-            <span class="summary-kicker">Current release</span>
-            <strong class="summary-value">v2.7.3</strong>
-            <div class="summary-caption">0 commits tracked in v2.7.3 from CHANGELOG.md.</div>
+            <span class="summary-kicker">Candidate release</span>
+            <strong class="summary-value">v2.7.4</strong>
+            <div class="summary-caption">121 commits tracked in v2.7.4 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -434,10 +434,520 @@ a:hover { text-decoration: underline; }
     <section class="release-list" id="release-list"></section>
   </main>
 
-  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v2.7.3</footer>
+  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v2.7.4</footer>
 
 <script>
 const releases = [
+  {
+    "version": "v2.7.4",
+    "date": "2026-08-01",
+    "tag": "fix",
+    "summary": "Required new fitness evidence to use run-bound v2 receipts and the exact task,; Added deterministic chronological fitness-backtest replay with an --as-of; Serialized fitness-store appends with bounded exclusive locking, dead-owner.",
+    "commits": [
+      [
+        "8cfd3498",
+        "test: define fail-closed route fitness contract"
+      ],
+      [
+        "9a141092",
+        "feat: add fail-closed route fitness evidence v2"
+      ],
+      [
+        "16a15cc6",
+        "fix: separate candidate runtime from admission harness"
+      ],
+      [
+        "88ef6fda",
+        "fix: resume incomplete prospective pairs safely"
+      ],
+      [
+        "5d300979",
+        "test: define sealed V15 route import contract"
+      ],
+      [
+        "b961ea88",
+        "feat: import manifest-sealed V15 route evidence"
+      ],
+      [
+        "12813de0",
+        "ci: test supported platforms and Node versions"
+      ],
+      [
+        "986ef81f",
+        "test: define recovery probe and task class contracts"
+      ],
+      [
+        "82f64311",
+        "fix: add prospective fitness recovery probes"
+      ],
+      [
+        "b0c17cd1",
+        "test: define sealed fitness evidence boundary"
+      ],
+      [
+        "612103ca",
+        "fix: seal skill fitness empirical evidence"
+      ],
+      [
+        "becadd2e",
+        "test: seal fitness command fixtures"
+      ],
+      [
+        "0dbd668f",
+        "test: bind fitness event execution mode"
+      ],
+      [
+        "ad97c0ab",
+        "fix: bind fitness execution provenance"
+      ],
+      [
+        "90e3f2e1",
+        "refactor: scope fitness evidence containment"
+      ],
+      [
+        "45cd891d",
+        "test: define atomic fitness append lock"
+      ],
+      [
+        "f81416a0",
+        "fix: serialize skill fitness appends"
+      ],
+      [
+        "e285a2b5",
+        "refactor: isolate fitness file locking"
+      ],
+      [
+        "0568964b",
+        "test: define 2.7.4 candidate release surfaces"
+      ],
+      [
+        "289bd728",
+        "chore: prepare Memi 2.7.4 candidate"
+      ],
+      [
+        "cd5335b1",
+        "chore: sync 2.7.4 candidate artifacts"
+      ],
+      [
+        "fe77585b",
+        "test: prevent fitness backtest look-ahead"
+      ],
+      [
+        "54099ce1",
+        "fix: timestamp complete fitness pairs"
+      ],
+      [
+        "8fb5e4b6",
+        "docs: record pair-complete fitness chronology"
+      ],
+      [
+        "bad1ca69",
+        "test: require 2.7.4 changelog commit provenance"
+      ],
+      [
+        "83535004",
+        "fix: preserve 2.7.4 changelog provenance"
+      ],
+      [
+        "9f80b0cf",
+        "test: define immutable package documentation boundary"
+      ],
+      [
+        "c6e72b3c",
+        "fix: keep candidate state out of npm docs"
+      ],
+      [
+        "9086a6ec",
+        "docs: record route fitness implementation"
+      ],
+      [
+        "60ef1843",
+        "research: freeze V15 2.7.3 confirmatory protocol"
+      ],
+      [
+        "64c25bd3",
+        "docs: record admission harness correction"
+      ],
+      [
+        "5d806ade",
+        "research: disclose V15 admission harness deviation"
+      ],
+      [
+        "debe9abe",
+        "research: record failed SwiftUI pair without imputation"
+      ],
+      [
+        "b0e771ee",
+        "research: disclose stalled V15 provider attempt"
+      ],
+      [
+        "e0fe87e3",
+        "docs: record prospective resume correction"
+      ],
+      [
+        "c7fcd074",
+        "feat: add V15 confirmatory analysis pipeline"
+      ],
+      [
+        "e8e620ef",
+        "research: seal V15 evidence ledgers"
+      ],
+      [
+        "770d9238",
+        "fix: align V15 analysis with exclusion and receipt hashing rules"
+      ],
+      [
+        "93914ddc",
+        "research: validate blinded grading panel"
+      ],
+      [
+        "d456fde5",
+        "docs: add V15 confirmatory audit paper"
+      ],
+      [
+        "ba9222da",
+        "docs: record V15 import and platform gate"
+      ],
+      [
+        "340c340e",
+        "docs: add 2.7.3 channel provenance audit"
+      ],
+      [
+        "08765bb2",
+        "test: define V15 analysis artifact contract"
+      ],
+      [
+        "96345c16",
+        "feat: generate V15 statistical report artifacts"
+      ],
+      [
+        "15059aaf",
+        "test: add V15 fitness-policy artifact reproducer"
+      ],
+      [
+        "a5d6d7b9",
+        "fix: add V15 fitness-policy artifact builder"
+      ],
+      [
+        "263fdf18",
+        "test: define blinded grader bundle contract"
+      ],
+      [
+        "46948632",
+        "feat: build fail-closed blinded grader bundle"
+      ],
+      [
+        "6e5f7915",
+        "docs: refresh 2.7.3 live channel audit"
+      ],
+      [
+        "63d99d49",
+        "research: record controlled website before-after audit"
+      ],
+      [
+        "68d88b7b",
+        "fix: require phone-width grader evidence"
+      ],
+      [
+        "f4eb4881",
+        "docs: record fail-closed recovery hardening"
+      ],
+      [
+        "b452cf9c",
+        "docs: record fitness containment cleanup"
+      ],
+      [
+        "f6e4a9e5",
+        "test: cover deterministic V15 artifact execution"
+      ],
+      [
+        "cb679f1c",
+        "test: require LF-only generated V15 tables"
+      ],
+      [
+        "d8d58e3b",
+        "research: execute V15 confirmatory analysis"
+      ],
+      [
+        "ffa3c108",
+        "docs: record atomic fitness append hardening"
+      ],
+      [
+        "9667833e",
+        "test: cover V15 chronology edge cases"
+      ],
+      [
+        "e7c0bf99",
+        "test: define blinded defect and repeat traceability"
+      ],
+      [
+        "853988bb",
+        "fix: align V15 defects and sensitivity labels"
+      ],
+      [
+        "32284f59",
+        "fix: extend V15 fitness chronology coverage"
+      ],
+      [
+        "05c83a8f",
+        "test: define deterministic V15 report package contract"
+      ],
+      [
+        "f986500e",
+        "test: define V15 chronological fitness backtest"
+      ],
+      [
+        "dda62026",
+        "feat: build deterministic V15 report package"
+      ],
+      [
+        "80f81e7f",
+        "feat: execute V15 chronological fitness backtest"
+      ],
+      [
+        "201e6bb0",
+        "research: index V15 fitness backtest artifacts"
+      ],
+      [
+        "4c3908f5",
+        "docs: record immutable package documentation boundary"
+      ],
+      [
+        "66b5abd4",
+        "test: harden V15 fitness replay evidence"
+      ],
+      [
+        "bf6ca42d",
+        "docs: compact V15 report float layout"
+      ],
+      [
+        "be8f1c74",
+        "fix: harden V15 fitness evidence replay"
+      ],
+      [
+        "260a662e",
+        "merge: add V15 2.7.3 confirmatory audit"
+      ],
+      [
+        "15cbbf8e",
+        "docs: reconcile 2.7.4 audit provenance"
+      ],
+      [
+        "c7aada97",
+        "fix: make V15 notebook execution portable"
+      ],
+      [
+        "3cd5cd18",
+        "test: pin and bound V15 fitness execution"
+      ],
+      [
+        "9788e457",
+        "fix: pin and cap V15 fitness execution"
+      ],
+      [
+        "6442263f",
+        "merge: harden V15 replay trust boundary"
+      ],
+      [
+        "39dabf1e",
+        "test: close residual V15 execution bounds"
+      ],
+      [
+        "52107c8b",
+        "fix: bound V15 JSON and process cleanup"
+      ],
+      [
+        "5dc13ebb",
+        "merge: close V15 process and JSON bounds"
+      ],
+      [
+        "d56a0a19",
+        "test: reproduce shallow clean-install ancestry failure"
+      ],
+      [
+        "3c3c79aa",
+        "ci: prepare full clean-install matrix"
+      ],
+      [
+        "a72f4db3",
+        "test: reproduce Windows path containment failures"
+      ],
+      [
+        "1edc58b6",
+        "fix: make path containment portable on Windows"
+      ],
+      [
+        "aa4b39c5",
+        "test: reproduce Windows tools RPC endpoint failure"
+      ],
+      [
+        "15756b00",
+        "fix: use named pipes for Windows tools RPC"
+      ],
+      [
+        "de900a60",
+        "test: reproduce Windows tsx shim execution failure"
+      ],
+      [
+        "dd45ce31",
+        "fix: launch execute-code portably on Windows"
+      ],
+      [
+        "4ebaa668",
+        "docs: record Windows tools RPC portability"
+      ],
+      [
+        "cd670299",
+        "docs: record Windows execute-code portability"
+      ],
+      [
+        "0744774b",
+        "fix: make Windows test contracts portable"
+      ],
+      [
+        "d83ccfee",
+        "docs: record Windows portability hardening"
+      ],
+      [
+        "31f6257c",
+        "test: reproduce residual Windows path failures"
+      ],
+      [
+        "3aa7fc30",
+        "fix: harden residual Windows path contracts"
+      ],
+      [
+        "fa8e81ee",
+        "docs: record residual Windows path hardening"
+      ],
+      [
+        "3e3e5a31",
+        "test: reproduce final Windows subprocess failures"
+      ],
+      [
+        "0a71e765",
+        "fix: launch Windows CLI shims portably"
+      ],
+      [
+        "65520f72",
+        "test: block symlink escapes and provenance overclaim"
+      ],
+      [
+        "9d18f3cd",
+        "fix: reject symlink escapes and clarify local provenance"
+      ],
+      [
+        "75de171f",
+        "docs: record symlink containment hardening"
+      ],
+      [
+        "7e657d54",
+        "docs: finalize cross-platform candidate audit"
+      ],
+      [
+        "bfc6bb87",
+        "docs: finalize V15 audit PDF artifact"
+      ],
+      [
+        "b611f58d",
+        "merge: integrate finalized V15 audit PDF artifact"
+      ],
+      [
+        "4cc1bf8a",
+        "docs: rebind backtest provenance to final candidate"
+      ],
+      [
+        "57aa761e",
+        "docs: finalize confirmatory audit PDF"
+      ],
+      [
+        "83db411c",
+        "research: rebind backtest to final candidate"
+      ],
+      [
+        "52b44828",
+        "merge: integrate final confirmatory audit PDF"
+      ],
+      [
+        "f484509b",
+        "test: make shadcn spec path assertion portable"
+      ],
+      [
+        "edbe0449",
+        "test: preserve prior public release provenance"
+      ],
+      [
+        "63cca7d5",
+        "fix: retain prior release record in candidate projection"
+      ],
+      [
+        "486f3dfa",
+        "chore: sync preserved public release provenance"
+      ],
+      [
+        "e28e63d2",
+        "test: label candidate changelog truthfully"
+      ],
+      [
+        "a4de7f6b",
+        "fix: distinguish candidate changelog status"
+      ],
+      [
+        "4d08ed27",
+        "test: reproduce Studio shutdown evidence race"
+      ],
+      [
+        "eaea4f88",
+        "fix: gate candidate changelog status consistently"
+      ],
+      [
+        "b58281a5",
+        "test: authenticate retained release records"
+      ],
+      [
+        "da4aee34",
+        "fix: authenticate retained release record bytes"
+      ],
+      [
+        "21e9e0eb",
+        "fix: drain Studio runtime work before cleanup"
+      ],
+      [
+        "1d1cdcb6",
+        "test: bind candidate to prior release record"
+      ],
+      [
+        "5aa0f92e",
+        "research: replay final candidate fitness chronology"
+      ],
+      [
+        "1c649edb",
+        "test: run Codex fixture through Node portably"
+      ],
+      [
+        "d66c5cd8",
+        "fix: close Windows archive and Studio handles"
+      ]
+    ],
+    "decisions": [
+      [
+        "Exact-match route identity",
+        "Fail closed on identity mismatch: only"
+      ],
+      [
+        "Evidence hash boundary",
+        "Treat evidence hashes as tamper checks inside"
+      ]
+    ],
+    "changes": [
+      "Required new fitness evidence to use run-bound v2 receipts and the exact task,",
+      "Added deterministic chronological fitness-backtest replay with an --as-of",
+      "Serialized fitness-store appends with bounded exclusive locking, dead-owner",
+      "Kept candidate-state release documents out of the immutable npm payload and",
+      "Added the manifest-sealed V15 confirmatory report and deterministic analysis",
+      "Made source checkouts LF-stable on every supported runner, isolated workflow"
+    ]
+  },
   {
     "version": "v2.7.3",
     "date": "2026-07-31",

@@ -1,0 +1,472 @@
+{
+  "algorithm": "sha256",
+  "entries": [
+    {
+      "bytes": 2502,
+      "path": "README.md",
+      "sha256": "sha256:be5e233a6a77ddbcff111494313ac8de89cdd92ab871caf9c89cb9cb6a2648b6"
+    },
+    {
+      "bytes": 4959,
+      "path": "analysis.ipynb",
+      "sha256": "sha256:66c72e516713501c468e9464dccfd798ce2a4979112eb08759dad8b8f5e6a7fd"
+    },
+    {
+      "bytes": 32,
+      "path": "analysis/.gitignore",
+      "sha256": "sha256:4d21bfccdadc6beeecb3216e768ec818eb9f6f095e830bcd2fef9ed332d3be6f"
+    },
+    {
+      "bytes": 1585,
+      "path": "analysis/README.md",
+      "sha256": "sha256:f8638d2d14a97ebfddee0ebc51174bbd742d5eaff32e30efc079c2da7c091732"
+    },
+    {
+      "bytes": 251,
+      "path": "analysis/__init__.py",
+      "sha256": "sha256:b8debd666b1398413c5e0776671bce92291d479e5a38d7509136126ab81ba5f9"
+    },
+    {
+      "bytes": 161518,
+      "path": "analysis/blinded_grading.json",
+      "sha256": "sha256:088cdd43604cd331e1ac61395abdce4417bd9c64260d8e72c1d9418c6aca42f8"
+    },
+    {
+      "bytes": 16975,
+      "path": "analysis/build_website_audit_ledger.py",
+      "sha256": "sha256:e5a03de011272996780860cf7465a597b34197a7f346fd07283e497511d0c0df"
+    },
+    {
+      "bytes": 50224,
+      "path": "analysis/fitness_backtest.py",
+      "sha256": "sha256:98cb9e6fc76acafc8fd342c0c8695c39f0e8f313fccf4f36a6dda570e38d7a3c"
+    },
+    {
+      "bytes": 26914,
+      "path": "analysis/fitness_policy.py",
+      "sha256": "sha256:78f4bfbef188d16773b2a9a86ba19cdd9588a220d3f1d54abce8153c89c2e6b7"
+    },
+    {
+      "bytes": 7067,
+      "path": "analysis/grader_bundle.py",
+      "sha256": "sha256:95bb77007a422e111b015f0ead935d995cfd5a95a9324c0eb23b86755a1a33f8"
+    },
+    {
+      "bytes": 3132,
+      "path": "analysis/notebook_executor.py",
+      "sha256": "sha256:c015e180e9ec035dde452881aeb89a71f7446a81b6a833d589c15ec96ecdf462"
+    },
+    {
+      "bytes": 49923,
+      "path": "analysis/pipeline.py",
+      "sha256": "sha256:9fa0959642d2a30525f016e0ea0ffcd317f95ff7b0271469cf6ff056b1e9bab5"
+    },
+    {
+      "bytes": 28403,
+      "path": "analysis/report_package.py",
+      "sha256": "sha256:a4072d7215bb0acfed2cb014cdd2fdfc22430d24f65fb602083667d922148d2e"
+    },
+    {
+      "bytes": 1324,
+      "path": "analysis/run_analysis.py",
+      "sha256": "sha256:970086e1c64edfe4a2e26da5790a37c543194eb0037f56eeac6764c72484e860"
+    },
+    {
+      "bytes": 59,
+      "path": "analysis/tests/__init__.py",
+      "sha256": "sha256:50624e98e225aa80f3d5b7b999045fbf39be6ab9b1f3a8d821b34d642b994f41"
+    },
+    {
+      "bytes": 19127,
+      "path": "analysis/tests/test_fitness_backtest.py",
+      "sha256": "sha256:5a3b4dd8895a2633d0442037ff059bc885ed520eb31371916ab1b2e97690d185"
+    },
+    {
+      "bytes": 29108,
+      "path": "analysis/tests/test_fitness_policy.py",
+      "sha256": "sha256:f95f227c87d619fae3660e9ca3d279788935f99439635025f3f535d1c5d5e4e9"
+    },
+    {
+      "bytes": 2899,
+      "path": "analysis/tests/test_grader_bundle.py",
+      "sha256": "sha256:c4310179e23a1a5440a70da63cd466d46f75176a37dbd66b29cdd0c116d0d906"
+    },
+    {
+      "bytes": 1186,
+      "path": "analysis/tests/test_notebook_executor.py",
+      "sha256": "sha256:fabdc15cd97b325c5c15b0fb074c8f32a9c32e6ce9f4665ea7b18e4647d484c0"
+    },
+    {
+      "bytes": 21881,
+      "path": "analysis/tests/test_pipeline.py",
+      "sha256": "sha256:ccec7fb11389fd267f88b8b9e84e8dc641be7ff681de36d22d7e1ff1a5860bac"
+    },
+    {
+      "bytes": 15111,
+      "path": "analysis/tests/test_report_package.py",
+      "sha256": "sha256:983cadf6ae160a11f29725b201ac798acc36f03cfc122011abeca99dfeb42438"
+    },
+    {
+      "bytes": 7071,
+      "path": "build-blinded-grading.py",
+      "sha256": "sha256:36d105c89f5ae36009ca88c05b65a5e47911cdd20b8ff6b3f2419c99dece7c11"
+    },
+    {
+      "bytes": 9547,
+      "path": "build-evidence-ledgers.py",
+      "sha256": "sha256:5edd1a5c817f1e430ba316f7bcbf8f6bd8d0f0f94736c2800714655fa78562af"
+    },
+    {
+      "bytes": 1775,
+      "path": "build-fitness-policy-artifacts.py",
+      "sha256": "sha256:83371cd95214ba7dea9c91597365e60f07572b5a171f9c0224e8aeac583e9d0c"
+    },
+    {
+      "bytes": 1654,
+      "path": "build-grader-bundle.py",
+      "sha256": "sha256:78a3c7839137c2d7eeb5713be9c3abc6364940fd2cd2168e79b4e76e42c9eb41"
+    },
+    {
+      "bytes": 1137,
+      "path": "build-report-package.py",
+      "sha256": "sha256:cfb8fb39aa4e2069e3fdde3688d46c2fe0d3e49b3a7b15f39fee9e2259f4f2e8"
+    },
+    {
+      "bytes": 972,
+      "path": "candidate-provenance.json",
+      "sha256": "sha256:0d62ee926cc6807f89fac6d25b9ab8313dd567914e79b8c51f5503e75e190a03"
+    },
+    {
+      "bytes": 2751,
+      "path": "deviations.json",
+      "sha256": "sha256:a59b22cb4f41472c0c5ae60cbe47e8a623cb20eb7083f7d326041dde79dd3ff7"
+    },
+    {
+      "bytes": 402,
+      "path": "environment.json",
+      "sha256": "sha256:13b072580ab3d27d0c144f3c8bf2d732a105079cfd1f8c68fcf53e30a407cc3e"
+    },
+    {
+      "bytes": 45025,
+      "path": "evidence-receipts.json",
+      "sha256": "sha256:2c4031cc517e1595b3c0988453742a9f2a2cca2a0314acf787c221296967fa2f"
+    },
+    {
+      "bytes": 10771,
+      "path": "exclusions.json",
+      "sha256": "sha256:c713f0b8fd1b006e28ce6b5e9ac58dd68b7dca567d593c04d38fafc3c0961ac5"
+    },
+    {
+      "bytes": 9893,
+      "path": "freeze.json",
+      "sha256": "sha256:a81451a6533d4018bdcddaf2127b273a68ad86fd93fb639515f627f19309ba0d"
+    },
+    {
+      "bytes": 42822,
+      "path": "generated/figures/fitness_backtest.png",
+      "sha256": "sha256:4da817d05b5a2d45d8933a1e16d9923d1c4eda5adfb4e56705e30359bd210fe8"
+    },
+    {
+      "bytes": 46886,
+      "path": "generated/figures/paired_quality_comparisons.png",
+      "sha256": "sha256:44428875c4660ba1456c9ca230febaeff4e7cc37957f156b1b499068efbc3fb3"
+    },
+    {
+      "bytes": 29613,
+      "path": "generated/figures/primary_noninferiority_bounds.png",
+      "sha256": "sha256:4bdf3db1434e7e81f4d7410b4e5353d3e7e721fe3297df1cd74be1465aada561"
+    },
+    {
+      "bytes": 34017,
+      "path": "generated/figures/primary_task_mean_deltas.png",
+      "sha256": "sha256:76e2dd57afedd31fdc99d33bd126f993faa5c3528fb9e5f2f11c45ae8c876782"
+    },
+    {
+      "bytes": 134399,
+      "path": "generated/figures/task_resource_intervals.png",
+      "sha256": "sha256:4c361f5cce9376d30bf694ddf8fd0cd5c7ef7a227a51c4edb1485af25ce3b3fa"
+    },
+    {
+      "bytes": 29276,
+      "path": "generated/fitness-policy/backtest-command-receipts.json",
+      "sha256": "sha256:8f06ed302fc1cb08ba646a090163b91b992e90500b8defe0b8e5e0e3491cd0f3"
+    },
+    {
+      "bytes": 667,
+      "path": "generated/fitness-policy/backtest-frozen-input.json",
+      "sha256": "sha256:230ee4d9b323ebc7f753da0c77f84cce1e1f69ef9bfbaed82a516d73923c645f"
+    },
+    {
+      "bytes": 30303,
+      "path": "generated/fitness-policy/chronological-ingestion-plan.json",
+      "sha256": "sha256:1dea5d676b3c67fb801795ffbb5f75fb412a961339c26bd4fd19fe9942be6305"
+    },
+    {
+      "bytes": 101930,
+      "path": "generated/fitness-policy/fitness-backtest-as-of.json",
+      "sha256": "sha256:32f68be396a9fea27091c849d5c16f2f8e083c7b99b64211f0e72f5e085dd5a5"
+    },
+    {
+      "bytes": 1650,
+      "path": "generated/fitness-policy/fitness-backtest-summary.json",
+      "sha256": "sha256:fd7821c9d4b5f1345d71edef7f1786bc0b71c2db58db2f9223306a8f7bb30e16"
+    },
+    {
+      "bytes": 6126,
+      "path": "generated/fitness-policy/fitness-backtest.json",
+      "sha256": "sha256:2f0458254b1e2e051fbe3afd27f26340b3ae678a87885ecefad7c36ddd62448e"
+    },
+    {
+      "bytes": 18538,
+      "path": "generated/fitness-policy/fitness-store.jsonl",
+      "sha256": "sha256:57d853cbb130d7e9a9419e567389b52c62a3f31b4425bbe774d08efb25983725"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/02-buzzr-tab-unread-badge-r1.json",
+      "sha256": "sha256:058af9fcd194322aa3e7630ab984a2b9e4a85da45b9758402e059b782a899cfa"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/03-paraform-command-menu-r1.json",
+      "sha256": "sha256:55b19a0a0176c6f3c280a58340c47fe873109644799a262ca4d95c1883fc9827"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/05-buzzr-tab-unread-badge-r2.json",
+      "sha256": "sha256:ea3b122feafee4f0ed96e6b356387da5d30f5fb4805f55fc0b77d6ee33c92b03"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/06-paraform-command-menu-r2.json",
+      "sha256": "sha256:5d0c4882db14a70926d6b35405d61120deea449a46f170e33fde65b8c56e5c65"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/08-buzzr-tab-unread-badge-r3.json",
+      "sha256": "sha256:f57a50661c5d1ad5037d8c898866dc0dfd81eb4470b7e70c7d568ae944f2ca70"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/09-paraform-command-menu-r3.json",
+      "sha256": "sha256:f5f0012cfa0650d036a71839a3448d3da8ac76afae6550501044310ad527a6c6"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/11-buzzr-tab-unread-badge-r4.json",
+      "sha256": "sha256:0ae5e5e81c3c71e185d3a9fb4e84c058d5d29f7378f77fbc241cfdbdf243f3d4"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/12-paraform-command-menu-r4.json",
+      "sha256": "sha256:c533c61cc986443ff905562378721f22684cc5cb1b62de43c11cf6d64578b898"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/14-buzzr-tab-unread-badge-r5.json",
+      "sha256": "sha256:2b37f3685df77a9112c28f416e2bc54d0f2690f1aa891067d6cacccbd3a69a5e"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/18-paraform-command-menu-r6.json",
+      "sha256": "sha256:5bf9dc622c05f6a1635cb2b4083f4b33e58dca63c71483bf7dc0b9b70624a4cb"
+    },
+    {
+      "bytes": 36672,
+      "path": "generated/fitness-policy/quality-evidence-v2.json",
+      "sha256": "sha256:c9e1ee6894facd5200aa3f296371ac91be3314414637f531a06a6f6d813e9825"
+    },
+    {
+      "bytes": 39362,
+      "path": "generated/tables/analysis_summary.json",
+      "sha256": "sha256:5da8c7095fe118a20f97ebc4b72f7a97c2711fedf1f2b11b034aa311962d1f78"
+    },
+    {
+      "bytes": 597,
+      "path": "generated/tables/grader_reliability.csv",
+      "sha256": "sha256:f972dd52b2ebf22b96a56a22d267711de0808054da5fcd38caa4aa036a799e53"
+    },
+    {
+      "bytes": 509,
+      "path": "generated/tables/leave_one_pair_out.csv",
+      "sha256": "sha256:31f3a4670ce9fa5cc739c814c5d94a7c3a8ac7f977497c6a70607c484a96047a"
+    },
+    {
+      "bytes": 658,
+      "path": "generated/tables/pooled_descriptive.csv",
+      "sha256": "sha256:b25e2099a74da7701bfeb84a41cc4ca8599a9c70ea99f4ab6749bae3054891f1"
+    },
+    {
+      "bytes": 1777,
+      "path": "generated/tables/primary_pair_level.csv",
+      "sha256": "sha256:7ac8baf26011ed7699263bb715ed3018805974e223bb216a8772226d9e761b83"
+    },
+    {
+      "bytes": 368,
+      "path": "generated/tables/primary_task_summary.csv",
+      "sha256": "sha256:27b55980687751546e72e5f22e23a5ae17722812980f21ada04d735069de29db"
+    },
+    {
+      "bytes": 3078,
+      "path": "generated/tables/secondary_task_tests.csv",
+      "sha256": "sha256:68d7a499d909a01deedc61ac92d2a5b9b2926e66864b66fb9c7b4e338b14307f"
+    },
+    {
+      "bytes": 414,
+      "path": "generated/tex/backtest-figure-interpretation.tex",
+      "sha256": "sha256:927778b5a75f51846960363e433d27c2a1ac84625ce39d96b48c6f047681bbbf"
+    },
+    {
+      "bytes": 553,
+      "path": "generated/tex/fitness-backtest-results.tex",
+      "sha256": "sha256:76a1583d90bc66502d72c2e7b2d7219d32f5af14d6afc8bbd0f8bf841337ee49"
+    },
+    {
+      "bytes": 937,
+      "path": "generated/tex/functional-quality-results.tex",
+      "sha256": "sha256:5cfdd672115cabf26da7327580756c21d090a192f6b4af80668fa80c5ff9230e"
+    },
+    {
+      "bytes": 435,
+      "path": "generated/tex/primary-task-summary.tex",
+      "sha256": "sha256:52b04f4661c7a94e64c2cd8d5a8587888256a4c76d601a21649b91e661065126"
+    },
+    {
+      "bytes": 213,
+      "path": "generated/tex/quality-figure-interpretation.tex",
+      "sha256": "sha256:88e20ecdede81b43cdb5df397480d55460a2330b5efff9a9951310fbd62e71e9"
+    },
+    {
+      "bytes": 1047,
+      "path": "generated/tex/release-gates.tex",
+      "sha256": "sha256:54ef49a48b6dfe35f09bc8e48e0330152b42400a9ee90d1d183ed57f1db491b3"
+    },
+    {
+      "bytes": 1687,
+      "path": "generated/tex/remediation-results.tex",
+      "sha256": "sha256:ffdab8d49be51e99bd02726d65b8a74ecf6cd6f188a5efc4985907aff22138b2"
+    },
+    {
+      "bytes": 552,
+      "path": "generated/tex/report-macros.tex",
+      "sha256": "sha256:0949a87fbccce26bd33861caf3e36930493554423c644af56ce524cf9d3a527a"
+    },
+    {
+      "bytes": 3102,
+      "path": "generated/tex/resource-efficiency-results.tex",
+      "sha256": "sha256:a0c6a19739a93504af54c52b8f292b25a1b78630b2c3c3acfa10ee41f7bfd01a"
+    },
+    {
+      "bytes": 228,
+      "path": "generated/tex/resource-figure-interpretation.tex",
+      "sha256": "sha256:dd05d2dd6fddabf6ce6a3db713b2d0d4233de5cbc07807db142c9a074f307e6b"
+    },
+    {
+      "bytes": 229,
+      "path": "generated/tex/technical-summary.tex",
+      "sha256": "sha256:62cae1787a432e7c85e49d2b51172ad67a00a381bc0f6994d730cbb12bdf4984"
+    },
+    {
+      "bytes": 992,
+      "path": "generated/tex/website-audit-results.tex",
+      "sha256": "sha256:6f50ef4c591e67b6fba592db98d9c31b1b06cfad67005560d972197767b6cfb9"
+    },
+    {
+      "bytes": 1471,
+      "path": "grading-receipts.json",
+      "sha256": "sha256:c9276b115f3fdaf3d166aaec45a447435b3ea4e39e0783cf40ec7715e5fe0204"
+    },
+    {
+      "bytes": 2227,
+      "path": "harness-provenance.json",
+      "sha256": "sha256:65a7a12c0f26376bf5a75f56102c03fcb865b26b955a3d1b8ee1af51fafc9976"
+    },
+    {
+      "bytes": 19785,
+      "path": "main.tex",
+      "sha256": "sha256:032b7c79d11e38c149b72b4b4010fbe4eb74b399c92daf969e686d6800033d07"
+    },
+    {
+      "bytes": 3127,
+      "path": "plan.json",
+      "sha256": "sha256:505a33cc60e0e4110e0fedf09c7b794ab1cdea75955ceb118e79063631fcd5af"
+    },
+    {
+      "bytes": 2037,
+      "path": "protocol.json",
+      "sha256": "sha256:90e390c0aaf49e3912332ca23eab5a997fc32991c36c4f70cf7010535769df8e"
+    },
+    {
+      "bytes": 24392,
+      "path": "release-2.7.3-channel-provenance.json",
+      "sha256": "sha256:b20fde7420ef101fcce8e8031ade712096f9463bb9e44b20c94416ea8ea33a16"
+    },
+    {
+      "bytes": 1109,
+      "path": "release-provenance.json",
+      "sha256": "sha256:1bf5e89e0ad8173a734f678dff5e19a282a4bbd709097e8547a695968d058649"
+    },
+    {
+      "bytes": 10163,
+      "path": "rendered-audit-ledger.json",
+      "sha256": "sha256:53ac9736f3afa8647b798a8b1511b3bfca915bd1eccda643a473719e42b6a048"
+    },
+    {
+      "bytes": 2752,
+      "path": "report-hooks.tex",
+      "sha256": "sha256:47fecefc8854276cbcf6abd39a660a607f6d477b094e0f70d2e7d771d7116013"
+    },
+    {
+      "bytes": 312,
+      "path": "repositories.json",
+      "sha256": "sha256:e2d9ed32fb4a5285f89971e9e3a417c436a73967f9c007ec957e682914a5abc3"
+    },
+    {
+      "bytes": 912,
+      "path": "rubric.json",
+      "sha256": "sha256:c55bfb34ee30a6974dc01230b240bd0057b38bda68d9b50ef49e4f34fbaa94bd"
+    },
+    {
+      "bytes": 2616,
+      "path": "run-fitness-backtest.py",
+      "sha256": "sha256:15574c8e3afc8277845ab6f7e1d6753bad6016db08b5868eabf7f6dde59d242d"
+    },
+    {
+      "bytes": 5977,
+      "path": "tasks/buzzr-tab-unread-badge.json",
+      "sha256": "sha256:2b1840512c07390d16944af67cf30809af621f0f72401f8f881b28baf8a39a22"
+    },
+    {
+      "bytes": 4489,
+      "path": "tasks/nate-options-reduce-motion.json",
+      "sha256": "sha256:1dd43195ee87e451838297f3299dc36b36d4346752b4397186f3fd67bbc29c0d"
+    },
+    {
+      "bytes": 5326,
+      "path": "tasks/paraform-command-menu.json",
+      "sha256": "sha256:1d60a06cad923613a844f38424ad34b3e88efe1b4d290f8f06f6a74e357b5f48"
+    },
+    {
+      "bytes": 962,
+      "path": "v14-audit-ledger.json",
+      "sha256": "sha256:07f411a17289e89f042915051361aa7aefde12e3f9faff3a347c20fbc5de4ccf"
+    },
+    {
+      "bytes": 23865,
+      "path": "verify-release-2.7.3-channels.mjs",
+      "sha256": "sha256:e9ec27e9c098018fbcd33b24502f838d88b26148011ed9364c2a201855cbb833"
+    },
+    {
+      "bytes": 81798,
+      "path": "website-audit-before-after.json",
+      "sha256": "sha256:1ccf198f211e3be7c14d0a09f28fc9483e22cd2421a400c12722e46180e2ceda"
+    }
+  ],
+  "entryCount": 92,
+  "excluded": [
+    "**/*.pdf",
+    "generated/report-package-checksums.json"
+  ],
+  "root": ".",
+  "schemaVersion": "memoire.report-package-checksums.v1"
+}

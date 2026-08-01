@@ -232,6 +232,21 @@ describe("prospective Memi 2.7 study", () => {
     })).toThrow(/complete matched pairs/);
   });
 
+  it("resumes one missing condition when its matched sibling is already complete", () => {
+    const receipt = freeze();
+    const completed = receipt.trials[0]!;
+
+    const batch = selectProspectiveBatch({
+      freeze: receipt,
+      completedTrialIds: [completed.trialId],
+      maximumTrials: 2,
+    });
+
+    expect(batch.map((trial) => trial.trialId)).toEqual([
+      receipt.trials[1]!.trialId,
+    ]);
+  });
+
   it("unlocks exactly 40 only after all three platforms pass three matched pairs", () => {
     const receipt = freeze();
     const runs = receipt.trials.map((trial) => acceptedRun(receipt, trial));

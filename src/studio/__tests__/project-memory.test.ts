@@ -77,7 +77,7 @@ describe("project memory index", () => {
       expect(index.items.find((item) => item.title === "Studio spacing pass")).toMatchObject({
         kind: "changelog",
         status: "active",
-        sourcePath: ".memoire/project-memory/changelog/studio-spacing.json",
+        sourcePath: join(".memoire", "project-memory", "changelog", "studio-spacing.json"),
         tags: expect.arrayContaining(["design-changelog", "studio"]),
       });
 
@@ -129,10 +129,10 @@ describe("project memory index", () => {
 
       expect(index.counts.research).toBe(1);
       expect(index.items.find((item) => item.kind === "changelog")).toBeUndefined();
-      expect(index.items.map((item) => item.sourcePath)).toContain("preview/design-system.html");
-      expect(index.items.map((item) => item.sourcePath)).not.toContain("preview/generated/gallery.html");
-      expect(index.items.map((item) => item.sourcePath)).not.toContain("preview/changelog.html");
-      expect(index.items.map((item) => item.sourcePath)).not.toContain("preview/standalone/changelog.html");
+      expect(index.items.map((item) => item.sourcePath)).toContain(join("preview", "design-system.html"));
+      expect(index.items.map((item) => item.sourcePath)).not.toContain(join("preview", "generated", "gallery.html"));
+      expect(index.items.map((item) => item.sourcePath)).not.toContain(join("preview", "changelog.html"));
+      expect(index.items.map((item) => item.sourcePath)).not.toContain(join("preview", "standalone", "changelog.html"));
       expect(searchable).not.toMatch(/dibs|aicp|bidding|\\bbids?\\b/);
     } finally {
       await rm(root, { recursive: true, force: true });

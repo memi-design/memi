@@ -1,0 +1,46 @@
+{
+  "chronologyCount": 19,
+  "chronologyOnlyCount": 7,
+  "kind": "memi-v15-fitness-backtest-summary",
+  "recoveredRouteCount": 0,
+  "routeCount": 2,
+  "routes": [
+    {
+      "finalDecision": "repository-only",
+      "finalState": "suppressed",
+      "latestReasons": [
+        "quality-regression"
+      ],
+      "matchingEvents": 6,
+      "modelId": "gpt-5.6-luna",
+      "provider": "codex",
+      "reasoningEffort": "low",
+      "repositoryFingerprintHash": "sha256:dfa4386fbef2b154b8a5f276b67209c12e1d560db5ed7635b221f9ca52ef5cb0",
+      "routeKey": "sha256:e3787a1f1d1315489555abf80a663a1ebca6c1b0ec138009f55faa0a736a6d80",
+      "skillContentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd",
+      "skillId": "atomic-design",
+      "suppressedAt": "2026-08-01T09:11:49.375Z",
+      "taskClass": "buzzr-tab-unread-badge"
+    },
+    {
+      "finalDecision": "repository-only",
+      "finalState": "suppressed",
+      "latestReasons": [
+        "quality-regression"
+      ],
+      "matchingEvents": 6,
+      "modelId": "gpt-5.6-luna",
+      "provider": "codex",
+      "reasoningEffort": "low",
+      "repositoryFingerprintHash": "sha256:ef98548e2139de0f2c7726bd0b612445103928ef15e296de1895e28dad193b12",
+      "routeKey": "sha256:731fefa1ba15cb75792b89bebc23c7cbf249112cb4008b2ddfdaa3abfe80ec3b",
+      "skillContentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902",
+      "skillId": "design-extract",
+      "suppressedAt": "2026-08-01T07:13:46.792Z",
+      "taskClass": "paraform-command-menu"
+    }
+  ],
+  "schemaVersion": 1,
+  "storeWriteCount": 12,
+  "suppressedRouteCount": 2
+}

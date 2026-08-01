@@ -25,29 +25,43 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 import { generateMemiToolsStub, type StubToolSpec } from "./stub-generator.js";
-import { ToolsRpcServer, type ScriptLogEntry, type ToolRunner } from "./tools-rpc-server.js";
+import {
+  resolveToolsRpcEndpoint,
+  ToolsRpcServer,
+  type ScriptLogEntry,
+  type ToolRunner,
+} from "./tools-rpc-server.js";
 
-let cachedTsxBin: string | null = null;
+const requireFromHere = createRequire(import.meta.url);
+let cachedTsxCli: string | null | undefined;
 
-function tsxBinPath(): string {
-  if (cachedTsxBin) return cachedTsxBin;
-  // Walk upward from this file to find the nearest node_modules/.bin/tsx.
-  // Works whether the engine is consumed as src or as dist.
+function tsxCliPath(): string | null {
+  if (cachedTsxCli !== undefined) return cachedTsxCli;
+  try {
+    cachedTsxCli = requireFromHere.resolve("tsx/cli");
+    return cachedTsxCli;
+  } catch {
+    // Fall through to the source/dist directory walk.
+  }
+
+  // Walk upward from this file to find the nearest platform-neutral CLI
+  // module. Executing node_modules/.bin/tsx directly is not portable because
+  // npm installs it as a shell shim on Windows.
   let dir = dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 8; i += 1) {
-    const candidate = resolve(dir, "node_modules", ".bin", "tsx");
+    const candidate = resolve(dir, "node_modules", "tsx", "dist", "cli.mjs");
     if (existsSync(candidate)) {
-      cachedTsxBin = candidate;
-      return candidate;
+      cachedTsxCli = candidate;
+      return cachedTsxCli;
     }
     const next = dirname(dir);
     if (next === dir) break;
     dir = next;
   }
-  // Fall back to the unqualified name; PATH will resolve it (or fail loudly).
-  cachedTsxBin = "tsx";
-  return cachedTsxBin;
+  cachedTsxCli = null;
+  return cachedTsxCli;
 }
 
 export interface ExecuteCodeRequest {
@@ -96,7 +110,7 @@ export async function executeCode(req: ExecuteCodeRequest, runner: ToolRunner): 
   // .mts forces ESM mode in tsx/Node so top-level await + import work.
   const stubPath = join(dir, "memi_tools.mts");
   const scriptPath = join(dir, "script.mts");
-  const socketPath = join(dir, "tools.sock");
+  const socketPath = resolveToolsRpcEndpoint(dir);
 
   await writeFile(
     stubPath,
@@ -133,7 +147,7 @@ export async function executeCode(req: ExecuteCodeRequest, runner: ToolRunner): 
     ...(req.envExtra ?? {}),
   });
 
-  const { command, args } = resolveCommand(req.runtime ?? "tsx", scriptPath, req.memoryMb);
+  const { command, args } = resolveExecuteCodeCommand(req.runtime ?? "tsx", scriptPath, req.memoryMb);
 
   let child: ChildProcess;
   try {
@@ -214,7 +228,7 @@ function buildChildEnv(allowlist: readonly string[], extra: Record<string, strin
   return env;
 }
 
-function resolveCommand(
+export function resolveExecuteCodeCommand(
   runtime: NonNullable<ExecuteCodeRequest["runtime"]>,
   scriptPath: string,
   memoryMb?: number,
@@ -226,12 +240,14 @@ function resolveCommand(
     };
   }
   if (runtime === "tsx") {
-    // tsx is a devDep. Call its bin directly (skip npx startup overhead).
-    // Resolves relative to this module so it picks up the engine's
-    // node_modules even if cwd has been changed. Memory cap is applied
-    // via NODE_OPTIONS env var (tsx doesn't accept --node-options).
+    // Resolve the JS entry module relative to this engine and run it through
+    // Node. This bypasses npm's platform-specific .bin shell shims, which
+    // cannot be spawned directly on Windows.
     void memoryMb; // honored via NODE_OPTIONS in the parent env
-    return { command: tsxBinPath(), args: [scriptPath] };
+    const cliPath = tsxCliPath();
+    return cliPath
+      ? { command: process.execPath, args: [cliPath, scriptPath] }
+      : { command: "tsx", args: [scriptPath] };
   }
   if (runtime === "bun") {
     return { command: "bun", args: ["run", scriptPath] };

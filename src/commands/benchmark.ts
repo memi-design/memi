@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
 import {
@@ -34,6 +34,7 @@ import {
 import {
   buildProspectiveFreeze,
   evaluateProspectiveStudy,
+  hashValue,
   prospectiveFreezeSchema,
   prospectiveStudyPlanSchema,
   selectProspectiveTrial,
@@ -52,11 +53,17 @@ import {
   NoteLoader,
   resolveRoutedSkills,
   buildRepositoryFingerprint,
+  SkillFitnessBoundRouteReceiptSchema,
+  SkillFitnessQualityEvidenceSchema,
   SkillFitnessRouteReceiptSchema,
+  assessSkillRouteFitness,
   appendSkillFitnessEvent,
+  backtestSkillFitness,
   buildSkillFitnessEvent,
   loadSkillFitnessEvents,
   projectSkillFitness,
+  resolveSkillRouteExecutionMode,
+  type SkillFitnessBoundRouteReceipt,
 } from "../notes/index.js";
 import { ui } from "../tui/format.js";
 
@@ -162,10 +169,12 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .command("prospective-evaluate <plan> <freeze>")
     .description("Evaluate prospective receipts without granting credit to invalid evidence")
     .requiredOption("--store-root <path>", "External immutable run store root")
+    .requiredOption("--evidence-root <path>", "Trusted root containing raw trial evidence")
     .requiredOption("--out <path>", "Evaluation report output path")
     .option("--json", "Output JSON")
     .action(async (planPath: string, freezePath: string, opts: {
       storeRoot: string;
+      evidenceRoot: string;
       out: string;
       json?: boolean;
     }) => {
@@ -176,7 +185,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         await readFile(resolve(freezePath), "utf8"),
       ));
       const store = new EfficiencyRunStore(resolve(opts.storeRoot));
-      const candidates = (await store.list()).filter((run) =>
+      const candidates = (await store.listStrict()).filter((run) =>
         run.prospective?.freezeHash === freeze.freezeHash);
       const verifiedRuns: BenchmarkRunRecord[] = [];
       const evidenceFailures: Array<{
@@ -200,6 +209,14 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           evidenceDirectory,
           expectedManifestSha256: run.prospective.evidenceManifestSha256,
           requiredArtifacts: freeze.requiredArtifacts,
+          expectedBinding: {
+            trialId: run.prospective.trialId,
+            taskId: run.taskId,
+            repeat: run.repeat,
+            condition: run.condition,
+            sequence: run.prospective.sequence,
+          },
+          allowedEvidenceRoot: resolve(opts.evidenceRoot),
         });
         if (!verification.valid) {
           evidenceFailures.push({
@@ -373,6 +390,11 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .option("--claude <path>", "Claude Code path", "claude")
     .option("--freeze <path>", "Prospective freeze receipt")
     .option("--trial <id>", "Frozen prospective trial id")
+    .option("--task-class <id>", "Stable route-fitness task class (defaults to task id)")
+    .option(
+      "--recovery-probe",
+      "Execute a currently suppressed exact route only as a frozen prospective recovery probe",
+    )
     .option("--execute", "Acknowledge model quota and disposable writes")
     .option("--json", "Output JSON")
     .action(async (taskPath: string, opts: {
@@ -393,6 +415,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       claude: string;
       freeze?: string;
       trial?: string;
+      taskClass?: string;
+      recoveryProbe?: boolean;
       execute?: boolean;
       json?: boolean;
     }) => {
@@ -408,6 +432,10 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         throw new Error("--freeze and --trial must be provided together");
       }
       const condition = benchmarkConditionSchema.parse(opts.condition);
+      const taskClass = stableTaskClass(opts.taskClass ?? task.id);
+      if (opts.recoveryProbe && condition !== "memi") {
+        throw new Error("--recovery-probe requires the memi condition");
+      }
       const provider = providers(opts.provider)[0];
       const modelId = opts.model ?? (
         provider === "codex" ? "gpt-5.6-sol" : "claude-sonnet-4-6"
@@ -436,6 +464,9 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         : null;
       let routedContext = "";
       let route: Awaited<ReturnType<typeof resolveRoutedSkills>> | null = null;
+      let routePolicy: ReturnType<typeof assessSkillRouteFitness> | null = null;
+      let routeExecutionMode: "production" | "repository-only" | "recovery-probe" =
+        "production";
       if (condition === "memi") {
         const loader = opts.skillsRoot
           ? new NoteLoader(resolve(opts.skillsRoot))
@@ -453,7 +484,41 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           maximumSkills: freeze?.harness.maximumSkills ?? 2,
           maximumContextBytes: freeze?.harness.maximumContextBytes ?? 8_000,
         });
-        routedContext = formatRoutedSkillContext(route);
+        if (route.route.repositoryFingerprintHash && route.route.selected.length > 0) {
+          routePolicy = assessSkillRouteFitness({
+            events: await loadSkillFitnessEvents(
+              skillFitnessPath(resolve(opts.storeRoot)),
+            ),
+            route: {
+              routerVersion: route.route.routerVersion,
+              repositoryFingerprintHash: route.route.repositoryFingerprintHash,
+              taskClass,
+              harness: {
+                provider,
+                modelId,
+                reasoningEffort: opts.reasoning,
+              },
+              skills: route.route.selected.map(({ id, contentHash }) => ({
+                skillId: id,
+                contentHash,
+              })),
+            },
+          });
+          routeExecutionMode = resolveSkillRouteExecutionMode({
+            assessment: routePolicy,
+            recoveryProbe: opts.recoveryProbe === true,
+            prospective: frozenTrial !== null,
+          });
+          if (routeExecutionMode === "repository-only") {
+            route = suppressResolvedRoute(route, routePolicy.reasons);
+          }
+        }
+        if (opts.recoveryProbe && routeExecutionMode !== "recovery-probe") {
+          throw new Error("recovery probe requires an exact route that is currently suppressed");
+        }
+        routedContext = route.route.selected.length > 0
+          ? formatRoutedSkillContext(route)
+          : "";
       }
       const adapter = provider === "codex"
         ? createCodexWorkflowAdapter({
@@ -476,10 +541,15 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         adapter,
       });
       const completedAt = new Date();
-      const routePath = route
+      const routePath = route && route.route.selected.length > 0
         ? join(result.evidenceDirectory, "skill-route.json")
         : null;
-      if (routePath && route) await writeJson(routePath, route);
+      const routePolicyPath = routePolicy
+        ? join(result.evidenceDirectory, "skill-fitness-policy.json")
+        : null;
+      if (routePolicyPath && routePolicy) {
+        await writeJson(routePolicyPath, routePolicy);
+      }
       const failedChecks = result.verification.filter((check) => !check.passed).length;
       const grade = gradeAutomatedAcceptance({
         accepted: result.accepted,
@@ -506,6 +576,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           }),
           writeJson(join(result.evidenceDirectory, "route.json"), {
             condition,
+            taskClass,
+            executionMode: routeExecutionMode,
             route: route ?? null,
           }),
           writeJson(
@@ -526,6 +598,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           join(result.evidenceDirectory, "verification.json"),
           join(result.evidenceDirectory, "events.jsonl"),
           ...(routePath ? [routePath] : []),
+          ...(routePolicyPath ? [routePolicyPath] : []),
         ];
       let record = benchmarkRunRecordSchema.parse({
         schemaVersion: 1,
@@ -569,6 +642,9 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         evidenceRefs: [
           ...evidenceRefs,
           ...(routePath && !evidenceRefs.includes(routePath) ? [routePath] : []),
+          ...(routePolicyPath && !evidenceRefs.includes(routePolicyPath)
+            ? [routePolicyPath]
+            : []),
           ...(result.adapter.usage.estimatedCostUsd === null
             ? [`estimatedCostUsd:unassessed-${provider}-subscription`]
             : []),
@@ -587,6 +663,26 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           }
           : {}),
       });
+      if (routePath && route) {
+        await writeJson(routePath, {
+          schemaVersion: 2,
+          runId: record.runId,
+          taskId: record.taskId,
+          taskClass,
+          executionMode: routeExecutionMode,
+          repeat: record.repeat,
+          repository: {
+            pathHash: record.repository.pathHash,
+            revision: record.repository.revision,
+          },
+          harness: {
+            provider: record.harness.id,
+            modelId: record.harness.modelId,
+            reasoningEffort: record.harness.reasoningEffort,
+          },
+          route: route.route,
+        });
+      }
       const runPath = join(result.evidenceDirectory, "run.json");
       if (freeze && frozenTrial) {
         await writeJson(runPath, record);
@@ -596,6 +692,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           artifactNames: [
             ...freeze.requiredArtifacts.filter((artifact) =>
               artifact !== "evidence-manifest.json"),
+            ...(routePath ? ["skill-route.json"] : []),
+            ...(routePolicyPath ? ["skill-fitness-policy.json"] : []),
             "run.json",
           ],
         });
@@ -615,6 +713,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         status: result.accepted ? "accepted" : "failed-quality-gate",
         run: record,
         route: route?.route ?? null,
+        taskClass,
+        routeExecutionMode,
         evidenceDirectory: result.evidenceDirectory,
       };
       if (opts.json) console.log(JSON.stringify(payload, null, 2));
@@ -649,6 +749,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .requiredOption("--route <path>", "Memi skill-route.json receipt")
     .requiredOption("--task-class <id>", "Stable task class")
     .requiredOption("--store-root <path>", "External immutable run store root")
+    .option("--quality-evidence <path>", "Hash-verified blinded quality evidence v2")
     .option("--json", "Output JSON")
     .action(async (opts: {
       baseline: string;
@@ -656,21 +757,56 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       route: string;
       taskClass: string;
       storeRoot: string;
+      qualityEvidence?: string;
       json?: boolean;
     }) => {
       const storeRoot = resolve(opts.storeRoot);
       const store = new EfficiencyRunStore(storeRoot);
-      const runs = await store.list();
+      const runs = await store.listStrict();
       const baseline = uniqueRun(runs, opts.baseline, "baseline");
       const memi = uniqueRun(runs, opts.memi, "memi");
-      const route = SkillFitnessRouteReceiptSchema.parse(
-        JSON.parse(await readFile(resolve(opts.route), "utf8")),
-      );
+      const routePath = resolve(opts.route);
+      assertRouteReceiptReferenced(memi, routePath);
+      await verifyManifestSealedFitnessRun({
+        run: baseline,
+        condition: "baseline",
+      });
+      await verifyManifestSealedFitnessRun({
+        run: memi,
+        condition: "memi",
+      });
+      const routeReceipt = await readBoundedJson(routePath, "route receipt");
+      const boundResult = SkillFitnessBoundRouteReceiptSchema.safeParse(routeReceipt);
+      const routeBinding = boundResult.success
+        ? await validateManifestSealedBoundRoute({
+          receipt: boundResult.data,
+          memi,
+          taskClass: opts.taskClass,
+          routePath,
+        })
+        : await importProspectiveRawRoute({
+          routeReceipt,
+          routePath,
+          memi,
+          taskClass: opts.taskClass,
+          boundError: boundResult.error.message,
+        });
+      const qualityEvidence = opts.qualityEvidence
+        ? SkillFitnessQualityEvidenceSchema.parse(await readBoundedJson(
+          resolve(opts.qualityEvidence),
+          "quality evidence",
+        ))
+        : undefined;
+      if (routeBinding.executionMode === "recovery-probe" && !qualityEvidence) {
+        throw new Error("recovery-probe fitness evidence requires blinded quality evidence v2");
+      }
       const event = buildSkillFitnessEvent({
         baseline,
         memi,
-        route,
+        route: routeBinding.route,
         taskClass: opts.taskClass,
+        qualityEvidence,
+        evidenceMode: routeBinding.executionMode,
       });
       const path = skillFitnessPath(storeRoot);
       await appendSkillFitnessEvent(path, event);
@@ -680,6 +816,31 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       else {
         console.log(ui.ok(`Recorded fitness evidence ${event.eventId}`));
         console.log(ui.dots("Fitness store", path));
+      }
+    });
+
+  benchmark
+    .command("fitness-backtest")
+    .description("Replay exact-match route fitness policy chronologically")
+    .requiredOption("--store-root <path>", "External immutable run store root")
+    .option("--as-of <timestamp>", "Inclusive ISO-8601 replay cutoff")
+    .option("--json", "Output JSON")
+    .action(async (opts: {
+      storeRoot: string;
+      asOf?: string;
+      json?: boolean;
+    }) => {
+      const path = skillFitnessPath(resolve(opts.storeRoot));
+      const backtest = backtestSkillFitness({
+        events: await loadSkillFitnessEvents(path),
+        asOf: opts.asOf,
+      });
+      const payload = { status: "backtested", path, backtest };
+      if (opts.json) console.log(JSON.stringify(payload, null, 2));
+      else {
+        console.log(ui.section("MEMI SKILL FITNESS BACKTEST"));
+        console.log(ui.dots("Events replayed", String(backtest.eventsReplayed)));
+        console.log(ui.dots("Exact routes", String(backtest.routes.length)));
       }
     });
 
@@ -932,6 +1093,327 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
 async function writeJson(path: string, value: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
   await writeFile(path, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf-8", mode: 0o600 });
+}
+
+function suppressResolvedRoute(
+  route: Awaited<ReturnType<typeof resolveRoutedSkills>>,
+  reasons: readonly string[],
+): Awaited<ReturnType<typeof resolveRoutedSkills>> {
+  const reason = `fitness-suppressed:${reasons.join("+") || "harmful-history"}`;
+  return {
+    route: {
+      ...route.route,
+      decision: "abstain",
+      selected: [],
+      excluded: [
+        ...route.route.excluded,
+        ...route.route.selected.map((skill) => ({ id: skill.id, reason })),
+      ],
+      contextBytes: 0,
+    },
+    skills: [],
+    resources: [],
+    contextBytes: 0,
+  };
+}
+
+async function readBoundedJson(file: string, label: string): Promise<unknown> {
+  const metadata = await lstat(file);
+  if (metadata.isSymbolicLink() || !metadata.isFile()) {
+    throw new Error(`${label} must be a regular non-symlink file`);
+  }
+  if (metadata.size > 1_000_000) {
+    throw new Error(`${label} exceeds the 1000000-byte safety limit`);
+  }
+  try {
+    return JSON.parse(await readFile(file, "utf8"));
+  } catch (error) {
+    throw new Error(
+      `${label} is not valid JSON: ${
+        error instanceof Error ? error.message : "unknown error"
+      }`,
+    );
+  }
+}
+
+async function importProspectiveRawRoute(input: {
+  readonly routeReceipt: unknown;
+  readonly routePath: string;
+  readonly memi: BenchmarkRunRecord;
+  readonly taskClass: string;
+  readonly boundError: string;
+}): Promise<SkillFitnessBoundRouteReceipt> {
+  if (!input.memi.prospective) {
+    throw new Error(
+      `fitness-record requires a bound v2 route receipt: ${input.boundError}`,
+    );
+  }
+  const rawResult = SkillFitnessRouteReceiptSchema.safeParse(input.routeReceipt);
+  if (!rawResult.success) {
+    throw new Error(`prospective raw route receipt is invalid: ${rawResult.error.message}`);
+  }
+  if (basename(input.routePath) !== "skill-route.json") {
+    throw new Error("prospective raw route must be named skill-route.json");
+  }
+  const evidenceDirectory = dirname(input.routePath);
+  const evidenceDirectoryMetadata = await lstat(evidenceDirectory);
+  if (
+    evidenceDirectoryMetadata.isSymbolicLink()
+    || !evidenceDirectoryMetadata.isDirectory()
+  ) {
+    throw new Error("prospective evidence directory must be a regular non-symlink directory");
+  }
+  const routeArtifactPath = siblingEvidenceRef(
+    input.memi,
+    evidenceDirectory,
+    "route.json",
+  );
+  const manifestPath = siblingEvidenceRef(
+    input.memi,
+    evidenceDirectory,
+    "evidence-manifest.json",
+  );
+  const runPath = siblingEvidenceRef(input.memi, evidenceDirectory, "run.json");
+  const [routeArtifact, sealedRunValue] = await Promise.all([
+    readBoundedJson(routeArtifactPath, "prospective route artifact"),
+    readBoundedJson(runPath, "prospective run receipt"),
+    readBoundedJson(manifestPath, "prospective evidence manifest"),
+  ]);
+  const verification = await verifyEvidenceManifest({
+    evidenceDirectory,
+    expectedManifestSha256: input.memi.prospective.evidenceManifestSha256,
+    requiredArtifacts: ["route.json", "run.json"],
+    expectedBinding: {
+      trialId: input.memi.prospective.trialId,
+      taskId: input.memi.taskId,
+      repeat: input.memi.repeat,
+      condition: "memi",
+      sequence: input.memi.prospective.sequence,
+    },
+    allowedEvidenceRoot: evidenceDirectory,
+  });
+  if (!verification.valid) {
+    throw new Error(
+      `prospective route evidence verification failed: ${verification.reasons.join(",")}`,
+    );
+  }
+  const sealedRun = benchmarkRunRecordSchema.parse(sealedRunValue);
+  if (hashValue(sealedRun) !== hashValue(input.memi)) {
+    throw new Error("prospective run receipt does not match the immutable stored Memi run");
+  }
+  const sealedRoute = manifestSealedRawRoute(routeArtifact);
+  if (hashValue(sealedRoute) !== hashValue(input.routeReceipt)) {
+    throw new Error("raw route does not match the manifest-sealed route artifact");
+  }
+  const boundRoute = SkillFitnessBoundRouteReceiptSchema.parse({
+    schemaVersion: 2,
+    runId: input.memi.runId,
+    taskId: input.memi.taskId,
+    taskClass: input.memi.taskId,
+    executionMode: "production",
+    repeat: input.memi.repeat,
+    repository: {
+      pathHash: input.memi.repository.pathHash,
+      revision: input.memi.repository.revision,
+    },
+    harness: {
+      provider: input.memi.harness.id,
+      modelId: input.memi.harness.modelId,
+      reasoningEffort: input.memi.harness.reasoningEffort,
+    },
+    route: rawResult.data,
+  });
+  return validatedBoundRoute(boundRoute, input.memi, input.taskClass);
+}
+
+async function validateManifestSealedBoundRoute(input: {
+  readonly receipt: SkillFitnessBoundRouteReceipt;
+  readonly memi: BenchmarkRunRecord;
+  readonly taskClass: string;
+  readonly routePath: string;
+}): Promise<SkillFitnessBoundRouteReceipt> {
+  await verifyManifestSealedFitnessRun({
+    run: input.memi,
+    condition: "memi",
+    requiredArtifactPath: input.routePath,
+  });
+  return validatedBoundRoute(input.receipt, input.memi, input.taskClass);
+}
+
+async function verifyManifestSealedFitnessRun(input: {
+  readonly run: BenchmarkRunRecord;
+  readonly condition: "baseline" | "memi";
+  readonly requiredArtifactPath?: string;
+}): Promise<void> {
+  if (!input.run.prospective) {
+    throw new Error(
+      `${input.condition} fitness run requires manifest-sealed prospective evidence`,
+    );
+  }
+  const runPath = uniqueEvidencePath(input.run, "run.json", input.condition);
+  const manifestPath = uniqueEvidencePath(
+    input.run,
+    "evidence-manifest.json",
+    input.condition,
+  );
+  const evidenceDirectory = dirname(runPath);
+  if (dirname(manifestPath) !== evidenceDirectory) {
+    throw new Error(`${input.condition} prospective evidence must be sibling artifacts`);
+  }
+  const directoryMetadata = await lstat(evidenceDirectory);
+  if (directoryMetadata.isSymbolicLink() || !directoryMetadata.isDirectory()) {
+    throw new Error(
+      `${input.condition} evidence directory must be a regular non-symlink directory`,
+    );
+  }
+  await readBoundedJson(
+    manifestPath,
+    `${input.condition} prospective evidence manifest`,
+  );
+  if (
+    input.requiredArtifactPath
+    && dirname(input.requiredArtifactPath) !== evidenceDirectory
+  ) {
+    throw new Error("bound route receipt must be a sibling prospective artifact");
+  }
+  const requiredArtifacts = [
+    "run.json",
+    ...(input.requiredArtifactPath ? [basename(input.requiredArtifactPath)] : []),
+  ];
+  const verification = await verifyEvidenceManifest({
+    evidenceDirectory,
+    expectedManifestSha256: input.run.prospective.evidenceManifestSha256,
+    requiredArtifacts,
+    expectedBinding: {
+      trialId: input.run.prospective.trialId,
+      taskId: input.run.taskId,
+      repeat: input.run.repeat,
+      condition: input.condition,
+      sequence: input.run.prospective.sequence,
+    },
+    allowedEvidenceRoot: evidenceDirectory,
+  });
+  if (!verification.valid) {
+    throw new Error(
+      `${input.condition} prospective evidence verification failed: ${verification.reasons.join(",")}`,
+    );
+  }
+  const sealedRun = benchmarkRunRecordSchema.parse(
+    await readBoundedJson(runPath, `${input.condition} prospective run receipt`),
+  );
+  if (hashValue(sealedRun) !== hashValue(input.run)) {
+    throw new Error(
+      `${input.condition} prospective run receipt does not match the immutable stored run`,
+    );
+  }
+}
+
+function uniqueEvidencePath(
+  run: BenchmarkRunRecord,
+  artifactName: string,
+  condition: "baseline" | "memi",
+): string {
+  const matches = run.evidenceRefs.flatMap((reference) => {
+    try {
+      const candidate = resolve(reference);
+      return basename(candidate) === artifactName ? [candidate] : [];
+    } catch {
+      return [];
+    }
+  });
+  if (matches.length !== 1) {
+    throw new Error(
+      `${condition} manifest-sealed prospective evidence requires one ${artifactName} reference`,
+    );
+  }
+  return matches[0];
+}
+
+
+function siblingEvidenceRef(
+  memi: BenchmarkRunRecord,
+  evidenceDirectory: string,
+  artifactName: string,
+): string {
+  const matches = memi.evidenceRefs.flatMap((reference) => {
+    try {
+      const path = resolve(reference);
+      return basename(path) === artifactName ? [path] : [];
+    } catch {
+      return [];
+    }
+  });
+  if (matches.length !== 1 || dirname(matches[0]) !== evidenceDirectory) {
+    throw new Error("prospective evidence must be sibling artifacts");
+  }
+  return matches[0];
+}
+
+function manifestSealedRawRoute(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("prospective route artifact is invalid");
+  }
+  const artifact = value as Record<string, unknown>;
+  if (
+    Object.keys(artifact).length !== 2
+    || artifact.condition !== "memi"
+    || !("route" in artifact)
+  ) {
+    throw new Error("prospective route artifact is invalid");
+  }
+  return artifact.route;
+}
+
+function assertRouteReceiptReferenced(
+  memi: BenchmarkRunRecord,
+  routePath: string,
+): void {
+  const referenced = memi.evidenceRefs.some((reference) => {
+    try {
+      return resolve(reference) === routePath;
+    } catch {
+      return false;
+    }
+  });
+  if (!referenced) {
+    throw new Error("route receipt is not referenced by the Memi run");
+  }
+}
+
+function validateBoundRouteReceipt(
+  receipt: SkillFitnessBoundRouteReceipt,
+  memi: BenchmarkRunRecord,
+  taskClass: string,
+): void {
+  const mismatches = [
+    ["run id", receipt.runId, memi.runId],
+    ["task id", receipt.taskId, memi.taskId],
+    ["task class", receipt.taskClass ?? receipt.taskId, taskClass],
+    ["repeat", receipt.repeat, memi.repeat],
+    ["repository path", receipt.repository.pathHash, memi.repository.pathHash],
+    ["repository revision", receipt.repository.revision, memi.repository.revision],
+    ["provider", receipt.harness.provider, memi.harness.id],
+    ["model", receipt.harness.modelId, memi.harness.modelId],
+    ["reasoning effort", receipt.harness.reasoningEffort, memi.harness.reasoningEffort],
+  ] as const;
+  const mismatch = mismatches.find(([, observed, expected]) => observed !== expected);
+  if (mismatch) throw new Error(`bound route ${mismatch[0]} mismatch`);
+}
+
+function validatedBoundRoute(
+  receipt: SkillFitnessBoundRouteReceipt,
+  memi: BenchmarkRunRecord,
+  taskClass: string,
+): SkillFitnessBoundRouteReceipt {
+  validateBoundRouteReceipt(receipt, memi, taskClass);
+  return receipt;
+}
+
+function stableTaskClass(value: string): string {
+  if (!/^[a-z][a-z0-9-]*$/.test(value)) {
+    throw new Error("task-class must use lowercase kebab-case");
+  }
+  return value;
 }
 
 function integer(value: string, label: string): number {

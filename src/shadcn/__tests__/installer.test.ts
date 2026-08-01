@@ -1,13 +1,37 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import type { MemoireEngine } from "../../engine/core.js";
 import type { AnySpec } from "../../specs/types.js";
-import { installShadcnRegistryItem, resolveShadcnRegistryItem } from "../installer.js";
+import {
+  assertShadcnInstallTargetContained,
+  installShadcnRegistryItem,
+  resolveShadcnRegistryItem,
+} from "../installer.js";
 
 describe("shadcn registry installer", () => {
+  it("accepts Windows alias targets within the project and rejects escapes", () => {
+    const root = "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\memoire-shadcn-install";
+
+    expect(() => assertShadcnInstallTargetContained(
+      root,
+      `${root}\\components\\ui\\button.tsx`,
+      "@/components/ui/button.tsx",
+    )).not.toThrow();
+    expect(() => assertShadcnInstallTargetContained(
+      root,
+      "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\outside\\button.tsx",
+      "@/components/ui/button.tsx",
+    )).toThrow(/outside project root/i);
+    expect(() => assertShadcnInstallTargetContained(
+      root,
+      "D:\\outside\\button.tsx",
+      "@/components/ui/button.tsx",
+    )).toThrow(/outside project root/i);
+  });
+
   it.each([
     "http://[::ffff:127.0.0.1]/registry.json",
     "http://[::ffff:169.254.169.254]/registry.json",
@@ -44,7 +68,13 @@ describe("shadcn registry installer", () => {
       expect(result.codePath).toBe(join(projectRoot, "components", "ui", "button.tsx"));
       expect(await readFile(result.codePath!, "utf8")).toContain("export function Button");
       expect(savedSpecs[0]?.name).toBe("Button");
-      expect(result.specPath).toContain(".memoire/specs/components/Button.json");
+      expect(result.specPath).toBe(join(
+        projectRoot,
+        ".memoire",
+        "specs",
+        "components",
+        "Button.json",
+      ));
     } finally {
       await rm(projectRoot, { recursive: true, force: true });
     }
@@ -89,6 +119,32 @@ describe("shadcn registry installer", () => {
       })).rejects.toThrow(/escapes the shadcn registry root/i);
     } finally {
       await rm(projectRoot, { recursive: true, force: true });
+    }
+  });
+
+  it.skipIf(process.platform === "win32")("refuses to write through a project symlink outside the project root", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memoire-shadcn-target-root-"));
+    const outside = await mkdtemp(join(tmpdir(), "memoire-shadcn-target-outside-"));
+    try {
+      await writeFile(join(projectRoot, "components.json"), JSON.stringify({
+        aliases: { components: "@/components" },
+      }));
+      await writeShadcnFixture(projectRoot);
+      await symlink(outside, join(projectRoot, "components"));
+
+      const engine = {
+        config: { projectRoot },
+        registry: { saveSpec: async () => undefined },
+      } as unknown as MemoireEngine;
+
+      await expect(installShadcnRegistryItem(engine, {
+        from: join(projectRoot, "public", "r"),
+        name: "Button",
+      })).rejects.toThrow(/outside project root/i);
+      await expect(readFile(join(outside, "ui", "button.tsx"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(projectRoot, { recursive: true, force: true });
+      await rm(outside, { recursive: true, force: true });
     }
   });
 });

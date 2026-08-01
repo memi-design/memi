@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-2.7-prospective-v15-273-confirmatory",
+  "planId": "memi-2.7-v15-2.7.3-confirmatory",
+  "status": "draft",
+  "currentScore": 0,
+  "targetScore": 23,
+  "claimBoundary": "Exact 2.7.3 candidate evidence on three named frozen fixtures. Any quality statement requires the preregistered task-level non-inferiority gate; pooled results are descriptive, model grading is not practitioner evidence, and USD cost is not inferred.",
+  "scoreBudget": [
+    {
+      "dimension": "prospective-registration",
+      "currentCredit": 0,
+      "targetCredit": 5,
+      "unlock": "A hash-verified V15 freeze predates all 36 provider cells."
+    },
+    {
+      "dimension": "complete-matched-pairs",
+      "currentCredit": 0,
+      "targetCredit": 18,
+      "maximumCredit": 18,
+      "unlock": "All three fixtures complete six valid accepted matched pairs."
+    },
+    {
+      "dimension": "blinded-quality-panel",
+      "currentCredit": 0,
+      "targetCredit": 0,
+      "unlock": "Reported separately through the preregistered quality rubric and statistical gate."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "buzzr-tab-unread-badge",
+      "platformFamily": "react-native-expo",
+      "revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+      "pairs": 6,
+      "interimCredit": 6,
+      "risk": "Expo component and rendered-state contract under a 450000-input-token ceiling."
+    },
+    {
+      "id": "paraform-command-menu",
+      "platformFamily": "web-design-engineering",
+      "revision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+      "pairs": 6,
+      "interimCredit": 6,
+      "risk": "Production web build and Playwright keyboard/focus/reduced-motion journey."
+    },
+    {
+      "id": "nate-options-reduce-motion",
+      "platformFamily": "native-swiftui",
+      "revision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+      "pairs": 6,
+      "interimCredit": 6,
+      "risk": "Xcode build and protected Simulator UI journey with exclusive machine access."
+    }
+  ],
+  "runContract": {
+    "seed": 2715,
+    "matchedPairs": 18,
+    "trials": 36,
+    "conditions": ["baseline", "memi"],
+    "freshClonePerTrial": true,
+    "counterbalancedOrder": true,
+    "requiredArtifacts": [
+      "git.patch",
+      "preparation.json",
+      "events.jsonl",
+      "usage.json",
+      "route.json",
+      "tools.json",
+      "tool-profile.json",
+      "verification.json",
+      "environment.json",
+      "verification-isolation.json",
+      "evidence-manifest.json",
+      "run.json"
+    ],
+    "acceptance": {
+      "requiredValidPairsPerTask": 6,
+      "requiredPassingPairsPerTask": 6,
+      "fixtureMutationAllowed": false,
+      "providerErrorAllowed": false,
+      "missingOrDuplicateConditionAllowed": false,
+      "postPatchIsolatedVerificationRequired": true
+    }
+  },
+  "creditPolicy": {
+    "planningEarnsCredit": false,
+    "manualCreditEditsAllowed": false,
+    "prospectiveRegistrationCredit": "all-or-none",
+    "independentRepeatInterimCreditPerQualifiedPlatform": 6,
+    "independentRepeatInterimCreditCap": 18,
+    "fullRepeatCreditRequiresAllReleaseCriticalTasks": true
+  }
+}

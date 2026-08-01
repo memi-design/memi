@@ -90,7 +90,7 @@ describe("mermaid-jam command", () => {
       source: "research",
       exports: expect.arrayContaining([expect.objectContaining({
         kind: "journey-map",
-        outputPath: expect.stringContaining(".memoire/mermaid-jam"),
+        outputPath: expect.stringContaining(join(".memoire", "mermaid-jam")),
         source: expect.stringContaining("journey"),
       })]),
     });

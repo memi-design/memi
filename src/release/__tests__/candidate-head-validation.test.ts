@@ -14,16 +14,28 @@ const artifactPath = join(
 );
 const scorecardPath = join(root, "docs", "audits", "memi-100-scorecard.json");
 const ciWorkflowPath = join(root, ".github", "workflows", "ci.yml");
+const cleanInstallWorkflowPath = join(
+  root,
+  ".github",
+  "workflows",
+  "clean-install.yml",
+);
 
 describe("candidate head validation evidence", () => {
   it("checks out full history before validating commit ancestry", async () => {
-    const workflow = await readFile(ciWorkflowPath, "utf8");
-    const buildAndTest = workflow.slice(
-      workflow.indexOf("  build-and-test:"),
-      workflow.indexOf("  memi-ci:"),
+    const [ciWorkflow, cleanInstallWorkflow] = await Promise.all([
+      readFile(ciWorkflowPath, "utf8"),
+      readFile(cleanInstallWorkflowPath, "utf8"),
+    ]);
+    const buildAndTest = ciWorkflow.slice(
+      ciWorkflow.indexOf("  build-and-test:"),
+      ciWorkflow.indexOf("  memi-ci:"),
     );
 
     expect(buildAndTest).toMatch(
+      /actions\/checkout@[^\n]+\n\s+with:\n\s+fetch-depth: 0/,
+    );
+    expect(cleanInstallWorkflow).toMatch(
       /actions\/checkout@[^\n]+\n\s+with:\n\s+fetch-depth: 0/,
     );
   });

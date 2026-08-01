@@ -93,7 +93,7 @@ describe("research design package", () => {
       });
 
       expect(exports.length).toBeGreaterThan(2);
-      expect(exports[0]).toMatchObject({ format: "mermaid", outputPath: expect.stringContaining(".memoire/mermaid-jam") });
+      expect(exports[0]).toMatchObject({ format: "mermaid", outputPath: expect.stringContaining(join(".memoire", "mermaid-jam")) });
       expect(exports[0].nextSteps.join(" ")).toContain("paste");
       expect(exports[0].nextSteps.join(" ")).not.toMatch(/clipboard|automation/i);
       const source = await readFile(exports[0].outputPath, "utf-8");

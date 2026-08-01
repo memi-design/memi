@@ -63,7 +63,7 @@ describe("studio tool broker", () => {
 
       await expect(broker.call({
         toolId: "workspace.read",
-        input: { path: "/etc/hosts" },
+        input: { path: join(root, "..", "outside-workspace.txt") },
       })).resolves.toMatchObject({
         status: "failed",
         error: expect.stringMatching(/workspace/i),

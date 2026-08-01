@@ -58,6 +58,8 @@ describe("clean install CI contract", () => {
     expect(workflow).toContain("node-version: [20, 22, 24]");
     expect(workflow).toContain("runs-on: ${{ matrix.os }}");
     expect(workflow).toContain("npm ci --include=optional --ignore-scripts");
+    expect(workflow).toContain("npm run typecheck");
+    expect(workflow).toContain("npm test -- --run");
     expect(workflow).toContain("npm run build");
     expect(workflow).toContain("npm run smoke:clean-install");
   });

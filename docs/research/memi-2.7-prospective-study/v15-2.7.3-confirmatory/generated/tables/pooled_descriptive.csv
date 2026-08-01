@@ -1,0 +1,11 @@
+family,rows,mean_delta,median_delta,min_delta,max_delta,metric,mean_task_mean_delta,median_task_mean_delta
+primary_quality,10,0.5,1.5,-7.0,4.0,,,
+secondary_descriptive,2,,,,,critical_defects,0.0,0.0
+secondary_descriptive,3,,,,,functional_acceptance,0.0,0.0
+secondary_descriptive,3,,,,,input_tokens,21930.0556,39487.8333
+secondary_descriptive,3,,,,,output_tokens,342.8889,326.3333
+secondary_descriptive,3,,,,,provider_failures,-0.1667,0.0
+secondary_descriptive,3,,,,,reasoning_tokens,92.6666,92.8333
+secondary_descriptive,3,,,,,retries,0.0556,0.0
+secondary_descriptive,3,,,,,tool_calls,0.1111,0.3333
+secondary_descriptive,3,,,,,wall_time_ms,28710.2778,9979.5

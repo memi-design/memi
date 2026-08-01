@@ -44,6 +44,7 @@ const taskRoot = path.resolve(options.taskRoot);
 const evidenceRoot = path.resolve(options.evidenceRoot);
 const storeRoot = path.resolve(options.storeRoot);
 const candidateArtifact = path.resolve(options.candidateArtifact);
+const harnessCliEntry = path.resolve(options.harnessCli);
 const evaluationOut = path.resolve(options.evaluationOut);
 const progressPath = path.join(evidenceRoot, "prospective-progress.json");
 const failuresPath = path.join(evidenceRoot, "orchestration-failures.jsonl");
@@ -76,6 +77,9 @@ if (effectiveTemporaryRoot !== path.resolve(freeze.environment.temporaryRoot)) {
 }
 if (await hashFile(candidateArtifact) !== freeze.candidate.artifactSha256) {
   throw new Error("candidate package artifact does not match the freeze receipt");
+}
+if (await hashFile(harnessCliEntry) !== options.harnessCliSha256) {
+  throw new Error("admission harness CLI does not match its pinned SHA-256");
 }
 for (const task of plan.tasks) {
   if (!repositoryMap[task.id]) {
@@ -125,7 +129,7 @@ try {
     "@memi-design",
     "cli",
   );
-  const cliEntry = path.join(packageRoot, "dist", "index.js");
+  const candidateCliEntry = path.join(packageRoot, "dist", "index.js");
   const skillsRoot = path.join(packageRoot, "skills");
   const store = new EfficiencyRunStore(storeRoot);
   const existingRuns = (await store.list()).filter((run) =>
@@ -159,7 +163,7 @@ try {
       total: freeze.trials.length,
     });
     const commandArgs = [
-      cliEntry,
+      candidateCliEntry,
       "benchmark",
       "workflow-run",
       path.join(taskRoot, `${trial.taskId}.json`),
@@ -235,13 +239,15 @@ try {
   await run({
     command: process.execPath,
     args: [
-      cliEntry,
+      harnessCliEntry,
       "benchmark",
       "prospective-evaluate",
       planPath,
       freezePath,
       "--store-root",
       storeRoot,
+      "--evidence-root",
+      evidenceRoot,
       "--out",
       evaluationOut,
       "--json",
@@ -310,6 +316,8 @@ function parseOptions(args: readonly string[]): {
   evidenceRoot: string;
   storeRoot: string;
   candidateArtifact: string;
+  harnessCli: string;
+  harnessCliSha256: string;
   evaluationOut: string;
   maximumTrials: number | null;
   execute: boolean;
@@ -340,10 +348,16 @@ function parseOptions(args: readonly string[]): {
     "evidence-root",
     "store-root",
     "candidate-artifact",
+    "harness-cli",
+    "harness-cli-sha256",
     "evaluation-out",
   ];
   for (const key of required) {
     if (!values.get(key)) throw new Error(`missing required option --${key}`);
+  }
+  const harnessCliSha256 = values.get("harness-cli-sha256")!;
+  if (!/^sha256:[a-f0-9]{64}$/.test(harnessCliSha256)) {
+    throw new Error("--harness-cli-sha256 must be a canonical SHA-256");
   }
   return {
     plan: values.get("plan")!,
@@ -353,6 +367,8 @@ function parseOptions(args: readonly string[]): {
     evidenceRoot: values.get("evidence-root")!,
     storeRoot: values.get("store-root")!,
     candidateArtifact: values.get("candidate-artifact")!,
+    harnessCli: values.get("harness-cli")!,
+    harnessCliSha256,
     evaluationOut: values.get("evaluation-out")!,
     maximumTrials: values.has("max-trials")
       ? parseMaximumTrials(values.get("max-trials")!)

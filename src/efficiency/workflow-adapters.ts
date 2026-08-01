@@ -23,6 +23,7 @@ const PROCESS_TERMINATION_GRACE_MS = 250;
 
 export interface WorkflowAdapterOptions {
   readonly executable: string;
+  readonly executableArgs?: readonly string[];
   readonly modelId: string;
   readonly reasoningEffort: string;
   readonly authHome?: string;
@@ -48,11 +49,14 @@ export function createCodexWorkflowAdapter(
         );
         const execution = await executeProcess({
           command: options.executable,
-          args: buildCodexWorkflowArgs({
-            workspaceRoot: input.workspaceRoot,
-            modelId: options.modelId,
-            reasoningEffort: options.reasoningEffort,
-          }),
+          args: [
+            ...(options.executableArgs ?? []),
+            ...buildCodexWorkflowArgs({
+              workspaceRoot: input.workspaceRoot,
+              modelId: options.modelId,
+              reasoningEffort: options.reasoningEffort,
+            }),
+          ],
           cwd: input.workspaceRoot,
           env: buildPreparedToolEnvironment(
             buildIsolatedCodexEnvironment(process.env, isolatedHome),
@@ -105,10 +109,13 @@ export function createClaudeWorkflowAdapter(
         const oauthToken = await resolveClaudeOAuthToken(authHome);
         const execution = await executeProcess({
           command: options.executable,
-          args: buildClaudeWorkflowArgs({
-            modelId: options.modelId,
-            reasoningEffort: options.reasoningEffort,
-          }),
+          args: [
+            ...(options.executableArgs ?? []),
+            ...buildClaudeWorkflowArgs({
+              modelId: options.modelId,
+              reasoningEffort: options.reasoningEffort,
+            }),
+          ],
           cwd: input.workspaceRoot,
           env: {
             ...buildPreparedToolEnvironment(process.env, isolatedHome),

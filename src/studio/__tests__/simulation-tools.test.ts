@@ -201,7 +201,7 @@ describe("studio simulation tools", () => {
       });
       expect(figjamExport).toMatchObject({
         status: "completed",
-        data: { exports: expect.arrayContaining([expect.objectContaining({ outputPath: expect.stringContaining(".memoire/mermaid-jam") })]) },
+        data: { exports: expect.arrayContaining([expect.objectContaining({ outputPath: expect.stringContaining(join(".memoire", "mermaid-jam")) })]) },
       });
       const exportedPath = ((figjamExport.data as { exports: Array<{ outputPath: string }> }).exports[0].outputPath);
       await expect(readFile(exportedPath, "utf-8")).resolves.toContain("journey");
@@ -254,7 +254,7 @@ describe("studio simulation tools", () => {
         status: "completed",
         data: {
           exports: expect.arrayContaining([expect.objectContaining({
-            outputPath: expect.stringContaining(".memoire/mermaid-jam/boards"),
+            outputPath: expect.stringContaining(join(".memoire", "mermaid-jam", "boards")),
           })]),
         },
       });

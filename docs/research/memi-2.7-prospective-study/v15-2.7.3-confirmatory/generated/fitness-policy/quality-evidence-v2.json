@@ -1,0 +1,918 @@
+{
+  "schemaVersion": 1,
+  "kind": "memi-fitness-quality-evidence-v2",
+  "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+  "entryCount": 10,
+  "entries": [
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T07:04:45.834Z",
+      "taskClass": "buzzr-tab-unread-badge",
+      "pair": {
+        "taskId": "buzzr-tab-unread-badge",
+        "repeat": 1,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:memi",
+        "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-baseline-19c4c3c1-87b7-4ffc-acec-2a019985a59e",
+        "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-memi-1cc3ca0f-2e53-443d-b7ec-8244c165d008"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:dfa4386fbef2b154b8a5f276b67209c12e1d560db5ed7635b221f9ca52ef5cb0",
+        "skills": [
+          {
+            "skillId": "atomic-design",
+            "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:5a93916c4a13fa7d3ac0dd2327fed3f7d6e989ea104a702de884df11868c6217",
+        "memiEvidenceManifestSha256": "sha256:ecc61ec00c56d71185dd3f4f8f319efaf4f7f8f0e85bc3a20da64f1341dda289",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:8b226f8c6101cc380cdb0f6d1599b0c1a9a916c8aca3d89269820ff5c2596848"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "buzzr-tab-unread-badge",
+          "repeat": 1,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 88.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 11.0,
+              "design-system-consistency": 13.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              88.0,
+              91.0,
+              82.0
+            ]
+          },
+          "memi": {
+            "score": 89.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 13.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              89.0,
+              92.0,
+              84.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:23440a4ae7978e928369fc417f3d8d592bff56a801f17d3c08f5dc3af8e6bd40",
+        "medianScoreBaseline": 88.0,
+        "medianScoreMemi": 89.0,
+        "deltaMemiMinusBaseline": 1.0,
+        "qualityParity": true
+      },
+      "efficiency": {
+        "tokenSavingsRatio": 0.201195,
+        "latencySavingsRatio": 0.048443,
+        "toolCallSavingsRatio": -0.5
+      },
+      "eventId": "fitness-v2:6a8b9c789ab7bdf9230a9154972a50487d99514211b0ae80293c683911024063",
+      "eventSha256": "sha256:6a8b9c789ab7bdf9230a9154972a50487d99514211b0ae80293c683911024063"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T07:13:46.792Z",
+      "taskClass": "paraform-command-menu",
+      "pair": {
+        "taskId": "paraform-command-menu",
+        "repeat": 1,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:memi",
+        "baselineRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-baseline-09426342-3c53-4a05-a171-e50d6538c0d2",
+        "memiRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-memi-a257bb18-2d44-4a49-9a6d-4f6f746d7fa0"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:ef98548e2139de0f2c7726bd0b612445103928ef15e296de1895e28dad193b12",
+        "skills": [
+          {
+            "skillId": "design-extract",
+            "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:1dbc8c59a62cb345c6497af23e6cc3881db35075c7f5a355910986498ccacf57",
+        "memiEvidenceManifestSha256": "sha256:f75494e8f3d6733156d4c5631953665ad01584961ad5770ea3454dd651477448",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:75bac3966c35b1cc094984adeb08f419e61b290abf16dcdf541d2d0e95401914"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "paraform-command-menu",
+          "repeat": 1,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 83.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 19.0,
+              "visual-hierarchy": 13.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              83.0,
+              85.0,
+              83.0
+            ]
+          },
+          "memi": {
+            "score": 80.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 18.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 13.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              80.0,
+              83.0,
+              76.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:1a12fbc712eb69d4ddab407806b319cea7657f1491f85c646ef95de125d37a93",
+        "medianScoreBaseline": 83.0,
+        "medianScoreMemi": 80.0,
+        "deltaMemiMinusBaseline": -3.0,
+        "qualityParity": false
+      },
+      "efficiency": {
+        "tokenSavingsRatio": 0.2181,
+        "latencySavingsRatio": 0.083712,
+        "toolCallSavingsRatio": 0.333333
+      },
+      "eventId": "fitness-v2:1047a03ddd10d279a4658cf70fad600aec7348431f791226797d5459c370e5b5",
+      "eventSha256": "sha256:1047a03ddd10d279a4658cf70fad600aec7348431f791226797d5459c370e5b5"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T07:32:05.739Z",
+      "taskClass": "buzzr-tab-unread-badge",
+      "pair": {
+        "taskId": "buzzr-tab-unread-badge",
+        "repeat": 2,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:memi",
+        "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-baseline-0e923ccd-ff34-45c8-b7fa-90f774319b5e",
+        "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-memi-6f5cbe66-f378-44bd-9477-415fc0b0c104"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:dfa4386fbef2b154b8a5f276b67209c12e1d560db5ed7635b221f9ca52ef5cb0",
+        "skills": [
+          {
+            "skillId": "atomic-design",
+            "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:8deb66eecf67620a6c7414d3a529b61f12ca1ebf6ff27402a1255c58aaf3982f",
+        "memiEvidenceManifestSha256": "sha256:8d13a5729ea98a7f00412444c90803943107735ce4fea92807a640aa1237eb5c",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:b3e0bff5780356a71d2090e5fa77151aa623ac9d4ca2815ab208527ef7256615"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "buzzr-tab-unread-badge",
+          "repeat": 2,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 89.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 13.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              89.0,
+              89.0,
+              82.0
+            ]
+          },
+          "memi": {
+            "score": 91.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 15.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              91.0,
+              93.0,
+              83.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:a84b8a4e694fb250d8414932f4ff3b69087534c9b753f19091c13b68b151f0e1",
+        "medianScoreBaseline": 89.0,
+        "medianScoreMemi": 91.0,
+        "deltaMemiMinusBaseline": 2.0,
+        "qualityParity": true
+      },
+      "efficiency": {
+        "tokenSavingsRatio": -0.460919,
+        "latencySavingsRatio": -0.303638,
+        "toolCallSavingsRatio": -0.4
+      },
+      "eventId": "fitness-v2:465fd301fd1219d513713f0419314da9ef81de28be98ec457ec5d6769c51e5ed",
+      "eventSha256": "sha256:465fd301fd1219d513713f0419314da9ef81de28be98ec457ec5d6769c51e5ed"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T07:37:20.225Z",
+      "taskClass": "paraform-command-menu",
+      "pair": {
+        "taskId": "paraform-command-menu",
+        "repeat": 2,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:memi",
+        "baselineRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-baseline-98aac3a0-5fda-4a73-b955-33869e86d29e",
+        "memiRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-memi-6f07e466-0531-4c82-8720-1cdd2c15bd4b"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:ef98548e2139de0f2c7726bd0b612445103928ef15e296de1895e28dad193b12",
+        "skills": [
+          {
+            "skillId": "design-extract",
+            "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:067f8f919b418b730e403d333026510188ab8c7bc813e17e4d62a928c025b5b5",
+        "memiEvidenceManifestSha256": "sha256:e590f2bdd6a5c8757f6dc229091d80a2fbab34d9c96a0e47a293b5715177deee",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:049c10e890eb0a02ff08d87283e249ad1155e934ec1ac20578fde3a83aa1b15e"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "paraform-command-menu",
+          "repeat": 2,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 83.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 19.0,
+              "visual-hierarchy": 13.0,
+              "design-system-consistency": 13.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              83.0,
+              84.0,
+              77.0
+            ]
+          },
+          "memi": {
+            "score": 76.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 17.0,
+              "visual-hierarchy": 11.0,
+              "design-system-consistency": 11.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 8.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              77.0,
+              76.0,
+              70.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:80cc2dffa417c1bfccf191b386ace97613ed36150a732a3bb6a69c68a8bf018e",
+        "medianScoreBaseline": 83.0,
+        "medianScoreMemi": 76.0,
+        "deltaMemiMinusBaseline": -7.0,
+        "qualityParity": false
+      },
+      "efficiency": {
+        "tokenSavingsRatio": -0.31265,
+        "latencySavingsRatio": -0.009238,
+        "toolCallSavingsRatio": -0.5
+      },
+      "eventId": "fitness-v2:c3dd98bafba7db434031fc69c7cf8470e90ac77dead76f57944cb6449daad181",
+      "eventSha256": "sha256:c3dd98bafba7db434031fc69c7cf8470e90ac77dead76f57944cb6449daad181"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T08:19:31.285Z",
+      "taskClass": "buzzr-tab-unread-badge",
+      "pair": {
+        "taskId": "buzzr-tab-unread-badge",
+        "repeat": 3,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:memi",
+        "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-baseline-046cf61d-d3af-4469-ba96-38e8292f2401",
+        "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-memi-a4d16342-557b-4352-a586-30a793440bd1"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:dfa4386fbef2b154b8a5f276b67209c12e1d560db5ed7635b221f9ca52ef5cb0",
+        "skills": [
+          {
+            "skillId": "atomic-design",
+            "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:7a9c5ca35d42e17b2abeddca3c44288a2bfc381366b2eacae178e9ba20e02d0f",
+        "memiEvidenceManifestSha256": "sha256:5abda353dd8487b7a480faa9b9b36b91c8039f019c7b6d43c6a783aec663dedc",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:99f5e0d9f9d934c9ea1a342a19778d5664a4166e2aa26f3062441f2221e88ed6"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "buzzr-tab-unread-badge",
+          "repeat": 3,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 89.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              91.0,
+              89.0,
+              82.0
+            ]
+          },
+          "memi": {
+            "score": 90.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 13.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              90.0,
+              92.0,
+              87.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:5828e2f5494b6b62c5f8b2c51a1e3930cc041d4f746231e52d8d72bf96328d35",
+        "medianScoreBaseline": 89.0,
+        "medianScoreMemi": 90.0,
+        "deltaMemiMinusBaseline": 1.0,
+        "qualityParity": true
+      },
+      "efficiency": {
+        "tokenSavingsRatio": 0.12533,
+        "latencySavingsRatio": -0.076151,
+        "toolCallSavingsRatio": 0.285714
+      },
+      "eventId": "fitness-v2:a9eef3a38f1808d89e3a6e815fa4c212cd32c191704b54b8ef6561ea02d8267c",
+      "eventSha256": "sha256:a9eef3a38f1808d89e3a6e815fa4c212cd32c191704b54b8ef6561ea02d8267c"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T08:25:45.087Z",
+      "taskClass": "paraform-command-menu",
+      "pair": {
+        "taskId": "paraform-command-menu",
+        "repeat": 3,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:memi",
+        "baselineRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-baseline-f0d9119b-9c58-4937-9fac-e25bec7c0aec",
+        "memiRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-memi-d35c0efc-4237-4a4a-af65-4f283514d306"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:ef98548e2139de0f2c7726bd0b612445103928ef15e296de1895e28dad193b12",
+        "skills": [
+          {
+            "skillId": "design-extract",
+            "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:e363b1b9825b5a00f39c22b001a50b2fc5a8b53e9d70a70dcf9fc5a69fdb7ed6",
+        "memiEvidenceManifestSha256": "sha256:cfb2da064f5512d055381a3d938336f769501b601ea36c2ccb3e973c39871cf2",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:59a785b3754f998038a9cd6a77f148069d404115475845d9d29bd3bef185f1ee"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "paraform-command-menu",
+          "repeat": 3,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 80.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 18.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              80.0,
+              85.0,
+              78.0
+            ]
+          },
+          "memi": {
+            "score": 82.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 19.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              82.0,
+              84.0,
+              81.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:ebbe552a7e15a7db41aa4a705282dc2c3c57ad966dc41ab25fdbe5e6a7e174be",
+        "medianScoreBaseline": 80.0,
+        "medianScoreMemi": 82.0,
+        "deltaMemiMinusBaseline": 2.0,
+        "qualityParity": true
+      },
+      "efficiency": {
+        "tokenSavingsRatio": 0.270066,
+        "latencySavingsRatio": 0.081666,
+        "toolCallSavingsRatio": 0.166667
+      },
+      "eventId": "fitness-v2:190829d269d799983c180a5accf92e31414a5de921b615841cd398cd786e0732",
+      "eventSha256": "sha256:190829d269d799983c180a5accf92e31414a5de921b615841cd398cd786e0732"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T08:45:12.822Z",
+      "taskClass": "buzzr-tab-unread-badge",
+      "pair": {
+        "taskId": "buzzr-tab-unread-badge",
+        "repeat": 4,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:memi",
+        "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-baseline-d16037c1-3f51-463a-ac26-22d86d331248",
+        "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-memi-8c9dd257-9677-4c1c-b568-789339851396"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:dfa4386fbef2b154b8a5f276b67209c12e1d560db5ed7635b221f9ca52ef5cb0",
+        "skills": [
+          {
+            "skillId": "atomic-design",
+            "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:800f8b1265b74b4b67e7dfc900fd01611d8087ca7418b45d11f35a3aba222857",
+        "memiEvidenceManifestSha256": "sha256:59a4d3e35f4278f8ada2a4b35b107e2bbdd675eca7a5fa98c40d4ddc08e2a01d",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:185b051f0668565ad38e94268f09d478c7eb149b9831403d085f61dd5893dff3"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "buzzr-tab-unread-badge",
+          "repeat": 4,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 88.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 13.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              88.0,
+              88.0,
+              84.0
+            ]
+          },
+          "memi": {
+            "score": 92.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 13.0,
+              "design-system-consistency": 15.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              92.0,
+              93.0,
+              88.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:7a567e4183553f91fb1f9ceec0276657064f839095457325736ffe302e54cd60",
+        "medianScoreBaseline": 88.0,
+        "medianScoreMemi": 92.0,
+        "deltaMemiMinusBaseline": 4.0,
+        "qualityParity": true
+      },
+      "efficiency": {
+        "tokenSavingsRatio": 0.036846,
+        "latencySavingsRatio": 0.181401,
+        "toolCallSavingsRatio": -0.166667
+      },
+      "eventId": "fitness-v2:a486c49f8250ea7d938810d0bcacfbdb7ee5db3dd0eb67ff80ad2b772d6bf6e6",
+      "eventSha256": "sha256:a486c49f8250ea7d938810d0bcacfbdb7ee5db3dd0eb67ff80ad2b772d6bf6e6"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T08:52:13.928Z",
+      "taskClass": "paraform-command-menu",
+      "pair": {
+        "taskId": "paraform-command-menu",
+        "repeat": 4,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:memi",
+        "baselineRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-baseline-eed010c0-db78-42f4-a500-9618bc26a943",
+        "memiRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-memi-290e9b01-0704-4e09-b60d-ee40d4bdc45f"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:ef98548e2139de0f2c7726bd0b612445103928ef15e296de1895e28dad193b12",
+        "skills": [
+          {
+            "skillId": "design-extract",
+            "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:0ea63b50069adb6f67eab23c1821f475bb498ed714061dce21ca17b36bba90e0",
+        "memiEvidenceManifestSha256": "sha256:2a960829ca48b69d3a8fec55a604d4d5fff01f0d72336ddbebdbe0a1caf50c10",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:88cb3a31c8ad7ba48bf7e2e6a7f301b831765ce2787e58a66778ad079eb2ecbc"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "paraform-command-menu",
+          "repeat": 4,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 81.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 19.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              81.0,
+              85.0,
+              81.0
+            ]
+          },
+          "memi": {
+            "score": 84.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 19.0,
+              "visual-hierarchy": 14.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              84.0,
+              86.0,
+              84.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:c74ec2285069fe572148e1d8630cf5619c5674f802aeca76e26f96d50891381b",
+        "medianScoreBaseline": 81.0,
+        "medianScoreMemi": 84.0,
+        "deltaMemiMinusBaseline": 3.0,
+        "qualityParity": true
+      },
+      "efficiency": {
+        "tokenSavingsRatio": -0.507952,
+        "latencySavingsRatio": -0.235816,
+        "toolCallSavingsRatio": 0.2
+      },
+      "eventId": "fitness-v2:5842a8aa2faeba16c557f95a5345d707b797666d9e507b266b6511885fa45c2b",
+      "eventSha256": "sha256:5842a8aa2faeba16c557f95a5345d707b797666d9e507b266b6511885fa45c2b"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T09:11:49.375Z",
+      "taskClass": "buzzr-tab-unread-badge",
+      "pair": {
+        "taskId": "buzzr-tab-unread-badge",
+        "repeat": 5,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:memi",
+        "baselineRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-baseline-89cf3cba-1afe-42c3-a0f6-815a691a4d9b",
+        "memiRunId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-memi-7d796963-e1d4-4074-83fd-2acb20562784"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:dfa4386fbef2b154b8a5f276b67209c12e1d560db5ed7635b221f9ca52ef5cb0",
+        "skills": [
+          {
+            "skillId": "atomic-design",
+            "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:8214b82c167e2cd70ebe9ef40a87fde0c431d3759ea8d81acaf5afac7cf187e6",
+        "memiEvidenceManifestSha256": "sha256:4a3be28091ade4a456c7efa37aed1c75946c5999f3def1b9cf2dbaafae19f855",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:dcc87ae4e49075b2593a6121b5cd06579b3e0d9e5b72125b01075dc4b60651c3"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "buzzr-tab-unread-badge",
+          "repeat": 5,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 89.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 13.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              89.0,
+              89.0,
+              81.0
+            ]
+          },
+          "memi": {
+            "score": 88.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 25.0,
+              "accessibility": 20.0,
+              "visual-hierarchy": 11.0,
+              "design-system-consistency": 13.0,
+              "responsive-adaptive-behavior": 9.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              88.0,
+              88.0,
+              81.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:a6983ff3914a98c27675ad4d1361488a350dbd11eaafec7fcf521a7dbf068001",
+        "medianScoreBaseline": 89.0,
+        "medianScoreMemi": 88.0,
+        "deltaMemiMinusBaseline": -1.0,
+        "qualityParity": false
+      },
+      "efficiency": {
+        "tokenSavingsRatio": -0.194922,
+        "latencySavingsRatio": 0.063873,
+        "toolCallSavingsRatio": 0.166667
+      },
+      "eventId": "fitness-v2:56ff69236a003b344ccf0dc1046cd0094dc256cf861cc5214dd468fdc9926879",
+      "eventSha256": "sha256:56ff69236a003b344ccf0dc1046cd0094dc256cf861cc5214dd468fdc9926879"
+    },
+    {
+      "schemaVersion": 2,
+      "observedAt": "2026-08-01T09:45:09.965Z",
+      "taskClass": "paraform-command-menu",
+      "pair": {
+        "taskId": "paraform-command-menu",
+        "repeat": 6,
+        "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:baseline",
+        "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:memi",
+        "baselineRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-baseline-b5453542-61be-4e4b-a2ac-9693c53dd0d0",
+        "memiRunId": "paraform-command-menu-codex:gpt-5.6-luna:low-memi-5bea0b9b-4afa-41e0-8cec-61072d370757"
+      },
+      "route": {
+        "decision": "single",
+        "repositoryFingerprintHash": "sha256:ef98548e2139de0f2c7726bd0b612445103928ef15e296de1895e28dad193b12",
+        "skills": [
+          {
+            "skillId": "design-extract",
+            "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+          }
+        ]
+      },
+      "harness": {
+        "provider": "codex",
+        "modelId": "gpt-5.6-luna",
+        "reasoningEffort": "low"
+      },
+      "receipts": {
+        "baselineEvidenceManifestSha256": "sha256:db302dc5e200e19320e1c1dcaee9825465dc6b55e3edf5f33632cf8ee51d0746",
+        "memiEvidenceManifestSha256": "sha256:0a6e4daa763c96932c17b445a728d897fadd4454013e172a0fa24a3d372be066",
+        "baselineRouteSha256": null,
+        "memiRouteSha256": "sha256:a372d878459dd4419f0834b3fafdb4998027c05ba35ecd2528f4392c43511209"
+      },
+      "quality": {
+        "label": "model-graded; not independent human practitioner evidence",
+        "qualityEvidence": {
+          "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+          "taskId": "paraform-command-menu",
+          "repeat": 6,
+          "baselineTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:baseline",
+          "memiTrialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:memi",
+          "graderCount": 3,
+          "baseline": {
+            "score": 81.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 18.0,
+              "visual-hierarchy": 12.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              81.0,
+              85.0,
+              76.0
+            ]
+          },
+          "memi": {
+            "score": 84.0,
+            "dimensionMedians": {
+              "task-interaction-correctness": 24.0,
+              "accessibility": 19.0,
+              "visual-hierarchy": 14.0,
+              "design-system-consistency": 14.0,
+              "responsive-adaptive-behavior": 4.0,
+              "implementation-quality": 9.0
+            },
+            "criticalDefectCount": 0,
+            "rawScores": [
+              84.0,
+              87.0,
+              84.0
+            ]
+          }
+        },
+        "qualityEvidenceSha256": "sha256:9e581e1592f2f4c95de99b66c9da7f79ffee7e86d6bd1e8d3b071ba08af15bbf",
+        "medianScoreBaseline": 81.0,
+        "medianScoreMemi": 84.0,
+        "deltaMemiMinusBaseline": 3.0,
+        "qualityParity": true
+      },
+      "efficiency": {
+        "tokenSavingsRatio": 0.221254,
+        "latencySavingsRatio": -0.089489,
+        "toolCallSavingsRatio": 0.333333
+      },
+      "eventId": "fitness-v2:c7ed285c8cb415a3ad183e9e3de497f84703c1d20689a6c1be5575678ff01780",
+      "eventSha256": "sha256:c7ed285c8cb415a3ad183e9e3de497f84703c1d20689a6c1be5575678ff01780"
+    }
+  ]
+}

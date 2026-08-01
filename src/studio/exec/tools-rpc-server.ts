@@ -1,5 +1,6 @@
 /**
- * ToolsRpcServer — listens on a Unix domain socket; dispatches tool
+ * ToolsRpcServer — listens on a local IPC endpoint (a Unix domain socket
+ * or Windows named pipe); dispatches tool
  * calls from the child script to a host-supplied tool runner; sends
  * results back over the same socket.
  *
@@ -23,6 +24,8 @@
 
 import { createServer, Server, Socket } from "node:net";
 import { unlink } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { posix } from "node:path";
 import {
   createDecoderState,
   decodeChunk,
@@ -58,6 +61,28 @@ export interface ToolsRpcServerConfig {
   readonly runner: ToolRunner;
   readonly onLog?: (entry: ScriptLogEntry) => void;
   readonly onError?: (error: unknown, context: { phase: string }) => void;
+}
+
+/**
+ * Resolve the per-execution local IPC endpoint.
+ *
+ * Windows' `net.Server.listen(path)` accepts named pipes, not ordinary
+ * filesystem paths. Hashing the already-unique execution directory keeps the
+ * pipe name isolated while avoiding disclosure of the runner's temp path.
+ */
+export function resolveToolsRpcEndpoint(
+  executionDirectory: string,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  if (platform !== "win32") {
+    return posix.join(executionDirectory, "tools.sock");
+  }
+
+  const endpointId = createHash("sha256")
+    .update(executionDirectory)
+    .digest("hex")
+    .slice(0, 24);
+  return `\\\\.\\pipe\\memi-tools-${endpointId}`;
 }
 
 export class ToolsRpcServer {

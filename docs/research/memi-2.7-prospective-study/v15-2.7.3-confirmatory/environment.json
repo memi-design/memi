@@ -1,0 +1,10 @@
+{
+  "machine": "MacBook Pro Mac15,7; Apple M3 Pro; 12 CPU cores; 36 GB memory",
+  "os": "macOS 26.2 (25C56)",
+  "arch": "arm64",
+  "node": "v22.22.3",
+  "xcode": "26.6 (17F113)",
+  "simulator": "Memi V12 iPhone 17; iOS 26.5; FED7FB9E-13D5-4383-93EA-7FFE0111A496",
+  "workspaceVolume": "ExtremeSSD APFS",
+  "temporaryRoot": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/tmp"
+}

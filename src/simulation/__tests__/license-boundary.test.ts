@@ -21,7 +21,7 @@ describe("fork source license boundary", () => {
       expect(result.ok).toBe(false);
       expect(result.violations).toEqual(expect.arrayContaining([
         expect.objectContaining({
-          path: "src/copied.py",
+          path: join("src", "copied.py"),
           marker: "generate_reddit_agent_graph",
         }),
       ]));

@@ -95,7 +95,7 @@ describe("agent install command", () => {
       "grok-build",
     ]);
     expect(payload.plans.find((plan: { target: string }) => plan.target === "hermes").destination)
-      .toContain(".hermes/skills/memoire/memoire-design-tooling");
+      .toContain(join(".hermes", "skills", "memoire", "memoire-design-tooling"));
     expect(payload.plans.find((plan: { target: string }) => plan.target === "openclaw").destination)
       .toBe(join(projectRoot, "skills", "memoire", "memoire-design-tooling"));
     expect(payload.plans.find((plan: { target: string }) => plan.target === "universal").destination)
@@ -118,7 +118,7 @@ describe("agent install command", () => {
     expect(payload.plans).toEqual(expect.arrayContaining([expect.objectContaining({
       target: "universal",
       kind: "skill",
-      source: expect.stringContaining("skills/memoire-design-tooling"),
+      source: expect.stringContaining(join("skills", "memoire-design-tooling")),
       destination: join(projectRoot, ".agents", "skills", "memoire-design-tooling"),
     })]));
 
@@ -146,8 +146,8 @@ describe("agent install command", () => {
       plans: [{
         target: "hermes",
         kind: "skill",
-        source: expect.stringContaining("agent-kits/hermes/memoire-design-tooling"),
-        destination: expect.stringContaining(".hermes/skills/memoire/memoire-design-tooling"),
+        source: expect.stringContaining(join("agent-kits", "hermes", "memoire-design-tooling")),
+        destination: expect.stringContaining(join(".hermes", "skills", "memoire", "memoire-design-tooling")),
       }],
     });
   });
@@ -168,9 +168,9 @@ describe("agent install command", () => {
       plans: [{
         target: "codex-plugin",
         kind: "plugin",
-        source: expect.stringContaining("plugins/memoire"),
-        destination: expect.stringContaining("plugins/memoire"),
-        marketplaceDestination: expect.stringContaining(".agents/plugins/marketplace.json"),
+        source: expect.stringContaining(join("plugins", "memoire")),
+        destination: expect.stringContaining(join("plugins", "memoire")),
+        marketplaceDestination: expect.stringContaining(join(".agents", "plugins", "marketplace.json")),
       }],
       suiteManifest: {
         wouldWrite: false,

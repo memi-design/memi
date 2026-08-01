@@ -1,0 +1,2306 @@
+{
+  "auditHarness": {
+    "after": {
+      "aggregateSha256": "adc7414dafec6df3f70138dc5891de8e98afb4c1bc451eac3c17299f04de3cee",
+      "files": [
+        {
+          "path": ".github/workflows/ci-webpage.yml",
+          "sha256": "fa5abbc047d29813810beeedcd9c64e1ca4294509ddbd5730e6efdb4f66485a8"
+        },
+        {
+          "path": ".lighthouserc.json",
+          "sha256": "ad794607a0e90eff1de4c6a473662ca5fbab9361e7de0ec322d6a3c806fb8b78"
+        },
+        {
+          "path": "astro.audit.config.mjs",
+          "sha256": "5e2b10eeab82b660b8ff5702ea779ff4c9a2f8e90a9dde96711919f120f9e93b"
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "3766886dd468486e35bfeda66cf88b5fbd29d82d7adc360ece2e190702396e24"
+        },
+        {
+          "path": "package.json",
+          "sha256": "11e57137ea91f3d2666f2b8602d694f3a22fadbcc0689772431c03452d7a4370"
+        },
+        {
+          "path": "playwright.config.ts",
+          "sha256": "2b03fc3cab09fa89f760d6b891362ad91ebab728c3007045a150d3423c487888"
+        },
+        {
+          "path": "playwright.production.config.ts",
+          "sha256": "22f2cda5a9713fabf0e34e58a0695f1c9988e552bf4875e8ddd4cfd0b2f48e55"
+        },
+        {
+          "path": "tests/e2e/a11y.spec.ts",
+          "sha256": "80be5b93c726aa807e18b57e0e12e79e7df8f64eba3de636d562bad63fa7b4f8"
+        },
+        {
+          "path": "tests/e2e/light-mode-wcag.spec.ts",
+          "sha256": "3a44453cb750104dc33a243b2a59140bd93f161119e1a49ed8967cade11a4601"
+        }
+      ]
+    },
+    "before": {
+      "aggregateSha256": "adc7414dafec6df3f70138dc5891de8e98afb4c1bc451eac3c17299f04de3cee",
+      "files": [
+        {
+          "path": ".github/workflows/ci-webpage.yml",
+          "sha256": "fa5abbc047d29813810beeedcd9c64e1ca4294509ddbd5730e6efdb4f66485a8"
+        },
+        {
+          "path": ".lighthouserc.json",
+          "sha256": "ad794607a0e90eff1de4c6a473662ca5fbab9361e7de0ec322d6a3c806fb8b78"
+        },
+        {
+          "path": "astro.audit.config.mjs",
+          "sha256": "5e2b10eeab82b660b8ff5702ea779ff4c9a2f8e90a9dde96711919f120f9e93b"
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "3766886dd468486e35bfeda66cf88b5fbd29d82d7adc360ece2e190702396e24"
+        },
+        {
+          "path": "package.json",
+          "sha256": "11e57137ea91f3d2666f2b8602d694f3a22fadbcc0689772431c03452d7a4370"
+        },
+        {
+          "path": "playwright.config.ts",
+          "sha256": "2b03fc3cab09fa89f760d6b891362ad91ebab728c3007045a150d3423c487888"
+        },
+        {
+          "path": "playwright.production.config.ts",
+          "sha256": "22f2cda5a9713fabf0e34e58a0695f1c9988e552bf4875e8ddd4cfd0b2f48e55"
+        },
+        {
+          "path": "tests/e2e/a11y.spec.ts",
+          "sha256": "80be5b93c726aa807e18b57e0e12e79e7df8f64eba3de636d562bad63fa7b4f8"
+        },
+        {
+          "path": "tests/e2e/light-mode-wcag.spec.ts",
+          "sha256": "3a44453cb750104dc33a243b2a59140bd93f161119e1a49ed8967cade11a4601"
+        }
+      ]
+    }
+  },
+  "claimBoundary": {
+    "claim": "The fix removes one serious Lighthouse label-content-name-mismatch finding and makes the unchanged blocking Lighthouse gate pass on all three controlled routes.",
+    "nonClaims": [
+      "No causal performance improvement is claimed from nine local laboratory runs.",
+      "The local Astro adapter does not exercise edge compression, CDN caching, or production TLS.",
+      "Playwright axe passed before and after because this experimental Lighthouse rule is outside the frozen Playwright axe rule selection; that pass does not contradict the Lighthouse finding."
+    ]
+  },
+  "controlledStudy": {
+    "after": {
+      "build": {
+        "aggregateSha256": "1e6e2e178d7430d13afdc75f5831660517c4def8b68368b0c04fcb45a3c02fe9",
+        "fileCount": 446,
+        "footerMismatchAriaPresent": false
+      },
+      "lighthouse": {
+        "assertionGate": {
+          "blockingFindingIds": [],
+          "command": "npx lhci assert --config=.lighthouserc.json",
+          "executed": true,
+          "exitCode": 0,
+          "note": "Derived from the unchanged blocking Lighthouse accessibility assertions; warning-level diagnostics do not fail the gate.",
+          "status": "pass"
+        },
+        "reports": [
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 3,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 170,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:51:59.718Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 451.7116,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 709.9488,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 707.9488,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 451.7116,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "f74e9510b69c038d95a757a229313b407fa1af97c1b4d0be85749621054aaef4",
+            "route": "/",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 3805,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 3,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 170,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:52:12.543Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 453.62235,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 710.8298,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 708.8298,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 453.62235,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "fd1b3ae746c6b50d545b0185264e3bcd2c8c13cd46d3569053d947f7f999462e",
+            "route": "/",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 2731,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 3,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 170,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:52:25.708Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 462.022375,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 733.6965,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 733.6965,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 474.3392742495978,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "45ff88a45fdeb1eef73ea1d3bcf604058f82a973473f09fdd184edde41d2e053",
+            "route": "/",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 3365.5,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:53:10.123Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 452.15805000000006,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 647.8774000000001,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 647.8774,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 452.15805000000006,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "0f6ac8ab8ce94c5b609bc8c8db9a13161eca3d25b01d1414c73f5d360cb043e6",
+            "route": "/about",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 2086.5,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:53:20.360Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 448.7816,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 645.7088000000001,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 645.7088,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 448.7816,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "c386da10abf04d0ad15cf0a2ca28eb82dfed1e3f1d356303170169732970b76e",
+            "route": "/about",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 3027,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:53:31.406Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 447.969225,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 645.2923000000001,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 645.2923000000001,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 447.969225,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "fb4798a72c4639b38fa530db0fc1a024310066757bd6eb9a7db7ea0147c8ac3f",
+            "route": "/about",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 2858.5,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 5,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:52:37.217Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 459.33239999999995,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 695.4431999999999,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 695.4431999999999,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 657.9514511652183,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "9e7d2308e0c538a7cb64cd5497ef1b903e1ac1db777ae3902e9aba8ef10923f7",
+            "route": "/components",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 2139.5,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 5,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:52:48.294Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 453.48522499999996,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 689.9802999999999,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 689.9802999999999,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 453.48522499999996,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "c599b906dcf59377cae370cde563f625be32cf71927064ce3e8f02f18483c76d",
+            "route": "/components",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 2861.5,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 5,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:52:59.720Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 451.7603,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 688.6804,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 688.6804,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 451.7603,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "3b20df3289c3bcf14231a7856f9fd4e2c6bd27364a3764e36f9e15f97954dd48",
+            "route": "/components",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 2655,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          }
+        ],
+        "routeSummaries": [
+          {
+            "accessibilityFindingIds": [],
+            "categoryMedians": {
+              "accessibility": 1.0,
+              "best-practices": 0.96,
+              "performance": 1.0,
+              "seo": 1.0
+            },
+            "metricMedians": {
+              "cumulative-layout-shift": 0.0,
+              "first-contentful-paint": 453.62235,
+              "interactive": 710.8298,
+              "largest-contentful-paint": 708.8298,
+              "speed-index": 453.62235,
+              "total-blocking-time": 0.0
+            },
+            "route": "/",
+            "runCount": 3
+          },
+          {
+            "accessibilityFindingIds": [],
+            "categoryMedians": {
+              "accessibility": 1.0,
+              "best-practices": 0.96,
+              "performance": 1.0,
+              "seo": 1.0
+            },
+            "metricMedians": {
+              "cumulative-layout-shift": 0.0,
+              "first-contentful-paint": 453.48522499999996,
+              "interactive": 689.9802999999999,
+              "largest-contentful-paint": 689.9802999999999,
+              "speed-index": 453.48522499999996,
+              "total-blocking-time": 0.0
+            },
+            "route": "/components",
+            "runCount": 3
+          },
+          {
+            "accessibilityFindingIds": [],
+            "categoryMedians": {
+              "accessibility": 1.0,
+              "best-practices": 0.96,
+              "performance": 1.0,
+              "seo": 1.0
+            },
+            "metricMedians": {
+              "cumulative-layout-shift": 0.0,
+              "first-contentful-paint": 448.7816,
+              "interactive": 645.7088000000001,
+              "largest-contentful-paint": 645.7088,
+              "speed-index": 448.7816,
+              "total-blocking-time": 0.0
+            },
+            "route": "/about",
+            "runCount": 3
+          }
+        ]
+      },
+      "name": "after",
+      "playwright": {
+        "axeRouteTests": [
+          {
+            "ok": true,
+            "statuses": [
+              "passed"
+            ],
+            "title": "a11y: home has no WCAG violations"
+          },
+          {
+            "ok": true,
+            "statuses": [
+              "passed"
+            ],
+            "title": "a11y: marketplace has no WCAG violations"
+          },
+          {
+            "ok": true,
+            "statuses": [
+              "passed"
+            ],
+            "title": "a11y: about has no WCAG violations"
+          },
+          {
+            "ok": true,
+            "statuses": [
+              "skipped"
+            ],
+            "title": "a11y: component detail page (seed-gated)"
+          }
+        ],
+        "lightModeTests": {
+          "failed": 0,
+          "passed": 55,
+          "skipped": 0,
+          "total": 55
+        },
+        "reportSha256": "cbe2fba379b68b06a46f21fdf6fb64e5fae5181168dfdfd2aba936ab1f7bf3cd",
+        "scope": {
+          "axeTags": [
+            "wcag2a",
+            "wcag2aa",
+            "wcag21a",
+            "wcag21aa",
+            "wcag22aa"
+          ],
+          "browserProject": "chromium",
+          "colorAndMotion": "light-mode suite forces light and reduced motion; core axe suite forces reduced motion",
+          "server": "Astro standalone production adapter"
+        },
+        "stats": {
+          "duration": 30928.477,
+          "expected": 71,
+          "flaky": 0,
+          "skipped": 4,
+          "startTime": "2026-08-01T10:54:51.124Z",
+          "unexpected": 0
+        },
+        "topLevelErrors": []
+      },
+      "sourceCommit": "bc131bf598e93c5c0688c35d91e863311114045f",
+      "sourceTree": "5dbba6b96852b9b349e354a1fc0b0d03e5f2cd00"
+    },
+    "before": {
+      "build": {
+        "aggregateSha256": "accb4fdfa8782193d57a8d7a9104806b335fa95b7ae7248510de646ef89cd924",
+        "fileCount": 446,
+        "footerMismatchAriaPresent": true
+      },
+      "lighthouse": {
+        "assertionGate": {
+          "blockingFindingIds": [
+            "label-content-name-mismatch"
+          ],
+          "command": "npx lhci assert --config=.lighthouserc.json",
+          "executed": true,
+          "exitCode": 1,
+          "note": "Derived from the unchanged blocking Lighthouse accessibility assertions; warning-level diagnostics do not fail the gate.",
+          "status": "fail"
+        },
+        "reports": [
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 3,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:46:14.329Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 460.734375,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 748.3125,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 746.3125,
+                "score": 0.98
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 487.95709408442804,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "1ce3d4e394c2d0ede3eecf53891b3176747405d67e5584747982f45233c98e44",
+            "route": "/",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 1633,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 3,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 170,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:46:27.118Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 453.88802499999997,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 710.8507,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 708.8507,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 453.88802499999997,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "22287b410a1bf20ef4eccd9ac535c523460697e3b12d31094d41b7fac16b1424",
+            "route": "/",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 2417,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 3,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:46:40.550Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 465.367575,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 770.4901,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 770.4901,
+                "score": 0.98
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 511.8339177503266,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "b2526ee222dba2e69934a9e3746321e84bace19da716b729614a7f0345221580",
+            "route": "/",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 1532,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:47:28.575Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 456.47024999999996,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 650.627,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 650.627,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 456.47024999999996,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "fce54d508a3937c092b2cb19052c63a1352b613ecb4eb4c6e48e8087091204c2",
+            "route": "/about",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 1440,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:47:40.931Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 452.42155,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 647.8954000000001,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 647.8954,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 452.42155,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "dee4735418c8741856c5e1a2c832d36df7eb3a488b127859bda837e80f646d12",
+            "route": "/about",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 1882.5,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 4,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:47:52.380Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 452.7127,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 648.2836,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 648.2836,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 452.7127,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "260ed1b85a5f3712511c235bf395784cb81cde0bfac2d4a95fd69155f4d9e7fe",
+            "route": "/about",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 1917,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 5,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:46:53.580Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 488.13879999999995,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 744.7081999999999,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 744.7081999999999,
+                "score": 0.98
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 488.13879999999995,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "0b1af4cb809a88d14e988df867fef601767c515480c971367ccc160190bce6bc",
+            "route": "/components",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 2042.5,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 5,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:47:05.043Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 339.90905,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 758.5454,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 758.5454,
+                "score": 0.98
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 339.90905,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "3bcb1dc90314eb58554f1d231c775d2d9c9711d2a445d07570fc891680d263e3",
+            "route": "/components",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 1377.5,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          },
+          {
+            "accessibilityFindings": [
+              {
+                "id": "label-content-name-mismatch",
+                "impact": "serious",
+                "nodes": [
+                  {
+                    "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name",
+                    "nodeLabel": "CREATED BY\n@SARVESHSEA",
+                    "selector": "footer.memoire-footer > div.memoire-footer__inner > div.memoire-footer__band > a.memoire-footer__credit",
+                    "snippet": "<a class=\"memoire-footer__credit\" href=\"https://github.com/sarveshsea\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Created by Sarvesh on GitHub\" data-astro-cid-6fhkmn26=\"\">"
+                  }
+                ],
+                "score": 0,
+                "title": "Elements with visible text labels do not have matching accessible names."
+              }
+            ],
+            "categories": {
+              "accessibility": 1,
+              "best-practices": 0.96,
+              "performance": 1,
+              "seo": 1
+            },
+            "configuredWarnings": [
+              {
+                "id": "document-latency-insight",
+                "itemCount": 3,
+                "numericValue": null,
+                "score": 0.5
+              },
+              {
+                "id": "errors-in-console",
+                "itemCount": 1,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "image-delivery-insight",
+                "itemCount": 2,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "modern-image-formats",
+                "itemCount": 2,
+                "numericValue": 80,
+                "score": 0
+              },
+              {
+                "id": "network-dependency-tree-insight",
+                "itemCount": 0,
+                "numericValue": null,
+                "score": 0
+              },
+              {
+                "id": "unused-javascript",
+                "itemCount": 1,
+                "numericValue": 40,
+                "score": 0
+              },
+              {
+                "id": "uses-text-compression",
+                "itemCount": 5,
+                "numericValue": 200,
+                "score": 0
+              }
+            ],
+            "fetchTime": "2026-08-01T10:47:16.899Z",
+            "metrics": {
+              "cumulative-layout-shift": {
+                "numericUnit": "unitless",
+                "numericValue": 0,
+                "score": 1
+              },
+              "first-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 459.842975,
+                "score": 1
+              },
+              "interactive": {
+                "numericUnit": "millisecond",
+                "numericValue": 694.4573,
+                "score": 1
+              },
+              "largest-contentful-paint": {
+                "numericUnit": "millisecond",
+                "numericValue": 694.4573,
+                "score": 0.99
+              },
+              "speed-index": {
+                "numericUnit": "millisecond",
+                "numericValue": 459.842975,
+                "score": 1
+              },
+              "total-blocking-time": {
+                "numericUnit": "millisecond",
+                "numericValue": 0,
+                "score": 1
+              }
+            },
+            "reportSha256": "daa13a4e5b3b3e57014f5d07ee42f03d95a7a0f29f2db387d9a1e85855dd46f3",
+            "route": "/components",
+            "runtime": {
+              "axeCore": "4.11.3",
+              "benchmarkIndex": 1616,
+              "hostUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+              "lighthouseVersion": "12.6.1",
+              "networkUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+            }
+          }
+        ],
+        "routeSummaries": [
+          {
+            "accessibilityFindingIds": [
+              "label-content-name-mismatch"
+            ],
+            "categoryMedians": {
+              "accessibility": 1.0,
+              "best-practices": 0.96,
+              "performance": 1.0,
+              "seo": 1.0
+            },
+            "metricMedians": {
+              "cumulative-layout-shift": 0.0,
+              "first-contentful-paint": 460.734375,
+              "interactive": 748.3125,
+              "largest-contentful-paint": 746.3125,
+              "speed-index": 487.95709408442804,
+              "total-blocking-time": 0.0
+            },
+            "route": "/",
+            "runCount": 3
+          },
+          {
+            "accessibilityFindingIds": [
+              "label-content-name-mismatch"
+            ],
+            "categoryMedians": {
+              "accessibility": 1.0,
+              "best-practices": 0.96,
+              "performance": 1.0,
+              "seo": 1.0
+            },
+            "metricMedians": {
+              "cumulative-layout-shift": 0.0,
+              "first-contentful-paint": 459.842975,
+              "interactive": 744.7081999999999,
+              "largest-contentful-paint": 744.7081999999999,
+              "speed-index": 459.842975,
+              "total-blocking-time": 0.0
+            },
+            "route": "/components",
+            "runCount": 3
+          },
+          {
+            "accessibilityFindingIds": [
+              "label-content-name-mismatch"
+            ],
+            "categoryMedians": {
+              "accessibility": 1.0,
+              "best-practices": 0.96,
+              "performance": 1.0,
+              "seo": 1.0
+            },
+            "metricMedians": {
+              "cumulative-layout-shift": 0.0,
+              "first-contentful-paint": 452.7127,
+              "interactive": 648.2836,
+              "largest-contentful-paint": 648.2836,
+              "speed-index": 452.7127,
+              "total-blocking-time": 0.0
+            },
+            "route": "/about",
+            "runCount": 3
+          }
+        ]
+      },
+      "name": "before",
+      "playwright": {
+        "axeRouteTests": [
+          {
+            "ok": true,
+            "statuses": [
+              "passed"
+            ],
+            "title": "a11y: home has no WCAG violations"
+          },
+          {
+            "ok": true,
+            "statuses": [
+              "passed"
+            ],
+            "title": "a11y: marketplace has no WCAG violations"
+          },
+          {
+            "ok": true,
+            "statuses": [
+              "passed"
+            ],
+            "title": "a11y: about has no WCAG violations"
+          },
+          {
+            "ok": true,
+            "statuses": [
+              "skipped"
+            ],
+            "title": "a11y: component detail page (seed-gated)"
+          }
+        ],
+        "lightModeTests": {
+          "failed": 0,
+          "passed": 55,
+          "skipped": 0,
+          "total": 55
+        },
+        "reportSha256": "68cb660ca7d6340ec534073c730fea5ef4bc639be9f58da099da2bfcb79f6197",
+        "scope": {
+          "axeTags": [
+            "wcag2a",
+            "wcag2aa",
+            "wcag21a",
+            "wcag21aa",
+            "wcag22aa"
+          ],
+          "browserProject": "chromium",
+          "colorAndMotion": "light-mode suite forces light and reduced motion; core axe suite forces reduced motion",
+          "server": "Astro standalone production adapter"
+        },
+        "stats": {
+          "duration": 31146.006,
+          "expected": 71,
+          "flaky": 0,
+          "skipped": 4,
+          "startTime": "2026-08-01T10:55:47.729Z",
+          "unexpected": 0
+        },
+        "topLevelErrors": []
+      },
+      "sourceCommit": "f231a5aef808d97d77e98d6dfd4314685361433b",
+      "sourceTree": "6f6bfbbf3f3123d05312fd572e08fd41b7b1010d"
+    }
+  },
+  "design": {
+    "after": "bc131bf598e93c5c0688c35d91e863311114045f",
+    "auditHarnessRevision": "bc131bf598e93c5c0688c35d91e863311114045f",
+    "baseline": "f231a5a",
+    "baselineOverlay": [
+      ".github/workflows/ci-webpage.yml",
+      ".lighthouserc.json",
+      "astro.audit.config.mjs",
+      "package-lock.json",
+      "package.json",
+      "playwright.config.ts",
+      "playwright.production.config.ts"
+    ],
+    "excludedSources": [
+      ".vercel",
+      "dist",
+      ".astro",
+      "test-results",
+      "generated community examples"
+    ],
+    "execution": "serial",
+    "executionOrderByProbe": {
+      "lighthouse": [
+        "before",
+        "discarded-stale-after",
+        "after"
+      ],
+      "playwright": [
+        "after",
+        "before"
+      ]
+    },
+    "lighthouseRunsPerRoute": 3,
+    "routes": [
+      "/",
+      "/components",
+      "/about"
+    ],
+    "type": "clean-checkout controlled before/after audit"
+  },
+  "discardedStaleServerDiagnostic": {
+    "admittedToControlledComparison": false,
+    "disposition": "Reports deleted from the after condition, baseline PID terminated, after server started manually, served HTML inspected, and all nine after reports recollected.",
+    "observed": {
+      "allLabelContentNameMismatchScores": 0,
+      "allReportsContainedBaselineFooterAria": true,
+      "listeningProcess": {
+        "command": "node",
+        "pidAtDiagnosis": 81984,
+        "port": 4326
+      },
+      "reportCount": 9,
+      "reportSha256": [
+        "6a4c5b3e6f17bccc906e5908068ac998e81ee0b4df81d00fabddaedbda4b36cd",
+        "c07e221cc200df65f3994e6026966955053f19d97fd3b070e648056963cb053d",
+        "f29ac8a8b5b291a6511ead8347d576b94986a2882dad13dd7b4dade2a8bb9d",
+        "5ac001cb49a9e777ec1ab643e11febaec166504a415930b8e248df11e18c3ad7",
+        "6193ca097a4b1c6c75b542e5c79de6b4ac0bd7b59c691df950e0d875729882e4",
+        "a55d2f7ff5a05918c4b018a50bdf278c4d0d1bc5b1789870d8835fecc96325b2",
+        "9ec2713826cff1d98b02baf805b1487501aa7ca8b08cb3e9857155e89766354e",
+        "8c70e74194c587ecca79427a63ced81b2d350046eb487fef30be103c7f3adae0",
+        "dff931fadfe2f404acbaf89b0219cf5341225275c1d2c94fee3965b829a8b138"
+      ]
+    },
+    "reason": "LHCI readiness timed out and a lingering baseline PID continued serving port 4326 during the first after collection."
+  },
+  "environment": {
+    "machine": "arm64",
+    "node": "v22.22.3",
+    "npm": "10.9.8",
+    "platform": "macOS-26.2-arm64-arm-64bit-Mach-O"
+  },
+  "ledgerSha256": "d6da0a06ca738faad43779126d310e8fdb6091641d9b4cd5c3dfec0dad5abcb0",
+  "schemaVersion": "memoire.website-audit.before-after.v1",
+  "study": "Memi 2.7.3 confirmatory website remediation"
+}

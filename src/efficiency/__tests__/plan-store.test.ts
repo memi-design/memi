@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -52,6 +52,26 @@ describe("paired benchmark plan and store", () => {
     const raw = await readFile(join(root, ".memoire", "efficiency", "runs.jsonl"), "utf-8");
     expect(raw.trim().split("\n")).toHaveLength(1);
     expect(raw).not.toContain("prompt");
+  });
+
+  it("fails strict reads on corrupt, schema-invalid, duplicate, and oversized stores", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memi-efficiency-store-"));
+    roots.push(root);
+    const store = new EfficiencyRunStore(root);
+    await mkdir(join(root, ".memoire", "efficiency"), { recursive: true });
+
+    await writeFile(store.path, "not-json\n");
+    await expect(store.listStrict()).rejects.toThrow(/line 1.*JSON/i);
+
+    await writeFile(store.path, `${JSON.stringify({ schemaVersion: 1 })}\n`);
+    await expect(store.listStrict()).rejects.toThrow(/schema.*line 1/i);
+
+    const record = sampleRun();
+    await writeFile(store.path, `${JSON.stringify(record)}\n${JSON.stringify(record)}\n`);
+    await expect(store.listStrict()).rejects.toThrow(/duplicate benchmark run run-1/);
+
+    await writeFile(store.path, `${JSON.stringify(record)}\n`);
+    await expect(store.listStrict({ maxBytes: 8 })).rejects.toThrow(/byte safety limit/);
   });
 });
 

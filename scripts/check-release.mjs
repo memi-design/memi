@@ -153,8 +153,6 @@ const requiredPackagedDocs = [
   ["docs/INTERFACE_UNDERSTANDING.md", "Interface understanding is the memi v2 core loop"],
   ["docs/AGENT_STACKS.md", "ECC / AGENTS.md stacks"],
   ["docs/V2_PACKAGE_POSITIONING.md", "High-download package bar"],
-  ["docs/RELEASE_GATES.md", "Local Publish-Ready Gate"],
-  ["docs/CURRENT_RELEASE.md", "Current Memi release truth"],
   ["docs/IOS_SWIFT.md", "Apple-platform design CI"],
   ["docs/PROOF.md", "No-Figma"],
 ];
@@ -163,6 +161,15 @@ for (const [docPath, requiredTerm] of requiredPackagedDocs) {
     fail(`package.json files must include ${docPath}`);
     continue;
   }
+  const doc = await readFile(join(root, docPath), "utf-8");
+  if (!doc.includes(requiredTerm)) {
+    fail(`${docPath} is missing required term: ${requiredTerm}`);
+  }
+}
+for (const [docPath, requiredTerm] of [
+  ["docs/RELEASE_GATES.md", "Local Publish-Ready Gate"],
+  ["docs/CURRENT_RELEASE.md", "Current Memi release truth"],
+]) {
   const doc = await readFile(join(root, docPath), "utf-8");
   if (!doc.includes(requiredTerm)) {
     fail(`${docPath} is missing required term: ${requiredTerm}`);
@@ -346,7 +353,9 @@ if (!changelogMatch) {
 const previewPath = join(root, "preview", "changelog.html");
 const currentPreview = normalizeNewlines(await readFile(previewPath, "utf-8"));
 const releases = parseChangelogMarkdown(changelog);
-const generatedPreview = applyChangelogData(currentPreview, releases);
+const generatedPreview = applyChangelogData(currentPreview, releases, {
+  releaseState: releaseManifest.releaseGroups.engine.state,
+});
 if (generatedPreview !== currentPreview) {
   fail("preview/changelog.html is not synced with CHANGELOG.md");
 }

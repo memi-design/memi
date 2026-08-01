@@ -1,0 +1,3 @@
+task_id,graded_pairs,mean_delta,median_delta,sign_test_positive,sign_test_negative,sign_test_ties,sign_test_p_greater,bootstrap_ci_lower_2p5,bootstrap_ci_upper_97p5,noninferiority_lower_95_one_sided,noninferiority_margin,noninferior
+buzzr-tab-unread-badge,5,1.4,1.0,4,1,0,0.1875,0.0,2.8,0.2,-5.0,True
+paraform-command-menu,5,-0.4,2.0,3,2,0,0.5,-4.2,2.8,-3.4,-5.0,True

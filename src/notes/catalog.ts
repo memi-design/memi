@@ -3,6 +3,7 @@ import { createReadStream } from "node:fs";
 import { mkdir, mkdtemp, readFile, rename, rm, writeFile, cp, lstat, readdir, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join, posix, resolve } from "node:path";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { extract as extractTar, Parser, type ReadEntry } from "tar";
 import { z } from "zod";
@@ -246,11 +247,10 @@ function assertDownloadSize(actualBytes: number, limits: ReadBytesLimits): void 
 async function validateArchiveContents(archivePath: string): Promise<void> {
   const entries: string[] = [];
   let totalBytes = 0;
-  await new Promise<void>((resolveArchive, rejectArchive) => {
-    const parser = new Parser({
-      strict: true,
-      maxDecompressionRatio: 100,
-      onReadEntry: (entry: ReadEntry) => {
+  const parser = new Parser({
+    strict: true,
+    maxDecompressionRatio: 100,
+    onReadEntry: (entry: ReadEntry) => {
       entries.push(entry.path);
       let violation: string | null = null;
       if (entries.length > MAX_ARCHIVE_ENTRIES) {
@@ -273,15 +273,10 @@ async function validateArchiveContents(archivePath: string): Promise<void> {
         violation = `Note archive contains an executable file: ${entry.path}`;
       }
       if (violation) parser.abort(new Error(violation));
-        entry.resume();
-      },
-    });
-    const source = createReadStream(archivePath);
-    source.on("error", rejectArchive);
-    parser.on("error", rejectArchive);
-    parser.on("end", resolveArchive);
-    source.pipe(parser);
+      entry.resume();
+    },
   });
+  await pipeline(createReadStream(archivePath), parser);
   assertSafeArchiveEntries(entries);
 }
 

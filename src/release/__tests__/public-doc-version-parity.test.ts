@@ -136,7 +136,7 @@ describe("public documentation release truth", () => {
     expect(readme).toContain("assets/readme-hero.svg");
     expect(readme).toContain("img.shields.io/npm/dw/@memi-design/cli");
     expect(readme).toContain(
-      `npx -y @memi-design/cli@${publicEngineVersion} diagnose . --json --no-write --fail-on none`,
+      "npx -y @memi-design/cli@latest diagnose . --json --no-write --fail-on none",
     );
     expect(readme).toContain("If Memi catches a real interface issue");
     expect(quickstartIndex).toBeGreaterThan(-1);

@@ -3,7 +3,11 @@ import { createConnection } from "node:net";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ToolsRpcServer, type ToolRunner } from "../../exec/tools-rpc-server.js";
+import {
+  resolveToolsRpcEndpoint,
+  ToolsRpcServer,
+  type ToolRunner,
+} from "../../exec/tools-rpc-server.js";
 import { createDecoderState, decodeChunk, encodeMessage } from "../../exec/tools-rpc-protocol.js";
 
 function makeRunner(allowed: string[], handler: (tool: string, args: unknown) => unknown | Promise<unknown>): ToolRunner {
@@ -48,7 +52,7 @@ describe("exec/tools-rpc-server", () => {
 
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), "memi-tools-rpc-"));
-    socketPath = join(dir, "tools.sock");
+    socketPath = resolveToolsRpcEndpoint(dir);
   });
 
   afterEach(async () => {
@@ -57,6 +61,32 @@ describe("exec/tools-rpc-server", () => {
       server = null;
     }
     await rm(dir, { recursive: true, force: true });
+  });
+
+  it("uses a Windows named pipe instead of a filesystem socket path", () => {
+    const endpoint = resolveToolsRpcEndpoint(
+      "C:\\Users\\runneradmin\\AppData\\Local\\Temp\\memi-execcode-a1b2c3",
+      "win32",
+    );
+
+    const prefix = "\\\\.\\pipe\\memi-tools-";
+    expect(endpoint.startsWith(prefix)).toBe(true);
+    expect(endpoint.slice(prefix.length)).toMatch(/^[a-f0-9]{24}$/);
+    expect(endpoint).not.toContain("runneradmin");
+    expect(endpoint).not.toContain("tools.sock");
+  });
+
+  it("keeps the per-execution filesystem socket on non-Windows platforms", () => {
+    expect(resolveToolsRpcEndpoint("/tmp/memi-execcode-a1b2c3", "darwin")).toBe(
+      "/tmp/memi-execcode-a1b2c3/tools.sock",
+    );
+  });
+
+  it("isolates named pipes for distinct execution directories", () => {
+    const first = resolveToolsRpcEndpoint("C:\\Temp\\memi-execcode-first", "win32");
+    const second = resolveToolsRpcEndpoint("C:\\Temp\\memi-execcode-second", "win32");
+
+    expect(first).not.toBe(second);
   });
 
   it("listen + close cleanly with no clients", async () => {

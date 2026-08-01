@@ -156,7 +156,7 @@ describe("Registry resolver", () => {
       }));
       const resolved = await resolveRegistry("ai-chat", dir);
       expect(resolved.registry.name).toBe("@memoire-examples/ai-chat");
-      expect(resolved.source).toContain("@memoire-examples/ai-chat");
+      expect(resolved.source).toBe("local-package:@memoire-examples/ai-chat@1.0.0");
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

@@ -1,0 +1,178 @@
+{
+  "asOf": null,
+  "eventsAvailable": 12,
+  "eventsReplayed": 12,
+  "routes": [
+    {
+      "finalDecision": "repository-only",
+      "finalState": "suppressed",
+      "identity": {
+        "harness": {
+          "modelId": "gpt-5.6-luna",
+          "provider": "codex",
+          "reasoningEffort": "low"
+        },
+        "repositoryFingerprintHash": "sha256:dfa4386fbef2b154b8a5f276b67209c12e1d560db5ed7635b221f9ca52ef5cb0",
+        "routerVersion": "skill-router-v2",
+        "skills": [
+          {
+            "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd",
+            "skillId": "atomic-design"
+          }
+        ],
+        "taskClass": "buzzr-tab-unread-badge"
+      },
+      "routeKey": "sha256:e3787a1f1d1315489555abf80a663a1ebca6c1b0ec138009f55faa0a736a6d80",
+      "timeline": [
+        {
+          "createdAt": "2026-08-01T07:04:45.834Z",
+          "decisionAfter": "allow",
+          "eventId": "fitness:faa83c49c56da74b9b1d1bb897c29e46b7a4d7d3f455e8916007d369749f22e1",
+          "reasonsAfter": [],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "healthy"
+        },
+        {
+          "createdAt": "2026-08-01T07:32:05.739Z",
+          "decisionAfter": "allow",
+          "eventId": "fitness:cd326261e6eea2261523f94fe29ae027f543d7a8fbec24c62f1c414d07d4004a",
+          "reasonsAfter": [],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "healthy"
+        },
+        {
+          "createdAt": "2026-08-01T08:19:31.285Z",
+          "decisionAfter": "allow",
+          "eventId": "fitness:38cd9d9eed6232641eb0a40e9bb2d2e0f3127373dca7f36a6cb860303fcd1a3a",
+          "reasonsAfter": [],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "healthy"
+        },
+        {
+          "createdAt": "2026-08-01T08:45:12.822Z",
+          "decisionAfter": "allow",
+          "eventId": "fitness:bacdefb496f767a64f49b030b49a8caeee1ef9035e706bc7de8516279005d0e4",
+          "reasonsAfter": [],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "healthy"
+        },
+        {
+          "createdAt": "2026-08-01T09:11:49.375Z",
+          "decisionAfter": "repository-only",
+          "eventId": "fitness:d48ca6762fbb9d23910b5dbf27d6e36a4968d254a1e6e17652f1a207ba1d9867",
+          "reasonsAfter": [
+            "quality-regression"
+          ],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "suppressed"
+        },
+        {
+          "createdAt": "2026-08-01T09:37:40.379Z",
+          "decisionAfter": "repository-only",
+          "eventId": "fitness:5f16eb4a9b2d8e8bec356549bd886ef9f8753792d16f97519254484b92bbff71",
+          "reasonsAfter": [
+            "quality-regression"
+          ],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 1,
+          "stateAfter": "suppressed"
+        }
+      ]
+    },
+    {
+      "finalDecision": "repository-only",
+      "finalState": "suppressed",
+      "identity": {
+        "harness": {
+          "modelId": "gpt-5.6-luna",
+          "provider": "codex",
+          "reasoningEffort": "low"
+        },
+        "repositoryFingerprintHash": "sha256:ef98548e2139de0f2c7726bd0b612445103928ef15e296de1895e28dad193b12",
+        "routerVersion": "skill-router-v2",
+        "skills": [
+          {
+            "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902",
+            "skillId": "design-extract"
+          }
+        ],
+        "taskClass": "paraform-command-menu"
+      },
+      "routeKey": "sha256:731fefa1ba15cb75792b89bebc23c7cbf249112cb4008b2ddfdaa3abfe80ec3b",
+      "timeline": [
+        {
+          "createdAt": "2026-08-01T07:13:46.792Z",
+          "decisionAfter": "repository-only",
+          "eventId": "fitness:d72c517a1d080504e8ab7763a0f296681ab1ce82c1cff174ffe96597aa2988cd",
+          "reasonsAfter": [
+            "quality-regression"
+          ],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "suppressed"
+        },
+        {
+          "createdAt": "2026-08-01T07:37:20.225Z",
+          "decisionAfter": "repository-only",
+          "eventId": "fitness:cf2e82ab6921dbd58cc9afdb8148960b8ada5d42202cfd8971c276924d4a96fa",
+          "reasonsAfter": [
+            "quality-regression"
+          ],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "suppressed"
+        },
+        {
+          "createdAt": "2026-08-01T08:25:45.087Z",
+          "decisionAfter": "repository-only",
+          "eventId": "fitness:7c47b886f5ed29fafb74981e9266985f111a7f8eb94107a500aafb859872c9ba",
+          "reasonsAfter": [
+            "quality-regression"
+          ],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "suppressed"
+        },
+        {
+          "createdAt": "2026-08-01T08:52:13.928Z",
+          "decisionAfter": "repository-only",
+          "eventId": "fitness:6b76ff5a2049e1dc96da47b7466ebfcda233402fe10161058d47737ed8345c84",
+          "reasonsAfter": [
+            "quality-regression"
+          ],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "suppressed"
+        },
+        {
+          "createdAt": "2026-08-01T09:17:36.434Z",
+          "decisionAfter": "repository-only",
+          "eventId": "fitness:18b92031965be0e36fa78fca547ebe45535442fa843359910189c717c4273483",
+          "reasonsAfter": [
+            "quality-regression"
+          ],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 1,
+          "stateAfter": "suppressed"
+        },
+        {
+          "createdAt": "2026-08-01T09:45:09.965Z",
+          "decisionAfter": "repository-only",
+          "eventId": "fitness:c48f1b408c0f3bca7bbae342fe455f5573f7f729cffebd959593a92682212c4e",
+          "reasonsAfter": [
+            "quality-regression"
+          ],
+          "recoveryEventsAfter": 0,
+          "schemaVersion": 2,
+          "stateAfter": "suppressed"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 1
+}

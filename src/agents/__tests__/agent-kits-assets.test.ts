@@ -1,9 +1,9 @@
-import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { spawnPortableSync } from "../../utils/subprocess.js";
 
 interface AgentKitManifest {
   version: number;
@@ -132,7 +132,9 @@ describe("packaged agent kits", () => {
     const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
 
     for (const name of focusedSkills) {
-      const skill = await readFile(join(root, "skills", name, "SKILL.md"), "utf-8");
+      const skill = normalizeNewlines(
+        await readFile(join(root, "skills", name, "SKILL.md"), "utf-8"),
+      );
       const lines = skill.split("\n");
 
       expect(skill).toMatch(new RegExp(`^---\\nname: ${name}\\ndescription: Use when `));
@@ -147,8 +149,8 @@ describe("packaged agent kits", () => {
   it("ships valid SKILL.md frontmatter for Hermes and OpenClaw", async () => {
     const root = process.cwd();
     const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
-    const hermesSkill = await readFile(join(root, "agent-kits", "hermes", "memoire-design-tooling", "SKILL.md"), "utf-8");
-    const openClawSkill = await readFile(join(root, "agent-kits", "openclaw", "memoire-design-tooling", "SKILL.md"), "utf-8");
+    const hermesSkill = normalizeNewlines(await readFile(join(root, "agent-kits", "hermes", "memoire-design-tooling", "SKILL.md"), "utf-8"));
+    const openClawSkill = normalizeNewlines(await readFile(join(root, "agent-kits", "openclaw", "memoire-design-tooling", "SKILL.md"), "utf-8"));
 
     for (const skill of [hermesSkill, openClawSkill]) {
       expect(skill).toMatch(/^---\n/);
@@ -299,7 +301,7 @@ describe("packaged agent kits", () => {
 
   it("excludes repository-only integration assets from npm pack output", () => {
     const npmCache = mkdtempSync(join(tmpdir(), "memoire-npm-cache-"));
-    const pack = spawnSync("npm", ["pack", "--dry-run", "--json"], {
+    const pack = spawnPortableSync(process.platform === "win32" ? "npm.cmd" : "npm", ["pack", "--dry-run", "--json"], {
       cwd: process.cwd(),
       encoding: "utf-8",
       env: {
@@ -326,3 +328,7 @@ describe("packaged agent kits", () => {
     expect([...paths].filter((path) => /^(agent-kits|plugins|notes|plugin|assets)\//.test(path))).toEqual([]);
   });
 });
+
+function normalizeNewlines(value: string): string {
+  return value.replace(/\r\n/g, "\n");
+}

@@ -32,7 +32,7 @@ describe("studio marketplace", () => {
         installable: true,
       });
       expect(note.tags).toEqual(expect.any(Array));
-      expect(note.sourcePath).toEqual(expect.stringContaining("notes/design-systems"));
+      expect(note.sourcePath).toEqual(expect.stringContaining(join("notes", "design-systems")));
     } finally {
       await rm(root, { recursive: true, force: true });
     }

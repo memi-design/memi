@@ -1,4 +1,4 @@
-import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -57,7 +57,12 @@ describe("model-agnostic workflow adapters", () => {
     expect(environment).toMatchObject({
       HOME: "/tmp/isolated-home",
       PATH: "/usr/bin",
-      PLAYWRIGHT_BROWSERS_PATH: "/Users/tester/Library/Caches/ms-playwright",
+      PLAYWRIGHT_BROWSERS_PATH: path.join(
+        "/Users/tester",
+        "Library",
+        "Caches",
+        "ms-playwright",
+      ),
     });
     expect(environment.CODEX_HOME).toBeUndefined();
   });
@@ -150,7 +155,7 @@ describe("model-agnostic workflow adapters", () => {
   it("executes Claude in an isolated home and retains streamed tool accounting", async () => {
     const root = await temporaryDirectory();
     const authHome = path.join(root, "claude-auth");
-    const executable = path.join(root, "fixture-claude");
+    const executable = path.join(root, "fixture-claude.cjs");
     await mkdir(authHome, { recursive: true });
     await writeFile(path.join(authHome, ".credentials.json"), JSON.stringify({
       claudeAiOauth: {
@@ -159,7 +164,6 @@ describe("model-agnostic workflow adapters", () => {
       },
     }));
     await writeFile(executable, [
-      "#!/usr/bin/env node",
       "const events=[",
       "{type:'assistant',message:{content:[{type:'tool_use',id:'tool-1',name:'Bash'}]}},",
       "{type:'user',message:{content:[{type:'tool_result',tool_use_id:'tool-1',content:'done'}]}},",
@@ -167,9 +171,9 @@ describe("model-agnostic workflow adapters", () => {
       "];",
       "for(const event of events) process.stdout.write(JSON.stringify(event)+'\\n');",
     ].join("\n"));
-    await chmod(executable, 0o700);
     const adapter = createClaudeWorkflowAdapter({
-      executable,
+      executable: process.execPath,
+      executableArgs: [executable],
       modelId: "fixture-model",
       reasoningEffort: "low",
       authHome,
@@ -191,11 +195,10 @@ describe("model-agnostic workflow adapters", () => {
   it("escalates termination for a stubborn child while retaining complete output accounting", async () => {
     const root = await temporaryDirectory();
     const authHome = path.join(root, "auth");
-    const executable = path.join(root, "stubborn-codex");
+    const executable = path.join(root, "stubborn-codex.cjs");
     await mkdir(authHome, { recursive: true });
     await writeFile(path.join(authHome, "auth.json"), "{}\n");
     await writeFile(executable, [
-      "#!/usr/bin/env node",
       "process.on('SIGTERM', () => {});",
       "const first={type:'item.started',item:{type:'command_execution',id:'call-1'}};",
       "const second={type:'item.completed',item:{type:'command_execution',id:'call-1',aggregated_output:'0123456789'}};",
@@ -203,9 +206,9 @@ describe("model-agnostic workflow adapters", () => {
       "process.stdout.write(JSON.stringify(second)+'\\n');",
       "setTimeout(() => process.exit(0), 1200);",
     ].join("\n"));
-    await chmod(executable, 0o700);
     const adapter = createCodexWorkflowAdapter({
-      executable,
+      executable: process.execPath,
+      executableArgs: [executable],
       modelId: "fixture-model",
       reasoningEffort: "low",
       authHome,
@@ -234,19 +237,18 @@ describe("model-agnostic workflow adapters", () => {
   it("preserves partial output when the adapter deadline terminates a stubborn child", async () => {
     const root = await temporaryDirectory();
     const authHome = path.join(root, "auth");
-    const executable = path.join(root, "timeout-codex");
+    const executable = path.join(root, "timeout-codex.cjs");
     await mkdir(authHome, { recursive: true });
     await writeFile(path.join(authHome, "auth.json"), "{}\n");
     await writeFile(executable, [
-      "#!/bin/sh",
-      "trap '' TERM",
-      "printf '%s\\n' '{\"type\":\"thread.started\"}'",
-      "printf '%s\\n' 'provider-stderr' >&2",
-      "while :; do :; done",
+      "process.on('SIGTERM', () => {});",
+      "process.stdout.write(JSON.stringify({type:'thread.started'})+'\\n');",
+      "process.stderr.write('provider-stderr\\n');",
+      "while (true) {}",
     ].join("\n"));
-    await chmod(executable, 0o700);
     const adapter = createCodexWorkflowAdapter({
-      executable,
+      executable: process.execPath,
+      executableArgs: [executable],
       modelId: "fixture-model",
       reasoningEffort: "low",
       authHome,
