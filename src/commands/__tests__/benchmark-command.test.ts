@@ -1,10 +1,14 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerBenchmarkCommand } from "../benchmark.js";
 import type { BenchmarkRunRecord } from "../../efficiency/contracts.js";
+import {
+  createEvidenceManifest,
+  EVIDENCE_MANIFEST_HASH_PLACEHOLDER,
+} from "../../efficiency/prospective-files.js";
 import { createSkillFitnessQualityEvidence } from "../../notes/skill-fitness.js";
 import { captureLogs, lastLog } from "./test-helpers.js";
 
@@ -357,6 +361,98 @@ describe("benchmark command", () => {
     ], { from: "user" })).rejects.toThrow(/requires a bound v2 route receipt/);
   });
 
+  it("imports an exact raw 2.7.3 route through its prospective evidence manifest", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+    const fixture = await rawProspectiveRouteFixture(5);
+    await recordRuns(program, fixture.baseline, fixture.memi);
+
+    const logs = captureLogs();
+    await program.parseAsync([
+      "benchmark",
+      "fitness-record",
+      "--baseline",
+      fixture.baseline.runId,
+      "--memi",
+      fixture.memi.runId,
+      "--route",
+      fixture.routePath,
+      "--task-class",
+      fixture.memi.taskId,
+      "--store-root",
+      projectRoot,
+      "--json",
+    ], { from: "user" });
+
+    expect(JSON.parse(lastLog(logs))).toMatchObject({
+      status: "recorded",
+      event: {
+        pair: {
+          baselineRunId: fixture.baseline.runId,
+          memiRunId: fixture.memi.runId,
+        },
+        skills: [{
+          skillId: "atomic-design",
+          contentHash: `sha256:${"a".repeat(64)}`,
+        }],
+      },
+    });
+  });
+
+  it("rejects raw 2.7.3 route tampering not represented by the sealed route artifact", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+    const fixture = await rawProspectiveRouteFixture(6);
+    await recordRuns(program, fixture.baseline, fixture.memi);
+    await writeFile(fixture.routePath, JSON.stringify({
+      ...fixture.rawRoute,
+      route: {
+        ...fixture.rawRoute.route,
+        selected: [{
+          ...fixture.rawRoute.route.selected[0],
+          contentHash: `sha256:${"f".repeat(64)}`,
+        }],
+      },
+    }));
+
+    await expect(recordRawFitness(program, fixture)).rejects.toThrow(
+      /raw route does not match the manifest-sealed route artifact/,
+    );
+  });
+
+  it("rejects manifest tampering and an evidence run outside the route directory", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+    const tampered = await rawProspectiveRouteFixture(7);
+    await recordRuns(program, tampered.baseline, tampered.memi);
+    await writeFile(tampered.routeArtifactPath, JSON.stringify({
+      condition: "memi",
+      route: { ...tampered.rawRoute, contextBytes: 999 },
+    }));
+    await expect(recordRawFitness(program, tampered)).rejects.toThrow(
+      /artifact-hash-mismatch:route\.json/,
+    );
+
+    const escaped = await rawProspectiveRouteFixture(8);
+    const foreignDirectory = join(projectRoot, "foreign-evidence");
+    const foreignRunPath = join(foreignDirectory, "run.json");
+    await mkdir(foreignDirectory, { recursive: true });
+    await writeFile(foreignRunPath, JSON.stringify(escaped.memi));
+    const escapedMemi = {
+      ...escaped.memi,
+      evidenceRefs: escaped.memi.evidenceRefs.map((reference) =>
+        reference === escaped.runPath ? foreignRunPath : reference),
+    };
+    await recordRuns(program, escaped.baseline, escapedMemi);
+    await expect(recordRawFitness(program, {
+      ...escaped,
+      memi: escapedMemi,
+    })).rejects.toThrow(/prospective evidence must be sibling artifacts/);
+  });
+
   it("validates bound v2 receipt metadata even without quality evidence", async () => {
     const program = new Command();
     program.exitOverride();
@@ -547,6 +643,126 @@ function engine() {
     config: { projectRoot },
     async init() {},
   };
+}
+
+async function rawProspectiveRouteFixture(repeat: number) {
+  const evidenceDirectory = join(projectRoot, `raw-route-${repeat}`);
+  const routePath = join(evidenceDirectory, "skill-route.json");
+  const routeArtifactPath = join(evidenceDirectory, "route.json");
+  const manifestPath = join(evidenceDirectory, "evidence-manifest.json");
+  const runPath = join(evidenceDirectory, "run.json");
+  await mkdir(evidenceDirectory, { recursive: true });
+  const rawRoute = {
+    route: {
+      schemaVersion: 2,
+      routerVersion: "skill-router-v2",
+      decision: "single",
+      intentHash: `sha256:${"d".repeat(64)}`,
+      repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+      selected: [{
+        id: "atomic-design",
+        skillName: "Atomic Design",
+        file: "/candidate/skills/ATOMIC_DESIGN.md",
+        score: 11,
+        matchedTerms: ["component", "design"],
+        contentHash: `sha256:${"a".repeat(64)}`,
+        contextBytes: 2_900,
+      }],
+      excluded: [],
+      candidates: [],
+      contextBytes: 2_900,
+      maximumContextBytes: 4_096,
+    },
+    skills: [{
+      noteId: "atomic-design",
+      skillName: "Atomic Design",
+      file: "/candidate/skills/ATOMIC_DESIGN.md",
+      content: "# Atomic Design",
+      activateOn: "component-creation",
+      freedomLevel: "reference",
+    }],
+    resources: [],
+    contextBytes: 2_900,
+  };
+  const repository = {
+    pathHash: `sha256:${"c".repeat(64)}`,
+    revision: "9cde918",
+    dirty: false,
+  };
+  const baseline = { ...run("baseline", repeat, 1_000, 100_000), repository };
+  let memi = {
+    ...run("memi", repeat, 500, 50_000),
+    repository,
+    evidenceRefs: [routePath, routeArtifactPath, manifestPath, runPath],
+    prospective: {
+      planHash: `sha256:${"1".repeat(64)}`,
+      freezeHash: `sha256:${"2".repeat(64)}`,
+      candidateArtifactSha256: `sha256:${"3".repeat(64)}`,
+      taskManifestSha256: `sha256:${"4".repeat(64)}`,
+      evidenceManifestSha256: EVIDENCE_MANIFEST_HASH_PLACEHOLDER,
+      trialId: `v15:audit:r${repeat}:memi`,
+      sequence: repeat * 2,
+    },
+  } satisfies BenchmarkRunRecord;
+  await writeFile(routePath, JSON.stringify(rawRoute));
+  await writeFile(routeArtifactPath, JSON.stringify({
+    condition: "memi",
+    route: rawRoute,
+  }));
+  await writeFile(runPath, JSON.stringify(memi));
+  const manifest = await createEvidenceManifest({
+    evidenceDirectory,
+    trialId: memi.prospective.trialId,
+    artifactNames: ["route.json", "run.json"],
+  });
+  memi = {
+    ...memi,
+    prospective: {
+      ...memi.prospective,
+      evidenceManifestSha256: manifest.manifestSha256,
+    },
+  };
+  await writeFile(runPath, JSON.stringify(memi));
+  return {
+    baseline,
+    memi,
+    rawRoute,
+    routePath,
+    routeArtifactPath,
+    runPath,
+  };
+}
+
+async function recordRuns(
+  program: Command,
+  ...records: readonly BenchmarkRunRecord[]
+): Promise<void> {
+  for (const record of records) {
+    const path = join(projectRoot, `stored-${record.runId}.json`);
+    await writeFile(path, JSON.stringify(record));
+    await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
+  }
+}
+
+async function recordRawFitness(
+  program: Command,
+  fixture: Awaited<ReturnType<typeof rawProspectiveRouteFixture>>,
+): Promise<void> {
+  await program.parseAsync([
+    "benchmark",
+    "fitness-record",
+    "--baseline",
+    fixture.baseline.runId,
+    "--memi",
+    fixture.memi.runId,
+    "--route",
+    fixture.routePath,
+    "--task-class",
+    fixture.memi.taskId,
+    "--store-root",
+    projectRoot,
+    "--json",
+  ], { from: "user" });
 }
 
 function run(
