@@ -24,6 +24,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `becadd2e` test: seal fitness command fixtures
 - `0dbd668f` test: bind fitness event execution mode
 - `ad97c0ab` fix: bind fitness execution provenance
+- `90e3f2e1` refactor: scope fitness evidence containment
 - Added RED contract coverage for full-identity fitness isolation, blinded
   quality evidence v2, immediate regression suppression, prospective recovery,
   legacy v1 compatibility, and chronological no-look-ahead replay.
