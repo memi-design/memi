@@ -30,6 +30,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `eebf45c9` — test: bind V2 drafts to native capture tasks
 - `58a5dd7b` — feat: bind V2 drafts to native captures
 - `853a15ad` — fix: preserve bounded V2 artifact root
+- `6e6026a0` — test: support Windows prospective evidence paths
+- `31b8d5be` — fix: admit Windows prospective run receipts
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -46,6 +48,8 @@ verifier times, produces the receipt, and seals all declared files in the manife
 Native capture commands now run only after isolated post-patch verification and
 must copy their regular output into an empty per-cell capture root that exactly
 matches the V2 receipt draft; stale capture files fail before provider execution.
+Prospective evaluation now recognizes both POSIX and Windows evidence-reference
+separators before applying the same manifest and receipt validation path.
 
 ## v2.7.4 — 2026-08-01
 
