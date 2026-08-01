@@ -770,12 +770,10 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       await verifyManifestSealedFitnessRun({
         run: baseline,
         condition: "baseline",
-        storeRoot,
       });
       await verifyManifestSealedFitnessRun({
         run: memi,
         condition: "memi",
-        storeRoot,
       });
       const routeReceipt = await readBoundedJson(routePath, "route receipt");
       const boundResult = SkillFitnessBoundRouteReceiptSchema.safeParse(routeReceipt);
@@ -785,7 +783,6 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           memi,
           taskClass: opts.taskClass,
           routePath,
-          storeRoot,
         })
         : await importProspectiveRawRoute({
           routeReceipt,
@@ -793,7 +790,6 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           memi,
           taskClass: opts.taskClass,
           boundError: boundResult.error.message,
-          storeRoot,
         });
       const qualityEvidence = opts.qualityEvidence
         ? SkillFitnessQualityEvidenceSchema.parse(await readBoundedJson(
@@ -1146,7 +1142,6 @@ async function importProspectiveRawRoute(input: {
   readonly memi: BenchmarkRunRecord;
   readonly taskClass: string;
   readonly boundError: string;
-  readonly storeRoot: string;
 }): Promise<SkillFitnessBoundRouteReceipt> {
   if (!input.memi.prospective) {
     throw new Error(
@@ -1236,12 +1231,10 @@ async function validateManifestSealedBoundRoute(input: {
   readonly memi: BenchmarkRunRecord;
   readonly taskClass: string;
   readonly routePath: string;
-  readonly storeRoot: string;
 }): Promise<SkillFitnessBoundRouteReceipt> {
   await verifyManifestSealedFitnessRun({
     run: input.memi,
     condition: "memi",
-    storeRoot: input.storeRoot,
     requiredArtifactPath: input.routePath,
   });
   return validatedBoundRoute(input.receipt, input.memi, input.taskClass);
@@ -1250,7 +1243,6 @@ async function validateManifestSealedBoundRoute(input: {
 async function verifyManifestSealedFitnessRun(input: {
   readonly run: BenchmarkRunRecord;
   readonly condition: "baseline" | "memi";
-  readonly storeRoot: string;
   readonly requiredArtifactPath?: string;
 }): Promise<void> {
   if (!input.run.prospective) {
