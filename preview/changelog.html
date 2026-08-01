@@ -390,7 +390,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">242</span> commits</span>
+      <span><span class="n" id="stat-commits">267</span> commits</span>
       <span><span class="n" id="stat-versions">37</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-01</span> latest</span>
     </div>
@@ -408,7 +408,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v2.7.4</strong>
-            <div class="summary-caption">0 commits tracked in v2.7.4 from CHANGELOG.md.</div>
+            <div class="summary-caption">25 commits tracked in v2.7.4 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -442,38 +442,124 @@ const releases = [
     "version": "v2.7.4",
     "date": "2026-08-01",
     "tag": "fix",
-    "summary": "8cfd3498 test: define fail-closed route fitness contract; 9a141092 feat: add fail-closed route fitness evidence v2; 16a15cc6 fix: separate candidate runtime from admission harness.",
-    "commits": [],
-    "decisions": [],
+    "summary": "Required new fitness evidence to use run-bound v2 receipts and the exact task,; Added deterministic chronological fitness-backtest replay with an --as-of; Serialized fitness-store appends with bounded exclusive locking, dead-owner.",
+    "commits": [
+      [
+        "8cfd3498",
+        "test: define fail-closed route fitness contract"
+      ],
+      [
+        "9a141092",
+        "feat: add fail-closed route fitness evidence v2"
+      ],
+      [
+        "16a15cc6",
+        "fix: separate candidate runtime from admission harness"
+      ],
+      [
+        "88ef6fda",
+        "fix: resume incomplete prospective pairs safely"
+      ],
+      [
+        "5d300979",
+        "test: define sealed V15 route import contract"
+      ],
+      [
+        "b961ea88",
+        "feat: import manifest-sealed V15 route evidence"
+      ],
+      [
+        "12813de0",
+        "ci: test supported platforms and Node versions"
+      ],
+      [
+        "986ef81f",
+        "test: define recovery probe and task class contracts"
+      ],
+      [
+        "82f64311",
+        "fix: add prospective fitness recovery probes"
+      ],
+      [
+        "b0c17cd1",
+        "test: define sealed fitness evidence boundary"
+      ],
+      [
+        "612103ca",
+        "fix: seal skill fitness empirical evidence"
+      ],
+      [
+        "becadd2e",
+        "test: seal fitness command fixtures"
+      ],
+      [
+        "0dbd668f",
+        "test: bind fitness event execution mode"
+      ],
+      [
+        "ad97c0ab",
+        "fix: bind fitness execution provenance"
+      ],
+      [
+        "90e3f2e1",
+        "refactor: scope fitness evidence containment"
+      ],
+      [
+        "45cd891d",
+        "test: define atomic fitness append lock"
+      ],
+      [
+        "f81416a0",
+        "fix: serialize skill fitness appends"
+      ],
+      [
+        "e285a2b5",
+        "refactor: isolate fitness file locking"
+      ],
+      [
+        "0568964b",
+        "test: define 2.7.4 candidate release surfaces"
+      ],
+      [
+        "289bd728",
+        "chore: prepare Memi 2.7.4 candidate"
+      ],
+      [
+        "cd5335b1",
+        "chore: sync 2.7.4 candidate artifacts"
+      ],
+      [
+        "fe77585b",
+        "test: prevent fitness backtest look-ahead"
+      ],
+      [
+        "54099ce1",
+        "fix: timestamp complete fitness pairs"
+      ],
+      [
+        "8fb5e4b6",
+        "docs: record pair-complete fitness chronology"
+      ],
+      [
+        "bad1ca69",
+        "test: require 2.7.4 changelog commit provenance"
+      ]
+    ],
+    "decisions": [
+      [
+        "Exact-match route identity",
+        "Fail closed on identity mismatch: only"
+      ],
+      [
+        "Evidence hash boundary",
+        "Treat evidence hashes as tamper checks inside"
+      ]
+    ],
     "changes": [
-      "8cfd3498 test: define fail-closed route fitness contract",
-      "9a141092 feat: add fail-closed route fitness evidence v2",
-      "16a15cc6 fix: separate candidate runtime from admission harness",
-      "88ef6fda fix: resume incomplete prospective pairs safely",
-      "5d300979 test: define sealed V15 route import contract",
-      "b961ea88 feat: import manifest-sealed V15 route evidence",
-      "12813de0 ci: test supported platforms and Node versions",
-      "986ef81f test: define recovery probe and task class contracts",
-      "82f64311 fix: add prospective fitness recovery probes",
-      "b0c17cd1 test: define sealed fitness evidence boundary",
-      "612103ca fix: seal skill fitness empirical evidence",
-      "becadd2e test: seal fitness command fixtures",
-      "0dbd668f test: bind fitness event execution mode",
-      "ad97c0ab fix: bind fitness execution provenance",
-      "90e3f2e1 refactor: scope fitness evidence containment",
-      "45cd891d test: define atomic fitness append lock",
-      "f81416a0 fix: serialize skill fitness appends",
-      "e285a2b5 refactor: isolate fitness file locking",
-      "0568964b test: define 2.7.4 candidate release surfaces",
-      "289bd728 chore: prepare Memi 2.7.4 candidate",
-      "fe77585b test: prevent fitness backtest look-ahead",
-      "54099ce1 fix: timestamp complete fitness pairs",
       "Required new fitness evidence to use run-bound v2 receipts and the exact task,",
       "Added deterministic chronological fitness-backtest replay with an --as-of",
       "Serialized fitness-store appends with bounded exclusive locking, dead-owner",
-      "Added the manifest-sealed V15 confirmatory report and deterministic analysis",
-      "Fail closed on identity mismatch: only hash-verified, blinded v2 prospective",
-      "Treat evidence hashes as tamper checks inside the file-owner trust boundary,"
+      "Added the manifest-sealed V15 confirmatory report and deterministic analysis"
     ]
   },
   {

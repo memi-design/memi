@@ -10,30 +10,38 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## v2.7.4 — 2026-08-01
 
+### Commits
+
+| Hash | Message |
+|------|---------|
+| `8cfd3498` | test: define fail-closed route fitness contract |
+| `9a141092` | feat: add fail-closed route fitness evidence v2 |
+| `16a15cc6` | fix: separate candidate runtime from admission harness |
+| `88ef6fda` | fix: resume incomplete prospective pairs safely |
+| `5d300979` | test: define sealed V15 route import contract |
+| `b961ea88` | feat: import manifest-sealed V15 route evidence |
+| `12813de0` | ci: test supported platforms and Node versions |
+| `986ef81f` | test: define recovery probe and task class contracts |
+| `82f64311` | fix: add prospective fitness recovery probes |
+| `b0c17cd1` | test: define sealed fitness evidence boundary |
+| `612103ca` | fix: seal skill fitness empirical evidence |
+| `becadd2e` | test: seal fitness command fixtures |
+| `0dbd668f` | test: bind fitness event execution mode |
+| `ad97c0ab` | fix: bind fitness execution provenance |
+| `90e3f2e1` | refactor: scope fitness evidence containment |
+| `45cd891d` | test: define atomic fitness append lock |
+| `f81416a0` | fix: serialize skill fitness appends |
+| `e285a2b5` | refactor: isolate fitness file locking |
+| `0568964b` | test: define 2.7.4 candidate release surfaces |
+| `289bd728` | chore: prepare Memi 2.7.4 candidate |
+| `cd5335b1` | chore: sync 2.7.4 candidate artifacts |
+| `fe77585b` | test: prevent fitness backtest look-ahead |
+| `54099ce1` | fix: timestamp complete fitness pairs |
+| `8fb5e4b6` | docs: record pair-complete fitness chronology |
+| `bad1ca69` | test: require 2.7.4 changelog commit provenance |
+
 ### Exact-match fail-closed route fitness
 
-- `8cfd3498` test: define fail-closed route fitness contract
-- `9a141092` feat: add fail-closed route fitness evidence v2
-- `16a15cc6` fix: separate candidate runtime from admission harness
-- `88ef6fda` fix: resume incomplete prospective pairs safely
-- `5d300979` test: define sealed V15 route import contract
-- `b961ea88` feat: import manifest-sealed V15 route evidence
-- `12813de0` ci: test supported platforms and Node versions
-- `986ef81f` test: define recovery probe and task class contracts
-- `82f64311` fix: add prospective fitness recovery probes
-- `b0c17cd1` test: define sealed fitness evidence boundary
-- `612103ca` fix: seal skill fitness empirical evidence
-- `becadd2e` test: seal fitness command fixtures
-- `0dbd668f` test: bind fitness event execution mode
-- `ad97c0ab` fix: bind fitness execution provenance
-- `90e3f2e1` refactor: scope fitness evidence containment
-- `45cd891d` test: define atomic fitness append lock
-- `f81416a0` fix: serialize skill fitness appends
-- `e285a2b5` refactor: isolate fitness file locking
-- `0568964b` test: define 2.7.4 candidate release surfaces
-- `289bd728` chore: prepare Memi 2.7.4 candidate
-- `fe77585b` test: prevent fitness backtest look-ahead
-- `54099ce1` fix: timestamp complete fitness pairs
 - Required new fitness evidence to use run-bound v2 receipts and the exact task,
   repository, harness, skill, and content-hash identity. Legacy v1 evidence
   remains readable but cannot promote or recover a route.
@@ -45,12 +53,13 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   artifacts. The report retains its stated scope and limitations and does not
   establish broader product or harness comparisons.
 
-#### Architectural decisions
+### Key Design Decisions
 
-- Fail closed on identity mismatch: only hash-verified, blinded v2 prospective
-  pairs with an exact route identity may promote or recover a route.
-- Treat evidence hashes as tamper checks inside the file-owner trust boundary,
-  not as third-party authorship proof.
+- **Exact-match route identity** — Fail closed on identity mismatch: only
+  hash-verified, blinded v2 prospective pairs with an exact route identity may
+  promote or recover a route.
+- **Evidence hash boundary** — Treat evidence hashes as tamper checks inside
+  the file-owner trust boundary, not as third-party authorship proof.
 
 ## v2.7.3 — 2026-07-31
 
