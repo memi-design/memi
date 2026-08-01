@@ -438,12 +438,13 @@ def _rendered_audit_ledger(
 
 
 def _website_audit_tex(summary: Mapping[str, Any]) -> str:
+    after_short = _tex(str(summary["afterCommit"])[:7])
     return (
         "% Generated deterministically from website-audit-before-after.json; do not edit.\n"
         "A clean-checkout controlled audit compared baseline \\texttt{"
         f"{_tex(summary['baselineCommit'])}"
-        "} with remediation \\texttt{"
-        f"{_tex(summary['afterCommit'])}"
+        "} with remediation commit \\texttt{"
+        f"{after_short}"
         "}. Before remediation, all nine of nine Lighthouse reports reproduced the "
         "\\texttt{label-content-name-mismatch} finding at \\emph{serious} impact, and "
         "the unchanged blocking assertion gate exited 1. The footer accessible name was "
