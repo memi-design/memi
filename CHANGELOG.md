@@ -39,6 +39,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `5ee13ea2` — test: seal V2 fixture preflight receipts
 - `b2d9508c` — feat: attest V2 fixture preflight state
 - `25b1af4c` — research: correct V16 Expo fixture provenance
+- `093fb537` — test: bind V2 fixtures to repository origins
+- `445f3430` — feat: verify V2 fixture repository origins
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -69,6 +71,8 @@ admitted capture kinds for independent reconstruction.
 The V16 readiness ledger now identifies the verified Buzzr Expo fixture rather
 than an unrelated active repository, while preserving the requirement for new
 Simulator capture and calibration evidence.
+Preflight additionally canonicalizes GitHub SSH and HTTPS remotes and rejects
+any checkout whose origin differs from the preregistered fixture identity.
 
 ## v2.7.4 — 2026-08-01
 
