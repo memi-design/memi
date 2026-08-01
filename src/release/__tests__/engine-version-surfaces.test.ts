@@ -23,6 +23,10 @@ describe("2.7.4 candidate release surfaces", () => {
       previousPublicRelease: {
         version: publicVersion,
         sourceCommit: publicSourceCommit,
+        releaseRecord: {
+          path: "release-artifacts/npm/2.7.3.release.json",
+          sha256: "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02",
+        },
       },
       verification: {
         eligibleForParity: false,
