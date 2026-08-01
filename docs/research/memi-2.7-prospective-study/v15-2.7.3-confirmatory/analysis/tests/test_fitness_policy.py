@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+from hashlib import sha256
 from pathlib import Path
 
 from analysis.fitness_policy import (
@@ -44,6 +45,7 @@ class FitnessPolicyArtifactsTests(unittest.TestCase):
             )
 
             nate_entry = quality_evidence["entries"][1]
+            self.assertEqual(nate_entry["observedAt"], "2026-08-01T09:10:00.000Z")
             self.assertEqual(nate_entry["route"]["decision"], "abstain")
             self.assertEqual(nate_entry["route"]["skills"], [])
             self.assertFalse(nate_entry["quality"]["qualityParity"])
@@ -189,7 +191,7 @@ def _write_fixture(root: Path, omit_trial_ids: set[str] | None = None) -> StudyF
             task_id="nate-options-reduce-motion",
             repeat=1,
             condition="baseline",
-            completed_at="2026-08-01T09:00:00.000Z",
+            completed_at="2026-08-01T09:10:00.000Z",
             repository_hash=f"sha256:{'2' * 64}",
             route_payload=None,
             input_tokens=1100,
@@ -313,7 +315,7 @@ def _write_run(
     route_envelope = {"condition": condition, "route": route_payload}
     route_path = run_dir / "route.json"
     route_path.write_text(json.dumps(route_envelope, indent=2) + "\n", encoding="utf-8")
-    route_sha = f"sha256:{canonical_sha256(route_envelope).removeprefix('sha256:')}"
+    route_sha = f"sha256:{sha256(route_path.read_bytes()).hexdigest()}"
     manifest_sha = f"sha256:{repeat:064x}"
     run_payload = {
         "schemaVersion": 1,
