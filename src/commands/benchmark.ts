@@ -598,6 +598,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         condition,
         routedContext,
         adapter,
+        ...(evidenceDraft ? { captureRoot: evidenceDraft.artifactRoot } : {}),
       });
       const completedAt = new Date();
       const routePath = route && route.route.selected.length > 0

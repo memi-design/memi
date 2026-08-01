@@ -1,6 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import {
+  copyFile,
+  lstat,
   mkdir,
   mkdtemp,
   readFile,
@@ -85,6 +87,22 @@ export interface WorkflowPreparationResult {
   readonly stderr: string;
 }
 
+export interface WorkflowNativeCaptureResult {
+  readonly kind: WorkflowTask["nativeCaptures"][number]["kind"];
+  readonly artifactName: string;
+  readonly sourcePath: string;
+  readonly command: string;
+  readonly args: readonly string[];
+  readonly startedAt: string;
+  readonly completedAt: string;
+  readonly durationMs: number;
+  readonly exitCode: number;
+  readonly passed: boolean;
+  readonly timedOut: boolean;
+  readonly stdout: string;
+  readonly stderr: string;
+}
+
 export interface WorkflowTrialResult {
   readonly schemaVersion: 1;
   readonly runId: string;
@@ -99,6 +117,7 @@ export interface WorkflowTrialResult {
   readonly toolProfile: Readonly<WorkflowToolProfile>;
   readonly preparation: readonly WorkflowPreparationResult[];
   readonly verification: readonly WorkflowVerificationResult[];
+  readonly nativeCaptures: readonly WorkflowNativeCaptureResult[];
   readonly verificationIsolation: {
     readonly mode: "fresh-clone-post-patch";
     readonly patchApplied: boolean;
@@ -117,9 +136,14 @@ export async function runWorkflowTrial(input: {
   readonly condition: BenchmarkCondition;
   readonly routedContext: string;
   readonly adapter: WorkflowAdapter;
+  readonly captureRoot?: string;
 }): Promise<Readonly<WorkflowTrialResult>> {
   const task = workflowTaskSchema.parse(input.task);
+  if (task.nativeCaptures.length > 0 && !input.captureRoot) {
+    throw new Error("native workflow captures require a bounded capture root");
+  }
   const sourceRepository = path.resolve(input.sourceRepository);
+  const captureRoot = input.captureRoot ? path.resolve(input.captureRoot) : null;
   const sourceRevision = (await runProcess({
     command: "git",
     args: ["rev-parse", "HEAD"],
@@ -142,6 +166,7 @@ export async function runWorkflowTrial(input: {
   const workspaceParent = await mkdtemp(path.join(tmpdir(), "memi-workflow-"));
   const workspaceRoot = path.join(workspaceParent, "workspace");
   let verificationParent: string | null = null;
+  let verificationRoot: string | null = null;
   const events: Record<string, unknown>[] = [];
   const startedAt = new Date();
   const start = performance.now();
@@ -268,6 +293,7 @@ export async function runWorkflowTrial(input: {
         patch: "",
         preparation,
         verification: [],
+        nativeCaptures: [],
         events,
         adapterResult,
         toolProfile,
@@ -287,6 +313,7 @@ export async function runWorkflowTrial(input: {
         toolProfile,
         preparation,
         verification: [],
+        nativeCaptures: [],
         verificationIsolation,
         budget,
         adapterWallTimeMs: 0,
@@ -420,7 +447,7 @@ export async function runWorkflowTrial(input: {
         tmpdir(),
         "memi-workflow-verification-",
       ));
-      const verificationRoot = path.join(verificationParent, "workspace");
+      verificationRoot = path.join(verificationParent, "workspace");
       await requireSuccessfulProcess({
         command: "git",
         args: ["clone", "--quiet", "--no-checkout", "--no-hardlinks", sourceRepository, verificationRoot],
@@ -534,7 +561,7 @@ export async function runWorkflowTrial(input: {
       }));
     }
 
-    const accepted = adapterResult.exitCode === 0
+    const acceptanceBeforeNativeCapture = adapterResult.exitCode === 0
       && fixturesUnchanged
       && verificationPreparationPassed
       && verificationPatchApplied
@@ -544,6 +571,17 @@ export async function runWorkflowTrial(input: {
       && budget.withinBudget
       && task.requiredArtifacts.every((artifact) =>
         ["git.patch", "verification.json", "events.jsonl"].includes(artifact));
+    const nativeCaptures = acceptanceBeforeNativeCapture && captureRoot
+      ? await runNativeCaptures({
+        captures: task.nativeCaptures,
+        verificationRoot,
+        captureRoot,
+        events,
+      })
+      : [];
+    const accepted = acceptanceBeforeNativeCapture
+      && nativeCaptures.length === task.nativeCaptures.length
+      && nativeCaptures.every((capture) => capture.passed);
     const durationMs = Math.round(performance.now() - start);
     events.push(event("workflow.completed", {
       accepted,
@@ -555,6 +593,7 @@ export async function runWorkflowTrial(input: {
       patch,
       preparation,
       verification,
+      nativeCaptures,
       events,
       adapterResult,
       toolProfile,
@@ -574,6 +613,7 @@ export async function runWorkflowTrial(input: {
       toolProfile,
       preparation,
       verification,
+      nativeCaptures,
       verificationIsolation: {
         mode: "fresh-clone-post-patch",
         preparationPassed: verificationPreparationPassed,
@@ -597,6 +637,7 @@ async function persistWorkflowEvidence(input: {
   readonly patch: string;
   readonly preparation: readonly WorkflowPreparationResult[];
   readonly verification: readonly WorkflowVerificationResult[];
+  readonly nativeCaptures: readonly WorkflowNativeCaptureResult[];
   readonly events: readonly Record<string, unknown>[];
   readonly adapterResult: Readonly<WorkflowAdapterResult>;
   readonly toolProfile: Readonly<WorkflowToolProfile>;
@@ -614,6 +655,11 @@ async function persistWorkflowEvidence(input: {
     writeFile(
       path.join(input.evidenceDirectory, "verification.json"),
       `${JSON.stringify(input.verification, null, 2)}\n`,
+      { mode: 0o600 },
+    ),
+    writeFile(
+      path.join(input.evidenceDirectory, "native-capture.json"),
+      `${JSON.stringify(input.nativeCaptures, null, 2)}\n`,
       { mode: 0o600 },
     ),
     writeFile(
@@ -642,6 +688,83 @@ async function persistWorkflowEvidence(input: {
       { mode: 0o600 },
     ),
   ]);
+}
+
+async function runNativeCaptures(input: {
+  readonly captures: WorkflowTask["nativeCaptures"];
+  readonly verificationRoot: string | null;
+  readonly captureRoot: string;
+  readonly events: Record<string, unknown>[];
+}): Promise<WorkflowNativeCaptureResult[]> {
+  if (input.captures.length === 0) return [];
+  if (!input.verificationRoot) {
+    throw new Error("native captures require an isolated verification checkout");
+  }
+  await mkdir(input.captureRoot, { recursive: true, mode: 0o700 });
+  const results: WorkflowNativeCaptureResult[] = [];
+  for (const capture of input.captures) {
+    const startedAt = new Date();
+    const start = performance.now();
+    const processResult = await runProcess({
+      command: capture.command,
+      args: capture.args,
+      cwd: input.verificationRoot,
+      timeoutMs: capture.timeoutMs,
+    });
+    let passed = processResult.exitCode === 0 && !processResult.timedOut;
+    let stderr = processResult.stderr;
+    if (passed) {
+      const source = path.resolve(input.verificationRoot, capture.sourcePath);
+      const relative = path.relative(input.verificationRoot, source);
+      const stats = !relative.startsWith("..") && !path.isAbsolute(relative)
+        ? await lstat(source).catch(() => null)
+        : null;
+      if (!stats?.isFile()) {
+        passed = false;
+        stderr = appendBounded(
+          stderr,
+          `\nnative capture source is not a regular file: ${capture.sourcePath}`,
+        );
+      } else {
+        const target = path.join(input.captureRoot, capture.artifactName);
+        const existing = await lstat(target).catch(() => null);
+        if (existing) {
+          passed = false;
+          stderr = appendBounded(
+            stderr,
+            `\nnative capture artifact already exists: ${capture.artifactName}`,
+          );
+        } else {
+          await copyFile(source, target);
+          await chmod(target, 0o600);
+        }
+      }
+    }
+    const result: WorkflowNativeCaptureResult = {
+      kind: capture.kind,
+      artifactName: capture.artifactName,
+      sourcePath: capture.sourcePath,
+      command: capture.command,
+      args: [...capture.args],
+      startedAt: startedAt.toISOString(),
+      completedAt: new Date().toISOString(),
+      durationMs: Math.round(performance.now() - start),
+      exitCode: processResult.exitCode,
+      passed,
+      timedOut: processResult.timedOut,
+      stdout: processResult.stdout,
+      stderr,
+    };
+    results.push(result);
+    input.events.push(event("workflow.native-capture.completed", {
+      kind: result.kind,
+      artifactName: result.artifactName,
+      exitCode: result.exitCode,
+      passed: result.passed,
+      timedOut: result.timedOut,
+    }));
+  }
+  return results;
 }
 
 async function verifyFixtures(
