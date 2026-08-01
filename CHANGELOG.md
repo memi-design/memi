@@ -14,6 +14,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `9a141092` feat: add fail-closed route fitness evidence v2
 - `16a15cc6` fix: separate candidate runtime from admission harness
 - `88ef6fda` fix: resume incomplete prospective pairs safely
+- `5d300979` test: define sealed V15 route import contract
+- `b961ea88` feat: import manifest-sealed V15 route evidence
+- `12813de0` ci: test supported platforms and Node versions
 - Added RED contract coverage for full-identity fitness isolation, blinded
   quality evidence v2, immediate regression suppression, prospective recovery,
   legacy v1 compatibility, and chronological no-look-ahead replay.
@@ -33,6 +36,12 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   evaluate their immutable receipts.
 - Made interrupted prospective pairs resumable without rerunning or duplicating
   the already completed matched condition.
+- Added a fail-closed compatibility importer for the manifest-sealed raw route
+  receipts emitted by 2.7.3, preserving native bound-v2 behavior while
+  rejecting unbound, tampered, escaped, or symlinked evidence.
+- Promoted the existing Linux, macOS, and Windows Node 20/22/24 clean-install
+  matrix into a complete typecheck, test, build, pack, install, and invocation
+  gate.
 
 #### Architectural decisions
 
