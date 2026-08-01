@@ -9,6 +9,28 @@ post-patch verification clone, and a V2 evidence receipt. The receipt is only
 admitted when its native captures and measured billing files are copied from a
 bounded source root, individually hashed, and included in the cell manifest.
 
+## What would make a claim supported
+
+The prior paper's two "not supported" rows are not a verdict that Memi is
+worse. They mean the available data could not distinguish a real improvement
+from chance, task variation, missing native rendering, or unobserved billing.
+V16 treats each statement as a separate gate:
+
+| Statement a reader might make | Current status | Evidence that can support it |
+| --- | --- | --- |
+| "Memi preserves design quality on these tasks" | Not yet re-tested natively | Six complete native matched pairs per fixture, blinded-quality non-inferiority gate, and no unreported exclusions |
+| "Memi is better on a named task" | Not supported | The corresponding preregistered superiority analysis passes after the quality gate; a pooled average alone never suffices |
+| "Memi is faster" | Not supported | All admitted pairs retain comparable adapter and verifier wall times, with the corrected task-level secondary test passing |
+| "Memi is cheaper in USD" | Not measured | Per-cell provider usage exports or invoice allocations plus immutable price cards, followed by the preregistered cost analysis |
+| "Memi produces professionally better frontend work" | Not established | The native evidence above plus blinded practitioner grading; model graders alone are explicitly insufficient |
+
+The engineering gates already implemented are narrower but real: V2 receipts
+require the native capture and billing files, manifests seal every declared
+file, fresh capture roots reject stale artifacts, preflight refuses dirty or
+wrong-origin fixture repositories, and it can emit a hash-verified attestation.
+Those controls improve whether the next data are trustworthy; they do not turn
+the old data into positive evidence.
+
 ## Two-stage execution
 
 1. **Capture-calibration pilot.** Run one matched baseline/Memi pair on each
