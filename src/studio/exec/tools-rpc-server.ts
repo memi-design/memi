@@ -25,7 +25,7 @@
 import { createServer, Server, Socket } from "node:net";
 import { unlink } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { join } from "node:path";
+import { posix } from "node:path";
 import {
   createDecoderState,
   decodeChunk,
@@ -75,7 +75,7 @@ export function resolveToolsRpcEndpoint(
   platform: NodeJS.Platform = process.platform,
 ): string {
   if (platform !== "win32") {
-    return join(executionDirectory, "tools.sock");
+    return posix.join(executionDirectory, "tools.sock");
   }
 
   const endpointId = createHash("sha256")
