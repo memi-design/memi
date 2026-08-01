@@ -4,7 +4,11 @@ import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
 import { defaultStudioConfig, saveStudioConfig } from "../config.js";
 import { StudioRuntimeServer } from "../server.js";
-import { MemoryTelemetrySink } from "../tracing/opentelemetry.js";
+import {
+  MemoryTelemetrySink,
+  type OpenTelemetryProjection,
+  type TelemetrySink,
+} from "../tracing/opentelemetry.js";
 
 const servers: StudioRuntimeServer[] = [];
 
@@ -124,7 +128,83 @@ describe("studio provider runtime RPC", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("waits for pending runtime evidence exports before shutdown resolves", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memi-provider-shutdown-"));
+    const telemetrySink = new DeferredTelemetrySink();
+    let server: StudioRuntimeServer | null = null;
+    try {
+      const config = defaultStudioConfig(root);
+      await saveStudioConfig(root, {
+        ...config,
+        enabledTools: { ...config.enabledTools, shell: true },
+        harnesses: config.harnesses.map((harness) =>
+          harness.id === "shell"
+            ? {
+                ...harness,
+                enabled: true,
+                command: process.execPath,
+                commandTemplates: { ...harness.commandTemplates, raw: ["-e", "process.exit(0)"] },
+              }
+            : harness),
+      });
+      server = new StudioRuntimeServer({ projectRoot: root, port: 0, telemetrySink });
+      servers.push(server);
+      await server.start();
+      const session = await server.startSession({
+        harness: "shell",
+        cwd: root,
+        prompt: "emit shutdown evidence",
+        action: "raw",
+      });
+      await waitForSession(server, session.id);
+      await telemetrySink.waitUntilCalled();
+
+      const stop = server.stop();
+      const resolvedBeforeRelease = await Promise.race([
+        stop.then(() => true),
+        new Promise<false>((resolve) => setTimeout(() => resolve(false), 100)),
+      ]);
+      telemetrySink.release();
+      await stop;
+
+      expect(resolvedBeforeRelease).toBe(false);
+    } finally {
+      telemetrySink.release();
+      await server?.stop();
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });
+
+class DeferredTelemetrySink implements TelemetrySink {
+  private readonly called: Promise<void>;
+  private markCalled!: () => void;
+  private readonly pending: Promise<void>;
+  private settlePending!: () => void;
+
+  constructor() {
+    this.called = new Promise((resolve) => {
+      this.markCalled = resolve;
+    });
+    this.pending = new Promise((resolve) => {
+      this.settlePending = resolve;
+    });
+  }
+
+  async emit(_projection: OpenTelemetryProjection): Promise<void> {
+    this.markCalled();
+    await this.pending;
+  }
+
+  waitUntilCalled(): Promise<void> {
+    return this.called;
+  }
+
+  release(): void {
+    this.settlePending();
+  }
+}
 
 async function waitForSession(server: StudioRuntimeServer, sessionId: string): Promise<void> {
   for (let i = 0; i < 60; i += 1) {
