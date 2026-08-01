@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildWebReleaseArtifact,
   serializeJson,
+  verifyCoreReleaseSurfaces,
 } from "../../../scripts/lib/release-manifest.mjs";
 
 const root = join(import.meta.dirname, "..", "..", "..");
@@ -127,6 +128,21 @@ describe("release manifest", () => {
     );
 
     expect(result.status, result.stderr || result.stdout).toBe(0);
+  });
+
+  it("fails closed when prior public release evidence is not byte- and identity-bound", async () => {
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const wrongDigest = structuredClone(manifest);
+    wrongDigest.releaseGroups.engine.previousPublicRelease.releaseRecord.sha256 = "f".repeat(64);
+    await expect(verifyCoreReleaseSurfaces(root, wrongDigest)).resolves.toContain(
+      "candidate previousPublicRelease release record SHA-256 does not match its committed bytes",
+    );
+
+    const wrongSource = structuredClone(manifest);
+    wrongSource.releaseGroups.engine.previousPublicRelease.sourceCommit = "a".repeat(40);
+    await expect(verifyCoreReleaseSurfaces(root, wrongSource)).resolves.toContain(
+      "candidate previousPublicRelease release record source commit does not match the manifest",
+    );
   });
 
   it("validates a committed candidate artifact from a depth-1 checkout", async () => {
