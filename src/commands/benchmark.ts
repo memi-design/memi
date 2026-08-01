@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import type { Command } from "commander";
+import { z } from "zod";
 import type { MemoireEngine } from "../engine/core.js";
 import {
   benchmarkConditionSchema,
@@ -79,6 +80,23 @@ import {
   type SkillFitnessBoundRouteReceipt,
 } from "../notes/index.js";
 import { ui } from "../tui/format.js";
+
+const prospectiveFixtureRootsSchema = z.object({
+  schemaVersion: z.literal(1),
+  fixtures: z.array(z.object({
+    taskId: z.string().min(1),
+    repository: z.string().min(1),
+  }).strict()).min(1),
+}).strict().superRefine((value, context) => {
+  const ids = value.fixtures.map((fixture) => fixture.taskId);
+  if (new Set(ids).size !== ids.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["fixtures"],
+      message: "fixture task ids must be unique",
+    });
+  }
+});
 
 export function registerBenchmarkCommand(program: Command, engine: MemoireEngine): void {
   const benchmark = program
@@ -175,6 +193,91 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       else {
         console.log(ui.ok(`Prospective study frozen: ${freeze.freezeHash}`));
         console.log(ui.dots("Receipt", out));
+      }
+    });
+
+  benchmark
+    .command("prospective-preflight <plan>")
+    .description("Verify clean, pinned V2 fixtures and native capture contracts before freezing")
+    .requiredOption("--fixtures <path>", "Task-to-fixture repository mapping JSON")
+    .requiredOption("--task-root <path>", "Directory containing <task-id>.json workflow manifests")
+    .option("--json", "Output JSON")
+    .action(async (planPath: string, opts: {
+      fixtures: string;
+      taskRoot: string;
+      json?: boolean;
+    }) => {
+      const plan = prospectiveStudyPlanSchema.parse(JSON.parse(
+        await readFile(resolve(planPath), "utf8"),
+      ));
+      const evidenceV2 = plan.runContract.evidenceV2;
+      if (!evidenceV2) {
+        throw new Error("prospective preflight requires a plan with evidenceV2 enabled");
+      }
+      const fixtureManifest = prospectiveFixtureRootsSchema.parse(JSON.parse(
+        await readFile(resolve(opts.fixtures), "utf8"),
+      ));
+      const rootsByTask = new Map(fixtureManifest.fixtures.map((fixture) => [
+        fixture.taskId,
+        resolve(fixture.repository),
+      ]));
+      const expectedTaskIds = new Set(plan.tasks.map((task) => task.id));
+      const unexpected = fixtureManifest.fixtures.find((fixture) =>
+        !expectedTaskIds.has(fixture.taskId));
+      if (unexpected) {
+        throw new Error(`fixture is not declared by prospective plan: ${unexpected.taskId}`);
+      }
+      const taskRoot = resolve(opts.taskRoot);
+      const fixtures = await Promise.all(plan.tasks.map(async (task) => {
+        const repository = rootsByTask.get(task.id);
+        if (!repository) throw new Error(`fixture repository missing for task: ${task.id}`);
+        const revision = await benchmarkRepositoryRevision(repository);
+        if (revision !== task.revision) {
+          throw new Error(
+            `fixture revision mismatch for ${task.id}: expected ${task.revision}, received ${revision}`,
+          );
+        }
+        const sourceStatus = await benchmarkRepositoryStatus(repository);
+        if (sourceStatus) {
+          throw new Error(`fixture repository must be clean: ${task.id}`);
+        }
+        const taskPath = join(taskRoot, `${task.id}.json`);
+        const workflowTask = workflowTaskSchema.parse(JSON.parse(
+          await readFile(taskPath, "utf8"),
+        ));
+        if (workflowTask.id !== task.id) {
+          throw new Error(`workflow task id mismatch: expected ${task.id}, received ${workflowTask.id}`);
+        }
+        const nativeCaptureKinds = [...new Set(workflowTask.nativeCaptures.map(
+          (capture) => capture.kind,
+        ))].sort();
+        const missingCapture = evidenceV2.requiredCaptureKinds.find(
+          (kind) => !nativeCaptureKinds.includes(kind),
+        );
+        if (missingCapture) {
+          throw new Error(`native capture missing for ${task.id}: ${missingCapture}`);
+        }
+        return {
+          taskId: task.id,
+          repository,
+          revision,
+          taskManifestSha256: await hashFile(taskPath),
+          nativeCaptureKinds,
+        };
+      }));
+      const payload = {
+        status: "ready",
+        planId: plan.planId,
+        planHash: hashValue(plan),
+        fixtures,
+      };
+      if (opts.json) console.log(JSON.stringify(payload, null, 2));
+      else {
+        console.log(ui.ok(`Prospective V2 preflight ready: ${plan.planId}`));
+        fixtures.forEach((fixture) => console.log(ui.dots(
+          fixture.taskId,
+          fixture.revision,
+        )));
       }
     });
 
