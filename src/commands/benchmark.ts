@@ -444,17 +444,12 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         const repositoryFingerprint = await buildRepositoryFingerprint(
           resolve(opts.repository),
         );
-        const fitnessEvents = await loadSkillFitnessEvents(
-          skillFitnessPath(resolve(opts.storeRoot)),
-        );
         route = await resolveRoutedSkills({
           intent: task.intent,
           notes: loader.notes,
           capabilities: csv(opts.capabilities),
           platforms: csv(opts.platforms),
           repositoryFingerprint,
-          taskClass: task.id,
-          fitnessEvents,
           maximumSkills: freeze?.harness.maximumSkills ?? 2,
           maximumContextBytes: freeze?.harness.maximumContextBytes ?? 8_000,
         });
