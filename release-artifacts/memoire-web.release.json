@@ -3,9 +3,9 @@
   "provenance": {
     "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "a642d6c4b3ae41f0952549319b8aeeda287e6260",
-    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/a642d6c4b3ae41f0952549319b8aeeda287e6260/release-manifest.json",
-    "manifestSha256": "16b26cf6a16e59ac3c6b7dfd4103d8a56bd4e826a1e5e50a07907d237141eb11"
+    "sourceCommit": "9a47f390b7ea9ac57e1d2ade66380ab374563361",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/9a47f390b7ea9ac57e1d2ade66380ab374563361/release-manifest.json",
+    "manifestSha256": "77a261cf286cea722401f24ba5068f8b69c862320570ae16f1c966cb73adb9cc"
   },
   "orchestration": {
     "schemaVersion": 1,
@@ -13,16 +13,15 @@
     "releaseGroups": {
       "engine": {
         "version": "2.7.3",
-        "state": "candidate",
-        "sourceCommit": null,
-        "releaseRecord": null,
-        "previousPublicRelease": {
-          "version": "2.7.1",
-          "sourceCommit": "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f"
+        "state": "published",
+        "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1",
+        "releaseRecord": {
+          "path": "release-artifacts/npm/2.7.3.release.json",
+          "sha256": "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02"
         },
         "verification": {
           "eligibleForParity": false,
-          "reason": "2.7.1 remains public while 2.7.3 is an unpublished candidate"
+          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
         }
       },
       "studio": {
@@ -74,13 +73,13 @@
     }
   },
   "publicTruth": {
-    "source": "previousPublicRelease",
+    "source": "currentRelease",
     "engine": {
-      "version": "2.7.1",
-      "sourceCommit": "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f",
+      "version": "2.7.3",
+      "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1",
       "packageName": "@memi-design/cli",
       "npmUrl": "https://www.npmjs.com/package/@memi-design/cli",
-      "githubReleaseUrl": "https://github.com/memi-design/memi/releases/tag/v2.7.1"
+      "githubReleaseUrl": "https://github.com/memi-design/memi/releases/tag/v2.7.3"
     }
   },
   "release": {
@@ -88,15 +87,17 @@
     "updatedAt": "2026-08-01",
     "releaseGroups": {
       "engine": {
-        "version": "2.7.1",
-        "state": "historical",
-        "sourceCommit": "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f",
-        "releaseRecord": null,
+        "version": "2.7.3",
+        "state": "published",
+        "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1",
+        "releaseRecord": {
+          "path": "release-artifacts/npm/2.7.3.release.json",
+          "sha256": "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02"
+        },
         "verification": {
           "eligibleForParity": false,
-          "reason": "2.7.1 remains public while 2.7.3 is an unpublished candidate"
-        },
-        "plannedSuccessor": "2.7.3"
+          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+        }
       },
       "studio": {
         "version": "2.5.0",
@@ -119,7 +120,7 @@
         "releaseGroup": "engine",
         "repository": "memi-design/memi",
         "tagPrefix": "v",
-        "url": "https://github.com/memi-design/memi/releases/tag/v2.7.1"
+        "url": "https://github.com/memi-design/memi/releases/tag/v2.7.3"
       },
       "githubAction": {
         "releaseGroup": "engine",

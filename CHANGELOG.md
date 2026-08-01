@@ -13,6 +13,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 ### Release renumbering and deterministic verification
 
 - `b6beb464` chore: declare 2.7.3 release candidate
+- `9a47f390` chore: record 2.7.3 npm provenance
 - Promoted the unpublished 2.7.2 candidate code as 2.7.3 so the public release
   contains the sealed prospective-study harness and its bounded workflow
   contracts without rewriting the version recorded by the completed V14 study.

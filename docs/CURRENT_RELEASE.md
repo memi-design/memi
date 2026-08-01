@@ -4,21 +4,19 @@
 
 Manifest updated: 2026-08-01
 
-> Engine 2.7.3 is not the current public release. The public activation path remains 2.7.1 until independent live-release verification passes.
-
 
 Memi is the read-only design engineering audit and skill layer for coding agents. The CLI and focused skills are primary; Studio is a companion.
 
 | Release group | Version | Canonical evidence |
 |---|---:|---|
-| Engine candidate (unreleased) | `2.7.3` | [GitHub release](https://github.com/memi-design/memi/releases/tag/v2.7.1) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
+| Engine published (parity pending) | `2.7.3` | [GitHub release](https://github.com/memi-design/memi/releases/tag/v2.7.3) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
 | Studio | `2.5.0` | [Studio release](https://github.com/memi-design/memi-studio/releases/tag/v2.5.0) |
 | Website | `1.0.4` | [memoire.cv](https://www.memoire.cv) |
 
 ## Immutable engine identity
 
-- Release state: `candidate`
-- Source commit: Not assigned. npm provenance must bind the eventual publish commit.
+- Release state: `published`
+- Source commit: `2e29c5c656ac34242369eac9840838619ad113e1`
 - GitHub tag: `v2.7.3`
 - GitHub Action major channel: `v2`
 - MCP server: `io.github.sarveshsea/memi`
@@ -32,7 +30,7 @@ Memi is the read-only design engineering audit and skill layer for coding agents
 ## Primary activation path
 
 ```bash
-npx -y @memi-design/cli@2.7.1 diagnose . --json --no-write --fail-on none
+npx -y @memi-design/cli@2.7.3 diagnose . --json --no-write --fail-on none
 ```
 
 This command is read-only. A successful first audit must return file-anchored findings or an explicit evidence-backed unsupported state; an empty or unassessed result is never a whole-product pass.

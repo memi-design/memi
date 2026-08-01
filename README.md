@@ -27,7 +27,7 @@ Memi reads the product you already have, identifies accessibility, hierarchy, st
 Run one audit in any frontend repository:
 
 ```bash
-npx -y @memi-design/cli@2.7.1 diagnose . --json --no-write --fail-on none
+npx -y @memi-design/cli@2.7.3 diagnose . --json --no-write --fail-on none
 ```
 
 You get a score, normalized finding IDs, confidence, provenance, and `file:line` evidence. No account, API key, Figma file, global install, or daemon is required.
@@ -104,12 +104,12 @@ These results predate the full 100-task InterfaceBench run. They are reported as
 | Six-repository read-only suite | 6 paired runs | 100% pass rate in both conditions | 19.92% mean, 95% CI -0.23% to 40.07% | 0.50% mean, 95% CI -11.72% to 14.55% | Claim not verified |
 | Latest Example 2 Router v2 calibration | 1 paired Expo run | Automated acceptance passed in both conditions | 14.15% | 25.08% | Calibration only |
 
-Candidate verification currently records:
+Published 2.7.3 verification records:
 
-- 2,154/2,154 tests passing across 300 files.
+- 2,187/2,187 tests passing across 304 files locally and across the Linux, macOS, and Windows Node 20/22/24 release matrix.
 - 70.57% statements, 58.87% branches, 79.82% functions, and 72.35% lines. This is a measured improvement from 64.91%, 53.73%, 73.11%, and 66.62%, respectively, but remains below the 80% repository target.
 - Zero production dependency vulnerabilities.
-- The published 54-file npm artifact measures exactly 570,048 bytes compressed and 2,019,418 bytes unpacked, within the 750,000-byte and 2 MiB release budgets.
+- The published 54-file npm artifact measures exactly 577,370 bytes compressed and 1,990,260 bytes unpacked, within the 750,000-byte and 2 MiB release budgets.
 - No defensible per-run USD cost from the available subscription traces, so total tokens are explicitly labeled as the cost proxy.
 
 Historical `qualityScore: 100` workflow records mean automated acceptance passed, not senior-practitioner quality. New records label that evidence, cap it at 80, and reserve higher scores for calibrated practitioner review.
@@ -156,10 +156,10 @@ and its [unexecuted cross-harness protocol](docs/research/designworkbench-v2-pap
 
 | Surface | Start here | Best for |
 | --- | --- | --- |
-| One-time CLI audit | `npx -y @memi-design/cli@2.7.1 diagnose . --no-write` | Trying Memi without installing |
+| One-time CLI audit | `npx -y @memi-design/cli@2.7.3 diagnose . --no-write` | Trying Memi without installing |
 | Global CLI | `npm i -g @memi-design/cli` | Daily local use |
 | Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude, Cursor, and compatible agents |
-| GitHub Action | `uses: memi-design/memi@5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f` | Pull-request design CI |
+| GitHub Action | `uses: memi-design/memi@2e29c5c656ac34242369eac9840838619ad113e1` | Pull-request design CI |
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
 | Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
 
@@ -186,9 +186,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: memi-design/memi@5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f # v2.7.1
+      - uses: memi-design/memi@2e29c5c656ac34242369eac9840838619ad113e1 # v2.7.3
         with:
-          version: "2.7.1"
+          version: "2.7.3"
           report: true
           upload-sarif: true
 ```
