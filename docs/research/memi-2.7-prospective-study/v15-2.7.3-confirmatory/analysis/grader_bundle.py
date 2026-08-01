@@ -130,6 +130,14 @@ def load_sources(study_root: Path, rendered_root: Path) -> list[dict[str, Any]]:
                 f"Paraform {mapping['anonTrialId']} is missing required rendered states: "
                 f"{sorted(required_states - captured_states)}"
             )
+        mobile_capture = next(
+            capture for capture in case["captures"] if capture["state"] == "mobile"
+        )
+        if int(mobile_capture["viewport"]["width"]) > 430:
+            raise RuntimeError(
+                f"Paraform {mapping['anonTrialId']} mobile viewport is not phone-sized: "
+                f"{mobile_capture['viewport']}"
+            )
         paraform_rows.append({
             "runId": mapping["runId"],
             "sourceAnonId": mapping["anonTrialId"],
