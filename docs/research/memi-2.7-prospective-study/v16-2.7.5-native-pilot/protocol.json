@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "memi-2.7-v16-2.7.5-native-confirmatory",
+  "status": "preregistration-draft-awaiting-candidate-and-fixture-attestation",
+  "claimBoundary": "No outcome data are present. This protocol does not support a superiority, speed, or cost claim.",
+  "stages": {
+    "calibration": {
+      "pairsPerFixture": 1,
+      "includedInConfirmatoryAnalysis": false,
+      "purpose": "Prove platform capture, billing retention, and blinded-packet usability before scoring runs."
+    },
+    "confirmatory": {
+      "fixtures": 3,
+      "pairsPerFixture": 6,
+      "matchedPairs": 18,
+      "agentCells": 36,
+      "execution": "serialized",
+      "cleanClonePerCell": true,
+      "isolatedPostPatchVerification": true,
+      "contentAddressedEvidence": true,
+      "xcodeSimulatorExclusive": true
+    }
+  },
+  "requiredEvidence": {
+    "receiptSchema": "memi-prospective-evidence-v2",
+    "nativeCaptureKinds": [
+      "screenshot",
+      "interaction-trace",
+      "accessibility-tree"
+    ],
+    "billing": "retained provider usage export or invoice allocation plus immutable price card, measured in USD",
+    "timing": "separate adapter and verifier wall times",
+    "admission": "exact trial binding plus file-level and manifest-level SHA-256 verification"
+  },
+  "analysis": {
+    "primaryOutcome": "blinded paired design-quality score on a 0-100 rubric",
+    "nonInferiorityMargin": -5,
+    "bootstrapSamples": 10000,
+    "secondaryMultiplicity": "Holm correction within task-level secondary outcomes",
+    "missingData": "report every failure and exclusion; no imputation",
+    "pooledCrossPlatform": "descriptive only",
+    "humanEvidence": "required for an independent practitioner-design claim"
+  },
+  "freezePrerequisites": [
+    "exact 2.7.5 candidate tarball SHA-256",
+    "candidate source revision and source-state attestation",
+    "three fixture revisions and task-manifest SHA-256 values",
+    "provider, model, reasoning effort, and token ceilings",
+    "counterbalance seed and environment receipt",
+    "working native capture collectors for all three platforms",
+    "measured billing export and price-card retention procedure"
+  ]
+}

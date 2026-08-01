@@ -25,6 +25,11 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `254ca8e6` — test: record workflow adapter wall time
 - `1c78d5b1` — test: require V2 workflow evidence inputs
 - `3cb2ba11` — feat: materialize V2 workflow evidence
+- `a91f3069` — test: require native capture execution
+- `85004c72` — feat: capture native evidence after isolated verification
+- `eebf45c9` — test: bind V2 drafts to native capture tasks
+- `58a5dd7b` — feat: bind V2 drafts to native captures
+- `853a15ad` — fix: preserve bounded V2 artifact root
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -38,6 +43,9 @@ Frozen V2 workflow executions now fail before provider invocation unless the
 operator supplies a bounded draft and artifact root. After isolated verification,
 the harness copies the declared regular files, records separate adapter and
 verifier times, produces the receipt, and seals all declared files in the manifest.
+Native capture commands now run only after isolated post-patch verification and
+must copy their regular output into an empty per-cell capture root that exactly
+matches the V2 receipt draft; stale capture files fail before provider execution.
 
 ## v2.7.4 — 2026-08-01
 
