@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from hashlib import sha256
 from pathlib import Path
+from types import SimpleNamespace
 
 from analysis.pipeline import (
     AnalysisInputError,
@@ -18,6 +19,8 @@ from analysis.pipeline import (
     _icc2_1,
     _provider_failure_from_events,
     _primary_quality_analysis,
+    _secondary_analysis,
+    _write_outputs,
     preflight_report,
 )
 
@@ -224,6 +227,222 @@ class PrimaryQualityAnalysisTests(unittest.TestCase):
             grader_count=3,
             raw_scores=(score, score, score),
         )
+
+
+class SecondaryAnalysisTests(unittest.TestCase):
+    def test_every_task_metric_has_a_deterministic_10000_sample_paired_interval(self) -> None:
+        trial_runs = {}
+        for repeat, baseline_tokens, memi_tokens in [
+            (1, 100, 80),
+            (2, 120, 110),
+            (3, 90, 95),
+        ]:
+            baseline = _trial_run(
+                trial_id=f"task-a:r{repeat}:baseline",
+                repeat=repeat,
+                condition="baseline",
+                input_tokens=baseline_tokens,
+                output_tokens=20 + repeat,
+                reasoning_tokens=10 + repeat,
+                wall_time_ms=1_000 + repeat * 100,
+                tool_calls=10 + repeat,
+                retries=repeat % 2,
+                provider_failures=0,
+                accepted=True,
+                defects=repeat % 2,
+            )
+            memi = _trial_run(
+                trial_id=f"task-a:r{repeat}:memi",
+                repeat=repeat,
+                condition="memi",
+                input_tokens=memi_tokens,
+                output_tokens=18 + repeat,
+                reasoning_tokens=9 + repeat,
+                wall_time_ms=900 + repeat * 120,
+                tool_calls=9 + repeat,
+                retries=0,
+                provider_failures=1 if repeat == 3 else 0,
+                accepted=repeat != 3,
+                defects=0,
+            )
+            trial_runs[baseline.trial_id] = baseline
+            trial_runs[memi.trial_id] = memi
+
+        first = _secondary_analysis(trial_runs)
+        second = _secondary_analysis(trial_runs)
+
+        self.assertEqual(first, second)
+        self.assertEqual(len(first), 9)
+        self.assertEqual(
+            {row["metric"] for row in first},
+            {
+                "functional_acceptance",
+                "critical_defects",
+                "input_tokens",
+                "output_tokens",
+                "reasoning_tokens",
+                "wall_time_ms",
+                "tool_calls",
+                "retries",
+                "provider_failures",
+            },
+        )
+        for row in first:
+            self.assertEqual(row["bootstrap_samples"], 10_000)
+            self.assertLessEqual(row["bootstrap_ci_lower_2p5"], row["mean_raw_delta"])
+            self.assertGreaterEqual(row["bootstrap_ci_upper_97p5"], row["mean_raw_delta"])
+
+
+class GeneratedArtifactTests(unittest.TestCase):
+    def test_writes_deterministic_report_hook_figures_and_supported_tex_fragments(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            paths = SimpleNamespace(
+                tables_root=root / "tables",
+                figures_root=root / "figures",
+                tex_root=root / "tex",
+            )
+            summary = _synthetic_complete_summary()
+
+            _write_outputs(paths, summary)
+            figure_paths = [
+                paths.figures_root / "paired_quality_comparisons.png",
+                paths.figures_root / "task_resource_intervals.png",
+            ]
+            first_hashes = [sha256(path.read_bytes()).hexdigest() for path in figure_paths]
+            _write_outputs(paths, summary)
+            second_hashes = [sha256(path.read_bytes()).hexdigest() for path in figure_paths]
+
+            self.assertEqual(first_hashes, second_hashes)
+            for path in figure_paths:
+                self.assertTrue(path.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"))
+            expected_tex = {
+                "report-macros.tex",
+                "technical-summary.tex",
+                "functional-quality-results.tex",
+                "primary-task-summary.tex",
+                "quality-figure-interpretation.tex",
+                "resource-efficiency-results.tex",
+                "resource-figure-interpretation.tex",
+            }
+            self.assertEqual(
+                {path.name for path in paths.tex_root.glob("*.tex")},
+                expected_tex,
+            )
+            macros = (paths.tex_root / "report-macros.tex").read_text(encoding="utf-8")
+            self.assertIn(r"\renewcommand{\FreshCellStatus}", macros)
+            self.assertIn("36 of 36", macros)
+            self.assertNotIn(r"\renewcommand{\ReleaseGateStatus}", macros)
+            self.assertFalse((paths.tex_root / "fitness-backtest-results.tex").exists())
+            self.assertFalse((paths.tex_root / "website-audit-results.tex").exists())
+
+
+def _trial_run(
+    trial_id: str,
+    repeat: int,
+    condition: str,
+    input_tokens: int,
+    output_tokens: int,
+    reasoning_tokens: int,
+    wall_time_ms: int,
+    tool_calls: int,
+    retries: int,
+    provider_failures: int,
+    accepted: bool,
+    defects: int,
+) -> TrialRun:
+    return TrialRun(
+        trial_id=trial_id,
+        task_id="task-a",
+        repeat=repeat,
+        condition=condition,
+        run_id=f"run-{trial_id}",
+        accepted=accepted,
+        tests_passed=accepted,
+        defects=defects,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        reasoning_tokens=reasoning_tokens,
+        wall_time_ms=wall_time_ms,
+        tool_calls=tool_calls,
+        retries=retries,
+        provider_failures=provider_failures,
+        evidence_manifest_sha256="sha256:test",
+        verification_reasons=(),
+    )
+
+
+def _synthetic_complete_summary() -> dict:
+    primary_pairs = [
+        {
+            "task_id": "task-a",
+            "repeat": repeat,
+            "baseline_trial_id": f"task-a:r{repeat}:baseline",
+            "memi_trial_id": f"task-a:r{repeat}:memi",
+            "baseline_score": baseline,
+            "memi_score": memi,
+            "delta_memi_minus_baseline": memi - baseline,
+        }
+        for repeat, baseline, memi in [(1, 80, 82), (2, 84, 83), (3, 81, 85)]
+    ]
+    primary_summary = [{
+        "task_id": "task-a",
+        "graded_pairs": 3,
+        "mean_delta": 1.6667,
+        "median_delta": 2.0,
+        "sign_test_positive": 2,
+        "sign_test_negative": 1,
+        "sign_test_ties": 0,
+        "sign_test_p_greater": 0.5,
+        "bootstrap_ci_lower_2p5": -1.0,
+        "bootstrap_ci_upper_97p5": 4.0,
+        "noninferiority_lower_95_one_sided": -1.0,
+        "noninferiority_margin": -5.0,
+        "noninferior": True,
+    }]
+    secondary = []
+    for metric, unit, mean, lower, upper in [
+        ("input_tokens", "tokens", -20.0, -35.0, -5.0),
+        ("output_tokens", "tokens", -2.0, -4.0, 0.0),
+        ("reasoning_tokens", "tokens", -1.0, -2.0, 1.0),
+        ("wall_time_ms", "milliseconds", -100.0, -220.0, 20.0),
+        ("tool_calls", "calls", -1.0, -2.0, 0.0),
+        ("retries", "count", -0.3, -1.0, 0.0),
+        ("provider_failures", "count", 0.0, 0.0, 0.0),
+    ]:
+        secondary.append({
+            "task_id": "task-a",
+            "metric": metric,
+            "unit": unit,
+            "pairs": 3,
+            "direction": "lower",
+            "mean_raw_delta": mean,
+            "median_raw_delta": mean,
+            "bootstrap_samples": 10_000,
+            "bootstrap_ci_lower_2p5": lower,
+            "bootstrap_ci_upper_97p5": upper,
+            "sign_test_positive": 2,
+            "sign_test_negative": 1,
+            "sign_test_ties": 0,
+            "p_value_raw": 0.5,
+            "p_value_holm": 1.0,
+            "reject_holm_0p05": False,
+        })
+    return {
+        "studyId": "study-v15",
+        "analysisStatus": "complete",
+        "bootstrapSamples": 10_000,
+        "nonInferiorityMargin": -5.0,
+        "receiptPreflight": {"presentTrials": 36, "expectedTrials": 36},
+        "primarySummary": primary_summary,
+        "primaryPairRows": primary_pairs,
+        "leaveOnePairOut": [],
+        "secondaryTests": secondary,
+        "pooledDescriptives": [],
+        "graderReliability": [],
+        "deviations": [],
+        "exclusions": [],
+    }
 
 
 if __name__ == "__main__":
