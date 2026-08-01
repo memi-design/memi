@@ -1,4 +1,38 @@
 {
   "schemaVersion": 1,
-  "entries": []
+  "entries": [
+    {
+      "id": "V15-EXC-001",
+      "recordedAt": "2026-08-01T07:19:38.000Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:baseline",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-0af10457-a969-4a3e-a47d-7345b10bab28",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "compile-failed-private-symbol-access",
+        "input-token-ceiling-exceeded"
+      ],
+      "observedInputTokens": 452990,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:090770f6a6b2aae78886b470e8c32078a1d54dcfb733a6bdb483404d213d6030"
+    },
+    {
+      "id": "V15-EXC-002",
+      "recordedAt": "2026-08-01T07:19:38.000Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:memi",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-8db877c5-efd0-462d-a91d-ef41053f7a02",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "compile-failed-private-symbol-access"
+      ],
+      "observedInputTokens": 260128,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:dfa6bb9c99cd48f447bf63518a7d4e75635f981cb22c5b81a1abdd90c7a37fcb"
+    }
+  ]
 }
