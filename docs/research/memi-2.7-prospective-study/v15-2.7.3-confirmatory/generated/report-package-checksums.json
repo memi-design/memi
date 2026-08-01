@@ -62,9 +62,9 @@
       "sha256": "sha256:9fa0959642d2a30525f016e0ea0ffcd317f95ff7b0271469cf6ff056b1e9bab5"
     },
     {
-      "bytes": 28403,
+      "bytes": 35812,
       "path": "analysis/report_package.py",
-      "sha256": "sha256:a4072d7215bb0acfed2cb014cdd2fdfc22430d24f65fb602083667d922148d2e"
+      "sha256": "sha256:f01b8b594d5c9d6da132995940d6fe0e32b58f14b7df5dab2d35cb43c5d097db"
     },
     {
       "bytes": 1324,
@@ -102,9 +102,9 @@
       "sha256": "sha256:ccec7fb11389fd267f88b8b9e84e8dc641be7ff681de36d22d7e1ff1a5860bac"
     },
     {
-      "bytes": 15111,
+      "bytes": 18400,
       "path": "analysis/tests/test_report_package.py",
-      "sha256": "sha256:983cadf6ae160a11f29725b201ac798acc36f03cfc122011abeca99dfeb42438"
+      "sha256": "sha256:7807b302e1f6d8691204d071f9d86c9037d6cd162de3ff41ea42e585c8003675"
     },
     {
       "bytes": 7071,
@@ -342,6 +342,11 @@
       "sha256": "sha256:54ef49a48b6dfe35f09bc8e48e0330152b42400a9ee90d1d183ed57f1db491b3"
     },
     {
+      "bytes": 202,
+      "path": "generated/tex/release-status.tex",
+      "sha256": "sha256:0f17e3d02de7c3ff3dd50748635efd87c0976814690380091ee9c1f470e2d993"
+    },
+    {
       "bytes": 1687,
       "path": "generated/tex/remediation-results.tex",
       "sha256": "sha256:ffdab8d49be51e99bd02726d65b8a74ecf6cd6f188a5efc4985907aff22138b2"
@@ -412,9 +417,9 @@
       "sha256": "sha256:53ac9736f3afa8647b798a8b1511b3bfca915bd1eccda643a473719e42b6a048"
     },
     {
-      "bytes": 2752,
+      "bytes": 2794,
       "path": "report-hooks.tex",
-      "sha256": "sha256:47fecefc8854276cbcf6abd39a660a607f6d477b094e0f70d2e7d771d7116013"
+      "sha256": "sha256:36c636726e21877bcd72985b1d6badab878e6dcbfdbc297b674e278e64d03cc8"
     },
     {
       "bytes": 312,
@@ -462,7 +467,7 @@
       "sha256": "sha256:1ccf198f211e3be7c14d0a09f28fc9483e22cd2421a400c12722e46180e2ceda"
     }
   ],
-  "entryCount": 92,
+  "entryCount": 93,
   "excluded": [
     "**/*.pdf",
     "generated/report-package-checksums.json"

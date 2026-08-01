@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from hashlib import sha256
 import json
 from pathlib import Path, PurePosixPath
@@ -32,7 +33,9 @@ class StudyReportPaths:
     chronological_ingestion_plan_path: Path
     website_audit_tex_path: Path
     remediation_tex_path: Path
+    live_release_verification_path: Path
     release_gates_tex_path: Path
+    release_status_tex_path: Path
     rendered_audit_ledger_path: Path
     checksum_inventory_path: Path
 
@@ -53,7 +56,9 @@ def study_report_paths(study_root: Path | None = None) -> StudyReportPaths:
         ),
         website_audit_tex_path=root / "generated" / "tex" / "website-audit-results.tex",
         remediation_tex_path=root / "generated" / "tex" / "remediation-results.tex",
+        live_release_verification_path=root / "release-2.7.4-live-verification.json",
         release_gates_tex_path=root / "generated" / "tex" / "release-gates.tex",
+        release_status_tex_path=root / "generated" / "tex" / "release-status.tex",
         rendered_audit_ledger_path=root / "rendered-audit-ledger.json",
         checksum_inventory_path=root / "generated" / "report-package-checksums.json",
     )
@@ -79,6 +84,11 @@ def build_outputs(paths: StudyReportPaths) -> dict[Path, str]:
     )
     website_summary = _validate_website_audit(website_audit)
     remediation_summary = _validate_remediation_artifacts(quality_evidence, ingestion_plan)
+    live_release_summary = (
+        _validate_live_release_verification(_load_json(paths.live_release_verification_path))
+        if paths.live_release_verification_path.is_file()
+        else None
+    )
 
     ledger = _rendered_audit_ledger(
         paths=paths,
@@ -91,7 +101,16 @@ def build_outputs(paths: StudyReportPaths) -> dict[Path, str]:
     outputs: dict[Path, str] = {
         paths.website_audit_tex_path: _website_audit_tex(website_summary),
         paths.remediation_tex_path: _remediation_tex(remediation_summary),
-        paths.release_gates_tex_path: _pending_release_gates_tex(),
+        paths.release_gates_tex_path: (
+            _verified_release_gates_tex(live_release_summary)
+            if live_release_summary is not None
+            else _pending_release_gates_tex()
+        ),
+        paths.release_status_tex_path: (
+            _verified_release_status_tex()
+            if live_release_summary is not None
+            else _pending_release_status_tex()
+        ),
         paths.rendered_audit_ledger_path: _json_text(ledger),
     }
     outputs[paths.checksum_inventory_path] = _json_text(_checksum_inventory(paths, outputs))
@@ -518,6 +537,142 @@ def _pending_release_gates_tex() -> str:
         "\\bottomrule\n\\end{tabularx}\n"
         "\\renewcommand{\\ReleaseGateStatus}{PENDING LIVE VERIFICATION --- no final "
         "2.7.4 public-channel ledger has been admitted.}\n"
+    )
+
+
+_LIVE_RELEASE_CHANNELS = {
+    "npm": "npm trusted-publisher OIDC and exact packed bytes",
+    "node-installs": "fresh Node 20/22/24 install and invocation",
+    "github-release": "GitHub tag, release assets, and checksums",
+    "github-action": "GitHub Action v2",
+    "homebrew": "Homebrew formula and installed CLI",
+    "ghcr": "GHCR image digest and invocation",
+    "mcp-registry": "MCP Registry metadata and package resolution",
+    "website-pdf": "website PDF and checksum parity",
+    "public-gate": "public gate with failures: [] and parityEligible: true",
+}
+
+
+def _validate_live_release_verification(payload: Mapping[str, Any]) -> dict[str, Any]:
+    if payload.get("schemaVersion") != "memoire.release-live-verification.v1":
+        raise ReportPackageInputError("live release ledger schemaVersion is invalid")
+    if payload.get("releaseVersion") != "2.7.4" or payload.get("tag") != "v2.7.4":
+        raise ReportPackageInputError("live release ledger must identify Memi 2.7.4 and tag v2.7.4")
+    if payload.get("sourceCommit") != "8aa4649f412bbcaaf2af4ee209bf79016566f035":
+        raise ReportPackageInputError("live release ledger source commit is not the published candidate")
+    verified_at = payload.get("verifiedAt")
+    if not isinstance(verified_at, str) or not verified_at.endswith("Z"):
+        raise ReportPackageInputError("live release ledger verifiedAt must be an ISO UTC timestamp")
+    try:
+        datetime.fromisoformat(verified_at.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise ReportPackageInputError(
+            "live release ledger verifiedAt must be an ISO UTC timestamp"
+        ) from error
+
+    channels = payload.get("channels")
+    if not isinstance(channels, list):
+        raise ReportPackageInputError("live release ledger channels must be an array")
+    by_id: dict[str, dict[str, Any]] = {}
+    for channel in channels:
+        if not isinstance(channel, dict) or not isinstance(channel.get("id"), str):
+            raise ReportPackageInputError("every live release channel must be an object with an id")
+        channel_id = channel["id"]
+        if channel_id in by_id:
+            raise ReportPackageInputError("every required live release channel must appear exactly once")
+        by_id[channel_id] = channel
+    if set(by_id) != set(_LIVE_RELEASE_CHANNELS):
+        raise ReportPackageInputError("every required live release channel must appear exactly once")
+
+    normalized: dict[str, dict[str, Any]] = {}
+    for channel_id in _LIVE_RELEASE_CHANNELS:
+        channel = by_id[channel_id]
+        expected_mode = "detached-post-build" if channel_id == "website-pdf" else "direct"
+        allowed_statuses = {"verified", "detached"} if channel_id == "website-pdf" else {"verified"}
+        if channel.get("status") not in allowed_statuses:
+            raise ReportPackageInputError(f"live release channel {channel_id} is not verified")
+        if channel.get("version") != "2.7.4":
+            raise ReportPackageInputError(f"live release channel {channel_id} has the wrong version")
+        if channel.get("verificationMode") != expected_mode:
+            raise ReportPackageInputError(
+                f"live release channel {channel_id} has the wrong verification mode"
+            )
+        digest = _require_sha256(
+            channel.get("evidenceSha256"),
+            f"live release channel {channel_id} evidence hash",
+        )
+        urls = channel.get("evidenceUrls")
+        if (
+            not isinstance(urls, list)
+            or not urls
+            or any(not isinstance(url, str) or not url.startswith("https://") for url in urls)
+        ):
+            raise ReportPackageInputError(
+                f"live release channel {channel_id} requires HTTPS evidence URLs"
+            )
+        normalized[channel_id] = {
+            "status": channel["status"],
+            "evidenceSha256": digest,
+            "evidenceUrls": list(urls),
+            "verificationMode": expected_mode,
+        }
+
+    public_gate = payload.get("publicGate")
+    if not isinstance(public_gate, dict):
+        raise ReportPackageInputError("live release ledger public gate is missing")
+    if public_gate.get("failures") != [] or public_gate.get("parityEligible") is not True:
+        raise ReportPackageInputError(
+            "live release ledger public gate requires failures: [] and parityEligible: true"
+        )
+    public_gate_digest = _require_sha256(
+        public_gate.get("evidenceSha256"),
+        "live release public gate evidence hash",
+    )
+    return {
+        "verifiedAt": verified_at,
+        "channels": normalized,
+        "publicGateEvidenceSha256": public_gate_digest,
+    }
+
+
+def _verified_release_gates_tex(summary: Mapping[str, Any]) -> str:
+    rows = []
+    for channel_id, label in _LIVE_RELEASE_CHANNELS.items():
+        state = "DETACHED LEDGER" if channel_id == "website-pdf" else "VERIFIED"
+        rows.append(f"{_tex(label)} & {state} \\")
+    return (
+        "% Generated from release-2.7.4-live-verification.json; do not edit.\n"
+        "\\begin{center}\n"
+        "\\fbox{\\begin{minipage}{0.92\\linewidth}\n"
+        "\\small\\textbf{PUBLIC SOFTWARE CHANNELS VERIFIED.} Memi 2.7.4 resolves "
+        "to the published source commit across every non-self-referential public channel. "
+        "The checksum of this PDF is necessarily established by the detached post-build "
+        "ledger attached to the release, not by a self-hash embedded in the PDF.\n"
+        "\\end{minipage}}\n"
+        "\\end{center}\n"
+        "\\begin{tabularx}{\\columnwidth}{@{}Xl@{}}\n"
+        "\\toprule\nChannel evidence & State \\\\\n\\midrule\n"
+        + "\n".join(rows)
+        + "\n\\bottomrule\n\\end{tabularx}\n"
+        f"\\textit{{Ledger admitted at {_tex(summary['verifiedAt'])}.}}\n"
+        "\\renewcommand{\\ReleaseGateStatus}{PUBLIC SOFTWARE CHANNELS VERIFIED --- "
+        "the final PDF checksum is recorded in the detached post-build release ledger.}\n"
+    )
+
+
+def _pending_release_status_tex() -> str:
+    return (
+        "% Generated fail-closed: no final live 2.7.4 verification artifact was supplied.\n"
+        "\\renewcommand{\\ReleaseGateStatus}{PENDING LIVE VERIFICATION --- no final "
+        "2.7.4 public-channel ledger has been admitted.}\n"
+    )
+
+
+def _verified_release_status_tex() -> str:
+    return (
+        "% Generated from the admitted live 2.7.4 verification ledger.\n"
+        "\\renewcommand{\\ReleaseGateStatus}{PUBLIC SOFTWARE CHANNELS VERIFIED --- "
+        "the final PDF checksum is recorded in the detached post-build release ledger.}\n"
     )
 
 
