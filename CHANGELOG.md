@@ -34,6 +34,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `31b8d5be` — fix: admit Windows prospective run receipts
 - `12178d19` — docs: record Windows evidence-path fix
 - `680df05f` — research: audit V16 freeze readiness
+- `8bc5fd4f` — test: define V2 prospective fixture preflight
+- `47c3b1a5` — feat: preflight pinned V2 study fixtures
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -55,6 +57,9 @@ separators before applying the same manifest and receipt validation path.
 The V16 readiness ledger records the observed fixture revisions and explicitly
 keeps the native study unfreezable until an exact candidate, repinned Buzzr
 fixture, collectors, calibration receipts, and measured billing artifacts exist.
+The harness now also provides a preflight gate which refuses to freeze unless
+each repository is clean at its preregistered revision and each task manifest
+contains the capture kinds required by the sealed V2 evidence contract.
 
 ## v2.7.4 — 2026-08-01
 
