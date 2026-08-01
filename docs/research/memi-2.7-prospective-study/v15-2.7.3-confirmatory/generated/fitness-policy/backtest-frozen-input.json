@@ -1,0 +1,7 @@
+{
+  "engineCliSha256": "sha256:5a511f55d230c309dcb2401a3bda1a721c9fc6b233b11f14d410264fd88fdd3e",
+  "kind": "memi-v15-fitness-backtest-frozen-provenance",
+  "schemaVersion": 1,
+  "sourceDigest": "sha256:747e625a5303f7cbf779e782222b4743fda4634b6bede42ad9c90821a86e76f6",
+  "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol"
+}

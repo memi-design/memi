@@ -5,10 +5,13 @@ import json
 import math
 import os
 import re
+import selectors
 import shutil
+import signal
 import stat
 import subprocess
 import tempfile
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -71,6 +74,13 @@ class BacktestInputs:
 
 
 @dataclass(frozen=True)
+class CappedCommandResult:
+    returncode: int
+    stdout: bytes
+    stderr: bytes
+
+
+@dataclass(frozen=True)
 class BacktestPaths:
     study_root: Path
     engine_cli: Path
@@ -84,6 +94,10 @@ class BacktestPaths:
     @property
     def source_store_path(self) -> Path:
         return self.source_store_root / ".memoire" / "efficiency" / "runs.jsonl"
+
+    @property
+    def frozen_provenance_path(self) -> Path:
+        return self.fitness_root / "backtest-frozen-input.json"
 
     @property
     def figure_path(self) -> Path:
@@ -130,6 +144,83 @@ def canonical_sha256(value: Any) -> str:
 
 def file_sha256(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def bounded_positive_repeat(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1 or value > 1000:
+        raise BacktestInputError(f"repeat must be a positive integer from 1 to 1000: {value!r}")
+    return value
+
+
+def validate_frozen_provenance(
+    frozen: dict[str, Any], *, engine_sha256: str, source_digest: str
+) -> None:
+    if (
+        frozen.get("schemaVersion") != 1
+        or frozen.get("kind") != "memi-v15-fitness-backtest-frozen-provenance"
+    ):
+        raise BacktestInputError("invalid frozen fitness-backtest provenance input")
+    if frozen.get("engineCliSha256") != engine_sha256:
+        raise BacktestInputError("frozen engine CLI digest mismatch")
+    if frozen.get("sourceDigest") != source_digest:
+        raise BacktestInputError("frozen source-root digest mismatch")
+
+
+def run_capped_command(
+    argv: Sequence[str], *, timeout_seconds: float, max_output_bytes: int
+) -> CappedCommandResult:
+    process = subprocess.Popen(
+        list(argv),
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        start_new_session=True,
+    )
+    if process.stdout is None or process.stderr is None:
+        _kill_process_group(process)
+        raise BacktestInputError("engine command pipes were not created")
+    selector = selectors.DefaultSelector()
+    streams = {process.stdout: bytearray(), process.stderr: bytearray()}
+    selector.register(process.stdout, selectors.EVENT_READ)
+    selector.register(process.stderr, selectors.EVENT_READ)
+    deadline = time.monotonic() + timeout_seconds
+    try:
+        while selector.get_map():
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                _kill_process_group(process)
+                raise BacktestInputError(
+                    f"engine command exceeded the {timeout_seconds:g}-second timeout"
+                )
+            for key, _ in selector.select(min(remaining, 0.25)):
+                stream = key.fileobj
+                chunk = os.read(stream.fileno(), 65_536)
+                if not chunk:
+                    selector.unregister(stream)
+                    continue
+                buffered = sum(len(value) for value in streams.values())
+                if buffered + len(chunk) > max_output_bytes:
+                    _kill_process_group(process)
+                    raise BacktestInputError(
+                        f"engine command output exceeded the {max_output_bytes}-byte safety limit"
+                    )
+                streams[stream].extend(chunk)
+        try:
+            returncode = process.wait(timeout=max(0.1, deadline - time.monotonic()))
+        except subprocess.TimeoutExpired as error:
+            _kill_process_group(process)
+            raise BacktestInputError(
+                f"engine command exceeded the {timeout_seconds:g}-second timeout"
+            ) from error
+        return CappedCommandResult(
+            returncode,
+            bytes(streams[process.stdout]),
+            bytes(streams[process.stderr]),
+        )
+    finally:
+        selector.close()
+        process.stdout.close()
+        process.stderr.close()
 
 
 def engine_canonical_sha256(value: Any) -> str:
@@ -511,14 +602,23 @@ def execute_backtest(paths: BacktestPaths, scratch_root: Path | None = None) -> 
     if not paths.source_store_path.is_file() or not paths.source_runs_root.is_dir():
         raise BacktestInputError("canonical V15 source store/evidence root is missing")
     engine_sha256 = file_sha256(paths.engine_cli)
+    source_before = _source_digest(paths, inputs.write_entries)
+    validate_frozen_provenance(
+        _read_json(paths.frozen_provenance_path),
+        engine_sha256=engine_sha256,
+        source_digest=source_before,
+    )
     owned_temp = scratch_root is None
     temporary = tempfile.TemporaryDirectory(prefix="memi-v15-fitness-backtest-") if owned_temp else None
-    isolated_root = Path(temporary.name) if temporary else scratch_root.resolve()
+    if scratch_root is not None and scratch_root.is_symlink():
+        raise BacktestInputError(f"isolated root must not be a symlink: {scratch_root}")
+    isolated_root = Path(temporary.name).resolve() if temporary else scratch_root.absolute()
     try:
         if isolated_root.exists() and any(isolated_root.iterdir()):
             raise BacktestInputError(f"isolated root must be empty: {isolated_root}")
         isolated_root.mkdir(parents=True, exist_ok=True)
-        source_before = _source_digest(paths, inputs.write_entries)
+        if isolated_root.resolve() != isolated_root:
+            raise BacktestInputError(f"isolated root resolves through a symlink: {isolated_root}")
         isolated_store, isolated_runs, copy_receipts = _copy_isolated_evidence(
             paths, inputs.write_entries, isolated_root
         )
@@ -554,6 +654,7 @@ def execute_backtest(paths: BacktestPaths, scratch_root: Path | None = None) -> 
                 )
                 quality_name = _quality_filename(command)
                 quality_path = quality_root / quality_name
+                ensure_safe_output_path(quality_path, isolated_root)
                 _write_json(quality_path, quality_payload, mode=0o600)
                 generated_quality[quality_name] = quality_payload
                 argv[-1:-1] = ["--quality-evidence", str(quality_path)]
@@ -726,6 +827,7 @@ def _validate_write_identity(command: WriteEntry) -> None:
     assert source is not None
     _safe_component(command.source_entry.get("taskClass"), "task class")
     _safe_component(source["pair"].get("taskId"), "task id")
+    bounded_positive_repeat(source["pair"].get("repeat"))
     for label in ("baselineRunId", "memiRunId"):
         _safe_component(source["pair"].get(label), label)
     for skill in source["route"].get("skills", []):
@@ -869,40 +971,50 @@ def _hash_manifest_artifact(path: Path, name: str) -> str:
 
 
 def _run_json_command(argv: list[str], isolated_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    try:
-        completed = subprocess.run(
-            argv,
-            text=True,
-            capture_output=True,
-            check=False,
-            timeout=120,
-        )
-    except subprocess.TimeoutExpired as error:
-        raise BacktestInputError("engine command exceeded the 120-second timeout") from error
+    completed = run_capped_command(
+        argv,
+        timeout_seconds=120,
+        max_output_bytes=MAX_COMMAND_OUTPUT_BYTES,
+    )
     normalized_argv = [argument.replace(str(isolated_root), "$ISOLATED_ROOT") for argument in argv]
-    stdout = completed.stdout.replace(str(isolated_root), "$ISOLATED_ROOT")
-    stderr = completed.stderr.replace(str(isolated_root), "$ISOLATED_ROOT")
-    if len(stdout.encode("utf-8")) > MAX_COMMAND_OUTPUT_BYTES:
-        raise BacktestInputError("engine command stdout exceeds the 10 MiB safety limit")
-    if len(stderr.encode("utf-8")) > MAX_COMMAND_OUTPUT_BYTES:
-        raise BacktestInputError("engine command stderr exceeds the 10 MiB safety limit")
+    stdout = completed.stdout.decode("utf-8", errors="replace")
+    stderr = completed.stderr.decode("utf-8", errors="replace")
+    normalized_stdout = stdout.replace(str(isolated_root), "$ISOLATED_ROOT")
+    normalized_stderr = stderr.replace(str(isolated_root), "$ISOLATED_ROOT")
     receipt = {
         "argv": normalized_argv,
         "exitCode": completed.returncode,
-        "stdoutSha256": "sha256:" + hashlib.sha256(stdout.encode("utf-8")).hexdigest(),
-        "stderrSha256": "sha256:" + hashlib.sha256(stderr.encode("utf-8")).hexdigest(),
-        "stderrPresent": bool(stderr),
+        "stdoutSha256": "sha256:" + hashlib.sha256(normalized_stdout.encode("utf-8")).hexdigest(),
+        "stderrSha256": "sha256:" + hashlib.sha256(normalized_stderr.encode("utf-8")).hexdigest(),
+        "stderrPresent": bool(normalized_stderr),
     }
     if completed.returncode != 0:
         raise BacktestInputError(
             f"engine command failed ({completed.returncode}): {' '.join(normalized_argv)}\n"
-            + stderr[:4096]
+            + normalized_stderr[:4096]
         )
     try:
-        payload = json.loads(completed.stdout)
-    except json.JSONDecodeError as error:
+        payload = json.loads(stdout)
+    except (json.JSONDecodeError, RecursionError) as error:
         raise BacktestInputError(f"engine command emitted invalid JSON: {error}") from error
+    if not isinstance(payload, dict):
+        raise BacktestInputError("engine command JSON payload must be an object")
     return _normalize_paths(payload, isolated_root), receipt
+
+
+def _kill_process_group(process: subprocess.Popen[bytes]) -> None:
+    if process.poll() is not None:
+        return
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    finally:
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
 
 
 def _normalize_paths(value: Any, isolated_root: Path) -> Any:
@@ -917,7 +1029,12 @@ def _normalize_paths(value: Any, isolated_root: Path) -> Any:
 
 def _quality_filename(command: WriteEntry) -> str:
     pair = command.pair
-    return f"{command.sequence:02d}-{pair['taskId']}-r{pair['repeat']}.json"
+    task_id = _safe_component(pair.get("taskId"), "task id")
+    repeat = bounded_positive_repeat(pair.get("repeat"))
+    return _safe_component(
+        f"{command.sequence:02d}-{task_id}-r{repeat}.json",
+        "quality evidence filename",
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
