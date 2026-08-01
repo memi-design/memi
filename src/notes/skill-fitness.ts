@@ -310,6 +310,7 @@ export async function appendSkillFitnessEvent(
   if (existing.some((candidate) => candidate.eventId === event.eventId)) {
     throw new Error(`Skill fitness event ${event.eventId} already exists`);
   }
+  assertUniqueRouteEvidence([...existing, event]);
   await mkdir(path.dirname(file), { recursive: true });
   await appendFile(file, `${JSON.stringify(event)}\n`, {
     encoding: "utf8",
@@ -359,6 +360,7 @@ export async function loadSkillFitnessEvents(
     }
     ids.add(event.eventId);
   }
+  assertUniqueRouteEvidence(events);
   return deepFreeze(events);
 }
 
@@ -370,8 +372,9 @@ export function assessSkillRouteFitness(input: {
   const route = canonicalRouteIdentity(input.route);
   const asOf = normalizeAsOf(input.asOf);
   const routeKey = skillFitnessRouteKey(route);
-  const matching = input.events
-    .map((event) => SkillFitnessEventSchema.parse(event))
+  const events = input.events.map((event) => SkillFitnessEventSchema.parse(event));
+  assertUniqueRouteEvidence(events);
+  const matching = events
     .filter((event) => skillFitnessRouteKey(routeIdentityFromEvent(event)) === routeKey)
     .filter((event) => !asOf || timestampMillis(event.createdAt) <= timestampMillis(asOf))
     .sort(compareEvents);
@@ -414,6 +417,7 @@ export function backtestSkillFitness(input: {
 }): Readonly<SkillFitnessBacktest> {
   const asOf = normalizeAsOf(input.asOf);
   const available = input.events.map((event) => SkillFitnessEventSchema.parse(event));
+  assertUniqueRouteEvidence(available);
   const replayed = available
     .filter((event) => !asOf || timestampMillis(event.createdAt) <= timestampMillis(asOf))
     .sort(compareEvents);
@@ -471,6 +475,7 @@ export function projectSkillFitness(
   input: readonly SkillFitnessEvent[],
 ): Readonly<SkillFitnessProjection> {
   const events = input.map((event) => SkillFitnessEventSchema.parse(event));
+  assertUniqueRouteEvidence(events);
   const groups = new Map<string, {
     skillId: string;
     contentHash: string;
@@ -556,6 +561,57 @@ function routeIdentityFromEvent(event: SkillFitnessEvent): SkillFitnessRouteIden
     harness: event.harness,
     skills: event.skills,
   });
+}
+
+function assertUniqueRouteEvidence(events: readonly SkillFitnessEvent[]): void {
+  const routes = new Map<string, {
+    readonly pairs: Set<string>;
+    readonly baselineRuns: Set<string>;
+    readonly memiRuns: Set<string>;
+    readonly prospectivePairs: Set<string>;
+    readonly baselineTrials: Set<string>;
+    readonly memiTrials: Set<string>;
+  }>();
+  for (const event of events) {
+    const routeKey = skillFitnessRouteKey(routeIdentityFromEvent(event));
+    const route = routes.get(routeKey) ?? {
+      pairs: new Set<string>(),
+      baselineRuns: new Set<string>(),
+      memiRuns: new Set<string>(),
+      prospectivePairs: new Set<string>(),
+      baselineTrials: new Set<string>(),
+      memiTrials: new Set<string>(),
+    };
+    const pairKey = hashCanonical(event.pair);
+    if (route.pairs.has(pairKey)) {
+      throw new Error(`Duplicate exact-route empirical pair at event ${event.eventId}`);
+    }
+    if (
+      route.baselineRuns.has(event.pair.baselineRunId)
+      || route.memiRuns.has(event.pair.memiRunId)
+    ) {
+      throw new Error(`Duplicate exact-route empirical pair member at event ${event.eventId}`);
+    }
+    if (event.schemaVersion === 2 && event.prospective !== null) {
+      const prospectiveKey = hashCanonical(event.prospective);
+      if (route.prospectivePairs.has(prospectiveKey)) {
+        throw new Error(`Duplicate exact-route prospective pair at event ${event.eventId}`);
+      }
+      if (
+        route.baselineTrials.has(event.prospective.baselineTrialId)
+        || route.memiTrials.has(event.prospective.memiTrialId)
+      ) {
+        throw new Error(`Duplicate exact-route prospective pair member at event ${event.eventId}`);
+      }
+      route.prospectivePairs.add(prospectiveKey);
+      route.baselineTrials.add(event.prospective.baselineTrialId);
+      route.memiTrials.add(event.prospective.memiTrialId);
+    }
+    route.pairs.add(pairKey);
+    route.baselineRuns.add(event.pair.baselineRunId);
+    route.memiRuns.add(event.pair.memiRunId);
+    routes.set(routeKey, route);
+  }
 }
 
 function canonicalRouteIdentity(input: SkillFitnessRouteIdentity): SkillFitnessRouteIdentity {

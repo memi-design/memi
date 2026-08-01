@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
-import { basename, dirname, join, resolve } from "node:path";
+import { lstat, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
 import {
@@ -766,17 +766,35 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       const baseline = uniqueRun(runs, opts.baseline, "baseline");
       const memi = uniqueRun(runs, opts.memi, "memi");
       const routePath = resolve(opts.route);
+      await assertContainedPath(storeRoot, routePath, "route receipt");
       assertRouteReceiptReferenced(memi, routePath);
+      await verifyManifestSealedFitnessRun({
+        run: baseline,
+        condition: "baseline",
+        storeRoot,
+      });
+      await verifyManifestSealedFitnessRun({
+        run: memi,
+        condition: "memi",
+        storeRoot,
+      });
       const routeReceipt = await readBoundedJson(routePath, "route receipt");
       const boundResult = SkillFitnessBoundRouteReceiptSchema.safeParse(routeReceipt);
       const routeBinding = boundResult.success
-        ? validatedBoundRoute(boundResult.data, memi, opts.taskClass)
+        ? await validateManifestSealedBoundRoute({
+          receipt: boundResult.data,
+          memi,
+          taskClass: opts.taskClass,
+          routePath,
+          storeRoot,
+        })
         : await importProspectiveRawRoute({
           routeReceipt,
           routePath,
           memi,
           taskClass: opts.taskClass,
           boundError: boundResult.error.message,
+          storeRoot,
         });
       const qualityEvidence = opts.qualityEvidence
         ? SkillFitnessQualityEvidenceSchema.parse(await readBoundedJson(
@@ -1129,6 +1147,7 @@ async function importProspectiveRawRoute(input: {
   readonly memi: BenchmarkRunRecord;
   readonly taskClass: string;
   readonly boundError: string;
+  readonly storeRoot: string;
 }): Promise<SkillFitnessBoundRouteReceipt> {
   if (!input.memi.prospective) {
     throw new Error(
@@ -1177,7 +1196,7 @@ async function importProspectiveRawRoute(input: {
       condition: "memi",
       sequence: input.memi.prospective.sequence,
     },
-    allowedEvidenceRoot: evidenceDirectory,
+    allowedEvidenceRoot: input.storeRoot,
   });
   if (!verification.valid) {
     throw new Error(
@@ -1211,6 +1230,118 @@ async function importProspectiveRawRoute(input: {
     route: rawResult.data,
   });
   return validatedBoundRoute(boundRoute, input.memi, input.taskClass);
+}
+
+async function validateManifestSealedBoundRoute(input: {
+  readonly receipt: SkillFitnessBoundRouteReceipt;
+  readonly memi: BenchmarkRunRecord;
+  readonly taskClass: string;
+  readonly routePath: string;
+  readonly storeRoot: string;
+}): Promise<SkillFitnessBoundRouteReceipt> {
+  await verifyManifestSealedFitnessRun({
+    run: input.memi,
+    condition: "memi",
+    storeRoot: input.storeRoot,
+    requiredArtifactPath: input.routePath,
+  });
+  return validatedBoundRoute(input.receipt, input.memi, input.taskClass);
+}
+
+async function verifyManifestSealedFitnessRun(input: {
+  readonly run: BenchmarkRunRecord;
+  readonly condition: "baseline" | "memi";
+  readonly storeRoot: string;
+  readonly requiredArtifactPath?: string;
+}): Promise<void> {
+  if (!input.run.prospective) {
+    throw new Error(
+      `${input.condition} fitness run requires manifest-sealed prospective evidence`,
+    );
+  }
+  const runPath = uniqueEvidencePath(input.run, "run.json", input.condition);
+  const manifestPath = uniqueEvidencePath(
+    input.run,
+    "evidence-manifest.json",
+    input.condition,
+  );
+  const evidenceDirectory = dirname(runPath);
+  if (dirname(manifestPath) !== evidenceDirectory) {
+    throw new Error(`${input.condition} prospective evidence must be sibling artifacts`);
+  }
+  await assertContainedPath(input.storeRoot, evidenceDirectory, `${input.condition} evidence`);
+  if (
+    input.requiredArtifactPath
+    && dirname(input.requiredArtifactPath) !== evidenceDirectory
+  ) {
+    throw new Error("bound route receipt must be a sibling prospective artifact");
+  }
+  const requiredArtifacts = [
+    "run.json",
+    ...(input.requiredArtifactPath ? [basename(input.requiredArtifactPath)] : []),
+  ];
+  const verification = await verifyEvidenceManifest({
+    evidenceDirectory,
+    expectedManifestSha256: input.run.prospective.evidenceManifestSha256,
+    requiredArtifacts,
+    expectedBinding: {
+      trialId: input.run.prospective.trialId,
+      taskId: input.run.taskId,
+      repeat: input.run.repeat,
+      condition: input.condition,
+      sequence: input.run.prospective.sequence,
+    },
+    allowedEvidenceRoot: input.storeRoot,
+  });
+  if (!verification.valid) {
+    throw new Error(
+      `${input.condition} prospective evidence verification failed: ${verification.reasons.join(",")}`,
+    );
+  }
+  const sealedRun = benchmarkRunRecordSchema.parse(
+    await readBoundedJson(runPath, `${input.condition} prospective run receipt`),
+  );
+  if (hashValue(sealedRun) !== hashValue(input.run)) {
+    throw new Error(
+      `${input.condition} prospective run receipt does not match the immutable stored run`,
+    );
+  }
+}
+
+function uniqueEvidencePath(
+  run: BenchmarkRunRecord,
+  artifactName: string,
+  condition: "baseline" | "memi",
+): string {
+  const matches = run.evidenceRefs.flatMap((reference) => {
+    try {
+      const candidate = resolve(reference);
+      return basename(candidate) === artifactName ? [candidate] : [];
+    } catch {
+      return [];
+    }
+  });
+  if (matches.length !== 1) {
+    throw new Error(
+      `${condition} manifest-sealed prospective evidence requires one ${artifactName} reference`,
+    );
+  }
+  return matches[0];
+}
+
+async function assertContainedPath(
+  allowedRoot: string,
+  target: string,
+  label: string,
+): Promise<void> {
+  const [rootPath, targetPath] = await Promise.all([
+    realpath(resolve(allowedRoot)),
+    realpath(resolve(target)),
+  ]);
+  const containment = relative(rootPath, targetPath);
+  if (containment.startsWith("..") || isAbsolute(containment)) {
+    throw new Error(`${label} escapes the store root`);
+  }
 }
 
 function siblingEvidenceRef(
