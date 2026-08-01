@@ -169,7 +169,7 @@
       "runId": "paraform-command-menu-codex:gpt-5.6-luna:low-memi-d35c0efc-4237-4a4a-af65-4f283514d306"
     }
   ],
-  "engineCliSha256": "sha256:133972e75ff6be73138a276dd41b288e4261c33b9b9ab3fbc4e05fe3a5cc0235",
+  "engineCliSha256": "sha256:141d787f2d269d51dad3c22cbf1c68e5afe8a732e550519a4d32e1caf55281dd",
   "finalBacktestCommand": {
     "argv": [
       "node",
