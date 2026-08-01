@@ -131,6 +131,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `b58281a5` | test: authenticate retained release records |
 | `da4aee34` | fix: authenticate retained release record bytes |
 | `21e9e0eb` | fix: drain Studio runtime work before cleanup |
+| `1d1cdcb6` | test: bind candidate to prior release record |
 
 ### Exact-match fail-closed route fitness
 
