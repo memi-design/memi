@@ -68,6 +68,7 @@ class CsvOutputTests(unittest.TestCase):
             )
             self.assertEqual(first, "primary,2.0,,")
             self.assertEqual(second, "secondary,,tokens,-1.0")
+            self.assertNotIn("\r", path.read_text(encoding="utf-8"))
 
 
 class ProviderFailureTests(unittest.TestCase):
