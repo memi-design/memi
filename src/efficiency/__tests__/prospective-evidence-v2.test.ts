@@ -118,4 +118,16 @@ describe("prospective evidence v2", () => {
       },
     })).toThrow(/unique/);
   });
+
+  it("rejects a measured billing claim without retained source and price-card artifacts", () => {
+    expect(() => receipt({
+      billing: {
+        source: "provider-usage-export",
+        currency: "USD",
+        amount: 0.42,
+        sourceSha256: sha("f"),
+        priceCardSha256: sha("1"),
+      },
+    })).toThrow(/sourceArtifact/);
+  });
 });
