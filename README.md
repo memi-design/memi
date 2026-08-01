@@ -156,10 +156,10 @@ and its [unexecuted cross-harness protocol](docs/research/designworkbench-v2-pap
 
 | Surface | Start here | Best for |
 | --- | --- | --- |
-| One-time CLI audit | `npx -y @memi-design/cli@2.7.3 diagnose . --no-write` | Trying Memi without installing |
+| One-time CLI audit | `npx -y @memi-design/cli@2.7.4 diagnose . --no-write` | Trying Memi without installing |
 | Global CLI | `npm i -g @memi-design/cli` | Daily local use |
 | Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude, Cursor, and compatible agents |
-| GitHub Action | `uses: memi-design/memi@2e29c5c656ac34242369eac9840838619ad113e1` | Pull-request design CI |
+| GitHub Action | `uses: memi-design/memi@8aa4649f412bbcaaf2af4ee209bf79016566f035` | Pull-request design CI |
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
 | Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
 
@@ -186,9 +186,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: memi-design/memi@2e29c5c656ac34242369eac9840838619ad113e1 # v2.7.3
+      - uses: memi-design/memi@8aa4649f412bbcaaf2af4ee209bf79016566f035 # v2.7.4
         with:
-          version: "2.7.3"
+          version: "2.7.4"
           report: true
           upload-sarif: true
 ```

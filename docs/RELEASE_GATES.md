@@ -6,7 +6,7 @@ package version.
 
 The primary public story is: `Memi is the read-only design engineering audit and skill layer for coding agents.` Studio is a companion.
 
-Current verified engine release: `2.7.3`.
+Current verified engine release: `2.7.4`.
 
 Use these checks before announcing, tagging, or publishing a public release.
 
@@ -137,7 +137,7 @@ For the current public engine line, npm must report the current `package.json` v
 
 Before any public distribution push, verify every external surface points to the same current release story:
 
-- npm latest: current `package.json` version, currently `2.7.3`
+- npm latest: current `package.json` version, currently `2.7.4`
 - npm README phrase: `read-only design engineering audit and skill layer for coding agents`
 - npm install command: `npm i -g @memi-design/cli`
 - MCP name: `io.github.sarveshsea/memi`

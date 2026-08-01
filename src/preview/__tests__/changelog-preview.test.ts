@@ -29,8 +29,8 @@ describe("preview changelog sync", () => {
       ]),
     });
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
-    expect(generatedHtml).toContain('<span class="summary-kicker">Candidate release</span>');
-    expect(generatedHtml).not.toContain('<span class="summary-kicker">Current release</span>');
+    expect(generatedHtml).toContain('<span class="summary-kicker">Current release</span>');
+    expect(generatedHtml).not.toContain('<span class="summary-kicker">Candidate release</span>');
     expect(currentHtml.replace(/\r\n/g, "\n")).toBe(
       generatedHtml.replace(/\r\n/g, "\n"),
     );
