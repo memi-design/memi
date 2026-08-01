@@ -760,6 +760,42 @@ export async function resolveReleaseRecordPath(root, relativePath) {
   return realTarget;
 }
 
+async function verifyReleaseRecordPointerFromDisk(
+  root,
+  { pointer, version, sourceCommit, label },
+) {
+  const failures = [];
+  let recordPath;
+  try {
+    recordPath = await resolveReleaseRecordPath(root, pointer?.path);
+  } catch (error) {
+    return [`${label} ${error instanceof Error ? error.message : String(error)}`];
+  }
+
+  const recordBytes = await readFile(recordPath).catch(() => null);
+  if (!recordBytes) return [`${label} release record is missing or unreadable`];
+  const actualSha256 = createHash("sha256").update(recordBytes).digest("hex");
+  if (pointer?.sha256 !== actualSha256) {
+    failures.push(`${label} release record SHA-256 does not match its committed bytes`);
+  }
+
+  let record;
+  try {
+    record = JSON.parse(recordBytes.toString("utf8"));
+  } catch {
+    failures.push(`${label} release record is invalid JSON`);
+    return failures;
+  }
+  failures.push(...validateEngineReleaseRecord(record).map((failure) => `${label} ${failure}`));
+  if (record.version !== version) {
+    failures.push(`${label} release record version does not match the manifest`);
+  }
+  if (record.sourceCommit !== sourceCommit) {
+    failures.push(`${label} release record source commit does not match the manifest`);
+  }
+  return failures;
+}
+
 export function buildWebReleaseArtifact(manifest, sourceCommit) {
   const canonical = serializeJson(manifest);
   const release = buildPublicReleaseManifest(manifest);
@@ -956,6 +992,26 @@ export async function verifyCoreReleaseSurfaces(root, manifest) {
     "action.yml": await readFile(join(root, "action.yml"), "utf8"),
   };
   failures.push(...validateEngineSurfaceSnapshot(manifest, snapshot));
+
+  const engine = manifest.releaseGroups.engine;
+  const retainedRelease = engine.state === "candidate"
+    ? {
+        ...engine.previousPublicRelease,
+        label: "candidate previousPublicRelease",
+      }
+    : {
+        ...engine,
+        label: `${engine.state} engine`,
+      };
+  if (retainedRelease.releaseRecord !== null
+    && retainedRelease.releaseRecord !== undefined) {
+    failures.push(...await verifyReleaseRecordPointerFromDisk(root, {
+      pointer: retainedRelease.releaseRecord,
+      version: retainedRelease.version,
+      sourceCommit: retainedRelease.sourceCommit,
+      label: retainedRelease.label,
+    }));
+  }
 
   const artifactPath = join(root, "release-artifacts", "memoire-web.release.json");
   const artifact = await readFile(artifactPath, "utf8")
