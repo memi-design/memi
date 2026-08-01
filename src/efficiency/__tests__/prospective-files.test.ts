@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createEvidenceManifest,
+  evidenceReferenceHasArtifact,
   hashFile,
   verifyEvidenceManifest,
 } from "../prospective-files.js";
@@ -16,6 +17,17 @@ afterEach(async () => {
 });
 
 describe("prospective evidence files", () => {
+  it("recognizes a run receipt through either supported filesystem separator", () => {
+    expect(evidenceReferenceHasArtifact(
+      "C:\\evidence\\trial-1\\run.json",
+      "run.json",
+    )).toBe(true);
+    expect(evidenceReferenceHasArtifact(
+      "/evidence/trial-1/run.json",
+      "run.json",
+    )).toBe(true);
+  });
+
   it("hashes and verifies immutable trial artifacts", async () => {
     const directory = await temporaryDirectory();
     await writeFile(path.join(directory, "git.patch"), "patch\n");
