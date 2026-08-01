@@ -5,11 +5,12 @@
 
 import { EventEmitter } from "events";
 import { readFile, writeFile, readdir, mkdir, rename } from "fs/promises";
-import { join, resolve } from "path";
+import { join } from "path";
 import { createLogger } from "./logger.js";
 import { ComponentSpec, PageSpec, DataVizSpec, DesignSpec, IASpec, AnySpec } from "../specs/types.js";
 import type { Finding } from "../codegen/generator.js";
 import type { LayoutCritique } from "../codegen/layout-critic.js";
+import { isPathWithin } from "../utils/path-containment.js";
 
 const log = createLogger("registry");
 
@@ -66,9 +67,7 @@ function assertSafeName(name: string): void {
 
 /** Ensure a resolved path stays within the expected parent directory */
 function assertWithinDir(filePath: string, parentDir: string): void {
-  const resolved = resolve(filePath);
-  const parent = resolve(parentDir);
-  if (!resolved.startsWith(parent + "/") && resolved !== parent) {
+  if (!isPathWithin(filePath, parentDir)) {
     throw new Error(`Path traversal detected: ${filePath} escapes ${parentDir}`);
   }
 }

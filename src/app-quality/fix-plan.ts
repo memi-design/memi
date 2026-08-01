@@ -1,8 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { buildAppGraph, type AppGraph } from "./app-graph.js";
 import { diagnoseAppQuality, type AppQualityDiagnosis, type AppQualityIssue } from "./engine.js";
 import type { UxAuditReport } from "../ux/tenets-traps.js";
+import { resolvePathWithin } from "../utils/path-containment.js";
 
 export type UiFixCategory = "tokens" | "accessibility" | "components" | "responsive" | "code-health";
 export type UiFixRisk = "safe" | "review" | "manual";
@@ -334,12 +335,11 @@ export function addMissingAltPlaceholders(content: string): string {
 }
 
 function safeProjectPath(projectRoot: string, file: string): string {
-  const root = resolve(projectRoot);
-  const resolved = resolve(root, file);
-  if (!resolved.startsWith(`${root}/`) && resolved !== root) {
+  try {
+    return resolvePathWithin(projectRoot, file);
+  } catch {
     throw new Error(`Refusing to modify file outside project root: ${file}`);
   }
-  return resolved;
 }
 
 async function writeFixPlan(projectRoot: string, plan: UiFixPlan): Promise<void> {
