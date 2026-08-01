@@ -82,6 +82,7 @@ describe("benchmark command", () => {
     const planPath = join(projectRoot, "plan.json");
     const taskRoot = join(projectRoot, "tasks");
     const fixturesPath = join(projectRoot, "fixtures.json");
+    const preflightPath = join(projectRoot, "preflight.json");
     await mkdir(taskRoot, { recursive: true });
     await writeFile(planPath, JSON.stringify(plan));
     await writeFile(join(taskRoot, "web-task.json"), JSON.stringify({
@@ -105,11 +106,16 @@ describe("benchmark command", () => {
       "benchmark", "prospective-preflight", planPath,
       "--fixtures", fixturesPath,
       "--task-root", taskRoot,
+      "--out", preflightPath,
+      "--checked-at", "2026-08-02T00:00:00.000Z",
       "--json",
     ], { from: "user" });
 
-    expect(JSON.parse(lastLog(logs))).toMatchObject({
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload).toMatchObject({
       status: "ready",
+      checkedAt: "2026-08-02T00:00:00.000Z",
+      preflightHash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
       fixtures: [{
         taskId: "web-task",
         revision,
@@ -120,6 +126,7 @@ describe("benchmark command", () => {
         ],
       }],
     });
+    expect(JSON.parse(await readFile(preflightPath, "utf8"))).toEqual(payload);
   });
 
   it("records runs and reports an evidence-qualified result", async () => {
