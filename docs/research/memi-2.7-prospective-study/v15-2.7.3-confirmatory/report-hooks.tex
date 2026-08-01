@@ -28,9 +28,11 @@ publication and public-channel parity are not established.}
 }{}
 
 % Analysis output may authorize only study claims. Release authorization is a
-% separate live-evidence gate and therefore remains fail-closed here.
-\renewcommand{\ReleaseGateStatus}{PENDING LIVE VERIFICATION --- Memi 2.7.4
-publication and public-channel parity are not established.}
+% separate live-evidence gate and therefore remains fail-closed unless the
+% deterministic report-package builder admits a live verification ledger.
+\IfFileExists{generated/tex/release-status.tex}{%
+  \input{generated/tex/release-status.tex}%
+}{}
 
 \newcommand{\FigurePlaceholder}[1]{%
   \fbox{\begin{minipage}[c][43mm][c]{0.94\linewidth}

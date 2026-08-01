@@ -15,7 +15,7 @@ import {
 const root = join(import.meta.dirname, "..", "..", "..");
 const manifestPath = join(root, "release-manifest.json");
 const webArtifactPath = join(root, "release-artifacts", "memoire-web.release.json");
-const publicEngineSourceCommit = "2e29c5c656ac34242369eac9840838619ad113e1";
+const publicEngineSourceCommit = "8aa4649f412bbcaaf2af4ee209bf79016566f035";
 
 describe("release manifest", () => {
   it("is the canonical source for every public release surface", async () => {
@@ -26,20 +26,15 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.7.4",
-          state: "candidate",
-          sourceCommit: null,
-          releaseRecord: null,
-          previousPublicRelease: {
-            version: "2.7.3",
-            sourceCommit: publicEngineSourceCommit,
-            releaseRecord: {
-              path: "release-artifacts/npm/2.7.3.release.json",
-              sha256: "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02",
-            },
+          state: "published",
+          sourceCommit: publicEngineSourceCommit,
+          releaseRecord: {
+            path: "release-artifacts/npm/2.7.4.release.json",
+            sha256: "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d",
           },
           verification: {
             eligibleForParity: false,
-            reason: "2.7.3 remains public while 2.7.4 is an unpublished candidate",
+            reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
           },
         },
         studio: { version: "2.5.0" },
@@ -75,36 +70,35 @@ describe("release manifest", () => {
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
     expect(artifact.publicTruth).toEqual({
-      source: "previousPublicRelease",
+      source: "currentRelease",
       engine: {
-        version: "2.7.3",
+        version: "2.7.4",
         sourceCommit: publicEngineSourceCommit,
         packageName: "@memi-design/cli",
         npmUrl: "https://www.npmjs.com/package/@memi-design/cli",
-        githubReleaseUrl: "https://github.com/memi-design/memi/releases/tag/v2.7.3",
+        githubReleaseUrl: "https://github.com/memi-design/memi/releases/tag/v2.7.4",
       },
     });
     expect(artifact.release).toMatchObject({
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.3",
-          state: "historical",
+          version: "2.7.4",
+          state: "published",
           sourceCommit: publicEngineSourceCommit,
           releaseRecord: {
-            path: "release-artifacts/npm/2.7.3.release.json",
-            sha256: "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02",
+            path: "release-artifacts/npm/2.7.4.release.json",
+            sha256: "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d",
           },
           verification: {
             eligibleForParity: false,
-            reason: "2.7.3 remains public while 2.7.4 is an unpublished candidate",
+            reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
           },
-          plannedSuccessor: "2.7.4",
         },
       },
       surfaces: {
         githubRelease: {
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.3",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.4",
         },
       },
     });
@@ -130,18 +124,18 @@ describe("release manifest", () => {
     expect(result.status, result.stderr || result.stdout).toBe(0);
   });
 
-  it("fails closed when prior public release evidence is not byte- and identity-bound", async () => {
+  it("fails closed when published release evidence is not byte- and identity-bound", async () => {
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
     const wrongDigest = structuredClone(manifest);
-    wrongDigest.releaseGroups.engine.previousPublicRelease.releaseRecord.sha256 = "f".repeat(64);
+    wrongDigest.releaseGroups.engine.releaseRecord.sha256 = "f".repeat(64);
     await expect(verifyCoreReleaseSurfaces(root, wrongDigest)).resolves.toContain(
-      "candidate previousPublicRelease release record SHA-256 does not match its committed bytes",
+      "published engine release record SHA-256 does not match its committed bytes",
     );
 
     const wrongSource = structuredClone(manifest);
-    wrongSource.releaseGroups.engine.previousPublicRelease.sourceCommit = "a".repeat(40);
+    wrongSource.releaseGroups.engine.sourceCommit = "a".repeat(40);
     await expect(verifyCoreReleaseSurfaces(root, wrongSource)).resolves.toContain(
-      "candidate previousPublicRelease release record source commit does not match the manifest",
+      "published engine release record source commit does not match the manifest",
     );
   });
 

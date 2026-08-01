@@ -52,6 +52,10 @@ class ReportPackageTests(unittest.TestCase):
             self.assertIn("npm trusted-publisher OIDC", release_tex)
             self.assertIn("public gate", release_tex)
             self.assertNotIn("Release verified", release_tex)
+            self.assertIn(
+                "PENDING LIVE VERIFICATION",
+                outputs[paths.release_status_tex_path],
+            )
 
             ledger = json.loads(outputs[paths.rendered_audit_ledger_path])
             self.assertEqual(ledger["receiptAudit"]["verifiedCells"], 36)
@@ -74,6 +78,43 @@ class ReportPackageTests(unittest.TestCase):
                 ledger["sourceArtifacts"]["evidence-receipts.json"]["sha256"],
                 "sha256:" + sha256(paths.evidence_receipts_path.read_bytes()).hexdigest(),
             )
+
+    def test_build_outputs_admits_complete_live_release_ledger(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            _write_json(paths.live_release_verification_path, _live_release_fixture())
+
+            outputs = build_outputs(paths)
+            release_tex = outputs[paths.release_gates_tex_path]
+            release_status = outputs[paths.release_status_tex_path]
+
+            self.assertIn("PUBLIC SOFTWARE CHANNELS VERIFIED", release_tex)
+            self.assertIn("npm trusted-publisher OIDC", release_tex)
+            self.assertIn("VERIFIED", release_tex)
+            self.assertIn("DETACHED LEDGER", release_tex)
+            self.assertNotIn("PENDING LIVE VERIFICATION", release_tex)
+            self.assertIn("PUBLIC SOFTWARE CHANNELS VERIFIED", release_status)
+            self.assertIn("detached", release_status.lower())
+
+    def test_build_outputs_rejects_failed_public_release_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["publicGate"]["failures"] = ["website mismatch"]
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, r"failures: \[\]"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_duplicate_live_release_channels(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["channels"][-1]["id"] = payload["channels"][0]["id"]
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "exactly once"):
+                build_outputs(paths)
 
     def test_build_outputs_fails_closed_on_incomplete_receipts(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -351,6 +392,46 @@ def _website_condition(name: str, *, gate_status: str, gate_code: int, finding: 
             "lightModeTests": {"total": 55, "passed": 55, "failed": 0, "skipped": 0},
             "stats": {"unexpected": 0},
             "topLevelErrors": [],
+        },
+    }
+
+
+def _live_release_fixture() -> dict[str, object]:
+    channel_ids = [
+        "npm",
+        "node-installs",
+        "github-release",
+        "github-action",
+        "homebrew",
+        "ghcr",
+        "mcp-registry",
+        "website-pdf",
+        "public-gate",
+    ]
+    channels = [
+        {
+            "id": channel_id,
+            "status": "detached" if channel_id == "website-pdf" else "verified",
+            "version": "2.7.4",
+            "evidenceSha256": f"sha256:{index:064x}",
+            "evidenceUrls": [f"https://example.invalid/evidence/{channel_id}"],
+            "verificationMode": (
+                "detached-post-build" if channel_id == "website-pdf" else "direct"
+            ),
+        }
+        for index, channel_id in enumerate(channel_ids, start=1)
+    ]
+    return {
+        "schemaVersion": "memoire.release-live-verification.v1",
+        "releaseVersion": "2.7.4",
+        "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "tag": "v2.7.4",
+        "verifiedAt": "2026-08-01T14:00:00Z",
+        "channels": channels,
+        "publicGate": {
+            "failures": [],
+            "parityEligible": True,
+            "evidenceSha256": f"sha256:{'f' * 64}",
         },
     }
 

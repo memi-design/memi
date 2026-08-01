@@ -4,20 +4,15 @@
   "releaseGroups": {
     "engine": {
       "version": "2.7.4",
-      "state": "candidate",
-      "sourceCommit": null,
-      "releaseRecord": null,
-    "previousPublicRelease": {
-      "version": "2.7.3",
-      "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1",
+      "state": "published",
+      "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
       "releaseRecord": {
-        "path": "release-artifacts/npm/2.7.3.release.json",
-        "sha256": "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02"
-      }
+        "path": "release-artifacts/npm/2.7.4.release.json",
+        "sha256": "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d"
       },
       "verification": {
         "eligibleForParity": false,
-        "reason": "2.7.3 remains public while 2.7.4 is an unpublished candidate"
+        "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
       }
     },
     "studio": {
