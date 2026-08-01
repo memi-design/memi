@@ -37,6 +37,11 @@
       "sha256": "sha256:e5a03de011272996780860cf7465a597b34197a7f346fd07283e497511d0c0df"
     },
     {
+      "bytes": 35338,
+      "path": "analysis/fitness_backtest.py",
+      "sha256": "sha256:64c5d94d63c0c6b57fcc3ad92cbf04685ff01b860c01e8a122055928b76d15f5"
+    },
+    {
       "bytes": 26914,
       "path": "analysis/fitness_policy.py",
       "sha256": "sha256:78f4bfbef188d16773b2a9a86ba19cdd9588a220d3f1d54abce8153c89c2e6b7"
@@ -72,9 +77,9 @@
       "sha256": "sha256:50624e98e225aa80f3d5b7b999045fbf39be6ab9b1f3a8d821b34d642b994f41"
     },
     {
-      "bytes": 9969,
+      "bytes": 10005,
       "path": "analysis/tests/test_fitness_backtest.py",
-      "sha256": "sha256:10c60d48072f4bf9b50ebe6f388548f9df38cb4c22e1b5ec11a292921e18e077"
+      "sha256": "sha256:18f5acb779c4c5b104c1fe2c47051ee18426a35b2ad344aaf6b6d2d82f375824"
     },
     {
       "bytes": 29108,
@@ -157,6 +162,11 @@
       "sha256": "sha256:a81451a6533d4018bdcddaf2127b273a68ad86fd93fb639515f627f19309ba0d"
     },
     {
+      "bytes": 42822,
+      "path": "generated/figures/fitness_backtest.png",
+      "sha256": "sha256:4da817d05b5a2d45d8933a1e16d9923d1c4eda5adfb4e56705e30359bd210fe8"
+    },
+    {
       "bytes": 46886,
       "path": "generated/figures/paired_quality_comparisons.png",
       "sha256": "sha256:44428875c4660ba1456c9ca230febaeff4e7cc37957f156b1b499068efbc3fb3"
@@ -177,9 +187,84 @@
       "sha256": "sha256:4c361f5cce9376d30bf694ddf8fd0cd5c7ef7a227a51c4edb1485af25ce3b3fa"
     },
     {
+      "bytes": 29041,
+      "path": "generated/fitness-policy/backtest-command-receipts.json",
+      "sha256": "sha256:33db4e1802d14782316c49feaee2b0e9e76dc55f4cf80de88ace6231ee9a4f79"
+    },
+    {
       "bytes": 30303,
       "path": "generated/fitness-policy/chronological-ingestion-plan.json",
       "sha256": "sha256:1dea5d676b3c67fb801795ffbb5f75fb412a961339c26bd4fd19fe9942be6305"
+    },
+    {
+      "bytes": 101740,
+      "path": "generated/fitness-policy/fitness-backtest-as-of.json",
+      "sha256": "sha256:79ec867d5ac148db87499920a0e1aaf6b72286b1b4c273a35b06d964cf222128"
+    },
+    {
+      "bytes": 1650,
+      "path": "generated/fitness-policy/fitness-backtest-summary.json",
+      "sha256": "sha256:fd7821c9d4b5f1345d71edef7f1786bc0b71c2db58db2f9223306a8f7bb30e16"
+    },
+    {
+      "bytes": 6126,
+      "path": "generated/fitness-policy/fitness-backtest.json",
+      "sha256": "sha256:2f0458254b1e2e051fbe3afd27f26340b3ae678a87885ecefad7c36ddd62448e"
+    },
+    {
+      "bytes": 18538,
+      "path": "generated/fitness-policy/fitness-store.jsonl",
+      "sha256": "sha256:57d853cbb130d7e9a9419e567389b52c62a3f31b4425bbe774d08efb25983725"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/02-buzzr-tab-unread-badge-r1.json",
+      "sha256": "sha256:058af9fcd194322aa3e7630ab984a2b9e4a85da45b9758402e059b782a899cfa"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/03-paraform-command-menu-r1.json",
+      "sha256": "sha256:55b19a0a0176c6f3c280a58340c47fe873109644799a262ca4d95c1883fc9827"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/05-buzzr-tab-unread-badge-r2.json",
+      "sha256": "sha256:ea3b122feafee4f0ed96e6b356387da5d30f5fb4805f55fc0b77d6ee33c92b03"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/06-paraform-command-menu-r2.json",
+      "sha256": "sha256:5d0c4882db14a70926d6b35405d61120deea449a46f170e33fde65b8c56e5c65"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/08-buzzr-tab-unread-badge-r3.json",
+      "sha256": "sha256:f57a50661c5d1ad5037d8c898866dc0dfd81eb4470b7e70c7d568ae944f2ca70"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/09-paraform-command-menu-r3.json",
+      "sha256": "sha256:f5f0012cfa0650d036a71839a3448d3da8ac76afae6550501044310ad527a6c6"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/11-buzzr-tab-unread-badge-r4.json",
+      "sha256": "sha256:0ae5e5e81c3c71e185d3a9fb4e84c058d5d29f7378f77fbc241cfdbdf243f3d4"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/12-paraform-command-menu-r4.json",
+      "sha256": "sha256:c533c61cc986443ff905562378721f22684cc5cb1b62de43c11cf6d64578b898"
+    },
+    {
+      "bytes": 548,
+      "path": "generated/fitness-policy/quality-cli/14-buzzr-tab-unread-badge-r5.json",
+      "sha256": "sha256:2b37f3685df77a9112c28f416e2bc54d0f2690f1aa891067d6cacccbd3a69a5e"
+    },
+    {
+      "bytes": 546,
+      "path": "generated/fitness-policy/quality-cli/18-paraform-command-menu-r6.json",
+      "sha256": "sha256:5bf9dc622c05f6a1635cb2b4083f4b33e58dca63c71483bf7dc0b9b70624a4cb"
     },
     {
       "bytes": 36672,
@@ -220,6 +305,16 @@
       "bytes": 3078,
       "path": "generated/tables/secondary_task_tests.csv",
       "sha256": "sha256:68d7a499d909a01deedc61ac92d2a5b9b2926e66864b66fb9c7b4e338b14307f"
+    },
+    {
+      "bytes": 414,
+      "path": "generated/tex/backtest-figure-interpretation.tex",
+      "sha256": "sha256:927778b5a75f51846960363e433d27c2a1ac84625ce39d96b48c6f047681bbbf"
+    },
+    {
+      "bytes": 553,
+      "path": "generated/tex/fitness-backtest-results.tex",
+      "sha256": "sha256:76a1583d90bc66502d72c2e7b2d7219d32f5af14d6afc8bbd0f8bf841337ee49"
     },
     {
       "bytes": 937,
@@ -327,6 +422,11 @@
       "sha256": "sha256:c55bfb34ee30a6974dc01230b240bd0057b38bda68d9b50ef49e4f34fbaa94bd"
     },
     {
+      "bytes": 2887,
+      "path": "run-fitness-backtest.py",
+      "sha256": "sha256:7ef68f2072933e8fda09c81202470a18bd94ce99a49d27dfadaaef6f988dbba1"
+    },
+    {
       "bytes": 5977,
       "path": "tasks/buzzr-tab-unread-badge.json",
       "sha256": "sha256:2b1840512c07390d16944af67cf30809af621f0f72401f8f881b28baf8a39a22"
@@ -357,7 +457,7 @@
       "sha256": "sha256:1ccf198f211e3be7c14d0a09f28fc9483e22cd2421a400c12722e46180e2ceda"
     }
   ],
-  "entryCount": 71,
+  "entryCount": 91,
   "excluded": [
     "**/*.pdf",
     "generated/report-package-checksums.json"
