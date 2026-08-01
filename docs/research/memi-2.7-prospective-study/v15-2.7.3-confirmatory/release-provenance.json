@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "rangeStart": "0a4228bdce76e51f670495a39307891e65547edc",
+  "rangeEnd": "f9cb9987095b18d321350c45deeda0679e586bd7",
+  "commits": [
+    { "sha": "0a4228bdce76e51f670495a39307891e65547edc", "role": "sealed prospective workflow harness" },
+    { "sha": "38b1da10", "role": "workflow-adapter test stabilization only" },
+    { "sha": "b6beb464", "role": "2.7.3 candidate declaration" },
+    { "sha": "a642d6c4", "role": "release surface preparation" },
+    { "sha": "2e29c5c656ac34242369eac9840838619ad113e1", "role": "canonical v2.7.3 tag source" },
+    { "sha": "9a47f390", "role": "npm provenance record" },
+    { "sha": "be69d04164749fc92893a9108ded4f7ddb674f0f", "role": "published release truth and website artifact" },
+    { "sha": "f9cb9987095b18d321350c45deeda0679e586bd7", "role": "main-branch provenance anchor" }
+  ],
+  "runtimePathConclusion": "Relative to the V14 candidate source, 2.7.3 changed release metadata, guidance, and adapter-test stabilization; the benchmarked runtime paths were not changed. V15 nevertheless tests the exact published 2.7.3 tarball directly."
+}

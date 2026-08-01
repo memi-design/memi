@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "rubricVersion": "memi-design-quality-v1",
+  "maximumScore": 100,
+  "dimensions": [
+    { "id": "task-interaction-correctness", "points": 25 },
+    { "id": "accessibility", "points": 20 },
+    { "id": "visual-hierarchy", "points": 15 },
+    { "id": "design-system-consistency", "points": 15 },
+    { "id": "responsive-adaptive-behavior", "points": 15 },
+    { "id": "implementation-quality", "points": 10 }
+  ],
+  "criticalDefects": [
+    "registered task journey is nonfunctional",
+    "keyboard or assistive-technology access is blocked",
+    "security or privacy regression",
+    "fixture contract is bypassed or mutated",
+    "rendered output is absent or materially misleading"
+  ],
+  "graderRules": {
+    "conditionLabelsHidden": true,
+    "runIdentifiersAnonymized": true,
+    "graderCount": 3,
+    "independentScoring": true,
+    "evidenceRequiredForEveryDeduction": true
+  }
+}
