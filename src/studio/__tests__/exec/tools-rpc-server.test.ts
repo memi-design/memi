@@ -52,7 +52,7 @@ describe("exec/tools-rpc-server", () => {
 
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), "memi-tools-rpc-"));
-    socketPath = join(dir, "tools.sock");
+    socketPath = resolveToolsRpcEndpoint(dir);
   });
 
   afterEach(async () => {
@@ -69,7 +69,9 @@ describe("exec/tools-rpc-server", () => {
       "win32",
     );
 
-    expect(endpoint).toMatch(/^\\\\\\.\\pipe\\memi-tools-[a-f0-9]{24}$/);
+    const prefix = "\\\\.\\pipe\\memi-tools-";
+    expect(endpoint.startsWith(prefix)).toBe(true);
+    expect(endpoint.slice(prefix.length)).toMatch(/^[a-f0-9]{24}$/);
     expect(endpoint).not.toContain("runneradmin");
     expect(endpoint).not.toContain("tools.sock");
   });

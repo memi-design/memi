@@ -26,7 +26,12 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 import { generateMemiToolsStub, type StubToolSpec } from "./stub-generator.js";
-import { ToolsRpcServer, type ScriptLogEntry, type ToolRunner } from "./tools-rpc-server.js";
+import {
+  resolveToolsRpcEndpoint,
+  ToolsRpcServer,
+  type ScriptLogEntry,
+  type ToolRunner,
+} from "./tools-rpc-server.js";
 
 let cachedTsxBin: string | null = null;
 
@@ -96,7 +101,7 @@ export async function executeCode(req: ExecuteCodeRequest, runner: ToolRunner): 
   // .mts forces ESM mode in tsx/Node so top-level await + import work.
   const stubPath = join(dir, "memi_tools.mts");
   const scriptPath = join(dir, "script.mts");
-  const socketPath = join(dir, "tools.sock");
+  const socketPath = resolveToolsRpcEndpoint(dir);
 
   await writeFile(
     stubPath,
