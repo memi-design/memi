@@ -109,8 +109,8 @@ describe("2.7.1 candidate release surfaces", () => {
   it("labels 2.7.1 as unreleased while keeping only the verified public activation", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
     expect(currentRelease).toContain("Release state: `candidate`");
-    expect(currentRelease).toContain("Engine candidate (public release remains 2.7.0)");
-    expect(currentRelease).toContain("Source commit: Not assigned.");
+    expect(currentRelease).toContain("Engine candidate (unreleased)");
+    expect(currentRelease).toContain("Source commit: Not assigned. npm provenance must bind the eventual publish commit.");
     expect(currentRelease).toContain(`npx -y @memi-design/cli@${publicVersion}`);
     expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.3");
   });
