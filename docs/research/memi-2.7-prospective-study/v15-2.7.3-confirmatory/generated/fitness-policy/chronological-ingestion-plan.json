@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "kind": "memi-fitness-chronological-ingestion-plan",
+  "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+  "dryRun": true,
+  "storeWritePlanned": false,
+  "entryCount": 11,
+  "entries": [
+    {
+      "observedAt": "2026-07-29T21:44:57.657Z",
+      "sourceVersion": "v1",
+      "sourceKind": "legacy-workflow-proof",
+      "pairId": "buzzr-tab-unread-badge-v2",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "legacy-v1",
+      "skills": [
+        "react-native-gen"
+      ],
+      "ingestDecision": "record-v1-only-unmatched-negative",
+      "storeWriteEligible": false,
+      "reason": "legacy v1 evidence does not carry repository fingerprint or content-hash route identity",
+      "sequence": 1
+    },
+    {
+      "observedAt": "2026-08-01T07:04:45.834Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:6a8b9c789ab7bdf9230a9154972a50487d99514211b0ae80293c683911024063",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:23440a4ae7978e928369fc417f3d8d592bff56a801f17d3c08f5dc3af8e6bd40",
+      "eventSha256": "sha256:6a8b9c789ab7bdf9230a9154972a50487d99514211b0ae80293c683911024063",
+      "sequence": 2
+    },
+    {
+      "observedAt": "2026-08-01T07:13:46.792Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:1047a03ddd10d279a4658cf70fad600aec7348431f791226797d5459c370e5b5",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:1a12fbc712eb69d4ddab407806b319cea7657f1491f85c646ef95de125d37a93",
+      "eventSha256": "sha256:1047a03ddd10d279a4658cf70fad600aec7348431f791226797d5459c370e5b5",
+      "sequence": 3
+    },
+    {
+      "observedAt": "2026-08-01T07:32:05.739Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:465fd301fd1219d513713f0419314da9ef81de28be98ec457ec5d6769c51e5ed",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:a84b8a4e694fb250d8414932f4ff3b69087534c9b753f19091c13b68b151f0e1",
+      "eventSha256": "sha256:465fd301fd1219d513713f0419314da9ef81de28be98ec457ec5d6769c51e5ed",
+      "sequence": 4
+    },
+    {
+      "observedAt": "2026-08-01T07:37:20.225Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:c3dd98bafba7db434031fc69c7cf8470e90ac77dead76f57944cb6449daad181",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:80cc2dffa417c1bfccf191b386ace97613ed36150a732a3bb6a69c68a8bf018e",
+      "eventSha256": "sha256:c3dd98bafba7db434031fc69c7cf8470e90ac77dead76f57944cb6449daad181",
+      "sequence": 5
+    },
+    {
+      "observedAt": "2026-08-01T08:19:31.285Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:a9eef3a38f1808d89e3a6e815fa4c212cd32c191704b54b8ef6561ea02d8267c",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:5828e2f5494b6b62c5f8b2c51a1e3930cc041d4f746231e52d8d72bf96328d35",
+      "eventSha256": "sha256:a9eef3a38f1808d89e3a6e815fa4c212cd32c191704b54b8ef6561ea02d8267c",
+      "sequence": 6
+    },
+    {
+      "observedAt": "2026-08-01T08:25:45.087Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:190829d269d799983c180a5accf92e31414a5de921b615841cd398cd786e0732",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:ebbe552a7e15a7db41aa4a705282dc2c3c57ad966dc41ab25fdbe5e6a7e174be",
+      "eventSha256": "sha256:190829d269d799983c180a5accf92e31414a5de921b615841cd398cd786e0732",
+      "sequence": 7
+    },
+    {
+      "observedAt": "2026-08-01T08:45:12.822Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:a486c49f8250ea7d938810d0bcacfbdb7ee5db3dd0eb67ff80ad2b772d6bf6e6",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:7a567e4183553f91fb1f9ceec0276657064f839095457325736ffe302e54cd60",
+      "eventSha256": "sha256:a486c49f8250ea7d938810d0bcacfbdb7ee5db3dd0eb67ff80ad2b772d6bf6e6",
+      "sequence": 8
+    },
+    {
+      "observedAt": "2026-08-01T08:52:13.928Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:5842a8aa2faeba16c557f95a5345d707b797666d9e507b266b6511885fa45c2b",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:c74ec2285069fe572148e1d8630cf5619c5674f802aeca76e26f96d50891381b",
+      "eventSha256": "sha256:5842a8aa2faeba16c557f95a5345d707b797666d9e507b266b6511885fa45c2b",
+      "sequence": 9
+    },
+    {
+      "observedAt": "2026-08-01T09:11:49.375Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:56ff69236a003b344ccf0dc1046cd0094dc256cf861cc5214dd468fdc9926879",
+      "taskClass": "buzzr-tab-unread-badge",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "atomic-design",
+          "contentHash": "sha256:32bbabc01be9b91a636bbbed9a15ed80446054a4f2ff421ce4849b036920a7cd"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:a6983ff3914a98c27675ad4d1361488a350dbd11eaafec7fcf521a7dbf068001",
+      "eventSha256": "sha256:56ff69236a003b344ccf0dc1046cd0094dc256cf861cc5214dd468fdc9926879",
+      "sequence": 10
+    },
+    {
+      "observedAt": "2026-08-01T09:45:09.965Z",
+      "sourceVersion": "v2",
+      "sourceKind": "v15-confirmatory",
+      "pairId": "fitness-v2:c7ed285c8cb415a3ad183e9e3de497f84703c1d20689a6c1be5575678ff01780",
+      "taskClass": "paraform-command-menu",
+      "routeDecision": "single",
+      "skills": [
+        {
+          "skillId": "design-extract",
+          "contentHash": "sha256:a2632744d1aaeec30fd5212b08afa0df224d2f2e038813b3e77c16cb0c1f9902"
+        }
+      ],
+      "ingestDecision": "record-v2-quality-evidence",
+      "storeWriteEligible": true,
+      "reason": "exact-route v2 evidence is complete and hash-verified",
+      "qualityEvidenceSha256": "sha256:9e581e1592f2f4c95de99b66c9da7f79ffee7e86d6bd1e8d3b071ba08af15bbf",
+      "eventSha256": "sha256:c7ed285c8cb415a3ad183e9e3de497f84703c1d20689a6c1be5575678ff01780",
+      "sequence": 11
+    }
+  ]
+}

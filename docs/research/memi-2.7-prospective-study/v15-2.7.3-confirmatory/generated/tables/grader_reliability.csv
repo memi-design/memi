@@ -1,0 +1,12 @@
+task_id,repeat,baseline_absolute_disagreement,memi_absolute_disagreement,baseline_grader_count,memi_grader_count,icc2_1_absolute_agreement
+buzzr-tab-unread-badge,1,6.0,5.3333,3,3,
+buzzr-tab-unread-badge,2,4.6667,6.6667,3,3,
+buzzr-tab-unread-badge,3,6.0,3.3333,3,3,
+buzzr-tab-unread-badge,4,2.6667,3.3333,3,3,
+buzzr-tab-unread-badge,5,5.3333,4.6667,3,3,
+paraform-command-menu,1,1.3333,4.6667,3,3,
+paraform-command-menu,2,4.6667,4.6667,3,3,
+paraform-command-menu,3,4.6667,2.0,3,3,
+paraform-command-menu,4,2.6667,1.3333,3,3,
+paraform-command-menu,6,6.0,2.0,3,3,
+all-graded-trials,pooled,,,,,0.531536

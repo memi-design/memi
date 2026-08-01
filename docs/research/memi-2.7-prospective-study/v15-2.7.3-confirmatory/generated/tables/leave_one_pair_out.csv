@@ -1,0 +1,11 @@
+task_id,omitted_pair_index,remaining_pairs,mean_delta,noninferiority_lower_95_one_sided,noninferior
+buzzr-tab-unread-badge,1,4,1.5,0.0,True
+buzzr-tab-unread-badge,2,4,1.25,0.0,True
+buzzr-tab-unread-badge,3,4,1.5,0.0,True
+buzzr-tab-unread-badge,4,4,0.75,-0.25,True
+buzzr-tab-unread-badge,5,4,2.0,1.0,True
+paraform-command-menu,1,4,0.25,-4.5,True
+paraform-command-menu,2,4,1.25,-1.5,True
+paraform-command-menu,3,4,-1.0,-4.5,True
+paraform-command-menu,4,4,-1.25,-4.75,True
+paraform-command-menu,5,4,-1.25,-4.75,True

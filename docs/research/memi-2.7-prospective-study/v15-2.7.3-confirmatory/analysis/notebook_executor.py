@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import sys
 import traceback
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,7 +26,7 @@ def execute_notebook(path: Path, working_directory: Path | None = None) -> Noteb
     }
     executed_cells = 0
     cwd = working_directory or path.parent
-    with _temporary_chdir(cwd):
+    with _temporary_chdir(cwd), _temporary_import_path(cwd):
         for cell_index, cell in enumerate(notebook.get("cells", [])):
             if cell.get("cell_type") != "code":
                 continue
@@ -81,3 +82,16 @@ def _temporary_chdir(path: Path):
         yield SimpleNamespace(path=path)
     finally:
         os.chdir(previous)
+
+
+@contextlib.contextmanager
+def _temporary_import_path(path: Path):
+    value = str(path.resolve())
+    sys.path.insert(0, value)
+    try:
+        yield SimpleNamespace(path=path)
+    finally:
+        if sys.path and sys.path[0] == value:
+            sys.path.pop(0)
+        else:
+            sys.path.remove(value)
