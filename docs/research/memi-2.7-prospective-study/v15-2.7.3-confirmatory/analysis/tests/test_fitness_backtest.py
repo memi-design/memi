@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 import unittest
 from collections import Counter
@@ -8,6 +9,7 @@ from pathlib import Path
 
 from analysis.fitness_backtest import (
     BacktestInputError,
+    bounded_positive_repeat,
     build_engine_quality_evidence,
     canonical_sha256,
     default_backtest_paths,
@@ -17,9 +19,11 @@ from analysis.fitness_backtest import (
     expected_replay_counts,
     execute_backtest,
     load_backtest_inputs,
+    run_capped_command,
     render_backtest_artifacts,
     summarize_backtest,
     validate_snapshot_prefix,
+    validate_frozen_provenance,
     validate_cli_event,
     verify_source_manifest,
 )
@@ -287,6 +291,46 @@ class FitnessBacktestTests(unittest.TestCase):
             [snapshot["backtest"]["eventsReplayed"] for snapshot in result["snapshots"]],
             [0, 1, 2, 2, 3, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 12, 12],
         )
+
+    def test_repeat_is_a_bounded_positive_integer_before_filename_construction(self) -> None:
+        self.assertEqual(bounded_positive_repeat(6), 6)
+        for invalid in (0, -1, 1001, "../outside", True):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(BacktestInputError, "repeat"):
+                    bounded_positive_repeat(invalid)
+
+    def test_frozen_provenance_rejects_source_or_engine_substitution(self) -> None:
+        frozen = {
+            "schemaVersion": 1,
+            "kind": "memi-v15-fitness-backtest-frozen-provenance",
+            "engineCliSha256": f"sha256:{'a' * 64}",
+            "sourceDigest": f"sha256:{'b' * 64}",
+        }
+        validate_frozen_provenance(
+            frozen,
+            engine_sha256=f"sha256:{'a' * 64}",
+            source_digest=f"sha256:{'b' * 64}",
+        )
+        with self.assertRaisesRegex(BacktestInputError, "engine CLI digest"):
+            validate_frozen_provenance(
+                frozen,
+                engine_sha256=f"sha256:{'c' * 64}",
+                source_digest=f"sha256:{'b' * 64}",
+            )
+        with self.assertRaisesRegex(BacktestInputError, "source-root digest"):
+            validate_frozen_provenance(
+                frozen,
+                engine_sha256=f"sha256:{'a' * 64}",
+                source_digest=f"sha256:{'c' * 64}",
+            )
+
+    def test_capped_command_kills_output_flood_before_buffering_past_limit(self) -> None:
+        with self.assertRaisesRegex(BacktestInputError, "output exceeded"):
+            run_capped_command(
+                [sys.executable, "-c", "import sys; sys.stdout.write('x' * 10000); sys.stdout.flush()"],
+                timeout_seconds=5,
+                max_output_bytes=128,
+            )
 
 
 def _event_for(command: object) -> dict[str, object]:
