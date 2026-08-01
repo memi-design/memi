@@ -96,7 +96,11 @@ describe("benchmark command", () => {
     }));
     await writeFile(fixturesPath, JSON.stringify({
       schemaVersion: 1,
-      fixtures: [{ taskId: "web-task", repository }],
+      fixtures: [{
+        taskId: "web-task",
+        repository,
+        origin: "https://example.test/v2-fixture.git",
+      }],
     }));
     const logs = captureLogs();
     const program = new Command();
@@ -1307,6 +1311,9 @@ async function fixtureRepository(name: string): Promise<string> {
   await execFileAsync("git", ["init", "--quiet"], { cwd: repository });
   await execFileAsync("git", ["config", "user.name", "Memi Test"], { cwd: repository });
   await execFileAsync("git", ["config", "user.email", "test@memi.invalid"], { cwd: repository });
+  await execFileAsync("git", ["remote", "add", "origin", `https://example.test/${name}.git`], {
+    cwd: repository,
+  });
   await writeFile(join(repository, "README.md"), "fixture\n");
   await execFileAsync("git", ["add", "README.md"], { cwd: repository });
   await execFileAsync("git", ["commit", "--quiet", "-m", "fixture"], { cwd: repository });
