@@ -143,6 +143,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `dac2dd9c` | chore: clear Memi 2.7.4 parity cap |
 | `9b92653a` | fix: bind parity clearance to live receipt |
 | `006b55bc` | fix: byte-bind website parity provenance |
+| `6d205fb3` | docs: finalize Memi 2.7.4 confirmatory report |
 
 ### Exact-match fail-closed route fitness
 
