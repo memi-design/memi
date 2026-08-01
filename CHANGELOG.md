@@ -30,6 +30,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Separated the exact candidate runtime from the hash-pinned admission harness
   so older candidates remain testable while current fail-closed evidence checks
   evaluate their immutable receipts.
+- Made interrupted prospective pairs resumable without rerunning or duplicating
+  the already completed matched condition.
 
 #### Architectural decisions
 

@@ -274,17 +274,21 @@ export function selectProspectiveBatch(input: {
       throw new Error(`completed trial is not part of the prospective freeze: ${trialId}`);
     }
   }
-  const pending = [...freeze.trials]
-    .sort((left, right) => left.sequence - right.sequence)
-    .filter((trial) => !completedTrialIds.has(trial.trialId));
-  const selected = pending.slice(0, input.maximumTrials);
-  const selectedPairs = new Map<string, number>();
-  for (const trial of selected) {
+  const orderedTrials = [...freeze.trials]
+    .sort((left, right) => left.sequence - right.sequence);
+  const selected: ProspectiveFreeze["trials"][number][] = [];
+  const visitedPairs = new Set<string>();
+  for (const trial of orderedTrials) {
     const pairId = `${trial.taskId}:r${trial.repeat}`;
-    selectedPairs.set(pairId, (selectedPairs.get(pairId) ?? 0) + 1);
-  }
-  if ([...selectedPairs.values()].some((count) => count !== 2)) {
-    throw new Error("selected batch would split a matched pair");
+    if (visitedPairs.has(pairId)) continue;
+    visitedPairs.add(pairId);
+    const pendingPair = orderedTrials.filter((candidate) =>
+      candidate.taskId === trial.taskId
+      && candidate.repeat === trial.repeat
+      && !completedTrialIds.has(candidate.trialId));
+    if (pendingPair.length === 0) continue;
+    if (selected.length + pendingPair.length > input.maximumTrials) break;
+    selected.push(...pendingPair);
   }
   return deepFreeze(selected);
 }
