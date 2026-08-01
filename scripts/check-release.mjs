@@ -353,7 +353,9 @@ if (!changelogMatch) {
 const previewPath = join(root, "preview", "changelog.html");
 const currentPreview = normalizeNewlines(await readFile(previewPath, "utf-8"));
 const releases = parseChangelogMarkdown(changelog);
-const generatedPreview = applyChangelogData(currentPreview, releases);
+const generatedPreview = applyChangelogData(currentPreview, releases, {
+  releaseState: releaseManifest.releaseGroups.engine.state,
+});
 if (generatedPreview !== currentPreview) {
   fail("preview/changelog.html is not synced with CHANGELOG.md");
 }
