@@ -1,4 +1,12 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import {
+  access,
+  lstat,
+  mkdir,
+  mkdtemp,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -91,6 +99,86 @@ describe("skill fitness empirical identity security", () => {
     });
 
     expect(production.eventId).not.toBe(recoveryProbe.eventId);
+  });
+
+  it("serializes concurrent writers and admits an exact-route pair only once", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-lock-race-"));
+    tempDirectories.push(root);
+    const store = path.join(root, "skill-fitness.jsonl");
+    const writes = await Promise.allSettled(Array.from({ length: 12 }, (_, index) =>
+      appendSkillFitnessEvent(store, event({
+        eventId: `concurrent-${index}`,
+        baselineScore: 80 + index,
+        memiScore: 92,
+      }))));
+
+    expect(writes.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(writes.filter((result) => result.status === "rejected")).toHaveLength(11);
+    const content = await import("../skill-fitness.js").then(({ loadSkillFitnessEvents }) =>
+      loadSkillFitnessEvents(store));
+    expect(content).toHaveLength(1);
+  });
+
+  it("recovers only an old dead-owner lock and preserves private permissions", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-stale-lock-"));
+    tempDirectories.push(root);
+    const store = path.join(root, "skill-fitness.jsonl");
+    const lock = `${store}.lock`;
+    await mkdir(lock, { mode: 0o700 });
+    await writeFile(path.join(lock, "owner.json"), JSON.stringify({
+      schemaVersion: 1,
+      token: "stale-owner",
+      pid: 2_147_483_647,
+      createdAt: "2000-01-01T00:00:00.000Z",
+    }), { mode: 0o600 });
+
+    await appendSkillFitnessEvent(store, event({ eventId: "after-stale" }), {
+      lockWaitMs: 250,
+      lockRetryMs: 5,
+      staleLockMs: 10,
+    });
+
+    await expect(access(lock)).rejects.toMatchObject({ code: "ENOENT" });
+    expect((await lstat(store)).mode & 0o777).toBe(0o600);
+  });
+
+  it("fails closed on a symlinked lock without touching its target", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-symlink-lock-"));
+    tempDirectories.push(root);
+    const store = path.join(root, "skill-fitness.jsonl");
+    const target = path.join(root, "attacker-target");
+    await mkdir(target);
+    await writeFile(path.join(target, "sentinel"), "keep");
+    await symlink(target, `${store}.lock`);
+
+    await expect(appendSkillFitnessEvent(store, event({ eventId: "blocked" }), {
+      lockWaitMs: 50,
+      lockRetryMs: 5,
+      staleLockMs: 10,
+    })).rejects.toThrow(/lock.*non-symlink/i);
+    await expect(access(path.join(target, "sentinel"))).resolves.toBeUndefined();
+  });
+
+  it("bounds waiting for a live lock owner", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-live-lock-"));
+    tempDirectories.push(root);
+    const store = path.join(root, "skill-fitness.jsonl");
+    const lock = `${store}.lock`;
+    await mkdir(lock, { mode: 0o700 });
+    await writeFile(path.join(lock, "owner.json"), JSON.stringify({
+      schemaVersion: 1,
+      token: "live-owner",
+      pid: process.pid,
+      createdAt: "2000-01-01T00:00:00.000Z",
+    }), { mode: 0o600 });
+    const startedAt = Date.now();
+
+    await expect(appendSkillFitnessEvent(store, event({ eventId: "times-out" }), {
+      lockWaitMs: 40,
+      lockRetryMs: 5,
+      staleLockMs: 1,
+    })).rejects.toThrow(/timed out waiting for skill fitness lock/i);
+    expect(Date.now() - startedAt).toBeLessThan(500);
   });
 });
 
