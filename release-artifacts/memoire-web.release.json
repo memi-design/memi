@@ -3,9 +3,9 @@
   "provenance": {
     "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "289bd7284a889750f2de5f8b52e92bda7fcbe7de",
-    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/289bd7284a889750f2de5f8b52e92bda7fcbe7de/release-manifest.json",
-    "manifestSha256": "bea3ff6432089da567394916aebb2475b9cdfe23b6cd5b3ee43fe7787446c366"
+    "sourceCommit": "63cca7d538887b85215dff42ae3b91976e092989",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/63cca7d538887b85215dff42ae3b91976e092989/release-manifest.json",
+    "manifestSha256": "ac055e51e0ca9e0730c3309a3ce2974209c0cabd555ff9641d30d48078de5bef"
   },
   "orchestration": {
     "schemaVersion": 1,
@@ -18,7 +18,11 @@
         "releaseRecord": null,
         "previousPublicRelease": {
           "version": "2.7.3",
-          "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1"
+          "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1",
+          "releaseRecord": {
+            "path": "release-artifacts/npm/2.7.3.release.json",
+            "sha256": "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02"
+          }
         },
         "verification": {
           "eligibleForParity": false,
@@ -91,7 +95,10 @@
         "version": "2.7.3",
         "state": "historical",
         "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1",
-        "releaseRecord": null,
+        "releaseRecord": {
+          "path": "release-artifacts/npm/2.7.3.release.json",
+          "sha256": "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02"
+        },
         "verification": {
           "eligibleForParity": false,
           "reason": "2.7.3 remains public while 2.7.4 is an unpublished candidate"
