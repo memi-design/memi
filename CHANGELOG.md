@@ -134,6 +134,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `1d1cdcb6` | test: bind candidate to prior release record |
 | `5aa0f92e` | research: replay final candidate fitness chronology |
 | `1c649edb` | test: run Codex fixture through Node portably |
+| `d66c5cd8` | fix: close Windows archive and Studio handles |
 
 ### Exact-match fail-closed route fitness
 
