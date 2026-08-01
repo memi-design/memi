@@ -189,6 +189,7 @@ export class StudioRuntimeServer {
   private readonly providerToolTraceContexts = new Map<string, RuntimeTraceContext>();
   private readonly toolCalls = new Map<string, StudioToolCallResult>();
   private readonly providerEventSeq = new Map<string, number>();
+  private readonly backgroundTasks = new Set<Promise<void>>();
   private readonly startedAt = Date.now();
   private readonly activeStreams = new Set<string>();
   private eventBufferSize = 0;
@@ -246,8 +247,7 @@ export class StudioRuntimeServer {
   }
 
   async stop(): Promise<void> {
-    for (const child of this.processes.values()) child.kill("SIGTERM");
-    this.processes.clear();
+    await this.stopActiveProcesses();
     await this.browser.closeAll();
     for (const client of this.clients) client.res.end();
     this.clients.clear();
@@ -258,6 +258,7 @@ export class StudioRuntimeServer {
     if (!this.server) return;
     await new Promise<void>((resolveStop) => this.server?.close(() => resolveStop()));
     this.server = null;
+    await this.waitForBackgroundTasks();
   }
 
   getSession(id: string): StudioSession | null {
@@ -1740,13 +1741,13 @@ export class StudioRuntimeServer {
       }
     }
     if (shouldCaptureKnowledgeEvent(event)) {
-      void captureKnowledgeEvent(this.projectRoot, event, {
+      this.trackBackgroundTask(captureKnowledgeEvent(this.projectRoot, event, {
         harness: session.harness,
         action: session.action,
-      }).catch(() => undefined);
+      }));
     }
     if (shouldCaptureDesignSystemArtifactEvent(event)) {
-      void captureDesignSystemArtifact(this.projectRoot, {
+      this.trackBackgroundTask(captureDesignSystemArtifact(this.projectRoot, {
         session: {
           id: session.id,
           harness: session.harness,
@@ -1754,10 +1755,10 @@ export class StudioRuntimeServer {
           cwd: session.cwd,
         },
         events: this.sessionStore.readSessionEvents(sessionId),
-      }).catch(() => undefined);
+      }));
     }
     if (event.type === "session_done" || event.type === "session_result") {
-      void captureDesignChangelogEntry(this.projectRoot, {
+      this.trackBackgroundTask(captureDesignChangelogEntry(this.projectRoot, {
         session: {
           id: session.id,
           harness: session.harness,
@@ -1766,7 +1767,7 @@ export class StudioRuntimeServer {
           prompt: session.prompt,
         },
         events: this.sessionStore.readSessionEvents(sessionId),
-      }).catch(() => undefined);
+      }));
     }
     for (const client of this.clients) {
       if (client.sessionId === sessionId) writeSSE(client.res, sanitizeStudioEvent(event));
@@ -1775,9 +1776,31 @@ export class StudioRuntimeServer {
 
   private publishProviderEvent(event: ProviderRuntimeEvent): void {
     const publishable = sanitizeRuntimeEvent(event);
-    void this.eventJournal.append(publishable.sessionId, publishable).catch(() => undefined);
+    this.trackBackgroundTask(this.eventJournal.append(publishable.sessionId, publishable));
     this.providerEventBus.publish(publishable);
-    void exportRuntimeEvent(publishable, this.telemetrySink).catch(() => undefined);
+    this.trackBackgroundTask(exportRuntimeEvent(publishable, this.telemetrySink));
+  }
+
+  private trackBackgroundTask(task: Promise<unknown>): void {
+    let tracked: Promise<void>;
+    tracked = task
+      .then(() => undefined, () => undefined)
+      .finally(() => {
+        this.backgroundTasks.delete(tracked);
+      });
+    this.backgroundTasks.add(tracked);
+  }
+
+  private async waitForBackgroundTasks(): Promise<void> {
+    while (this.backgroundTasks.size > 0) {
+      await Promise.all([...this.backgroundTasks]);
+    }
+  }
+
+  private async stopActiveProcesses(): Promise<void> {
+    const active = [...this.processes.values()];
+    await Promise.all(active.map((child) => waitForChildShutdown(child)));
+    this.processes.clear();
   }
 
   private providerRuntimeEventFromStudioEvent(session: StudioSession, event: StudioEvent): ProviderRuntimeEvent | null {
@@ -2143,6 +2166,37 @@ export class StudioRuntimeServer {
     res.writeHead(statusCode, { "content-type": "application/json; charset=utf-8" });
     res.end(JSON.stringify(payload, null, 2));
   }
+}
+
+function waitForChildShutdown(child: ChildProcessWithoutNullStreams): Promise<void> {
+  if (child.exitCode !== null || child.signalCode !== null) return Promise.resolve();
+  return new Promise((resolveShutdown) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(forceTimer);
+      clearTimeout(releaseTimer);
+      child.off("close", finish);
+      child.off("error", finish);
+      resolveShutdown();
+    };
+    const forceTimer = setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+        // The process may have exited between the close check and escalation.
+      }
+    }, 500);
+    const releaseTimer = setTimeout(finish, 2_000);
+    child.once("close", finish);
+    child.once("error", finish);
+    try {
+      child.kill("SIGTERM");
+    } catch {
+      finish();
+    }
+  });
 }
 
 async function readJSON<T>(req: IncomingMessage): Promise<T> {

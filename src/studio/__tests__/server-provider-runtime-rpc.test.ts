@@ -68,7 +68,7 @@ describe("studio provider runtime RPC", () => {
       expect(new Set(events.map((event) => (event.trace as { spanId: string }).spanId)).size)
         .toBeGreaterThan(1);
     } finally {
-      await rm(root, { recursive: true, force: true });
+      await stopServersAndRemove(root);
     }
   });
 
@@ -125,7 +125,7 @@ describe("studio provider runtime RPC", () => {
         }),
       ]));
     } finally {
-      await rm(root, { recursive: true, force: true });
+      await stopServersAndRemove(root);
     }
   });
 
@@ -171,8 +171,7 @@ describe("studio provider runtime RPC", () => {
       expect(resolvedBeforeRelease).toBe(false);
     } finally {
       telemetrySink.release();
-      await server?.stop();
-      await rm(root, { recursive: true, force: true });
+      await stopServersAndRemove(root);
     }
   });
 });
@@ -204,6 +203,16 @@ class DeferredTelemetrySink implements TelemetrySink {
   release(): void {
     this.settlePending();
   }
+}
+
+async function stopServersAndRemove(root: string): Promise<void> {
+  await Promise.all(servers.splice(0).map((server) => server.stop()));
+  await rm(root, {
+    recursive: true,
+    force: true,
+    maxRetries: process.platform === "win32" ? 5 : 0,
+    retryDelay: 50,
+  });
 }
 
 async function waitForSession(server: StudioRuntimeServer, sessionId: string): Promise<void> {

@@ -1,7 +1,8 @@
-import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { delimiter, join } from "node:path";
+import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
+import { defaultStudioConfig, saveStudioConfig } from "../config.js";
 import { StudioRuntimeServer } from "../server.js";
 
 const servers: StudioRuntimeServer[] = [];
@@ -29,7 +30,7 @@ describe("studio runtime server", () => {
       expect(status.metrics.indexedSessions).toEqual(expect.any(Number));
       expect(harnesses.harnesses.map((harness: { id: string }) => harness.id)).toContain("codex");
     } finally {
-      await rm(root, { recursive: true, force: true });
+      await stopServersAndRemove(root);
     }
   });
 
@@ -64,7 +65,7 @@ describe("studio runtime server", () => {
         },
       });
     } finally {
-      await rm(root, { recursive: true, force: true });
+      await stopServersAndRemove(root);
     }
   });
 
@@ -88,7 +89,7 @@ describe("studio runtime server", () => {
       expect(response.status).toBe(403);
       expect(await response.json()).toMatchObject({ error: expect.stringMatching(/workspace/i) });
     } finally {
-      await rm(root, { recursive: true, force: true });
+      await stopServersAndRemove(root);
     }
   });
 
@@ -121,25 +122,32 @@ describe("studio runtime server", () => {
         dryRun: true,
       });
     } finally {
-      await rm(root, { recursive: true, force: true });
+      await stopServersAndRemove(root);
     }
   });
 
   it("journals Codex sessions as ProviderRuntimeEvents and replays them through /api/rpc", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-rpc-"));
-    const bin = join(root, "bin");
-    const oldPath = process.env.PATH;
     try {
-      await mkdir(bin, { recursive: true });
-      const codex = join(bin, process.platform === "win32" ? "codex.cmd" : "codex");
+      const codex = join(root, process.platform === "win32" ? "codex-fixture.cmd" : "codex-fixture");
+      const codexScript = join(root, "codex-fixture.cjs");
+      const outputScript = "process.stdout.write(JSON.stringify({ type: 'agent_message', message: 'done' }) + '\\n');\n";
+      await writeFile(codexScript, outputScript);
       await writeFile(
         codex,
         process.platform === "win32"
-          ? "@echo off\r\necho {\"type\":\"agent_message\",\"message\":\"done\"}\r\n"
-          : "#!/bin/sh\necho '{\"type\":\"agent_message\",\"message\":\"done\"}'\n",
+          ? `@echo off\r\n"${process.execPath}" "%~dp0codex-fixture.cjs" %*\r\n`
+          : `#!${process.execPath}\n${outputScript}`,
       );
       await chmod(codex, 0o755);
-      process.env.PATH = `${bin}${delimiter}${oldPath ?? ""}`;
+      const config = defaultStudioConfig(root);
+      await saveStudioConfig(root, {
+        ...config,
+        harnesses: config.harnesses.map((harness) =>
+          harness.id === "codex"
+            ? { ...harness, command: codex }
+            : harness),
+      });
 
       const server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
       servers.push(server);
@@ -171,11 +179,20 @@ describe("studio runtime server", () => {
       ]));
       expect(rpc.responses.some((response: { kind: string }) => response.kind === "end")).toBe(true);
     } finally {
-      process.env.PATH = oldPath;
-      await rm(root, { recursive: true, force: true });
+      await stopServersAndRemove(root);
     }
   });
 });
+
+async function stopServersAndRemove(root: string): Promise<void> {
+  await Promise.all(servers.splice(0).map((server) => server.stop()));
+  await rm(root, {
+    recursive: true,
+    force: true,
+    maxRetries: process.platform === "win32" ? 5 : 0,
+    retryDelay: 50,
+  });
+}
 
 async function replayEvents(runtimeUrl: string, sessionId: string): Promise<{ responses: Array<{ kind: string; event?: { type: string } }> }> {
   return fetch(`${runtimeUrl}/api/rpc`, {
