@@ -17,6 +17,7 @@ from analysis.pipeline import (
     _hash_evidence_artifact,
     _holm_adjustment,
     _icc2_1,
+    _leave_one_out_rows,
     _provider_failure_from_events,
     _primary_quality_analysis,
     _secondary_analysis,
@@ -40,6 +41,11 @@ class BootstrapTests(unittest.TestCase):
         left = _bootstrap_mean_interval([1.0, 2.0, 3.0], samples=1000, seed=11)
         right = _bootstrap_mean_interval([1.0, 2.0, 3.0], samples=1000, seed=11)
         self.assertEqual(left, right)
+
+    def test_leave_one_out_preserves_frozen_repeat_identity(self) -> None:
+        rows = _leave_one_out_rows("task-a", [(1, -3.0), (2, -7.0), (6, 3.0)])
+
+        self.assertEqual([row["omitted_repeat"] for row in rows], [1, 2, 6])
 
 
 class HolmTests(unittest.TestCase):
@@ -287,8 +293,25 @@ class SecondaryAnalysisTests(unittest.TestCase):
             trial_runs[baseline.trial_id] = baseline
             trial_runs[memi.trial_id] = memi
 
-        first = _secondary_analysis(trial_runs)
-        second = _secondary_analysis(trial_runs)
+        trial_grades = {}
+        for run in trial_runs.values():
+            critical_defects = 2 if run.condition == "baseline" else 0
+            grade = TrialGrade(
+                trial_id=run.trial_id,
+                task_id=run.task_id,
+                repeat=run.repeat,
+                condition=run.condition,
+                score=80.0,
+                dimension_medians={},
+                critical_defect_count=critical_defects,
+                absolute_disagreement=0.0,
+                grader_count=3,
+                raw_scores=(80.0, 80.0, 80.0),
+            )
+            trial_grades[grade.trial_id] = grade
+
+        first = _secondary_analysis(trial_runs, trial_grades)
+        second = _secondary_analysis(trial_runs, trial_grades)
 
         self.assertEqual(first, second)
         self.assertEqual(len(first), 9)
@@ -310,6 +333,32 @@ class SecondaryAnalysisTests(unittest.TestCase):
             self.assertEqual(row["bootstrap_samples"], 10_000)
             self.assertLessEqual(row["bootstrap_ci_lower_2p5"], row["mean_raw_delta"])
             self.assertGreaterEqual(row["bootstrap_ci_upper_97p5"], row["mean_raw_delta"])
+
+        critical = next(row for row in first if row["metric"] == "critical_defects")
+        self.assertEqual(critical["pairs"], 3)
+        self.assertEqual(critical["mean_raw_delta"], -2.0)
+
+    def test_critical_defects_uses_only_complete_blinded_grade_pairs(self) -> None:
+        runs = {
+            "task-a:r1:baseline": _trial_run("task-a:r1:baseline", 1, "baseline", 10, 1, 1, 10, 1, 0, 0, True, 99),
+            "task-a:r1:memi": _trial_run("task-a:r1:memi", 1, "memi", 10, 1, 1, 10, 1, 0, 0, True, 77),
+            "task-a:r2:baseline": _trial_run("task-a:r2:baseline", 2, "baseline", 10, 1, 1, 10, 1, 0, 0, True, 55),
+            "task-a:r2:memi": _trial_run("task-a:r2:memi", 2, "memi", 10, 1, 1, 10, 1, 0, 0, True, 44),
+            "task-b:r1:baseline": _trial_run("task-b:r1:baseline", 1, "baseline", 10, 1, 1, 10, 1, 0, 0, True, 33),
+            "task-b:r1:memi": _trial_run("task-b:r1:memi", 1, "memi", 10, 1, 1, 10, 1, 0, 0, True, 22),
+        }
+        grades = {
+            "task-a:r1:baseline": _trial_grade("task-a:r1:baseline", "task-a", 1, "baseline", 2),
+            "task-a:r1:memi": _trial_grade("task-a:r1:memi", "task-a", 1, "memi", 1),
+        }
+
+        rows = _secondary_analysis(runs, grades)
+        critical_rows = [row for row in rows if row["metric"] == "critical_defects"]
+
+        self.assertEqual(len(critical_rows), 1)
+        self.assertEqual(critical_rows[0]["task_id"], "task-a")
+        self.assertEqual(critical_rows[0]["pairs"], 1)
+        self.assertEqual(critical_rows[0]["mean_raw_delta"], -1.0)
 
 
 class GeneratedArtifactTests(unittest.TestCase):
@@ -388,6 +437,27 @@ def _trial_run(
         provider_failures=provider_failures,
         evidence_manifest_sha256="sha256:test",
         verification_reasons=(),
+    )
+
+
+def _trial_grade(
+    trial_id: str,
+    task_id: str,
+    repeat: int,
+    condition: str,
+    critical_defect_count: int,
+) -> TrialGrade:
+    return TrialGrade(
+        trial_id=trial_id,
+        task_id=task_id,
+        repeat=repeat,
+        condition=condition,
+        score=80.0,
+        dimension_medians={},
+        critical_defect_count=critical_defect_count,
+        absolute_disagreement=0.0,
+        grader_count=3,
+        raw_scores=(80.0, 80.0, 80.0),
     )
 
 
