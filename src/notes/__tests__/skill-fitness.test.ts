@@ -20,7 +20,7 @@ afterEach(async () => {
 });
 
 describe("append-only skill fitness evidence", () => {
-  it("persists immutable paired-run evidence and projects deterministic medians", async () => {
+  it("loads legacy v1 evidence without allowing automation-only promotion", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "memi-skill-fitness-"));
     tempDirs.push(root);
     const store = path.join(root, "fitness.jsonl");
@@ -39,7 +39,7 @@ describe("append-only skill fitness evidence", () => {
       qualityParityRate: 1,
       medianTokenSavingsRatio: 0.3,
       medianLatencySavingsRatio: 0.2,
-      recommendation: "promote",
+      recommendation: "observe",
     });
     expect((await readFile(store, "utf8")).trim().split("\n")).toHaveLength(3);
   });

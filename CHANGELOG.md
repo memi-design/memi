@@ -8,6 +8,18 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+### Fail-closed route-fitness contract
+
+- Added RED contract coverage for full-identity fitness isolation, blinded
+  quality evidence v2, immediate regression suppression, prospective recovery,
+  legacy v1 compatibility, and chronological no-look-ahead replay.
+
+#### Architectural decisions
+
+- Automation-only v1 evidence remains loadable and can suppress a harmful
+  route, but only hash-verified blinded v2 prospective pairs may promote or
+  recover a route.
+
 ## v2.7.3 — 2026-07-31
 
 ### Release renumbering and deterministic verification
