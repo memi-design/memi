@@ -20,6 +20,7 @@ from analysis.pipeline import (
     _provider_failure_from_events,
     _primary_quality_analysis,
     _secondary_analysis,
+    _write_csv,
     _write_outputs,
     preflight_report,
 )
@@ -50,6 +51,23 @@ class HolmTests(unittest.TestCase):
 class IccTests(unittest.TestCase):
     def test_icc_returns_none_when_matrix_is_not_estimable(self) -> None:
         self.assertIsNone(_icc2_1([(1.0,), (2.0,)]))
+
+
+class CsvOutputTests(unittest.TestCase):
+    def test_writes_heterogeneous_rows_with_union_of_columns(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "rows.csv"
+            _write_csv(path, [
+                {"family": "primary", "mean_delta": 2.0},
+                {"family": "secondary", "metric": "tokens", "median_delta": -1.0},
+            ])
+            header, first, second = path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(
+                header.split(","),
+                ["family", "mean_delta", "metric", "median_delta"],
+            )
+            self.assertEqual(first, "primary,2.0,,")
+            self.assertEqual(second, "secondary,,tokens,-1.0")
 
 
 class ProviderFailureTests(unittest.TestCase):
