@@ -1,6 +1,6 @@
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerBenchmarkCommand } from "../benchmark.js";
@@ -94,62 +94,8 @@ describe("benchmark command", () => {
   it("records and projects routed skill fitness from an exact paired run", async () => {
     const program = new Command();
     registerBenchmarkCommand(program, engine() as never);
-    const routePath = join(projectRoot, "skill-route.json");
-    const repository = {
-      pathHash: `sha256:${"c".repeat(64)}`,
-      revision: "9cde918",
-      dirty: false,
-    };
-    const baseline = { ...run("baseline", 1, 1_000, 100_000), repository };
-    const memi = {
-      ...run("memi", 1, 500, 50_000),
-      repository,
-      evidenceRefs: [routePath],
-    };
-    for (const record of [baseline, memi]) {
-      const path = join(projectRoot, `${record.runId}.json`);
-      await writeFile(path, JSON.stringify(record));
-      await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
-    }
-    await writeFile(routePath, JSON.stringify({
-      schemaVersion: 2,
-      runId: memi.runId,
-      taskId: memi.taskId,
-      repeat: memi.repeat,
-      repository: {
-        pathHash: memi.repository.pathHash,
-        revision: memi.repository.revision,
-      },
-      harness: {
-        provider: memi.harness.id,
-        modelId: memi.harness.modelId,
-        reasoningEffort: memi.harness.reasoningEffort,
-      },
-      route: {
-        schemaVersion: 2,
-        routerVersion: "skill-router-v2",
-        decision: "single",
-        intentHash: `sha256:${"d".repeat(64)}`,
-        repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
-        selected: [{
-          id: "expo-router-navigation",
-          skillName: "expo-router-navigation",
-          file: "/skills/expo-router-navigation/SKILL.md",
-          score: 120,
-          matchedTerms: ["bottom-tab-badge"],
-          contentHash: `sha256:${"a".repeat(64)}`,
-          contextBytes: 1_920,
-          explanation: {
-            intentEvidence: ["bottom-tab-badge"],
-            repositoryEvidence: ["dependency:expo-router"],
-          },
-        }],
-        excluded: [],
-        candidates: [],
-        contextBytes: 1_920,
-        maximumContextBytes: 8_000,
-      },
-    }));
+    const { baseline, memi, routePath } = await boundProspectiveRouteFixture(1);
+    await recordRuns(program, baseline, memi);
 
     const logs = captureLogs();
     await program.parseAsync([
@@ -199,44 +145,10 @@ describe("benchmark command", () => {
     const program = new Command();
     program.exitOverride();
     registerBenchmarkCommand(program, engine() as never);
-    const routePath = join(projectRoot, "stable-task-class-route.json");
-    const repository = {
-      pathHash: `sha256:${"c".repeat(64)}`,
-      revision: "9cde918",
-      dirty: false,
-    };
-    const baseline = { ...run("baseline", 6, 1_000, 100_000), repository };
-    const memi = {
-      ...run("memi", 6, 500, 50_000),
-      repository,
-      evidenceRefs: [routePath],
-    };
-    await recordRuns(program, baseline, memi);
-    await writeFile(routePath, JSON.stringify({
-      schemaVersion: 2,
-      runId: memi.runId,
-      taskId: memi.taskId,
+    const { baseline, memi, routePath } = await boundProspectiveRouteFixture(6, {
       taskClass: "web-checkout-repair",
-      executionMode: "production",
-      repeat: memi.repeat,
-      repository: {
-        pathHash: memi.repository.pathHash,
-        revision: memi.repository.revision,
-      },
-      harness: {
-        provider: memi.harness.id,
-        modelId: memi.harness.modelId,
-        reasoningEffort: memi.harness.reasoningEffort,
-      },
-      route: {
-        routerVersion: "skill-router-v2",
-        repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
-        selected: [{
-          id: "expo-router-navigation",
-          contentHash: `sha256:${"a".repeat(64)}`,
-        }],
-      },
-    }));
+    });
+    await recordRuns(program, baseline, memi);
 
     const logs = captureLogs();
     await program.parseAsync([
@@ -279,55 +191,9 @@ describe("benchmark command", () => {
     const program = new Command();
     program.exitOverride();
     registerBenchmarkCommand(program, engine() as never);
-    const routePath = join(projectRoot, "bound-skill-route.json");
     const qualityPath = join(projectRoot, "quality-evidence.json");
-    const repositoryPathHash = `sha256:${"c".repeat(64)}`;
-    const baseline = {
-      ...run("baseline", 2, 1_000, 100_000),
-      repository: {
-        pathHash: repositoryPathHash,
-        revision: "9cde918",
-        dirty: false,
-      },
-    };
-    const memi = {
-      ...run("memi", 2, 500, 50_000),
-      repository: {
-        pathHash: repositoryPathHash,
-        revision: "9cde918",
-        dirty: false,
-      },
-      evidenceRefs: [routePath],
-    };
-    for (const record of [baseline, memi]) {
-      const path = join(projectRoot, `${record.runId}.json`);
-      await writeFile(path, JSON.stringify(record));
-      await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
-    }
-    const route = {
-      routerVersion: "skill-router-v2",
-      repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
-      selected: [{
-        id: "expo-router-navigation",
-        contentHash: `sha256:${"a".repeat(64)}`,
-      }],
-    };
-    await writeFile(routePath, JSON.stringify({
-      schemaVersion: 2,
-      runId: memi.runId,
-      taskId: memi.taskId,
-      repeat: memi.repeat,
-      repository: {
-        pathHash: memi.repository.pathHash,
-        revision: memi.repository.revision,
-      },
-      harness: {
-        provider: memi.harness.id,
-        modelId: memi.harness.modelId,
-        reasoningEffort: memi.harness.reasoningEffort,
-      },
-      route,
-    }));
+    const { baseline, memi, routePath } = await boundProspectiveRouteFixture(2);
+    await recordRuns(program, baseline, memi);
     await writeFile(qualityPath, JSON.stringify(createSkillFitnessQualityEvidence({
       pair: {
         baselineRunId: baseline.runId,
@@ -400,7 +266,7 @@ describe("benchmark command", () => {
     });
   });
 
-  it("rejects a route receipt that is not bound to the selected Memi run", async () => {
+  it("rejects an unsealed route and pair before considering route binding", async () => {
     const program = new Command();
     program.exitOverride();
     registerBenchmarkCommand(program, engine() as never);
@@ -438,7 +304,7 @@ describe("benchmark command", () => {
       "--store-root",
       projectRoot,
       "--json",
-    ], { from: "user" })).rejects.toThrow(/requires a bound v2 route receipt/);
+    ], { from: "user" })).rejects.toThrow(/manifest-sealed prospective evidence/);
   });
 
   it("imports an exact raw 2.7.3 route through its prospective evidence manifest", async () => {
@@ -553,40 +419,10 @@ describe("benchmark command", () => {
     const program = new Command();
     program.exitOverride();
     registerBenchmarkCommand(program, engine() as never);
-    const routePath = join(projectRoot, "stale-bound-route.json");
-    const baseline = run("baseline", 4, 1_000, 100_000);
-    const memi = {
-      ...run("memi", 4, 500, 50_000),
-      evidenceRefs: [routePath],
-    };
-    for (const record of [baseline, memi]) {
-      const path = join(projectRoot, `${record.runId}.json`);
-      await writeFile(path, JSON.stringify(record));
-      await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
-    }
-    await writeFile(routePath, JSON.stringify({
-      schemaVersion: 2,
+    const { baseline, memi, routePath } = await boundProspectiveRouteFixture(4, {
       runId: "wrong-run",
-      taskId: memi.taskId,
-      repeat: memi.repeat,
-      repository: {
-        pathHash: `sha256:${"c".repeat(64)}`,
-        revision: memi.repository.revision,
-      },
-      harness: {
-        provider: memi.harness.id,
-        modelId: memi.harness.modelId,
-        reasoningEffort: memi.harness.reasoningEffort,
-      },
-      route: {
-        routerVersion: "skill-router-v2",
-        repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
-        selected: [{
-          id: "expo-router-navigation",
-          contentHash: `sha256:${"a".repeat(64)}`,
-        }],
-      },
-    }));
+    });
+    await recordRuns(program, baseline, memi);
 
     await expect(program.parseAsync([
       "benchmark",
@@ -741,6 +577,106 @@ function engine() {
   };
 }
 
+async function boundProspectiveRouteFixture(
+  repeat: number,
+  overrides: {
+    readonly runId?: string;
+    readonly taskClass?: string;
+  } = {},
+) {
+  const baselineDirectory = join(projectRoot, `bound-route-${repeat}-baseline`);
+  const memiDirectory = join(projectRoot, `bound-route-${repeat}-memi`);
+  const routePath = join(memiDirectory, "skill-route.json");
+  await Promise.all([
+    mkdir(baselineDirectory, { recursive: true }),
+    mkdir(memiDirectory, { recursive: true }),
+  ]);
+  const repository = {
+    pathHash: `sha256:${"c".repeat(64)}`,
+    revision: "9cde918",
+    dirty: false,
+  };
+  const baselineBase = { ...run("baseline", repeat, 1_000, 100_000), repository };
+  const memiBase = { ...run("memi", repeat, 500, 50_000), repository };
+  await writeFile(routePath, JSON.stringify({
+    schemaVersion: 2,
+    runId: overrides.runId ?? memiBase.runId,
+    taskId: memiBase.taskId,
+    ...(overrides.taskClass ? { taskClass: overrides.taskClass } : {}),
+    executionMode: "production",
+    repeat: memiBase.repeat,
+    repository: {
+      pathHash: memiBase.repository.pathHash,
+      revision: memiBase.repository.revision,
+    },
+    harness: {
+      provider: memiBase.harness.id,
+      modelId: memiBase.harness.modelId,
+      reasoningEffort: memiBase.harness.reasoningEffort,
+    },
+    route: {
+      routerVersion: "skill-router-v2",
+      repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+      selected: [{
+        id: "expo-router-navigation",
+        contentHash: `sha256:${"a".repeat(64)}`,
+      }],
+    },
+  }));
+  const baseline = await sealProspectiveRun(
+    baselineBase,
+    baselineDirectory,
+    [],
+    repeat * 2 - 1,
+  );
+  const memi = await sealProspectiveRun(
+    memiBase,
+    memiDirectory,
+    [routePath],
+    repeat * 2,
+  );
+  return { baseline, memi, routePath };
+}
+
+async function sealProspectiveRun(
+  record: BenchmarkRunRecord,
+  evidenceDirectory: string,
+  artifactPaths: readonly string[],
+  sequence: number,
+): Promise<BenchmarkRunRecord> {
+  await mkdir(evidenceDirectory, { recursive: true });
+  const runPath = join(evidenceDirectory, "run.json");
+  const manifestPath = join(evidenceDirectory, "evidence-manifest.json");
+  let sealed = {
+    ...record,
+    evidenceRefs: [manifestPath, runPath, ...artifactPaths],
+    prospective: {
+      planHash: `sha256:${"1".repeat(64)}`,
+      freezeHash: `sha256:${"2".repeat(64)}`,
+      candidateArtifactSha256: `sha256:${"3".repeat(64)}`,
+      taskManifestSha256: `sha256:${"4".repeat(64)}`,
+      evidenceManifestSha256: EVIDENCE_MANIFEST_HASH_PLACEHOLDER,
+      trialId: `v15:${record.taskId}:r${record.repeat}:${record.condition}`,
+      sequence,
+    },
+  } satisfies BenchmarkRunRecord;
+  await writeFile(runPath, JSON.stringify(sealed));
+  const manifest = await createEvidenceManifest({
+    evidenceDirectory,
+    trialId: sealed.prospective.trialId,
+    artifactNames: ["run.json", ...artifactPaths.map((entry) => basename(entry))],
+  });
+  sealed = {
+    ...sealed,
+    prospective: {
+      ...sealed.prospective,
+      evidenceManifestSha256: manifest.manifestSha256,
+    },
+  };
+  await writeFile(runPath, JSON.stringify(sealed));
+  return sealed;
+}
+
 async function rawProspectiveRouteFixture(repeat: number) {
   const evidenceDirectory = join(projectRoot, `raw-route-${repeat}`);
   const routePath = join(evidenceDirectory, "skill-route.json");
@@ -785,7 +721,7 @@ async function rawProspectiveRouteFixture(repeat: number) {
     revision: "9cde918",
     dirty: false,
   };
-  const baseline = { ...run("baseline", repeat, 1_000, 100_000), repository };
+  const baselineBase = { ...run("baseline", repeat, 1_000, 100_000), repository };
   let memi = {
     ...run("memi", repeat, 500, 50_000),
     repository,
@@ -819,6 +755,12 @@ async function rawProspectiveRouteFixture(repeat: number) {
     },
   };
   await writeFile(runPath, JSON.stringify(memi));
+  const baseline = await sealProspectiveRun(
+    baselineBase,
+    join(projectRoot, `raw-route-${repeat}-baseline`),
+    [],
+    repeat * 2 - 1,
+  );
   return {
     baseline,
     memi,

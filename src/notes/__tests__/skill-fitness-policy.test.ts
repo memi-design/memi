@@ -420,14 +420,17 @@ function identity(): SkillFitnessRouteIdentity {
 }
 
 function v1Event(overrides: Partial<SkillFitnessEvent> = {}): SkillFitnessEvent {
+  const eventId = typeof overrides.eventId === "string"
+    ? overrides.eventId
+    : "legacy-event";
   return {
     schemaVersion: 1,
-    eventId: "legacy-event",
+    eventId,
     createdAt: "2026-07-29T00:00:00.000Z",
     ...identity(),
     pair: {
-      baselineRunId: "baseline-legacy",
-      memiRunId: "memi-legacy",
+      baselineRunId: `baseline-${eventId}`,
+      memiRunId: `memi-${eventId}`,
     },
     qualityParity: true,
     tokenSavingsRatio: 0.2,

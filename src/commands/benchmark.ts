@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { lstat, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
-import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
 import {
@@ -766,7 +766,6 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       const baseline = uniqueRun(runs, opts.baseline, "baseline");
       const memi = uniqueRun(runs, opts.memi, "memi");
       const routePath = resolve(opts.route);
-      await assertContainedPath(storeRoot, routePath, "route receipt");
       assertRouteReceiptReferenced(memi, routePath);
       await verifyManifestSealedFitnessRun({
         run: baseline,
@@ -1196,7 +1195,7 @@ async function importProspectiveRawRoute(input: {
       condition: "memi",
       sequence: input.memi.prospective.sequence,
     },
-    allowedEvidenceRoot: input.storeRoot,
+    allowedEvidenceRoot: evidenceDirectory,
   });
   if (!verification.valid) {
     throw new Error(
@@ -1269,7 +1268,16 @@ async function verifyManifestSealedFitnessRun(input: {
   if (dirname(manifestPath) !== evidenceDirectory) {
     throw new Error(`${input.condition} prospective evidence must be sibling artifacts`);
   }
-  await assertContainedPath(input.storeRoot, evidenceDirectory, `${input.condition} evidence`);
+  const directoryMetadata = await lstat(evidenceDirectory);
+  if (directoryMetadata.isSymbolicLink() || !directoryMetadata.isDirectory()) {
+    throw new Error(
+      `${input.condition} evidence directory must be a regular non-symlink directory`,
+    );
+  }
+  await readBoundedJson(
+    manifestPath,
+    `${input.condition} prospective evidence manifest`,
+  );
   if (
     input.requiredArtifactPath
     && dirname(input.requiredArtifactPath) !== evidenceDirectory
@@ -1291,7 +1299,7 @@ async function verifyManifestSealedFitnessRun(input: {
       condition: input.condition,
       sequence: input.run.prospective.sequence,
     },
-    allowedEvidenceRoot: input.storeRoot,
+    allowedEvidenceRoot: evidenceDirectory,
   });
   if (!verification.valid) {
     throw new Error(
@@ -1329,20 +1337,6 @@ function uniqueEvidencePath(
   return matches[0];
 }
 
-async function assertContainedPath(
-  allowedRoot: string,
-  target: string,
-  label: string,
-): Promise<void> {
-  const [rootPath, targetPath] = await Promise.all([
-    realpath(resolve(allowedRoot)),
-    realpath(resolve(target)),
-  ]);
-  const containment = relative(rootPath, targetPath);
-  if (containment.startsWith("..") || isAbsolute(containment)) {
-    throw new Error(`${label} escapes the store root`);
-  }
-}
 
 function siblingEvidenceRef(
   memi: BenchmarkRunRecord,
