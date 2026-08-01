@@ -242,6 +242,8 @@ try {
       freezePath,
       "--store-root",
       storeRoot,
+      "--evidence-root",
+      evidenceRoot,
       "--out",
       evaluationOut,
       "--json",

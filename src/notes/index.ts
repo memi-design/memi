@@ -42,16 +42,30 @@ export {
 } from "./skill-router.js";
 export { buildRepositoryFingerprint } from "./repository-fingerprint.js";
 export {
+  SkillFitnessBoundRouteReceiptSchema,
   SkillFitnessEventSchema,
+  SkillFitnessEventV1Schema,
+  SkillFitnessEventV2Schema,
+  SkillFitnessQualityEvidenceSchema,
   SkillFitnessRouteSchema,
   SkillFitnessRouteReceiptSchema,
+  SkillFitnessRouteIdentitySchema,
+  assessSkillRouteFitness,
   appendSkillFitnessEvent,
+  backtestSkillFitness,
   buildSkillFitnessEvent,
+  createSkillFitnessQualityEvidence,
   loadSkillFitnessEvents,
   projectSkillFitness,
+  skillFitnessRouteKey,
+  type SkillFitnessBacktest,
+  type SkillFitnessBoundRouteReceipt,
   type SkillFitnessEvent,
   type SkillFitnessProjection,
+  type SkillFitnessQualityEvidence,
   type SkillFitnessRoute,
+  type SkillFitnessRouteIdentity,
+  type SkillRouteFitnessAssessment,
 } from "./skill-fitness.js";
 
 export {

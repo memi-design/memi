@@ -2,10 +2,15 @@ import { createHash } from "node:crypto";
 import {
   lstat,
   readFile,
+  realpath,
   writeFile,
 } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
+import {
+  benchmarkConditionSchema,
+  benchmarkRunRecordSchema,
+} from "./contracts.js";
 import { hashValue } from "./prospective-study.js";
 
 const sha256Schema = z.string().regex(/^sha256:[a-f0-9]{64}$/);
@@ -24,6 +29,14 @@ const evidenceManifestContentSchema = z.object({
 const evidenceManifestSchema = evidenceManifestContentSchema.extend({
   manifestSha256: sha256Schema,
 }).strict();
+const evidenceBindingSchema = z.object({
+  trialId: z.string().min(1),
+  taskId: z.string().min(1),
+  repeat: z.number().int().positive(),
+  condition: benchmarkConditionSchema,
+  sequence: z.number().int().nonnegative(),
+}).strict();
+export type EvidenceBinding = z.infer<typeof evidenceBindingSchema>;
 
 export async function hashFile(file: string): Promise<`sha256:${string}`> {
   const bytes = await readFile(file);
@@ -69,9 +82,26 @@ export async function verifyEvidenceManifest(input: {
   readonly evidenceDirectory: string;
   readonly expectedManifestSha256: string;
   readonly requiredArtifacts: readonly string[];
+  readonly expectedBinding?: EvidenceBinding;
+  readonly allowedEvidenceRoot?: string;
 }): Promise<Readonly<{ valid: boolean; reasons: readonly string[] }>> {
-  const evidenceDirectory = path.resolve(input.evidenceDirectory);
+  const allowedEvidenceRoot = input.allowedEvidenceRoot
+    ? await resolveAllowedEvidenceRoot(input.allowedEvidenceRoot)
+    : null;
+  const evidenceDirectory = await resolveEvidenceDirectory(
+    input.evidenceDirectory,
+    allowedEvidenceRoot,
+  ).catch(() => null);
+  if (!evidenceDirectory) {
+    return deepFreeze({
+      valid: false,
+      reasons: ["evidence-directory-escape"],
+    });
+  }
   const reasons: string[] = [];
+  const expectedBinding = input.expectedBinding
+    ? evidenceBindingSchema.parse(input.expectedBinding)
+    : null;
   let manifest: z.infer<typeof evidenceManifestSchema>;
   try {
     manifest = evidenceManifestSchema.parse(JSON.parse(await readFile(
@@ -90,6 +120,9 @@ export async function verifyEvidenceManifest(input: {
     || manifestSha256 !== hashValue(content)
   ) {
     reasons.push("evidence-manifest-hash-mismatch");
+  }
+  if (expectedBinding && manifest.trialId !== expectedBinding.trialId) {
+    reasons.push("trial-binding-mismatch:trialId");
   }
   const filesByName = new Map(manifest.files.map((file) => [file.name, file]));
   const artifacts = new Set([
@@ -135,6 +168,13 @@ export async function verifyEvidenceManifest(input: {
         reasons.push("run-manifest-hash-mismatch");
       }
     }
+  }
+  if (expectedBinding) {
+    const runBindingReasons = await verifyRunBinding(
+      path.join(evidenceDirectory, "run.json"),
+      expectedBinding,
+    );
+    reasons.push(...runBindingReasons);
   }
   return deepFreeze({ valid: reasons.length === 0, reasons });
 }
@@ -191,6 +231,58 @@ function validateArtifactName(name: string): void {
   ) {
     throw new Error(`invalid evidence artifact name: ${name}`);
   }
+}
+
+async function verifyRunBinding(
+  runPath: string,
+  expectedBinding: EvidenceBinding,
+): Promise<readonly string[]> {
+  let run: z.infer<typeof benchmarkRunRecordSchema>;
+  try {
+    run = benchmarkRunRecordSchema.parse(JSON.parse(await readFile(runPath, "utf8")));
+  } catch {
+    return ["run-receipt-invalid"];
+  }
+  const reasons: string[] = [];
+  if (run.taskId !== expectedBinding.taskId) {
+    reasons.push("trial-binding-mismatch:taskId");
+  }
+  if (run.repeat !== expectedBinding.repeat) {
+    reasons.push("trial-binding-mismatch:repeat");
+  }
+  if (run.condition !== expectedBinding.condition) {
+    reasons.push("trial-binding-mismatch:condition");
+  }
+  if (
+    !run.prospective
+    || run.prospective.trialId !== expectedBinding.trialId
+  ) {
+    reasons.push("trial-binding-mismatch:trialId");
+  }
+  if (
+    !run.prospective
+    || run.prospective.sequence !== expectedBinding.sequence
+  ) {
+    reasons.push("trial-binding-mismatch:sequence");
+  }
+  return reasons;
+}
+
+async function resolveAllowedEvidenceRoot(root: string): Promise<string> {
+  return await realpath(path.resolve(root));
+}
+
+async function resolveEvidenceDirectory(
+  evidenceDirectory: string,
+  allowedEvidenceRoot: string | null,
+): Promise<string> {
+  const resolved = await realpath(path.resolve(evidenceDirectory));
+  if (!allowedEvidenceRoot) return resolved;
+  const relative = path.relative(allowedEvidenceRoot, resolved);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error("evidence directory escapes the allowed root");
+  }
+  return resolved;
 }
 
 function deepFreeze<T>(value: T): Readonly<T> {

@@ -10,9 +10,21 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### Fail-closed route-fitness contract
 
+- `8cfd3498` test: define fail-closed route fitness contract
 - Added RED contract coverage for full-identity fitness isolation, blinded
   quality evidence v2, immediate regression suppression, prospective recovery,
   legacy v1 compatibility, and chronological no-look-ahead replay.
+- Added `memi benchmark fitness-backtest --store-root ... --as-of ... --json`
+  with deterministic chronological replay and exact task, repository, harness,
+  skill, and content-hash isolation.
+- Required every new fitness record to reference a run-bound v2 route receipt;
+  legacy v1 events remain readable, negative v1 evidence can suppress, and
+  automation-only v1 evidence cannot promote or recover a route.
+- Bound prospective evidence manifests to the frozen trial, task, condition,
+  repeat, sequence, and trusted evidence root, rejecting direct and symlinked
+  path escapes.
+- Added strict regular-file, duplicate-row, schema, JSON, and byte-limit checks
+  for benchmark and fitness JSONL stores.
 
 #### Architectural decisions
 

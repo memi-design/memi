@@ -3,6 +3,7 @@ import {
   assessSkillRouteFitness,
   backtestSkillFitness,
   createSkillFitnessQualityEvidence,
+  projectSkillFitness,
   type SkillFitnessEvent,
   type SkillFitnessRouteIdentity,
 } from "../skill-fitness.js";
@@ -155,6 +156,11 @@ describe("history-aware fail-closed skill routing", () => {
       recoveryEvents: 3,
       reasons: ["three-prospective-healthy-pairs"],
     });
+    expect(projectSkillFitness([
+      suppression,
+      ineligible,
+      ...recoveries,
+    ]).skills[0]?.recommendation).toBe("promote");
   });
 
   it("resets recovery progress when another harmful event arrives", () => {
@@ -315,6 +321,27 @@ describe("chronological fitness backtest", () => {
       "paraform-command-menu",
     ]);
   });
+
+  it("orders valid ISO timestamps by instant rather than offset text", () => {
+    const earlierInstant = v1Event({
+      eventId: "earlier-instant",
+      createdAt: "2026-07-21T00:00:00Z",
+      qualityParity: false,
+    });
+    const laterInstant = v2Event({
+      eventId: "later-instant",
+      createdAt: "2026-07-21T00:00:00.500Z",
+      baselineScore: 90,
+      memiScore: 92,
+    });
+
+    expect(backtestSkillFitness({
+      events: [laterInstant, earlierInstant],
+    }).routes[0]?.timeline.map((entry) => entry.eventId)).toEqual([
+      "earlier-instant",
+      "later-instant",
+    ]);
+  });
 });
 
 function identity(): SkillFitnessRouteIdentity {
@@ -386,6 +413,7 @@ function v2Event(input: {
     ...identity(),
     pair: { baselineRunId, memiRunId },
     qualityEvidence,
+    functionalAcceptance: true,
     prospective: input.prospective === false
       ? null
       : {

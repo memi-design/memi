@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -55,7 +55,34 @@ describe("append-only skill fitness evidence", () => {
     ).rejects.toThrow(/already exists/);
   });
 
-  it("requires six quality-parity regressions before recommending quarantine", () => {
+  it("fails deterministically on corrupt and duplicate persisted evidence", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-skill-fitness-"));
+    tempDirs.push(root);
+    const store = path.join(root, "fitness.jsonl");
+    await writeFile(store, "not-json\n");
+    await expect(loadSkillFitnessEvents(store)).rejects.toThrow(/line 1/);
+
+    const duplicate = event("duplicate", 0.2, 0.1);
+    await writeFile(store, `${JSON.stringify(duplicate)}\n${JSON.stringify(duplicate)}\n`);
+    await expect(loadSkillFitnessEvents(store)).rejects.toThrow(
+      /Duplicate skill fitness event duplicate/,
+    );
+  });
+
+  it("rejects symlinked and oversized fitness stores", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-skill-fitness-"));
+    tempDirs.push(root);
+    const target = path.join(root, "target.jsonl");
+    const linked = path.join(root, "linked.jsonl");
+    await writeFile(target, `${JSON.stringify(event("linked", 0.2, 0.1))}\n`);
+    await symlink(target, linked);
+    await expect(loadSkillFitnessEvents(linked)).rejects.toThrow(/non-symlink/);
+    await expect(loadSkillFitnessEvents(target, { maxBytes: 8 })).rejects.toThrow(
+      /byte safety limit/,
+    );
+  });
+
+  it("quarantines immediately when legacy evidence records a quality regression", () => {
     const regressions = Array.from({ length: 6 }, (_, index) => ({
       ...event(`event-${index}`, -0.2, -0.1),
       qualityParity: index !== 5,

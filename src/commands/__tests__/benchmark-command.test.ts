@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerBenchmarkCommand } from "../benchmark.js";
 import type { BenchmarkRunRecord } from "../../efficiency/contracts.js";
+import { createSkillFitnessQualityEvidence } from "../../notes/skill-fitness.js";
 import { captureLogs, lastLog } from "./test-helpers.js";
 
 let projectRoot: string;
@@ -89,15 +90,37 @@ describe("benchmark command", () => {
   it("records and projects routed skill fitness from an exact paired run", async () => {
     const program = new Command();
     registerBenchmarkCommand(program, engine() as never);
-    const baseline = run("baseline", 1, 1_000, 100_000);
-    const memi = run("memi", 1, 500, 50_000);
+    const routePath = join(projectRoot, "skill-route.json");
+    const repository = {
+      pathHash: `sha256:${"c".repeat(64)}`,
+      revision: "9cde918",
+      dirty: false,
+    };
+    const baseline = { ...run("baseline", 1, 1_000, 100_000), repository };
+    const memi = {
+      ...run("memi", 1, 500, 50_000),
+      repository,
+      evidenceRefs: [routePath],
+    };
     for (const record of [baseline, memi]) {
       const path = join(projectRoot, `${record.runId}.json`);
       await writeFile(path, JSON.stringify(record));
       await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
     }
-    const routePath = join(projectRoot, "skill-route.json");
     await writeFile(routePath, JSON.stringify({
+      schemaVersion: 2,
+      runId: memi.runId,
+      taskId: memi.taskId,
+      repeat: memi.repeat,
+      repository: {
+        pathHash: memi.repository.pathHash,
+        revision: memi.repository.revision,
+      },
+      harness: {
+        provider: memi.harness.id,
+        modelId: memi.harness.modelId,
+        reasoningEffort: memi.harness.reasoningEffort,
+      },
       route: {
         schemaVersion: 2,
         routerVersion: "skill-router-v2",
@@ -122,9 +145,6 @@ describe("benchmark command", () => {
         contextBytes: 1_920,
         maximumContextBytes: 8_000,
       },
-      skills: [],
-      resources: [],
-      contextBytes: 1_920,
     }));
 
     const logs = captureLogs();
@@ -138,7 +158,7 @@ describe("benchmark command", () => {
       "--route",
       routePath,
       "--task-class",
-      "expo-bottom-tab-badge",
+      memi.taskId,
       "--store-root",
       projectRoot,
       "--json",
@@ -169,6 +189,228 @@ describe("benchmark command", () => {
       "--json",
     ], { from: "user" });
     expect(JSON.parse(lastLog(logs)).projection.events).toBe(1);
+  });
+
+  it("records hash-verified v2 quality evidence and emits a stable no-look-ahead backtest", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+    const routePath = join(projectRoot, "bound-skill-route.json");
+    const qualityPath = join(projectRoot, "quality-evidence.json");
+    const repositoryPathHash = `sha256:${"c".repeat(64)}`;
+    const baseline = {
+      ...run("baseline", 2, 1_000, 100_000),
+      repository: {
+        pathHash: repositoryPathHash,
+        revision: "9cde918",
+        dirty: false,
+      },
+    };
+    const memi = {
+      ...run("memi", 2, 500, 50_000),
+      repository: {
+        pathHash: repositoryPathHash,
+        revision: "9cde918",
+        dirty: false,
+      },
+      evidenceRefs: [routePath],
+    };
+    for (const record of [baseline, memi]) {
+      const path = join(projectRoot, `${record.runId}.json`);
+      await writeFile(path, JSON.stringify(record));
+      await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
+    }
+    const route = {
+      routerVersion: "skill-router-v2",
+      repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+      selected: [{
+        id: "expo-router-navigation",
+        contentHash: `sha256:${"a".repeat(64)}`,
+      }],
+    };
+    await writeFile(routePath, JSON.stringify({
+      schemaVersion: 2,
+      runId: memi.runId,
+      taskId: memi.taskId,
+      repeat: memi.repeat,
+      repository: {
+        pathHash: memi.repository.pathHash,
+        revision: memi.repository.revision,
+      },
+      harness: {
+        provider: memi.harness.id,
+        modelId: memi.harness.modelId,
+        reasoningEffort: memi.harness.reasoningEffort,
+      },
+      route,
+    }));
+    await writeFile(qualityPath, JSON.stringify(createSkillFitnessQualityEvidence({
+      pair: {
+        baselineRunId: baseline.runId,
+        memiRunId: memi.runId,
+      },
+      rubricVersion: "memi-design-quality-v1",
+      blinded: true,
+      graderCount: 3,
+      baseline: { score: 90, criticalDefects: 0 },
+      memi: { score: 92, criticalDefects: 0 },
+    })));
+
+    const logs = captureLogs();
+    await program.parseAsync([
+      "benchmark",
+      "fitness-record",
+      "--baseline",
+      baseline.runId,
+      "--memi",
+      memi.runId,
+      "--route",
+      routePath,
+      "--task-class",
+      memi.taskId,
+      "--quality-evidence",
+      qualityPath,
+      "--store-root",
+      projectRoot,
+      "--json",
+    ], { from: "user" });
+    expect(JSON.parse(lastLog(logs))).toMatchObject({
+      status: "recorded",
+      event: {
+        schemaVersion: 2,
+        qualityEvidence: {
+          rubricVersion: "memi-design-quality-v1",
+          graderCount: 3,
+          evidenceSha256: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
+        },
+      },
+    });
+
+    await program.parseAsync([
+      "benchmark",
+      "fitness-backtest",
+      "--store-root",
+      projectRoot,
+      "--as-of",
+      memi.timing.completedAt,
+      "--json",
+    ], { from: "user" });
+    const first = lastLog(logs);
+    await program.parseAsync([
+      "benchmark",
+      "fitness-backtest",
+      "--store-root",
+      projectRoot,
+      "--as-of",
+      memi.timing.completedAt,
+      "--json",
+    ], { from: "user" });
+    expect(lastLog(logs)).toBe(first);
+    expect(JSON.parse(first)).toMatchObject({
+      status: "backtested",
+      backtest: {
+        eventsAvailable: 1,
+        eventsReplayed: 1,
+        routes: [{ finalDecision: "allow", finalState: "healthy" }],
+      },
+    });
+  });
+
+  it("rejects a route receipt that is not bound to the selected Memi run", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+    const routePath = join(projectRoot, "unbound-route.json");
+    const baseline = run("baseline", 3, 1_000, 100_000);
+    const memi = {
+      ...run("memi", 3, 500, 50_000),
+      evidenceRefs: [routePath],
+    };
+    for (const record of [baseline, memi]) {
+      const path = join(projectRoot, `${record.runId}.json`);
+      await writeFile(path, JSON.stringify(record));
+      await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
+    }
+    await writeFile(routePath, JSON.stringify({
+      routerVersion: "skill-router-v2",
+      repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+      selected: [{
+        id: "expo-router-navigation",
+        contentHash: `sha256:${"a".repeat(64)}`,
+      }],
+    }));
+
+    await expect(program.parseAsync([
+      "benchmark",
+      "fitness-record",
+      "--baseline",
+      baseline.runId,
+      "--memi",
+      memi.runId,
+      "--route",
+      routePath,
+      "--task-class",
+      memi.taskId,
+      "--store-root",
+      projectRoot,
+      "--json",
+    ], { from: "user" })).rejects.toThrow(/requires a bound v2 route receipt/);
+  });
+
+  it("validates bound v2 receipt metadata even without quality evidence", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+    const routePath = join(projectRoot, "stale-bound-route.json");
+    const baseline = run("baseline", 4, 1_000, 100_000);
+    const memi = {
+      ...run("memi", 4, 500, 50_000),
+      evidenceRefs: [routePath],
+    };
+    for (const record of [baseline, memi]) {
+      const path = join(projectRoot, `${record.runId}.json`);
+      await writeFile(path, JSON.stringify(record));
+      await program.parseAsync(["benchmark", "record", path, "--json"], { from: "user" });
+    }
+    await writeFile(routePath, JSON.stringify({
+      schemaVersion: 2,
+      runId: "wrong-run",
+      taskId: memi.taskId,
+      repeat: memi.repeat,
+      repository: {
+        pathHash: `sha256:${"c".repeat(64)}`,
+        revision: memi.repository.revision,
+      },
+      harness: {
+        provider: memi.harness.id,
+        modelId: memi.harness.modelId,
+        reasoningEffort: memi.harness.reasoningEffort,
+      },
+      route: {
+        routerVersion: "skill-router-v2",
+        repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+        selected: [{
+          id: "expo-router-navigation",
+          contentHash: `sha256:${"a".repeat(64)}`,
+        }],
+      },
+    }));
+
+    await expect(program.parseAsync([
+      "benchmark",
+      "fitness-record",
+      "--baseline",
+      baseline.runId,
+      "--memi",
+      memi.runId,
+      "--route",
+      routePath,
+      "--task-class",
+      memi.taskId,
+      "--store-root",
+      projectRoot,
+      "--json",
+    ], { from: "user" })).rejects.toThrow(/bound route run id mismatch/);
   });
 
   it("creates a deterministic multi-provider workflow plan", async () => {
