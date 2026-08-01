@@ -145,6 +145,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `006b55bc` | fix: byte-bind website parity provenance |
 | `6d205fb3` | docs: finalize Memi 2.7.4 confirmatory report |
 | `7635dc83` | docs: harden confirmatory report provenance |
+| `d34174f4` | fix: seal final report channel evidence |
 
 ### Exact-match fail-closed route fitness
 
