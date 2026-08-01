@@ -92,6 +92,7 @@ describe("workflow trial runner", () => {
           "utf8",
         )).toBe("ready\n");
         await writeFile(path.join(input.workspaceRoot, "implemented.txt"), "ready\n");
+        await new Promise((resolve) => setTimeout(resolve, 20));
         return {
           exitCode: 0,
           stdout: "implemented",
@@ -118,6 +119,7 @@ describe("workflow trial runner", () => {
     });
 
     expect(result.accepted).toBe(true);
+    expect(result.adapterWallTimeMs).toBeGreaterThan(0);
     expect(result.verification).toHaveLength(2);
     expect(result.verificationIsolation).toMatchObject({
       mode: "fresh-clone-post-patch",
