@@ -570,6 +570,72 @@ describe("benchmark command", () => {
     );
   });
 
+  it("requires V2 workflow tasks to generate the frozen native capture set", async () => {
+    const taskPath = join(projectRoot, "workflow-task.json");
+    const freezePath = join(projectRoot, "v2-freeze.json");
+    const draftPath = join(projectRoot, "evidence-draft.json");
+    const artifactRoot = join(projectRoot, "captured");
+    const task = { ...workflowTask(), id: "web-task" };
+    await mkdir(artifactRoot, { recursive: true });
+    await writeFile(taskPath, JSON.stringify(task));
+    const freeze = buildProspectiveFreeze({
+      plan: prospectivePlanV2(),
+      frozenAt: "2026-07-30T12:00:00.000Z",
+      candidate: {
+        version: "2.7.5",
+        revision: "d".repeat(40),
+        sourceState: "clean",
+        dirtyFileCount: 0,
+        sourceTreeSha256: `sha256:${"e".repeat(64)}`,
+        artifactSha256: `sha256:${"f".repeat(64)}`,
+      },
+      harness: {
+        provider: "codex",
+        modelId: "gpt-5.6-sol",
+        reasoningEffort: "medium",
+        harnessVersion: "test-harness",
+        permissionPolicy: "workspace-write",
+        maximumSkills: 2,
+        maximumContextBytes: 8_000,
+      },
+      environment: {
+        machine: "test-mac",
+        os: "macOS 26.0",
+        arch: "arm64",
+        node: "v22.22.3",
+        xcode: "26.6",
+        simulator: "iPhone 17 / iOS 26.5",
+        workspaceVolume: "external-ssd",
+        temporaryRoot: "/Volumes/External/evidence/tmp",
+      },
+      taskManifestHashes: { "web-task": await hashFile(taskPath) },
+    });
+    await writeFile(freezePath, JSON.stringify(freeze));
+    await writeFile(draftPath, JSON.stringify(evidenceDraft()));
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await expect(program.parseAsync([
+      "benchmark", "workflow-run", taskPath,
+      "--condition", "baseline",
+      "--provider", "codex",
+      "--repository", projectRoot,
+      "--evidence-root", join(projectRoot, "evidence"),
+      "--store-root", join(projectRoot, "store"),
+      "--suite", "prospective-v2",
+      "--experiment", "v2-gate",
+      "--repeat", "1",
+      "--freeze", freezePath,
+      "--trial", freeze.trials[0].trialId,
+      "--evidence-draft", draftPath,
+      "--artifact-root", artifactRoot,
+      "--execute",
+    ], { from: "user" })).rejects.toThrow(
+      "prospective evidence V2 requires nativeCaptures matching the draft",
+    );
+  });
+
   it("excludes a V2 receipt when a declared billing artifact is not manifest-sealed", async () => {
     const planPath = join(projectRoot, "v2-plan.json");
     const environmentPath = join(projectRoot, "environment.json");
@@ -1131,6 +1197,28 @@ function prospectivePlanV2() {
       ...prospectivePlan().creditPolicy,
       independentRepeatInterimCreditCap: 6,
     },
+  };
+}
+
+function evidenceDraft() {
+  return {
+    schemaVersion: 1,
+    kind: "memi-prospective-evidence-draft-v1",
+    native: {
+      captures: [
+        { kind: "screenshot", name: "desktop.png", source: "desktop.png" },
+        { kind: "interaction-trace", name: "flow.json", source: "flow.json" },
+        { kind: "accessibility-tree", name: "a11y.json", source: "a11y.json" },
+      ],
+    },
+    billing: {
+      source: "provider-usage-export",
+      currency: "USD",
+      amount: 0.42,
+      sourceArtifact: { name: "provider-usage.json", source: "usage.json" },
+      priceCardArtifact: { name: "price-card.json", source: "price-card.json" },
+    },
+    execution: { retryReasons: [] },
   };
 }
 
