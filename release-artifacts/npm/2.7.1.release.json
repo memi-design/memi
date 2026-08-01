@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "version": "2.7.1",
+  "packageName": "@memi-design/cli",
+  "sourceCommit": "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f",
+  "integrity": "sha512-+A7Gp4cnc9SKCJGg3xikpTbpRZQ6w1MvvCC9dC6mz9gVg3zt+fpJwlnnq347T1GcHtfcAQ2vrlLE89h9jaQINw==",
+  "shasum": "b951070a960b81ff17a6f4850c1059894cabfb72",
+  "tarball": {
+    "url": "https://registry.npmjs.org/@memi-design/cli/-/cli-2.7.1.tgz",
+    "sha512": "f80ec6a7872773d48a0891a0df18a4a536e945943ac3532fbc20bd742ea6cfd815837cedf9fa49c259e7ab7e3b4f519c1ed7dc010dafae52c4f3d87d8da40837",
+    "sha1": "b951070a960b81ff17a6f4850c1059894cabfb72"
+  },
+  "signature": {
+    "count": 1,
+    "npmAuditSignaturesVerified": true
+  },
+  "attestation": {
+    "url": "https://registry.npmjs.org/-/npm/v1/attestations/@memi-design%2fcli@2.7.1",
+    "predicateType": "https://slsa.dev/provenance/v1",
+    "subject": "pkg:npm/%40memi-design/cli@2.7.1",
+    "sha512": "f80ec6a7872773d48a0891a0df18a4a536e945943ac3532fbc20bd742ea6cfd815837cedf9fa49c259e7ab7e3b4f519c1ed7dc010dafae52c4f3d87d8da40837",
+    "repository": "https://github.com/memi-design/memi",
+    "workflowPath": ".github/workflows/publish.yml",
+    "workflowRef": "refs/heads/main",
+    "invocationId": "https://github.com/memi-design/memi/actions/runs/30676604723/attempts/1"
+  },
+  "workflow": {
+    "repository": "memi-design/memi",
+    "path": ".github/workflows/publish.yml",
+    "ref": "refs/heads/main",
+    "runId": "30676604723",
+    "runAttempt": 1
+  },
+  "sbom": {
+    "path": "memi.cdx.json",
+    "sha256": "0e35653f83dbb398bf7cd47ca88925a4bcead3806e09c12422ee38e5e934459f"
+  },
+  "publishedAt": "2026-08-01T00:55:23.498Z"
+}
