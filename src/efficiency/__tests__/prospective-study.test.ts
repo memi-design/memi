@@ -133,6 +133,60 @@ function freeze() {
 }
 
 describe("prospective Memi 2.7 study", () => {
+  it("freezes a v2 evidence contract only when every native task and artifact is named", () => {
+    const nativeTasks = plan.tasks.map((task, index) => ({
+      ...task,
+      nativePlatform: (["expo", "swiftui", "web"] as const)[index],
+    }));
+    const evidenceV2 = {
+      required: true,
+      requiredCaptureKinds: ["screenshot", "interaction-trace", "accessibility-tree"],
+      measuredBillingRequired: true,
+      structuredStopReasonsRequired: true,
+    };
+    const valid = prospectiveStudyPlanSchema.parse({
+      ...plan,
+      tasks: nativeTasks,
+      runContract: {
+        ...plan.runContract,
+        requiredArtifacts: [...plan.runContract.requiredArtifacts, "prospective-evidence-v2.json"],
+        evidenceV2,
+      },
+    });
+    const receipt = buildProspectiveFreeze({
+      plan: valid,
+      frozenAt: "2026-08-01T12:00:00.000Z",
+      candidate: {
+        version: "2.7.5",
+        revision: "d".repeat(40),
+        sourceState: "clean",
+        dirtyFileCount: 0,
+        sourceTreeSha256: `sha256:${"e".repeat(64)}`,
+        artifactSha256: `sha256:${"f".repeat(64)}`,
+      },
+      harness: freeze().harness,
+      environment: freeze().environment,
+      taskManifestHashes: Object.fromEntries(valid.tasks.map((task, index) => [
+        task.id,
+        `sha256:${String(index + 1).repeat(64)}`,
+      ])),
+    });
+
+    expect(receipt.evidenceV2).toEqual(evidenceV2);
+    expect(receipt.taskNativePlatforms).toEqual({
+      "expo-task": "expo",
+      "swift-task": "swiftui",
+      "web-task": "web",
+    });
+    expect(() => prospectiveStudyPlanSchema.parse({
+      ...valid,
+      runContract: {
+        ...valid.runContract,
+        requiredArtifacts: plan.runContract.requiredArtifacts,
+      },
+    })).toThrow(/prospective-evidence-v2\.json/);
+  });
+
   it("creates a tamper-evident freeze with a deterministic counterbalanced matrix", () => {
     const receipt = freeze();
 
