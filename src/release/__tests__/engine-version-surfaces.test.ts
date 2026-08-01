@@ -5,28 +5,28 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const candidateVersion = "2.7.1";
-const publicVersion = "2.7.0";
-const publicSourceCommit = "00be64b9bd49fab57f4f54f678550a2021f6d1ae";
+const publicVersion = "2.7.1";
+const publicSourceCommit = "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f";
+const releaseRecord = {
+  path: "release-artifacts/npm/2.7.1.release.json",
+  sha256: "9daa1a0008332654ffabec001b432693c09bda4a80a27bec29e272d126386129",
+};
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.7.1 candidate release surfaces", () => {
-  it("keeps the candidate unbound while preserving the immutable public release", async () => {
+describe("2.7.1 published release surfaces", () => {
+  it("binds the published version to its immutable source and release record", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toEqual({
       version: candidateVersion,
-      state: "candidate",
-      sourceCommit: null,
-      releaseRecord: null,
-      previousPublicRelease: {
-        version: publicVersion,
-        sourceCommit: publicSourceCommit,
-      },
+      state: "published",
+      sourceCommit: publicSourceCommit,
+      releaseRecord,
       verification: {
         eligibleForParity: false,
-        reason: "2.7.1 is a local candidate; publish provenance and independent public-surface parity verification are pending",
+        reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
       },
     });
     expect(manifest.surfaces.githubRelease.url.endsWith("/v2.7.1")).toBe(true);
@@ -106,11 +106,11 @@ describe("2.7.1 candidate release surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
   });
 
-  it("labels 2.7.1 as unreleased while keeping only the verified public activation", async () => {
+  it("labels 2.7.1 as published while keeping parity fail closed", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Release state: `candidate`");
-    expect(currentRelease).toContain("Engine candidate (unreleased)");
-    expect(currentRelease).toContain("Source commit: Not assigned. npm provenance must bind the eventual publish commit.");
+    expect(currentRelease).toContain("Release state: `published`");
+    expect(currentRelease).toContain("Engine published (parity pending)");
+    expect(currentRelease).toContain(`Source commit: \`${publicSourceCommit}\``);
     expect(currentRelease).toContain(`npx -y @memi-design/cli@${publicVersion}`);
     expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.3");
   });
