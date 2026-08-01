@@ -32,6 +32,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `853a15ad` — fix: preserve bounded V2 artifact root
 - `6e6026a0` — test: support Windows prospective evidence paths
 - `31b8d5be` — fix: admit Windows prospective run receipts
+- `12178d19` — docs: record Windows evidence-path fix
+- `680df05f` — research: audit V16 freeze readiness
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -50,6 +52,9 @@ must copy their regular output into an empty per-cell capture root that exactly
 matches the V2 receipt draft; stale capture files fail before provider execution.
 Prospective evaluation now recognizes both POSIX and Windows evidence-reference
 separators before applying the same manifest and receipt validation path.
+The V16 readiness ledger records the observed fixture revisions and explicitly
+keeps the native study unfreezable until an exact candidate, repinned Buzzr
+fixture, collectors, calibration receipts, and measured billing artifacts exist.
 
 ## v2.7.4 — 2026-08-01
 
