@@ -883,7 +883,9 @@ def _write_tex_outputs(tex_root: Path, summary: dict[str, Any]) -> None:
         )
     functional_lines.extend([
         "\\end{description}",
-        "These functional and defect outcomes retain every valid receipt even when a cell is excluded from rendered grading.",
+        "Functional-acceptance outcomes retain every valid receipt even when rendered grading is unavailable. "
+        "Critical-defect counts are restricted to pairs with complete graded/renderable evidence, "
+        "so their denominators are smaller and Nate has no admitted defect estimate.",
         "",
     ])
     _write_tex(

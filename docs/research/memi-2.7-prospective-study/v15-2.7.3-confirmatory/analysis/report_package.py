@@ -100,7 +100,10 @@ def build_outputs(paths: StudyReportPaths) -> dict[Path, str]:
     )
     outputs: dict[Path, str] = {
         paths.website_audit_tex_path: _website_audit_tex(website_summary),
-        paths.remediation_tex_path: _remediation_tex(remediation_summary),
+        paths.remediation_tex_path: _remediation_tex(
+            remediation_summary,
+            live_release_summary,
+        ),
         paths.release_gates_tex_path: (
             _verified_release_gates_tex(live_release_summary)
             if live_release_summary is not None
@@ -479,38 +482,60 @@ def _website_audit_tex(summary: Mapping[str, Any]) -> str:
     )
 
 
-def _remediation_tex(summary: Mapping[str, Any]) -> str:
-    return (
+def _remediation_tex(
+    summary: Mapping[str, Any],
+    live_release_summary: Mapping[str, Any] | None,
+) -> str:
+    engineering_evidence = (
         "% Generated deterministically from sealed remediation artifacts; do not edit.\n"
         "The reviewed 2.7.4 engineering chain implements exact route identity (task class, "
         "repository fingerprint, provider, model, effort, skill ID, and skill content hash), "
         "immutable blinded-quality evidence v2, fail-closed legacy-v1 handling, chronological "
         "no-look-ahead replay, immediate regression suppression, three-later-pair prospective "
         "recovery, corrupt/duplicate event rejection, and repository-only fallback for "
-        "suppressed routes. The published 2.7.4 code artifact is anchored at exact source "
-        "commit \\texttt{8aa4649f}; post-release evidence synchronization at "
-        "\\texttt{b1b8b7ef} does not alter the published package bytes. The final "
-        "evidence-bound parity clearance merged at \\texttt{a7261456} and is anchored "
-        "to the immutable public-gate receipt whose SHA-256 begins "
-        "\\texttt{ca45f11f}; neither commit changes the npm tarball.\n\n"
+        "suppressed routes.\n\n"
         f"The sealed dry-run artifacts contain {summary['qualityEntryCount']} complete "
         "model-graded v2 quality pairs and "
         f"{summary['chronologyEntryCount']} chronological ingestion events. "
         "\\texttt{storeWritePlanned} is false: these report artifacts validate deterministic "
-        "policy inputs and chronology without mutating a production fitness store. Public "
-        "release channels and final cross-platform package bytes remain subject to the "
-        "separate fail-closed release gate.\n\n"
-        "At exact published source \\texttt{8aa4649f}, the local full suite passed 2,241 "
-        "tests across 310 files; typecheck and build passed. Clean-install CI also passed "
-        "nine Linux, macOS, and Windows cells spanning Node 20, 22, and 24. The replay "
-        "harness additionally pins frozen "
+        "policy inputs and chronology without mutating a production fitness store.\n\n"
+        "The replay harness pins frozen "
         "source and engine digests, rejects path and symlink escapes, and caps combined "
         "subprocess output at 10 MiB with process-group termination. The final security "
-        "review reported no actionable findings. These are local engineering checks, not "
-        "public-channel proof. "
+        "review reported no actionable findings; local typecheck and build passed. "
         "The residual trust boundary is explicit: same-owner local artifacts lack external "
         "signatures, and the append lock relies on normal local-filesystem atomicity; weakly "
-        "consistent NFS is out of scope.\n"
+        "consistent NFS is out of scope.\n\n"
+    )
+    if live_release_summary is None:
+        return (
+            engineering_evidence
+            + "These are source-level checks only. Publication, final cross-platform package "
+            "bytes, and evidence-bound parity are not established because no complete live "
+            "release ledger has been admitted.\n"
+        )
+    final_verifier = live_release_summary["finalVerifier"]
+    release_provenance = live_release_summary["releaseProvenance"]
+    source_short = _tex(str(live_release_summary["sourceCommit"])[:8])
+    evidence_short = _tex(str(release_provenance["postReleaseEvidenceCommit"])[:8])
+    parity_short = _tex(str(release_provenance["parityClearanceCommit"])[:8])
+    public_gate_short = _tex(
+        str(live_release_summary["publicGateEvidenceSha256"]).removeprefix("sha256:")[:8]
+    )
+    return (
+        engineering_evidence
+        + "The admitted live ledger binds the published 2.7.4 code artifact to exact source "
+        f"commit \\texttt{{{source_short}}}; post-release evidence synchronization at "
+        f"\\texttt{{{evidence_short}}} does not alter the published package bytes. The "
+        f"evidence-bound parity clearance merged at \\texttt{{{parity_short}}} and is "
+        "anchored to the immutable public-gate receipt whose SHA-256 begins "
+        f"\\texttt{{{public_gate_short}}}; neither commit changes the npm tarball. At exact "
+        f"published source \\texttt{{{source_short}}}, the local full suite "
+        "passed 2,241 tests across 310 files. Clean-install CI passed nine Linux, macOS, and "
+        "Windows cells spanning Node 20, 22, and 24. Final verification at tooling merge "
+        f"\\texttt{{{_tex(str(final_verifier['toolingMergeCommit'])[:8])}}} admitted the "
+        "byte-bound website provenance and returned an empty failure list with parity "
+        "eligibility true.\n"
     )
 
 
@@ -563,17 +588,31 @@ def _validate_live_release_verification(payload: Mapping[str, Any]) -> dict[str,
         raise ReportPackageInputError("live release ledger schemaVersion is invalid")
     if payload.get("releaseVersion") != "2.7.4" or payload.get("tag") != "v2.7.4":
         raise ReportPackageInputError("live release ledger must identify Memi 2.7.4 and tag v2.7.4")
-    if payload.get("sourceCommit") != "8aa4649f412bbcaaf2af4ee209bf79016566f035":
+    source_commit = payload.get("sourceCommit")
+    if source_commit != "8aa4649f412bbcaaf2af4ee209bf79016566f035":
         raise ReportPackageInputError("live release ledger source commit is not the published candidate")
     verified_at = payload.get("verifiedAt")
     if not isinstance(verified_at, str) or not verified_at.endswith("Z"):
         raise ReportPackageInputError("live release ledger verifiedAt must be an ISO UTC timestamp")
     try:
-        datetime.fromisoformat(verified_at.replace("Z", "+00:00"))
+        verified_at_datetime = datetime.fromisoformat(verified_at.replace("Z", "+00:00"))
     except ValueError as error:
         raise ReportPackageInputError(
             "live release ledger verifiedAt must be an ISO UTC timestamp"
         ) from error
+
+    release_provenance = payload.get("releaseProvenance")
+    expected_release_provenance = {
+        "postReleaseEvidenceCommit": "b1b8b7ef57d5df17f676ac160a5b45e23682e2a4",
+        "parityClearanceCommit": "a72614562bdc54c11b4beb416987b635740713c5",
+    }
+    if not isinstance(release_provenance, dict) or any(
+        release_provenance.get(field) != expected
+        for field, expected in expected_release_provenance.items()
+    ):
+        raise ReportPackageInputError(
+            "live release ledger release provenance does not match the admitted commits"
+        )
 
     channels = payload.get("channels")
     if not isinstance(channels, list):
@@ -633,10 +672,66 @@ def _validate_live_release_verification(payload: Mapping[str, Any]) -> dict[str,
         public_gate.get("evidenceSha256"),
         "live release public gate evidence hash",
     )
+    if public_gate_digest != (
+        "sha256:ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a"
+    ):
+        raise ReportPackageInputError(
+            "live release public gate provenance does not match the admitted receipt"
+        )
+    final_verifier = public_gate.get("finalVerifier")
+    if not isinstance(final_verifier, dict):
+        raise ReportPackageInputError("live release public gate final verifier is missing")
+    final_verified_at = final_verifier.get("verifiedAt")
+    if not isinstance(final_verified_at, str) or not final_verified_at.endswith("Z"):
+        raise ReportPackageInputError(
+            "live release public gate final verifier verifiedAt must be an ISO UTC timestamp"
+        )
+    try:
+        final_verified_at_datetime = datetime.fromisoformat(
+            final_verified_at.replace("Z", "+00:00")
+        )
+    except ValueError as error:
+        raise ReportPackageInputError(
+            "live release public gate final verifier verifiedAt must be an ISO UTC timestamp"
+        ) from error
+    authenticated_rerun_timestamp = "2026-08-01T16:45:15Z"
+    if (
+        final_verified_at != authenticated_rerun_timestamp
+        or verified_at != authenticated_rerun_timestamp
+        or verified_at_datetime != final_verified_at_datetime
+    ):
+        raise ReportPackageInputError(
+            "live release verification chronology does not match the authenticated rerun"
+        )
+    if (
+        final_verifier.get("status") != "passed"
+        or final_verifier.get("failures") != []
+        or final_verifier.get("parityEligible") is not True
+    ):
+        raise ReportPackageInputError(
+            "live release public gate final verifier state is not fail-closed clean"
+        )
+    expected_final_verifier = {
+        "toolingMergeCommit": "09635d81d9fbd281a2b5b3a7fefb55f0156380b3",
+        "pullRequest": "https://github.com/memi-design/memi/pull/108",
+        "cleanInstallMatrixRun": "https://github.com/memi-design/memi/actions/runs/30707179725",
+        "websiteManifestSha256": "1ec702fa4a309158744640a3ae761427fc307436aac7ae0ef4ece40a575232e0",
+        "websiteSourceCommit": "dac2dd9cb7f74dec977b4cb4280676b0c6d9d2c9",
+    }
+    if any(
+        final_verifier.get(field) != expected
+        for field, expected in expected_final_verifier.items()
+    ):
+        raise ReportPackageInputError(
+            "live release public gate final verifier provenance does not match the admitted gate"
+        )
     return {
+        "sourceCommit": source_commit,
         "verifiedAt": verified_at,
         "channels": normalized,
         "publicGateEvidenceSha256": public_gate_digest,
+        "finalVerifier": dict(final_verifier),
+        "releaseProvenance": dict(release_provenance),
     }
 
 
@@ -681,6 +776,16 @@ def _verified_release_status_tex() -> str:
     )
 
 
+_CHECKSUM_EXCLUSION_PATTERNS = [
+    "**/*.pdf",
+    "**/*.pyc",
+    "**/__pycache__/**",
+    "**/.pytest_cache/**",
+    "**/.DS_Store",
+    "generated/report-package-checksums.json",
+]
+
+
 def _checksum_inventory(
     paths: StudyReportPaths,
     virtual_outputs: Mapping[Path, str],
@@ -719,7 +824,7 @@ def _checksum_inventory(
         "schemaVersion": "memoire.report-package-checksums.v1",
         "algorithm": "sha256",
         "root": ".",
-        "excluded": ["**/*.pdf", "generated/report-package-checksums.json"],
+        "excluded": list(_CHECKSUM_EXCLUSION_PATTERNS),
         "entryCount": len(entries),
         "entries": entries,
     }
@@ -731,6 +836,7 @@ def _checksum_excluded(paths: StudyReportPaths, path: Path) -> bool:
         or path.suffix.lower() == ".pdf"
         or path.suffix == ".pyc"
         or "__pycache__" in path.parts
+        or ".pytest_cache" in path.parts
         or path.name in {".DS_Store"}
     )
 

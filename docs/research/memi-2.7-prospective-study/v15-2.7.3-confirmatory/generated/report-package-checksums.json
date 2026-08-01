@@ -2,26 +2,6 @@
   "algorithm": "sha256",
   "entries": [
     {
-      "bytes": 37,
-      "path": ".pytest_cache/.gitignore",
-      "sha256": "sha256:3ed731b65d06150c138e2dadb0be0697550888a6b47eb8c45ecc9adba8b8e9bd"
-    },
-    {
-      "bytes": 191,
-      "path": ".pytest_cache/CACHEDIR.TAG",
-      "sha256": "sha256:37dc88ef9a0abeddbe81053a6dd8fdfb13afb613045ea1eb4a5c815a74a3bde4"
-    },
-    {
-      "bytes": 302,
-      "path": ".pytest_cache/README.md",
-      "sha256": "sha256:73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad"
-    },
-    {
-      "bytes": 6421,
-      "path": ".pytest_cache/v/cache/nodeids",
-      "sha256": "sha256:a60207080814473cc2bc43d9ba1ead88222458cf21af36ec57eda40b6521e817"
-    },
-    {
       "bytes": 2724,
       "path": "README.md",
       "sha256": "sha256:d6581d5012f377f502bf98c9acc74de794864f098ffe6aafee81c44c0e482f9e"
@@ -77,14 +57,14 @@
       "sha256": "sha256:c015e180e9ec035dde452881aeb89a71f7446a81b6a833d589c15ec96ecdf462"
     },
     {
-      "bytes": 49923,
+      "bytes": 50095,
       "path": "analysis/pipeline.py",
-      "sha256": "sha256:9fa0959642d2a30525f016e0ea0ffcd317f95ff7b0271469cf6ff056b1e9bab5"
+      "sha256": "sha256:c25c74545f7b39b1398bc34a08bea2e36714c04690002015e87ff42d04ff0ca8"
     },
     {
-      "bytes": 36215,
+      "bytes": 40776,
       "path": "analysis/report_package.py",
-      "sha256": "sha256:2bfb015b82ef78d9123241aa51771245c83d343c9b91aeef8dbf93e4e3375d98"
+      "sha256": "sha256:91ce84092bb59f2335dadb0747f7d9a430501c902af9a4512ec71661cdb47e5d"
     },
     {
       "bytes": 1324,
@@ -117,14 +97,14 @@
       "sha256": "sha256:fabdc15cd97b325c5c15b0fb074c8f32a9c32e6ce9f4665ea7b18e4647d484c0"
     },
     {
-      "bytes": 21881,
+      "bytes": 22394,
       "path": "analysis/tests/test_pipeline.py",
-      "sha256": "sha256:ccec7fb11389fd267f88b8b9e84e8dc641be7ff681de36d22d7e1ff1a5860bac"
+      "sha256": "sha256:6141aff13e0f6418d45e34b7ce7461449ff73a6ae570dace4e0ff4e6dd60b9d0"
     },
     {
-      "bytes": 19375,
+      "bytes": 26363,
       "path": "analysis/tests/test_report_package.py",
-      "sha256": "sha256:e98a082b3375017450257e7a480afb7bb0192acc03520827729262534b926155"
+      "sha256": "sha256:c23debffc872778dc2e448595ec95da2d653d6ac64a94ac9e4b0e3812ab617c9"
     },
     {
       "bytes": 7071,
@@ -342,9 +322,9 @@
       "sha256": "sha256:76a1583d90bc66502d72c2e7b2d7219d32f5af14d6afc8bbd0f8bf841337ee49"
     },
     {
-      "bytes": 937,
+      "bytes": 1087,
       "path": "generated/tex/functional-quality-results.tex",
-      "sha256": "sha256:5cfdd672115cabf26da7327580756c21d090a192f6b4af80668fa80c5ff9230e"
+      "sha256": "sha256:ee5832008717fb84e7f4b7970064d201e42d3a3cb28246635a1471c059c9f373"
     },
     {
       "bytes": 435,
@@ -359,7 +339,7 @@
     {
       "bytes": 1253,
       "path": "generated/tex/release-gates.tex",
-      "sha256": "sha256:be47aebc0c889bd9ca5516d1af3b955a02d1114865ad66489894cf023b010fc9"
+      "sha256": "sha256:79f7427abc77ffea8bd1235b67ee7c864eb4760165ccf22603a521e8fbbe9fd4"
     },
     {
       "bytes": 213,
@@ -367,9 +347,9 @@
       "sha256": "sha256:d5cfae24e4241064e47184c6b2aa2ad4421e18924627884481363747de580410"
     },
     {
-      "bytes": 2031,
+      "bytes": 2013,
       "path": "generated/tex/remediation-results.tex",
-      "sha256": "sha256:2a95353016e017e4a205db34ff08c4d3ee9b2788c3327693207640ee2e74e753"
+      "sha256": "sha256:8c19cc0f3d2945c3cfc4eb4a6900abe4b760c43e50948fc3234f1a48ca4a3325"
     },
     {
       "bytes": 552,
@@ -414,7 +394,7 @@
     {
       "bytes": 100,
       "path": "memi-2.7.3-confirmatory-audit.pdf.sha256",
-      "sha256": "sha256:f0933a18145bcd0bb911477e0233063373dcb31824f595a981ce785caaa7317e"
+      "sha256": "sha256:937d32cf500a4b5c58c67542bd68583570d5639ab1b052f27035f0aa472d8627"
     },
     {
       "bytes": 3127,
@@ -437,9 +417,9 @@
       "sha256": "sha256:3cb55b8e5915e2aa2391e3989e5fe87749b9ad044904ab8e0b601ee842131df0"
     },
     {
-      "bytes": 4192,
+      "bytes": 4415,
       "path": "release-2.7.4-live-verification.json",
-      "sha256": "sha256:e3f8211c1a783df74dd48c8f79aa855bfc3f8e51c48066052a5c4e40fb2bde93"
+      "sha256": "sha256:69a25dd059c7e4ab3b541719862c8d2fff60549f3ecdd075fa744328ab518665"
     },
     {
       "bytes": 1109,
@@ -502,9 +482,13 @@
       "sha256": "sha256:1ccf198f211e3be7c14d0a09f28fc9483e22cd2421a400c12722e46180e2ceda"
     }
   ],
-  "entryCount": 100,
+  "entryCount": 96,
   "excluded": [
     "**/*.pdf",
+    "**/*.pyc",
+    "**/__pycache__/**",
+    "**/.pytest_cache/**",
+    "**/.DS_Store",
     "generated/report-package-checksums.json"
   ],
   "root": ".",
