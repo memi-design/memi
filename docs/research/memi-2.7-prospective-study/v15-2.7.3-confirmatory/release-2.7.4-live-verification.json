@@ -3,7 +3,11 @@
   "releaseVersion": "2.7.4",
   "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
   "tag": "v2.7.4",
-  "verifiedAt": "2026-08-01T15:19:31Z",
+  "verifiedAt": "2026-08-01T16:45:15Z",
+  "releaseProvenance": {
+    "postReleaseEvidenceCommit": "b1b8b7ef57d5df17f676ac160a5b45e23682e2a4",
+    "parityClearanceCommit": "a72614562bdc54c11b4beb416987b635740713c5"
+  },
   "channels": [
     {
       "id": "npm",
@@ -104,6 +108,7 @@
     "parityEligible": true,
     "evidenceSha256": "sha256:ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a",
     "finalVerifier": {
+      "verifiedAt": "2026-08-01T16:45:15Z",
       "status": "passed",
       "failures": [],
       "parityEligible": true,

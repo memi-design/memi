@@ -430,6 +430,13 @@ class GeneratedArtifactTests(unittest.TestCase):
             self.assertIn(r"\begin{table}[ht]", primary_tex)
             self.assertIn(r"\resizebox{\columnwidth}{!}", primary_tex)
             self.assertNotIn(r"\begin{table*}", primary_tex)
+            functional_tex = (paths.tex_root / "functional-quality-results.tex").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("Functional-acceptance outcomes retain every valid receipt", functional_tex)
+            self.assertIn("Critical-defect counts are restricted", functional_tex)
+            self.assertIn("Nate has no admitted defect estimate", functional_tex)
+            self.assertNotIn("functional and defect outcomes retain every valid receipt", functional_tex)
             self.assertFalse((paths.tex_root / "fitness-backtest-results.tex").exists())
             self.assertFalse((paths.tex_root / "website-audit-results.tex").exists())
 

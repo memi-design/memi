@@ -38,12 +38,14 @@ class ReportPackageTests(unittest.TestCase):
             self.assertIn("immutable blinded-quality evidence", remediation_tex)
             self.assertIn("chronological", remediation_tex)
             self.assertIn("repository-only", remediation_tex)
-            self.assertIn("2,241 tests across 310 files", remediation_tex)
-            self.assertIn("8aa4649f", remediation_tex)
-            self.assertIn("b1b8b7ef", remediation_tex)
-            self.assertIn("a7261456", remediation_tex)
-            self.assertIn("ca45f11f", remediation_tex)
-            self.assertIn("nine Linux, macOS, and Windows", remediation_tex)
+            self.assertIn("source-level checks only", remediation_tex)
+            self.assertIn("not established", remediation_tex)
+            self.assertNotIn("2,241 tests across 310 files", remediation_tex)
+            self.assertNotIn("8aa4649f", remediation_tex)
+            self.assertNotIn("b1b8b7ef", remediation_tex)
+            self.assertNotIn("a7261456", remediation_tex)
+            self.assertNotIn("ca45f11f", remediation_tex)
+            self.assertNotIn("nine Linux, macOS, and Windows", remediation_tex)
             self.assertIn("frozen source and engine digests", remediation_tex)
             self.assertIn("10 MiB", remediation_tex)
             self.assertIn("typecheck and build passed", remediation_tex)
@@ -101,6 +103,85 @@ class ReportPackageTests(unittest.TestCase):
             self.assertIn("checksum parity & DETACHED LEDGER \\\\", release_tex)
             self.assertIn("PUBLIC SOFTWARE CHANNELS VERIFIED", release_status)
             self.assertIn("detached", release_status.lower())
+
+            remediation_tex = outputs[paths.remediation_tex_path]
+            self.assertIn("2,241 tests across 310 files", remediation_tex)
+            self.assertIn("8aa4649f", remediation_tex)
+            self.assertIn("b1b8b7ef", remediation_tex)
+            self.assertIn("a7261456", remediation_tex)
+            self.assertIn("ca45f11f", remediation_tex)
+            self.assertIn("nine Linux, macOS, and Windows", remediation_tex)
+
+    def test_build_outputs_rejects_missing_final_verifier(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            del payload["publicGate"]["finalVerifier"]
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "final verifier"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_altered_final_verifier_provenance(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["publicGate"]["finalVerifier"]["websiteSourceCommit"] = "0" * 40
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "final verifier provenance"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_altered_public_gate_digest(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["publicGate"]["evidenceSha256"] = f"sha256:{'1' * 64}"
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "public gate provenance"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_altered_release_provenance_commits(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["releaseProvenance"]["parityClearanceCommit"] = "0" * 40
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "release provenance"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_ledger_timestamp_before_final_verifier(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["verifiedAt"] = "2026-08-01T16:45:14Z"
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "verification chronology"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_final_verifier_before_tooling_merge(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["publicGate"]["finalVerifier"]["verifiedAt"] = "2026-08-01T16:07:23Z"
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "verification chronology"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_unauthenticated_future_verifier_timestamp(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["verifiedAt"] = "2099-01-01T00:00:00Z"
+            payload["publicGate"]["finalVerifier"]["verifiedAt"] = "2099-01-01T00:00:00Z"
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "verification chronology"):
+                build_outputs(paths)
 
     def test_build_outputs_rejects_failed_public_release_gate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -170,12 +251,55 @@ class ReportPackageTests(unittest.TestCase):
             self.assertNotIn("generated/report-package-checksums.json", inventory_paths)
             self.assertEqual(
                 manifest["excluded"],
-                ["**/*.pdf", "generated/report-package-checksums.json"],
+                [
+                    "**/*.pdf",
+                    "**/*.pyc",
+                    "**/__pycache__/**",
+                    "**/.pytest_cache/**",
+                    "**/.DS_Store",
+                    "generated/report-package-checksums.json",
+                ],
             )
 
             second_outputs = build_outputs(paths)
             write_outputs(paths, second_outputs)
             self.assertEqual(first, paths.checksum_inventory_path.read_bytes())
+
+    def test_checksum_inventory_declares_and_ignores_cache_residue(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            paths = _write_fixture(root)
+            residue = {
+                root / "analysis" / ".pytest_cache" / "v" / "cache" / "nodeids": b"volatile\n",
+                root / "analysis" / "module.pyc": b"bytecode\n",
+                root / "analysis" / "__pycache__" / "module.cpython-313.pyc": b"cache\n",
+                root / "analysis" / ".DS_Store": b"finder\n",
+            }
+            for cache_file, content in residue.items():
+                cache_file.parent.mkdir(parents=True, exist_ok=True)
+                cache_file.write_bytes(content)
+
+            outputs = build_outputs(paths)
+            write_outputs(paths, outputs)
+            with_cache = paths.checksum_inventory_path.read_bytes()
+            inventory_paths = [
+                entry["path"]
+                for entry in json.loads(with_cache)["entries"]
+            ]
+            self.assertFalse(
+                any(
+                    path.endswith((".pyc", ".DS_Store"))
+                    or "/__pycache__/" in path
+                    or "/.pytest_cache/" in path
+                    for path in inventory_paths
+                )
+            )
+
+            for cache_file in residue:
+                cache_file.unlink()
+            outputs_without_cache = build_outputs(paths)
+            write_outputs(paths, outputs_without_cache)
+            self.assertEqual(with_cache, paths.checksum_inventory_path.read_bytes())
 
     def test_verify_outputs_detects_stale_generated_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -443,12 +567,27 @@ def _live_release_fixture() -> dict[str, object]:
         "releaseVersion": "2.7.4",
         "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
         "tag": "v2.7.4",
-        "verifiedAt": "2026-08-01T14:00:00Z",
+        "verifiedAt": "2026-08-01T16:45:15Z",
+        "releaseProvenance": {
+            "postReleaseEvidenceCommit": "b1b8b7ef57d5df17f676ac160a5b45e23682e2a4",
+            "parityClearanceCommit": "a72614562bdc54c11b4beb416987b635740713c5",
+        },
         "channels": channels,
         "publicGate": {
             "failures": [],
             "parityEligible": True,
-            "evidenceSha256": f"sha256:{'f' * 64}",
+            "evidenceSha256": "sha256:ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a",
+            "finalVerifier": {
+                "verifiedAt": "2026-08-01T16:45:15Z",
+                "status": "passed",
+                "failures": [],
+                "parityEligible": True,
+                "toolingMergeCommit": "09635d81d9fbd281a2b5b3a7fefb55f0156380b3",
+                "pullRequest": "https://github.com/memi-design/memi/pull/108",
+                "cleanInstallMatrixRun": "https://github.com/memi-design/memi/actions/runs/30707179725",
+                "websiteManifestSha256": "1ec702fa4a309158744640a3ae761427fc307436aac7ae0ef4ece40a575232e0",
+                "websiteSourceCommit": "dac2dd9cb7f74dec977b4cb4280676b0c6d9d2c9",
+            },
         },
     }
 
