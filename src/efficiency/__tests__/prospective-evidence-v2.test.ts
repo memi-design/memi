@@ -88,7 +88,7 @@ describe("prospective evidence v2", () => {
         taskId: "web",
         repeat: 1,
         condition: "memi",
-        repositoryRevision: "z".repeat(40),
+        repositoryRevision: "f".repeat(40),
         candidateArtifactSha256: sha("b"),
       },
     });
@@ -99,10 +99,10 @@ describe("prospective evidence v2", () => {
     })).toEqual({
       valid: false,
       reasons: [
+        "trial-binding-mismatch:repositoryRevision",
         "native-capture-missing:interaction-trace",
         "native-capture-missing:accessibility-tree",
         "billing-unmeasured",
-        "trial-binding-mismatch:repositoryRevision",
       ],
     });
   });
