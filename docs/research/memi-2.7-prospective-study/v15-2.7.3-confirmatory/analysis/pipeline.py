@@ -136,7 +136,7 @@ def run_confirmatory_analysis(write_outputs: bool = True) -> dict[str, Any]:
         trial_grades=grading,
         exclusion_index=exclusion_index,
     )
-    secondary_rows = _secondary_analysis(trial_runs)
+    secondary_rows = _secondary_analysis(trial_runs, grading)
     pooled_rows = _pooled_descriptives(primary_rows, secondary_rows)
 
     summary = {
@@ -426,7 +426,7 @@ def _primary_quality_analysis(
 
     pair_rows: list[dict[str, Any]] = []
     reliability_rows: list[dict[str, Any]] = []
-    grouped_scores_by_task: dict[str, list[float]] = {}
+    grouped_scores_by_task: dict[str, list[tuple[int, float]]] = {}
     for pair_key, pair in sorted(grouped.items()):
         task_id, repeat = pair_key
         if len(pair) != 2 or "baseline" not in pair or "memi" not in pair:
@@ -453,7 +453,7 @@ def _primary_quality_analysis(
             "memi_score": round(memi.score, 4),
             "delta_memi_minus_baseline": round(delta, 4),
         })
-        grouped_scores_by_task.setdefault(task_id, []).append(delta)
+        grouped_scores_by_task.setdefault(task_id, []).append((repeat, delta))
         reliability_rows.append({
             "task_id": task_id,
             "repeat": repeat,
@@ -465,7 +465,8 @@ def _primary_quality_analysis(
 
     summary_rows: list[dict[str, Any]] = []
     loo_rows: list[dict[str, Any]] = []
-    for task_id, deltas in sorted(grouped_scores_by_task.items()):
+    for task_id, paired_deltas in sorted(grouped_scores_by_task.items()):
+        deltas = [delta for _, delta in paired_deltas]
         bootstrap = _bootstrap_mean_interval(
             deltas,
             samples=protocol["primaryOutcome"]["bootstrapSamples"],
@@ -487,7 +488,7 @@ def _primary_quality_analysis(
             "noninferiority_margin": NONINFERIORITY_MARGIN,
             "noninferior": bootstrap["one_sided_lower"] > NONINFERIORITY_MARGIN,
         })
-        loo_rows.extend(_leave_one_out_rows(task_id, deltas))
+        loo_rows.extend(_leave_one_out_rows(task_id, paired_deltas))
 
     score_matrix = [
         grade.raw_scores
@@ -507,14 +508,20 @@ def _primary_quality_analysis(
     return pair_rows, summary_rows, loo_rows, reliability_rows
 
 
-def _secondary_analysis(trial_runs: dict[str, TrialRun]) -> list[dict[str, Any]]:
+def _secondary_analysis(
+    trial_runs: dict[str, TrialRun],
+    trial_grades: dict[str, TrialGrade],
+) -> list[dict[str, Any]]:
     pair_index: dict[tuple[str, int], dict[str, TrialRun]] = {}
     for run in trial_runs.values():
         pair_index.setdefault((run.task_id, run.repeat), {})[run.condition] = run
+    grade_pair_index: dict[tuple[str, int], dict[str, TrialGrade]] = {}
+    for grade in trial_grades.values():
+        grade_pair_index.setdefault((grade.task_id, grade.repeat), {})[grade.condition] = grade
 
     metrics = {
         "functional_acceptance": ("accepted", "higher", "indicator"),
-        "critical_defects": ("defects", "lower", "defects"),
+        "critical_defects": ("critical_defect_count", "lower", "defects"),
         "input_tokens": ("input_tokens", "lower", "tokens"),
         "output_tokens": ("output_tokens", "lower", "tokens"),
         "reasoning_tokens": ("reasoning_tokens", "lower", "tokens"),
@@ -531,8 +538,20 @@ def _secondary_analysis(trial_runs: dict[str, TrialRun]) -> list[dict[str, Any]]
             for repeat in sorted(repeat for other_task, repeat in pair_index if other_task == task_id)
         ]
         for metric_name, (field, direction, unit) in metrics.items():
+            metric_pairs: list[dict[str, TrialRun] | dict[str, TrialGrade]]
+            if metric_name == "critical_defects":
+                metric_pairs = [
+                    grade_pair_index[(task_id, repeat)]
+                    for repeat in sorted(
+                        repeat
+                        for other_task, repeat in grade_pair_index
+                        if other_task == task_id
+                    )
+                ]
+            else:
+                metric_pairs = task_pairs
             deltas: list[float] = []
-            for pair in task_pairs:
+            for pair in metric_pairs:
                 if "baseline" not in pair or "memi" not in pair:
                     continue
                 baseline = pair["baseline"]
@@ -1036,9 +1055,13 @@ def _is_explicitly_excluded_missing_sibling(
     return True
 
 
-def _leave_one_out_rows(task_id: str, deltas: list[float]) -> list[dict[str, Any]]:
+def _leave_one_out_rows(
+    task_id: str,
+    paired_deltas: list[tuple[int, float]],
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    base = np.asarray(deltas, dtype=float)
+    repeats = [repeat for repeat, _ in paired_deltas]
+    base = np.asarray([delta for _, delta in paired_deltas], dtype=float)
     if len(base) < 2:
         return rows
     for index in range(len(base)):
@@ -1050,7 +1073,7 @@ def _leave_one_out_rows(task_id: str, deltas: list[float]) -> list[dict[str, Any
         )
         rows.append({
             "task_id": task_id,
-            "omitted_pair_index": index + 1,
+            "omitted_repeat": repeats[index],
             "remaining_pairs": len(reduced),
             "mean_delta": round(float(np.mean(reduced)), 4),
             "noninferiority_lower_95_one_sided": round(bootstrap["one_sided_lower"], 4),
