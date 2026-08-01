@@ -8,7 +8,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
-### Fail-closed route-fitness contract
+## v2.7.4 — 2026-08-01
+
+### Exact-match fail-closed route fitness
 
 - `8cfd3498` test: define fail-closed route fitness contract
 - `9a141092` feat: add fail-closed route fitness evidence v2
@@ -28,52 +30,24 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `45cd891d` test: define atomic fitness append lock
 - `f81416a0` fix: serialize skill fitness appends
 - `e285a2b5` refactor: isolate fitness file locking
-- Added RED contract coverage for full-identity fitness isolation, blinded
-  quality evidence v2, immediate regression suppression, prospective recovery,
-  legacy v1 compatibility, and chronological no-look-ahead replay.
-- Added `memi benchmark fitness-backtest --store-root ... --as-of ... --json`
-  with deterministic chronological replay and exact task, repository, harness,
-  skill, and content-hash isolation.
-- Required every new fitness record to reference a run-bound v2 route receipt;
-  legacy v1 events remain readable, negative v1 evidence can suppress, and
-  automation-only v1 evidence cannot promote or recover a route.
-- Bound prospective evidence manifests to the frozen trial, task, condition,
-  repeat, sequence, and trusted evidence root, rejecting direct and symlinked
-  path escapes.
-- Added strict regular-file, duplicate-row, schema, JSON, and byte-limit checks
-  for benchmark and fitness JSONL stores.
-- Separated the exact candidate runtime from the hash-pinned admission harness
-  so older candidates remain testable while current fail-closed evidence checks
-  evaluate their immutable receipts.
-- Made interrupted prospective pairs resumable without rerunning or duplicating
-  the already completed matched condition.
-- Added a fail-closed compatibility importer for the manifest-sealed raw route
-  receipts emitted by 2.7.3, preserving native bound-v2 behavior while
-  rejecting unbound, tampered, escaped, or symlinked evidence.
-- Promoted the existing Linux, macOS, and Windows Node 20/22/24 clean-install
-  matrix into a complete typecheck, test, build, pack, install, and invocation
-  gate.
-- Kept suppressed production routes repository-only while adding an explicit
-  frozen prospective `--recovery-probe` path. Only three later, healthy,
-  blinded v2 probe pairs with the exact route identity may recover a route.
-- Made stable task classes independently addressable from task IDs while
-  preserving task-ID defaults for compatible receipts.
-- Required both paired runs and the bound route receipt to match sealed
-  prospective manifests, and rejected reuse of any exact-route run or trial
-  pair even when a caller supplies a different quality-evidence hash.
-- Serialized process-level fitness-store appends through a private exclusive
-  lock directory with bounded waiting, dead-owner quarantine recovery, secure
-  no-follow writes, and duplicate revalidation immediately before append.
+- `0568964b` test: define 2.7.4 candidate release surfaces
+- Required new fitness evidence to use run-bound v2 receipts and the exact task,
+  repository, harness, skill, and content-hash identity. Legacy v1 evidence
+  remains readable but cannot promote or recover a route.
+- Added deterministic chronological `fitness-backtest` replay with an `--as-of`
+  cutoff, duplicate protection, and no-look-ahead behavior.
+- Serialized fitness-store appends with bounded exclusive locking, dead-owner
+  recovery, no-follow writes, and duplicate revalidation before append.
+- Added the manifest-sealed V15 confirmatory report and deterministic analysis
+  artifacts. The report retains its stated scope and limitations and does not
+  establish broader product or harness comparisons.
 
 #### Architectural decisions
 
-- Automation-only v1 evidence remains loadable and can suppress a harmful
-  route, but only hash-verified blinded v2 prospective pairs may promote or
-  recover a route.
-- Hashes provide tamper evidence inside the file-owner trust boundary, not
-  third-party authorship. Recovery therefore requires sealed prospective
-  artifacts and explicitly marked probe execution; writable-store compromise
-  remains outside the evidence-authentication claim.
+- Fail closed on identity mismatch: only hash-verified, blinded v2 prospective
+  pairs with an exact route identity may promote or recover a route.
+- Treat evidence hashes as tamper checks inside the file-owner trust boundary,
+  not as third-party authorship proof.
 
 ## v2.7.3 — 2026-07-31
 
