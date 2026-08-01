@@ -16,12 +16,18 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `3348e637` — feat: freeze native evidence requirements
 - `ef9c6761` — test: require retained billing artifacts
 - `a499e1a6` — feat: bind billing evidence artifacts
+- `b964117f` — docs: record billing evidence binding
+- `7a3fabdd` — test: require sealed V2 billing artifacts
+- `5e2dc9c7` — feat: verify sealed V2 study evidence
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
 measured USD billing with retained provider-usage and price-card artifacts, and
 structured stop/retry telemetry. These requirements
 are part of the freeze hash and cannot be relaxed after outcomes are observed.
+The evaluator now treats every receipt-declared capture, provider-usage export,
+and price card as a manifest-sealed and independently hash-checked artifact;
+an adjacent but unsealed file earns no study credit.
 
 ## v2.7.4 — 2026-08-01
 
