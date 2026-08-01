@@ -141,6 +141,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `bb7ad3a7` | docs: record 2.7.4 release-truth repair |
 | `c6d4fee2` | feat: admit fail-closed live release evidence |
 | `dac2dd9c` | chore: clear Memi 2.7.4 parity cap |
+| `9b92653a` | fix: bind parity clearance to live receipt |
 
 ### Exact-match fail-closed route fitness
 
