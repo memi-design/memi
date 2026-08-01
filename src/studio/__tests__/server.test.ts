@@ -1,4 +1,4 @@
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
@@ -129,23 +129,15 @@ describe("studio runtime server", () => {
   it("journals Codex sessions as ProviderRuntimeEvents and replays them through /api/rpc", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-rpc-"));
     try {
-      const codex = join(root, process.platform === "win32" ? "codex-fixture.cmd" : "codex-fixture");
-      const codexScript = join(root, "codex-fixture.cjs");
+      const codexScript = join(root, "exec");
       const outputScript = "process.stdout.write(JSON.stringify({ type: 'agent_message', message: 'done' }) + '\\n');\n";
       await writeFile(codexScript, outputScript);
-      await writeFile(
-        codex,
-        process.platform === "win32"
-          ? `@echo off\r\n"${process.execPath}" "%~dp0codex-fixture.cjs" %*\r\n`
-          : `#!${process.execPath}\n${outputScript}`,
-      );
-      await chmod(codex, 0o755);
       const config = defaultStudioConfig(root);
       await saveStudioConfig(root, {
         ...config,
         harnesses: config.harnesses.map((harness) =>
           harness.id === "codex"
-            ? { ...harness, command: codex }
+            ? { ...harness, command: process.execPath }
             : harness),
       });
 
