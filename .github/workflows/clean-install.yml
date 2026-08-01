@@ -33,6 +33,10 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install dependencies without lifecycle scripts
         run: npm ci --include=optional --ignore-scripts
+      - name: Typecheck package on the supported matrix
+        run: npm run typecheck
+      - name: Run the complete engine test suite on the supported matrix
+        run: npm test -- --run
       - name: Build package from the checked-out source
         run: npm run build
       - name: Pack, install, and invoke the consumer binary
