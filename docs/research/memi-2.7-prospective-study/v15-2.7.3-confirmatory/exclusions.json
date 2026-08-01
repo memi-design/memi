@@ -3,13 +3,33 @@
   "entries": [
     {
       "id": "V15-EXC-001",
+      "recordedAt": "2026-08-01T09:30:22.047Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r6:memi",
+      "runId": "buzzr-tab-unread-badge-codex:gpt-5.6-luna:low-memi-201da0a9-a40b-4c48-bfb6-4a7331511488",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "budget-max-input-tokens-exceeded",
+        "input-token-ceiling-exceeded"
+      ],
+      "observedInputTokens": 565381,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:a13e0c62b98446e371dd41ee0635744c8fdfc60f06c972cfff9ee02a05e426c3"
+    },
+    {
+      "id": "V15-EXC-002",
       "recordedAt": "2026-08-01T07:19:38.000Z",
       "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:baseline",
       "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-0af10457-a969-4a3e-a47d-7345b10bab28",
       "scope": "rendered-frontend-grading-only",
       "reasonCodes": [
+        "budget-max-input-tokens-exceeded",
+        "build-or-compile-failed",
         "compile-failed-private-symbol-access",
-        "input-token-ceiling-exceeded"
+        "input-token-ceiling-exceeded",
+        "ios-simulator-verification-failed"
       ],
       "observedInputTokens": 452990,
       "maximumInputTokens": 450000,
@@ -19,13 +39,15 @@
       "evidenceManifestSha256": "sha256:090770f6a6b2aae78886b470e8c32078a1d54dcfb733a6bdb483404d213d6030"
     },
     {
-      "id": "V15-EXC-002",
+      "id": "V15-EXC-003",
       "recordedAt": "2026-08-01T07:19:38.000Z",
       "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:memi",
       "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-8db877c5-efd0-462d-a91d-ef41053f7a02",
       "scope": "rendered-frontend-grading-only",
       "reasonCodes": [
-        "compile-failed-private-symbol-access"
+        "build-or-compile-failed",
+        "compile-failed-private-symbol-access",
+        "ios-simulator-verification-failed"
       ],
       "observedInputTokens": 260128,
       "maximumInputTokens": 450000,
@@ -33,6 +55,201 @@
       "resourceOutcomeRetained": true,
       "imputed": false,
       "evidenceManifestSha256": "sha256:dfa6bb9c99cd48f447bf63518a7d4e75635f981cb22c5b81a1abdd90c7a37fcb"
+    },
+    {
+      "id": "V15-EXC-004",
+      "recordedAt": "2026-08-01T07:39:12.685Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r2:baseline",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-7c95ca9d-2aab-48e2-b1fa-df6deb8f54d7",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "budget-max-tool-output-bytes-exceeded",
+        "no-renderable-patch",
+        "provider-execution-failed"
+      ],
+      "observedInputTokens": 0,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:55d456403faecf4c35df9e494f17a43ad3b900b75c92f12ec9393bd4b98e3069"
+    },
+    {
+      "id": "V15-EXC-005",
+      "recordedAt": "2026-08-01T07:38:54.693Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r2:memi",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-b7303f86-5d26-4903-bba2-36f087605911",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "build-or-compile-failed",
+        "ios-simulator-verification-failed"
+      ],
+      "observedInputTokens": 252528,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:602a2945e54cf7d21a7643b475ee74ea370647371062b5557c0f95d2599db19b"
+    },
+    {
+      "id": "V15-EXC-006",
+      "recordedAt": "2026-08-01T08:28:12.803Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r3:baseline",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-1aa2925d-67dd-48d4-8ccf-80a0fbe0dd5a",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "budget-max-input-tokens-exceeded",
+        "build-or-compile-failed",
+        "input-token-ceiling-exceeded",
+        "ios-simulator-verification-failed"
+      ],
+      "observedInputTokens": 755420,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:2440c3908a0b2cc1e89fb219e07fcfb7d1645aa51b2f92474cee3a99a0c60e98"
+    },
+    {
+      "id": "V15-EXC-007",
+      "recordedAt": "2026-08-01T08:30:57.922Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r3:memi",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-aa86ec22-16b7-4dbc-86fb-d5a7e0bf964d",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "build-or-compile-failed",
+        "ios-simulator-verification-failed"
+      ],
+      "observedInputTokens": 414336,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:9591f3b66fb1a2e4593991876a5c675b06b34d48c352ba1b54546f9b946a7e80"
+    },
+    {
+      "id": "V15-EXC-008",
+      "recordedAt": "2026-08-01T08:56:59.493Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r4:baseline",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-a68af2aa-62db-4cf4-b99c-1c58e567dd4d",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "budget-max-tool-output-bytes-exceeded",
+        "no-renderable-patch",
+        "provider-execution-failed"
+      ],
+      "observedInputTokens": 0,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:f754b48d19689b8a6fd6633020bcbbf7883e0b36814c5edcb4a17d2f29b2d63b"
+    },
+    {
+      "id": "V15-EXC-009",
+      "recordedAt": "2026-08-01T08:56:34.948Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r4:memi",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-cda5940c-03b8-42bf-9717-6ff044762d57",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "build-or-compile-failed",
+        "ios-simulator-verification-failed"
+      ],
+      "observedInputTokens": 292067,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:284347307de2f15b6c00723adfb0dfd95e2b3c4211cd7c776d964932936848b8"
+    },
+    {
+      "id": "V15-EXC-010",
+      "recordedAt": "2026-08-01T09:18:28.457Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r5:baseline",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-14718d9b-5db1-43bd-82d0-ff3353d55a08",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "budget-max-tool-output-bytes-exceeded",
+        "no-renderable-patch",
+        "provider-execution-failed"
+      ],
+      "observedInputTokens": 0,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:ce43338f9941d4da3d6c0f7f118380cf1c2f76b5aa8bcc69e2ab8f2e306448f3"
+    },
+    {
+      "id": "V15-EXC-011",
+      "recordedAt": "2026-08-01T09:21:23.225Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r5:memi",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-39439653-5d64-4b6a-9e76-9eea66090f5c",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "budget-max-input-tokens-exceeded",
+        "build-or-compile-failed",
+        "input-token-ceiling-exceeded",
+        "ios-simulator-verification-failed"
+      ],
+      "observedInputTokens": 514344,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:0b6686ec6803c1977ab1a4e2dd738f42305a3c7d7a70cd9c90b1c81c956a5f3a"
+    },
+    {
+      "id": "V15-EXC-012",
+      "recordedAt": "2026-08-01T09:51:47.614Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r6:baseline",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-baseline-4c64939e-9bf5-4447-8d08-1d6f45f31ed8",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "budget-max-input-tokens-exceeded",
+        "build-or-compile-failed",
+        "input-token-ceiling-exceeded",
+        "ios-simulator-verification-failed"
+      ],
+      "observedInputTokens": 562242,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:c8a85fb840162414db4ded3ac1e4416cedd245d64f625afd8d540c3cc6d4ce53"
+    },
+    {
+      "id": "V15-EXC-013",
+      "recordedAt": "2026-08-01T09:48:35.774Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r6:memi",
+      "runId": "nate-options-reduce-motion-codex:gpt-5.6-luna:low-memi-6c91443b-c172-475c-ba8c-a401dacc7ec6",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "build-or-compile-failed",
+        "ios-simulator-verification-failed"
+      ],
+      "observedInputTokens": 337724,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:4a07591673af43e24043a29d6a91fcc1914e2404c2744df9c5351b0171530835"
+    },
+    {
+      "id": "V15-EXC-014",
+      "recordedAt": "2026-08-01T09:17:36.434Z",
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r5:baseline",
+      "runId": "paraform-command-menu-codex:gpt-5.6-luna:low-baseline-a250e48f-848b-4db8-bbb3-90c05919a165",
+      "scope": "rendered-frontend-grading-only",
+      "reasonCodes": [
+        "rendered-flow-verification-failed"
+      ],
+      "observedInputTokens": 281407,
+      "maximumInputTokens": 450000,
+      "functionalOutcomeRetained": true,
+      "resourceOutcomeRetained": true,
+      "imputed": false,
+      "evidenceManifestSha256": "sha256:0fa067580e3bbdc5e00b0b922cfbb19bb48314582c3b12511028d73647feefb0"
     }
   ]
 }
