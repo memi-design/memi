@@ -113,6 +113,24 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `65520f72` | test: block symlink escapes and provenance overclaim |
 | `9d18f3cd` | fix: reject symlink escapes and clarify local provenance |
 | `75de171f` | docs: record symlink containment hardening |
+| `7e657d54` | docs: finalize cross-platform candidate audit |
+| `bfc6bb87` | docs: finalize V15 audit PDF artifact |
+| `b611f58d` | merge: integrate finalized V15 audit PDF artifact |
+| `4cc1bf8a` | docs: rebind backtest provenance to final candidate |
+| `57aa761e` | docs: finalize confirmatory audit PDF |
+| `83db411c` | research: rebind backtest to final candidate |
+| `52b44828` | merge: integrate final confirmatory audit PDF |
+| `f484509b` | test: make shadcn spec path assertion portable |
+| `edbe0449` | test: preserve prior public release provenance |
+| `63cca7d5` | fix: retain prior release record in candidate projection |
+| `486f3dfa` | chore: sync preserved public release provenance |
+| `e28e63d2` | test: label candidate changelog truthfully |
+| `a4de7f6b` | fix: distinguish candidate changelog status |
+| `4d08ed27` | test: reproduce Studio shutdown evidence race |
+| `eaea4f88` | fix: gate candidate changelog status consistently |
+| `b58281a5` | test: authenticate retained release records |
+| `da4aee34` | fix: authenticate retained release record bytes |
+| `21e9e0eb` | fix: drain Studio runtime work before cleanup |
 
 ### Exact-match fail-closed route fitness
 
