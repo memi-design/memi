@@ -17,7 +17,14 @@ describe("preview changelog sync", () => {
     const releases = parseChangelogMarkdown(markdown);
     const generatedHtml = applyChangelogData(currentHtml, releases);
 
-    expect(releases[0]?.version).toBeTruthy();
+    expect(releases[0]).toMatchObject({
+      version: "v2.7.4",
+      commits: expect.arrayContaining([
+        ["0568964b", "test: define 2.7.4 candidate release surfaces"],
+        ["289bd728", "chore: prepare Memi 2.7.4 candidate"],
+        ["cd5335b1", "chore: sync 2.7.4 candidate artifacts"],
+      ]),
+    });
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
     expect(currentHtml).toBe(generatedHtml);
   });
