@@ -71,6 +71,14 @@ export const prospectiveEvidenceDraftSchema = z.object({
 });
 export type ProspectiveEvidenceDraft = z.infer<typeof prospectiveEvidenceDraftSchema>;
 
+export function prospectiveEvidenceDraftArtifactNames(
+  input: ProspectiveEvidenceDraft,
+): readonly string[] {
+  return draftArtifacts(prospectiveEvidenceDraftSchema.parse(input)).map(
+    (artifact) => artifact.name,
+  );
+}
+
 const executionSchema = z.object({
   stopReason: z.enum([
     "verification-passed",

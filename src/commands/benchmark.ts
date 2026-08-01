@@ -32,6 +32,12 @@ import {
   verifyEvidenceManifest,
 } from "../efficiency/prospective-files.js";
 import {
+  materializeProspectiveEvidenceV2,
+  prospectiveEvidenceDraftArtifactNames,
+  prospectiveEvidenceDraftSchema,
+  type ProspectiveEvidenceDraft,
+} from "../efficiency/prospective-evidence-materialization.js";
+import {
   prospectiveEvidenceV2Artifacts,
   prospectiveEvidenceV2Schema,
   validateProspectiveEvidenceV2,
@@ -410,6 +416,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .option("--claude <path>", "Claude Code path", "claude")
     .option("--freeze <path>", "Prospective freeze receipt")
     .option("--trial <id>", "Frozen prospective trial id")
+    .option("--evidence-draft <path>", "V2 native-capture and billing receipt draft")
+    .option("--artifact-root <path>", "Bounded root containing V2 capture and billing files")
     .option("--task-class <id>", "Stable route-fitness task class (defaults to task id)")
     .option(
       "--recovery-probe",
@@ -435,6 +443,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       claude: string;
       freeze?: string;
       trial?: string;
+      evidenceDraft?: string;
+      artifactRoot?: string;
       taskClass?: string;
       recoveryProbe?: boolean;
       execute?: boolean;
@@ -461,13 +471,42 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         provider === "codex" ? "gpt-5.6-sol" : "claude-sonnet-4-6"
       );
       const taskManifestSha256 = await hashFile(resolve(taskPath));
-      const repositoryRoot = resolve(opts.repository);
-      const repositoryRevision = await benchmarkRepositoryRevision(repositoryRoot);
       const freeze = opts.freeze
         ? prospectiveFreezeSchema.parse(JSON.parse(
           await readFile(resolve(opts.freeze), "utf8"),
         ))
         : null;
+      if (Boolean(opts.evidenceDraft) !== Boolean(opts.artifactRoot)) {
+        throw new Error("--evidence-draft and --artifact-root must be provided together");
+      }
+      let evidenceDraft: Readonly<{
+        draft: ProspectiveEvidenceDraft;
+        artifactRoot: string;
+      }> | null = null;
+      if (freeze?.evidenceV2) {
+        if (!opts.evidenceDraft || !opts.artifactRoot) {
+          throw new Error(
+            "prospective evidence V2 requires --evidence-draft and --artifact-root before model execution",
+          );
+        }
+        const draft = prospectiveEvidenceDraftSchema.parse(JSON.parse(
+            await readFile(resolve(opts.evidenceDraft), "utf8"),
+          ));
+        const reservedArtifact = prospectiveEvidenceDraftArtifactNames(draft).find(
+          (name) => workflowReservedEvidenceArtifacts.has(name),
+        );
+        if (reservedArtifact) {
+          throw new Error(`prospective evidence artifact name is reserved: ${reservedArtifact}`);
+        }
+        evidenceDraft = {
+          draft,
+          artifactRoot: resolve(opts.artifactRoot),
+        };
+      } else if (opts.evidenceDraft || opts.artifactRoot) {
+        throw new Error("V2 evidence inputs require a freeze with evidenceV2 enabled");
+      }
+      const repositoryRoot = resolve(opts.repository);
+      const repositoryRevision = await benchmarkRepositoryRevision(repositoryRoot);
       const frozenTrial = freeze && opts.trial
         ? selectProspectiveTrial({
           freeze,
@@ -580,6 +619,9 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       let evidenceManifestSha256: string | null = freeze && frozenTrial
         ? EVIDENCE_MANIFEST_HASH_PLACEHOLDER
         : null;
+      let prospectiveEvidenceReceipt: ReturnType<
+        typeof prospectiveEvidenceV2Schema.parse
+      > | null = null;
       if (freeze && frozenTrial) {
         await Promise.all([
           writeJson(join(result.evidenceDirectory, "environment.json"), {
@@ -605,6 +647,35 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
             result.verificationIsolation,
           ),
         ]);
+        if (freeze.evidenceV2) {
+          if (!evidenceDraft || !freeze.taskNativePlatforms?.[task.id]) {
+            throw new Error("prospective evidence V2 materialization prerequisites are missing");
+          }
+          prospectiveEvidenceReceipt = await materializeProspectiveEvidenceV2({
+            artifactRoot: evidenceDraft.artifactRoot,
+            evidenceDirectory: result.evidenceDirectory,
+            draft: evidenceDraft.draft,
+            expected: {
+              runId: result.runId,
+              trialId: frozenTrial.trialId,
+              taskId: task.id,
+              repeat: positiveInteger(opts.repeat, "repeat"),
+              condition,
+              repositoryRevision: result.sourceRevision,
+              candidateArtifactSha256: freeze.candidate.artifactSha256,
+              platform: freeze.taskNativePlatforms[task.id],
+              requiredCaptureKinds: freeze.evidenceV2.requiredCaptureKinds,
+            },
+            execution: {
+              stopReason: workflowStopReason(result),
+              agentWallTimeMs: result.adapterWallTimeMs,
+              verifierWallTimeMs: result.verification.reduce(
+                (sum, check) => sum + check.durationMs,
+                0,
+              ),
+            },
+          });
+        }
       }
       const evidenceRefs = freeze
         ? [...new Set([
@@ -665,6 +736,11 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           ...(routePolicyPath && !evidenceRefs.includes(routePolicyPath)
             ? [routePolicyPath]
             : []),
+          ...(prospectiveEvidenceReceipt
+            ? prospectiveEvidenceV2Artifacts(prospectiveEvidenceReceipt).map(
+              (artifact) => join(result.evidenceDirectory, artifact.name),
+            )
+            : []),
           ...(result.adapter.usage.estimatedCostUsd === null
             ? [`estimatedCostUsd:unassessed-${provider}-subscription`]
             : []),
@@ -714,6 +790,11 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
               artifact !== "evidence-manifest.json"),
             ...(routePath ? ["skill-route.json"] : []),
             ...(routePolicyPath ? ["skill-fitness-policy.json"] : []),
+            ...(prospectiveEvidenceReceipt
+              ? prospectiveEvidenceV2Artifacts(prospectiveEvidenceReceipt).map(
+                (artifact) => artifact.name,
+              )
+              : []),
             "run.json",
           ],
         });
@@ -1435,6 +1516,45 @@ function stableTaskClass(value: string): string {
   }
   return value;
 }
+
+function workflowStopReason(result: Awaited<ReturnType<typeof runWorkflowTrial>>):
+  | "verification-passed"
+  | "verification-failed"
+  | "provider-failed"
+  | "token-budget-exhausted"
+  | "preflight-failed" {
+  if (!result.verificationIsolation.preparationPassed) return "preflight-failed";
+  if (result.budget.exceeded.some((dimension) =>
+    dimension === "max-input-tokens"
+    || dimension === "max-output-tokens"
+    || dimension === "max-reasoning-tokens",
+  )) {
+    return "token-budget-exhausted";
+  }
+  if (result.adapter.exitCode !== 0) return "provider-failed";
+  return result.accepted ? "verification-passed" : "verification-failed";
+}
+
+const workflowReservedEvidenceArtifacts = new Set([
+  "git.patch",
+  "preparation.json",
+  "verification.json",
+  "events.jsonl",
+  "adapter.stdout.log",
+  "adapter.stderr.log",
+  "tool-profile.json",
+  "budget.json",
+  "environment.json",
+  "usage.json",
+  "tools.json",
+  "route.json",
+  "verification-isolation.json",
+  "skill-route.json",
+  "skill-fitness-policy.json",
+  "run.json",
+  "evidence-manifest.json",
+  "prospective-evidence-v2.json",
+]);
 
 async function verifyProspectiveEvidenceV2Receipt(input: {
   readonly evidenceDirectory: string;

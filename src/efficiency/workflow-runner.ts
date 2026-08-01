@@ -106,6 +106,7 @@ export interface WorkflowTrialResult {
     readonly preparationPassed: boolean;
   };
   readonly budget: Readonly<WorkflowBudgetAssessment>;
+  readonly adapterWallTimeMs: number;
   readonly durationMs: number;
 }
 
@@ -288,6 +289,7 @@ export async function runWorkflowTrial(input: {
         verification: [],
         verificationIsolation,
         budget,
+        adapterWallTimeMs: 0,
         durationMs,
       });
     }
@@ -368,11 +370,12 @@ export async function runWorkflowTrial(input: {
         failure: message,
       }));
     }
+    const adapterWallTimeMs = Math.round(performance.now() - adapterStarted);
     const toolProfile = profileWorkflowTools(input.adapter.id, adapterResult.stdout);
     const budget = assessWorkflowBudget(task.agentBudget, adapterResult);
     events.push(event("workflow.adapter.completed", {
       exitCode: adapterResult.exitCode,
-      durationMs: Math.round(performance.now() - adapterStarted),
+      durationMs: adapterWallTimeMs,
       usage: adapterResult.usage,
       tools: adapterResult.tools,
     }));
@@ -578,6 +581,7 @@ export async function runWorkflowTrial(input: {
         fixturesUnchanged: verificationFixturesUnchanged,
       },
       budget,
+      adapterWallTimeMs,
       durationMs,
     });
   } finally {
