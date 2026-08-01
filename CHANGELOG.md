@@ -41,6 +41,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `25b1af4c` — research: correct V16 Expo fixture provenance
 - `093fb537` — test: bind V2 fixtures to repository origins
 - `445f3430` — feat: verify V2 fixture repository origins
+- `e7357fe0` — research: clarify V16 claim support gates
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -73,6 +74,9 @@ than an unrelated active repository, while preserving the requirement for new
 Simulator capture and calibration evidence.
 Preflight additionally canonicalizes GitHub SSH and HTTPS remotes and rejects
 any checkout whose origin differs from the preregistered fixture identity.
+The V16 protocol now separates the evidentiary gates for preserved quality,
+task-specific superiority, runtime, measured USD cost, and practitioner-grade
+design claims so an engineering safeguard is never mistaken for an outcome.
 
 ## v2.7.4 — 2026-08-01
 
