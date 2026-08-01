@@ -41,8 +41,8 @@
         "tag": "v2.7.4",
         "tagPeeledCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
         "checksumsAssetSha256": "f0ff2f7af7e0d37b0efbab3d9eeea4c4bc8d8f2940efcc52979563f8fb07c242",
-        "reportAssetSha256": "7f89b93951cc6ee35ce5d38cc9c8009f4d607be9681190c18700bf2aeb7f2bc5",
-        "reportChecksumAssetSha256": "f0933a18145bcd0bb911477e0233063373dcb31824f595a981ce785caaa7317e",
+        "reportAssetSha256": "5f178a3a0198c4f8a790d35dc1a2bf463c28e01cb1f495bf862b44c41ddbedb7",
+        "reportChecksumAssetSha256": "937d32cf500a4b5c58c67542bd68583570d5639ab1b052f27035f0aa472d8627",
         "platformAssets": {
           "memi-darwin-arm64.tar.gz": "72e7135e6c0b1236b8b9a2dcae68b6ac732f208d975be5d11da4491ac7a3f1c8",
           "memi-darwin-x64.tar.gz": "39cc1d5661c1af5752da4cf8e7de39701ab15fceaf80a88b8d52d5c8486156a3",
@@ -110,9 +110,13 @@
         "releaseUrl": "https://github.com/memi-design/memi/releases/tag/v2.7.4",
         "releaseAssetUrl": "https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf",
         "checksumAssetUrl": "https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf.sha256",
-        "pdfBytes": 560252,
-        "pdfSha256": "7f89b93951cc6ee35ce5d38cc9c8009f4d607be9681190c18700bf2aeb7f2bc5",
-        "checksumAssetSha256": "f0933a18145bcd0bb911477e0233063373dcb31824f595a981ce785caaa7317e",
+        "websiteSourceCommit": "e2a7d1dfe7a5c9e9a50f2bf585ce97f119c5ff44",
+        "productionDeploymentId": "dpl_9K2P9sDq8Y7Es77qTd1WJxbzFF5M",
+        "productionDeploymentUrl": "https://memoire-4mpu85ofv-sarveshseas-projects.vercel.app",
+        "verifiedAt": "2026-08-01T17:14:05Z",
+        "pdfBytes": 560146,
+        "pdfSha256": "5f178a3a0198c4f8a790d35dc1a2bf463c28e01cb1f495bf862b44c41ddbedb7",
+        "checksumAssetSha256": "937d32cf500a4b5c58c67542bd68583570d5639ab1b052f27035f0aa472d8627",
         "reason": "The PDF checksum was established after compilation and is intentionally excluded from the self-referential PDF."
       }
     },
