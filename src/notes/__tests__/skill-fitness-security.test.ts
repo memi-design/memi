@@ -5,10 +5,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   appendSkillFitnessEvent,
   assessSkillRouteFitness,
+  buildSkillFitnessEvent,
   createSkillFitnessQualityEvidence,
   type SkillFitnessEvent,
   type SkillFitnessRouteIdentity,
 } from "../skill-fitness.js";
+import type { BenchmarkRunRecord } from "../../efficiency/contracts.js";
 
 const HASH_A = `sha256:${"a".repeat(64)}`;
 const HASH_B = `sha256:${"b".repeat(64)}`;
@@ -54,6 +56,41 @@ describe("skill fitness empirical identity security", () => {
       events: [first, rewritten],
       route: identity(),
     })).toThrow(/duplicate exact-route prospective pair/i);
+  });
+
+  it("content-addresses the prospective execution mode in generated v2 event ids", () => {
+    const baseline = run("baseline");
+    const memi = run("memi");
+    const qualityEvidence = createSkillFitnessQualityEvidence({
+      pair: { baselineRunId: baseline.runId, memiRunId: memi.runId },
+      rubricVersion: "memi-design-quality-v1",
+      blinded: true,
+      graderCount: 3,
+      baseline: { score: 90, criticalDefects: 0 },
+      memi: { score: 92, criticalDefects: 0 },
+    });
+    const common = {
+      baseline,
+      memi,
+      route: {
+        routerVersion: "skill-router-v2",
+        repositoryFingerprintHash: HASH_B,
+        selected: [{ id: "atomic-design", contentHash: HASH_A }],
+      },
+      taskClass: "web-design-repair",
+      qualityEvidence,
+    } as const;
+
+    const production = buildSkillFitnessEvent({
+      ...common,
+      evidenceMode: "production",
+    });
+    const recoveryProbe = buildSkillFitnessEvent({
+      ...common,
+      evidenceMode: "recovery-probe",
+    });
+
+    expect(production.eventId).not.toBe(recoveryProbe.eventId);
   });
 });
 
@@ -105,4 +142,49 @@ function event(input: {
       memiTrialId: "study:task:r1:memi",
     },
   } as SkillFitnessEvent;
+}
+
+function run(condition: "baseline" | "memi"): BenchmarkRunRecord {
+  return {
+    schemaVersion: 1,
+    runId: `${condition}-sealed-run`,
+    experimentId: "fitness-security-v1",
+    suiteId: "fitness-security-v1",
+    taskId: "web-design-repair",
+    repeat: 1,
+    condition,
+    repository: { pathHash: HASH_C, revision: "abc123", dirty: false },
+    harness: { id: "codex", modelId: "gpt-5.6-luna", reasoningEffort: "low" },
+    timing: {
+      startedAt: "2026-08-01T00:00:00.000Z",
+      completedAt: "2026-08-01T00:01:00.000Z",
+      wallTimeMs: condition === "baseline" ? 60_000 : 50_000,
+      toolTimeMs: 10_000,
+    },
+    usage: {
+      inputTokens: condition === "baseline" ? 1_000 : 800,
+      cachedInputTokens: 0,
+      outputTokens: 100,
+      reasoningTokens: 100,
+      estimatedCostUsd: null,
+    },
+    tools: { calls: 10, errors: 0, retries: 0 },
+    outcome: {
+      accepted: true,
+      testsPassed: true,
+      qualityScore: 90,
+      defects: 0,
+      humanInterventions: 0,
+    },
+    evidenceRefs: [],
+    prospective: {
+      planHash: HASH_A,
+      freezeHash: HASH_B,
+      candidateArtifactSha256: HASH_C,
+      taskManifestSha256: HASH_A,
+      evidenceManifestSha256: HASH_B,
+      trialId: `study:task:r1:${condition}`,
+      sequence: condition === "baseline" ? 1 : 2,
+    },
+  };
 }
