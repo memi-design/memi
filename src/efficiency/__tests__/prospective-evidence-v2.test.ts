@@ -33,6 +33,8 @@ function receipt(overrides: Record<string, unknown> = {}) {
       amount: 0.42,
       sourceSha256: sha("f"),
       priceCardSha256: sha("1"),
+      sourceArtifact: { name: "provider-usage.json", sha256: sha("f") },
+      priceCardArtifact: { name: "price-card.json", sha256: sha("1") },
     },
     execution: {
       stopReason: "verification-passed",
@@ -82,6 +84,8 @@ describe("prospective evidence v2", () => {
         amount: null,
         sourceSha256: null,
         priceCardSha256: null,
+        sourceArtifact: null,
+        priceCardArtifact: null,
       },
       trial: {
         trialId: "study:web:r1:memi",

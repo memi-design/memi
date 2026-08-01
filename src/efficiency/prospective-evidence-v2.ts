@@ -26,6 +26,11 @@ const nativeCaptureSchema = z.object({
   sha256: sha256Schema,
 }).strict();
 
+const evidenceArtifactSchema = z.object({
+  name: artifactNameSchema,
+  sha256: sha256Schema,
+}).strict();
+
 const billingSchema = z.discriminatedUnion("source", [
   z.object({
     source: z.enum(["provider-usage-export", "invoice-allocation"]),
@@ -33,6 +38,8 @@ const billingSchema = z.discriminatedUnion("source", [
     amount: z.number().nonnegative(),
     sourceSha256: sha256Schema,
     priceCardSha256: sha256Schema,
+    sourceArtifact: evidenceArtifactSchema,
+    priceCardArtifact: evidenceArtifactSchema,
   }).strict(),
   z.object({
     source: z.literal("unavailable"),
@@ -40,6 +47,8 @@ const billingSchema = z.discriminatedUnion("source", [
     amount: z.literal(null),
     sourceSha256: z.literal(null),
     priceCardSha256: z.literal(null),
+    sourceArtifact: z.literal(null),
+    priceCardArtifact: z.literal(null),
   }).strict(),
 ]);
 
@@ -79,11 +88,24 @@ export const prospectiveEvidenceV2Schema = evidenceContentSchema.superRefine(
   (receipt, context) => {
     const identities = receipt.native.captures.map((capture) =>
       `${capture.kind}:${capture.name}`);
-    if (new Set(identities).size !== identities.length) {
+  if (new Set(identities).size !== identities.length) {
       context.addIssue({
         code: "custom",
         path: ["native", "captures"],
         message: "capture kind and filename identities must be unique",
+      });
+  }
+    if (
+      receipt.billing.source !== "unavailable"
+      && (
+        receipt.billing.sourceSha256 !== receipt.billing.sourceArtifact.sha256
+        || receipt.billing.priceCardSha256 !== receipt.billing.priceCardArtifact.sha256
+      )
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["billing"],
+        message: "billing artifact hashes must match their declared source hashes",
       });
     }
   },
