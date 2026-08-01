@@ -267,18 +267,21 @@ export function buildSkillFitnessEvent(
   const qualityEvidence = SkillFitnessQualityEvidenceSchema.parse(input.qualityEvidence);
   validateQualityEvidencePair(qualityEvidence, input.baseline, input.memi);
   const prospective = prospectivePair(input.baseline, input.memi);
+  const evidenceMode = input.evidenceMode ?? "production";
   return deepFreeze(SkillFitnessEventV2Schema.parse({
     schemaVersion: 2,
     eventId: fitnessEventId({
       schemaVersion: 2,
       ...common,
       qualityEvidenceSha256: qualityEvidence.evidenceSha256,
+      prospective,
+      evidenceMode,
     }),
     ...common,
     functionalAcceptance: passed(input.baseline) && passed(input.memi),
     qualityEvidence,
     prospective,
-    evidenceMode: input.evidenceMode ?? "production",
+    evidenceMode,
   }));
 }
 
