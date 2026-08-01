@@ -131,8 +131,13 @@ describe("studio runtime server", () => {
     const oldPath = process.env.PATH;
     try {
       await mkdir(bin, { recursive: true });
-      const codex = join(bin, "codex");
-      await writeFile(codex, "#!/bin/sh\necho '{\"type\":\"agent_message\",\"message\":\"done\"}'\n");
+      const codex = join(bin, process.platform === "win32" ? "codex.cmd" : "codex");
+      await writeFile(
+        codex,
+        process.platform === "win32"
+          ? "@echo off\r\necho {\"type\":\"agent_message\",\"message\":\"done\"}\r\n"
+          : "#!/bin/sh\necho '{\"type\":\"agent_message\",\"message\":\"done\"}'\n",
+      );
       await chmod(codex, 0o755);
       process.env.PATH = `${bin}:${oldPath ?? ""}`;
 

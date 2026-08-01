@@ -1,9 +1,9 @@
-import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { spawnPortableSync } from "../../utils/subprocess.js";
 
 interface AgentKitManifest {
   version: number;
@@ -301,7 +301,7 @@ describe("packaged agent kits", () => {
 
   it("excludes repository-only integration assets from npm pack output", () => {
     const npmCache = mkdtempSync(join(tmpdir(), "memoire-npm-cache-"));
-    const pack = spawnSync(process.platform === "win32" ? "npm.cmd" : "npm", ["pack", "--dry-run", "--json"], {
+    const pack = spawnPortableSync(process.platform === "win32" ? "npm.cmd" : "npm", ["pack", "--dry-run", "--json"], {
       cwd: process.cwd(),
       encoding: "utf-8",
       env: {

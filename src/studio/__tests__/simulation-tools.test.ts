@@ -254,7 +254,7 @@ describe("studio simulation tools", () => {
         status: "completed",
         data: {
           exports: expect.arrayContaining([expect.objectContaining({
-            outputPath: expect.stringContaining(".memoire/mermaid-jam/boards"),
+            outputPath: expect.stringContaining(join(".memoire", "mermaid-jam", "boards")),
           })]),
         },
       });
