@@ -11,11 +11,12 @@
   "fixtures": [
     {
       "id": "buzzr-tab-unread-badge",
-      "repository": "https://github.com/Buzzr-app/dfs-engine.git",
-      "observedRevision": "11819dda048fd720cd7a55478b81af3ba2fb5131",
+      "repository": "https://github.com/Buzzr-app/Buzzr.git",
+      "verifiedCheckout": "/Volumes/ExtremeSSD/Projects/_benchmarks/memi-2.7-cases/buzzr",
+      "observedRevision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
       "previousV15Revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
-      "status": "repin-required",
-      "reason": "The active checkout has advanced from the previous frozen revision."
+      "status": "available-to-reverify",
+      "reason": "The verified checkout is the Expo benchmark fixture used by V15 and remains clean at its frozen revision. V15 rendered only a testing-library tree, so native Simulator collectors and calibration are still required."
     },
     {
       "id": "paraform-command-menu",
@@ -34,7 +35,7 @@
   ],
   "remainingPrerequisites": [
     "Build an exact 2.7.5 candidate tarball and record its SHA-256.",
-    "Choose and cleanly clone a new Buzzr revision, then hash its task manifest.",
+    "Use the verified Buzzr Expo fixture revision and hash a V16 task manifest with native Simulator collectors.",
     "Commit a task-defined screenshot, interaction-trace, and accessibility collector for every fixture.",
     "Perform one unscored native-capture calibration pair per fixture.",
     "Retain per-cell provider usage exports or invoice allocations and price-card artifacts before scored execution."
