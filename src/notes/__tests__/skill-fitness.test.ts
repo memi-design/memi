@@ -129,6 +129,27 @@ describe("append-only skill fitness evidence", () => {
       taskClass: "expo-bottom-tab-badge",
     })).toThrow(/repository revision mismatch/);
   });
+
+  it("timestamps evidence only after both paired runs are complete", () => {
+    const baseline = run("baseline", 2_000, 120_000, 20);
+    const memi = run("memi", 1_000, 90_000, 15);
+    const laterBaseline = {
+      ...baseline,
+      timing: {
+        ...baseline.timing,
+        completedAt: "2026-07-29T00:10:00.000Z",
+      },
+    };
+
+    const result = buildSkillFitnessEvent({
+      baseline: laterBaseline,
+      memi,
+      route: skillRoute(),
+      taskClass: "expo-bottom-tab-badge",
+    });
+
+    expect(result.createdAt).toBe("2026-07-29T00:10:00.000Z");
+  });
 });
 
 function event(
