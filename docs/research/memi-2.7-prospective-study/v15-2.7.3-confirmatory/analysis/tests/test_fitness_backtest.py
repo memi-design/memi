@@ -11,11 +11,15 @@ from analysis.fitness_backtest import (
     build_engine_quality_evidence,
     canonical_sha256,
     engine_canonical_sha256,
+    artifact_set_mismatches,
+    ensure_safe_output_path,
     expected_replay_counts,
     load_backtest_inputs,
     render_backtest_artifacts,
     summarize_backtest,
+    validate_snapshot_prefix,
     validate_cli_event,
+    verify_source_manifest,
 )
 
 
@@ -193,6 +197,77 @@ class FitnessBacktestTests(unittest.TestCase):
             self.assertIn(b"Nate", first[2])
             self.assertIn(b"abstained", first[2])
             self.assertNotIn(b"Nate exact-route suppression", first[2])
+
+    def test_source_manifest_is_authenticated_before_resealing(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            run_root = Path(directory) / "safe-run"
+            run_root.mkdir()
+            artifact = run_root / "artifact.json"
+            artifact.write_text("{}\n", encoding="utf-8")
+            run = {
+                "runId": "safe-run",
+                "prospective": {
+                    "trialId": "study:task:r1:baseline",
+                    "evidenceManifestSha256": "",
+                },
+            }
+            (run_root / "run.json").write_text(json.dumps(run), encoding="utf-8")
+            files = [
+                {
+                    "name": "artifact.json",
+                    "bytes": artifact.stat().st_size,
+                    "sha256": "sha256:" + __import__("hashlib").sha256(artifact.read_bytes()).hexdigest(),
+                }
+            ]
+            content = {"schemaVersion": 1, "trialId": "study:task:r1:baseline", "files": files}
+            manifest_hash = canonical_sha256(content)
+            run["prospective"]["evidenceManifestSha256"] = manifest_hash
+            (run_root / "run.json").write_text(json.dumps(run), encoding="utf-8")
+            (run_root / "evidence-manifest.json").write_text(
+                json.dumps({**content, "manifestSha256": manifest_hash}), encoding="utf-8"
+            )
+
+            verify_source_manifest(run_root, run)
+            artifact.write_text('{"tampered":true}\n', encoding="utf-8")
+            with self.assertRaisesRegex(BacktestInputError, "artifact hash mismatch"):
+                verify_source_manifest(run_root, run)
+
+    def test_snapshot_validation_rejects_future_event_substitution_at_same_count(self) -> None:
+        events = [
+            {"eventId": "fitness:first", "taskClass": "task-a", "createdAt": "2026-08-01T01:00:00.000Z"},
+            {"eventId": "fitness:future", "taskClass": "task-a", "createdAt": "2026-08-01T03:00:00.000Z"},
+        ]
+        correct = {
+            "eventsAvailable": 2,
+            "eventsReplayed": 1,
+            "routes": [{"identity": {"taskClass": "task-a"}, "timeline": [
+                {"eventId": "fitness:first", "createdAt": "2026-08-01T01:00:00.000Z"}
+            ]}],
+        }
+        validate_snapshot_prefix(correct, events[:1], "2026-08-01T02:00:00.000Z", 2)
+        substituted = json.loads(json.dumps(correct))
+        substituted["routes"][0]["timeline"][0] = {
+            "eventId": "fitness:future",
+            "createdAt": "2026-08-01T03:00:00.000Z",
+        }
+        with self.assertRaisesRegex(BacktestInputError, "event prefix"):
+            validate_snapshot_prefix(substituted, events[:1], "2026-08-01T02:00:00.000Z", 2)
+
+    def test_artifact_comparison_rejects_unexpected_files(self) -> None:
+        self.assertEqual(artifact_set_mismatches({"a": b"same"}, {"a": b"same"}), [])
+        self.assertEqual(
+            artifact_set_mismatches({"a": b"same", "obsolete": b"old"}, {"a": b"same"}),
+            ["unexpected:obsolete"],
+        )
+
+    def test_output_guard_rejects_symlink_ancestors(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            outside = root / "outside"
+            outside.mkdir()
+            (root / "generated").symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(BacktestInputError, "symlink"):
+                ensure_safe_output_path(root / "generated" / "artifact.json", root)
 
 
 def _event_for(command: object) -> dict[str, object]:
