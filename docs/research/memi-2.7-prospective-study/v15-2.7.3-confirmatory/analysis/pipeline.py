@@ -21,6 +21,7 @@ BOOTSTRAP_BASE_SEED = 2715
 NONINFERIORITY_MARGIN = -5.0
 PROVIDER_FAILURE_REASONS = {"provider-execution-failed", "provider-timeout"}
 GRADING_EXCLUSION_SCOPE = "rendered-frontend-grading-only"
+EVIDENCE_MANIFEST_HASH_PLACEHOLDER = f'sha256:{"0" * 64}'
 
 
 class AnalysisInputError(RuntimeError):
@@ -230,9 +231,11 @@ def _load_runs(runs_root: Path) -> dict[str, TrialRun]:
         trial_id = payload["prospective"]["trialId"]
         manifest_path = run_path.with_name("evidence-manifest.json")
         verification_path = run_path.with_name("verification.json")
+        events_path = run_path.with_name("events.jsonl")
         manifest = _load_json(manifest_path)
         verification = _load_json(verification_path)
-        manifest_sha = _sha256_file(manifest_path)
+        events = _load_jsonl(events_path)
+        manifest_sha = _canonical_manifest_sha256(manifest)
         if manifest_sha != payload["prospective"]["evidenceManifestSha256"]:
             raise AnalysisInputError(
                 f"manifest hash mismatch for {trial_id}: "
@@ -246,14 +249,32 @@ def _load_runs(runs_root: Path) -> dict[str, TrialRun]:
             raise AnalysisInputError(
                 f"manifest trial id mismatch for {trial_id}: {manifest['trialId']}"
             )
-        listed_run = next((entry for entry in manifest["files"] if entry["name"] == "run.json"), None)
-        if listed_run is None:
+        files_by_name = {entry["name"]: entry for entry in manifest["files"]}
+        if "run.json" not in files_by_name:
             raise AnalysisInputError(f"run.json missing from evidence manifest for {trial_id}")
-        actual_run_sha = _sha256_file(run_path)
-        if listed_run["sha256"] != actual_run_sha:
-            raise AnalysisInputError(
-                f"run.json hash mismatch for {trial_id}: {listed_run['sha256']} != {actual_run_sha}"
-            )
+        if "events.jsonl" not in files_by_name:
+            raise AnalysisInputError(f"events.jsonl missing from evidence manifest for {trial_id}")
+        for artifact_name, entry in files_by_name.items():
+            artifact_path = run_path.with_name(artifact_name)
+            if not artifact_path.is_file():
+                raise AnalysisInputError(f"manifest artifact missing for {trial_id}: {artifact_name}")
+            actual_bytes = artifact_path.stat().st_size
+            if int(entry["bytes"]) != actual_bytes:
+                raise AnalysisInputError(
+                    f"artifact byte mismatch for {trial_id} {artifact_name}: {entry['bytes']} != {actual_bytes}"
+                )
+            actual_sha = _hash_evidence_artifact(artifact_path, artifact_name)
+            if entry["sha256"] != actual_sha:
+                raise AnalysisInputError(
+                    f"artifact hash mismatch for {trial_id} {artifact_name}: {entry['sha256']} != {actual_sha}"
+                )
+            if artifact_name == "run.json":
+                embedded_manifest_sha = _read_run_manifest_sha256(artifact_path)
+                if embedded_manifest_sha is not None and embedded_manifest_sha != manifest_sha:
+                    raise AnalysisInputError(
+                        f"run.json embedded manifest hash mismatch for {trial_id}: "
+                        f"{embedded_manifest_sha} != {manifest_sha}"
+                    )
         failed_reasons = tuple(
             str(item.get("reason"))
             for item in verification
@@ -274,7 +295,7 @@ def _load_runs(runs_root: Path) -> dict[str, TrialRun]:
             wall_time_ms=int(payload["timing"]["wallTimeMs"]),
             tool_calls=int(payload["tools"]["calls"]),
             retries=int(payload["tools"]["retries"]),
-            provider_failures=int(any(reason in PROVIDER_FAILURE_REASONS for reason in failed_reasons)),
+            provider_failures=_provider_failure_from_events(events),
             evidence_manifest_sha256=manifest_sha,
             verification_reasons=failed_reasons,
         )
@@ -402,6 +423,14 @@ def _primary_quality_analysis(
     for pair_key, pair in sorted(grouped.items()):
         task_id, repeat = pair_key
         if len(pair) != 2 or "baseline" not in pair or "memi" not in pair:
+            if _is_explicitly_excluded_missing_sibling(
+                task_id=task_id,
+                repeat=repeat,
+                present_pair=pair,
+                exclusion_index=exclusion_index,
+                trial_runs=trial_runs,
+            ):
+                continue
             raise AnalysisInputError(f"incomplete graded pair for {task_id} repeat {repeat}")
         baseline = pair["baseline"]
         memi = pair["memi"]
@@ -657,6 +686,44 @@ def _grade_exclusion_index(exclusions: dict[str, Any]) -> set[str]:
     }
 
 
+def _provider_failure_from_events(events: list[dict[str, Any]]) -> int:
+    for event in events:
+        reason = event.get("reason")
+        if event.get("type") == "workflow.verification.skipped" and reason in PROVIDER_FAILURE_REASONS:
+            return 1
+        if event.get("type") == "workflow.adapter.failed":
+            return 1
+        if event.get("type") == "workflow.adapter.completed" and int(event.get("exitCode", 0)) != 0:
+            return 1
+    return 0
+
+
+def _is_explicitly_excluded_missing_sibling(
+    task_id: str,
+    repeat: int,
+    present_pair: dict[str, TrialGrade],
+    exclusion_index: set[str],
+    trial_runs: dict[str, TrialRun],
+) -> bool:
+    expected_runs = {
+        run.condition: run
+        for run in trial_runs.values()
+        if run.task_id == task_id and run.repeat == repeat
+    }
+    if not expected_runs:
+        return False
+    missing_conditions = {"baseline", "memi"} - set(present_pair)
+    if not missing_conditions:
+        return False
+    for missing_condition in missing_conditions:
+        missing_run = expected_runs.get(missing_condition)
+        if missing_run is None:
+            return False
+        if missing_run.trial_id not in exclusion_index:
+            return False
+    return True
+
+
 def _leave_one_out_rows(task_id: str, deltas: list[float]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     base = np.asarray(deltas, dtype=float)
@@ -793,9 +860,76 @@ def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        records.append(json.loads(line))
+    return records
+
+
+def _canonical_manifest_sha256(manifest: dict[str, Any]) -> str:
+    content = {
+        "schemaVersion": manifest["schemaVersion"],
+        "trialId": manifest["trialId"],
+        "files": manifest["files"],
+    }
+    return _hash_value(content)
+
+
+def _hash_evidence_artifact(path: Path, artifact_name: str) -> str:
+    if artifact_name != "run.json":
+        return _sha256_file(path)
+    content = path.read_text(encoding="utf-8")
+    manifest_sha = _read_run_manifest_sha256(path)
+    if manifest_sha is None:
+        return _sha256_text(content)
+    property_pattern = '"evidenceManifestSha256"'
+    if content.count(property_pattern) != 1:
+        raise AnalysisInputError("run.json must contain one evidenceManifestSha256 property")
+    canonical_content = content.replace(
+        f'"evidenceManifestSha256": "{manifest_sha}"',
+        f'"evidenceManifestSha256": "{EVIDENCE_MANIFEST_HASH_PLACEHOLDER}"',
+        1,
+    )
+    return _sha256_text(canonical_content)
+
+
+def _read_run_manifest_sha256(path: Path) -> str | None:
+    payload = _load_json(path)
+    prospective = payload.get("prospective")
+    if not isinstance(prospective, dict):
+        return None
+    manifest_sha = prospective.get("evidenceManifestSha256")
+    if manifest_sha is None:
+        return None
+    return str(manifest_sha)
+
+
+def _hash_value(value: Any) -> str:
+    return _sha256_text(_canonical_json(value))
+
+
+def _canonical_json(value: Any) -> str:
+    if isinstance(value, list):
+        return "[" + ",".join(_canonical_json(item) for item in value) + "]"
+    if value is not None and isinstance(value, dict):
+        return "{" + ",".join(
+            f"{json.dumps(key)}:{_canonical_json(value[key])}"
+            for key in sorted(value)
+        ) + "}"
+    return json.dumps(value)
+
+
 def _sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(65536), b""):
             digest.update(chunk)
     return f"sha256:{digest.hexdigest()}"
+
+
+def _sha256_text(value: str) -> str:
+    return f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}"
