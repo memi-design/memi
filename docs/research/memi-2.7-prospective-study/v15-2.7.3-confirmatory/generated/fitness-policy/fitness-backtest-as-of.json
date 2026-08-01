@@ -25,7 +25,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:ac20ceb20a1dc989481a370e699c91bbe11847bd50473f65fc1b73e4b3ecd606"
       },
@@ -89,7 +89,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:d6d6453d5110aff5bbf2b501948e82a1f7c112f24de37ac375774832a2f6a5e1"
       },
@@ -187,7 +187,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:a54c628394956a193e7d6a9238a9b2364d704700e05aedef917a1a1d4a1c6177"
       },
@@ -285,7 +285,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:be65fc6d563b45097d198a549e85d67eb133883e7cec2b59559a7ae7c5514dcf"
       },
@@ -392,7 +392,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:878a623bf6cf0b24cee3ab94a19eba5969f3083108c962a14b94f41ba43cdb7c"
       },
@@ -510,7 +510,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:5c0cc74ff12bddaf29f059a4a5861be86b4d9f372d7a712b90af79b3d5a9df7e"
       },
@@ -628,7 +628,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:2356c6de17d27114f6029dfe50d69331702b30b05f0bc173472970f96445a9fd"
       },
@@ -755,7 +755,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:5fab37d882845c573e1afb317d087c6f2975e88f2fc4b962808c26271c056b0f"
       },
@@ -893,7 +893,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:42068860c667dcb6f9000bd459ceca11ba1dfe20c42725d566ed49f61ff25a24"
       },
@@ -1031,7 +1031,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:f80d4d7e817b9c10cd474ed76c803a4f0da98f85f7b1a448d94a44eef0d63c57"
       },
@@ -1178,7 +1178,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:a07694522d6c1d92f27b31c0567d54be16db169221f7df38784e57e914e6e512"
       },
@@ -1336,7 +1336,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:f0f0d8d0ea60b9ce064ffd6a3cfcd06bcb247a3ca8a3c065ee80c5f45e077d4f"
       },
@@ -1494,7 +1494,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:5484c7d4c1390937721b6496b78c9d5784986f6fdf571cea0839aef057fd024a"
       },
@@ -1663,7 +1663,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:9929b95b6dae6a8cef4f6c85b41f14ec2acd8e571111f9281b5ca8774cf97858"
       },
@@ -1843,7 +1843,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:ac79c66c5da92e1d498adb9fb6c73b187f20c495833349a75932c9d06e77a251"
       },
@@ -2023,7 +2023,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:c75f320f22dba1a32959a8ddc04640a8d162620ab6bac54d43f36024d8ca48f7"
       },
@@ -2214,7 +2214,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:a8c709e54dd076c3d9c36e366ddabff959b634e17e047e477f4c700b6aacbfbd"
       },
@@ -2416,7 +2416,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:d9027118c05fb115e509040abea1c71633f06ef242411bed386358f72e6b8e51"
       },
@@ -2618,7 +2618,7 @@
           "--json"
         ],
         "exitCode": 0,
-        "stderr": "",
+        "stderrPresent": false,
         "stderrSha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdoutSha256": "sha256:ec8e5a35c67d4b3127a5e4ed291402081045ce82f5560c7859924b610884e2a1"
       },

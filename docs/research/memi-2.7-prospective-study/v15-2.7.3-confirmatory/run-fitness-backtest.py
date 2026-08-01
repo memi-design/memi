@@ -10,6 +10,7 @@ from pathlib import Path
 from analysis.fitness_backtest import (
     BacktestInputError,
     BacktestPaths,
+    artifact_set_mismatches,
     default_backtest_paths,
     execute_backtest,
     execution_artifact_paths,
@@ -56,22 +57,16 @@ def _check_outputs(paths: BacktestPaths, result: dict[str, object]) -> None:
         )
         write_execution_artifacts(expected_paths, result)
         actual_by_relative = {
-            path.relative_to(paths.study_root): path
+            str(path.relative_to(paths.study_root)): path.read_bytes()
             for path in execution_artifact_paths(paths)
         }
         expected_by_relative = {
-            path.relative_to(expected_paths.study_root): path
+            str(path.relative_to(expected_paths.study_root)): path.read_bytes()
             for path in execution_artifact_paths(expected_paths)
         }
-        missing = sorted(set(expected_by_relative) - set(actual_by_relative))
-        stale = sorted(
-            relative
-            for relative in set(expected_by_relative) & set(actual_by_relative)
-            if expected_by_relative[relative].read_bytes() != actual_by_relative[relative].read_bytes()
-        )
-        if missing or stale:
-            details = [*(f"missing:{path}" for path in missing), *(f"stale:{path}" for path in stale)]
-            raise BacktestInputError("fitness backtest artifacts differ: " + ", ".join(details))
+        mismatches = artifact_set_mismatches(actual_by_relative, expected_by_relative)
+        if mismatches:
+            raise BacktestInputError("fitness backtest artifacts differ: " + ", ".join(mismatches))
 
 
 if __name__ == "__main__":

@@ -10,10 +10,12 @@ from analysis.fitness_backtest import (
     BacktestInputError,
     build_engine_quality_evidence,
     canonical_sha256,
+    default_backtest_paths,
     engine_canonical_sha256,
     artifact_set_mismatches,
     ensure_safe_output_path,
     expected_replay_counts,
+    execute_backtest,
     load_backtest_inputs,
     render_backtest_artifacts,
     summarize_backtest,
@@ -203,7 +205,7 @@ class FitnessBacktestTests(unittest.TestCase):
             run_root = Path(directory) / "safe-run"
             run_root.mkdir()
             artifact = run_root / "artifact.json"
-            artifact.write_text("{}\n", encoding="utf-8")
+            artifact.write_text('{"x":1}\n', encoding="utf-8")
             run = {
                 "runId": "safe-run",
                 "prospective": {
@@ -228,7 +230,7 @@ class FitnessBacktestTests(unittest.TestCase):
             )
 
             verify_source_manifest(run_root, run)
-            artifact.write_text('{"tampered":true}\n', encoding="utf-8")
+            artifact.write_text('{"x":2}\n', encoding="utf-8")
             with self.assertRaisesRegex(BacktestInputError, "artifact hash mismatch"):
                 verify_source_manifest(run_root, run)
 
@@ -268,6 +270,23 @@ class FitnessBacktestTests(unittest.TestCase):
             (root / "generated").symlink_to(outside, target_is_directory=True)
             with self.assertRaisesRegex(BacktestInputError, "symlink"):
                 ensure_safe_output_path(root / "generated" / "artifact.json", root)
+
+    @unittest.skipUnless(
+        Path("/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js").is_file()
+        and Path("/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/store").is_dir(),
+        "requires the sealed V15 evidence and rebuilt 2.7.4 CLI",
+    )
+    def test_real_cli_execution_authenticates_copy_and_exact_cutoff_prefixes(self) -> None:
+        result = execute_backtest(default_backtest_paths(study_root=STUDY_ROOT))
+
+        self.assertEqual(len(result["commandReceipts"]), 12)
+        self.assertEqual(len(result["snapshots"]), 19)
+        self.assertEqual([row["exitCode"] for row in result["commandReceipts"]], [0] * 12)
+        self.assertEqual(result["finalBacktest"]["eventsReplayed"], 12)
+        self.assertEqual(
+            [snapshot["backtest"]["eventsReplayed"] for snapshot in result["snapshots"]],
+            [0, 1, 2, 2, 3, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 12, 12],
+        )
 
 
 def _event_for(command: object) -> dict[str, object]:
