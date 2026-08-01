@@ -19,6 +19,12 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `b964117f` — docs: record billing evidence binding
 - `7a3fabdd` — test: require sealed V2 billing artifacts
 - `5e2dc9c7` — feat: verify sealed V2 study evidence
+- `e502dbc8` — docs: record sealed V2 evidence gate
+- `9c3e676d` — test: define prospective evidence materialization
+- `ae3c41c5` — feat: materialize prospective evidence receipts
+- `254ca8e6` — test: record workflow adapter wall time
+- `1c78d5b1` — test: require V2 workflow evidence inputs
+- `3cb2ba11` — feat: materialize V2 workflow evidence
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -28,6 +34,10 @@ are part of the freeze hash and cannot be relaxed after outcomes are observed.
 The evaluator now treats every receipt-declared capture, provider-usage export,
 and price card as a manifest-sealed and independently hash-checked artifact;
 an adjacent but unsealed file earns no study credit.
+Frozen V2 workflow executions now fail before provider invocation unless the
+operator supplies a bounded draft and artifact root. After isolated verification,
+the harness copies the declared regular files, records separate adapter and
+verifier times, produces the receipt, and seals all declared files in the manifest.
 
 ## v2.7.4 — 2026-08-01
 
