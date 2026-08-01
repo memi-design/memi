@@ -57,6 +57,7 @@ export {
   createSkillFitnessQualityEvidence,
   loadSkillFitnessEvents,
   projectSkillFitness,
+  resolveSkillRouteExecutionMode,
   skillFitnessRouteKey,
   type SkillFitnessBacktest,
   type SkillFitnessBoundRouteReceipt,

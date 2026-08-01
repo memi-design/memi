@@ -244,6 +244,7 @@ describe("history-aware fail-closed skill routing", () => {
         createdAt: "2026-07-23T00:00:00.000Z",
         baselineScore: 90,
         memiScore: 92,
+        evidenceMode: "recovery-probe",
       }),
     ];
 

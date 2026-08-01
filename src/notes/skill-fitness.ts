@@ -41,6 +41,8 @@ export const SkillFitnessBoundRouteReceiptSchema = z.object({
   schemaVersion: z.literal(2),
   runId: z.string().min(1),
   taskId: z.string().min(1),
+  taskClass: z.string().regex(/^[a-z][a-z0-9-]*$/).optional(),
+  executionMode: z.enum(["production", "recovery-probe"]).optional(),
   repeat: z.number().int().positive(),
   repository: z.object({
     pathHash: sha256Schema,
@@ -131,6 +133,7 @@ export const SkillFitnessEventV2Schema = z.object({
   functionalAcceptance: z.boolean(),
   qualityEvidence: SkillFitnessQualityEvidenceSchema,
   prospective: prospectivePairSchema.nullable(),
+  evidenceMode: z.enum(["production", "recovery-probe"]).optional(),
 }).strict().superRefine((event, context) => {
   if (event.qualityEvidence.pair.baselineRunId !== event.pair.baselineRunId) {
     context.addIssue({
@@ -206,6 +209,7 @@ export interface BuildSkillFitnessEventInput {
   readonly route: SkillFitnessRoute;
   readonly taskClass: string;
   readonly qualityEvidence?: SkillFitnessQualityEvidence;
+  readonly evidenceMode?: "production" | "recovery-probe";
 }
 
 export function createSkillFitnessQualityEvidence(
@@ -274,7 +278,27 @@ export function buildSkillFitnessEvent(
     functionalAcceptance: passed(input.baseline) && passed(input.memi),
     qualityEvidence,
     prospective,
+    evidenceMode: input.evidenceMode ?? "production",
   }));
+}
+
+export function resolveSkillRouteExecutionMode(input: {
+  readonly assessment: SkillRouteFitnessAssessment;
+  readonly recoveryProbe: boolean;
+  readonly prospective: boolean;
+}): "production" | "repository-only" | "recovery-probe" {
+  if (!input.recoveryProbe) {
+    return input.assessment.decision === "repository-only"
+      ? "repository-only"
+      : "production";
+  }
+  if (input.assessment.decision !== "repository-only") {
+    throw new Error("recovery probe requires an exact route that is currently suppressed");
+  }
+  if (!input.prospective) {
+    throw new Error("recovery probe requires a prospective freeze and frozen trial");
+  }
+  return "recovery-probe";
 }
 
 export async function appendSkillFitnessEvent(
@@ -570,6 +594,7 @@ function isQualityHealthy(event: SkillFitnessEvent): boolean {
 
 function isRecoveryEligible(event: SkillFitnessEvent): boolean {
   return event.schemaVersion === 2
+    && event.evidenceMode === "recovery-probe"
     && event.prospective !== null
     && isQualityHealthy(event)
     && eventHarmReasons(event).length === 0;

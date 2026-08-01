@@ -62,6 +62,7 @@ import {
   buildSkillFitnessEvent,
   loadSkillFitnessEvents,
   projectSkillFitness,
+  resolveSkillRouteExecutionMode,
   type SkillFitnessBoundRouteReceipt,
 } from "../notes/index.js";
 import { ui } from "../tui/format.js";
@@ -389,6 +390,11 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .option("--claude <path>", "Claude Code path", "claude")
     .option("--freeze <path>", "Prospective freeze receipt")
     .option("--trial <id>", "Frozen prospective trial id")
+    .option("--task-class <id>", "Stable route-fitness task class (defaults to task id)")
+    .option(
+      "--recovery-probe",
+      "Execute a currently suppressed exact route only as a frozen prospective recovery probe",
+    )
     .option("--execute", "Acknowledge model quota and disposable writes")
     .option("--json", "Output JSON")
     .action(async (taskPath: string, opts: {
@@ -409,6 +415,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       claude: string;
       freeze?: string;
       trial?: string;
+      taskClass?: string;
+      recoveryProbe?: boolean;
       execute?: boolean;
       json?: boolean;
     }) => {
@@ -424,6 +432,10 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         throw new Error("--freeze and --trial must be provided together");
       }
       const condition = benchmarkConditionSchema.parse(opts.condition);
+      const taskClass = stableTaskClass(opts.taskClass ?? task.id);
+      if (opts.recoveryProbe && condition !== "memi") {
+        throw new Error("--recovery-probe requires the memi condition");
+      }
       const provider = providers(opts.provider)[0];
       const modelId = opts.model ?? (
         provider === "codex" ? "gpt-5.6-sol" : "claude-sonnet-4-6"
@@ -453,6 +465,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       let routedContext = "";
       let route: Awaited<ReturnType<typeof resolveRoutedSkills>> | null = null;
       let routePolicy: ReturnType<typeof assessSkillRouteFitness> | null = null;
+      let routeExecutionMode: "production" | "repository-only" | "recovery-probe" =
+        "production";
       if (condition === "memi") {
         const loader = opts.skillsRoot
           ? new NoteLoader(resolve(opts.skillsRoot))
@@ -478,7 +492,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
             route: {
               routerVersion: route.route.routerVersion,
               repositoryFingerprintHash: route.route.repositoryFingerprintHash,
-              taskClass: task.id,
+              taskClass,
               harness: {
                 provider,
                 modelId,
@@ -490,9 +504,17 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
               })),
             },
           });
-          if (routePolicy.decision === "repository-only") {
+          routeExecutionMode = resolveSkillRouteExecutionMode({
+            assessment: routePolicy,
+            recoveryProbe: opts.recoveryProbe === true,
+            prospective: frozenTrial !== null,
+          });
+          if (routeExecutionMode === "repository-only") {
             route = suppressResolvedRoute(route, routePolicy.reasons);
           }
+        }
+        if (opts.recoveryProbe && routeExecutionMode !== "recovery-probe") {
+          throw new Error("recovery probe requires an exact route that is currently suppressed");
         }
         routedContext = route.route.selected.length > 0
           ? formatRoutedSkillContext(route)
@@ -554,6 +576,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           }),
           writeJson(join(result.evidenceDirectory, "route.json"), {
             condition,
+            taskClass,
+            executionMode: routeExecutionMode,
             route: route ?? null,
           }),
           writeJson(
@@ -644,6 +668,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           schemaVersion: 2,
           runId: record.runId,
           taskId: record.taskId,
+          taskClass,
+          executionMode: routeExecutionMode,
           repeat: record.repeat,
           repository: {
             pathHash: record.repository.pathHash,
@@ -687,6 +713,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         status: result.accepted ? "accepted" : "failed-quality-gate",
         run: record,
         route: route?.route ?? null,
+        taskClass,
+        routeExecutionMode,
         evidenceDirectory: result.evidenceDirectory,
       };
       if (opts.json) console.log(JSON.stringify(payload, null, 2));
@@ -741,7 +769,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       assertRouteReceiptReferenced(memi, routePath);
       const routeReceipt = await readBoundedJson(routePath, "route receipt");
       const boundResult = SkillFitnessBoundRouteReceiptSchema.safeParse(routeReceipt);
-      const route = boundResult.success
+      const routeBinding = boundResult.success
         ? validatedBoundRoute(boundResult.data, memi, opts.taskClass)
         : await importProspectiveRawRoute({
           routeReceipt,
@@ -756,12 +784,16 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           "quality evidence",
         ))
         : undefined;
+      if (routeBinding.executionMode === "recovery-probe" && !qualityEvidence) {
+        throw new Error("recovery-probe fitness evidence requires blinded quality evidence v2");
+      }
       const event = buildSkillFitnessEvent({
         baseline,
         memi,
-        route,
+        route: routeBinding.route,
         taskClass: opts.taskClass,
         qualityEvidence,
+        evidenceMode: routeBinding.executionMode,
       });
       const path = skillFitnessPath(storeRoot);
       await appendSkillFitnessEvent(path, event);
@@ -1097,7 +1129,7 @@ async function importProspectiveRawRoute(input: {
   readonly memi: BenchmarkRunRecord;
   readonly taskClass: string;
   readonly boundError: string;
-}): Promise<SkillFitnessBoundRouteReceipt["route"]> {
+}): Promise<SkillFitnessBoundRouteReceipt> {
   if (!input.memi.prospective) {
     throw new Error(
       `fitness-record requires a bound v2 route receipt: ${input.boundError}`,
@@ -1164,6 +1196,8 @@ async function importProspectiveRawRoute(input: {
     schemaVersion: 2,
     runId: input.memi.runId,
     taskId: input.memi.taskId,
+    taskClass: input.memi.taskId,
+    executionMode: "production",
     repeat: input.memi.repeat,
     repository: {
       pathHash: input.memi.repository.pathHash,
@@ -1237,7 +1271,7 @@ function validateBoundRouteReceipt(
   const mismatches = [
     ["run id", receipt.runId, memi.runId],
     ["task id", receipt.taskId, memi.taskId],
-    ["task class", taskClass, memi.taskId],
+    ["task class", receipt.taskClass ?? receipt.taskId, taskClass],
     ["repeat", receipt.repeat, memi.repeat],
     ["repository path", receipt.repository.pathHash, memi.repository.pathHash],
     ["repository revision", receipt.repository.revision, memi.repository.revision],
@@ -1253,9 +1287,16 @@ function validatedBoundRoute(
   receipt: SkillFitnessBoundRouteReceipt,
   memi: BenchmarkRunRecord,
   taskClass: string,
-): SkillFitnessBoundRouteReceipt["route"] {
+): SkillFitnessBoundRouteReceipt {
   validateBoundRouteReceipt(receipt, memi, taskClass);
-  return receipt.route;
+  return receipt;
+}
+
+function stableTaskClass(value: string): string {
+  if (!/^[a-z][a-z0-9-]*$/.test(value)) {
+    throw new Error("task-class must use lowercase kebab-case");
+  }
+  return value;
 }
 
 function integer(value: string, label: string): number {

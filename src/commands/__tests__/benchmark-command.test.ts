@@ -270,7 +270,7 @@ describe("benchmark command", () => {
       "--task-class",
       "different-task-class",
       "--store-root",
-      join(projectRoot, "other-store"),
+      projectRoot,
       "--json",
     ], { from: "user" })).rejects.toThrow(/bound route task class mismatch/);
   });
