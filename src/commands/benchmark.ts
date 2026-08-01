@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import type { Command } from "commander";
 import type { MemoireEngine } from "../engine/core.js";
 import {
@@ -34,6 +34,7 @@ import {
 import {
   buildProspectiveFreeze,
   evaluateProspectiveStudy,
+  hashValue,
   prospectiveFreezeSchema,
   prospectiveStudyPlanSchema,
   selectProspectiveTrial,
@@ -54,6 +55,7 @@ import {
   buildRepositoryFingerprint,
   SkillFitnessBoundRouteReceiptSchema,
   SkillFitnessQualityEvidenceSchema,
+  SkillFitnessRouteReceiptSchema,
   assessSkillRouteFitness,
   appendSkillFitnessEvent,
   backtestSkillFitness,
@@ -739,14 +741,15 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       assertRouteReceiptReferenced(memi, routePath);
       const routeReceipt = await readBoundedJson(routePath, "route receipt");
       const boundResult = SkillFitnessBoundRouteReceiptSchema.safeParse(routeReceipt);
-      if (!boundResult.success) {
-        throw new Error(`fitness-record requires a bound v2 route receipt: ${
-          boundResult.error.message
-        }`);
-      }
-      const boundRoute = boundResult.data;
-      validateBoundRouteReceipt(boundRoute, memi, opts.taskClass);
-      const route = boundRoute.route;
+      const route = boundResult.success
+        ? validatedBoundRoute(boundResult.data, memi, opts.taskClass)
+        : await importProspectiveRawRoute({
+          routeReceipt,
+          routePath,
+          memi,
+          taskClass: opts.taskClass,
+          boundError: boundResult.error.message,
+        });
       const qualityEvidence = opts.qualityEvidence
         ? SkillFitnessQualityEvidenceSchema.parse(await readBoundedJson(
           resolve(opts.qualityEvidence),
@@ -1088,6 +1091,128 @@ async function readBoundedJson(file: string, label: string): Promise<unknown> {
   }
 }
 
+async function importProspectiveRawRoute(input: {
+  readonly routeReceipt: unknown;
+  readonly routePath: string;
+  readonly memi: BenchmarkRunRecord;
+  readonly taskClass: string;
+  readonly boundError: string;
+}): Promise<SkillFitnessBoundRouteReceipt["route"]> {
+  if (!input.memi.prospective) {
+    throw new Error(
+      `fitness-record requires a bound v2 route receipt: ${input.boundError}`,
+    );
+  }
+  const rawResult = SkillFitnessRouteReceiptSchema.safeParse(input.routeReceipt);
+  if (!rawResult.success) {
+    throw new Error(`prospective raw route receipt is invalid: ${rawResult.error.message}`);
+  }
+  if (basename(input.routePath) !== "skill-route.json") {
+    throw new Error("prospective raw route must be named skill-route.json");
+  }
+  const evidenceDirectory = dirname(input.routePath);
+  const evidenceDirectoryMetadata = await lstat(evidenceDirectory);
+  if (
+    evidenceDirectoryMetadata.isSymbolicLink()
+    || !evidenceDirectoryMetadata.isDirectory()
+  ) {
+    throw new Error("prospective evidence directory must be a regular non-symlink directory");
+  }
+  const routeArtifactPath = siblingEvidenceRef(
+    input.memi,
+    evidenceDirectory,
+    "route.json",
+  );
+  const manifestPath = siblingEvidenceRef(
+    input.memi,
+    evidenceDirectory,
+    "evidence-manifest.json",
+  );
+  const runPath = siblingEvidenceRef(input.memi, evidenceDirectory, "run.json");
+  const [routeArtifact, sealedRunValue] = await Promise.all([
+    readBoundedJson(routeArtifactPath, "prospective route artifact"),
+    readBoundedJson(runPath, "prospective run receipt"),
+    readBoundedJson(manifestPath, "prospective evidence manifest"),
+  ]);
+  const verification = await verifyEvidenceManifest({
+    evidenceDirectory,
+    expectedManifestSha256: input.memi.prospective.evidenceManifestSha256,
+    requiredArtifacts: ["route.json", "run.json"],
+    expectedBinding: {
+      trialId: input.memi.prospective.trialId,
+      taskId: input.memi.taskId,
+      repeat: input.memi.repeat,
+      condition: "memi",
+      sequence: input.memi.prospective.sequence,
+    },
+    allowedEvidenceRoot: evidenceDirectory,
+  });
+  if (!verification.valid) {
+    throw new Error(
+      `prospective route evidence verification failed: ${verification.reasons.join(",")}`,
+    );
+  }
+  const sealedRun = benchmarkRunRecordSchema.parse(sealedRunValue);
+  if (hashValue(sealedRun) !== hashValue(input.memi)) {
+    throw new Error("prospective run receipt does not match the immutable stored Memi run");
+  }
+  const sealedRoute = manifestSealedRawRoute(routeArtifact);
+  if (hashValue(sealedRoute) !== hashValue(input.routeReceipt)) {
+    throw new Error("raw route does not match the manifest-sealed route artifact");
+  }
+  const boundRoute = SkillFitnessBoundRouteReceiptSchema.parse({
+    schemaVersion: 2,
+    runId: input.memi.runId,
+    taskId: input.memi.taskId,
+    repeat: input.memi.repeat,
+    repository: {
+      pathHash: input.memi.repository.pathHash,
+      revision: input.memi.repository.revision,
+    },
+    harness: {
+      provider: input.memi.harness.id,
+      modelId: input.memi.harness.modelId,
+      reasoningEffort: input.memi.harness.reasoningEffort,
+    },
+    route: rawResult.data,
+  });
+  return validatedBoundRoute(boundRoute, input.memi, input.taskClass);
+}
+
+function siblingEvidenceRef(
+  memi: BenchmarkRunRecord,
+  evidenceDirectory: string,
+  artifactName: string,
+): string {
+  const matches = memi.evidenceRefs.flatMap((reference) => {
+    try {
+      const path = resolve(reference);
+      return basename(path) === artifactName ? [path] : [];
+    } catch {
+      return [];
+    }
+  });
+  if (matches.length !== 1 || dirname(matches[0]) !== evidenceDirectory) {
+    throw new Error("prospective evidence must be sibling artifacts");
+  }
+  return matches[0];
+}
+
+function manifestSealedRawRoute(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("prospective route artifact is invalid");
+  }
+  const artifact = value as Record<string, unknown>;
+  if (
+    Object.keys(artifact).length !== 2
+    || artifact.condition !== "memi"
+    || !("route" in artifact)
+  ) {
+    throw new Error("prospective route artifact is invalid");
+  }
+  return artifact.route;
+}
+
 function assertRouteReceiptReferenced(
   memi: BenchmarkRunRecord,
   routePath: string,
@@ -1122,6 +1247,15 @@ function validateBoundRouteReceipt(
   ] as const;
   const mismatch = mismatches.find(([, observed, expected]) => observed !== expected);
   if (mismatch) throw new Error(`bound route ${mismatch[0]} mismatch`);
+}
+
+function validatedBoundRoute(
+  receipt: SkillFitnessBoundRouteReceipt,
+  memi: BenchmarkRunRecord,
+  taskClass: string,
+): SkillFitnessBoundRouteReceipt["route"] {
+  validateBoundRouteReceipt(receipt, memi, taskClass);
+  return receipt.route;
 }
 
 function integer(value: string, label: string): number {

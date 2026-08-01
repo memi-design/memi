@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -419,6 +419,22 @@ describe("benchmark command", () => {
 
     await expect(recordRawFitness(program, fixture)).rejects.toThrow(
       /raw route does not match the manifest-sealed route artifact/,
+    );
+  });
+
+  it("rejects a prospective raw route supplied through a symlink", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+    const fixture = await rawProspectiveRouteFixture(9);
+    await recordRuns(program, fixture.baseline, fixture.memi);
+    const targetPath = join(projectRoot, "raw-route-target.json");
+    await writeFile(targetPath, JSON.stringify(fixture.rawRoute));
+    await rm(fixture.routePath);
+    await symlink(targetPath, fixture.routePath);
+
+    await expect(recordRawFitness(program, fixture)).rejects.toThrow(
+      /route receipt must be a regular non-symlink file/,
     );
   });
 
