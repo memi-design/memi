@@ -27,6 +27,7 @@ import {
 import { runWorkflowTrial } from "../efficiency/workflow-runner.js";
 import {
   createEvidenceManifest,
+  evidenceReferenceHasArtifact,
   EVIDENCE_MANIFEST_HASH_PLACEHOLDER,
   hashFile,
   verifyEvidenceManifest,
@@ -207,7 +208,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       }> = [];
       for (const run of candidates) {
         const runRef = run.evidenceRefs.find((reference) =>
-          reference.endsWith("/run.json"));
+          evidenceReferenceHasArtifact(reference, "run.json"));
         if (!runRef || !run.prospective) {
           evidenceFailures.push({
             runId: run.runId,
