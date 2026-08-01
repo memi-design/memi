@@ -121,6 +121,8 @@ def build_outputs(paths: StudyFitnessPaths) -> tuple[dict[str, Any], dict[str, A
     ingestion_entries = _build_ingestion_entries(
         quality_entries=quality_entries,
         legacy_results=legacy_results,
+        run_records=run_records,
+        exclusion_index=exclusion_index,
     )
     ingestion_output = {
         "schemaVersion": 1,
@@ -254,11 +256,20 @@ def _load_grades(
         raise RuntimeError("blinded grading study id mismatch")
 
     required_dimensions = [entry["id"] for entry in rubric["dimensions"]]
-    expected_trials = {
-        trial_id
-        for trial_id, record in run_records.items()
-        if record["run"]["outcome"]["accepted"] and trial_id not in exclusion_index
-    }
+    expected_trials: set[str] = set()
+    for pair in _group_pair_records(run_records).values():
+        baseline = pair.get("baseline")
+        memi = pair.get("memi")
+        if baseline is None or memi is None:
+            continue
+        baseline_trial_id = baseline["run"]["prospective"]["trialId"]
+        memi_trial_id = memi["run"]["prospective"]["trialId"]
+        if baseline_trial_id in exclusion_index or memi_trial_id in exclusion_index:
+            continue
+        if not baseline["run"]["outcome"]["accepted"] or not memi["run"]["outcome"]["accepted"]:
+            continue
+        expected_trials.add(baseline_trial_id)
+        expected_trials.add(memi_trial_id)
     grades: dict[str, dict[str, Any]] = {}
     for entry in grading.get("entries", []):
         trial_id = str(entry.get("trialId", "")).strip()
@@ -326,14 +337,18 @@ def _build_v2_quality_entries(
     exclusion_index: set[str],
 ) -> list[dict[str, Any]]:
     grouped: dict[tuple[str, int], dict[str, dict[str, Any]]] = {}
-    for trial_id, record in run_records.items():
-        run = record["run"]
-        if not run["outcome"]["accepted"]:
+    for key, pair in _group_pair_records(run_records).items():
+        baseline = pair.get("baseline")
+        memi = pair.get("memi")
+        if baseline is None or memi is None:
             continue
-        if trial_id in exclusion_index:
+        baseline_trial_id = baseline["run"]["prospective"]["trialId"]
+        memi_trial_id = memi["run"]["prospective"]["trialId"]
+        if baseline_trial_id in exclusion_index or memi_trial_id in exclusion_index:
             continue
-        key = (run["taskId"], int(run["repeat"]))
-        grouped.setdefault(key, {})[run["condition"]] = record
+        if not baseline["run"]["outcome"]["accepted"] or not memi["run"]["outcome"]["accepted"]:
+            continue
+        grouped[key] = pair
 
     entries: list[dict[str, Any]] = []
     for task_id, repeat in sorted(grouped):
@@ -442,6 +457,8 @@ def _build_ingestion_entries(
     *,
     quality_entries: list[dict[str, Any]],
     legacy_results: dict[str, Any],
+    run_records: dict[str, dict[str, Any]],
+    exclusion_index: set[str],
 ) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     for pair in legacy_results.get("pairs", []):
@@ -461,8 +478,48 @@ def _build_ingestion_entries(
             "skills": list(pair.get("skillIds", [])),
             "ingestDecision": "record-v1-only-unmatched-negative",
             "storeWriteEligible": False,
+            "promotionEligible": False,
+            "recoveryEligible": False,
             "reason": "legacy v1 evidence does not carry repository fingerprint or content-hash route identity",
         })
+    quality_pair_keys = {
+        (entry["pair"]["taskId"], int(entry["pair"]["repeat"]))
+        for entry in quality_entries
+    }
+    for key, pair in sorted(_group_pair_records(run_records).items()):
+        if key in quality_pair_keys:
+            continue
+        baseline = pair.get("baseline")
+        memi = pair.get("memi")
+        if baseline is None or memi is None:
+            continue
+        route_decision = memi["routeDecision"]
+        if route_decision == "abstain":
+            entries.append(
+                _build_v1_pair_ingestion_entry(
+                    baseline=baseline,
+                    memi=memi,
+                    exclusion_index=exclusion_index,
+                    ingest_decision="record-v1-abstain-chronology-only",
+                    store_write_eligible=False,
+                    reason="route abstained; preserve chronology but do not write an exact-route fitness event",
+                )
+            )
+            continue
+        if route_decision in {"baseline", "unknown"}:
+            continue
+        if not memi["repositoryFingerprintHash"] or not memi["receipt"].get("routeSha256"):
+            continue
+        entries.append(
+            _build_v1_pair_ingestion_entry(
+                baseline=baseline,
+                memi=memi,
+                exclusion_index=exclusion_index,
+                ingest_decision="record-v1-automation-only-negative",
+                store_write_eligible=True,
+                reason="exact-route automation-only v1 evidence may suppress a route but may not promote or recover one",
+            )
+        )
     for entry in quality_entries:
         route_decision = entry["route"]["decision"]
         if route_decision == "abstain":
@@ -483,6 +540,8 @@ def _build_ingestion_entries(
             "skills": entry["route"]["skills"],
             "ingestDecision": ingest_decision,
             "storeWriteEligible": store_write,
+            "promotionEligible": False,
+            "recoveryEligible": False,
             "reason": reason,
             "qualityEvidenceSha256": entry["quality"]["qualityEvidenceSha256"],
             "eventSha256": entry["eventSha256"],
@@ -495,6 +554,118 @@ def _build_ingestion_entries(
 
 def _legacy_task_class(experiment_id: str) -> str:
     return re.sub(r"-v\d+$", "", experiment_id)
+
+
+def _group_pair_records(
+    run_records: dict[str, dict[str, Any]],
+) -> dict[tuple[str, int], dict[str, dict[str, Any]]]:
+    grouped: dict[tuple[str, int], dict[str, dict[str, Any]]] = {}
+    for record in run_records.values():
+        run = record["run"]
+        key = (run["taskId"], int(run["repeat"]))
+        grouped.setdefault(key, {})[run["condition"]] = record
+    return grouped
+
+
+def _build_v1_pair_ingestion_entry(
+    *,
+    baseline: dict[str, Any],
+    memi: dict[str, Any],
+    exclusion_index: set[str],
+    ingest_decision: str,
+    store_write_eligible: bool,
+    reason: str,
+) -> dict[str, Any]:
+    baseline_trial_id = baseline["run"]["prospective"]["trialId"]
+    memi_trial_id = memi["run"]["prospective"]["trialId"]
+    route = {
+        "decision": memi["routeDecision"],
+        "repositoryFingerprintHash": memi["repositoryFingerprintHash"],
+        "skills": sorted(
+            memi["selectedSkills"],
+            key=lambda entry: (entry["skillId"], entry["contentHash"]),
+        ),
+    }
+    core = {
+        "observedAt": max(
+            baseline["run"]["timing"]["completedAt"],
+            memi["run"]["timing"]["completedAt"],
+        ),
+        "sourceVersion": "v1",
+        "sourceKind": "v15-confirmatory",
+        "taskClass": memi["run"]["taskId"],
+        "routeDecision": route["decision"],
+        "skills": route["skills"],
+        "ingestDecision": ingest_decision,
+        "storeWriteEligible": store_write_eligible,
+        "promotionEligible": False,
+        "recoveryEligible": False,
+        "reason": reason,
+        "pair": {
+            "taskId": memi["run"]["taskId"],
+            "repeat": int(memi["run"]["repeat"]),
+            "baselineTrialId": baseline_trial_id,
+            "memiTrialId": memi_trial_id,
+            "baselineRunId": baseline["run"]["runId"],
+            "memiRunId": memi["run"]["runId"],
+        },
+        "route": route,
+        "harness": {
+            "provider": memi["run"]["harness"]["id"],
+            "modelId": memi["run"]["harness"]["modelId"],
+            "reasoningEffort": memi["run"]["harness"]["reasoningEffort"],
+        },
+        "receipts": {
+            "baselineEvidenceManifestSha256": baseline["receipt"]["evidenceManifestSha256"],
+            "memiEvidenceManifestSha256": memi["receipt"]["evidenceManifestSha256"],
+            "baselineRouteSha256": baseline["receipt"].get("routeSha256"),
+            "memiRouteSha256": memi["receipt"].get("routeSha256"),
+        },
+        "outcomes": {
+            "baseline": _pair_outcome(baseline),
+            "memi": _pair_outcome(memi),
+        },
+        "blockingReasons": _blocking_reasons(
+            baseline=baseline,
+            memi=memi,
+            exclusion_index=exclusion_index,
+        ),
+    }
+    return {
+        **core,
+        "pairId": f"fitness-v1:{canonical_sha256(core).removeprefix('sha256:')}",
+    }
+
+
+def _pair_outcome(record: dict[str, Any]) -> dict[str, Any]:
+    outcome = record["run"]["outcome"]
+    return {
+        "accepted": bool(outcome["accepted"]),
+        "testsPassed": bool(outcome["testsPassed"]),
+        "qualityScore": float(outcome["qualityScore"]),
+        "defects": int(outcome["defects"]),
+    }
+
+
+def _blocking_reasons(
+    *,
+    baseline: dict[str, Any],
+    memi: dict[str, Any],
+    exclusion_index: set[str],
+) -> list[str]:
+    reasons: list[str] = []
+    for condition, record in [("baseline", baseline), ("memi", memi)]:
+        trial_id = record["run"]["prospective"]["trialId"]
+        outcome = record["run"]["outcome"]
+        if not outcome["accepted"]:
+            reasons.append(f"{condition}-not-accepted")
+        if not outcome["testsPassed"]:
+            reasons.append(f"{condition}-tests-failed")
+        if trial_id in exclusion_index:
+            reasons.append(f"{condition}-excluded-from-rendered-frontend-grading-only")
+    if memi["routeDecision"] == "abstain":
+        reasons.append("route-abstained")
+    return reasons
 
 
 def _total_tokens(run: dict[str, Any]) -> float:
