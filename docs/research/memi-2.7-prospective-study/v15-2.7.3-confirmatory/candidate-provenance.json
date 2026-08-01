@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "package": "@memi-design/cli",
+  "version": "2.7.3",
+  "sourceCommit": "2e29c5c656ac34242369eac9840838619ad113e1",
+  "sourceTreeSha256": "sha256:da9179b4e753334a0cbb85abbe07e21279738ed634c7202dc3ae9bdf76ca8487",
+  "artifactPath": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v14-calibrated-web/artifacts/memi-design-cli-2.7.3.tgz",
+  "artifactSha256": "sha256:b2b56189f45b69a3cec41220ae3e9d50d6ecfb682aee5a64c1fe0ce0d0ec3e1e",
+  "npmIntegrity": "sha512-akrBEHieVCWYwvZU3KpZe8E9ixdqyUjMa7YMEmXTPMqoWQBhWc3haoPwndqZs/UG9aJurbyETj876w3vWVUqyg==",
+  "npmShasum": "f00b05e06fae353322b119243f02a370423a7a88",
+  "npmTarballSha512Hex": "6a4ac110789e542598c2f654dcaa597bc13d8b176ac948cc6bb60c1265d33ccaa859006159cde16a83f09dda99b3f506f5a26eadbc844e3f3beb0def59552aca",
+  "npmAttestation": "https://registry.npmjs.org/-/npm/v1/attestations/@memi-design%2fcli@2.7.3",
+  "publishWorkflowRun": "30684627316",
+  "publishedAt": "2026-08-01T04:50:48.505Z"
+}

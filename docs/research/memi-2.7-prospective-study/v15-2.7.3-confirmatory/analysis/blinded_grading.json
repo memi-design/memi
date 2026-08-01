@@ -1,0 +1,2364 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+  "rubricVersion": "memi-design-quality-v1",
+  "modelGraded": true,
+  "independentHumanPractitionerEvidence": false,
+  "graderCount": 3,
+  "entries": [
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 88.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/548840051f470da3084fd3eacc161eccc5a93749a0537ba91505f62bb8fbb49b.json",
+              "state": "renderer",
+              "finding": "Scenarios render 7, cap 153 to 99+, retain full labels, hide badge accessibility, preserve selected states, and keep the pulse dot at zero."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/c433e9714197c2b4ad2f450ac2e61f9f5fdc1a2a614f728cfcec4ecc3cdbe5d7.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and the three focused contract tests passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/5ce30a9ae11ad1c381c99fdef118139f1c56350f6ee9f4b90e29d4d384bc02ce.json",
+              "state": "replay-verification",
+              "finding": "Build and rendered-flow replay both passed."
+            }
+          ],
+          "notes": "Contract behavior is complete and the renderer exposes good tab semantics, a 52-point minimum target, flexible row layout, and a max-width container. The 12px-high badge uses a compact 10px text treatment and resolved Buzzr light/dark colors. Visual and adaptive scores remain evidence-limited because this is a testing-library renderer tree, not Expo Simulator or pixel proof, and the payload reports no breakpoint-specific branch or separate focus-ring branch.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-004"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 91.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 10,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/548840051f470da3084fd3eacc161eccc5a93749a0537ba91505f62bb8fbb49b.json (capturePayload: 7, 99+, zero/pulse, selected and accessibility states)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/c433e9714197c2b4ad2f450ac2e61f9f5fdc1a2a614f728cfcec4ecc3cdbe5d7.json (recorded typecheck and focused contract passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/5ce30a9ae11ad1c381c99fdef118139f1c56350f6ee9f4b90e29d4d384bc02ce.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/03cf009296e2e71398178d2d0da0b65735c18498da69ee778fbbe0ac62779a65.json (trial: realSimulatorCapturePossible false)"
+          ],
+          "notes": "The renderer proves exact and capped counts, full-count tab labels, selected state, decorative accessibility hiding, zero suppression, preserved pulse behavior, and distinct light/dark palette values. The 20x12 pill is compact but its right=-12 placement is less securely anchored than the best variants. Visual and adaptive scores are capped because this is renderer structure, not Simulator or pixel proof; the payload explicitly reports no breakpoint-specific branch beyond max-width sizing. Implementation is strong with clean typecheck/focused-test replay, but the bundle exposes only a patch hash rather than source-level maintainability evidence.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-004"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 82.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/548840051f470da3084fd3eacc161eccc5a93749a0537ba91505f62bb8fbb49b.json",
+              "state": "renderer",
+              "observation": "Scenarios show 7, 99+, no zero badge, full labels, selected state, hidden badge semantics, and the pulse dot; the badge is minWidth 20 at right -12 while the old chat dot also remains."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/5ce30a9ae11ad1c381c99fdef118139f1c56350f6ee9f4b90e29d4d384bc02ce.json",
+              "state": "replay",
+              "observation": "Typecheck and focused rendered contract both passed on replay."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/03cf009296e2e71398178d2d0da0b65735c18498da69ee778fbbe0ac62779a65.json",
+              "state": "trial",
+              "observation": "Capture passed, replay passed, and real Simulator capture was unavailable."
+            }
+          ],
+          "notes": "Functional and accessibility semantics are strong. The renderer tree suggests visual competition from retaining both the chat dot and count badge. ResponsiveMaxContentWidth supplies limited scaling, but the payload explicitly records no breakpoint-specific variant; renderer evidence is not native Simulator or pixel proof.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-004"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 89.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/355873f664b1a5332dc2fa45896b82754c07960e402cddfe991fccded73e0f7b.json",
+              "state": "renderer",
+              "finding": "Direct Text badge renders 7/99+, is hidden from accessibility, retains full labels and selected state, disappears at zero, and preserves pulse activity."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/109a81531c4783f41268dee48d1b2a4bd140cebfbb87f179c7031ac36c14d5cd.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and all three focused contract tests pass."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/cb8e0eb0c9d766e0df8b05f7c5785b37610d6201cd4299bd7f1a8a6df96ea99f.json",
+              "state": "replay-verification",
+              "finding": "Replay remains green."
+            }
+          ],
+          "notes": "The single-node Text badge is compact and structurally simple, with correct palette colors, 20px minimum width, and centered 10px text. The renderer cannot prove clipping, vertical centering, or contrast against actual native icon pixels. The flexible tab row and minimum touch size earn partial adaptive credit, while the JSON reports no breakpoint-specific branch or focus ring. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-021"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 92.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 10,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/355873f664b1a5332dc2fa45896b82754c07960e402cddfe991fccded73e0f7b.json (capturePayload: direct Text pill, 20px minimum, right=-6/top=-4, all semantic states)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/109a81531c4783f41268dee48d1b2a4bd140cebfbb87f179c7031ac36c14d5cd.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/cb8e0eb0c9d766e0df8b05f7c5785b37610d6201cd4299bd7f1a8a6df96ea99f.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/aeb4010eb69d70a407b965c226d794a524dc57ddcb5e5cc810e6795f28ef89b3.json (trial: no real Simulator capture)"
+          ],
+          "notes": "The direct Text pill is structurally compact, closely anchored, uses a robust 20px minimum, switches palette colors, preserves selected/pulse behavior, and passes all exact/capped/zero and accessibility contracts. It lacks the explicit Buzzr Montserrat font and separating border of the strongest system-matched variants, so consistency is one point below maximum. Visual/adaptive scores remain capped because the bundle contains renderer structure only, explicitly no breakpoint-specific branch, and no Simulator/pixel capture.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-021"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/355873f664b1a5332dc2fa45896b82754c07960e402cddfe991fccded73e0f7b.json",
+              "state": "renderer",
+              "observation": "The badge is a single hidden Text pill with 20 minimum width, palette colors, no redundant chat dot, correct exact/capped labels, and preserved pulse dot."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/cb8e0eb0c9d766e0df8b05f7c5785b37610d6201cd4299bd7f1a8a6df96ea99f.json",
+              "state": "replay",
+              "observation": "Both required checks passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/aeb4010eb69d70a407b965c226d794a524dc57ddcb5e5cc810e6795f28ef89b3.json",
+              "state": "trial",
+              "observation": "Successful evidence is renderer-only; real Simulator capture is false."
+            }
+          ],
+          "notes": "The single-node badge is compact, avoids double signaling, and retains correct screen-reader behavior. It lacks branded font evidence and native pixel/adaptive proof; the payload explicitly reports no breakpoint-specific layout.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-021"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 89.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f300ff713bad9dd2a1ccfb8edfe95bb97100d11fec25b632d1f12d475ca2f102.json",
+              "state": "renderer",
+              "finding": "Renderer confirms exact/capped text, full accessible count, hidden decoration, selected state, zero suppression, and pulse activity."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f527bebcc4d8efefa87c2fed0ee8688441db08a1e182632e0860bd9c36c43031.json",
+              "state": "recorded-verification",
+              "finding": "Required typecheck and focused tests pass."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/9cc854515a1ce9dcb583c317992add7279e307e20ac40d0ebb7f5a91a788dfee.json",
+              "state": "replay-verification",
+              "finding": "Replay verification passes both checks."
+            }
+          ],
+          "notes": "The palette-aware 1px border and 12px line height make the compact badge more robust on light and dark surfaces. All semantic requirements are directly represented in the tree. Pixel-level fit at right -14/top -8 remains unproven, and the payload reports no breakpoint-specific layout branch. Flexible sizing and minimum touch height earn partial adaptive credit. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-007"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 89.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f300ff713bad9dd2a1ccfb8edfe95bb97100d11fec25b632d1f12d475ca2f102.json (capturePayload: all contract states; bordered pill at right=-14/top=-8)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f527bebcc4d8efefa87c2fed0ee8688441db08a1e182632e0860bd9c36c43031.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/9cc854515a1ce9dcb583c317992add7279e307e20ac40d0ebb7f5a91a788dfee.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/7b1aef833e2fbe8bc0e863ad62ea6aaca758b2025a372009fc87834e96cb4a69.json (trial: no real Simulator capture)"
+          ],
+          "notes": "Functional and semantic behavior is complete, with a theme-aware border, correct exact/capped labels, hidden decorative count, selected indicator, and preserved pulse state. The far-right/high 12px pill has unresolved clipping and balance risk in renderer-only evidence, so hierarchy is below the robust 20px/right=-6 variants. Responsive evidence is structural only: max-width sizing exists, but no adaptive branch and no Simulator/pixel capture are available.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-007"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 82.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 10,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f300ff713bad9dd2a1ccfb8edfe95bb97100d11fec25b632d1f12d475ca2f102.json",
+              "state": "renderer",
+              "observation": "Semantic states are correct; badge styles use palette-aware border colors and padding, but right -14/top -8 placement and the retained chat dot may crowd the icon."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/9cc854515a1ce9dcb583c317992add7279e307e20ac40d0ebb7f5a91a788dfee.json",
+              "state": "replay",
+              "observation": "Typecheck and rendered flow passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/7b1aef833e2fbe8bc0e863ad62ea6aaca758b2025a372009fc87834e96cb4a69.json",
+              "state": "trial",
+              "observation": "The successful capture is renderer-only, not Simulator evidence."
+            }
+          ],
+          "notes": "Good palette consistency and complete semantics. The extra chat dot and outward offset reduce expected compactness and create a placement uncertainty that renderer JSON cannot settle. No adaptive or reduced-motion branch is represented.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-007"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 91.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 15,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/b3ccce3e33cfa64f220c43cf5da956dbd021a771a34ad6f19f74dfcf37047d25.json",
+              "state": "renderer",
+              "finding": "All three contract scenarios pass structurally; badge uses Montserrat_700Bold, established palette colors, full labels, and hidden decorative count."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/97053ad579474eb3d19d742e9adcb32ba546829ca3e09ad5f63c293093589467.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and focused test suite pass."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/75e793659c0ca24b605e3592103b81da7a76ed488acf4083cf674d09a73321e2.json",
+              "state": "replay-verification",
+              "finding": "Replay passes both checks."
+            }
+          ],
+          "notes": "The design-system evidence is strong: established bold typography, distinct light/dark accent colors, a compact pill, and preserved existing selected/pulse indicators. The absence of a border is not itself a defect, but device-level separation and clipping cannot be verified. Flex/max-width/minimum-target evidence earns partial adaptive credit, while the payload reports no breakpoint branch. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-014"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 93.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 15,
+            "responsive-adaptive-behavior": 10,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/b3ccce3e33cfa64f220c43cf5da956dbd021a771a34ad6f19f74dfcf37047d25.json (capturePayload: 20px pill, right=-6/top=-4, Montserrat_700Bold, palette states)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/97053ad579474eb3d19d742e9adcb32ba546829ca3e09ad5f63c293093589467.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/75e793659c0ca24b605e3592103b81da7a76ed488acf4083cf674d09a73321e2.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/462be5f3e10c8ac335600dc95004f20f9bb2aacaa4de340950ee1681155fb897.json (trial: no real Simulator capture)"
+          ],
+          "notes": "This renderer state is highly consistent: exact and capped count behavior, full tab labels, hidden decorative badge, selected state, zero suppression, pulse preservation, dark/light palette switching, a stable 20px pill, close icon anchor, and Buzzr's Montserrat bold face are all evidenced. Full visual credit is withheld because no actual device pixels are available. Responsive credit is capped by the explicit absence of a breakpoint-specific branch and real Simulator capture, despite sensible existing full-width/max-width container structure.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-014"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 83.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 10,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/b3ccce3e33cfa64f220c43cf5da956dbd021a771a34ad6f19f74dfcf37047d25.json",
+              "state": "renderer",
+              "observation": "Badge text uses Montserrat_700Bold and palette colors with a 20-wide pill, but the count badge and old chat dot occupy the same top-right region; pulse behavior remains correct."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/75e793659c0ca24b605e3592103b81da7a76ed488acf4083cf674d09a73321e2.json",
+              "state": "replay",
+              "observation": "Typecheck and focused contract passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/462be5f3e10c8ac335600dc95004f20f9bb2aacaa4de340950ee1681155fb897.json",
+              "state": "trial",
+              "observation": "Renderer capture passed with no native Simulator evidence."
+            }
+          ],
+          "notes": "Typography and palette integration are strong, and the accessible state contract is complete. Retaining the chat dot under the numeric badge creates redundant hierarchy. Adaptive behavior is only max-width containment and is not visually proven on device.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-014"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 91.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 15,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/d6d8a7edadb2a4fe577ec188c30ef104a94bfe50ca2a0f6b8d4e69e28bc974fe.json",
+              "state": "renderer",
+              "finding": "All contract scenarios are satisfied; badge text uses Montserrat_700Bold, palette colors and adaptive surface border, while accessibility and selected/pulse states remain correct."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/435d1ea1f15cb05de20602c6ccfeee9f20cdb6804b065ba7219eb4e5d302d947.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and focused rendered-flow tests pass."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/432ed3b08d317109466ad5ffcd94921db56894b65fb48057fe3b5268da90391c.json",
+              "state": "replay-verification",
+              "finding": "Both checks pass in replay."
+            }
+          ],
+          "notes": "Established typography and palette-aware border/color choices support high design-system credit, and the contract behavior is complete. The far right/top placement cannot be checked for real-device clipping or optical alignment. Adaptive evidence is limited to flex, a 52-point minimum target, and max-width sizing; no breakpoint-specific branch is present. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-020"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 89.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/d6d8a7edadb2a4fe577ec188c30ef104a94bfe50ca2a0f6b8d4e69e28bc974fe.json (capturePayload: Montserrat badge, themed border, right=-15/top=-9, all states)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/435d1ea1f15cb05de20602c6ccfeee9f20cdb6804b065ba7219eb4e5d302d947.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/432ed3b08d317109466ad5ffcd94921db56894b65fb48057fe3b5268da90391c.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/bd748e3c224bd77ae61b2c5973a1513279ac1fddc35ef42d90816fe14af077a3.json (trial: no real Simulator capture)"
+          ],
+          "notes": "All exact/capped/zero/pulse, selected-state, dark/light palette, and accessibility contracts pass, with Buzzr's Montserrat face and theme-aware border improving system consistency. The pill is nevertheless pushed farthest upward/rightward at right=-15/top=-9 with a 12px minimum, leaving clipping and balance uncertainty that renderer JSON cannot settle. Adaptive evidence is only the existing max-width container; the payload has no breakpoint branch and the trial has no Simulator capture.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-020"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 82.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 10,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/d6d8a7edadb2a4fe577ec188c30ef104a94bfe50ca2a0f6b8d4e69e28bc974fe.json",
+              "state": "renderer",
+              "observation": "The full semantic contract passes and Montserrat_700Bold plus palette-aware borders are used, but right -15/top -9 placement and a retained chat dot create crowding risk."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/432ed3b08d317109466ad5ffcd94921db56894b65fb48057fe3b5268da90391c.json",
+              "state": "replay",
+              "observation": "Typecheck and focused tests passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/bd748e3c224bd77ae61b2c5973a1513279ac1fddc35ef42d90816fe14af077a3.json",
+              "state": "trial",
+              "observation": "Renderer capture passed; no native Simulator capture was possible."
+            }
+          ],
+          "notes": "Good typography and semantic coverage, offset by duplicate chat signaling and aggressive positioning. Adaptive confidence is limited by the explicit unsupported breakpoint branch and the lack of Simulator/pixel evidence.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-020"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 90.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/abb6203915b6fa3d2d4d04d54963b4c9c6d5d171e38c25059fb952fa2a8d3ee8.json",
+              "state": "renderer",
+              "finding": "Renderer captures exact/capped counts, full screen-reader labels, hidden visual text, selected states, no zero badge, and preserved pulse dot; border adapts to light/dark surface."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/827f7fe7f41101cd5978e90cb7b287bd789c239157765a6bb5f063d353982fea.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and all focused contract tests pass."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/7a9be1ac664a117f510195920b0dcfced5f4d667bba5c0a4e08fa11b04ee6ec3.json",
+              "state": "replay-verification",
+              "finding": "Replayed checks remain green."
+            }
+          ],
+          "notes": "The palette-aware border, 20px minimum pill width, and conservative right/top offset are structurally promising and consistent with the existing accent treatment. Interaction and accessibility are fully evidenced. Device pixels, clipping, and optical balance remain unproven; adaptive structure is limited to flex/max-width/minimum-target behavior with no breakpoint-specific branch. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-015"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 92.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 10,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/abb6203915b6fa3d2d4d04d54963b4c9c6d5d171e38c25059fb952fa2a8d3ee8.json (capturePayload: 20px bordered pill at right=-6/top=-4 and complete states)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/827f7fe7f41101cd5978e90cb7b287bd789c239157765a6bb5f063d353982fea.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/7a9be1ac664a117f510195920b0dcfced5f4d667bba5c0a4e08fa11b04ee6ec3.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/42510782b95ad081135928824e7a8bbe9a73b44a682654ef49e30596501a1171.json (trial: no real Simulator capture)"
+          ],
+          "notes": "The robust 20px pill, close anchor, theme-aware separating border, palette colors, and preserved selected indicator provide strong structural visual evidence, while every count/accessibility/pulse contract and verification passes. The badge text uses a generic bold declaration instead of the explicit Buzzr Montserrat face seen in the most system-specific variants. Renderer-only evidence prevents full hierarchy/adaptive confidence; no breakpoint branch or Simulator screenshot is present.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-015"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 87.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 8,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/abb6203915b6fa3d2d4d04d54963b4c9c6d5d171e38c25059fb952fa2a8d3ee8.json",
+              "state": "renderer",
+              "observation": "A 20-wide bordered pill replaces the chat dot, preserves the separate pulse dot, uses theme-aware colors, and has correct exact/capped/hidden semantics."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/7a9be1ac664a117f510195920b0dcfced5f4d667bba5c0a4e08fa11b04ee6ec3.json",
+              "state": "replay",
+              "observation": "Both required checks passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/42510782b95ad081135928824e7a8bbe9a73b44a682654ef49e30596501a1171.json",
+              "state": "trial",
+              "observation": "Renderer capture and replay passed; real Simulator capture was unavailable."
+            }
+          ],
+          "notes": "A strong compact solution with clear separation, no duplicate chat indicator, and complete accessibility semantics. It loses points because renderer evidence cannot establish true device pixels and the payload records no adaptive branch beyond max-width sizing.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-015"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 88.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f5688e4652aba3d658cf92636bebe3b26f06b29f0e88062545956175374e182d.json",
+              "state": "renderer",
+              "finding": "All required unread and pulse scenarios are correctly represented, including assistive-technology hiding and full-count labels."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/fc9fec780a3915f8088744b98cccfd8ad0a126adcb958ad9869ad998c69edeb4.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and three focused tests pass."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/eaad3c4e71b11d89c2058c26d91212fa8dd44e14d5acf1a6a128d8550acf6648.json",
+              "state": "replay-verification",
+              "finding": "Replayed build and flow pass."
+            }
+          ],
+          "notes": "The badge is compact, uses the resolved Buzzr accent colors in light and dark, and does not disturb the selected marker or pulse dot in the tree. Its unbordered, 12px-high treatment cannot be visually validated against real icons from JSON alone. The layout retains flex distribution, minimum target size, and content max width, but has no breakpoint-specific branch. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-008"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 88.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f5688e4652aba3d658cf92636bebe3b26f06b29f0e88062545956175374e182d.json (capturePayload: all contract states; 12px pill at right=-12/top=-7)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/fc9fec780a3915f8088744b98cccfd8ad0a126adcb958ad9869ad998c69edeb4.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/eaad3c4e71b11d89c2058c26d91212fa8dd44e14d5acf1a6a128d8550acf6648.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f774547280bee658a62a60441c8bc7923fc5c7f81c080f2ec8f59b7275ca1a20.json (trial: no real Simulator capture)"
+          ],
+          "notes": "The renderer and focused tests show complete unread-count and accessibility behavior in light, dark, capped, zero, selected, and pulse scenarios. The compact pill is positioned better than the furthest-offset variants, but its generic typography and lack of separating border provide weaker design-system/pixel confidence. Visual and responsive scores remain bounded by the explicit non-Simulator caveat and the payload's lack of breakpoint-specific adaptation.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-008"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f5688e4652aba3d658cf92636bebe3b26f06b29f0e88062545956175374e182d.json",
+              "state": "renderer",
+              "observation": "Exact/capped/zero states and hidden accessibility semantics are correct; the badge replaces the chat dot, uses palette colors, and preserves the separate pulse dot."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/eaad3c4e71b11d89c2058c26d91212fa8dd44e14d5acf1a6a128d8550acf6648.json",
+              "state": "replay",
+              "observation": "Typecheck and focused contract passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/f774547280bee658a62a60441c8bc7923fc5c7f81c080f2ec8f59b7275ca1a20.json",
+              "state": "trial",
+              "observation": "Successful renderer capture explicitly lacks real Simulator capture."
+            }
+          ],
+          "notes": "This avoids double unread signaling and keeps the pulse activity dot intact. Positioning is compact and semantics are strong, but visual confidence remains bounded by renderer data and the capture reports no breakpoint-specific adaptation beyond max-width containment.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-008"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 92.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 15,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/dbc9c60290357d2840febfb4099a15c7f423ede1942de3b4f8f646c88efa451d.json",
+              "state": "renderer",
+              "finding": "Exact/capped counts, full labels, hidden decoration, selected states, zero suppression, and pulse behavior all match the contract; badge uses Montserrat_700Bold and palette-aware borders."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/663fadc038696a4347ce0ae25de9ce9d64b14fd6fd69a7186cfd782db0a4d966.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and focused tests pass."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/21cf2e679e51d4e3b756edeb7277ae117fabf7df86a2df6f90cf6b7fa4a9848f.json",
+              "state": "replay-verification",
+              "finding": "Both checks pass again under replay."
+            }
+          ],
+          "notes": "This is the strongest renderer-backed design-system treatment: it uses the established Montserrat bold face, light/dark accent and surface colors, a separating border, and a conservative right offset while retaining the existing selected indicator. Interaction and accessibility are fully evidenced. Adaptive credit remains partial because only flex/max-width behavior is captured and the payload declares no breakpoint branch. Renderer evidence is not Simulator or pixel proof, so visual hierarchy is not awarded full pixel-level credit.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-009"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 93.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 15,
+            "responsive-adaptive-behavior": 10,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/dbc9c60290357d2840febfb4099a15c7f423ede1942de3b4f8f646c88efa451d.json (capturePayload: 20px pill, right=-6/top=-4, Montserrat_700Bold, themed border)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/663fadc038696a4347ce0ae25de9ce9d64b14fd6fd69a7186cfd782db0a4d966.json (recorded typecheck and contract passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/21cf2e679e51d4e3b756edeb7277ae117fabf7df86a2df6f90cf6b7fa4a9848f.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/4cad5e49432b2e61d9853b18cfc95440ec9c33d89e20d9c5ddd71bfca66fa4eb.json (trial: no real Simulator capture)"
+          ],
+          "notes": "This is among the strongest renderer implementations: all behavioral and semantic states pass, while the 20px minimum pill, close right=-6/top=-4 anchor, Buzzr Montserrat bold type, palette-dependent fill/border, and preserved selected indicator are internally consistent. Visual hierarchy cannot receive full marks because renderer JSON is not pixel evidence. Responsive remains capped because only max-width structural sizing is evidenced, no adaptive branch exists, and real Simulator capture was unavailable.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-009"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 88.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 15,
+            "responsive-adaptive-behavior": 8,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/dbc9c60290357d2840febfb4099a15c7f423ede1942de3b4f8f646c88efa451d.json",
+              "state": "renderer",
+              "observation": "The badge replaces the chat dot, uses a 20-wide pill, theme border/background colors, and Montserrat_700Bold while preserving full labels, selected state, and the pulse dot."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/21cf2e679e51d4e3b756edeb7277ae117fabf7df86a2df6f90cf6b7fa4a9848f.json",
+              "state": "replay",
+              "observation": "Both required verification kinds passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/4cad5e49432b2e61d9853b18cfc95440ec9c33d89e20d9c5ddd71bfca66fa4eb.json",
+              "state": "trial",
+              "observation": "Capture/replay passed, but a native Simulator capture was impossible."
+            }
+          ],
+          "notes": "The renderer shows the strongest design-system alignment: branded typography, palette-aware separation, no redundant chat dot, and compact positioning. Responsive evidence remains incomplete because only width containment is represented and no native pixels were captured.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-009"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 89.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/784f8eabaebd44838889e149e50ce007e48cf9dbd871cc15948dbf68a8157961.json",
+              "state": "renderer",
+              "finding": "Exact and capped counts, full accessibility labels, hidden decorative badge, selected state, zero suppression, and pulse preservation are all captured."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/ceb4277129fec0826f84089d1e54d1c0cb31f7d7aac1aa06ecfd80566fbe19cc.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and focused unread-badge tests passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/9992ef376be8d75e7bb9556a54a79e997720aca7fabc042ae0a2462baa1dd3ba.json",
+              "state": "replay-verification",
+              "finding": "Both verification kinds pass on replay."
+            }
+          ],
+          "notes": "The contrast border switches with the light and dark palette, improving separation over an icon. Semantics and contract behavior are complete. The small badge is positioned high and far right, which cannot be validated for clipping without a real rendered device. Responsive evidence is limited to flex layout, minimum target size, and a max-width container; the JSON explicitly says there is no breakpoint-specific branch. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-005"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 89.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/784f8eabaebd44838889e149e50ce007e48cf9dbd871cc15948dbf68a8157961.json (capturePayload: functional states and 12px bordered pill at right=-16/top=-8)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/ceb4277129fec0826f84089d1e54d1c0cb31f7d7aac1aa06ecfd80566fbe19cc.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/9992ef376be8d75e7bb9556a54a79e997720aca7fabc042ae0a2462baa1dd3ba.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/d518fee5005dad694f760e7adddc16eb4b8186f757f7ccf9f6cb745a12e59dca.json (trial: no real Simulator capture)"
+          ],
+          "notes": "All task and accessibility contracts pass, including 99+, full accessible count, selected state, and pulse preservation. The themed border is consistent, but the minimum 12px pill pushed to right=-16/top=-8 creates more clipping/crowding uncertainty than better-anchored variants; renderer evidence cannot resolve that visually. No Simulator screenshot or breakpoint-specific adaptive branch is present, so visual/responsive points are withheld. Typecheck and both recorded/replayed focused tests pass.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-005"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 81.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 10,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/784f8eabaebd44838889e149e50ce007e48cf9dbd871cc15948dbf68a8157961.json",
+              "state": "renderer",
+              "observation": "All three semantic scenarios pass; the 12-high badge is positioned at right -16/top -8, has a palette-aware border, and coexists with the existing chat dot."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/9992ef376be8d75e7bb9556a54a79e997720aca7fabc042ae0a2462baa1dd3ba.json",
+              "state": "replay",
+              "observation": "Typecheck and focused contract passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/d518fee5005dad694f760e7adddc16eb4b8186f757f7ccf9f6cb745a12e59dca.json",
+              "state": "trial",
+              "observation": "The trial declares successful renderer capture but no real Simulator capture."
+            }
+          ],
+          "notes": "The semantics and exact/capped counts are correct. The far negative offsets and duplicate unread dot create a credible clipping/crowding risk that cannot be resolved from a renderer tree alone. Adaptive evidence is limited to width containment, with no breakpoint branch.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-005"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 88.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/0423190dcd5fa4f9065e745847b0ea72245444a2fdbc7609515d8589781977f4.json",
+              "state": "renderer",
+              "finding": "Three scenarios demonstrate the full count contract, screen-reader behavior, selected state, zero suppression, and pulse preservation."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/31e597a861425fc398db5621bd47fb8c3c1469450639265967e1ebd89d16382c.json",
+              "state": "recorded-verification",
+              "finding": "Build and focused contract are green."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/d03551dc2dd4e93991b226fed8d5c238ab74d80d133a5452a1364583d3cb9229.json",
+              "state": "replay-verification",
+              "finding": "Replay is green for both verification kinds."
+            }
+          ],
+          "notes": "Behavior and semantics are complete, including distinct light/dark palette values and a preserved selected marker. The compact unbordered badge is placed at right -13/top -8; renderer structure cannot prove its optical fit or absence of clipping on a device. The flexible tab row and 52-point target support partial adaptive credit, but the payload explicitly reports no breakpoint-specific branch. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-010"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 88.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/0423190dcd5fa4f9065e745847b0ea72245444a2fdbc7609515d8589781977f4.json (capturePayload: all states; generic 12px pill at right=-13/top=-8)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/31e597a861425fc398db5621bd47fb8c3c1469450639265967e1ebd89d16382c.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/d03551dc2dd4e93991b226fed8d5c238ab74d80d133a5452a1364583d3cb9229.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/a68dfeb91ef24c084acea8f0a0f3980e4eeb47d9904e1f7db9115318bdfae7f9.json (trial: no real Simulator capture)"
+          ],
+          "notes": "Exact/capped count logic, full labels, hidden decorative content, zero suppression, selected state, palette switching, and pulse preservation all pass. The generic font, unbordered 12px minimum pill, and right=-13/top=-8 placement yield less visual/system confidence than the best variants, particularly without a device screenshot. Responsive evidence is limited to a max-width container, with the capture payload explicitly listing no adaptive branch and the trial listing no Simulator capture.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-010"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 81.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 10,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/0423190dcd5fa4f9065e745847b0ea72245444a2fdbc7609515d8589781977f4.json",
+              "state": "renderer",
+              "observation": "Correct exact/capped/zero semantics are present, though the 12-high unbordered badge at right -13/top -8 coexists with the old chat dot."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/d03551dc2dd4e93991b226fed8d5c238ab74d80d133a5452a1364583d3cb9229.json",
+              "state": "replay",
+              "observation": "Typecheck and rendered flow passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/a68dfeb91ef24c084acea8f0a0f3980e4eeb47d9904e1f7db9115318bdfae7f9.json",
+              "state": "trial",
+              "observation": "The capture is renderer evidence only."
+            }
+          ],
+          "notes": "Core behavior and accessibility are correct. The renderer indicates likely crowding from duplicate chat indicators and aggressive offsets, and it explicitly offers no breakpoint-specific layout branch or native pixel proof.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-010"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r6:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 88.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 10
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/3139be023dbc0a7a835d02a5a9267d7d9f0831e0124ce21c53779c8d23ca7236.json",
+              "state": "renderer",
+              "finding": "All three scenarios meet count, cap, accessibility, selected-state, zero, and pulse requirements."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/ff1f17056270c36397139cd13de8aba42b69aa2845ab586c0e2372f31916ac41.json",
+              "state": "recorded-verification",
+              "finding": "Typecheck and focused rendered contract pass."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/fe2a962073e282dce2f82f91c31b907796ade4aeaa304e0772cce8925afcd2aa.json",
+              "state": "replay-verification",
+              "finding": "Replay remains green."
+            }
+          ],
+          "notes": "This compact treatment uses centered 10px text with a 12px line height and distinct light/dark badge colors. The unbordered badge at right -13/top -9 is plausible but cannot be judged for pixel clipping or optical alignment from a native renderer tree. Accessibility evidence is strong. Adaptive evidence is limited to the flexible tab row, 52-point minimum target, and max-width container, with no breakpoint branch. Renderer evidence is not Simulator or pixel proof.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-006"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 88.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 20,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 9,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/3139be023dbc0a7a835d02a5a9267d7d9f0831e0124ce21c53779c8d23ca7236.json (capturePayload: all states; generic 10px text, right=-13/top=-9 pill)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/ff1f17056270c36397139cd13de8aba42b69aa2845ab586c0e2372f31916ac41.json (recorded verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/fe2a962073e282dce2f82f91c31b907796ade4aeaa304e0772cce8925afcd2aa.json (replay verification passed)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/ff1eec4cfde11ae6f31afb9e8a673333d8296a4499777a89d443964f38944586.json (trial: no real Simulator capture)"
+          ],
+          "notes": "The count logic, accessibility labels/hiding, selection, zero suppression, dark palette, and pulse dot all render correctly and the focused contract replays. The high/far right=-13/top=-9 placement and 12px minimum pill remain visually uncertain without pixel proof, and the badge text uses a generic weight rather than the captured Buzzr Montserrat family used by the strongest variants. Adaptive evidence is limited to the existing max-width container; the payload states there is no breakpoint branch and the trial states no Simulator capture was possible.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-006"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 80.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 9,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 7,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/3139be023dbc0a7a835d02a5a9267d7d9f0831e0124ce21c53779c8d23ca7236.json",
+              "state": "renderer",
+              "observation": "Counts and accessibility labels are correct, but the unbordered badge sits at right -13/top -9 and the original chat dot remains under the same icon."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/fe2a962073e282dce2f82f91c31b907796ade4aeaa304e0772cce8925afcd2aa.json",
+              "state": "replay",
+              "observation": "Both verification kinds passed."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/buzzr/blobs/sha256/ff1eec4cfde11ae6f31afb9e8a673333d8296a4499777a89d443964f38944586.json",
+              "state": "trial",
+              "observation": "Renderer capture passed; native Simulator capture was not possible."
+            }
+          ],
+          "notes": "The contract works, including zero and pulse preservation. Visual deductions reflect aggressive negative positioning, lack of a separating border, and duplicate chat indicators. The evidence explicitly lacks adaptive variants and cannot establish native pixel placement.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-006"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 83.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-2bd8c5973ecd1bfdf4e1866c57a9de3b2ee0d23138f316ad97694cf71385cb1e.png",
+              "state": "light",
+              "finding": "Compact centered menu has clear search and destination hierarchy."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1d5b7ab57f929f93386c52eb98a6568194763517ad72a9d2799e3125b458827b.png",
+              "state": "keyboard_focus",
+              "finding": "Dashboard receives a single visible keyboard selection with an Enter hint."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3f60bf3a62bbd18e0fc154105ec10e11a7beabc205e2225692d9bc423f749264.png",
+              "state": "filter",
+              "finding": "Filter result is singular, legible, and actionable."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-4e1dbc1402273bce63e11478ed38e4184dbdc10a38a370cad37e4287890160d4.png",
+              "state": "empty",
+              "finding": "No-result state is explicit."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Phone viewport does not render the command menu or application."
+            }
+          ],
+          "notes": "The registered replay passed and the captured keyboard selection, filtering, empty state, and reduced-motion state support strong interaction and accessibility credit. No rendered manager-role journey is present. Responsive/adaptive scoring is capped by the explicit desktop-only phone placeholder. Renderer evidence is browser proof, not a substitute for broader device coverage.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-002"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 85.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-2bd8c5973ecd1bfdf4e1866c57a9de3b2ee0d23138f316ad97694cf71385cb1e.png (light: centered command dialog and Enter hint)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1d5b7ab57f929f93386c52eb98a6568194763517ad72a9d2799e3125b458827b.png (keyboard_focus: Dashboard selection)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3f60bf3a62bbd18e0fc154105ec10e11a7beabc205e2225692d9bc423f749264.png (filter: Candidates result with Enter hint)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-4e1dbc1402273bce63e11478ed38e4184dbdc10a38a370cad37e4287890160d4.png (empty result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-4d39cbf6994d261d5543c0d6ba2876c2f7717fd0efed730837a3f3df43e03adf.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/1/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "Filtering and keyboard selection are legible and the compact centered overlay fits the established UI; the Enter hint improves discoverability. Correctness and accessibility remain just below maximum because the evidence is recruiter-only and does not independently expose screen-reader announcements or manager-role filtering. The phone state is an intentional desktop-only placeholder and therefore provides a safe fallback but no responsive/adaptive command-menu behavior.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-002"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 83.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 19,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-2bd8c5973ecd1bfdf4e1866c57a9de3b2ee0d23138f316ad97694cf71385cb1e.png",
+              "state": "light",
+              "observation": "Compact centered dialog has restrained borders, clear search, and a single active row."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1d5b7ab57f929f93386c52eb98a6568194763517ad72a9d2799e3125b458827b.png",
+              "state": "keyboard_focus",
+              "observation": "Dashboard receives a distinct keyboard highlight and Enter affordance."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3f60bf3a62bbd18e0fc154105ec10e11a7beabc205e2225692d9bc423f749264.png",
+              "state": "filter",
+              "observation": "Candidates is the sole filtered result with an Enter cue."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-4e1dbc1402273bce63e11478ed38e4184dbdc10a38a370cad37e4287890160d4.png",
+              "state": "empty",
+              "observation": "Empty result messaging remains readable and spatially balanced."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "The phone viewport is an intentional desktop-only placeholder rather than an adaptive menu."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed."
+            }
+          ],
+          "notes": "This is a clean, legible desktop implementation with strong keyboard-state signaling and complete recorded states. The major deduction is confined to adaptive behavior because the product intentionally replaces the entire phone experience with a desktop-only message.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-002"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 80.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 18,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3465211a87afd1e511208cc9688aafaf8e770da2b585f02965ebf8f1e9ded5c4.png",
+              "state": "light",
+              "finding": "Menu aligns under the sidebar boundary and clearly distinguishes the current destination."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-d857be308f033e20a7e7b39ba82e45c9cbb635007182d27633567de0c826c3df.png",
+              "state": "keyboard_focus",
+              "finding": "Dashboard receives a single visible gray keyboard highlight."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-ce31e8e1c48d9f7883ab298ffb2a8a609106a50b9e7015b100d2a59dfe069c00.png",
+              "state": "filter",
+              "finding": "Candidate filtering produces a single highlighted result."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-08250f4e30de997b3023347bc1c51577530b1030c00c890343217f70e046f808.png",
+              "state": "empty",
+              "finding": "Compact no-result message is explicit."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Only the desktop-only placeholder is shown."
+            }
+          ],
+          "notes": "The replay passed and state captures support the filter, keyboard, empty, and reduced-motion behavior. The menu's placement competes slightly with the page heading and the gray focus state is modest rather than strong. Manager-role rendering is absent. Responsive/adaptive score is low because the phone state has no product UI.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-019"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 83.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3465211a87afd1e511208cc9688aafaf8e770da2b585f02965ebf8f1e9ded5c4.png (light: top-left floating menu over page heading region)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-d857be308f033e20a7e7b39ba82e45c9cbb635007182d27633567de0c826c3df.png (keyboard_focus: Dashboard highlight)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-ce31e8e1c48d9f7883ab298ffb2a8a609106a50b9e7015b100d2a59dfe069c00.png (filter: Candidates result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-08250f4e30de997b3023347bc1c51577530b1030c00c890343217f70e046f808.png (empty state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9f3932af7bb64fee598352e4d6bf374a6fd11be28a50321d69ee30f1d5a53933.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/18/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "Filtering, keyboard highlight, empty state, reduced-motion state, and replay are all successful. The menu's high top-left placement partially competes with the page title/search area and has a weaker visible relationship to the compact chrome opener than centered or trigger-adjacent versions, lowering hierarchy/system fit slightly. Only recruiter visual evidence is provided, not manager role or an AT transcript. The shared phone artifact is the desktop-only product placeholder, so no adaptive menu is demonstrated.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-019"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 76.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 18,
+            "visual-hierarchy": 10,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3465211a87afd1e511208cc9688aafaf8e770da2b585f02965ebf8f1e9ded5c4.png",
+              "state": "light",
+              "observation": "The dialog opens immediately beside the sidebar but overlaps the content title region and has no clearly labeled visible trigger."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-d857be308f033e20a7e7b39ba82e45c9cbb635007182d27633567de0c826c3df.png",
+              "state": "keyboard_focus",
+              "observation": "Dashboard receives a visible gray keyboard selection."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-ce31e8e1c48d9f7883ab298ffb2a8a609106a50b9e7015b100d2a59dfe069c00.png",
+              "state": "filter",
+              "observation": "Filtering works but the menu's upper-left placement obscures underlying header content."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-08250f4e30de997b3023347bc1c51577530b1030c00c890343217f70e046f808.png",
+              "state": "empty",
+              "observation": "Empty state is concise and readable."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "The product intentionally withholds the workflow at phone width."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed."
+            }
+          ],
+          "notes": "Filtering and keyboard navigation are supported, but discoverability and placement are weaker than the compact-trigger variants. Phone behavior is an intentional placeholder, so it is scored as poor adaptation rather than a critical render failure.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-019"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 83.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-ce206de288d5552641e3550115fdbe14365036d7401fb996cfeef58c3d5edc7c.png",
+              "state": "light",
+              "finding": "Centered menu and visible Command menu trigger fit the application chrome."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-af704c499be647898b77ee7b88ee09739d9366b0cda8c4ab945cec7ac0292c83.png",
+              "state": "keyboard_focus",
+              "finding": "Dashboard has a single visible keyboard highlight."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1d8cf7d20ae59160773b865a4b518b2cf575fc2ea0233932cb25d0eb330135bc.png",
+              "state": "filter",
+              "finding": "Candidates is the sole clear filtered result; input exposes a clear control."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-214c880b56dcb4ef241e0c685bea0847a3ff418e68c91dd62e6a834c9e8ead74.png",
+              "state": "empty",
+              "finding": "No destinations found is visible, though compact."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Product presents only its desktop-only phone placeholder."
+            }
+          ],
+          "notes": "The replay passed, desktop hierarchy is strong, and keyboard/filter/empty/reduced-motion states are present. The trailing 7 on the current Para AI row is less semantically clear than a Current label, but not blocking. Manager role is not rendered. The desktop-only phone placeholder drives the low responsive/adaptive score.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-011"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-ce206de288d5552641e3550115fdbe14365036d7401fb996cfeef58c3d5edc7c.png (light: centered dialog and named Command menu trigger)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-af704c499be647898b77ee7b88ee09739d9366b0cda8c4ab945cec7ac0292c83.png (keyboard_focus: Dashboard highlight)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1d8cf7d20ae59160773b865a4b518b2cf575fc2ea0233932cb25d0eb330135bc.png (filter: Candidates result and clear-search control)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-214c880b56dcb4ef241e0c685bea0847a3ff418e68c91dd62e6a834c9e8ead74.png (empty result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-e67b5ecc2283087084160ed06204702ead846982aef469bc7e309f8e80eaf8e3.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/10/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "The named trigger and centered menu are polished, filtering/empty/keyboard states are explicit, and replay passes. The unexplained '7' at the right of the Para AI result reads like the sidebar notification badge rather than a command-state label, slightly weakening system consistency. The evidence is recruiter-only and does not independently prove manager filtering or screen-reader output. The phone state is solely the desktop-only placeholder, which materially limits responsive scoring.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-011"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 77.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 18,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-ce206de288d5552641e3550115fdbe14365036d7401fb996cfeef58c3d5edc7c.png",
+              "state": "light",
+              "observation": "A compact centered menu is present, but the trailing 7 on Para AI is visually ambiguous inside a destination list."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-af704c499be647898b77ee7b88ee09739d9366b0cda8c4ab945cec7ac0292c83.png",
+              "state": "keyboard_focus",
+              "observation": "Dashboard has a clear gray keyboard selection."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1d8cf7d20ae59160773b865a4b518b2cf575fc2ea0233932cb25d0eb330135bc.png",
+              "state": "filter",
+              "observation": "Filtered Candidates state works; a small blue x introduces a visually unrelated accent."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-214c880b56dcb4ef241e0c685bea0847a3ff418e68c91dd62e6a834c9e8ead74.png",
+              "state": "empty",
+              "observation": "Empty copy is unusually small relative to the surrounding product typography."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "Only the desktop-only placeholder is available."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed."
+            }
+          ],
+          "notes": "The keyboard journey works and focus is visible. Small typography, the blue clear affordance, and an unexplained trailing count reduce cohesion. Mobile intentionally provides no adaptive command experience.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-011"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 77.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 17,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-cd0ec97dd6e9782a758c4ba9efc82702edfb8f73eedcfaf9b4d69be6a746f7d3.png",
+              "state": "light",
+              "finding": "Left-anchored menu is readable but very sparse, with a partially competing top-right trigger."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-6ad359deb81e32ef1f06cfac01d6e5f8a578160c45d9246f35ef1f41ccf86693.png",
+              "state": "keyboard_focus",
+              "finding": "No destination has a visible keyboard highlight in the focus capture."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-285f137a17a73195ef17b3e258f2418e0dcd6509dfb2c8f9ca4488865a34ba0f.png",
+              "state": "filter",
+              "finding": "Filtering works, but the sole result lacks a visible selected treatment."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-bc3988e553750e8289dea4dba16756152cefde3fd0651cc2542e7de583793c2c.png",
+              "state": "empty",
+              "finding": "Empty result is understandable but visually under-emphasized."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Product renders only the desktop-only placeholder at phone width."
+            }
+          ],
+          "notes": "Replay passes, so the keyboard journey is not classified as blocked. However, the keyboard-focus and filter captures do not expose a visible selected row, which is a meaningful focus-indication and hierarchy weakness. Manager-role behavior is not rendered. The phone placeholder materially reduces responsive/adaptive quality.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-018"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 76.0,
+          "dimensions": {
+            "task-interaction-correctness": 23,
+            "accessibility": 18,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 11,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 8
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-cd0ec97dd6e9782a758c4ba9efc82702edfb8f73eedcfaf9b4d69be6a746f7d3.png (light: muted upper-left menu and Menu trigger overlapping Configure)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-6ad359deb81e32ef1f06cfac01d6e5f8a578160c45d9246f35ef1f41ccf86693.png (keyboard_focus: no visible active-row differentiation)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-285f137a17a73195ef17b3e258f2418e0dcd6509dfb2c8f9ca4488865a34ba0f.png (filter: muted Candidates result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-bc3988e553750e8289dea4dba16756152cefde3fd0651cc2542e7de583793c2c.png (empty state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-61b9f384454b8f5ab017a1744a69ad7a37116612d8681c2c1756131a1c932d01.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/17/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "Replay and filtering/empty/reduced-motion captures establish a functioning journey, so the defects are not critical. However, the top-right Menu trigger visibly overlays the existing Configure control, the rows are unusually muted, and the keyboard_focus capture lacks a discernible active-row highlight; those observations directly reduce hierarchy, consistency, accessibility feedback, and implementation polish. Manager-role/AT evidence is also absent. The phone state remains only the standard desktop-only placeholder.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-018"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 70.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 17,
+            "visual-hierarchy": 8,
+            "design-system-consistency": 10,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 8
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-cd0ec97dd6e9782a758c4ba9efc82702edfb8f73eedcfaf9b4d69be6a746f7d3.png",
+              "state": "light",
+              "observation": "The Menu trigger overlaps the existing Configure control at top-right while the dialog opens at far left."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-6ad359deb81e32ef1f06cfac01d6e5f8a578160c45d9246f35ef1f41ccf86693.png",
+              "state": "keyboard_focus",
+              "observation": "The keyboard-focus capture has no visible moved-row selection."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-285f137a17a73195ef17b3e258f2418e0dcd6509dfb2c8f9ca4488865a34ba0f.png",
+              "state": "filter",
+              "observation": "Candidates filters correctly, but the result remains visually muted."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-bc3988e553750e8289dea4dba16756152cefde3fd0651cc2542e7de583793c2c.png",
+              "state": "empty",
+              "observation": "The no-results copy is tiny and vertically isolated in an oversized panel."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "The phone viewport provides only the desktop-only placeholder."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed, so the visual flaws do not constitute a nonfunctional journey."
+            }
+          ],
+          "notes": "The desktop journey works, but the visible trigger collision, weak row focus, small status copy, and disconnected menu placement are substantial quality defects. The deliberate phone placeholder further limits adaptation. None rises to the rubric's critical-defect threshold because rendering and registered interaction remain functional.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-018"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 80.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 17,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1877ab0a7983a1f477e61c792cb36dc0521aa484878756f9b8b677f80d67a5fb.png",
+              "state": "light",
+              "finding": "Centered menu is legible and preserves the existing Paraform chrome."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-36777b59dc8f6dad2d068444f72b4f84d6dd9651c025f7d97b3abc04cefdb43c.png",
+              "state": "keyboard_focus",
+              "finding": "Keyboard state visibly shows both Dashboard and Candidates with the same highlight, weakening focus clarity."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-165d948721e7168129155373d45b77baf86ba591e1b175b3c8997f138a4185ae.png",
+              "state": "filter",
+              "finding": "Filtering to cand leaves only Candidates."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-5b8ab57c96687bd9ab6606b32a00b1528bafbb86b02047d6cd1e2c5c8a3f3418.png",
+              "state": "empty",
+              "finding": "Empty query gives a clear no-destinations message."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Phone viewport contains only the desktop-only product placeholder."
+            }
+          ],
+          "notes": "Replay verification passed and filter, empty, and reduced-motion captures are coherent. The duplicate-looking keyboard highlight is a real focus-clarity deduction, not a critical block. Manager-role coverage is not rendered. The phone state is the product's desktop-only placeholder, so responsive/adaptive credit is necessarily low. The dark-media capture remains the light visual system; dark mode was not required by the task.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-001"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 85.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1877ab0a7983a1f477e61c792cb36dc0521aa484878756f9b8b677f80d67a5fb.png (light: centered command dialog with current destination)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-36777b59dc8f6dad2d068444f72b4f84d6dd9651c025f7d97b3abc04cefdb43c.png (keyboard_focus: visible row progression)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-165d948721e7168129155373d45b77baf86ba591e1b175b3c8997f138a4185ae.png (filter: Candidates-only result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-5b8ab57c96687bd9ab6606b32a00b1528bafbb86b02047d6cd1e2c5c8a3f3418.png (empty: explicit no-destinations message)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-df20f92b65300a3c04b0c50f5ab100ca8ecb95efca3db5235dfce25b7c3aba5f.png (reduced_motion: stable open state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile: desktop-only product placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/0/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "The registered recruiter journey replays and the captured filter, empty, keyboard, Escape affordance, and reduced-motion states are coherent. The restrained centered dialog preserves Paraform's neutral chrome. One point is held back in correctness/accessibility because the bundle does not separately demonstrate the manager role boundary or assistive-technology announcements. Responsive scoring is deliberately capped: the 390x844 capture is only the product's 'This prototype is only available for desktop' placeholder, not an adaptive command menu.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-001"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 78.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 18,
+            "visual-hierarchy": 11,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1877ab0a7983a1f477e61c792cb36dc0521aa484878756f9b8b677f80d67a5fb.png",
+              "state": "light",
+              "observation": "Centered command dialog exposes the four recruiter destinations and marks Para AI current."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-36777b59dc8f6dad2d068444f72b4f84d6dd9651c025f7d97b3abc04cefdb43c.png",
+              "state": "keyboard_focus",
+              "observation": "Keyboard state shows competing gray emphasis on Dashboard and Candidates, weakening the active-row cue."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-165d948721e7168129155373d45b77baf86ba591e1b175b3c8997f138a4185ae.png",
+              "state": "filter",
+              "observation": "The cand query reduces the list to Candidates."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-5b8ab57c96687bd9ab6606b32a00b1528bafbb86b02047d6cd1e2c5c8a3f3418.png",
+              "state": "empty",
+              "observation": "A clear No destinations found state is rendered."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "The phone viewport contains only the desktop-only product placeholder."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed; error state was explicitly excluded as inapplicable static navigation."
+            }
+          ],
+          "notes": "The registered keyboard journey is supported by a passing replay and complete filter/empty captures. Deductions reflect ambiguous simultaneous row emphasis and, most materially, the deliberate nonfunctional phone placeholder. The placeholder is product behavior, not a critical missing render.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-001"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 82.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-88f63c4834f74158ab1f461bdc1d4d31d291d8cd7532eb2dc20819f892dc253e.png",
+              "state": "light",
+              "finding": "Visible Navigate trigger and labeled section make the feature discoverable."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-711bb090e580c86b45e8dff848765745454744399d6803df8bff0d3ad4a46489.png",
+              "state": "keyboard_focus",
+              "finding": "Dashboard has one clear keyboard highlight and Enter affordance."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-def37e8362ee1cd96433bd88479df88d9eb37e775af51dfc4ae73f183efa007f.png",
+              "state": "filter",
+              "finding": "Filtering preserves a clear Candidates result."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-8852814442c426b91dac9fcbe89c8addb5c3fb7e4110793f368d874a77ae8d6e.png",
+              "state": "empty",
+              "finding": "Empty state remains readable, though the large left-anchored panel is visually heavy."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Only the desktop-only placeholder is available on phone."
+            }
+          ],
+          "notes": "Replay passed and all requested desktop states are present. The left-edge placement is less balanced than the strongest centered treatments but remains usable. The manager workspace is not separately rendered. The phone placeholder materially limits responsive/adaptive quality without making the registered desktop journey nonfunctional.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-003"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-88f63c4834f74158ab1f461bdc1d4d31d291d8cd7532eb2dc20819f892dc253e.png (light: wide upper-left dialog and Navigate trigger)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-711bb090e580c86b45e8dff848765745454744399d6803df8bff0d3ad4a46489.png (keyboard_focus: Dashboard highlight)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-def37e8362ee1cd96433bd88479df88d9eb37e775af51dfc4ae73f183efa007f.png (filter: Candidates only)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-8852814442c426b91dac9fcbe89c8addb5c3fb7e4110793f368d874a77ae8d6e.png (empty result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-6ba7bed3388b95105d34cc1e6a592272956e24daa719031243d7221541908e29.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/2/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "The interaction states are complete and readable, with a useful named Navigate trigger and clear keyboard highlight. The fixed upper-left placement is visually more detached from the page focal area than the centered alternatives, which costs hierarchy points but is not a functional defect. Manager-role and assistive-technology behavior are not separately evidenced. The shared phone capture is only Paraform's desktop-only placeholder, so adaptive behavior is necessarily low.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-003"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 81.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 19,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-88f63c4834f74158ab1f461bdc1d4d31d291d8cd7532eb2dc20819f892dc253e.png",
+              "state": "light",
+              "observation": "A labeled Navigate trigger anchors a large upper-left dialog with a clear section heading."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-711bb090e580c86b45e8dff848765745454744399d6803df8bff0d3ad4a46489.png",
+              "state": "keyboard_focus",
+              "observation": "Dashboard receives a distinct selected surface and Enter label."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-def37e8362ee1cd96433bd88479df88d9eb37e775af51dfc4ae73f183efa007f.png",
+              "state": "filter",
+              "observation": "Filtering leaves one emphasized Candidates result."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-8852814442c426b91dac9fcbe89c8addb5c3fb7e4110793f368d874a77ae8d6e.png",
+              "state": "empty",
+              "observation": "The empty state is explicit but the wide, left-anchored panel occupies more chrome than necessary."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "No mobile command journey is offered; only the desktop-only placeholder appears."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed."
+            }
+          ],
+          "notes": "The desktop task is complete and keyboard focus is clear. The dialog is somewhat oversized and visually detached from the main work area, while mobile deliberately offers no adaptive interaction.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-003"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 81.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 18,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-0f91ef9890ae7a75a0c21e3f8752f852b9974fbb9dd70bc6eb2d3fe72f52c2f5.png",
+              "state": "light",
+              "finding": "Large left-anchored menu is legible and consistent with sidebar alignment."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-77ae323f76136d6cf92b1d774a5e4240077a5c51857ce38b19917b16e15097cb.png",
+              "state": "keyboard_focus",
+              "finding": "Dashboard receives a visible but low-emphasis gray highlight."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-55e044bc23497ca96990e57f236323d1fbc7c1c880076a7224c63655cdf67cca.png",
+              "state": "filter",
+              "finding": "Filtered Candidates is clear and includes a clear-input control."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-e67762a6d488d2b35bee269d3d6e32ae34fd48faa23766af7b7282988d0f3d1e.png",
+              "state": "empty",
+              "finding": "No-result state is explicit, though visually sparse."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Phone viewport is unavailable beyond the desktop-only placeholder."
+            }
+          ],
+          "notes": "The journey passes and all desktop state captures are usable. The low-contrast keyboard highlight and large left panel cost accessibility and hierarchy points but do not block access. There is no manager-role render. Responsive/adaptive behavior is substantially incomplete because the entire phone state is a desktop-only placeholder.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-017"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 85.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-0f91ef9890ae7a75a0c21e3f8752f852b9974fbb9dd70bc6eb2d3fe72f52c2f5.png (light: upper-left grouped menu)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-77ae323f76136d6cf92b1d774a5e4240077a5c51857ce38b19917b16e15097cb.png (keyboard_focus: Dashboard highlight)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-55e044bc23497ca96990e57f236323d1fbc7c1c880076a7224c63655cdf67cca.png (filter: Candidates result and clear control)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-e67762a6d488d2b35bee269d3d6e32ae34fd48faa23766af7b7282988d0f3d1e.png (empty state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-c1069f825a5d14a9e172661beb49e9511c3a5f776349a8488b54eb86ec412c98.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/16/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "All evidenced desktop states work and remain consistent with the neutral Paraform interface; grouping, row highlighting, clear-search control, and empty copy are easy to scan. The upper-left placement is slightly less connected to the content than centered versions, but it is visually sound. Recruiter-only screenshots and no AT transcript keep task/accessibility just below maximum. The mobile state is explicitly a desktop-only placeholder and earns only fallback-level adaptive credit.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-017"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 81.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 19,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-0f91ef9890ae7a75a0c21e3f8752f852b9974fbb9dd70bc6eb2d3fe72f52c2f5.png",
+              "state": "light",
+              "observation": "Upper-left dialog is roomy, clearly sectioned, and marks Para AI."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-77ae323f76136d6cf92b1d774a5e4240077a5c51857ce38b19917b16e15097cb.png",
+              "state": "keyboard_focus",
+              "observation": "Dashboard receives a distinct keyboard selection surface."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-55e044bc23497ca96990e57f236323d1fbc7c1c880076a7224c63655cdf67cca.png",
+              "state": "filter",
+              "observation": "Candidates filters correctly; the small blue x is the only discordant accent."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-e67762a6d488d2b35bee269d3d6e32ae34fd48faa23766af7b7282988d0f3d1e.png",
+              "state": "empty",
+              "observation": "No destinations found is clear within stable panel geometry."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "The phone layout is the intentional desktop-only placeholder."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed."
+            }
+          ],
+          "notes": "Strong keyboard and filtering evidence with good product fit. The upper-left panel consumes more space than the centered variants, and the mobile product boundary removes adaptive functionality entirely.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-017"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-da49996b7509c527b6ff978eeaaa826ea8d55d69cb42738caaf49cf39b883263.png",
+              "state": "light",
+              "finding": "Centered compact dialog uses a high-contrast active row and clear Escape hint."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-76d79721b7598b5ea2786bf3d9e06dc8fe096f8116f34fc194f6df8cc1b6895c.png",
+              "state": "keyboard_focus",
+              "finding": "Dashboard moves to the high-contrast selection with an Enter hint."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-8be4e16905898be24fd7e64b3a22e8db4cb3e32b34a9e66fc0d037907c3218b8.png",
+              "state": "filter",
+              "finding": "Candidates remains as a prominent actionable result."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1800a180de0ee65652545aa54bcb9eaa98e6c40d3650a79cb2ef2499deb2c21a.png",
+              "state": "empty",
+              "finding": "Centered no-result treatment is explicit and balanced."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "No application UI is available at the phone viewport."
+            }
+          ],
+          "notes": "This is a polished desktop treatment with strong keyboard-state contrast and complete filter/empty/reduced-motion evidence; replay passed. The evidence does not render the manager workspace. Responsive behavior receives little credit because Paraform intentionally replaces the entire phone experience with its desktop-only placeholder.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-012"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 86.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 15,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-da49996b7509c527b6ff978eeaaa826ea8d55d69cb42738caaf49cf39b883263.png (light: centered dialog with strong active row)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-76d79721b7598b5ea2786bf3d9e06dc8fe096f8116f34fc194f6df8cc1b6895c.png (keyboard_focus: Dashboard active row)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-8be4e16905898be24fd7e64b3a22e8db4cb3e32b34a9e66fc0d037907c3218b8.png (filter: Candidates-only high-contrast result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1800a180de0ee65652545aa54bcb9eaa98e6c40d3650a79cb2ef2499deb2c21a.png (empty state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-580111eb65dda3c6d57beaffac8582769d576345d6f85ad36a168a8ae85c58bd.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/11/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "The compact centered composition has the clearest hierarchy in the Paraform set, and the active row, filter, empty, and reduced-motion states remain legible while replay passes. The heavy black selection is effective but slightly stronger than the surrounding neutral system. Correctness/accessibility are one point below maximum because only recruiter visual evidence is present and no direct assistive-technology transcript is supplied. The explicit desktop-only phone placeholder prevents a high adaptive score.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-012"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-da49996b7509c527b6ff978eeaaa826ea8d55d69cb42738caaf49cf39b883263.png",
+              "state": "light",
+              "observation": "Centered dialog uses the product's black selection treatment and balanced spacing."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-76d79721b7598b5ea2786bf3d9e06dc8fe096f8116f34fc194f6df8cc1b6895c.png",
+              "state": "keyboard_focus",
+              "observation": "Dashboard becomes the single high-contrast keyboard selection with Enter text."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-8be4e16905898be24fd7e64b3a22e8db4cb3e32b34a9e66fc0d037907c3218b8.png",
+              "state": "filter",
+              "observation": "Candidates remains as a clearly selectable high-contrast result."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-1800a180de0ee65652545aa54bcb9eaa98e6c40d3650a79cb2ef2499deb2c21a.png",
+              "state": "empty",
+              "observation": "Empty state has clear centered copy and stable dialog geometry."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "Phone mode is the product desktop-only placeholder."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed."
+            }
+          ],
+          "notes": "Strong desktop hierarchy, clear keyboard targeting, and polished state continuity. The sole major limitation is that the product declines to adapt the workflow on phone-sized screens.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-012"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r5:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 79.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 17,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 13,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7cee3d3896da505f044789379a105758f3b6ceece158a5f4b3dbda22dace21e0.png",
+              "state": "light",
+              "finding": "Top-left dialog is legible and a Navigate trigger is visible in the top chrome."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7fb7f597b85ebdd4455deb6256401ac1c96bf5a8a2663967b3e4b312c906da53.png",
+              "state": "keyboard_focus",
+              "finding": "Keyboard-focus capture has no visible destination highlight, reducing focus-state clarity."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-d65235654e2c55a5091d47faf89e36ffb38dfaed4a19599e307d30e3b09990d0.png",
+              "state": "filter",
+              "finding": "Candidates filters correctly and a clear-input control is visible."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-075aaefa70c75f54879ed0f3bb5c0cfcc76997bb23b6ae908562eac20ccf1620.png",
+              "state": "empty",
+              "finding": "No-result message is clear but small within a large panel."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Phone is the desktop-only placeholder."
+            }
+          ],
+          "notes": "The registered journey passes, so the missing visible highlight in the keyboard-focus screenshot is treated as a focus-indication weakness rather than blocked keyboard access. Filter, empty, and reduced-motion states are otherwise coherent. There is no rendered manager journey. Responsive/adaptive scoring is sharply reduced by the product's desktop-only phone state.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-013"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 13,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7cee3d3896da505f044789379a105758f3b6ceece158a5f4b3dbda22dace21e0.png (light: upper-left menu and top-right Navigate trigger)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7fb7f597b85ebdd4455deb6256401ac1c96bf5a8a2663967b3e4b312c906da53.png (keyboard_focus state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-d65235654e2c55a5091d47faf89e36ffb38dfaed4a19599e307d30e3b09990d0.png (filter: Candidates result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-075aaefa70c75f54879ed0f3bb5c0cfcc76997bb23b6ae908562eac20ccf1620.png (empty result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3bf597e6e57e9a0fea621ba4d58ebdd5543df6d218961bb02c170b3d37e80626.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/12/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "The top-right Navigate trigger is discoverable and all registered desktop states function, including filtering, keyboard movement, empty copy, reduced motion, and replay. The menu's fixed far-left placement separates it from both its trigger and the central content, reducing visual hierarchy versus centered layouts. Manager-role and assistive-technology details are not separately captured. The mobile artifact is only the product desktop placeholder, not an adaptive menu.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-013"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 76.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 18,
+            "visual-hierarchy": 10,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7cee3d3896da505f044789379a105758f3b6ceece158a5f4b3dbda22dace21e0.png",
+              "state": "light",
+              "observation": "The Navigate trigger is top-right while the dialog opens upper-left, weakening spatial continuity."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7fb7f597b85ebdd4455deb6256401ac1c96bf5a8a2663967b3e4b312c906da53.png",
+              "state": "keyboard_focus",
+              "observation": "The keyboard-focus capture is visually unchanged from the initial list and does not expose a distinct moved-row cue."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-d65235654e2c55a5091d47faf89e36ffb38dfaed4a19599e307d30e3b09990d0.png",
+              "state": "filter",
+              "observation": "Candidates filters correctly, though the blue x departs from the otherwise neutral palette."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-075aaefa70c75f54879ed0f3bb5c0cfcc76997bb23b6ae908562eac20ccf1620.png",
+              "state": "empty",
+              "observation": "The no-results message is present but small and left-heavy."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "The product displays a desktop-only placeholder."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed despite the weaker visual focus evidence."
+            }
+          ],
+          "notes": "Functional replay prevents treating the journey as blocked, but the screenshots provide weaker keyboard-focus signaling and a disconnected trigger-to-dialog relationship. There is no phone adaptation beyond the deliberate placeholder.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-013"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:baseline",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 81.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 18,
+            "visual-hierarchy": 12,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7f8150d84c0a091b3909569ec2024c8aa258fe8689854a3c3e176db2d11e37f3.png",
+              "state": "light",
+              "finding": "Visible Jump to trigger, current marker, and left-aligned menu fit the sidebar system."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-032ecbd0082b3cd1843190afbb73eca076a32077b58ee6f1dd893d8deb37849d.png",
+              "state": "keyboard_focus",
+              "finding": "Focus capture continues to emphasize the current Para AI row rather than showing a moved destination selection."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-94506b9ade44171b60cb172294fefb72a991adce8a498f208cfedf62693c64ca.png",
+              "state": "filter",
+              "finding": "Filtering to Candidates works and remains legible."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-274e56a921a9e04b9d3ea52b6d5b056497ab71d08ba3cea1f55f988dc5fa0f55.png",
+              "state": "empty",
+              "finding": "No-result state is clear with balanced padding."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Phone shows only the desktop-only product placeholder."
+            }
+          ],
+          "notes": "The registered keyboard journey passes, so the focus-state ambiguity is scored as a visible affordance weakness rather than blocked access. Filter, empty, and reduced-motion captures are coherent, but no manager-role render is supplied. The desktop-only phone placeholder materially limits responsive/adaptive behavior.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-022"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 85.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7f8150d84c0a091b3909569ec2024c8aa258fe8689854a3c3e176db2d11e37f3.png (light: upper-left menu and named Jump to trigger)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-032ecbd0082b3cd1843190afbb73eca076a32077b58ee6f1dd893d8deb37849d.png (keyboard_focus state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-94506b9ade44171b60cb172294fefb72a991adce8a498f208cfedf62693c64ca.png (filter: Candidates result)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-274e56a921a9e04b9d3ea52b6d5b056497ab71d08ba3cea1f55f988dc5fa0f55.png (empty state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-25e8c1b71770207de94eec47520930b5d62da5f4c8804e3ef465e028804e66cb.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/21/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "The Jump to trigger is explicit, and the current, filter, keyboard, empty, reduced-motion, and replay states are complete and visually aligned with Paraform's neutral chrome. The upper-left fixed placement is slightly less focal than centered treatments, but the hierarchy remains good. Recruiter-only screenshots and no direct AT output keep correctness/accessibility just below maximum. The mobile capture is the desktop-only product placeholder and therefore does not demonstrate adaptive menu behavior.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-022"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 76.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 18,
+            "visual-hierarchy": 10,
+            "design-system-consistency": 12,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-7f8150d84c0a091b3909569ec2024c8aa258fe8689854a3c3e176db2d11e37f3.png",
+              "state": "light",
+              "observation": "A Jump to trigger appears in the sidebar, while the large menu is upper-left and marks the current destination."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-032ecbd0082b3cd1843190afbb73eca076a32077b58ee6f1dd893d8deb37849d.png",
+              "state": "keyboard_focus",
+              "observation": "The keyboard-focus capture is visually unchanged from the initial current-row state."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-94506b9ade44171b60cb172294fefb72a991adce8a498f208cfedf62693c64ca.png",
+              "state": "filter",
+              "observation": "Candidates filters correctly but has no distinct active surface or Enter cue."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-274e56a921a9e04b9d3ea52b6d5b056497ab71d08ba3cea1f55f988dc5fa0f55.png",
+              "state": "empty",
+              "observation": "No-results copy is readable but the dialog remains oversized for one line."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "Only the intentional desktop-only message is available on phone."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed."
+            }
+          ],
+          "notes": "The journey functions and filters, but the captures provide weaker visible keyboard-state feedback and a less compact layout. Mobile is intentionally unavailable, which directly limits adaptive scoring without constituting a critical defect.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-022"
+        }
+      ]
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:memi",
+      "ratings": [
+        {
+          "graderId": "grader-a",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 4,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3cfbdbe8139ffad3e69d564a5aeafd334919ebcb37a0392892ef785d53f002e3.png",
+              "state": "light",
+              "finding": "Centered dialog has a clear section label, strong selected row, Escape hint, and visible Command menu trigger."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-b9e6c80747ef93b88d75bb2f2e03cf7ddbbf23b08447758215a9b26de18b5059.png",
+              "state": "keyboard_focus",
+              "finding": "Dashboard receives an unambiguous high-contrast keyboard selection."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-86b064ebbae3ea24f9889a8a8794c049b798c0b4baf90360d39053d80e80531f.png",
+              "state": "filter",
+              "finding": "Filtered Candidates row remains clearly actionable."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-033b25b1e1c7eb4a79a8f14f55647a2787d9a5462efd7da6059de0224fa03a81.png",
+              "state": "empty",
+              "finding": "No-result state preserves section context and spacing."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "finding": "Only the desktop-only placeholder is rendered on phone."
+            }
+          ],
+          "notes": "Strong desktop hierarchy and keyboard affordance, with passing replay and coherent filter, empty, and reduced-motion states. Manager role is not separately rendered. The phone placeholder is a major adaptive limitation and is scored as such, but it does not invalidate the desktop journey.",
+          "receiptRef": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2#anon-v15-016"
+        },
+        {
+          "graderId": "grader-b",
+          "blinded": true,
+          "score": 87.0,
+          "dimensions": {
+            "task-interaction-correctness": 24,
+            "accessibility": 19,
+            "visual-hierarchy": 15,
+            "design-system-consistency": 15,
+            "responsive-adaptive-behavior": 5,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3cfbdbe8139ffad3e69d564a5aeafd334919ebcb37a0392892ef785d53f002e3.png (light: centered menu, labeled trigger, strong selected state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-b9e6c80747ef93b88d75bb2f2e03cf7ddbbf23b08447758215a9b26de18b5059.png (keyboard_focus: Dashboard selected)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-86b064ebbae3ea24f9889a8a8794c049b798c0b4baf90360d39053d80e80531f.png (filter: Candidates selected)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-033b25b1e1c7eb4a79a8f14f55647a2787d9a5462efd7da6059de0224fa03a81.png (empty state)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-bc0633755c797776233b59cc1dce46b29057c3c25da54b8a3adbf2622078ce3c.png (reduced_motion)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png (mobile desktop-only placeholder)",
+            "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json#/entries/15/evidence/7 (replay-verification passed)"
+          ],
+          "notes": "This is the strongest Paraform visual treatment: the named sidebar trigger, centered overlay, NAVIGATE PARAFORM grouping, high-contrast keyboard selection, empty state, and reduced-motion capture all fit the existing chrome and replay successfully. Correctness/accessibility stop one point short because only recruiter-role and visual keyboard evidence are bundled, not manager-role or direct AT output. The responsive dimension remains low because every submission receives the same desktop-only phone placeholder rather than an adapted command menu.",
+          "receiptRef": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0#anon-v15-016"
+        },
+        {
+          "graderId": "grader-c",
+          "blinded": true,
+          "score": 84.0,
+          "dimensions": {
+            "task-interaction-correctness": 25,
+            "accessibility": 19,
+            "visual-hierarchy": 14,
+            "design-system-consistency": 14,
+            "responsive-adaptive-behavior": 3,
+            "implementation-quality": 9
+          },
+          "criticalDefects": [],
+          "evidence": [
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-3cfbdbe8139ffad3e69d564a5aeafd334919ebcb37a0392892ef785d53f002e3.png",
+              "state": "light",
+              "observation": "Centered menu has a descriptive section label and high-contrast active row."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-b9e6c80747ef93b88d75bb2f2e03cf7ddbbf23b08447758215a9b26de18b5059.png",
+              "state": "keyboard_focus",
+              "observation": "Dashboard becomes the sole black keyboard selection."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-86b064ebbae3ea24f9889a8a8794c049b798c0b4baf90360d39053d80e80531f.png",
+              "state": "filter",
+              "observation": "Candidates is retained as a clearly actionable result."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-033b25b1e1c7eb4a79a8f14f55647a2787d9a5462efd7da6059de0224fa03a81.png",
+              "state": "empty",
+              "observation": "No-results copy is clear and geometry remains stable."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/paraform/objects/sha256-9b6f7d03ab2208bb81be08d90bb3a1a0402f037b60b2df7c8273feedbec78636.png",
+              "state": "mobile",
+              "observation": "The phone viewport intentionally offers only the desktop availability message."
+            },
+            {
+              "path": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-bundle/manifest.json",
+              "state": "replay",
+              "observation": "Replay verification passed."
+            }
+          ],
+          "notes": "Polished and consistent desktop states with excellent focus contrast and clear grouping. Responsive/adaptive scoring is necessarily low because the product does not expose the menu or workspace at phone width.",
+          "receiptRef": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3#anon-v15-016"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+task_id,repeat,baseline_trial_id,memi_trial_id,baseline_score,memi_score,delta_memi_minus_baseline
+buzzr-tab-unread-badge,1,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:baseline,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:memi,88.0,89.0,1.0
+buzzr-tab-unread-badge,2,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:baseline,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:memi,89.0,91.0,2.0
+buzzr-tab-unread-badge,3,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:baseline,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:memi,89.0,90.0,1.0
+buzzr-tab-unread-badge,4,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:baseline,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:memi,88.0,92.0,4.0
+buzzr-tab-unread-badge,5,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:baseline,memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:memi,89.0,88.0,-1.0
+paraform-command-menu,1,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:baseline,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:memi,83.0,80.0,-3.0
+paraform-command-menu,2,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:baseline,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:memi,83.0,76.0,-7.0
+paraform-command-menu,3,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:baseline,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:memi,80.0,82.0,2.0
+paraform-command-menu,4,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:baseline,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:memi,81.0,84.0,3.0
+paraform-command-menu,6,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:baseline,memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:memi,81.0,84.0,3.0

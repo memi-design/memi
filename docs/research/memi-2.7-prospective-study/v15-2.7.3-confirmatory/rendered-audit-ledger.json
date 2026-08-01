@@ -1,0 +1,274 @@
+{
+  "captureLimitations": [
+    "Buzzr visual evidence is a testing-library renderer tree, not Expo Simulator or native pixel proof.",
+    "Paraform's registered mobile breakpoint blocks the desktop workspace, so phone captures show the desktop-only placeholder rather than the command-menu workspace."
+  ],
+  "claimBoundary": {
+    "dollarSavingsClaimAuthorized": false,
+    "qualityLabel": "model-graded; not independent human practitioner evidence",
+    "superiorityClaimAuthorized": false
+  },
+  "grading": {
+    "graderCount": 3,
+    "graderReceipts": [
+      {
+        "blinded": true,
+        "entries": 22,
+        "graderId": "grader-a",
+        "model": "codex-blinded-model-grader",
+        "responseSha256": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2"
+      },
+      {
+        "blinded": true,
+        "entries": 22,
+        "graderId": "grader-b",
+        "model": "codex-blinded-model-grader",
+        "responseSha256": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0"
+      },
+      {
+        "blinded": true,
+        "entries": 22,
+        "graderId": "grader-c",
+        "model": "codex-blinded-model-grader",
+        "responseSha256": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3"
+      }
+    ],
+    "independentHumanPractitionerEvidence": false,
+    "mappingSha256": "sha256:31763e7e3bdd1c1b7435e4eec4273b9eb37d0a3481085f05f09ba1f93332ed1d",
+    "modelGraded": true
+  },
+  "receiptAudit": {
+    "evidenceRootDigest": "sha256:939c1fe4ef04234c8a4a896378bf1d15a35dc5e03f44d27d11e5b638ae00b98b",
+    "expectedCells": 36,
+    "verifiedCells": 36
+  },
+  "renderedAudit": {
+    "completeGradedPairs": 10,
+    "excludedTrials": 14,
+    "exclusions": [
+      {
+        "evidenceManifestSha256": "sha256:a13e0c62b98446e371dd41ee0635744c8fdfc60f06c972cfff9ee02a05e426c3",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-001",
+        "imputed": false,
+        "reasonCodes": [
+          "budget-max-input-tokens-exceeded",
+          "input-token-ceiling-exceeded"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r6:memi"
+      },
+      {
+        "evidenceManifestSha256": "sha256:090770f6a6b2aae78886b470e8c32078a1d54dcfb733a6bdb483404d213d6030",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-002",
+        "imputed": false,
+        "reasonCodes": [
+          "budget-max-input-tokens-exceeded",
+          "build-or-compile-failed",
+          "compile-failed-private-symbol-access",
+          "input-token-ceiling-exceeded",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:baseline"
+      },
+      {
+        "evidenceManifestSha256": "sha256:dfa6bb9c99cd48f447bf63518a7d4e75635f981cb22c5b81a1abdd90c7a37fcb",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-003",
+        "imputed": false,
+        "reasonCodes": [
+          "build-or-compile-failed",
+          "compile-failed-private-symbol-access",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:memi"
+      },
+      {
+        "evidenceManifestSha256": "sha256:55d456403faecf4c35df9e494f17a43ad3b900b75c92f12ec9393bd4b98e3069",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-004",
+        "imputed": false,
+        "reasonCodes": [
+          "budget-max-tool-output-bytes-exceeded",
+          "no-renderable-patch",
+          "provider-execution-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r2:baseline"
+      },
+      {
+        "evidenceManifestSha256": "sha256:602a2945e54cf7d21a7643b475ee74ea370647371062b5557c0f95d2599db19b",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-005",
+        "imputed": false,
+        "reasonCodes": [
+          "build-or-compile-failed",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r2:memi"
+      },
+      {
+        "evidenceManifestSha256": "sha256:2440c3908a0b2cc1e89fb219e07fcfb7d1645aa51b2f92474cee3a99a0c60e98",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-006",
+        "imputed": false,
+        "reasonCodes": [
+          "budget-max-input-tokens-exceeded",
+          "build-or-compile-failed",
+          "input-token-ceiling-exceeded",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r3:baseline"
+      },
+      {
+        "evidenceManifestSha256": "sha256:9591f3b66fb1a2e4593991876a5c675b06b34d48c352ba1b54546f9b946a7e80",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-007",
+        "imputed": false,
+        "reasonCodes": [
+          "build-or-compile-failed",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r3:memi"
+      },
+      {
+        "evidenceManifestSha256": "sha256:f754b48d19689b8a6fd6633020bcbbf7883e0b36814c5edcb4a17d2f29b2d63b",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-008",
+        "imputed": false,
+        "reasonCodes": [
+          "budget-max-tool-output-bytes-exceeded",
+          "no-renderable-patch",
+          "provider-execution-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r4:baseline"
+      },
+      {
+        "evidenceManifestSha256": "sha256:284347307de2f15b6c00723adfb0dfd95e2b3c4211cd7c776d964932936848b8",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-009",
+        "imputed": false,
+        "reasonCodes": [
+          "build-or-compile-failed",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r4:memi"
+      },
+      {
+        "evidenceManifestSha256": "sha256:ce43338f9941d4da3d6c0f7f118380cf1c2f76b5aa8bcc69e2ab8f2e306448f3",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-010",
+        "imputed": false,
+        "reasonCodes": [
+          "budget-max-tool-output-bytes-exceeded",
+          "no-renderable-patch",
+          "provider-execution-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r5:baseline"
+      },
+      {
+        "evidenceManifestSha256": "sha256:0b6686ec6803c1977ab1a4e2dd738f42305a3c7d7a70cd9c90b1c81c956a5f3a",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-011",
+        "imputed": false,
+        "reasonCodes": [
+          "budget-max-input-tokens-exceeded",
+          "build-or-compile-failed",
+          "input-token-ceiling-exceeded",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r5:memi"
+      },
+      {
+        "evidenceManifestSha256": "sha256:c8a85fb840162414db4ded3ac1e4416cedd245d64f625afd8d540c3cc6d4ce53",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-012",
+        "imputed": false,
+        "reasonCodes": [
+          "budget-max-input-tokens-exceeded",
+          "build-or-compile-failed",
+          "input-token-ceiling-exceeded",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r6:baseline"
+      },
+      {
+        "evidenceManifestSha256": "sha256:4a07591673af43e24043a29d6a91fcc1914e2404c2744df9c5351b0171530835",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-013",
+        "imputed": false,
+        "reasonCodes": [
+          "build-or-compile-failed",
+          "ios-simulator-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r6:memi"
+      },
+      {
+        "evidenceManifestSha256": "sha256:0fa067580e3bbdc5e00b0b922cfbb19bb48314582c3b12511028d73647feefb0",
+        "functionalOutcomeRetained": true,
+        "id": "V15-EXC-014",
+        "imputed": false,
+        "reasonCodes": [
+          "rendered-flow-verification-failed"
+        ],
+        "resourceOutcomeRetained": true,
+        "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r5:baseline"
+      }
+    ],
+    "functionalAndResourceOutcomesRetained": true,
+    "gradedTrials": 22,
+    "imputationUsed": false,
+    "pairRepeatsByTask": {
+      "buzzr-tab-unread-badge": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "paraform-command-menu": [
+        1,
+        2,
+        3,
+        4,
+        6
+      ]
+    }
+  },
+  "schemaVersion": "memoire.v15.rendered-audit-ledger.v1",
+  "sourceArtifacts": {
+    "analysis/blinded_grading.json": {
+      "bytes": 161518,
+      "sha256": "sha256:088cdd43604cd331e1ac61395abdce4417bd9c64260d8e72c1d9418c6aca42f8"
+    },
+    "evidence-receipts.json": {
+      "bytes": 45025,
+      "sha256": "sha256:2c4031cc517e1595b3c0988453742a9f2a2cca2a0314acf787c221296967fa2f"
+    },
+    "exclusions.json": {
+      "bytes": 10771,
+      "sha256": "sha256:c713f0b8fd1b006e28ce6b5e9ac58dd68b7dca567d593c04d38fafc3c0961ac5"
+    },
+    "generated/tables/analysis_summary.json": {
+      "bytes": 39362,
+      "sha256": "sha256:5da8c7095fe118a20f97ebc4b72f7a97c2711fedf1f2b11b034aa311962d1f78"
+    },
+    "grading-receipts.json": {
+      "bytes": 1471,
+      "sha256": "sha256:c9276b115f3fdaf3d166aaec45a447435b3ea4e39e0783cf40ec7715e5fe0204"
+    }
+  },
+  "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol"
+}

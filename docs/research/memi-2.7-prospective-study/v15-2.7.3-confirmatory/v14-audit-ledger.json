@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "study": "memi-2.7-v14-calibrated-web",
+  "candidateVersion": "2.7.2",
+  "freezeHash": "sha256:48cb8db737bbecbaea534ffab10ec87d82815f11b310db7b8e8c6db741237759",
+  "planHash": "sha256:6bb2d2b6f298b68c9464dfd773d7b9b4df85dd9822c035f4fe42d91af1708fb6",
+  "verifiedCells": 12,
+  "verifiedPairs": 6,
+  "fixtures": ["buzzr-tab-unread-badge", "paraform-command-menu"],
+  "evaluationBatches": [
+    { "file": "evaluation-batch-1.json", "sha256": "df8bcc8735c7bfc1a79ae346e85fc22eda133008841e84dc0160cc70afd3d082" },
+    { "file": "evaluation-batch-2.json", "sha256": "31428bb81b786c6af68cb69dd2f0b0f5459a819808dab3a2b416f599db6e778d" },
+    { "file": "evaluation-batch-3.json", "sha256": "369afeabe918b85cae3c0895a03121dbb4ecf50ee480890bf2fc5ebc879de7b6" }
+  ],
+  "auditConclusion": "V14 is retained as valid 2.7.2 feasibility evidence and is not relabeled as 2.7.3. It contains no Nate/SwiftUI cells and no rendered blinded quality panel."
+}

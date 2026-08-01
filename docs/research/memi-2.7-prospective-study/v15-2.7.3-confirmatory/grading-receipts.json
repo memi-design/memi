@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol",
+  "mappingPath": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/sealed-blinding-map.json",
+  "mappingSha256": "sha256:31763e7e3bdd1c1b7435e4eec4273b9eb37d0a3481085f05f09ba1f93332ed1d",
+  "graderReceipts": [
+    {
+      "graderId": "grader-a",
+      "model": "codex-blinded-model-grader",
+      "responsePath": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-responses/grader-a.json",
+      "responseSha256": "sha256:2dd7d615f031170dfc935117259a499bce221983abd4b4e100a637f63f5808c2",
+      "blinded": true,
+      "entries": 22
+    },
+    {
+      "graderId": "grader-b",
+      "model": "codex-blinded-model-grader",
+      "responsePath": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-responses/grader-b.json",
+      "responseSha256": "sha256:370d0afcbb5a862310632f8c86ebc10dd7bfe4d0f6fd689479d5e66e11fc9fc0",
+      "blinded": true,
+      "entries": 22
+    },
+    {
+      "graderId": "grader-c",
+      "model": "codex-blinded-model-grader",
+      "responsePath": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/rendered/grader-responses/grader-c.json",
+      "responseSha256": "sha256:721fab08e91ce63ac011c621fd3e9c2a7587c4580fea0ceeebfda84aeea78fa3",
+      "blinded": true,
+      "entries": 22
+    }
+  ],
+  "gradedTrials": 22,
+  "excludedTrials": 14
+}

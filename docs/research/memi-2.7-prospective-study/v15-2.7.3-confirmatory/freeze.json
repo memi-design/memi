@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-2.7-prospective-v15-273-confirmatory",
+  "planId": "memi-2.7-v15-2.7.3-confirmatory",
+  "planHash": "sha256:2e4a79e831343b4a7b5204b74ea1ff81d38b7ff24b7d9b9bd55c21d1b4c4ed4e",
+  "frozenAt": "2026-08-01T06:47:03.000Z",
+  "candidate": {
+    "version": "2.7.3",
+    "revision": "2e29c5c656ac34242369eac9840838619ad113e1",
+    "sourceState": "clean",
+    "dirtyFileCount": 0,
+    "sourceTreeSha256": "sha256:da9179b4e753334a0cbb85abbe07e21279738ed634c7202dc3ae9bdf76ca8487",
+    "artifactSha256": "sha256:b2b56189f45b69a3cec41220ae3e9d50d6ecfb682aee5a64c1fe0ce0d0ec3e1e"
+  },
+  "harness": {
+    "provider": "codex",
+    "modelId": "gpt-5.6-luna",
+    "reasoningEffort": "low",
+    "harnessVersion": "codex-cli-0.145.0",
+    "permissionPolicy": "workspace-write",
+    "maximumSkills": 1,
+    "maximumContextBytes": 4096
+  },
+  "environment": {
+    "machine": "MacBook Pro Mac15,7; Apple M3 Pro; 12 CPU cores; 36 GB memory",
+    "os": "macOS 26.2 (25C56)",
+    "arch": "arm64",
+    "node": "v22.22.3",
+    "xcode": "26.6 (17F113)",
+    "simulator": "Memi V12 iPhone 17; iOS 26.5; FED7FB9E-13D5-4383-93EA-7FFE0111A496",
+    "workspaceVolume": "ExtremeSSD APFS",
+    "temporaryRoot": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/tmp"
+  },
+  "taskRevisions": {
+    "buzzr-tab-unread-badge": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+    "paraform-command-menu": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+    "nate-options-reduce-motion": "9cde918e309d74943457ad6def8a9c14db7ea01b"
+  },
+  "taskManifestHashes": {
+    "buzzr-tab-unread-badge": "sha256:2b1840512c07390d16944af67cf30809af621f0f72401f8f881b28baf8a39a22",
+    "paraform-command-menu": "sha256:1d60a06cad923613a844f38424ad34b3e88efe1b4d290f8f06f6a74e357b5f48",
+    "nate-options-reduce-motion": "sha256:1dd43195ee87e451838297f3299dc36b36d4346752b4397186f3fd67bbc29c0d"
+  },
+  "requiredArtifacts": [
+    "git.patch",
+    "preparation.json",
+    "events.jsonl",
+    "usage.json",
+    "route.json",
+    "tools.json",
+    "tool-profile.json",
+    "verification.json",
+    "environment.json",
+    "verification-isolation.json",
+    "evidence-manifest.json",
+    "run.json"
+  ],
+  "trials": [
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:baseline",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 1,
+      "condition": "baseline",
+      "sequence": 0
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:memi",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 1,
+      "condition": "memi",
+      "sequence": 1
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:memi",
+      "taskId": "paraform-command-menu",
+      "repeat": 1,
+      "condition": "memi",
+      "sequence": 2
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r1:baseline",
+      "taskId": "paraform-command-menu",
+      "repeat": 1,
+      "condition": "baseline",
+      "sequence": 3
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:baseline",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 1,
+      "condition": "baseline",
+      "sequence": 4
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r1:memi",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 1,
+      "condition": "memi",
+      "sequence": 5
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:memi",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 2,
+      "condition": "memi",
+      "sequence": 6
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r2:baseline",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 2,
+      "condition": "baseline",
+      "sequence": 7
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:baseline",
+      "taskId": "paraform-command-menu",
+      "repeat": 2,
+      "condition": "baseline",
+      "sequence": 8
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r2:memi",
+      "taskId": "paraform-command-menu",
+      "repeat": 2,
+      "condition": "memi",
+      "sequence": 9
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r2:memi",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 2,
+      "condition": "memi",
+      "sequence": 10
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r2:baseline",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 2,
+      "condition": "baseline",
+      "sequence": 11
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:baseline",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 3,
+      "condition": "baseline",
+      "sequence": 12
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:memi",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 3,
+      "condition": "memi",
+      "sequence": 13
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:memi",
+      "taskId": "paraform-command-menu",
+      "repeat": 3,
+      "condition": "memi",
+      "sequence": 14
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r3:baseline",
+      "taskId": "paraform-command-menu",
+      "repeat": 3,
+      "condition": "baseline",
+      "sequence": 15
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r3:baseline",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 3,
+      "condition": "baseline",
+      "sequence": 16
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r3:memi",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 3,
+      "condition": "memi",
+      "sequence": 17
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:memi",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 4,
+      "condition": "memi",
+      "sequence": 18
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r4:baseline",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 4,
+      "condition": "baseline",
+      "sequence": 19
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:baseline",
+      "taskId": "paraform-command-menu",
+      "repeat": 4,
+      "condition": "baseline",
+      "sequence": 20
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r4:memi",
+      "taskId": "paraform-command-menu",
+      "repeat": 4,
+      "condition": "memi",
+      "sequence": 21
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r4:memi",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 4,
+      "condition": "memi",
+      "sequence": 22
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r4:baseline",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 4,
+      "condition": "baseline",
+      "sequence": 23
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:baseline",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 5,
+      "condition": "baseline",
+      "sequence": 24
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r5:memi",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 5,
+      "condition": "memi",
+      "sequence": 25
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r5:memi",
+      "taskId": "paraform-command-menu",
+      "repeat": 5,
+      "condition": "memi",
+      "sequence": 26
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r5:baseline",
+      "taskId": "paraform-command-menu",
+      "repeat": 5,
+      "condition": "baseline",
+      "sequence": 27
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r5:baseline",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 5,
+      "condition": "baseline",
+      "sequence": 28
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r5:memi",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 5,
+      "condition": "memi",
+      "sequence": 29
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r6:memi",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 6,
+      "condition": "memi",
+      "sequence": 30
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r6:baseline",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 6,
+      "condition": "baseline",
+      "sequence": 31
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:baseline",
+      "taskId": "paraform-command-menu",
+      "repeat": 6,
+      "condition": "baseline",
+      "sequence": 32
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:paraform-command-menu:r6:memi",
+      "taskId": "paraform-command-menu",
+      "repeat": 6,
+      "condition": "memi",
+      "sequence": 33
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r6:memi",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 6,
+      "condition": "memi",
+      "sequence": 34
+    },
+    {
+      "trialId": "memi-2.7-v15-2.7.3-confirmatory:nate-options-reduce-motion:r6:baseline",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 6,
+      "condition": "baseline",
+      "sequence": 35
+    }
+  ],
+  "freezeHash": "sha256:e7e987f314c08c7b9ffcff032a8bea6fb0f0e128c2a5b6a2c6fe0bf8799afa4a"
+}

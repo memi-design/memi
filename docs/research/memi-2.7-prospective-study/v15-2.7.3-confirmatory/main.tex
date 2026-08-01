@@ -1,0 +1,443 @@
+% !TEX program = pdflatex
+\documentclass[9pt,twocolumn]{extarticle}
+
+\usepackage[letterpaper,top=0.62in,bottom=0.66in,left=0.62in,right=0.62in,columnsep=0.24in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{seqsplit}
+
+\definecolor{ink}{HTML}{18202A}
+\definecolor{muted}{HTML}{586473}
+\definecolor{ruleblue}{HTML}{254E70}
+\definecolor{warning}{HTML}{8A4B08}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=ruleblue,
+  urlcolor=ruleblue,
+  pdfborder={0 0 0},
+  pdftitle={Memi 2.7.3 Confirmatory Audit and 2.7.4 Fail-Closed Release Assessment},
+  pdfauthor={Memi V15 technical audit}
+}
+\urlstyle{same}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3.4pt plus 0.8pt minus 0.4pt}
+\setlist{nosep,leftmargin=*,topsep=2pt}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.12}
+\emergencystretch=2em
+\raggedbottom
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+
+\newcommand{\Memi}{Memi}
+\newcommand{\Candidate}{\texttt{@memi-design/cli@2.7.3}}
+\newcommand{\Release}{\texttt{2.7.4}}
+\newcommand{\sha}[1]{\texttt{\seqsplit{#1}}}
+\newcommand{\sectionrule}{\color{ruleblue}\rule{\linewidth}{0.45pt}\color{ink}}
+\newcommand{\artifact}[1]{\path{#1}}
+\newcommand{\Interpretation}{\par\smallskip\textbf{Interpretation.} }
+\newcommand{\Limitation}{\par\smallskip\textbf{Limitation.} }
+
+\input{report-hooks.tex}
+
+\title{\vspace{-1.5em}\textbf{Memi 2.7.3 Confirmatory Audit and\\2.7.4 Fail-Closed Release Assessment}}
+\author{Technical audit package \quad $\cdot$ \quad V15 frozen confirmatory protocol}
+\date{1 August 2026}
+
+\begin{document}
+\color{ink}
+\twocolumn[
+  \maketitle
+  \vspace{-1.3em}
+  \begin{center}
+    \fcolorbox{warning}{white}{\begin{minipage}{0.94\textwidth}
+      \centering\small\textbf{Artifact status: \AuditStatusLabel}\par
+      \ClaimDecision
+    \end{minipage}}
+  \end{center}
+  \vspace{0.35em}
+]
+
+\begin{abstract}
+This audit reconstructs the exact
+\Candidate{} release, preserves the earlier V14 evidence under its actual
+2.7.2 label, and evaluates the exact published 2.7.3 tarball under a frozen,
+three-platform, 18-pair protocol.  The primary estimand is the within-task
+paired difference in a blinded, model-graded design-quality score.  Functional
+acceptance and resource use are secondary outcomes.  The associated 2.7.4
+engineering change replaces permissive skill-fitness reuse with exact route
+identity, immutable quality evidence, chronological replay, immediate
+fail-closed suppression, and prospective recovery.  This document distinguishes
+receipt validity, functional acceptance, renderability, statistical evidence,
+and public-release verification; none is substituted for another.
+\end{abstract}
+
+\section{Technical summary and claim decision}
+\sectionrule
+
+\textbf{Study boundary.} V15 concerns one exact candidate, three frozen
+repositories, six counterbalanced matched pairs per repository, and one
+provider/model/effort configuration.  Cross-fixture pooling is descriptive
+because the tasks are heterogeneous.  Model-panel grades are not independent
+human-practitioner evidence.  Dollar cost is not estimated because billing data
+were not measured.
+
+\textbf{Current decision.} \ClaimDecision
+
+\textbf{Evidence completion.} \FreshCellStatus
+
+The receipt ledger validates 36 of 36 frozen cells with no admission failure.
+Fourteen cell-level exclusions apply only to rendered frontend grading; they
+retain functional and resource outcomes without imputation.  Of 22 cells with
+grades, 20 form 10 complete matched pairs: five Buzzr pairs and five Paraform
+pairs.  Buzzr repeat 6 baseline and Paraform repeat 5 Memi remain graded but
+unpaired after their siblings' exclusions.  Nate has no renderable graded pair.
+
+\textbf{Primary gate.} \PrimaryGateStatus
+
+\textbf{Release gate.} \ReleaseGateStatus
+
+\InputOrPending{generated/tex/technical-summary.tex}{The executed notebook must
+state the task-level decisions, exclusions, and exact scope of any claim.}
+
+An affirmative task-level quality statement is allowed only if the one-sided
+95\% paired-bootstrap lower bound for
+\begin{equation}
+  \Delta_q = q_{\mathrm{Memi}} - q_{\mathrm{baseline}}
+\end{equation}
+is strictly greater than the preregistered $-5$ point non-inferiority margin.
+Passing that gate establishes non-inferiority for the named task; it does not,
+by itself, establish superiority, lower cost, or generality.
+
+\section{Exact 2.7.3 release reconstruction}
+\sectionrule
+
+The candidate under test is the published npm tarball, not a mutable checkout.
+Its SHA-256 is
+\sha{b2b56189f45b69a3cec41220ae3e9d50d6ecfb682aee5a64c1fe0ce0d0ec3e1e};
+its npm SHA-1 is \sha{f00b05e06fae353322b119243f02a370423a7a88}.
+The canonical tag source is
+\sha{2e29c5c656ac34242369eac9840838619ad113e1}.  Candidate provenance also
+records npm integrity, registry attestation, publish workflow run
+\texttt{30684627316}, and publication time.
+
+\begin{table*}[t]
+\centering
+\caption{Reconstructed 2.7.3 provenance chain. Abbreviated hashes are display
+labels; full values remain in \texttt{release-provenance.json}.}
+\label{tab:release-chain}
+\small
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+Commit & Audited role \\
+\midrule
+\texttt{0a4228bd} & Sealed prospective workflow harness. \\
+\texttt{38b1da10} & Workflow-adapter test stabilization only. \\
+\texttt{b6beb464} & 2.7.3 candidate declaration. \\
+\texttt{a642d6c4} & Release-surface preparation. \\
+\texttt{2e29c5c} & Canonical 2.7.3 tag source. \\
+\texttt{9a47f390} & npm provenance record. \\
+\texttt{be69d041} & Published release truth and website artifact. \\
+\texttt{f9cb9987} & Main-branch provenance anchor. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+The release ledger supports a narrow conclusion: relative to the V14 source,
+2.7.3 changed release metadata, guidance, and adapter-test stabilization rather
+than the benchmarked runtime paths.  V15 nevertheless executes the exact 2.7.3
+artifact, so this reconstruction is not used as a proxy for execution.
+
+\section{V14 evidence audit}
+\sectionrule
+
+V14 remains feasibility evidence for 2.7.2.  Its freeze and plan hashes are,
+respectively,
+\sha{48cb8db737bbecbaea534ffab10ec87d82815f11b310db7b8e8c6db741237759}
+and
+\sha{6bb2d2b6f298b68c9464dfd773d7b9b4df85dd9822c035f4fe42d91af1708fb6}.
+The ledger verifies 12 cells and six pairs over Buzzr and Paraform, with three
+content-addressed evaluation batches.  V14 contains neither Nate/SwiftUI cells
+nor a rendered blinded-quality panel.  It is not relabeled, pooled into V15
+inference, or used to fill V15 missing values.
+
+This separation replaces the stale five-pair 2.7.0 analysis path with V15 as the
+only source for exact-2.7.3 confirmatory claims while retaining V14 for audit
+history.
+
+\section{V15 design and data-quality controls}
+\sectionrule
+
+The frozen design has 18 matched pairs and 36 serialized cells.  Every pair
+shares model \texttt{gpt-5.6-luna}, low reasoning, a 450,000-input-token
+ceiling, task contract, and verification rules.  Condition order is
+counterbalanced with seed 2715.  Each cell starts from a clean clone at a pinned
+revision, uses an immutable fixture, runs isolated post-patch verification, and
+writes content-addressed evidence.  Xcode and Simulator access is exclusive.
+
+\begin{table}[ht]
+\centering
+\caption{Frozen V15 task strata.}
+\label{tab:fixtures}
+\small
+\begin{tabularx}{\columnwidth}{@{}Xlr@{}}
+\toprule
+Task & Platform & Pairs \\
+\midrule
+Buzzr unread badge & Expo & 6 \\
+Paraform command menu & Web & 6 \\
+Nate reduced motion & SwiftUI & 6 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Receipt gate.} Admission requires a unique frozen trial identity and
+all registered artifacts, including patch, route, usage, tools, environment,
+isolated verification, evidence manifest, and run receipt.  Hash, fixture,
+condition, timestamp, candidate, and environment mismatches fail closed.
+Duplicate or corrupt receipts are errors, not replicates.
+
+\textbf{Missingness and exclusions.} No value is imputed.  Fourteen cells are
+excluded from rendered grading: all 12 Nate cells, Buzzr repeat 6 Memi, and
+Paraform repeat 5 baseline.  A cell may retain
+its functional and resource outcome while being excluded from rendered grading
+when the exclusion ledger records, for example, a build failure, absent
+renderable patch, or budget breach.  Provider failures and retries remain
+outcomes.  The first orchestration deviation separated the exact 2.7.3 runtime
+from the hash-pinned 2.7.4 admission harness without changing candidate output.
+The second retained a stalled partial attempt as a provider/harness retry and
+used only a later complete receipt for the trial outcome.
+
+\textbf{Blinding.} Three model graders independently score anonymized rendered
+evidence on task and interaction correctness (25), accessibility (20), visual
+hierarchy (15), design-system consistency (15), responsive/adaptive behavior
+(15), and implementation quality (10).  Panel medians, absolute disagreement,
+and ICC(2,1), where estimable, are reported.  The label remains
+\emph{model-graded}.
+
+\textbf{Rendered-capture boundary.} Buzzr evidence is a testing-library
+renderer tree, not Expo Simulator or native pixel proof.  Paraform has browser
+captures for the registered desktop states, but its mobile breakpoint blocks
+the desktop workspace; the phone capture therefore shows the desktop-only
+placeholder rather than the command-menu workspace.  These limitations cap
+what the panel can infer about native pixels and phone adaptation.
+
+\section{Functional and design-quality results}
+\sectionrule
+
+\InputOrPending{generated/tex/functional-quality-results.tex}{A validated
+three-grader panel and complete receipt ledger are required before this section
+may contain numerical results.}
+
+\InputOrPending{generated/tex/primary-task-summary.tex}{The TeX task summary
+must be generated from \artifact{generated/tables/primary_task_summary.csv}, not
+transcribed manually.}
+
+The analysis reports task-level paired means and medians, exact sign tests,
+10,000-sample paired-bootstrap intervals, and leave-one-pair-out sensitivity.
+An excluded rendered pair reduces the quality-analysis sample for that task but
+does not erase its prespecified functional or resource outcome.  All exclusions
+must appear in \artifact{exclusions.json} with no imputation.
+
+\begin{figure*}[t]
+\centering
+\QualityFigure
+\caption{Paired design-quality comparison by frozen task. Scores are blinded
+panel medians on the 100-point rubric; deltas are Memi minus baseline.}
+\label{fig:quality}
+\begin{minipage}{0.96\textwidth}\small
+\Interpretation
+\InputOrPending{generated/tex/quality-figure-interpretation.tex}{State which
+task-level non-inferiority gates passed and distinguish non-inferiority from
+superiority.}
+\Limitation
+Only renderable, ledger-admitted evidence enters blinded quality grading.
+Model graders are not independent practitioners, excluded pairs are not
+imputed, and cross-task aggregation is descriptive because task semantics and
+platforms differ.  The result supports only the preregistered task-level
+non-inferiority statement; it is not a superiority claim.
+\end{minipage}
+\end{figure*}
+
+\section{Resource-efficiency results}
+\sectionrule
+
+\InputOrPending{generated/tex/resource-efficiency-results.tex}{Generate paired
+input/output/reasoning-token, wall-time, tool-call, retry, and provider-failure
+summaries from immutable run receipts.}
+
+For each metric, the raw paired difference is Memi minus baseline.  Exact sign
+tests are oriented so that ``better'' means higher functional acceptance and
+lower defects, tokens, time, calls, retries, or provider failures.  Holm
+adjustment is applied across task-level secondary tests.  Pooled values are
+descriptive.  No token count is converted to US dollars.
+
+\begin{figure*}[t]
+\centering
+\ResourceFigure
+\caption{Task-faceted paired resource intervals for the prespecified secondary
+outcomes. Direction and units must be displayed on each facet.}
+\label{fig:resources}
+\begin{minipage}{0.96\textwidth}\small
+\Interpretation
+\InputOrPending{generated/tex/resource-figure-interpretation.tex}{Describe the
+task-specific direction, interval, and Holm-adjusted evidence without converting
+tokens to cost.}
+\Limitation
+Wall time includes provider and tool variability on one serialized workstation;
+token measures are provider-reported usage rather than billing records.  With
+six pairs per task, intervals are expected to be wide and secondary tests have
+limited power.
+\end{minipage}
+\end{figure*}
+
+\section{Time-forward skill-fitness backtest}
+\sectionrule
+
+The 2.7.4 router indexes evidence by the exact tuple
+\begin{multline}
+R=(\text{task class},\text{repository fingerprint},\text{provider},\\
+\text{model},\text{effort},\text{skill ID},\text{skill content hash}).
+\end{multline}
+Evidence from any other tuple is ineligible.  Fitness evidence v2 adds immutable
+blinded-quality evidence and its SHA-256 while preserving v1 loading.  A v1
+negative event may suppress a route, but automation-only v1 evidence may not
+promote or recover one.
+
+The chronological replay consumes events only when
+$t_{\mathrm{event}}\leq t_{\mathrm{as\mbox{-}of}}$.  It suppresses immediately
+after a quality regression or after a joint catastrophic regression of at least
+50\% more tokens and 25\% more latency.  Recovery requires three later healthy,
+prospective, exact-match pairs.  An unrecovered route remains disabled, with
+repository-only discovery.
+
+\InputOrPending{generated/tex/fitness-backtest-results.tex}{Insert the stable
+JSON replay result, route transitions, and final exact-route states.}
+
+\begin{figure*}[t]
+\centering
+\BacktestFigure
+\caption{Chronological, no-look-ahead replay of the exact-match routing policy.
+State changes are derived only from evidence available at each as-of time.}
+\label{fig:backtest}
+\begin{minipage}{0.96\textwidth}\small
+\Interpretation
+\InputOrPending{generated/tex/backtest-figure-interpretation.tex}{Name each
+suppression or recovery transition and identify the exact evidence event that
+caused it.}
+\Limitation
+A deterministic backtest validates policy mechanics and guards against
+look-ahead leakage; it does not establish that the historical event stream is
+representative of future repositories, providers, models, or skill revisions.
+\end{minipage}
+\end{figure*}
+
+\section{Website/frontend production audit}
+\sectionrule
+
+The website is audited from a clean checkout.  Product-source review excludes
+\artifact{.vercel}, build output, generated community examples, and other
+non-product sources from the design score.  The verification matrix includes
+unit tests, Astro production build, Chromium journeys, axe checks in light and
+dark modes, keyboard/focus behavior, reduced motion, responsive states, size
+budgets, Lighthouse, and production smoke tests.  Screenshot review covers
+empty/error states and available light/dark variants.
+
+Only observed defects are eligible for repair.  The controlled before condition
+reproduced one serious \texttt{label-content-name-mismatch} finding in every
+registered Lighthouse report.  The footer accessible-name correction removed
+that finding and the unchanged blocking gate then passed cleanly.
+Infrastructure that prevents a test from executing is reported separately from
+a product defect, and a green local test is not treated as deployment proof.
+
+\InputOrPending{generated/tex/website-audit-results.tex}{Insert source-scoped
+before/after scores, verified fixes, remaining findings, Lighthouse/axe output,
+and production smoke evidence.}
+
+\section{2.7.4 remediation and release gates}
+\sectionrule
+
+The product remediation is intentionally narrow: exact route isolation,
+content-hash isolation, v1-compatible v2 quality evidence, stable chronological
+JSON replay, immediate suppression, prospective recovery, corrupt/duplicate
+event rejection, and repository-only fallback.  Tests are required for each
+policy boundary before implementation.  No route is force-enabled to make a
+release result appear favorable.
+
+\InputOrPending{generated/tex/remediation-results.tex}{Insert reviewed 2.7.4
+commit identities, complete cross-platform test evidence, security review, and
+the final state of each measured route.}
+
+\InputOrPending{generated/tex/release-gates.tex}{Insert npm trusted-publisher
+OIDC, fresh install, GitHub tag/assets/checksums, Action v2, Homebrew, GHCR,
+MCP Registry, website PDF, and public gate evidence. The public gate must report
+\texttt{failures: []} and \texttt{parityEligible: true}.}
+
+Publication is established only after each channel resolves to 2.7.4 and the
+PDF checksum attached to the GitHub release matches this artifact.  A source
+commit, local package, or passing CI job is not a substitute for registry and
+production checks.
+
+\section{Limitations, falsification criteria, and next study}
+\sectionrule
+
+\textbf{Limitations.} The design uses three intentionally different fixtures,
+one provider/model/effort setting, six pairs per task, and one Apple-silicon
+workstation.  Model grading can be systematic yet share model-family biases.
+Provider failures, input ceilings, compile failures, and renderability exclusions
+reduce the evidence available for some outcomes.  Serial execution controls
+machine contention but does not estimate multi-user throughput.  The study
+does not measure billing cost, maintainability after long-term use, independent
+practitioner preference, or general performance on unregistered repositories.
+
+\textbf{Falsification criteria.} Any of the following invalidates an affected
+claim: candidate checksum mismatch; duplicate or non-frozen trial identity;
+fixture mutation; condition leakage to graders; unverifiable evidence hash;
+look-ahead in policy replay; unreported exclusion; manual headline number that
+differs from the executed notebook; a task-level non-inferiority lower bound at
+or below $-5$; a critical accessibility or security finding; a LaTeX build with
+undefined references or overfull boxes; or a release channel that does not
+resolve to the audited bytes.
+
+\textbf{Next study.} A stronger follow-up should preregister more repositories
+per platform, independent human practitioners, multiple provider/model/effort
+strata, measured billing records, repeated hardware environments, and a longer
+prospective recovery horizon.  New evidence must remain segregated by the exact
+route tuple and content hash.
+
+\section*{Reproducibility and artifact contract}
+
+The executed source of analysis is \artifact{analysis.ipynb}; all headline
+numbers must independently reproduce from immutable receipts.  Machine-readable
+outputs are expected at:
+\begin{itemize}
+  \item \artifact{generated/tables/primary_pair_level.csv},
+        \artifact{primary_task_summary.csv}, and
+        \artifact{leave_one_pair_out.csv};
+  \item \artifact{generated/tables/secondary_task_tests.csv},
+        \artifact{pooled_descriptive.csv}, and
+        \artifact{grader_reliability.csv};
+  \item \artifact{generated/tables/analysis_summary.json}; and
+  \item the TeX and figure hooks enumerated in \artifact{report-hooks.tex}.
+\end{itemize}
+The protocol, plan, environment, rubric, candidate/release provenance,
+exclusion/deviation ledgers, receipt ledger, grading records, tables, figures,
+notebook, TeX source, and final PDF require a checksum inventory before public
+release.  \artifact{generated/report-package-checksums.json} inventories the
+current source package deterministically while excluding PDFs and its own path
+to avoid cyclic self-hashing.  The final PDF must be compiled and hashed only
+after live release evidence is admitted; it is intentionally not rebuilt by
+the report-package command.
+
+\end{document}
