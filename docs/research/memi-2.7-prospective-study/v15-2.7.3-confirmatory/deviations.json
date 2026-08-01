@@ -24,6 +24,29 @@
       "frozenProtocolChanged": false,
       "outcomeDataChanged": false,
       "disposition": "Retain both cells and disclose this deviation in the report."
+    },
+    {
+      "id": "V15-DEV-002",
+      "occurredAt": "2026-08-01T08:09:05.483Z",
+      "recordedAt": "2026-08-01T08:10:22.000Z",
+      "classification": "provider-timeout-process-stall",
+      "stage": "cell-execution",
+      "affectedTrials": [
+        "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r3:memi"
+      ],
+      "observed": "The exact 2.7.3 workflow process reached the task's 720000 ms agent ceiling, wrote a partial git.patch, produced no run.json or evidence manifest, then remained idle with no child process until terminated with SIGTERM.",
+      "diagnostics": {
+        "processId": 65897,
+        "processElapsedAtTerminationSeconds": 1410,
+        "partialPatchSha256": "060f58b594e7b6d99837d40ae7faba9af14e1f2c388e5aec4c0cf5f67f7c1677",
+        "immutableRunRecordCreated": false,
+        "orchestrationFailureRecorded": true
+      },
+      "resolution": "Preserve the partial attempt and orchestration-failure row, then rerun the same frozen trial from a new clean clone because no admissible trial receipt exists.",
+      "candidateRuntimeChanged": false,
+      "frozenProtocolChanged": false,
+      "outcomeDataChanged": false,
+      "disposition": "Count the stalled attempt as a provider/harness retry and use only a subsequently complete content-addressed receipt as the trial outcome."
     }
   ]
 }
