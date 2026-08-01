@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EventEmitter } from "events";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -10,6 +10,7 @@ import {
   isAllowedPreviewOrigin,
   isAuthorizedPreviewMutation,
   resolvePreviewStaticPath,
+  resolvePreviewStaticReadPath,
 } from "../api-server.js";
 
 describe("PreviewApiServer", () => {
@@ -276,6 +277,21 @@ describe("PreviewApiServer", () => {
     expect(resolvePreviewStaticPath(root, "/index.html")).toBe(`${root}\\index.html`);
     expect(resolvePreviewStaticPath(root, "/../secret.txt")).toBeNull();
     expect(resolvePreviewStaticPath(root, "D:\\secret.txt")).toBeNull();
+  });
+
+  it.skipIf(process.platform === "win32")("refuses to serve a static symlink outside the preview root", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memi-preview-static-root-"));
+    const outside = await mkdtemp(join(tmpdir(), "memi-preview-static-outside-"));
+    try {
+      const secret = join(outside, "secret.txt");
+      await writeFile(secret, "not preview content");
+      await symlink(secret, join(root, "linked.txt"));
+
+      await expect(resolvePreviewStaticReadPath(root, "/linked.txt")).resolves.toBeNull();
+    } finally {
+      await rm(root, { recursive: true, force: true });
+      await rm(outside, { recursive: true, force: true });
+    }
   });
 
   it("rejects DNS-rebinding hosts and cross-origin mutation requests", () => {
