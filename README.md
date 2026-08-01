@@ -27,7 +27,7 @@ Memi reads the product you already have, identifies accessibility, hierarchy, st
 Run one audit in any frontend repository:
 
 ```bash
-npx -y @memi-design/cli@2.7.3 diagnose . --json --no-write --fail-on none
+npx -y @memi-design/cli@latest diagnose . --json --no-write --fail-on none
 ```
 
 You get a score, normalized finding IDs, confidence, provenance, and `file:line` evidence. No account, API key, Figma file, global install, or daemon is required.
