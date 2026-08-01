@@ -17,6 +17,7 @@ import numpy as np
 
 try:
     from analysis.paper_figures import (
+        render_claim_decision,
         render_policy_state_machine,
         render_quality_results,
         render_resource_results,
@@ -24,6 +25,7 @@ try:
     )
 except ModuleNotFoundError:  # Direct execution via analysis/run_analysis.py.
     from paper_figures import (
+        render_claim_decision,
         render_policy_state_machine,
         render_quality_results,
         render_resource_results,
@@ -692,6 +694,11 @@ def _write_outputs(
             summary["primarySummary"],
         )
     if summary["primaryPairRows"]:
+        render_claim_decision(
+            paths.figures_root / "claim-decision.png",
+            summary["primarySummary"],
+            secondary_test_count=len(summary["secondaryTests"]),
+        )
         render_quality_results(
             paths.figures_root / "paired_quality_comparisons.png",
             summary["primarySummary"],

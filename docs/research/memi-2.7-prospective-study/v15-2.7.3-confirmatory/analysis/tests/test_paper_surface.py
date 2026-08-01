@@ -24,8 +24,19 @@ class PaperSurfaceTests(unittest.TestCase):
         self.assertIn(r"\RQ{2}", paper)
         self.assertIn(r"\RQ{3}", paper)
         self.assertIn("model-graded", paper)
+        self.assertIn("does not establish that Memi is better", paper)
+        self.assertIn(r"\ClaimDecisionFigure", paper)
         self.assertNotIn("Artifact status:", paper)
         self.assertNotIn(r"\section{2.7.4 remediation and release gates}", paper)
+
+    def test_next_release_plan_targets_measurable_quality_and_efficiency_evidence(self) -> None:
+        plan = (Path(__file__).resolve().parents[2] / "next-release-plan.md").read_text(encoding="utf-8")
+
+        self.assertIn("2.7.5", plan)
+        self.assertIn("independent human", plan)
+        self.assertIn("billing", plan)
+        self.assertIn("native", plan)
+        self.assertIn("no-look-ahead", plan)
 
 
 if __name__ == "__main__":

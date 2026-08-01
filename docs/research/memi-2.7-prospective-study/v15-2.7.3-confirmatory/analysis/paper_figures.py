@@ -45,6 +45,62 @@ TASK_COLORS = {
 PUBLICATION_METADATA = {"Software": "Memi V15 reproducible publication figures"}
 
 
+def render_claim_decision(
+    path: Path,
+    primary_rows: list[dict[str, Any]],
+    *,
+    secondary_test_count: int,
+) -> None:
+    """Render the claims the study can and cannot support in plain language."""
+    task_lines = []
+    for row in primary_rows:
+        task_lines.append(
+            f"{_task_label(str(row['task_id']))}: mean {float(row['mean_delta']):+.1f}; "
+            f"decision bound {float(row['noninferiority_lower_95_one_sided']):+.1f}"
+        )
+    rows = (
+        (
+            "What was supported",
+            "No large design-quality decline on two gradable tasks",
+            "\n".join(task_lines) + "\nBoth decision bounds cleared the pre-registered -5-point margin.",
+            BLUE_LIGHT,
+            BLUE,
+        ),
+        (
+            "What was not supported",
+            "Memi is better overall",
+            "Only 10 complete quality pairs were available, superiority was not established, and Nate had no admissible visual grade.",
+            ORANGE_LIGHT,
+            ORANGE,
+        ),
+        (
+            "What was not supported",
+            "Memi is faster or cheaper",
+            f"No result survived correction across {secondary_test_count} secondary tests, and no billing observations were collected.",
+            "#F2F4F6",
+            MUTED,
+        ),
+    )
+
+    with _paper_style():
+        fig, axis = plt.subplots(figsize=(11.4, 4.35))
+        axis.set_xlim(0, 1)
+        axis.set_ylim(0, 1)
+        axis.axis("off")
+        axis.text(0.02, 0.96, "What the V15 study actually establishes", fontsize=16,
+                  fontweight="bold", color=INK, va="top")
+        axis.text(0.02, 0.90,
+                  "The result is a bounded safety finding, not a general claim that Memi produces better designs.",
+                  fontsize=9.5, color=MUTED, va="top")
+        for index, (category, headline, detail, fill, edge) in enumerate(rows):
+            y = 0.62 - index * 0.25
+            _box(axis, 0.02, y, 0.18, 0.17, category, "", fill, edge)
+            axis.plot([0.20, 0.20], [y + 0.02, y + 0.15], color=edge, linewidth=2.2)
+            axis.text(0.23, y + 0.125, headline, fontsize=11, fontweight="bold", color=INK, va="center")
+            axis.text(0.23, y + 0.055, detail, fontsize=8.6, color=MUTED, va="center", linespacing=1.3)
+        _save(fig, path)
+
+
 def render_study_design(
     path: Path,
     protocol: dict[str, Any],
@@ -123,7 +179,7 @@ def render_quality_results(
     primary_rows: list[dict[str, Any]],
     pair_rows: list[dict[str, Any]],
 ) -> None:
-    """Render pair-level deltas and task-level non-inferiority evidence."""
+    """Render a reader-first view of the task-level quality claim boundary."""
     tasks = [str(row["task_id"]) for row in primary_rows]
     all_deltas = [_pair_delta(row) for row in pair_rows]
     lower = min([-5.0, *all_deltas, *(float(row["bootstrap_ci_lower_2p5"]) for row in primary_rows)])
@@ -132,91 +188,73 @@ def render_quality_results(
     x_limits = (lower - padding, upper + padding)
 
     with _paper_style():
-        fig, axes = plt.subplots(1, 2, figsize=(11.4, 4.6), gridspec_kw={"wspace": 0.32})
-        pair_axis, summary_axis = axes
-
-        for position, task in enumerate(tasks):
-            rows = sorted(
-                (row for row in pair_rows if str(row["task_id"]) == task),
-                key=lambda row: int(row["repeat"]),
-            )
-            deltas = [_pair_delta(row) for row in rows]
-            jitter = np.linspace(-0.11, 0.11, max(1, len(rows)))
-            pair_axis.scatter(
-                deltas,
-                position + jitter,
-                s=48,
-                color=TASK_COLORS.get(task, BLUE),
-                edgecolor=PAPER,
-                linewidth=0.7,
-                zorder=3,
-            )
-            pair_axis.text(
-                x_limits[1],
-                position,
-                f"n={len(rows)} pairs",
-                ha="right",
-                va="center",
-                fontsize=8,
-                color=MUTED,
-            )
-
-        _reference_lines(pair_axis, margin=True)
-        pair_axis.set_xlim(*x_limits)
-        pair_axis.set_yticks(range(len(tasks)), [_task_label(task) for task in tasks])
-        pair_axis.set_xlabel("Paired score difference (Memi - baseline)")
-        pair_axis.set_title("A. Observed pair-level differences", loc="left", fontweight="bold")
-        pair_axis.grid(axis="x", color=GRID, linewidth=0.7)
+        fig, axis = plt.subplots(figsize=(11.4, 4.7))
 
         for position, row in enumerate(primary_rows):
             task = str(row["task_id"])
+            rows = sorted(
+                (pair for pair in pair_rows if str(pair["task_id"]) == task),
+                key=lambda pair: int(pair["repeat"]),
+            )
+            deltas = [_pair_delta(pair) for pair in rows]
             mean = float(row["mean_delta"])
             ci_low = float(row["bootstrap_ci_lower_2p5"])
             ci_high = float(row["bootstrap_ci_upper_97p5"])
             one_sided = float(row["noninferiority_lower_95_one_sided"])
             color = TASK_COLORS.get(task, BLUE)
-            summary_axis.hlines(position, ci_low, ci_high, color=NEUTRAL, linewidth=4, zorder=1)
-            summary_axis.hlines(position, one_sided, mean, color=color, linewidth=4, zorder=2)
-            summary_axis.scatter(mean, position, s=62, color=color, edgecolor=PAPER, linewidth=0.8, zorder=3)
-            summary_axis.scatter(one_sided, position, s=52, marker="<", color=INK, zorder=4)
-            summary_axis.text(
+            jitter = np.linspace(-0.12, 0.12, max(1, len(deltas)))
+            axis.scatter(deltas, position + jitter, s=48, color=color, edgecolor=PAPER,
+                         linewidth=0.7, zorder=3)
+            axis.hlines(position, ci_low, ci_high, color=NEUTRAL, linewidth=5, zorder=1)
+            axis.hlines(position, one_sided, mean, color=color, linewidth=5, zorder=2)
+            axis.scatter(mean, position, s=86, color=color, edgecolor=PAPER, linewidth=1, zorder=4)
+            axis.scatter(one_sided, position, s=56, marker="|", color=INK, linewidth=2.2, zorder=5)
+            axis.text(
                 x_limits[1],
-                position,
-                f"mean {mean:+.1f}; lower {one_sided:+.1f}",
+                position + 0.23,
+                f"mean {mean:+.1f}; decision bound {one_sided:+.1f}; n={len(deltas)}",
                 ha="right",
-                va="center",
-                fontsize=8,
+                va="bottom",
+                fontsize=8.5,
                 color=INK,
             )
 
-        _reference_lines(summary_axis, margin=True)
-        summary_axis.set_xlim(*x_limits)
-        summary_axis.set_yticks(range(len(tasks)), [_task_label(task) for task in tasks])
-        summary_axis.set_xlabel("Score difference (points on 0-100 rubric)")
-        summary_axis.set_title("B. Task-level uncertainty and decision bound", loc="left", fontweight="bold")
-        summary_axis.grid(axis="x", color=GRID, linewidth=0.7)
+        _reference_lines(axis, margin=True)
+        axis.set_xlim(*x_limits)
+        axis.set_yticks(range(len(tasks)), [_task_label(task) for task in tasks])
+        axis.set_xlabel("Blinded score difference: Memi minus baseline (0--100 rubric points)")
+        axis.grid(axis="x", color=GRID, linewidth=0.7)
         fig.legend(
             handles=[
                 Line2D([0], [0], color=NEUTRAL, linewidth=4, label="two-sided 95% bootstrap interval"),
-                Line2D([0], [0], marker="<", color="none", markerfacecolor=INK,
-                       markeredgecolor=INK, label="one-sided 95% lower bound"),
+                Line2D([0], [0], marker="|", color=INK, markersize=11, linewidth=0,
+                       label="one-sided decision bound"),
+                Line2D([0], [0], marker="o", color="none", markerfacecolor=BLUE,
+                       markeredgecolor=PAPER, label="individual matched pair"),
             ],
             loc="lower center",
-            bbox_to_anchor=(0.70, 0.015),
+            bbox_to_anchor=(0.52, 0.01),
             frameon=False,
             fontsize=8,
-            ncol=2,
+            ncol=3,
         )
 
-        fig.suptitle("Blinded design-quality evidence by frozen task", x=0.06, ha="left", fontsize=14, fontweight="bold")
+        fig.suptitle(
+            "Quality result: no large decline observed",
+            x=0.06,
+            y=0.995,
+            ha="left",
+            fontsize=14,
+            fontweight="bold",
+        )
         fig.text(
             0.06,
             0.925,
-            "The preregistered non-inferiority decision requires the one-sided lower bound to remain right of the -5-point margin.",
+            "Better performance was not established: this is a narrow non-inferiority finding on two tasks, not a general design-quality win.",
             fontsize=9,
             color=MUTED,
         )
-        fig.subplots_adjust(top=0.82, bottom=0.22, left=0.14, right=0.98)
+        fig.subplots_adjust(top=0.80, bottom=0.23, left=0.16, right=0.98)
         _save(fig, path, tight=False)
 
 
@@ -265,45 +303,45 @@ def render_resource_results(path: Path, rows: list[dict[str, Any]]) -> None:
 
 
 def render_policy_state_machine(path: Path) -> None:
-    """Render the exact-route, fail-closed fitness policy."""
+    """Render the exact-route, fail-closed fitness policy in reader language."""
     with _paper_style():
         fig, axis = plt.subplots(figsize=(11.4, 4.1))
         axis.set_xlim(0, 1)
         axis.set_ylim(0, 1)
         axis.axis("off")
 
-        _box(axis, 0.02, 0.58, 0.18, 0.23, "Candidate route",
-             "task + repository + harness\n+ skill ID + content hash", BLUE_LIGHT, BLUE)
-        _box(axis, 0.27, 0.58, 0.18, 0.23, "Exact tuple match?",
-             "no evidence transfer\nacross route identities", "#F2F4F6", MUTED)
-        _box(axis, 0.53, 0.67, 0.18, 0.23, "Healthy",
-             "skill route eligible\nfor normal execution", BLUE_LIGHT, BLUE)
-        _box(axis, 0.79, 0.58, 0.19, 0.23, "Suppressed",
-             "repository-only discovery\nstarts immediately", ORANGE_LIGHT, ORANGE)
-        _box(axis, 0.27, 0.14, 0.18, 0.22, "Abstain",
-             "no exact evidence\nrepository discovery only", "#F2F4F6", MUTED)
-        _box(axis, 0.56, 0.13, 0.24, 0.23, "Prospective recovery",
-             "three later healthy v2 pairs\n1/3 -> 2/3 -> 3/3", OLIVE_LIGHT, OLIVE)
+        _box(axis, 0.02, 0.58, 0.20, 0.23, "Candidate skill",
+             "same task, repository, model,\nand skill-content version?", BLUE_LIGHT, BLUE)
+        _box(axis, 0.29, 0.58, 0.20, 0.23, "Exact evidence available?",
+             "never borrow a result\nfrom another route", "#F2F4F6", MUTED)
+        _box(axis, 0.56, 0.67, 0.18, 0.23, "Use the skill",
+             "only while its exact\nroute is healthy", BLUE_LIGHT, BLUE)
+        _box(axis, 0.79, 0.58, 0.19, 0.23, "Turn it off",
+             "a quality or severe efficiency\nregression stops routing", ORANGE_LIGHT, ORANGE)
+        _box(axis, 0.29, 0.14, 0.20, 0.22, "Do not inject it",
+             "use repository discovery\nwithout a history claim", "#F2F4F6", MUTED)
+        _box(axis, 0.56, 0.13, 0.24, 0.23, "Earn it back",
+             "three later healthy, exact-match\nprospective pairs", OLIVE_LIGHT, OLIVE)
 
-        _arrow(axis, (0.20, 0.695), (0.27, 0.695), BLUE)
-        _arrow(axis, (0.45, 0.73), (0.53, 0.78), BLUE)
+        _arrow(axis, (0.22, 0.695), (0.29, 0.695), BLUE)
+        _arrow(axis, (0.49, 0.73), (0.56, 0.78), BLUE)
         axis.text(0.485, 0.79, "yes", fontsize=8, color=BLUE, ha="center")
-        _arrow(axis, (0.36, 0.58), (0.36, 0.36), MUTED)
-        axis.text(0.375, 0.47, "no", fontsize=8, color=MUTED)
-        _arrow(axis, (0.71, 0.78), (0.79, 0.71), ORANGE)
-        axis.text(0.75, 0.82, "quality regression or\n+50% tokens and +25% latency", fontsize=7.5, color=ORANGE, ha="center")
+        _arrow(axis, (0.39, 0.58), (0.39, 0.36), MUTED)
+        axis.text(0.405, 0.47, "no", fontsize=8, color=MUTED)
+        _arrow(axis, (0.74, 0.78), (0.79, 0.71), ORANGE)
+        axis.text(0.77, 0.84, "harm observed", fontsize=8, color=ORANGE, ha="center")
         _arrow(axis, (0.88, 0.58), (0.78, 0.36), OLIVE)
-        axis.text(0.88, 0.43, "healthy prospective v2", fontsize=7.5, color=OLIVE, ha="center")
+        axis.text(0.88, 0.43, "new healthy evidence", fontsize=8, color=OLIVE, ha="center")
         _arrow(axis, (0.56, 0.25), (0.49, 0.58), OLIVE, connectionstyle="arc3,rad=-0.25")
-        axis.text(0.50, 0.37, "after 3/3", fontsize=7.5, color=OLIVE, ha="center")
+        axis.text(0.50, 0.37, "3 good pairs", fontsize=8, color=OLIVE, ha="center")
         _arrow(axis, (0.80, 0.20), (0.91, 0.58), ORANGE, connectionstyle="arc3,rad=0.20")
-        axis.text(0.91, 0.34, "harm resets recovery", fontsize=7.2, color=ORANGE, ha="center")
+        axis.text(0.91, 0.34, "new harm resets", fontsize=8, color=ORANGE, ha="center")
 
-        axis.text(0.02, 0.96, "Fail-closed history-aware routing policy", fontsize=14, fontweight="bold", color=INK, va="top")
+        axis.text(0.02, 0.96, "Fail-closed routing: unproven skills do not become defaults", fontsize=14, fontweight="bold", color=INK, va="top")
         axis.text(
             0.02,
             0.91,
-            "Legacy v1 negative evidence may suppress; automation-only v1 evidence can never promote or recover a route.",
+            "A route needs exact evidence to run. Harm turns it off immediately; only later exact-match evidence can turn it back on.",
             fontsize=9,
             color=MUTED,
             va="top",
@@ -509,6 +547,7 @@ def _parse_time(value: str) -> datetime:
 
 __all__ = [
     "render_backtest_timeline",
+    "render_claim_decision",
     "render_policy_state_machine",
     "render_quality_results",
     "render_resource_results",

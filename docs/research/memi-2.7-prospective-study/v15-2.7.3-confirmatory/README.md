@@ -29,6 +29,8 @@ an independently commissioned evaluation or a peer-reviewed acceptance.
 - `receipts/`, `evidence-receipts.json`, and `rendered-audit-ledger.json`: cell-level evidence
 - `exclusions.json` and `deviations.json`: complete exception ledgers
 - `figure-map.md`: analytical contract and limitations for every paper figure
+- `next-release-plan.md`: evidence-led 2.7.5 plan for native frontend quality,
+  measured billing, and fail-closed skill improvement
 
 ## Reproduce the analysis
 

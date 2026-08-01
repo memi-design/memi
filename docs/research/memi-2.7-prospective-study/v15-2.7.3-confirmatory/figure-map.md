@@ -4,7 +4,21 @@ These contracts make the paper's visual encodings reviewable independently of
 the prose. All charts use a colorblind-safe blue/orange/olive palette with
 shape, line style, position, or direct labels as redundant encodings.
 
-## Figure 1 — Study design and evidence boundary
+## Figure 1 — What V15 establishes and does not establish
+
+- **Question:** What can a public reader conclude from the study without
+  mistaking non-inferiority for a performance win?
+- **Takeaway:** Two task-specific quality bounds rule out the preregistered
+  five-point decline; they do not establish that Memi is better, faster, or
+  cheaper.
+- **Form:** Plain-language claim-boundary panel.
+- **Fields:** task-level means and one-sided decision bounds from
+  `generated/primary-analysis.json`, plus the secondary-test count.
+- **Limitation:** The panel summarizes the registered interpretation. It does
+  not replace the pair-level data, and the quality outcome is model-graded.
+- **Output:** `generated/figures/claim-decision.png`.
+
+## Figure 2 — Study design and evidence boundary
 
 - **Question:** How do the frozen candidate, fixtures, matched pairs, evidence
   checks, and admissible claims relate?
@@ -17,7 +31,7 @@ shape, line style, position, or direct labels as redundant encodings.
   effect size or uncertainty.
 - **Output:** `generated/figures/study_design.png`.
 
-## Figure 2 — Paired design-quality differences
+## Figure 3 — Paired design-quality differences
 
 - **Question:** Does the matched quality difference clear the preregistered
   non-inferiority margin within each gradable fixture?
@@ -31,7 +45,7 @@ shape, line style, position, or direct labels as redundant encodings.
   practitioners, and only 10 complete pairs are available.
 - **Output:** `generated/figures/paired_quality_comparisons.png`.
 
-## Figure 3 — Resource differences by fixture
+## Figure 4 — Resource differences by fixture
 
 - **Question:** How do candidate-minus-baseline resource outcomes vary by task?
 - **Takeaway:** Resource behavior is task-dependent; no single efficiency
@@ -43,7 +57,7 @@ shape, line style, position, or direct labels as redundant encodings.
   secondary tests yield no confirmatory rejection.
 - **Output:** `generated/figures/task_resource_intervals.png`.
 
-## Figure 4 — Fail-closed routing policy
+## Figure 5 — Fail-closed routing policy
 
 - **Question:** How does exact-match evidence change whether a skill route is
   admitted, suppressed, or re-enabled?
@@ -57,7 +71,7 @@ shape, line style, position, or direct labels as redundant encodings.
   future repository or model will benefit from it.
 - **Output:** `generated/figures/routing_policy_state_machine.png`.
 
-## Figure 5 — Chronological policy replay
+## Supporting artifact — Chronological policy replay
 
 - **Question:** Does time-forward replay reproduce each route's recorded state
   without using future evidence?
@@ -68,7 +82,10 @@ shape, line style, position, or direct labels as redundant encodings.
   `generated/fitness-policy/fitness-backtest-as-of.json`.
 - **Limitation:** Replay validates deterministic policy behavior on the sealed
   ledger; it is not a new prospective efficacy trial.
-- **Output:** `generated/figures/fitness_backtest.png`.
+- **Output:** `generated/figures/fitness_backtest.png`. This is kept in the
+  reproducibility package, rather than presented as a headline paper figure,
+  because it validates policy chronology rather than a reader-facing product
+  outcome.
 
 Separate website screenshots remain audit evidence rather than headline
 figures because they mix heterogeneous breakpoints and renderer capabilities;

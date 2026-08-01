@@ -7,6 +7,7 @@ from pathlib import Path
 
 from analysis.paper_figures import (
     render_backtest_timeline,
+    render_claim_decision,
     render_policy_state_machine,
     render_quality_results,
     render_resource_results,
@@ -18,6 +19,28 @@ PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
 class PaperFigureTests(unittest.TestCase):
+    def test_claim_decision_figure_makes_claim_boundaries_readable(self) -> None:
+        primary = [
+            {
+                "task_id": "buzzr-tab-unread-badge",
+                "graded_pairs": 5,
+                "mean_delta": 1.4,
+                "noninferiority_lower_95_one_sided": 0.2,
+                "noninferior": True,
+            },
+            {
+                "task_id": "paraform-command-menu",
+                "graded_pairs": 5,
+                "mean_delta": -0.4,
+                "noninferiority_lower_95_one_sided": -3.4,
+                "noninferior": True,
+            },
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "claim-decision.png"
+            render_claim_decision(path, primary, secondary_test_count=21)
+            self._assert_png(path)
+
     def test_study_design_and_policy_diagrams_render_without_mutating_inputs(self) -> None:
         protocol = {
             "design": {

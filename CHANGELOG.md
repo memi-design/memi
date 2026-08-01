@@ -18,6 +18,11 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   study admission, paired quality inference, task-level resources, fail-closed
   route transitions, and chronological no-look-ahead replay. Added executable
   figure contracts and regression tests for the public paper surface.
+- Put the claim boundary first in the V15 paper: the reported non-inferiority
+  result rules out only a large observed quality decline on two gradable tasks,
+  not a claim that Memi is better, faster, or cheaper. Added an evidence-led
+  2.7.5 plan for native frontend evaluation, independent human grading,
+  measured billing, and narrower exact-match skills.
 
 ## v2.7.4 — 2026-08-01
 

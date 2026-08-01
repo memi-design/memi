@@ -62,7 +62,7 @@
 \twocolumn[\maketitle\vspace{-1.5em}]
 
 \begin{abstract}
-Coding agents can receive repository-specific design skills, but successful
+This study does not establish that Memi is better. Coding agents can receive repository-specific design skills, but successful
 automation does not establish that the resulting interface is usable, that a
 skill transfers safely to a new repository, or that historical success should
 authorize future use. We evaluate the exact published Memi 2.7.3 artifact in a
@@ -272,7 +272,25 @@ the paper imports generated tables and figure assets from that pipeline.
 
 \section{Results}
 
-\subsection{All cells were admitted; rendered evidence was incomplete}
+\subsection{What V15 establishes---and what it does not}
+
+The short answer is deliberately narrow. V15 supports one bounded statement:
+on the two tasks with complete rendered evidence, the data rule out a design-
+quality loss of five or more rubric points under the preregistered model-panel
+procedure. It does not establish that Memi is better, generally faster, or
+cheaper. The third task has no admissible quality estimate, the quality panel
+contains only 10 complete pairs, none of the resource tests survived
+multiplicity correction, and billing observations were not collected.
+
+\begin{figure*}[t]
+\centering
+\ClaimDecisionFigure
+\caption{Plain-language claim boundary for V15. Clearing the orange $-5$ point
+margin means that a large decline was not observed on the two gradable tasks;
+it is not evidence that Memi outperforms the baseline.}\label{fig:claim-decision}
+\end{figure*}
+
+\subsection{All cells were admitted, but quality evidence covered only two tasks}
 
 All 36 frozen cells had unique, manifest-verified receipts. Fourteen exclusions
 applied only to rendered grading: all 12 Nate cells, Buzzr repeat 6 Memi, and
@@ -280,10 +298,13 @@ Paraform repeat 5 baseline. Twenty-two cells received grades. Twenty formed 10
 complete pairs--five Buzzr and five Paraform--while two graded cells remained
 unpaired after sibling exclusion. No value was imputed.
 
-\subsection{\RQ{1}: Quality was non-inferior on two renderable tasks}
+\subsection{\RQ{1}: The study rules out a large decline, not a performance win}
 
 Figure~\ref{fig:quality} separates observed pair differences from the
-task-level decision statistic. Buzzr's mean difference was $+1.4$ points
+task-level decision statistic. The orange $-5$ line is an acceptable-loss
+boundary, not a threshold for winning: a decision bound to its right passes
+non-inferiority, while a mean to the right of zero still does not prove better
+performance. Buzzr's mean difference was $+1.4$ points
 (median $+1$; two-sided 95\% bootstrap interval $0.0$ to $+2.8$); its one-sided
 lower bound was $+0.2$. Paraform's mean was $-0.4$ (median $+2$; interval
 $-4.2$ to $+2.8$); its one-sided lower bound was $-3.4$. Both lower bounds lie
@@ -293,10 +314,11 @@ respectively; these do not establish superiority.
 \begin{figure*}[t]
 \centering
 \QualityFigure
-\caption{Blinded design-quality evidence. Panel A shows every complete pair.
-Panel B shows task means, two-sided 95\% paired-bootstrap intervals, and the
-one-sided lower bounds used for the preregistered non-inferiority decision.
-The orange reference is the $-5$ point margin; the zero line denotes equality.}
+\caption{Blinded design-quality evidence. Dots are complete pairs, pale spans
+are two-sided 95\% paired-bootstrap intervals, solid dots are task means, and
+vertical ticks are the one-sided decision bounds. The orange reference is the
+$-5$ point acceptable-loss margin; the zero line denotes equality. Passing the
+orange line means ``no large decline observed,'' not ``Memi is better.''}
 \label{fig:quality}
 \end{figure*}
 
@@ -361,6 +383,10 @@ healthy, prospective, exact-match v2 pairs. New harmful evidence resets
 recovery progress. A route without exact evidence abstains rather than
 borrowing a favorable record.
 
+This policy is a safety mechanism, not evidence that a skill improves a future
+frontend. Its purpose is to prevent weak, stale, or mismatched evidence from
+turning a skill into a default route.
+
 \begin{figure*}[t]
 \centering
 \PolicyFigure
@@ -371,33 +397,24 @@ healthy prospective pairs on the same route.}
 \label{fig:policy}
 \end{figure*}
 
-\subsection{\RQ{3}: Replay suppressed both observed routes}
+\subsection{\RQ{3}: Replay confirmed policy mechanics, not product efficacy}
 
 The chronological backtest replayed 12 store-write-eligible events in
 pair-complete order: 10 blinded-quality v2 events and two automation-only
 negative v1 events. Seven additional rows were chronology-only. At each cutoff,
 the replay consumed only events with timestamps at or before that cutoff.
 
-Figure~\ref{fig:backtest} shows the resulting trajectories. Paraform/
-\texttt{design-extract} was suppressed by its first exact event. Buzzr/
+Paraform/\texttt{design-extract} was suppressed by its first exact event. Buzzr/
 \texttt{atomic-design} remained healthy through four events and was suppressed
 at 09:11 UTC after a quality regression. Neither route accumulated three
 eligible recovery pairs. Nate abstained in all six repeats; therefore no Nate
 route state or suppression claim exists.
 
-\begin{figure*}[t]
-\centering
-\BacktestFigure
-\caption{No-look-ahead replay of observed route evidence. Marker shape denotes
-evidence version or chronology-only abstention; line color denotes the state
-after each event. Both instantiated routes finish suppressed with repository-
-only discovery. Nate never instantiated an exact route.}
-\label{fig:backtest}
-\end{figure*}
-
 The replay validates deterministic policy mechanics and temporal isolation. It
 does not show that this event stream represents future repositories, models,
-providers, or skill revisions.
+providers, or skill revisions. The detailed chronological replay remains in
+the reproducibility package because it validates timing and isolation, rather
+than a user-facing quality or efficiency outcome.
 
 \section{Frontend and release validation}
 
@@ -537,13 +554,16 @@ claim that Memi is generally better; it is a reproducible method for separating
 what an agent executed, what reviewers could judge, what statistics support,
 and what a production router should be allowed to do.
 
-\section*{Next study}
+\section*{What must change before a better, faster, or cheaper claim}
 
-A stronger replication should preregister more repositories per platform,
-independent human practitioners, multiple provider/model/effort strata,
-measured billing records, repeated hardware environments, native rendered
-evidence for all tasks, and a longer prospective recovery horizon. New evidence
-must remain isolated by exact route identity and skill-content hash.
+The next study must use native rendered evidence on every platform, a
+preregistered independent human practitioner panel, measured billing records,
+and a larger confirmatory sample sized before execution. It must separately
+test quality superiority and efficiency, rather than treating a non-inferiority
+pass or provider token count as either result. The accompanying 2.7.5 plan
+specifies the harness, skill, router, and release gates required before those
+claims may be made; new evidence must remain isolated by exact route identity
+and skill-content hash.
 
 \begin{thebibliography}{9}
 \small
