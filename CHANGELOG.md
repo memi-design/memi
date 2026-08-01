@@ -85,6 +85,14 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `bf6ca42d` | docs: compact V15 report float layout |
 | `be8f1c74` | fix: harden V15 fitness evidence replay |
 | `260a662e` | merge: add V15 2.7.3 confirmatory audit |
+| `15cbbf8e` | docs: reconcile 2.7.4 audit provenance |
+| `c7aada97` | fix: make V15 notebook execution portable |
+| `3cd5cd18` | test: pin and bound V15 fitness execution |
+| `9788e457` | fix: pin and cap V15 fitness execution |
+| `6442263f` | merge: harden V15 replay trust boundary |
+| `39dabf1e` | test: close residual V15 execution bounds |
+| `52107c8b` | fix: bound V15 JSON and process cleanup |
+| `5dc13ebb` | merge: close V15 process and JSON bounds |
 
 ### Exact-match fail-closed route fitness
 

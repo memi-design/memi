@@ -37,9 +37,9 @@
       "sha256": "sha256:e5a03de011272996780860cf7465a597b34197a7f346fd07283e497511d0c0df"
     },
     {
-      "bytes": 45146,
+      "bytes": 50224,
       "path": "analysis/fitness_backtest.py",
-      "sha256": "sha256:34ab5148ddd603a6d49bed71cc2a669bdfb70288475a067243e0b443e1649759"
+      "sha256": "sha256:98cb9e6fc76acafc8fd342c0c8695c39f0e8f313fccf4f36a6dda570e38d7a3c"
     },
     {
       "bytes": 26914,
@@ -62,9 +62,9 @@
       "sha256": "sha256:9fa0959642d2a30525f016e0ea0ffcd317f95ff7b0271469cf6ff056b1e9bab5"
     },
     {
-      "bytes": 28146,
+      "bytes": 28357,
       "path": "analysis/report_package.py",
-      "sha256": "sha256:52c328af1ac81c7ef90e428e6306b75dfc1efea7a758f1fc70514357808c4767"
+      "sha256": "sha256:2c54041b9842ecac60db3fcbada362c92e8a8b35d55ae4b7a6fecd97952e064e"
     },
     {
       "bytes": 1324,
@@ -77,9 +77,9 @@
       "sha256": "sha256:50624e98e225aa80f3d5b7b999045fbf39be6ab9b1f3a8d821b34d642b994f41"
     },
     {
-      "bytes": 14636,
+      "bytes": 19127,
       "path": "analysis/tests/test_fitness_backtest.py",
-      "sha256": "sha256:5f815be9eed89d84758c772bc3a414dd2753c2542e2816a00175361210abec73"
+      "sha256": "sha256:5a3b4dd8895a2633d0442037ff059bc885ed520eb31371916ab1b2e97690d185"
     },
     {
       "bytes": 29108,
@@ -102,9 +102,9 @@
       "sha256": "sha256:ccec7fb11389fd267f88b8b9e84e8dc641be7ff681de36d22d7e1ff1a5860bac"
     },
     {
-      "bytes": 14924,
+      "bytes": 15111,
       "path": "analysis/tests/test_report_package.py",
-      "sha256": "sha256:ba50e7f50f8057cfebc715fe5bc63cded014bbac11bd4f34bea427d6a405a5a5"
+      "sha256": "sha256:259c87806193e741a05261626d467914337c70b93a058b49caec7ee10ac5e946"
     },
     {
       "bytes": 7071,
@@ -190,6 +190,11 @@
       "bytes": 29276,
       "path": "generated/fitness-policy/backtest-command-receipts.json",
       "sha256": "sha256:d0ff37cb2bbf21e777c12d0efd2eff51611f79337062fe8369240ccad03a5674"
+    },
+    {
+      "bytes": 328,
+      "path": "generated/fitness-policy/backtest-frozen-input.json",
+      "sha256": "sha256:ddc6e2f5d706b0c0fc4791726dd92634a5cb53aa609ee449b6e5ee54d0f6f156"
     },
     {
       "bytes": 30303,
@@ -337,9 +342,9 @@
       "sha256": "sha256:54ef49a48b6dfe35f09bc8e48e0330152b42400a9ee90d1d183ed57f1db491b3"
     },
     {
-      "bytes": 1509,
+      "bytes": 1687,
       "path": "generated/tex/remediation-results.tex",
-      "sha256": "sha256:9cace456e9f44c182ba773b158862f4b8bfdd4da6fb2697e892fde1783d78554"
+      "sha256": "sha256:af03d1548c2ce85dc198f212bd7defdabb98cc6ebe21f8b57b5154a71c1029a6"
     },
     {
       "bytes": 552,
@@ -457,7 +462,7 @@
       "sha256": "sha256:1ccf198f211e3be7c14d0a09f28fc9483e22cd2421a400c12722e46180e2ceda"
     }
   ],
-  "entryCount": 91,
+  "entryCount": 92,
   "excluded": [
     "**/*.pdf",
     "generated/report-package-checksums.json"
