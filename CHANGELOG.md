@@ -39,6 +39,9 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `54099ce1` | fix: timestamp complete fitness pairs |
 | `8fb5e4b6` | docs: record pair-complete fitness chronology |
 | `bad1ca69` | test: require 2.7.4 changelog commit provenance |
+| `83535004` | fix: preserve 2.7.4 changelog provenance |
+| `9f80b0cf` | test: define immutable package documentation boundary |
+| `c6e72b3c` | fix: keep candidate state out of npm docs |
 
 ### Exact-match fail-closed route fitness
 
@@ -49,6 +52,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   cutoff, duplicate protection, and no-look-ahead behavior.
 - Serialized fitness-store appends with bounded exclusive locking, dead-owner
   recovery, no-follow writes, and duplicate revalidation before append.
+- Kept candidate-state release documents out of the immutable npm payload and
+  made the packed README Quickstart use the evergreen `latest` channel.
 - Added the manifest-sealed V15 confirmatory report and deterministic analysis
   artifacts. The report retains its stated scope and limitations and does not
   establish broader product or harness comparisons.

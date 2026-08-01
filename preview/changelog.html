@@ -390,7 +390,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">267</span> commits</span>
+      <span><span class="n" id="stat-commits">270</span> commits</span>
       <span><span class="n" id="stat-versions">37</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-01</span> latest</span>
     </div>
@@ -408,7 +408,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v2.7.4</strong>
-            <div class="summary-caption">25 commits tracked in v2.7.4 from CHANGELOG.md.</div>
+            <div class="summary-caption">28 commits tracked in v2.7.4 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -543,6 +543,18 @@ const releases = [
       [
         "bad1ca69",
         "test: require 2.7.4 changelog commit provenance"
+      ],
+      [
+        "83535004",
+        "fix: preserve 2.7.4 changelog provenance"
+      ],
+      [
+        "9f80b0cf",
+        "test: define immutable package documentation boundary"
+      ],
+      [
+        "c6e72b3c",
+        "fix: keep candidate state out of npm docs"
       ]
     ],
     "decisions": [
@@ -559,6 +571,7 @@ const releases = [
       "Required new fitness evidence to use run-bound v2 receipts and the exact task,",
       "Added deterministic chronological fitness-backtest replay with an --as-of",
       "Serialized fitness-store appends with bounded exclusive locking, dead-owner",
+      "Kept candidate-state release documents out of the immutable npm payload and",
       "Added the manifest-sealed V15 confirmatory report and deterministic analysis"
     ]
   },
