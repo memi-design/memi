@@ -1,6 +1,8 @@
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
+import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerBenchmarkCommand } from "../benchmark.js";
@@ -19,6 +21,7 @@ import { createSkillFitnessQualityEvidence } from "../../notes/skill-fitness.js"
 import { captureLogs, lastLog } from "./test-helpers.js";
 
 let projectRoot: string;
+const execFileAsync = promisify(execFile);
 
 beforeEach(async () => {
   projectRoot = await mkdtemp(join(tmpdir(), "memi-benchmark-command-"));
@@ -62,6 +65,61 @@ describe("benchmark command", () => {
     expect(payload.status).toBe("planned");
     expect(payload.plan.trials).toHaveLength(12);
     await expect(readFile(outPath, "utf-8")).resolves.toContain("nate-efficiency-v1");
+  });
+
+  it("preflights clean, pinned V2 fixtures and their native capture contracts", async () => {
+    const repository = await fixtureRepository("v2-fixture");
+    const revision = (await execFileAsync("git", ["rev-parse", "HEAD"], {
+      cwd: repository,
+    })).stdout.trim();
+    const plan = {
+      ...prospectivePlanV2(),
+      tasks: [{
+        ...prospectivePlanV2().tasks[0],
+        revision,
+      }],
+    };
+    const planPath = join(projectRoot, "plan.json");
+    const taskRoot = join(projectRoot, "tasks");
+    const fixturesPath = join(projectRoot, "fixtures.json");
+    await mkdir(taskRoot, { recursive: true });
+    await writeFile(planPath, JSON.stringify(plan));
+    await writeFile(join(taskRoot, "web-task.json"), JSON.stringify({
+      ...workflowTask(),
+      id: "web-task",
+      nativeCaptures: [
+        captureContract("screenshot", "desktop.png"),
+        captureContract("interaction-trace", "flow.json"),
+        captureContract("accessibility-tree", "a11y.json"),
+      ],
+    }));
+    await writeFile(fixturesPath, JSON.stringify({
+      schemaVersion: 1,
+      fixtures: [{ taskId: "web-task", repository }],
+    }));
+    const logs = captureLogs();
+    const program = new Command();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await program.parseAsync([
+      "benchmark", "prospective-preflight", planPath,
+      "--fixtures", fixturesPath,
+      "--task-root", taskRoot,
+      "--json",
+    ], { from: "user" });
+
+    expect(JSON.parse(lastLog(logs))).toMatchObject({
+      status: "ready",
+      fixtures: [{
+        taskId: "web-task",
+        revision,
+        nativeCaptureKinds: [
+          "accessibility-tree",
+          "interaction-trace",
+          "screenshot",
+        ],
+      }],
+    });
   });
 
   it("records runs and reports an evidence-qualified result", async () => {
@@ -1220,6 +1278,32 @@ function evidenceDraft() {
     },
     execution: { retryReasons: [] },
   };
+}
+
+function captureContract(
+  kind: "screenshot" | "interaction-trace" | "accessibility-tree",
+  artifactName: string,
+) {
+  return {
+    kind,
+    command: process.execPath,
+    args: ["-e", `require('fs').writeFileSync(${JSON.stringify(artifactName)}, 'capture')`],
+    timeoutMs: 60_000,
+    sourcePath: artifactName,
+    artifactName,
+  };
+}
+
+async function fixtureRepository(name: string): Promise<string> {
+  const repository = join(projectRoot, name);
+  await mkdir(repository, { recursive: true });
+  await execFileAsync("git", ["init", "--quiet"], { cwd: repository });
+  await execFileAsync("git", ["config", "user.name", "Memi Test"], { cwd: repository });
+  await execFileAsync("git", ["config", "user.email", "test@memi.invalid"], { cwd: repository });
+  await writeFile(join(repository, "README.md"), "fixture\n");
+  await execFileAsync("git", ["add", "README.md"], { cwd: repository });
+  await execFileAsync("git", ["commit", "--quiet", "-m", "fixture"], { cwd: repository });
+  return repository;
 }
 
 async function sealProspectiveV2Run(input: {
