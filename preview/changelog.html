@@ -391,8 +391,8 @@ a:hover { text-decoration: underline; }
     </nav>
     <div class="hdr-stats">
       <span><span class="n" id="stat-commits">242</span> commits</span>
-      <span><span class="n" id="stat-versions">33</span> versions</span>
-      <span><span class="n" id="stat-latest">2026-07-29</span> latest</span>
+      <span><span class="n" id="stat-versions">34</span> versions</span>
+      <span><span class="n" id="stat-latest">2026-07-31</span> latest</span>
     </div>
   </header>
 
@@ -407,8 +407,8 @@ a:hover { text-decoration: underline; }
         <div class="hero-kpis">
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
-            <strong class="summary-value">v2.7.0</strong>
-            <div class="summary-caption">0 commits tracked in v2.7.0 from CHANGELOG.md.</div>
+            <strong class="summary-value">v2.7.1</strong>
+            <div class="summary-caption">0 commits tracked in v2.7.1 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -434,10 +434,60 @@ a:hover { text-decoration: underline; }
     <section class="release-list" id="release-list"></section>
   </main>
 
-  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v2.7.0</footer>
+  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v2.7.1</footer>
 
 <script>
 const releases = [
+  {
+    "version": "v2.7.1",
+    "date": "2026-07-31",
+    "tag": "fix",
+    "summary": "c16ed4ce fix: accept measured workflow tool output bytes; Preserve strict receipt validation while allowing adapters to record the; d4bc7cc5 feat: separate 2.7 evidence and release gates.",
+    "commits": [],
+    "decisions": [],
+    "changes": [
+      "c16ed4ce fix: accept measured workflow tool output bytes",
+      "Preserve strict receipt validation while allowing adapters to record the",
+      "d4bc7cc5 feat: separate 2.7 evidence and release gates",
+      "Keep package publication, paired efficiency claims, and blinded",
+      "Treat historical workflow qualityScore: 100 values as automated acceptance,",
+      "Preserve negative benchmark cases and unmeasured competitor performance in",
+      "6959b243 feat: report prepared fixture evidence",
+      "4f9a4f9a feat: require independent public fixture approval",
+      "e14fa674 test: require independent fixture approval workflow",
+      "6b4e2df9 feat: produce public fixture candidate evidence",
+      "eb955e58 test: require public fixture production workflow",
+      "fc60687f feat: validate public fixture candidate evidence",
+      "c3f1e1fe test: require validated public fixture candidates",
+      "61567ac6 feat: author public benchmark fixture candidates",
+      "91fa7066 test: define public fixture production contract",
+      "7e086e97 docs: publish benchmark calibration runbook",
+      "aab66e2d feat: activate three benchmark evidence runners",
+      "321cd65a feat: render and inspect motion runner evidence",
+      "685c61c1 test: require reproducible motion runner proof",
+      "1c99ec60 test: require executable benchmark evidence workflow",
+      "b6421a07 feat: capture traced browser runner evidence",
+      "c540c42d test: require traced browser runner proof",
+      "0db4e8a1 feat: produce representative artifact runner receipts",
+      "6c9448b5 test: require representative artifact runner proof",
+      "253dccd6 feat: derive readiness from verified evidence receipts",
+      "6371a3fa test: require receipt-derived benchmark readiness",
+      "156b07ac feat: verify immutable benchmark evidence receipts",
+      "f82bfdd0 test: define immutable benchmark evidence receipts",
+      "8f45e92c feat: enforce benchmark provenance and grader reliability",
+      "0782dca6 test: harden benchmark provenance and reliability",
+      "69545300 feat: gate designworkbench on practitioner proof",
+      "061932b0 test: require benchmark release wiring",
+      "63f456e3 test: define designworkbench readiness gate",
+      "5f824c73 feat: implement designworkbench v2 foundation",
+      "a4d7104b test: define designworkbench v2 contract",
+      "Derive benchmark readiness from immutable, candidate-bound receipts instead",
+      "Require every verified artifact to match its recorded hash and remain inside",
+      "Count a runner only when all evidence kinds in its contract exist and verify.",
+      "Keep calibration external and blinded. Synthetic practitioner identities or",
+      "Keep public candidate preparation separate from independent fixture"
+    ]
+  },
   {
     "version": "v2.7.0",
     "date": "2026-07-29",
