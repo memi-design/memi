@@ -62,9 +62,9 @@
       "sha256": "sha256:c25c74545f7b39b1398bc34a08bea2e36714c04690002015e87ff42d04ff0ca8"
     },
     {
-      "bytes": 40776,
+      "bytes": 47916,
       "path": "analysis/report_package.py",
-      "sha256": "sha256:91ce84092bb59f2335dadb0747f7d9a430501c902af9a4512ec71661cdb47e5d"
+      "sha256": "sha256:1455c244122b7a4bc59f22e8885498b4bac3270d12e4d976535e0a97f70fa26b"
     },
     {
       "bytes": 1324,
@@ -102,9 +102,9 @@
       "sha256": "sha256:6141aff13e0f6418d45e34b7ce7461449ff73a6ae570dace4e0ff4e6dd60b9d0"
     },
     {
-      "bytes": 26363,
+      "bytes": 33378,
       "path": "analysis/tests/test_report_package.py",
-      "sha256": "sha256:c23debffc872778dc2e448595ec95da2d653d6ac64a94ac9e4b0e3812ab617c9"
+      "sha256": "sha256:69a31f120bbcfc98fe52bdec3b8e974fdc7f5e4d0d644e912123497ac39d7090"
     },
     {
       "bytes": 7071,
@@ -412,14 +412,14 @@
       "sha256": "sha256:b20fde7420ef101fcce8e8031ade712096f9463bb9e44b20c94416ea8ea33a16"
     },
     {
-      "bytes": 6754,
+      "bytes": 7041,
       "path": "release-2.7.4-channel-evidence.json",
-      "sha256": "sha256:3cb55b8e5915e2aa2391e3989e5fe87749b9ad044904ab8e0b601ee842131df0"
+      "sha256": "sha256:95fc50b96fa264e15eb39fbcfa678c1b08c2272edcef39a1ec5b49c9d32e07d0"
     },
     {
       "bytes": 4415,
       "path": "release-2.7.4-live-verification.json",
-      "sha256": "sha256:69a25dd059c7e4ab3b541719862c8d2fff60549f3ecdd075fa744328ab518665"
+      "sha256": "sha256:6c27fb48e732edfb16fd8cff8e57f8bc67dc28f1d834172b44a82307b60c9670"
     },
     {
       "bytes": 1109,

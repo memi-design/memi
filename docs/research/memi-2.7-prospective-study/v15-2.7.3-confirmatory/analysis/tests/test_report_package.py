@@ -142,6 +142,83 @@ class ReportPackageTests(unittest.TestCase):
             with self.assertRaisesRegex(ReportPackageInputError, "public gate provenance"):
                 build_outputs(paths)
 
+    def test_build_outputs_rejects_channel_evidence_digest_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            payload = _live_release_fixture()
+            payload["channels"][0]["evidenceSha256"] = f"sha256:{'0' * 64}"
+            _write_json(paths.live_release_verification_path, payload)
+
+            with self.assertRaisesRegex(ReportPackageInputError, "channel evidence digest"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_missing_detached_pdf_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            channel_evidence = _release_channel_evidence_fixture()
+            website_record = next(
+                record for record in channel_evidence["records"] if record["id"] == "website-pdf"
+            )
+            del website_record["evidence"]["pdfSha256"]
+            _write_json(paths.release_channel_evidence_path, channel_evidence)
+            _write_json(
+                paths.live_release_verification_path,
+                _live_release_fixture(channel_evidence),
+            )
+
+            with self.assertRaisesRegex(ReportPackageInputError, "website PDF hash"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_github_website_pdf_hash_disagreement(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            channel_evidence = _release_channel_evidence_fixture()
+            github_record = next(
+                record
+                for record in channel_evidence["records"]
+                if record["id"] == "github-release"
+            )
+            github_record["evidence"]["reportAssetSha256"] = "0" * 64
+            _write_json(paths.release_channel_evidence_path, channel_evidence)
+            _write_json(
+                paths.live_release_verification_path,
+                _live_release_fixture(channel_evidence),
+            )
+
+            with self.assertRaisesRegex(ReportPackageInputError, "GitHub release PDF hash"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_duplicate_json_object_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            channel_evidence = _release_channel_evidence_fixture()
+            raw = json.dumps(channel_evidence, indent=2, sort_keys=True) + "\n"
+            expected_commit = "8aa4649f412bbcaaf2af4ee209bf79016566f035"
+            raw = raw.replace(
+                f'"sourceCommit": "{expected_commit}"',
+                f'"sourceCommit": "{"0" * 40}",\n  "sourceCommit": "{expected_commit}"',
+                1,
+            )
+            paths.release_channel_evidence_path.write_text(raw, encoding="utf-8")
+            _write_json(paths.live_release_verification_path, _live_release_fixture())
+
+            with self.assertRaisesRegex(ReportPackageInputError, "duplicate JSON object key"):
+                build_outputs(paths)
+
+    def test_build_outputs_rejects_non_finite_json_constants(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            paths = _write_fixture(Path(directory))
+            channel_evidence = _release_channel_evidence_fixture()
+            channel_evidence["records"][0]["evidence"]["invalid"] = float("nan")
+            _write_json(paths.release_channel_evidence_path, channel_evidence)
+            _write_json(
+                paths.live_release_verification_path,
+                _live_release_fixture(channel_evidence),
+            )
+
+            with self.assertRaisesRegex(ReportPackageInputError, "non-finite JSON constant"):
+                build_outputs(paths)
+
     def test_build_outputs_rejects_altered_release_provenance_commits(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             paths = _write_fixture(Path(directory))
@@ -505,6 +582,10 @@ def _write_fixture(root: Path) -> object:
     (root / "main.tex").write_text("report source\n", encoding="utf-8")
     (root / "report-hooks.tex").write_text("hooks\n", encoding="utf-8")
     (root / "README.md").write_text("fixture\n", encoding="utf-8")
+    _write_json(
+        root / "release-2.7.4-channel-evidence.json",
+        _release_channel_evidence_fixture(),
+    )
     return study_report_paths(root)
 
 
@@ -537,7 +618,9 @@ def _website_condition(name: str, *, gate_status: str, gate_code: int, finding: 
     }
 
 
-def _live_release_fixture() -> dict[str, object]:
+def _live_release_fixture(
+    channel_evidence: dict[str, object] | None = None,
+) -> dict[str, object]:
     channel_ids = [
         "npm",
         "node-installs",
@@ -549,18 +632,31 @@ def _live_release_fixture() -> dict[str, object]:
         "website-pdf",
         "public-gate",
     ]
+    channel_evidence = channel_evidence or _release_channel_evidence_fixture()
+    evidence_by_id = {
+        record["id"]: record["evidence"]
+        for record in channel_evidence["records"]
+    }
     channels = [
         {
             "id": channel_id,
             "status": "detached" if channel_id == "website-pdf" else "verified",
             "version": "2.7.4",
-            "evidenceSha256": f"sha256:{index:064x}",
+            "evidenceSha256": "sha256:"
+            + sha256(
+                json.dumps(
+                    evidence_by_id[channel_id],
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                    sort_keys=True,
+                ).encode("utf-8")
+            ).hexdigest(),
             "evidenceUrls": [f"https://example.invalid/evidence/{channel_id}"],
             "verificationMode": (
                 "detached-post-build" if channel_id == "website-pdf" else "direct"
             ),
         }
-        for index, channel_id in enumerate(channel_ids, start=1)
+        for channel_id in channel_ids
     ]
     return {
         "schemaVersion": "memoire.release-live-verification.v1",
@@ -589,6 +685,56 @@ def _live_release_fixture() -> dict[str, object]:
                 "websiteSourceCommit": "dac2dd9cb7f74dec977b4cb4280676b0c6d9d2c9",
             },
         },
+    }
+
+
+def _release_channel_evidence_fixture() -> dict[str, object]:
+    channel_ids = [
+        "npm",
+        "node-installs",
+        "github-release",
+        "github-action",
+        "homebrew",
+        "ghcr",
+        "mcp-registry",
+        "website-pdf",
+        "public-gate",
+    ]
+    records = []
+    for index, channel_id in enumerate(channel_ids, start=1):
+        evidence: dict[str, object] = {"sequence": index, "status": "verified"}
+        if channel_id == "github-release":
+            evidence = {
+                "status": "verified",
+                "url": "https://github.com/memi-design/memi/releases/tag/v2.7.4",
+                "tag": "v2.7.4",
+                "tagPeeledCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+                "reportAssetSha256": "5f178a3a0198c4f8a790d35dc1a2bf463c28e01cb1f495bf862b44c41ddbedb7",
+                "reportChecksumAssetSha256": "937d32cf500a4b5c58c67542bd68583570d5639ab1b052f27035f0aa472d8627",
+            }
+        elif channel_id == "website-pdf":
+            evidence = {
+                "status": "detached-post-build",
+                "artifactUrl": "https://www.memoire.cv/release/memi-release.json",
+                "pdfUrl": "https://www.memoire.cv/research/memi-2.7.3-confirmatory-audit.pdf",
+                "releaseUrl": "https://github.com/memi-design/memi/releases/tag/v2.7.4",
+                "releaseAssetUrl": "https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf",
+                "checksumAssetUrl": "https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf.sha256",
+                "websiteSourceCommit": "e2a7d1dfe7a5c9e9a50f2bf585ce97f119c5ff44",
+                "productionDeploymentId": "dpl_9K2P9sDq8Y7Es77qTd1WJxbzFF5M",
+                "productionDeploymentUrl": "https://memoire-4mpu85ofv-sarveshseas-projects.vercel.app",
+                "verifiedAt": "2026-08-01T17:14:05Z",
+                "pdfBytes": 560146,
+                "pdfSha256": "5f178a3a0198c4f8a790d35dc1a2bf463c28e01cb1f495bf862b44c41ddbedb7",
+                "checksumAssetSha256": "937d32cf500a4b5c58c67542bd68583570d5639ab1b052f27035f0aa472d8627",
+            }
+        records.append({"id": channel_id, "evidence": evidence})
+    return {
+        "schemaVersion": "memoire.release-channel-evidence.v1",
+        "releaseVersion": "2.7.4",
+        "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "canonicalization": "UTF-8 JSON with lexicographically sorted keys and compact separators",
+        "records": records,
     }
 
 

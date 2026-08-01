@@ -35,7 +35,7 @@
       "status": "verified",
       "version": "2.7.4",
       "verificationMode": "direct",
-      "evidenceSha256": "sha256:5197f5a8fed8607ff53395609753cb54e44101b6f72adc9109943f74b6b93dfa",
+      "evidenceSha256": "sha256:286154981e88f075c153089beb9f3eae4cc750fa21845d70eff114c42c452025",
       "evidenceUrls": [
         "https://github.com/memi-design/memi/releases/tag/v2.7.4"
       ]
@@ -86,7 +86,7 @@
       "status": "detached",
       "version": "2.7.4",
       "verificationMode": "detached-post-build",
-      "evidenceSha256": "sha256:08cf95e0812741148b8aec0c0ef485831c276b689c53ef24be7786683673db7f",
+      "evidenceSha256": "sha256:b85239e0752adb759791825c63ce43d03d3f05185ea06b9590ecb579f97f1421",
       "evidenceUrls": [
         "https://www.memoire.cv/research/memi-2.7.3-confirmatory-audit.pdf",
         "https://github.com/memi-design/memi/releases/tag/v2.7.4"
@@ -97,7 +97,7 @@
       "status": "verified",
       "version": "2.7.4",
       "verificationMode": "direct",
-      "evidenceSha256": "sha256:8f3616da081f34e4f064934b7788112f7d0dca3a2f58275d105ea4b6f9b0b84b",
+      "evidenceSha256": "sha256:f44c11dcab2f35157ed8121a80b6d1dd68c68c83589c4c2e430d42a9281b2919",
       "evidenceUrls": [
         "https://github.com/memi-design/memi/blob/a72614562bdc54c11b4beb416987b635740713c5/release-artifacts/public-gate/2.7.4.parity.json"
       ]

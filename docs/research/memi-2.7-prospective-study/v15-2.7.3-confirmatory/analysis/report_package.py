@@ -33,6 +33,7 @@ class StudyReportPaths:
     chronological_ingestion_plan_path: Path
     website_audit_tex_path: Path
     remediation_tex_path: Path
+    release_channel_evidence_path: Path
     live_release_verification_path: Path
     release_gates_tex_path: Path
     release_status_tex_path: Path
@@ -56,6 +57,7 @@ def study_report_paths(study_root: Path | None = None) -> StudyReportPaths:
         ),
         website_audit_tex_path=root / "generated" / "tex" / "website-audit-results.tex",
         remediation_tex_path=root / "generated" / "tex" / "remediation-results.tex",
+        release_channel_evidence_path=root / "release-2.7.4-channel-evidence.json",
         live_release_verification_path=root / "release-2.7.4-live-verification.json",
         release_gates_tex_path=root / "generated" / "tex" / "release-gates.tex",
         release_status_tex_path=root / "generated" / "tex" / "release-status.tex",
@@ -84,11 +86,15 @@ def build_outputs(paths: StudyReportPaths) -> dict[Path, str]:
     )
     website_summary = _validate_website_audit(website_audit)
     remediation_summary = _validate_remediation_artifacts(quality_evidence, ingestion_plan)
-    live_release_summary = (
-        _validate_live_release_verification(_load_json(paths.live_release_verification_path))
-        if paths.live_release_verification_path.is_file()
-        else None
-    )
+    live_release_summary = None
+    if paths.live_release_verification_path.is_file():
+        channel_evidence_digests = _validate_release_channel_evidence(
+            _load_json(paths.release_channel_evidence_path)
+        )
+        live_release_summary = _validate_live_release_verification(
+            _load_json(paths.live_release_verification_path),
+            channel_evidence_digests,
+        )
 
     ledger = _rendered_audit_ledger(
         paths=paths,
@@ -167,7 +173,11 @@ def _load_json(path: Path) -> dict[str, Any]:
     if path.is_symlink():
         raise ReportPackageInputError(f"report inputs must not be symlinks: {path}")
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_reject_duplicate_json_object_keys,
+            parse_constant=_reject_non_finite_json_constant,
+        )
     except FileNotFoundError as error:
         raise ReportPackageInputError(f"missing report input: {path}") from error
     except json.JSONDecodeError as error:
@@ -175,6 +185,21 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ReportPackageInputError(f"report input must be a JSON object: {path}")
     return payload
+
+
+def _reject_duplicate_json_object_keys(
+    pairs: list[tuple[str, Any]],
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise ReportPackageInputError(f"duplicate JSON object key: {key}")
+        payload[key] = value
+    return payload
+
+
+def _reject_non_finite_json_constant(value: str) -> None:
+    raise ReportPackageInputError(f"non-finite JSON constant is not allowed: {value}")
 
 
 def _validate_receipts(payload: Mapping[str, Any]) -> dict[str, Any]:
@@ -583,7 +608,138 @@ _LIVE_RELEASE_CHANNELS = {
 }
 
 
-def _validate_live_release_verification(payload: Mapping[str, Any]) -> dict[str, Any]:
+def _validate_release_channel_evidence(payload: Mapping[str, Any]) -> dict[str, str]:
+    if payload.get("schemaVersion") != "memoire.release-channel-evidence.v1":
+        raise ReportPackageInputError("release channel evidence schemaVersion is invalid")
+    if payload.get("releaseVersion") != "2.7.4":
+        raise ReportPackageInputError("release channel evidence must identify Memi 2.7.4")
+    if payload.get("sourceCommit") != "8aa4649f412bbcaaf2af4ee209bf79016566f035":
+        raise ReportPackageInputError(
+            "release channel evidence source commit is not the published candidate"
+        )
+    if payload.get("canonicalization") != (
+        "UTF-8 JSON with lexicographically sorted keys and compact separators"
+    ):
+        raise ReportPackageInputError("release channel evidence canonicalization is invalid")
+
+    records = payload.get("records")
+    if not isinstance(records, list):
+        raise ReportPackageInputError("release channel evidence records must be an array")
+    digests: dict[str, str] = {}
+    evidence_by_id: dict[str, dict[str, Any]] = {}
+    for record in records:
+        if not isinstance(record, dict) or not isinstance(record.get("id"), str):
+            raise ReportPackageInputError(
+                "every release channel evidence record must be an object with an id"
+            )
+        channel_id = record["id"]
+        if channel_id in digests:
+            raise ReportPackageInputError(
+                "every release channel evidence record must appear exactly once"
+            )
+        evidence = record.get("evidence")
+        if not isinstance(evidence, dict):
+            raise ReportPackageInputError(
+                f"release channel evidence {channel_id} must contain an evidence object"
+            )
+        canonical = json.dumps(
+            evidence,
+            allow_nan=False,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+        digests[channel_id] = "sha256:" + sha256(canonical).hexdigest()
+        evidence_by_id[channel_id] = evidence
+    if set(digests) != set(_LIVE_RELEASE_CHANNELS):
+        raise ReportPackageInputError(
+            "every required release channel evidence record must appear exactly once"
+        )
+    _validate_final_pdf_channel_evidence(evidence_by_id)
+    return digests
+
+
+def _validate_final_pdf_channel_evidence(
+    evidence_by_id: Mapping[str, Mapping[str, Any]],
+) -> None:
+    expected_source_commit = "8aa4649f412bbcaaf2af4ee209bf79016566f035"
+    expected_pdf_sha256 = "5f178a3a0198c4f8a790d35dc1a2bf463c28e01cb1f495bf862b44c41ddbedb7"
+    expected_sidecar_sha256 = "937d32cf500a4b5c58c67542bd68583570d5639ab1b052f27035f0aa472d8627"
+    expected_pdf_url = (
+        "https://www.memoire.cv/research/memi-2.7.3-confirmatory-audit.pdf"
+    )
+    expected_release_url = "https://github.com/memi-design/memi/releases/tag/v2.7.4"
+    expected_release_asset_url = (
+        "https://github.com/memi-design/memi/releases/download/v2.7.4/"
+        "memi-2.7.3-confirmatory-audit.pdf"
+    )
+    expected_checksum_asset_url = expected_release_asset_url + ".sha256"
+
+    github = evidence_by_id["github-release"]
+    if (
+        github.get("status") != "verified"
+        or github.get("url") != expected_release_url
+        or github.get("tag") != "v2.7.4"
+        or github.get("tagPeeledCommit") != expected_source_commit
+    ):
+        raise ReportPackageInputError("GitHub release PDF provenance is invalid")
+    github_pdf_sha256 = _require_sha256(
+        github.get("reportAssetSha256"),
+        "GitHub release PDF hash",
+    )
+    github_sidecar_sha256 = _require_sha256(
+        github.get("reportChecksumAssetSha256"),
+        "GitHub release PDF checksum asset hash",
+    )
+    if github_pdf_sha256 != f"sha256:{expected_pdf_sha256}":
+        raise ReportPackageInputError("GitHub release PDF hash is not the final audited PDF")
+    if github_sidecar_sha256 != f"sha256:{expected_sidecar_sha256}":
+        raise ReportPackageInputError(
+            "GitHub release PDF checksum asset hash is not the final sidecar"
+        )
+
+    website = evidence_by_id["website-pdf"]
+    required_website_values = {
+        "status": "detached-post-build",
+        "artifactUrl": "https://www.memoire.cv/release/memi-release.json",
+        "pdfUrl": expected_pdf_url,
+        "releaseUrl": expected_release_url,
+        "releaseAssetUrl": expected_release_asset_url,
+        "checksumAssetUrl": expected_checksum_asset_url,
+        "websiteSourceCommit": "e2a7d1dfe7a5c9e9a50f2bf585ce97f119c5ff44",
+        "productionDeploymentId": "dpl_9K2P9sDq8Y7Es77qTd1WJxbzFF5M",
+        "productionDeploymentUrl": (
+            "https://memoire-4mpu85ofv-sarveshseas-projects.vercel.app"
+        ),
+        "verifiedAt": "2026-08-01T17:14:05Z",
+        "pdfBytes": 560146,
+    }
+    if any(website.get(field) != expected for field, expected in required_website_values.items()):
+        raise ReportPackageInputError("website PDF provenance is invalid")
+    website_pdf_sha256 = _require_sha256(
+        website.get("pdfSha256"),
+        "website PDF hash",
+    )
+    website_sidecar_sha256 = _require_sha256(
+        website.get("checksumAssetSha256"),
+        "website PDF checksum asset hash",
+    )
+    if website_pdf_sha256 != f"sha256:{expected_pdf_sha256}":
+        raise ReportPackageInputError("website PDF hash is not the final audited PDF")
+    if website_sidecar_sha256 != f"sha256:{expected_sidecar_sha256}":
+        raise ReportPackageInputError("website PDF checksum asset hash is not the final sidecar")
+    if github_pdf_sha256 != website_pdf_sha256:
+        raise ReportPackageInputError("GitHub release PDF hash disagrees with website PDF hash")
+    if github_sidecar_sha256 != website_sidecar_sha256:
+        raise ReportPackageInputError(
+            "GitHub release PDF checksum asset hash disagrees with website checksum asset hash"
+        )
+
+
+def _validate_live_release_verification(
+    payload: Mapping[str, Any],
+    channel_evidence_digests: Mapping[str, str],
+) -> dict[str, Any]:
     if payload.get("schemaVersion") != "memoire.release-live-verification.v1":
         raise ReportPackageInputError("live release ledger schemaVersion is invalid")
     if payload.get("releaseVersion") != "2.7.4" or payload.get("tag") != "v2.7.4":
@@ -645,6 +801,10 @@ def _validate_live_release_verification(payload: Mapping[str, Any]) -> dict[str,
             channel.get("evidenceSha256"),
             f"live release channel {channel_id} evidence hash",
         )
+        if digest != channel_evidence_digests[channel_id]:
+            raise ReportPackageInputError(
+                f"live release channel {channel_id} channel evidence digest does not match"
+            )
         urls = channel.get("evidenceUrls")
         if (
             not isinstance(urls, list)
