@@ -133,7 +133,10 @@ async function resolveNpm(pkgName: string, cwd: string, options: ResolveRegistry
         `Local registry version ${local.registry.version} does not satisfy exact pin ${version}`,
       );
     }
-    return local;
+    return {
+      ...local,
+      source: `npm:${packageName}@${local.registry.version}`,
+    };
   } catch (localError) {
     try {
       const cached = await fetchNpmPackageToCache(packageName, cwd, version, {

@@ -9,12 +9,13 @@ import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { randomBytes, timingSafeEqual } from "crypto";
 import { readFile, readdir } from "fs/promises";
 import { existsSync } from "fs";
-import { join, extname, basename, resolve as resolvePath } from "path";
+import { join, extname, basename } from "path";
 import { WebSocketServer, WebSocket } from "ws";
 import type { MemoireEngine } from "../engine/core.js";
 import type { MemoireEvent } from "../engine/core.js";
 import { createLogger } from "../engine/logger.js";
 import { PreviewWidgetStateCache } from "./widget-state-cache.js";
+import { resolvePathWithin } from "../utils/path-containment.js";
 
 const log = createLogger("preview-api");
 
@@ -53,6 +54,18 @@ export function isAuthorizedPreviewMutation(
   }
   const presented = readCookie(headers.cookie, PREVIEW_SESSION_COOKIE);
   return constantTimeEqual(presented, sessionToken);
+}
+
+/** Resolve a URL path inside the preview root using host-platform path semantics. */
+export function resolvePreviewStaticPath(staticDir: string, requestPath: string): string | null {
+  const relativeRequest = requestPath === "/"
+    ? "index.html"
+    : requestPath.replace(/^\/+/, "");
+  try {
+    return resolvePathWithin(staticDir, relativeRequest);
+  } catch {
+    return null;
+  }
 }
 
 function createPortBindError(port: number, err: NodeJS.ErrnoException): Error & { code?: string; port?: number } {
@@ -409,13 +422,8 @@ export class PreviewApiServer {
         }
 
         // Static file serving
-        let filePath = url.pathname === "/" ? "/index.html" : url.pathname;
-        const fullPath = join(this.staticDir, filePath);
-
-        // Fix #1 (CRITICAL): path traversal guard — resolved path must stay inside staticDir
-        const resolvedStatic = resolvePath(fullPath);
-        const resolvedStaticDir = resolvePath(this.staticDir);
-        if (!resolvedStatic.startsWith(resolvedStaticDir + "/") && resolvedStatic !== resolvedStaticDir) {
+        const fullPath = resolvePreviewStaticPath(this.staticDir, url.pathname);
+        if (!fullPath) {
           res.statusCode = 403;
           res.setHeader("Content-Type", "text/plain");
           res.end("Forbidden");

@@ -7,6 +7,7 @@ import { ComponentSpecSchema } from "../specs/types.js";
 import { resolveMarketplaceAlias } from "../marketplace/catalog-loader.js";
 import { fetchNpmPackageToCache } from "../registry/npm-fetch.js";
 import { packagePath } from "../utils/asset-path.js";
+import { isPathWithin } from "../utils/path-containment.js";
 import { isPrivateOrLocalHostname } from "../security/network-address.js";
 import { fetchPublicText } from "../security/safe-fetch.js";
 import {
@@ -238,10 +239,18 @@ function resolveShadcnTarget(
   const projectRelative = normalizeAliasTarget(target, componentsJson);
   const resolved = resolve(projectRoot, projectRelative);
   const root = resolve(projectRoot);
-  if (!resolved.startsWith(`${root}/`) && resolved !== root) {
-    throw new Error(`Refusing to write shadcn file outside project root: ${target}`);
-  }
+  assertShadcnInstallTargetContained(root, resolved, target);
   return resolved;
+}
+
+export function assertShadcnInstallTargetContained(
+  projectRoot: string,
+  candidate: string,
+  source: string,
+): void {
+  if (!isPathWithin(candidate, projectRoot)) {
+    throw new Error(`Refusing to write shadcn file outside project root: ${source}`);
+  }
 }
 
 function normalizeAliasTarget(target: string, componentsJson: ComponentsJson): string {
