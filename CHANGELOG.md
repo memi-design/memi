@@ -32,6 +32,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `e285a2b5` refactor: isolate fitness file locking
 - `0568964b` test: define 2.7.4 candidate release surfaces
 - `289bd728` chore: prepare Memi 2.7.4 candidate
+- `fe77585b` test: prevent fitness backtest look-ahead
+- `54099ce1` fix: timestamp complete fitness pairs
 - Required new fitness evidence to use run-bound v2 receipts and the exact task,
   repository, harness, skill, and content-hash identity. Legacy v1 evidence
   remains readable but cannot promote or recover a route.
