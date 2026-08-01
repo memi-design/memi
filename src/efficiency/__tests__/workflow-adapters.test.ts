@@ -238,11 +238,11 @@ describe("model-agnostic workflow adapters", () => {
     await mkdir(authHome, { recursive: true });
     await writeFile(path.join(authHome, "auth.json"), "{}\n");
     await writeFile(executable, [
-      "#!/usr/bin/env node",
-      "process.on('SIGTERM', () => {});",
-      "process.stdout.write(JSON.stringify({type:'thread.started'})+'\\n');",
-      "process.stderr.write('provider-stderr\\n');",
-      "setTimeout(() => process.exit(0), 1200);",
+      "#!/bin/sh",
+      "trap '' TERM",
+      "printf '%s\\n' '{\"type\":\"thread.started\"}'",
+      "printf '%s\\n' 'provider-stderr' >&2",
+      "while :; do :; done",
     ].join("\n"));
     await chmod(executable, 0o700);
     const adapter = createCodexWorkflowAdapter({
@@ -255,7 +255,7 @@ describe("model-agnostic workflow adapters", () => {
     const result = await adapter.execute({
       workspaceRoot: root,
       prompt: "fixture prompt",
-      timeoutMs: 250,
+      timeoutMs: 500,
       maximumToolCalls: 4,
       maximumToolOutputBytes: 1_024,
     });
@@ -263,7 +263,7 @@ describe("model-agnostic workflow adapters", () => {
     expect(result.exitCode).toBe(1);
     expect(result.stdout).toContain("thread.started");
     expect(result.stderr).toContain("provider-stderr");
-    expect(result.stderr).toContain("timeout-exhausted:250ms");
+    expect(result.stderr).toContain("timeout-exhausted:500ms");
     expect(result.tools).toMatchObject({ calls: 0, outputBytes: 0 });
   });
 });
