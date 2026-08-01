@@ -489,6 +489,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
             "prospective evidence V2 requires --evidence-draft and --artifact-root before model execution",
           );
         }
+        const artifactRoot = resolve(opts.artifactRoot);
         const draft = prospectiveEvidenceDraftSchema.parse(JSON.parse(
             await readFile(resolve(opts.evidenceDraft), "utf8"),
           ));
@@ -513,7 +514,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         const preexistingCapture = await Promise.all(task.nativeCaptures.map(
           async (capture) => ({
             artifactName: capture.artifactName,
-            exists: await lstat(join(resolve(opts.artifactRoot), capture.artifactName)).then(
+            exists: await lstat(join(artifactRoot, capture.artifactName)).then(
               () => true,
               () => false,
             ),
@@ -527,7 +528,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         }
         evidenceDraft = {
           draft,
-          artifactRoot: resolve(opts.artifactRoot),
+          artifactRoot,
         };
       } else if (opts.evidenceDraft || opts.artifactRoot) {
         throw new Error("V2 evidence inputs require a freeze with evidenceV2 enabled");
