@@ -1,0 +1,56 @@
+% Compile-safe interface between the frozen paper and generated analysis output.
+% The analysis pipeline may provide generated/tex/report-macros.tex and the
+% section/figure interpretation fragments named below. Missing artifacts remain
+% conspicuous and do not silently become affirmative claims.
+
+\newcommand{\PendingArtifact}[1]{%
+  \begin{center}
+    \fbox{\begin{minipage}{0.92\linewidth}
+      \small\textbf{Pending generated artifact.} #1
+    \end{minipage}}
+  \end{center}%
+}
+
+\newcommand{\InputOrPending}[2]{%
+  \IfFileExists{#1}{\input{#1}}{\PendingArtifact{#2 (expected at \path{#1}).}}%
+}
+
+\newcommand{\AuditStatusLabel}{INCOMPLETE --- GENERATED RESULTS NOT LOADED}
+\newcommand{\ClaimDecision}{No confirmatory quality, efficiency, or superiority
+claim is authorized while generated analysis artifacts are absent.}
+\newcommand{\FreshCellStatus}{Pending receipt-ledger validation.}
+\newcommand{\PrimaryGateStatus}{Pending blinded grading and executed analysis.}
+\newcommand{\ReleaseGateStatus}{Memi 2.7.4 publication is not established by this draft.}
+
+\IfFileExists{generated/tex/report-macros.tex}{%
+  \input{generated/tex/report-macros.tex}%
+}{}
+
+\newcommand{\FigurePlaceholder}[1]{%
+  \fbox{\begin{minipage}[c][43mm][c]{0.94\linewidth}
+    \centering\small\textbf{Pending generated figure}\par\medskip
+    #1
+  \end{minipage}}%
+}
+
+\newcommand{\QualityFigure}{%
+  \IfFileExists{generated/figures/paired_quality_comparisons.png}{%
+    \includegraphics[width=\linewidth]{generated/figures/paired_quality_comparisons.png}%
+  }{\IfFileExists{generated/figures/primary_task_mean_deltas.png}{%
+    \includegraphics[width=\linewidth]{generated/figures/primary_task_mean_deltas.png}%
+  }{\FigurePlaceholder{Paired quality comparisons by task.}}}%
+}
+
+\newcommand{\ResourceFigure}{%
+  \IfFileExists{generated/figures/task_resource_intervals.png}{%
+    \includegraphics[width=\linewidth]{generated/figures/task_resource_intervals.png}%
+  }{\FigurePlaceholder{Task-faceted paired resource intervals.}}%
+}
+
+\newcommand{\BacktestFigure}{%
+  \IfFileExists{generated/figures/fitness_backtest.png}{%
+    \includegraphics[width=\linewidth]{generated/figures/fitness_backtest.png}%
+  }{\IfFileExists{generated/figures/chronological_fitness_backtest.png}{%
+    \includegraphics[width=\linewidth]{generated/figures/chronological_fitness_backtest.png}%
+  }{\FigurePlaceholder{Chronological, no-look-ahead routing-policy replay.}}}%
+}
