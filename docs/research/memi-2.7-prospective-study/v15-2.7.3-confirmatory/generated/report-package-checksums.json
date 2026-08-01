@@ -37,9 +37,9 @@
       "sha256": "sha256:e5a03de011272996780860cf7465a597b34197a7f346fd07283e497511d0c0df"
     },
     {
-      "bytes": 35338,
+      "bytes": 50224,
       "path": "analysis/fitness_backtest.py",
-      "sha256": "sha256:64c5d94d63c0c6b57fcc3ad92cbf04685ff01b860c01e8a122055928b76d15f5"
+      "sha256": "sha256:98cb9e6fc76acafc8fd342c0c8695c39f0e8f313fccf4f36a6dda570e38d7a3c"
     },
     {
       "bytes": 26914,
@@ -62,9 +62,9 @@
       "sha256": "sha256:98835dd9fdfe8577d938059c83621d324d2f3fd552759557c61ea51cd0c7bd02"
     },
     {
-      "bytes": 28146,
+      "bytes": 28192,
       "path": "analysis/report_package.py",
-      "sha256": "sha256:52c328af1ac81c7ef90e428e6306b75dfc1efea7a758f1fc70514357808c4767"
+      "sha256": "sha256:9df7aa77b4e228ad172d858776e151b297b2a8d6834c28631169a4b6ca8d3408"
     },
     {
       "bytes": 1324,
@@ -77,9 +77,9 @@
       "sha256": "sha256:50624e98e225aa80f3d5b7b999045fbf39be6ab9b1f3a8d821b34d642b994f41"
     },
     {
-      "bytes": 13632,
+      "bytes": 19127,
       "path": "analysis/tests/test_fitness_backtest.py",
-      "sha256": "sha256:e85166d7d7c65c2d7e14bd221be32c1888eb8eb920822acd9a893869731b1a18"
+      "sha256": "sha256:5a3b4dd8895a2633d0442037ff059bc885ed520eb31371916ab1b2e97690d185"
     },
     {
       "bytes": 29108,
@@ -187,9 +187,14 @@
       "sha256": "sha256:4c361f5cce9376d30bf694ddf8fd0cd5c7ef7a227a51c4edb1485af25ce3b3fa"
     },
     {
-      "bytes": 29041,
+      "bytes": 29276,
       "path": "generated/fitness-policy/backtest-command-receipts.json",
-      "sha256": "sha256:33db4e1802d14782316c49feaee2b0e9e76dc55f4cf80de88ace6231ee9a4f79"
+      "sha256": "sha256:d0ff37cb2bbf21e777c12d0efd2eff51611f79337062fe8369240ccad03a5674"
+    },
+    {
+      "bytes": 328,
+      "path": "generated/fitness-policy/backtest-frozen-input.json",
+      "sha256": "sha256:ddc6e2f5d706b0c0fc4791726dd92634a5cb53aa609ee449b6e5ee54d0f6f156"
     },
     {
       "bytes": 30303,
@@ -197,9 +202,9 @@
       "sha256": "sha256:1dea5d676b3c67fb801795ffbb5f75fb412a961339c26bd4fd19fe9942be6305"
     },
     {
-      "bytes": 101740,
+      "bytes": 101930,
       "path": "generated/fitness-policy/fitness-backtest-as-of.json",
-      "sha256": "sha256:79ec867d5ac148db87499920a0e1aaf6b72286b1b4c273a35b06d964cf222128"
+      "sha256": "sha256:32f68be396a9fea27091c849d5c16f2f8e083c7b99b64211f0e72f5e085dd5a5"
     },
     {
       "bytes": 1650,
@@ -362,9 +367,9 @@
       "sha256": "sha256:62cae1787a432e7c85e49d2b51172ad67a00a381bc0f6994d730cbb12bdf4984"
     },
     {
-      "bytes": 1018,
+      "bytes": 992,
       "path": "generated/tex/website-audit-results.tex",
-      "sha256": "sha256:8a6978d72c3fc3f8cf8b2aa4baf877b55936785771d4c0042fb4e074305835e4"
+      "sha256": "sha256:6f50ef4c591e67b6fba592db98d9c31b1b06cfad67005560d972197767b6cfb9"
     },
     {
       "bytes": 1471,
@@ -375,36 +380,6 @@
       "bytes": 2227,
       "path": "harness-provenance.json",
       "sha256": "sha256:65a7a12c0f26376bf5a75f56102c03fcb865b26b955a3d1b8ee1af51fafc9976"
-    },
-    {
-      "bytes": 3586,
-      "path": "main.aux",
-      "sha256": "sha256:e57932cb05f3ae61144f2e52701fd0778bb8c957fcea750a92cd30a2304f16a4"
-    },
-    {
-      "bytes": 19393,
-      "path": "main.fdb_latexmk",
-      "sha256": "sha256:c34b51632ae3418ecc40163958a34500f3e9ed9bf1f63fb7401faf5f40406a2d"
-    },
-    {
-      "bytes": 20479,
-      "path": "main.fls",
-      "sha256": "sha256:11758a0d71623485c1d91689602c4546b5056d4e9008312ace3f014b42074b1e"
-    },
-    {
-      "bytes": 33644,
-      "path": "main.log",
-      "sha256": "sha256:457c7b5f6bbc720ca106886dfe0178f40859518c1d4b0938b2cea766df632ae4"
-    },
-    {
-      "bytes": 2232,
-      "path": "main.out",
-      "sha256": "sha256:01f808b8bc6f5f766190cca76c288c359460ab10344f7c21ab3de8d5cdca1ae9"
-    },
-    {
-      "bytes": 76237,
-      "path": "main.synctex.gz",
-      "sha256": "sha256:bc03f6e61c7219dc053182b3596dda10d20e4ca15d4236068ac4e817425c6830"
     },
     {
       "bytes": 19785,
@@ -452,9 +427,9 @@
       "sha256": "sha256:c55bfb34ee30a6974dc01230b240bd0057b38bda68d9b50ef49e4f34fbaa94bd"
     },
     {
-      "bytes": 2887,
+      "bytes": 2616,
       "path": "run-fitness-backtest.py",
-      "sha256": "sha256:7ef68f2072933e8fda09c81202470a18bd94ce99a49d27dfadaaef6f988dbba1"
+      "sha256": "sha256:15574c8e3afc8277845ab6f7e1d6753bad6016db08b5868eabf7f6dde59d242d"
     },
     {
       "bytes": 5977,
@@ -487,7 +462,7 @@
       "sha256": "sha256:1ccf198f211e3be7c14d0a09f28fc9483e22cd2421a400c12722e46180e2ceda"
     }
   ],
-  "entryCount": 97,
+  "entryCount": 92,
   "excluded": [
     "**/*.pdf",
     "generated/report-package-checksums.json"
