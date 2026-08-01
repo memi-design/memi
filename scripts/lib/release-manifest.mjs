@@ -1050,6 +1050,17 @@ export function validateWebReleaseArtifact(manifest, artifact) {
   return failures;
 }
 
+export function validateWebReleaseArtifactSourceBytes(manifest, artifact, sourceManifestText) {
+  const failures = validateWebReleaseArtifact(manifest, artifact);
+  const canonical = serializeJson(manifest);
+  if (sourceManifestText !== canonical) {
+    failures.push(
+      "website release artifact source commit does not contain the canonical manifest bytes",
+    );
+  }
+  return failures;
+}
+
 export function resolveManifestSourceCommit(root, manifest) {
   const isShallow = execFileSync(
     "git",

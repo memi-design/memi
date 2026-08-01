@@ -17,5 +17,6 @@ describe("public release state gate wiring", () => {
     expect(source).toContain("SHA256SUMS.txt");
     expect(source).toContain("releaseArtifactUrl");
     expect(source).toContain("parityEligible");
+    expect(source).toContain("verifyWebsiteArtifactEvidence");
   });
 });

@@ -1,7 +1,14 @@
 // @ts-nocheck
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
-import { runPublicReleaseGate } from "../../../scripts/lib/public-release-gate.mjs";
+import {
+  runPublicReleaseGate,
+  verifyWebsiteArtifactEvidence,
+} from "../../../scripts/lib/public-release-gate.mjs";
+
+const root = join(import.meta.dirname, "..", "..", "..");
 
 const baseOptions = {
   packageName: "@memi-design/cli",
@@ -34,6 +41,37 @@ const registryMetadata = {
 };
 
 describe("public release gate helper", () => {
+  it("verifies exact historical manifest bytes and fails closed on drift or fetch failure", async () => {
+    const manifestText = await readFile(join(root, "release-manifest.json"), "utf8");
+    const manifest = JSON.parse(manifestText);
+    const artifact = JSON.parse(
+      await readFile(join(root, "release-artifacts", "memoire-web.release.json"), "utf8"),
+    );
+    const options = { manifest, url: manifest.surfaces.website.releaseArtifactUrl };
+    const fetchJson = vi.fn(async () => artifact);
+
+    await expect(verifyWebsiteArtifactEvidence(options, {
+      fetchJson,
+      fetchText: vi.fn(async () => manifestText),
+    })).resolves.toMatchObject({
+      verified: true,
+      sourceCommit: artifact.provenance.sourceCommit,
+      sourceUrl: artifact.provenance.sourceUrl,
+    });
+
+    await expect(verifyWebsiteArtifactEvidence(options, {
+      fetchJson,
+      fetchText: vi.fn(async () => `${manifestText} `),
+    })).rejects.toThrow("does not contain the canonical manifest bytes");
+
+    await expect(verifyWebsiteArtifactEvidence(options, {
+      fetchJson,
+      fetchText: vi.fn(async () => {
+        throw new Error("provenance source unavailable");
+      }),
+    })).rejects.toThrow("provenance source unavailable");
+  });
+
   it("records install smoke even when earlier site parity checks fail", async () => {
     const runInstallSmoke = vi.fn(async () => ({ ok: true, version: "2.6.2" }));
 
