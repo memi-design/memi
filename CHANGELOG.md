@@ -93,6 +93,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `39dabf1e` | test: close residual V15 execution bounds |
 | `52107c8b` | fix: bound V15 JSON and process cleanup |
 | `5dc13ebb` | merge: close V15 process and JSON bounds |
+| `aa4b39c5` | test: reproduce Windows tools RPC endpoint failure |
+| `15756b00` | fix: use named pipes for Windows tools RPC |
 
 ### Exact-match fail-closed route fitness
 
