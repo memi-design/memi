@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildWebReleaseArtifact,
   serializeJson,
+  validateWebReleaseArtifactSourceBytes,
   verifyCoreReleaseSurfaces,
 } from "../../../scripts/lib/release-manifest.mjs";
 
@@ -120,6 +121,39 @@ describe("release manifest", () => {
       manifestSha256: sha256,
     });
 
+  });
+
+  it("accepts a content-identical website artifact from an earlier provenance commit", async () => {
+    const manifestText = await readFile(manifestPath, "utf8");
+    const manifest = JSON.parse(manifestText);
+    const artifact = JSON.parse(await readFile(webArtifactPath, "utf8"));
+
+    expect(validateWebReleaseArtifactSourceBytes(manifest, artifact, manifestText)).toEqual([]);
+  });
+
+  it("rejects a website artifact whose claimed provenance commit contains different manifest bytes", async () => {
+    const manifestText = await readFile(manifestPath, "utf8");
+    const manifest = JSON.parse(manifestText);
+    const artifact = JSON.parse(await readFile(webArtifactPath, "utf8"));
+    const sourceManifestText = manifestText.replace(
+      "\"updatedAt\": \"2026-08-01\"",
+      "\"updatedAt\": \"2099-01-01\"",
+    );
+
+    expect(validateWebReleaseArtifactSourceBytes(manifest, artifact, sourceManifestText)).toContain(
+      "website release artifact source commit does not contain the canonical manifest bytes",
+    );
+  });
+
+  it("rejects a website artifact whose claimed provenance commit changes only manifest formatting", async () => {
+    const manifestText = await readFile(manifestPath, "utf8");
+    const manifest = JSON.parse(manifestText);
+    const artifact = JSON.parse(await readFile(webArtifactPath, "utf8"));
+    const sourceManifestText = JSON.stringify(JSON.parse(manifestText));
+
+    expect(validateWebReleaseArtifactSourceBytes(manifest, artifact, sourceManifestText)).toContain(
+      "website release artifact source commit does not contain the canonical manifest bytes",
+    );
   });
 
   it("passes the release-manifest drift gate", () => {

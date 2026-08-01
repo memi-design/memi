@@ -1,3 +1,10 @@
+import { createHash } from "node:crypto";
+import {
+  serializeJson,
+  validateWebReleaseArtifact,
+  validateWebReleaseArtifactSourceBytes,
+} from "./release-manifest.mjs";
+
 export async function runPublicReleaseGate(options, dependencies) {
   const {
     packageName,
@@ -66,6 +73,45 @@ export async function runPublicReleaseGate(options, dependencies) {
           ? "diagnostic"
           : "passed",
     failures,
+  };
+}
+
+export async function verifyWebsiteArtifactEvidence(options, dependencies) {
+  const { manifest, url } = options;
+  const { fetchJson, fetchText } = dependencies;
+  if (!url) throw new Error("releaseArtifactUrl is not configured");
+
+  const artifact = await fetchJson(url);
+  const artifactFailures = validateWebReleaseArtifact(manifest, artifact);
+  if (artifactFailures.length > 0) {
+    throw new Error(`deployed website release artifact is invalid: ${artifactFailures.join("; ")}`);
+  }
+
+  const sourceManifestText = await fetchText(artifact.provenance.sourceUrl);
+  const sourceFailures = validateWebReleaseArtifactSourceBytes(
+    manifest,
+    artifact,
+    sourceManifestText,
+  );
+  if (sourceFailures.length > 0) {
+    throw new Error(
+      `deployed website release artifact provenance is invalid: ${sourceFailures.join("; ")}`,
+    );
+  }
+  if (serializeJson(artifact.release) !== serializeJson(manifest)) {
+    throw new Error("deployed website release payload does not match the canonical manifest");
+  }
+
+  const manifestSha256 = createHash("sha256").update(serializeJson(manifest)).digest("hex");
+  if (artifact.provenance.manifestSha256 !== manifestSha256) {
+    throw new Error("deployed website release artifact has the wrong manifest SHA-256");
+  }
+  return {
+    verified: true,
+    manifestSha256,
+    sourceCommit: artifact.provenance.sourceCommit,
+    sourceUrl: artifact.provenance.sourceUrl,
+    url,
   };
 }
 

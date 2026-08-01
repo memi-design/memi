@@ -7,13 +7,14 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
-import { runPublicReleaseGate } from "./lib/public-release-gate.mjs";
+import {
+  runPublicReleaseGate,
+  verifyWebsiteArtifactEvidence,
+} from "./lib/public-release-gate.mjs";
 import {
   canClearPublicParityCap,
   loadReleaseManifest,
   resolveReleaseRecordPath,
-  serializeJson,
-  validateWebReleaseArtifact,
   verifyPublishedEngineTransitionFromGit,
 } from "./lib/release-manifest.mjs";
 
@@ -404,28 +405,10 @@ async function verifyStudioRelease() {
 
 async function verifyWebsiteArtifact() {
   const url = manifest.surfaces.website.releaseArtifactUrl;
-  if (!url) throw new Error("releaseArtifactUrl is not configured");
-  const artifact = await fetchJson(url);
-  const artifactFailures = validateWebReleaseArtifact(manifest, artifact);
-  if (artifactFailures.length > 0) {
-    throw new Error(`deployed website release artifact is invalid: ${artifactFailures.join("; ")}`);
-  }
-  if (serializeJson(artifact?.release) !== serializeJson(manifest)) {
-    throw new Error("deployed website release payload does not match the canonical manifest");
-  }
-  const manifestSha256 = createHash("sha256").update(serializeJson(manifest)).digest("hex");
-  if (artifact?.provenance?.manifestSha256 !== manifestSha256) {
-    throw new Error("deployed website release artifact has the wrong manifest SHA-256");
-  }
-  const transitionCommit = execFileSync(
-    "git",
-    ["log", "-1", "--format=%H", "--", "release-manifest.json"],
-    { cwd: root, encoding: "utf8" },
-  ).trim();
-  if (artifact?.provenance?.sourceCommit !== transitionCommit) {
-    throw new Error("deployed website release artifact is not generated from the transition commit");
-  }
-  return { verified: true, manifestSha256, sourceCommit: transitionCommit, url };
+  return verifyWebsiteArtifactEvidence(
+    { manifest, url },
+    { fetchJson, fetchText },
+  );
 }
 
 async function resolveGithubTagCommit(repository, tag) {
