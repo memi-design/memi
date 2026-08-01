@@ -3,14 +3,14 @@
   "recordedAt": "2026-08-01T06:51:53.000Z",
   "repository": "https://github.com/memi-design/memi",
   "worktree": "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine",
-  "sourceCommit": "9086a6ecd3b0e094984796eefcfa253e6579c593",
-  "sourceTree": "0df7b9c427305250594de409fecddd45eb8dd963",
+  "sourceCommit": "64c25bd3c6cc4133e4d872b7497d84189f304e4e",
+  "sourceTree": "abf321108cfb44a42d0591bf950e9f6f5eb3c24a",
   "implementationCommit": "9a141092",
   "redContractCommit": "8cfd3498",
   "fullSuite": {
     "command": "npm test",
-    "testFilesPassed": 305,
-    "testsPassed": 2206,
+    "testFilesPassed": 306,
+    "testsPassed": 2207,
     "failures": 0
   },
   "securityReview": {
@@ -20,7 +20,7 @@
     "low": 0
   },
   "sha256": {
-    "scripts/run-empirical-40.ts": "e221f4e0d801a8879832a467c79bc53829aeb51c071f6b138cccae720f2375b9",
+    "scripts/run-empirical-40.ts": "687e6a561a1f37f3539bdb4a1a642bb1c0a3acbca3bfa7354f2c5c4b865d60eb",
     "src/commands/benchmark.ts": "9425c21b061f0cc58ad1c97556490620a619dd59f0051837bb07d98ab77c02a5",
     "src/notes/skill-fitness.ts": "3217e851ccd6ef36d985c8a1ca16dd52405ffd9839cbc51853e6a160df53329f",
     "src/efficiency/prospective-files.ts": "14e90b3552893651e5e577a6c6224ab43b22274b3c0b66a03a2f938cfbfb0270",
@@ -31,5 +31,16 @@
     "package": "@memi-design/cli@2.7.3",
     "tarballSha256": "b2b56189f45b69a3cec41220ae3e9d50d6ecfb682aee5a64c1fe0ce0d0ec3e1e"
   },
+  "amendments": [
+    {
+      "id": "V15-DEV-001",
+      "recordedAt": "2026-08-01T07:07:19.000Z",
+      "initialSourceCommit": "9086a6ecd3b0e094984796eefcfa253e6579c593",
+      "initialSourceTree": "0df7b9c427305250594de409fecddd45eb8dd963",
+      "initialRunnerSha256": "e221f4e0d801a8879832a467c79bc53829aeb51c071f6b138cccae720f2375b9",
+      "correctionCommit": "16a15cc6",
+      "description": "Separated the exact 2.7.3 workflow runtime from the hash-pinned 2.7.4 admission evaluator after the first complete pair exposed an incompatible evaluator-only flag."
+    }
+  ],
   "interpretation": "The harness and admission logic are fixed by source commit and file hashes. The tested candidate remains the exact public 2.7.3 tarball; the 2.7.4 policy implementation is used only to execute, validate, and later backtest the frozen study."
 }

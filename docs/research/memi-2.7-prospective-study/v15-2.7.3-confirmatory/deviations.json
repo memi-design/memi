@@ -1,4 +1,29 @@
 {
   "schemaVersion": 1,
-  "entries": []
+  "entries": [
+    {
+      "id": "V15-DEV-001",
+      "occurredAt": "2026-08-01T07:04:45.834Z",
+      "recordedAt": "2026-08-01T07:07:19.000Z",
+      "classification": "orchestration-compatibility",
+      "stage": "post-pair-admission",
+      "affectedTrials": [
+        "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:baseline",
+        "memi-2.7-v15-2.7.3-confirmatory:buzzr-tab-unread-badge:r1:memi"
+      ],
+      "observed": "Both cells completed and stored immutable accepted receipts, then the wrapper passed the 2.7.4-only --evidence-root option to the exact 2.7.3 candidate evaluator, which rejected the unknown option.",
+      "cause": "The runner used the candidate CLI for both the runtime under test and the newer fail-closed admission step.",
+      "resolution": "Commit 16a15cc6 requires a separately hash-pinned harness CLI for admission while continuing to use the exact 2.7.3 tarball for every workflow cell.",
+      "independentAdmission": {
+        "performedAt": "2026-08-01T07:06:26.530Z",
+        "verifiedRuns": 2,
+        "evidenceFailures": [],
+        "evaluationSha256": "0ff6b8af8ad7128bf7e8fb59e5244da18ccff123e880cdcc45f7907eab32be2a"
+      },
+      "candidateRuntimeChanged": false,
+      "frozenProtocolChanged": false,
+      "outcomeDataChanged": false,
+      "disposition": "Retain both cells and disclose this deviation in the report."
+    }
+  ]
 }
