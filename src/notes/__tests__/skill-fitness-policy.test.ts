@@ -4,6 +4,7 @@ import {
   backtestSkillFitness,
   createSkillFitnessQualityEvidence,
   projectSkillFitness,
+  resolveSkillRouteExecutionMode,
   type SkillFitnessEvent,
   type SkillFitnessRouteIdentity,
 } from "../skill-fitness.js";
@@ -13,6 +14,34 @@ const HASH_B = `sha256:${"b".repeat(64)}`;
 const HASH_C = `sha256:${"c".repeat(64)}`;
 
 describe("history-aware fail-closed skill routing", () => {
+  it("keeps ordinary suppressed execution repository-only and permits only explicit prospective recovery probes", () => {
+    const suppressed = assessSkillRouteFitness({
+      events: [v1Event({ eventId: "harmful", qualityParity: false })],
+      route: identity(),
+    });
+
+    expect(resolveSkillRouteExecutionMode({
+      assessment: suppressed,
+      recoveryProbe: false,
+      prospective: false,
+    })).toBe("repository-only");
+    expect(() => resolveSkillRouteExecutionMode({
+      assessment: suppressed,
+      recoveryProbe: true,
+      prospective: false,
+    })).toThrow(/prospective freeze/);
+    expect(resolveSkillRouteExecutionMode({
+      assessment: suppressed,
+      recoveryProbe: true,
+      prospective: true,
+    })).toBe("recovery-probe");
+    expect(() => resolveSkillRouteExecutionMode({
+      assessment: { ...suppressed, decision: "allow", state: "healthy" },
+      recoveryProbe: true,
+      prospective: true,
+    })).toThrow(/currently suppressed/);
+  });
+
   it("isolates evidence by the complete route identity", () => {
     const harmful = v1Event({
       eventId: "harmful",
@@ -131,6 +160,7 @@ describe("history-aware fail-closed skill routing", () => {
       baselineScore: 90,
       memiScore: 92,
       prospective: true,
+      evidenceMode: "recovery-probe",
     }));
     const ineligible = v2Event({
       eventId: "non-prospective",
@@ -163,6 +193,31 @@ describe("history-aware fail-closed skill routing", () => {
     ]).skills[0]?.recommendation).toBe("promote");
   });
 
+  it("does not count ordinary prospective production evidence toward recovery", () => {
+    const suppression = v2Event({
+      eventId: "suppression",
+      createdAt: "2026-07-20T00:00:00.000Z",
+      baselineScore: 95,
+      memiScore: 90,
+    });
+    const ordinary = Array.from({ length: 3 }, (_, index) => v2Event({
+      eventId: `ordinary-${index}`,
+      createdAt: `2026-07-21T0${index}:00:00.000Z`,
+      baselineScore: 90,
+      memiScore: 92,
+      evidenceMode: "production",
+    }));
+
+    expect(assessSkillRouteFitness({
+      events: [suppression, ...ordinary],
+      route: identity(),
+    })).toMatchObject({
+      decision: "repository-only",
+      state: "suppressed",
+      recoveryEvents: 0,
+    });
+  });
+
   it("resets recovery progress when another harmful event arrives", () => {
     const events = [
       v2Event({
@@ -176,6 +231,7 @@ describe("history-aware fail-closed skill routing", () => {
         createdAt: "2026-07-21T00:00:00.000Z",
         baselineScore: 90,
         memiScore: 92,
+        evidenceMode: "recovery-probe",
       }),
       v2Event({
         eventId: "second-suppression",
@@ -264,6 +320,7 @@ describe("chronological fitness backtest", () => {
         createdAt: `2026-07-21T0${index}:00:00.000Z`,
         baselineScore: 90,
         memiScore: 92,
+        evidenceMode: "recovery-probe",
       })),
     ];
     const early = backtestSkillFitness({
@@ -389,6 +446,7 @@ function v2Event(input: {
   readonly tokenSavingsRatio?: number;
   readonly latencySavingsRatio?: number;
   readonly prospective?: boolean;
+  readonly evidenceMode?: "production" | "recovery-probe";
 }): SkillFitnessEvent {
   const baselineRunId = `baseline-${input.eventId}`;
   const memiRunId = `memi-${input.eventId}`;
@@ -414,6 +472,7 @@ function v2Event(input: {
     pair: { baselineRunId, memiRunId },
     qualityEvidence,
     functionalAcceptance: true,
+    evidenceMode: input.evidenceMode ?? "production",
     prospective: input.prospective === false
       ? null
       : {

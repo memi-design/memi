@@ -195,6 +195,86 @@ describe("benchmark command", () => {
     expect(JSON.parse(lastLog(logs)).projection.events).toBe(1);
   });
 
+  it("binds fitness evidence to an explicit stable task class distinct from task id", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+    const routePath = join(projectRoot, "stable-task-class-route.json");
+    const repository = {
+      pathHash: `sha256:${"c".repeat(64)}`,
+      revision: "9cde918",
+      dirty: false,
+    };
+    const baseline = { ...run("baseline", 6, 1_000, 100_000), repository };
+    const memi = {
+      ...run("memi", 6, 500, 50_000),
+      repository,
+      evidenceRefs: [routePath],
+    };
+    await recordRuns(program, baseline, memi);
+    await writeFile(routePath, JSON.stringify({
+      schemaVersion: 2,
+      runId: memi.runId,
+      taskId: memi.taskId,
+      taskClass: "web-checkout-repair",
+      executionMode: "production",
+      repeat: memi.repeat,
+      repository: {
+        pathHash: memi.repository.pathHash,
+        revision: memi.repository.revision,
+      },
+      harness: {
+        provider: memi.harness.id,
+        modelId: memi.harness.modelId,
+        reasoningEffort: memi.harness.reasoningEffort,
+      },
+      route: {
+        routerVersion: "skill-router-v2",
+        repositoryFingerprintHash: `sha256:${"b".repeat(64)}`,
+        selected: [{
+          id: "expo-router-navigation",
+          contentHash: `sha256:${"a".repeat(64)}`,
+        }],
+      },
+    }));
+
+    const logs = captureLogs();
+    await program.parseAsync([
+      "benchmark",
+      "fitness-record",
+      "--baseline",
+      baseline.runId,
+      "--memi",
+      memi.runId,
+      "--route",
+      routePath,
+      "--task-class",
+      "web-checkout-repair",
+      "--store-root",
+      projectRoot,
+      "--json",
+    ], { from: "user" });
+    expect(JSON.parse(lastLog(logs))).toMatchObject({
+      event: { taskClass: "web-checkout-repair" },
+    });
+
+    await expect(program.parseAsync([
+      "benchmark",
+      "fitness-record",
+      "--baseline",
+      baseline.runId,
+      "--memi",
+      memi.runId,
+      "--route",
+      routePath,
+      "--task-class",
+      "different-task-class",
+      "--store-root",
+      join(projectRoot, "other-store"),
+      "--json",
+    ], { from: "user" })).rejects.toThrow(/bound route task class mismatch/);
+  });
+
   it("records hash-verified v2 quality evidence and emits a stable no-look-ahead backtest", async () => {
     const program = new Command();
     program.exitOverride();
