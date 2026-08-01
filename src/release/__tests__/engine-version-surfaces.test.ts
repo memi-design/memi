@@ -4,29 +4,29 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const candidateVersion = "2.7.3";
+const candidateVersion = "2.7.4";
 const publicVersion = "2.7.3";
 const publicSourceCommit = "2e29c5c656ac34242369eac9840838619ad113e1";
-const releaseRecord = {
-  path: "release-artifacts/npm/2.7.3.release.json",
-  sha256: "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02",
-};
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.7.3 published release surfaces", () => {
-  it("binds the published version to its immutable source and release record", async () => {
+describe("2.7.4 candidate release surfaces", () => {
+  it("keeps the candidate unpublished until immutable release evidence exists", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toEqual({
       version: candidateVersion,
-      state: "published",
-      sourceCommit: publicSourceCommit,
-      releaseRecord,
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+      previousPublicRelease: {
+        version: publicVersion,
+        sourceCommit: publicSourceCommit,
+      },
       verification: {
         eligibleForParity: false,
-        reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
+        reason: "2.7.3 remains public while 2.7.4 is an unpublished candidate",
       },
     });
     expect(manifest.surfaces.githubRelease.url.endsWith(`/v${candidateVersion}`)).toBe(true);
@@ -76,6 +76,8 @@ describe("2.7.3 published release surfaces", () => {
     const action = await readFile(join(root, "action.yml"), "utf8");
     expect(action).toContain(`default: "${candidateVersion}"`);
     expect(action).toContain(`reviewed ${candidateVersion} pin`);
+    expect(await readFile(join(root, "llms.txt"), "utf8"))
+      .toContain(`version: "${candidateVersion}"`);
   });
 
   it("keeps packaged skills, generated examples, and changelog aligned", async () => {
@@ -106,12 +108,12 @@ describe("2.7.3 published release surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
   });
 
-  it("labels 2.7.3 as published while keeping parity fail closed", async () => {
+  it("labels the candidate while keeping the public activation path fail closed", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Release state: `published`");
-    expect(currentRelease).toContain("Engine published (parity pending)");
-    expect(currentRelease).toContain(`Source commit: \`${publicSourceCommit}\``);
+    expect(currentRelease).toContain("Release state: `candidate`");
+    expect(currentRelease).toContain("Engine candidate (unreleased)");
+    expect(currentRelease).toContain("Source commit: Not assigned.");
     expect(currentRelease).toContain(`npx -y @memi-design/cli@${publicVersion}`);
-    expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.3");
+    expect(currentRelease).not.toContain(`npx -y @memi-design/cli@${candidateVersion}`);
   });
 });
