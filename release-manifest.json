@@ -3,7 +3,7 @@
   "updatedAt": "2026-08-01",
   "releaseGroups": {
     "engine": {
-      "version": "2.7.2",
+      "version": "2.7.3",
       "state": "candidate",
       "sourceCommit": null,
       "releaseRecord": null,
@@ -13,7 +13,7 @@
       },
       "verification": {
         "eligibleForParity": false,
-        "reason": "2.7.1 remains public while 2.7.2 is an unpublished candidate"
+        "reason": "2.7.1 remains public while 2.7.3 is an unpublished candidate"
       }
     },
     "studio": {
@@ -37,7 +37,7 @@
       "releaseGroup": "engine",
       "repository": "memi-design/memi",
       "tagPrefix": "v",
-      "url": "https://github.com/memi-design/memi/releases/tag/v2.7.2"
+      "url": "https://github.com/memi-design/memi/releases/tag/v2.7.3"
     },
     "githubAction": {
       "releaseGroup": "engine",

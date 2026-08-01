@@ -3,16 +3,16 @@
   "provenance": {
     "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "d4ac20b2244b107ace5ac2b56aff2684b1f2019a",
-    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/d4ac20b2244b107ace5ac2b56aff2684b1f2019a/release-manifest.json",
-    "manifestSha256": "0ab05550a012a2ddfce92d18dfa3aee503a8bc94a6601a53fb313c1b45072f76"
+    "sourceCommit": "b6beb4649197c37f4eebfa5dd361d56b3284f70e",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/b6beb4649197c37f4eebfa5dd361d56b3284f70e/release-manifest.json",
+    "manifestSha256": "16b26cf6a16e59ac3c6b7dfd4103d8a56bd4e826a1e5e50a07907d237141eb11"
   },
   "orchestration": {
     "schemaVersion": 1,
     "updatedAt": "2026-08-01",
     "releaseGroups": {
       "engine": {
-        "version": "2.7.2",
+        "version": "2.7.3",
         "state": "candidate",
         "sourceCommit": null,
         "releaseRecord": null,
@@ -22,7 +22,7 @@
         },
         "verification": {
           "eligibleForParity": false,
-          "reason": "2.7.1 remains public while 2.7.2 is an unpublished candidate"
+          "reason": "2.7.1 remains public while 2.7.3 is an unpublished candidate"
         }
       },
       "studio": {
@@ -46,7 +46,7 @@
         "releaseGroup": "engine",
         "repository": "memi-design/memi",
         "tagPrefix": "v",
-        "url": "https://github.com/memi-design/memi/releases/tag/v2.7.2"
+        "url": "https://github.com/memi-design/memi/releases/tag/v2.7.3"
       },
       "githubAction": {
         "releaseGroup": "engine",
@@ -94,9 +94,9 @@
         "releaseRecord": null,
         "verification": {
           "eligibleForParity": false,
-          "reason": "2.7.1 remains public while 2.7.2 is an unpublished candidate"
+          "reason": "2.7.1 remains public while 2.7.3 is an unpublished candidate"
         },
-        "plannedSuccessor": "2.7.2"
+        "plannedSuccessor": "2.7.3"
       },
       "studio": {
         "version": "2.5.0",
