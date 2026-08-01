@@ -14,10 +14,13 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `2ac21650` — feat: define prospective evidence v2 receipt
 - `fa8d8a64` — test: require frozen native evidence contract
 - `3348e637` — feat: freeze native evidence requirements
+- `ef9c6761` — test: require retained billing artifacts
+- `a499e1a6` — feat: bind billing evidence artifacts
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
-measured USD billing, and structured stop/retry telemetry. These requirements
+measured USD billing with retained provider-usage and price-card artifacts, and
+structured stop/retry telemetry. These requirements
 are part of the freeze hash and cannot be relaxed after outcomes are observed.
 
 ## v2.7.4 — 2026-08-01
