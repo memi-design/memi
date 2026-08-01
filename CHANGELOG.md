@@ -138,6 +138,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `22568695` | chore: record Memi 2.7.4 npm provenance |
 | `075e431f` | docs: synchronize published Memi 2.7.4 surfaces |
 | `7570fc0b` | fix: align published 2.7.4 release truth |
+| `bb7ad3a7` | docs: record 2.7.4 release-truth repair |
+| `c6d4fee2` | feat: admit fail-closed live release evidence |
 
 ### Exact-match fail-closed route fitness
 
