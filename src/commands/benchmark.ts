@@ -26,6 +26,19 @@ import {
 } from "../efficiency/workflow-adapters.js";
 import { runWorkflowTrial } from "../efficiency/workflow-runner.js";
 import {
+  createEvidenceManifest,
+  EVIDENCE_MANIFEST_HASH_PLACEHOLDER,
+  hashFile,
+  verifyEvidenceManifest,
+} from "../efficiency/prospective-files.js";
+import {
+  buildProspectiveFreeze,
+  evaluateProspectiveStudy,
+  prospectiveFreezeSchema,
+  prospectiveStudyPlanSchema,
+  selectProspectiveTrial,
+} from "../efficiency/prospective-study.js";
+import {
   createWorkflowBenchmarkPlan,
   workflowTaskSchema,
   type WorkflowProvider,
@@ -51,6 +64,204 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
   const benchmark = program
     .command("benchmark")
     .description("Plan, record, and evaluate paired baseline-versus-Memi experiments");
+
+  benchmark
+    .command("prospective-freeze <plan>")
+    .description("Freeze a hash-verified prospective study before scored runs")
+    .requiredOption("--candidate-artifact <path>", "Immutable candidate package artifact")
+    .requiredOption("--candidate-version <version>", "Released candidate package version")
+    .requiredOption("--candidate-revision <sha>", "Candidate Git revision")
+    .requiredOption("--candidate-source-hash <sha256>", "Candidate source snapshot hash")
+    .requiredOption("--candidate-source-state <state>", "clean or content-addressed-dirty-snapshot")
+    .requiredOption("--candidate-dirty-files <count>", "Dirty file count at packaging")
+    .requiredOption("--environment <path>", "Frozen environment JSON")
+    .requiredOption("--task-root <path>", "Directory containing <task-id>.json manifests")
+    .requiredOption("--out <path>", "Freeze receipt output path")
+    .option("--provider <id>", "Provider", "codex")
+    .option("--model <id>", "Model id", "gpt-5.6-sol")
+    .option("--reasoning <effort>", "Reasoning effort", "medium")
+    .option("--harness-version <version>", "Harness version", "codex-cli 0.145.0")
+    .option("--permission-policy <policy>", "Permission policy", "workspace-write")
+    .option("--maximum-skills <count>", "Maximum routed skills", "2")
+    .option("--maximum-context-bytes <count>", "Maximum routed context bytes", "8000")
+    .option("--frozen-at <timestamp>", "Explicit freeze timestamp")
+    .option("--json", "Output JSON")
+    .action(async (planPath: string, opts: {
+      candidateArtifact: string;
+      candidateVersion: string;
+      candidateRevision: string;
+      candidateSourceHash: string;
+      candidateSourceState: string;
+      candidateDirtyFiles: string;
+      environment: string;
+      taskRoot: string;
+      out: string;
+      provider: string;
+      model: string;
+      reasoning: string;
+      harnessVersion: string;
+      permissionPolicy: string;
+      maximumSkills: string;
+      maximumContextBytes: string;
+      frozenAt?: string;
+      json?: boolean;
+    }) => {
+      const plan = prospectiveStudyPlanSchema.parse(
+        JSON.parse(await readFile(resolve(planPath), "utf8")),
+      );
+      const environment = JSON.parse(
+        await readFile(resolve(opts.environment), "utf8"),
+      ) as Record<string, unknown>;
+      const taskRoot = resolve(opts.taskRoot);
+      const taskManifestHashes = Object.fromEntries(await Promise.all(
+        plan.tasks.map(async (task) => [
+          task.id,
+          await hashFile(join(taskRoot, `${task.id}.json`)),
+        ]),
+      ));
+      const freeze = buildProspectiveFreeze({
+        plan,
+        frozenAt: opts.frozenAt ?? new Date().toISOString(),
+        candidate: {
+          version: opts.candidateVersion,
+          revision: opts.candidateRevision,
+          sourceState: candidateSourceState(opts.candidateSourceState),
+          dirtyFileCount: nonnegativeInteger(
+            opts.candidateDirtyFiles,
+            "candidate-dirty-files",
+          ),
+          sourceTreeSha256: opts.candidateSourceHash,
+          artifactSha256: await hashFile(resolve(opts.candidateArtifact)),
+        },
+        harness: {
+          provider: providers(opts.provider)[0],
+          modelId: opts.model,
+          reasoningEffort: opts.reasoning,
+          harnessVersion: opts.harnessVersion,
+          permissionPolicy: opts.permissionPolicy,
+          maximumSkills: positiveInteger(opts.maximumSkills, "maximum-skills"),
+          maximumContextBytes: positiveInteger(
+            opts.maximumContextBytes,
+            "maximum-context-bytes",
+          ),
+        },
+        environment: environment as never,
+        taskManifestHashes,
+      });
+      const out = resolve(opts.out);
+      await writeJson(out, freeze);
+      const payload = { status: "frozen", path: out, freeze };
+      if (opts.json) console.log(JSON.stringify(payload, null, 2));
+      else {
+        console.log(ui.ok(`Prospective study frozen: ${freeze.freezeHash}`));
+        console.log(ui.dots("Receipt", out));
+      }
+    });
+
+  benchmark
+    .command("prospective-evaluate <plan> <freeze>")
+    .description("Evaluate prospective receipts without granting credit to invalid evidence")
+    .requiredOption("--store-root <path>", "External immutable run store root")
+    .requiredOption("--out <path>", "Evaluation report output path")
+    .option("--json", "Output JSON")
+    .action(async (planPath: string, freezePath: string, opts: {
+      storeRoot: string;
+      out: string;
+      json?: boolean;
+    }) => {
+      const plan = prospectiveStudyPlanSchema.parse(JSON.parse(
+        await readFile(resolve(planPath), "utf8"),
+      ));
+      const freeze = prospectiveFreezeSchema.parse(JSON.parse(
+        await readFile(resolve(freezePath), "utf8"),
+      ));
+      const store = new EfficiencyRunStore(resolve(opts.storeRoot));
+      const candidates = (await store.list()).filter((run) =>
+        run.prospective?.freezeHash === freeze.freezeHash);
+      const verifiedRuns: BenchmarkRunRecord[] = [];
+      const evidenceFailures: Array<{
+        runId: string;
+        trialId: string;
+        reasons: readonly string[];
+      }> = [];
+      for (const run of candidates) {
+        const runRef = run.evidenceRefs.find((reference) =>
+          reference.endsWith("/run.json"));
+        if (!runRef || !run.prospective) {
+          evidenceFailures.push({
+            runId: run.runId,
+            trialId: run.prospective?.trialId ?? run.runId,
+            reasons: ["evidence-directory-missing"],
+          });
+          continue;
+        }
+        const evidenceDirectory = dirname(runRef);
+        const verification = await verifyEvidenceManifest({
+          evidenceDirectory,
+          expectedManifestSha256: run.prospective.evidenceManifestSha256,
+          requiredArtifacts: freeze.requiredArtifacts,
+        });
+        if (!verification.valid) {
+          evidenceFailures.push({
+            runId: run.runId,
+            trialId: run.prospective.trialId,
+            reasons: verification.reasons,
+          });
+          continue;
+        }
+        let sealedRun: BenchmarkRunRecord;
+        try {
+          sealedRun = benchmarkRunRecordSchema.parse(JSON.parse(
+            await readFile(runRef, "utf8"),
+          ));
+        } catch {
+          evidenceFailures.push({
+            runId: run.runId,
+            trialId: run.prospective.trialId,
+            reasons: ["run-receipt-invalid"],
+          });
+          continue;
+        }
+        if (JSON.stringify(sealedRun) !== JSON.stringify(run)) {
+          evidenceFailures.push({
+            runId: run.runId,
+            trialId: run.prospective.trialId,
+            reasons: ["store-run-mismatch"],
+          });
+          continue;
+        }
+        verifiedRuns.push(sealedRun);
+      }
+      const evaluation = evaluateProspectiveStudy({
+        plan,
+        freeze,
+        runs: verifiedRuns,
+      });
+      const report = {
+        schemaVersion: 1,
+        generatedAt: new Date().toISOString(),
+        planId: plan.planId,
+        freezeHash: freeze.freezeHash,
+        candidates: candidates.length,
+        verifiedRuns: verifiedRuns.length,
+        evidenceFailures,
+        evaluation,
+      };
+      const out = resolve(opts.out);
+      await writeJson(out, report);
+      const payload = {
+        status: evaluation.reachedTarget ? "target-reached" : "evidence-incomplete",
+        path: out,
+        report,
+      };
+      if (opts.json) console.log(JSON.stringify(payload, null, 2));
+      else {
+        console.log(evaluation.reachedTarget
+          ? ui.ok(`Empirical readiness target reached: ${evaluation.score}/100`)
+          : ui.warn(`Empirical readiness: ${evaluation.score}/100`));
+        console.log(ui.dots("Report", out));
+      }
+    });
 
   benchmark
     .command("plan <tasks>")
@@ -160,6 +371,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .option("--reasoning <effort>", "Reasoning effort", "medium")
     .option("--codex <path>", "Codex CLI path", "codex")
     .option("--claude <path>", "Claude Code path", "claude")
+    .option("--freeze <path>", "Prospective freeze receipt")
+    .option("--trial <id>", "Frozen prospective trial id")
     .option("--execute", "Acknowledge model quota and disposable writes")
     .option("--json", "Output JSON")
     .action(async (taskPath: string, opts: {
@@ -178,6 +391,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       reasoning: string;
       codex: string;
       claude: string;
+      freeze?: string;
+      trial?: string;
       execute?: boolean;
       json?: boolean;
     }) => {
@@ -189,11 +404,36 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       const task = workflowTaskSchema.parse(
         JSON.parse(await readFile(resolve(taskPath), "utf8")),
       );
+      if (Boolean(opts.freeze) !== Boolean(opts.trial)) {
+        throw new Error("--freeze and --trial must be provided together");
+      }
       const condition = benchmarkConditionSchema.parse(opts.condition);
       const provider = providers(opts.provider)[0];
       const modelId = opts.model ?? (
         provider === "codex" ? "gpt-5.6-sol" : "claude-sonnet-4-6"
       );
+      const taskManifestSha256 = await hashFile(resolve(taskPath));
+      const repositoryRoot = resolve(opts.repository);
+      const repositoryRevision = await benchmarkRepositoryRevision(repositoryRoot);
+      const freeze = opts.freeze
+        ? prospectiveFreezeSchema.parse(JSON.parse(
+          await readFile(resolve(opts.freeze), "utf8"),
+        ))
+        : null;
+      const frozenTrial = freeze && opts.trial
+        ? selectProspectiveTrial({
+          freeze,
+          trialId: opts.trial,
+          taskId: task.id,
+          condition,
+          repeat: positiveInteger(opts.repeat, "repeat"),
+          provider,
+          modelId,
+          reasoningEffort: opts.reasoning,
+          repositoryRevision,
+          taskManifestSha256,
+        })
+        : null;
       let routedContext = "";
       let route: Awaited<ReturnType<typeof resolveRoutedSkills>> | null = null;
       if (condition === "memi") {
@@ -204,14 +444,19 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         const repositoryFingerprint = await buildRepositoryFingerprint(
           resolve(opts.repository),
         );
+        const fitnessEvents = await loadSkillFitnessEvents(
+          skillFitnessPath(resolve(opts.storeRoot)),
+        );
         route = await resolveRoutedSkills({
           intent: task.intent,
           notes: loader.notes,
           capabilities: csv(opts.capabilities),
           platforms: csv(opts.platforms),
           repositoryFingerprint,
-          maximumSkills: 2,
-          maximumContextBytes: 8_000,
+          taskClass: task.id,
+          fitnessEvents,
+          maximumSkills: freeze?.harness.maximumSkills ?? 2,
+          maximumContextBytes: freeze?.harness.maximumContextBytes ?? 8_000,
         });
         routedContext = formatRoutedSkillContext(route);
       }
@@ -240,7 +485,6 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         ? join(result.evidenceDirectory, "skill-route.json")
         : null;
       if (routePath && route) await writeJson(routePath, route);
-      const repositoryRoot = resolve(opts.repository);
       const failedChecks = result.verification.filter((check) => !check.passed).length;
       const grade = gradeAutomatedAcceptance({
         accepted: result.accepted,
@@ -248,7 +492,47 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         failedChecks,
         adapterFailed: result.adapter.exitCode !== 0,
       });
-      const record = benchmarkRunRecordSchema.parse({
+      let evidenceManifestSha256: string | null = freeze && frozenTrial
+        ? EVIDENCE_MANIFEST_HASH_PLACEHOLDER
+        : null;
+      if (freeze && frozenTrial) {
+        await Promise.all([
+          writeJson(join(result.evidenceDirectory, "environment.json"), {
+            schemaVersion: 1,
+            frozen: freeze.environment,
+            candidate: freeze.candidate,
+            freezeHash: freeze.freezeHash,
+            observedAt: completedAt.toISOString(),
+          }),
+          writeJson(join(result.evidenceDirectory, "usage.json"), result.adapter.usage),
+          writeJson(join(result.evidenceDirectory, "tools.json"), {
+            aggregate: result.adapter.tools,
+            profile: result.toolProfile,
+          }),
+          writeJson(join(result.evidenceDirectory, "route.json"), {
+            condition,
+            route: route ?? null,
+          }),
+          writeJson(
+            join(result.evidenceDirectory, "verification-isolation.json"),
+            result.verificationIsolation,
+          ),
+        ]);
+      }
+      const evidenceRefs = freeze
+        ? [...new Set([
+          ...freeze.requiredArtifacts,
+          "evidence-manifest.json",
+          "run.json",
+        ])].map((artifact) => join(result.evidenceDirectory, artifact))
+        : [
+          join(result.evidenceDirectory, "git.patch"),
+          join(result.evidenceDirectory, "preparation.json"),
+          join(result.evidenceDirectory, "verification.json"),
+          join(result.evidenceDirectory, "events.jsonl"),
+          ...(routePath ? [routePath] : []),
+        ];
+      let record = benchmarkRunRecordSchema.parse({
         schemaVersion: 1,
         runId: result.runId,
         experimentId: opts.experiment,
@@ -288,19 +572,50 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           humanInterventions: 0,
         },
         evidenceRefs: [
-          join(result.evidenceDirectory, "git.patch"),
-          join(result.evidenceDirectory, "preparation.json"),
-          join(result.evidenceDirectory, "verification.json"),
-          join(result.evidenceDirectory, "events.jsonl"),
-          ...(routePath ? [routePath] : []),
+          ...evidenceRefs,
+          ...(routePath && !evidenceRefs.includes(routePath) ? [routePath] : []),
           ...(result.adapter.usage.estimatedCostUsd === null
             ? [`estimatedCostUsd:unassessed-${provider}-subscription`]
             : []),
         ],
+        ...(freeze && frozenTrial && evidenceManifestSha256
+          ? {
+            prospective: {
+              planHash: freeze.planHash,
+              freezeHash: freeze.freezeHash,
+              candidateArtifactSha256: freeze.candidate.artifactSha256,
+              taskManifestSha256,
+              evidenceManifestSha256,
+              trialId: frozenTrial.trialId,
+              sequence: frozenTrial.sequence,
+            },
+          }
+          : {}),
       });
+      const runPath = join(result.evidenceDirectory, "run.json");
+      if (freeze && frozenTrial) {
+        await writeJson(runPath, record);
+        const manifest = await createEvidenceManifest({
+          evidenceDirectory: result.evidenceDirectory,
+          trialId: frozenTrial.trialId,
+          artifactNames: [
+            ...freeze.requiredArtifacts.filter((artifact) =>
+              artifact !== "evidence-manifest.json"),
+            "run.json",
+          ],
+        });
+        evidenceManifestSha256 = manifest.manifestSha256;
+        record = benchmarkRunRecordSchema.parse({
+          ...record,
+          prospective: {
+            ...record.prospective,
+            evidenceManifestSha256,
+          },
+        });
+      }
       const store = new EfficiencyRunStore(resolve(opts.storeRoot));
+      await writeJson(runPath, record);
       await store.append(record);
-      await writeJson(join(result.evidenceDirectory, "run.json"), record);
       const payload = {
         status: result.accepted ? "accepted" : "failed-quality-gate",
         run: record,
@@ -634,6 +949,23 @@ function positiveInteger(value: string, label: string): number {
   const parsed = integer(value, label);
   if (parsed <= 0) throw new Error(`${label} must be positive`);
   return parsed;
+}
+
+function nonnegativeInteger(value: string, label: string): number {
+  const parsed = integer(value, label);
+  if (parsed < 0) throw new Error(`${label} must be nonnegative`);
+  return parsed;
+}
+
+function candidateSourceState(
+  value: string,
+): "clean" | "content-addressed-dirty-snapshot" {
+  if (value === "clean" || value === "content-addressed-dirty-snapshot") {
+    return value;
+  }
+  throw new Error(
+    "candidate-source-state must be clean or content-addressed-dirty-snapshot",
+  );
 }
 
 function ratio(value: string, label: string): number {

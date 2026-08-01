@@ -3707,6 +3707,49 @@
             "type": "string",
             "minLength": 1
           }
+        },
+        "prospective": {
+          "type": "object",
+          "properties": {
+            "planHash": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "freezeHash": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "candidateArtifactSha256": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "taskManifestSha256": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "evidenceManifestSha256": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "trialId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sequence": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "planHash",
+            "freezeHash",
+            "candidateArtifactSha256",
+            "taskManifestSha256",
+            "evidenceManifestSha256",
+            "trialId",
+            "sequence"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

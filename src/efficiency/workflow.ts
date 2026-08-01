@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { benchmarkConditionSchema, type BenchmarkCondition } from "./contracts.js";
+import type { WorkflowAgentBudget } from "./workflow-budget.js";
 
 const verificationKindSchema = z.enum([
   "build",
@@ -25,9 +26,26 @@ const workflowFixtureSchema = z.object({
   executable: z.boolean().default(false),
 }).strict();
 
+export const workflowAgentBudgetSchema = z.object({
+  maxToolCalls: z.number().int().min(1).max(50),
+  maxToolOutputBytes: z.number().int().min(1_024).max(2_000_000).default(160_000),
+  maxInputTokens: z.number().int().min(1_000).max(2_000_000),
+  maxOutputTokens: z.number().int().min(100).max(200_000),
+  maxReasoningTokens: z.number().int().min(0).max(200_000),
+}).strict();
+
+const defaultAgentBudget: WorkflowAgentBudget = {
+  maxToolCalls: 16,
+  maxToolOutputBytes: 160_000,
+  maxInputTokens: 375_000,
+  maxOutputTokens: 10_000,
+  maxReasoningTokens: 4_000,
+};
+
 export const workflowVerificationSchema = z.object({
   kind: verificationKindSchema,
   ...workflowProcessSchema.shape,
+  preflightExpectedExitCode: z.number().int().min(0).max(255).default(0),
 }).strict();
 
 export const workflowTaskSchema = z.object({
@@ -35,6 +53,10 @@ export const workflowTaskSchema = z.object({
   id: z.string().regex(/^[a-z][a-z0-9-]*$/),
   intent: z.string().min(20),
   maximumDurationMs: z.number().int().min(2 * 60_000).max(60 * 60_000),
+  focusPaths: z.array(z.string().min(1).refine(isSafeRelativePath, {
+    message: "focus path must remain inside the disposable checkout",
+  })).max(20).default([]),
+  agentBudget: workflowAgentBudgetSchema.default(defaultAgentBudget),
   steps: z.array(z.string().min(3)).min(5),
   preparation: z.array(workflowProcessSchema).max(10).default([]),
   fixtures: z.array(workflowFixtureSchema).max(50).default([]),
@@ -152,15 +174,32 @@ export function buildWorkflowPrompt(input: {
       ...task.fixtures.map((fixture) => `- ${fixture.path}`),
       "Any fixture change invalidates the benchmark even when verification passes.",
     ];
+  const focusContract = task.focusPaths.length === 0
+    ? []
+    : [
+      "Start with these task-provided paths, which are identical in both conditions:",
+      ...task.focusPaths.map((focusPath) => `- ${focusPath}`),
+      "Read only direct dependencies when the listed paths leave a concrete question unanswered.",
+      "Do not perform a repository-wide search, inspect lockfile bodies, or investigate unrelated product areas.",
+    ];
+  const budgetContract = [
+    `Hard execution limits: at most ${task.agentBudget.maxToolCalls} tool calls, ${task.agentBudget.maxInputTokens} input tokens, ${task.agentBudget.maxOutputTokens} output tokens, and ${task.agentBudget.maxReasoningTokens} reasoning tokens.`,
+    "Make one minimal scoped patch. Run each named verification command at most once unless its own failure directly identifies the requested change.",
+    "Do not repair unrelated dependency, platform, or pre-existing build failures. Record them concisely and stop.",
+    "Keep file reads and searches narrow: request at most 160 lines or one direct symbol per command.",
+    "Keep the final report under 200 words and state only completed work, verification, and unresolved blockers.",
+  ];
   const shared = [
     "Work in the disposable benchmark checkout only.",
     "Do not delegate or load personal skills, plugins, memory, or unrelated instructions.",
     "Complete the product task, not only a source review.",
     `Task: ${task.intent}`,
+    ...focusContract,
     "Required workflow:",
     ...task.steps.map((step, index) => `${index + 1}. ${step}`),
     "Run every verification command from the task manifest.",
     "Preserve failures and unresolved gaps in the final report.",
+    ...budgetContract,
     ...fixtureContract,
   ].join("\n");
   const condition = benchmarkConditionSchema.parse(input.condition);

@@ -1,11 +1,23 @@
-import { describe, expect, it } from "vitest";
+import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   buildPreparedToolEnvironment,
   buildClaudeWorkflowArgs,
   buildCodexWorkflowArgs,
+  createClaudeWorkflowAdapter,
+  createCodexWorkflowAdapter,
   parseClaudeOAuthCredential,
   parseClaudeStreamJson,
 } from "../workflow-adapters.js";
+
+const temporaryDirectories: string[] = [];
+
+afterEach(async () => {
+  await Promise.all(temporaryDirectories.splice(0).map((directory) =>
+    rm(directory, { recursive: true, force: true })));
+});
 
 describe("model-agnostic workflow adapters", () => {
   it("builds isolated writable Codex arguments", () => {
@@ -134,4 +146,130 @@ describe("model-agnostic workflow adapters", () => {
     expect(parseClaudeOAuthCredential(valid, now)).toBe("test-oauth-token");
     expect(parseClaudeOAuthCredential(expired, now)).toBeNull();
   });
+
+  it("executes Claude in an isolated home and retains streamed tool accounting", async () => {
+    const root = await temporaryDirectory();
+    const authHome = path.join(root, "claude-auth");
+    const executable = path.join(root, "fixture-claude");
+    await mkdir(authHome, { recursive: true });
+    await writeFile(path.join(authHome, ".credentials.json"), JSON.stringify({
+      claudeAiOauth: {
+        accessToken: "fixture-token",
+        expiresAt: Date.now() + 60_000,
+      },
+    }));
+    await writeFile(executable, [
+      "#!/usr/bin/env node",
+      "const events=[",
+      "{type:'assistant',message:{content:[{type:'tool_use',id:'tool-1',name:'Bash'}]}},",
+      "{type:'user',message:{content:[{type:'tool_result',tool_use_id:'tool-1',content:'done'}]}},",
+      "{type:'result',subtype:'success',result:'ok',usage:{input_tokens:10,output_tokens:2}}",
+      "];",
+      "for(const event of events) process.stdout.write(JSON.stringify(event)+'\\n');",
+    ].join("\n"));
+    await chmod(executable, 0o700);
+    const adapter = createClaudeWorkflowAdapter({
+      executable,
+      modelId: "fixture-model",
+      reasoningEffort: "low",
+      authHome,
+    });
+
+    const result = await adapter.execute({
+      workspaceRoot: root,
+      prompt: "fixture prompt",
+      timeoutMs: 2_000,
+      maximumToolCalls: 4,
+      maximumToolOutputBytes: 1_024,
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.usage).toMatchObject({ inputTokens: 10, outputTokens: 2 });
+    expect(result.tools).toMatchObject({ calls: 1, outputBytes: 4, errors: 0 });
+  });
+
+  it("escalates termination for a stubborn child while retaining complete output accounting", async () => {
+    const root = await temporaryDirectory();
+    const authHome = path.join(root, "auth");
+    const executable = path.join(root, "stubborn-codex");
+    await mkdir(authHome, { recursive: true });
+    await writeFile(path.join(authHome, "auth.json"), "{}\n");
+    await writeFile(executable, [
+      "#!/usr/bin/env node",
+      "process.on('SIGTERM', () => {});",
+      "const first={type:'item.started',item:{type:'command_execution',id:'call-1'}};",
+      "const second={type:'item.completed',item:{type:'command_execution',id:'call-1',aggregated_output:'0123456789'}};",
+      "process.stdout.write(JSON.stringify(first)+'\\n');",
+      "process.stdout.write(JSON.stringify(second)+'\\n');",
+      "setTimeout(() => process.exit(0), 1200);",
+    ].join("\n"));
+    await chmod(executable, 0o700);
+    const adapter = createCodexWorkflowAdapter({
+      executable,
+      modelId: "fixture-model",
+      reasoningEffort: "low",
+      authHome,
+    });
+
+    const started = performance.now();
+    const result = await adapter.execute({
+      workspaceRoot: root,
+      prompt: "fixture prompt",
+      timeoutMs: 5_000,
+      maximumToolCalls: 4,
+      maximumToolOutputBytes: 4,
+    });
+    const durationMs = performance.now() - started;
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain("0123456789");
+    expect(result.stderr).toContain("budget-exhausted:max-tool-output-bytes");
+    expect(result.tools).toMatchObject({
+      calls: 1,
+      outputBytes: 10,
+    });
+    expect(durationMs).toBeLessThan(900);
+  });
+
+  it("preserves partial output when the adapter deadline terminates a stubborn child", async () => {
+    const root = await temporaryDirectory();
+    const authHome = path.join(root, "auth");
+    const executable = path.join(root, "timeout-codex");
+    await mkdir(authHome, { recursive: true });
+    await writeFile(path.join(authHome, "auth.json"), "{}\n");
+    await writeFile(executable, [
+      "#!/usr/bin/env node",
+      "process.on('SIGTERM', () => {});",
+      "process.stdout.write(JSON.stringify({type:'thread.started'})+'\\n');",
+      "process.stderr.write('provider-stderr\\n');",
+      "setTimeout(() => process.exit(0), 1200);",
+    ].join("\n"));
+    await chmod(executable, 0o700);
+    const adapter = createCodexWorkflowAdapter({
+      executable,
+      modelId: "fixture-model",
+      reasoningEffort: "low",
+      authHome,
+    });
+
+    const result = await adapter.execute({
+      workspaceRoot: root,
+      prompt: "fixture prompt",
+      timeoutMs: 250,
+      maximumToolCalls: 4,
+      maximumToolOutputBytes: 1_024,
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain("thread.started");
+    expect(result.stderr).toContain("provider-stderr");
+    expect(result.stderr).toContain("timeout-exhausted:250ms");
+    expect(result.tools).toMatchObject({ calls: 0, outputBytes: 0 });
+  });
 });
+
+async function temporaryDirectory(): Promise<string> {
+  const directory = await mkdtemp(path.join(tmpdir(), "memi-adapter-test-"));
+  temporaryDirectories.push(directory);
+  return directory;
+}
