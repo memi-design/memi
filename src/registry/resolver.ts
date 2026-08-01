@@ -135,7 +135,7 @@ async function resolveNpm(pkgName: string, cwd: string, options: ResolveRegistry
     }
     return {
       ...local,
-      source: `npm:${packageName}@${local.registry.version}`,
+      source: `local-package:${packageName}@${local.registry.version}`,
     };
   } catch (localError) {
     try {

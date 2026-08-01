@@ -62,7 +62,7 @@ export async function installShadcnRegistryItem(
   for (const file of resolved.item.files) {
     const content = file.content ?? await resolved.readFileContent(file);
     const targetPath = resolveShadcnTarget(engine.config.projectRoot, file, componentsJson, options.targetDir);
-    await mkdir(dirname(targetPath), { recursive: true });
+    await prepareShadcnInstallTarget(engine.config.projectRoot, targetPath, file.target ?? file.path);
     await writeFile(targetPath, content);
     generatedFiles.push(targetPath);
     if (!codePath && /\.(tsx|jsx|ts|js|vue|svelte)$/.test(targetPath)) {
@@ -251,6 +251,53 @@ export function assertShadcnInstallTargetContained(
   if (!isPathWithin(candidate, projectRoot)) {
     throw new Error(`Refusing to write shadcn file outside project root: ${source}`);
   }
+}
+
+async function prepareShadcnInstallTarget(
+  projectRoot: string,
+  candidate: string,
+  source: string,
+): Promise<void> {
+  const root = resolve(projectRoot);
+  assertShadcnInstallTargetContained(root, candidate, source);
+
+  const targetParent = dirname(candidate);
+  const existingAncestor = await findExistingAncestor(targetParent);
+  const [realRoot, realAncestor] = await Promise.all([
+    realpath(root),
+    realpath(existingAncestor),
+  ]);
+  assertShadcnInstallTargetContained(realRoot, realAncestor, source);
+
+  await mkdir(targetParent, { recursive: true });
+  const realParent = await realpath(targetParent);
+  assertShadcnInstallTargetContained(realRoot, realParent, source);
+
+  try {
+    const realCandidate = await realpath(candidate);
+    assertShadcnInstallTargetContained(realRoot, realCandidate, source);
+  } catch (error) {
+    if (!isMissingPathError(error)) throw error;
+  }
+}
+
+async function findExistingAncestor(start: string): Promise<string> {
+  let current = start;
+  while (!await exists(current)) {
+    const parent = dirname(current);
+    if (parent === current) {
+      throw new Error(`No existing ancestor for shadcn install target: ${start}`);
+    }
+    current = parent;
+  }
+  return current;
+}
+
+function isMissingPathError(error: unknown): boolean {
+  return typeof error === "object"
+    && error !== null
+    && "code" in error
+    && (error as NodeJS.ErrnoException).code === "ENOENT";
 }
 
 function normalizeAliasTarget(target: string, componentsJson: ComponentsJson): string {

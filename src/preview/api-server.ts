@@ -7,7 +7,7 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { randomBytes, timingSafeEqual } from "crypto";
-import { readFile, readdir } from "fs/promises";
+import { readFile, readdir, realpath } from "fs/promises";
 import { existsSync } from "fs";
 import { join, extname, basename } from "path";
 import { WebSocketServer, WebSocket } from "ws";
@@ -15,7 +15,7 @@ import type { MemoireEngine } from "../engine/core.js";
 import type { MemoireEvent } from "../engine/core.js";
 import { createLogger } from "../engine/logger.js";
 import { PreviewWidgetStateCache } from "./widget-state-cache.js";
-import { resolvePathWithin } from "../utils/path-containment.js";
+import { isPathWithin, resolvePathWithin } from "../utils/path-containment.js";
 
 const log = createLogger("preview-api");
 
@@ -66,6 +66,20 @@ export function resolvePreviewStaticPath(staticDir: string, requestPath: string)
   } catch {
     return null;
   }
+}
+
+/** Resolve the real file path and reject symlinks that leave the preview root. */
+export async function resolvePreviewStaticReadPath(
+  staticDir: string,
+  requestPath: string,
+): Promise<string | null> {
+  const lexicalPath = resolvePreviewStaticPath(staticDir, requestPath);
+  if (!lexicalPath) return null;
+  const [realRoot, realCandidate] = await Promise.all([
+    realpath(staticDir),
+    realpath(lexicalPath),
+  ]);
+  return isPathWithin(realCandidate, realRoot) ? realCandidate : null;
 }
 
 function createPortBindError(port: number, err: NodeJS.ErrnoException): Error & { code?: string; port?: number } {
@@ -422,16 +436,15 @@ export class PreviewApiServer {
         }
 
         // Static file serving
-        const fullPath = resolvePreviewStaticPath(this.staticDir, url.pathname);
-        if (!fullPath) {
-          res.statusCode = 403;
-          res.setHeader("Content-Type", "text/plain");
-          res.end("Forbidden");
-          return;
-        }
-
-        const ext = extname(fullPath);
         try {
+          const fullPath = await resolvePreviewStaticReadPath(this.staticDir, url.pathname);
+          if (!fullPath) {
+            res.statusCode = 403;
+            res.setHeader("Content-Type", "text/plain");
+            res.end("Forbidden");
+            return;
+          }
+          const ext = extname(fullPath);
           const content = await readFile(fullPath);
           res.setHeader("Content-Type", MIME_TYPES[ext] || "application/octet-stream");
           res.end(content);
