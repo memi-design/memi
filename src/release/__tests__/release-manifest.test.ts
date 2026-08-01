@@ -24,16 +24,17 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.0",
-          state: "published",
-          sourceCommit: publicEngineSourceCommit,
-          releaseRecord: {
-            path: "release-artifacts/npm/2.7.0.release.json",
-            sha256: "1975911a27a9e148a4d12e644e88a8968a1f466c8d5724a80738015260916ca9",
+          version: "2.7.1",
+          state: "candidate",
+          sourceCommit: null,
+          releaseRecord: null,
+          previousPublicRelease: {
+            version: "2.7.0",
+            sourceCommit: publicEngineSourceCommit,
           },
           verification: {
             eligibleForParity: false,
-            reason: "npm, GitHub release, Action channel, binaries, checksums, container, and pinned Studio assets are verified; MCP Registry and deployed website parity are pending",
+            reason: "2.7.1 is a local candidate; publish provenance and independent public-surface parity verification are pending",
           },
         },
         studio: { version: "2.5.0" },
@@ -45,7 +46,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.0",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.1",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
@@ -69,7 +70,7 @@ describe("release manifest", () => {
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
     expect(artifact.publicTruth).toEqual({
-      source: "currentRelease",
+      source: "previousPublicRelease",
       engine: {
         version: "2.7.0",
         sourceCommit: publicEngineSourceCommit,
@@ -83,16 +84,14 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.7.0",
-          state: "published",
+          state: "historical",
           sourceCommit: publicEngineSourceCommit,
-          releaseRecord: {
-            path: "release-artifacts/npm/2.7.0.release.json",
-            sha256: "1975911a27a9e148a4d12e644e88a8968a1f466c8d5724a80738015260916ca9",
-          },
+          releaseRecord: null,
           verification: {
             eligibleForParity: false,
-            reason: "npm, GitHub release, Action channel, binaries, checksums, container, and pinned Studio assets are verified; MCP Registry and deployed website parity are pending",
+            reason: "2.7.0 remains public while 2.7.1 is an unpublished candidate",
           },
+          plannedSuccessor: "2.7.1",
         },
       },
       surfaces: {
