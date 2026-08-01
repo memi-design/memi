@@ -136,6 +136,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `1c649edb` | test: run Codex fixture through Node portably |
 | `d66c5cd8` | fix: close Windows archive and Studio handles |
 | `22568695` | chore: record Memi 2.7.4 npm provenance |
+| `075e431f` | docs: synchronize published Memi 2.7.4 surfaces |
+| `7570fc0b` | fix: align published 2.7.4 release truth |
 
 ### Exact-match fail-closed route fitness
 
