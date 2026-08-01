@@ -37,6 +37,7 @@ class StudyPaths:
     generated_root: Path
     tables_root: Path
     figures_root: Path
+    tex_root: Path
     evidence_runs_root: Path
     protocol_path: Path
     plan_path: Path
@@ -94,6 +95,7 @@ def study_paths() -> StudyPaths:
         generated_root=generated_root,
         tables_root=generated_root / "tables",
         figures_root=generated_root / "figures",
+        tex_root=generated_root / "tex",
         evidence_runs_root=Path("/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v15-2.7.3-confirmatory/runs"),
         protocol_path=study_root / "protocol.json",
         plan_path=study_root / "plan.json",
@@ -142,6 +144,11 @@ def run_confirmatory_analysis(write_outputs: bool = True) -> dict[str, Any]:
         "analysisStatus": "complete",
         "bootstrapSamples": BOOTSTRAP_SAMPLES,
         "nonInferiorityMargin": NONINFERIORITY_MARGIN,
+        "receiptPreflight": {
+            "expectedTrials": preflight["expectedTrials"],
+            "presentTrials": preflight["presentTrials"],
+            "gradeOnlyExclusions": preflight["gradeOnlyExclusions"],
+        },
         "primarySummary": primary_summary,
         "primaryPairRows": primary_rows,
         "leaveOnePairOut": loo_rows,
@@ -506,15 +513,15 @@ def _secondary_analysis(trial_runs: dict[str, TrialRun]) -> list[dict[str, Any]]
         pair_index.setdefault((run.task_id, run.repeat), {})[run.condition] = run
 
     metrics = {
-        "functional_acceptance": ("accepted", "higher"),
-        "critical_defects": ("defects", "lower"),
-        "input_tokens": ("input_tokens", "lower"),
-        "output_tokens": ("output_tokens", "lower"),
-        "reasoning_tokens": ("reasoning_tokens", "lower"),
-        "wall_time_ms": ("wall_time_ms", "lower"),
-        "tool_calls": ("tool_calls", "lower"),
-        "retries": ("retries", "lower"),
-        "provider_failures": ("provider_failures", "lower"),
+        "functional_acceptance": ("accepted", "higher", "indicator"),
+        "critical_defects": ("defects", "lower", "defects"),
+        "input_tokens": ("input_tokens", "lower", "tokens"),
+        "output_tokens": ("output_tokens", "lower", "tokens"),
+        "reasoning_tokens": ("reasoning_tokens", "lower", "tokens"),
+        "wall_time_ms": ("wall_time_ms", "lower", "milliseconds"),
+        "tool_calls": ("tool_calls", "lower", "calls"),
+        "retries": ("retries", "lower", "count"),
+        "provider_failures": ("provider_failures", "lower", "count"),
     }
     rows: list[dict[str, Any]] = []
     pvalue_rows: list[tuple[int, float]] = []
@@ -523,7 +530,7 @@ def _secondary_analysis(trial_runs: dict[str, TrialRun]) -> list[dict[str, Any]]
             pair_index[(task_id, repeat)]
             for repeat in sorted(repeat for other_task, repeat in pair_index if other_task == task_id)
         ]
-        for metric_name, (field, direction) in metrics.items():
+        for metric_name, (field, direction, unit) in metrics.items():
             deltas: list[float] = []
             for pair in task_pairs:
                 if "baseline" not in pair or "memi" not in pair:
@@ -536,13 +543,22 @@ def _secondary_analysis(trial_runs: dict[str, TrialRun]) -> list[dict[str, Any]]
                 continue
             better_deltas = deltas if direction == "higher" else [-value for value in deltas]
             sign = _exact_sign_test(better_deltas, alternative="greater")
+            bootstrap = _bootstrap_mean_interval(
+                deltas,
+                samples=BOOTSTRAP_SAMPLES,
+                seed=_task_seed(f"{task_id}:{metric_name}"),
+            )
             row = {
                 "task_id": task_id,
                 "metric": metric_name,
+                "unit": unit,
                 "pairs": len(deltas),
                 "direction": direction,
                 "mean_raw_delta": round(float(np.mean(deltas)), 4),
                 "median_raw_delta": round(float(np.median(deltas)), 4),
+                "bootstrap_samples": BOOTSTRAP_SAMPLES,
+                "bootstrap_ci_lower_2p5": round(bootstrap["two_sided_lower"], 4),
+                "bootstrap_ci_upper_97p5": round(bootstrap["two_sided_upper"], 4),
                 "sign_test_positive": sign["positive"],
                 "sign_test_negative": sign["negative"],
                 "sign_test_ties": sign["ties"],
@@ -591,6 +607,7 @@ def _pooled_descriptives(
 def _write_outputs(paths: StudyPaths, summary: dict[str, Any]) -> None:
     paths.tables_root.mkdir(parents=True, exist_ok=True)
     paths.figures_root.mkdir(parents=True, exist_ok=True)
+    paths.tex_root.mkdir(parents=True, exist_ok=True)
 
     _write_csv(
         paths.tables_root / "primary_pair_level.csv",
@@ -627,6 +644,136 @@ def _write_outputs(paths: StudyPaths, summary: dict[str, Any]) -> None:
             paths.figures_root / "primary_noninferiority_bounds.png",
             summary["primarySummary"],
         )
+    if summary["primaryPairRows"]:
+        _plot_paired_quality_comparisons(
+            paths.figures_root / "paired_quality_comparisons.png",
+            summary["primaryPairRows"],
+        )
+    resource_rows = [
+        row for row in summary["secondaryTests"]
+        if row["metric"] in RESOURCE_FIGURE_METRICS
+    ]
+    if resource_rows:
+        _plot_task_resource_intervals(
+            paths.figures_root / "task_resource_intervals.png",
+            resource_rows,
+        )
+    _write_tex_outputs(paths.tex_root, summary)
+
+
+RESOURCE_FIGURE_METRICS = (
+    "input_tokens",
+    "output_tokens",
+    "reasoning_tokens",
+    "wall_time_ms",
+    "tool_calls",
+    "retries",
+    "provider_failures",
+)
+
+
+def _plot_paired_quality_comparisons(
+    path: Path,
+    rows: list[dict[str, Any]],
+) -> None:
+    tasks = sorted({str(row["task_id"]) for row in rows})
+    figure, axes = plt.subplots(
+        1,
+        len(tasks),
+        figsize=(max(7.2, 3.4 * len(tasks)), 4.8),
+        sharey=True,
+        squeeze=False,
+    )
+    colors = ("#234f7d", "#b55239")
+    for task_index, task_id in enumerate(tasks):
+        axis = axes[0, task_index]
+        task_rows = sorted(
+            (row for row in rows if row["task_id"] == task_id),
+            key=lambda row: int(row["repeat"]),
+        )
+        for row in task_rows:
+            baseline = float(row["baseline_score"])
+            memi = float(row["memi_score"])
+            axis.plot([0, 1], [baseline, memi], color="#a8b0b8", linewidth=1.1, zorder=1)
+            axis.scatter([0, 1], [baseline, memi], color=colors, s=30, zorder=2)
+            axis.annotate(
+                f"r{row['repeat']}",
+                (1, memi),
+                xytext=(4, 0),
+                textcoords="offset points",
+                fontsize=7,
+                color="#4a4a4a",
+                va="center",
+            )
+        axis.set_xticks([0, 1], ["Baseline", "Memi"])
+        axis.set_xlim(-0.2, 1.25)
+        axis.set_ylim(0, 100)
+        axis.set_title(task_id.replace("-", "\n"), fontsize=9)
+        axis.grid(axis="y", color="#e2e6e9", linewidth=0.7)
+        if task_index == 0:
+            axis.set_ylabel("Blinded panel median (0--100)")
+    figure.suptitle("Paired design-quality scores by frozen task", fontsize=12)
+    figure.tight_layout()
+    figure.savefig(
+        path,
+        dpi=160,
+        metadata={"Software": "Memi V15 deterministic analysis"},
+    )
+    plt.close(figure)
+
+
+def _plot_task_resource_intervals(
+    path: Path,
+    rows: list[dict[str, Any]],
+) -> None:
+    metric_rows = {
+        metric: sorted(
+            (row for row in rows if row["metric"] == metric),
+            key=lambda row: str(row["task_id"]),
+        )
+        for metric in RESOURCE_FIGURE_METRICS
+    }
+    populated_metrics = [metric for metric in RESOURCE_FIGURE_METRICS if metric_rows[metric]]
+    columns = 2
+    row_count = math.ceil(len(populated_metrics) / columns)
+    figure, axes = plt.subplots(
+        row_count,
+        columns,
+        figsize=(11, max(5.8, 2.65 * row_count)),
+        squeeze=False,
+    )
+    for axis, metric in zip(axes.flat, populated_metrics):
+        entries = metric_rows[metric]
+        tasks = [str(row["task_id"]) for row in entries]
+        means = np.asarray([row["mean_raw_delta"] for row in entries], dtype=float)
+        lowers = np.asarray([row["bootstrap_ci_lower_2p5"] for row in entries], dtype=float)
+        uppers = np.asarray([row["bootstrap_ci_upper_97p5"] for row in entries], dtype=float)
+        positions = np.arange(len(entries))
+        axis.errorbar(
+            means,
+            positions,
+            xerr=np.vstack((means - lowers, uppers - means)),
+            fmt="o",
+            color="#234f7d",
+            ecolor="#7a8ca1",
+            capsize=3,
+        )
+        axis.axvline(0, color="#ad343e", linestyle="--", linewidth=1)
+        axis.set_yticks(positions, [task.replace("-", " ") for task in tasks], fontsize=7)
+        unit = str(entries[0]["unit"])
+        axis.set_xlabel(f"Memi minus baseline ({unit}; lower is better)", fontsize=8)
+        axis.set_title(metric.replace("_", " "), fontsize=10)
+        axis.grid(axis="x", color="#e2e6e9", linewidth=0.7)
+    for axis in list(axes.flat)[len(populated_metrics):]:
+        axis.set_visible(False)
+    figure.suptitle("Task-level paired resource deltas with 95% bootstrap intervals", fontsize=12)
+    figure.tight_layout()
+    figure.savefig(
+        path,
+        dpi=160,
+        metadata={"Software": "Memi V15 deterministic analysis"},
+    )
+    plt.close(figure)
 
 
 def _plot_primary_deltas(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -653,7 +800,7 @@ def _plot_noninferiority_bounds(path: Path, rows: list[dict[str, Any]]) -> None:
     axis.errorbar(
         means,
         y,
-        xerr=[means - lowers, uppers - means],
+        xerr=np.vstack((means - lowers, uppers - means)),
         fmt="o",
         color="#234f7d",
         ecolor="#7a8ca1",
@@ -666,6 +813,171 @@ def _plot_noninferiority_bounds(path: Path, rows: list[dict[str, Any]]) -> None:
     fig.tight_layout()
     fig.savefig(path, dpi=160)
     plt.close(fig)
+
+
+def _write_tex_outputs(tex_root: Path, summary: dict[str, Any]) -> None:
+    primary = sorted(summary["primarySummary"], key=lambda row: str(row["task_id"]))
+    secondary = sorted(
+        summary["secondaryTests"],
+        key=lambda row: (str(row["task_id"]), str(row["metric"])),
+    )
+    receipt = summary["receiptPreflight"]
+    passed_tasks = [str(row["task_id"]) for row in primary if row["noninferior"]]
+    failed_tasks = [str(row["task_id"]) for row in primary if not row["noninferior"]]
+    task_decision = _task_decision_text(passed_tasks, failed_tasks)
+    fresh_status = (
+        f"{receipt['presentTrials']} of {receipt['expectedTrials']} frozen cells have "
+        "unique, manifest-verified receipts; no missing cell is imputed."
+    )
+    macros = "\n".join([
+        "% Generated deterministically from the executed V15 analysis; do not edit.",
+        r"\renewcommand{\AuditStatusLabel}{V15 CONFIRMATORY ANALYSIS EXECUTED}",
+        f"\\renewcommand{{\\FreshCellStatus}}{{{_tex_escape(fresh_status)}}}",
+        f"\\renewcommand{{\\PrimaryGateStatus}}{{{_tex_escape(task_decision)}}}",
+        f"\\renewcommand{{\\ClaimDecision}}{{{_tex_escape(task_decision + ' No superiority or dollar-savings claim is authorized.')}}}",
+        "",
+    ])
+    _write_tex(tex_root / "report-macros.tex", macros)
+
+    technical_summary = (
+        f"The executed analysis admitted {_tex_escape(str(receipt['presentTrials']))} of "
+        f"{_tex_escape(str(receipt['expectedTrials']))} frozen receipts. "
+        f"{_tex_escape(task_decision)} Pooled cross-fixture quantities remain descriptive, "
+        "and no billing-cost estimate is made.\n"
+    )
+    _write_tex(tex_root / "technical-summary.tex", technical_summary)
+
+    functional_rows = [
+        row for row in secondary
+        if row["metric"] in {"functional_acceptance", "critical_defects"}
+    ]
+    functional_lines = [
+        "\\begin{description}",
+    ]
+    for row in functional_rows:
+        functional_lines.append(
+            f"\\item[{_tex_escape(str(row['task_id']))}: {_tex_escape(str(row['metric']).replace('_', ' '))}] "
+            f"The mean paired Memi-minus-baseline delta was {_format_number(row['mean_raw_delta'])} "
+            f"({_format_number(row['bootstrap_ci_lower_2p5'])} to "
+            f"{_format_number(row['bootstrap_ci_upper_97p5'])}; 95\\% paired bootstrap; "
+            f"Holm-adjusted $p={_format_number(row['p_value_holm'])}$)."
+        )
+    functional_lines.extend([
+        "\\end{description}",
+        "These functional and defect outcomes retain every valid receipt even when a cell is excluded from rendered grading.",
+        "",
+    ])
+    _write_tex(
+        tex_root / "functional-quality-results.tex",
+        "\n".join(functional_lines),
+    )
+
+    primary_lines = [
+        "\\begin{table*}[ht]",
+        "\\centering",
+        "\\caption{Task-level blinded design-quality results generated from the executed analysis.}",
+        "\\small",
+        "\\begin{tabular}{@{}lrrrrl@{}}",
+        "\\toprule",
+        "Task & Pairs & Mean $\\Delta$ & Median $\\Delta$ & One-sided 95\\% lower & NI gate \\\\",
+        "\\midrule",
+    ]
+    for row in primary:
+        primary_lines.append(
+            f"{_tex_escape(str(row['task_id']))} & {row['graded_pairs']} & "
+            f"{_format_number(row['mean_delta'])} & {_format_number(row['median_delta'])} & "
+            f"{_format_number(row['noninferiority_lower_95_one_sided'])} & "
+            f"{'pass' if row['noninferior'] else 'not established'} \\\\"
+        )
+    primary_lines.extend([
+        "\\bottomrule",
+        "\\end{tabular}",
+        "\\end{table*}",
+        "",
+    ])
+    _write_tex(tex_root / "primary-task-summary.tex", "\n".join(primary_lines))
+
+    quality_interpretation = (
+        f"{_tex_escape(task_decision)} The plotted lines preserve each matched pair and "
+        "the decision uses the preregistered one-sided lower bound, not visual separation.\n"
+    )
+    _write_tex(
+        tex_root / "quality-figure-interpretation.tex",
+        quality_interpretation,
+    )
+
+    resource_rows = [row for row in secondary if row["metric"] in RESOURCE_FIGURE_METRICS]
+    resource_lines = ["\\begin{description}"]
+    for row in resource_rows:
+        resource_lines.append(
+            f"\\item[{_tex_escape(str(row['task_id']))}: {_tex_escape(str(row['metric']).replace('_', ' '))}] "
+            f"Mean raw delta {_format_number(row['mean_raw_delta'])} {_tex_escape(str(row['unit']))}; "
+            f"95\\% paired-bootstrap interval {_format_number(row['bootstrap_ci_lower_2p5'])} to "
+            f"{_format_number(row['bootstrap_ci_upper_97p5'])}; Holm-adjusted "
+            f"$p={_format_number(row['p_value_holm'])}$."
+        )
+    resource_lines.extend(["\\end{description}", ""])
+    _write_tex(
+        tex_root / "resource-efficiency-results.tex",
+        "\n".join(resource_lines),
+    )
+
+    intervals_excluding_zero = [
+        row for row in resource_rows
+        if row["bootstrap_ci_upper_97p5"] < 0 or row["bootstrap_ci_lower_2p5"] > 0
+    ]
+    holm_rejections = [row for row in resource_rows if row["reject_holm_0p05"]]
+    resource_interpretation = (
+        f"Across {len(resource_rows)} task-by-resource estimates, "
+        f"{len(intervals_excluding_zero)} paired-bootstrap intervals excluded zero and "
+        f"{len(holm_rejections)} tests rejected after Holm correction. Negative raw deltas "
+        "indicate lower Memi resource use; these measurements are not converted to dollars.\n"
+    )
+    _write_tex(
+        tex_root / "resource-figure-interpretation.tex",
+        resource_interpretation,
+    )
+
+
+def _task_decision_text(passed_tasks: list[str], failed_tasks: list[str]) -> str:
+    clauses: list[str] = []
+    if passed_tasks:
+        clauses.append(
+            "Quality non-inferiority passed for " + ", ".join(sorted(passed_tasks))
+        )
+    if failed_tasks:
+        clauses.append(
+            "quality non-inferiority was not established for "
+            + ", ".join(sorted(failed_tasks))
+        )
+    if not clauses:
+        return "No task-level quality gate was estimable"
+    return "; ".join(clauses) + "."
+
+
+def _format_number(value: Any) -> str:
+    number = float(value)
+    if number == 0:
+        return "0"
+    return f"{number:.4f}".rstrip("0").rstrip(".")
+
+
+def _tex_escape(value: str) -> str:
+    replacements = {
+        "\\": r"\textbackslash{}",
+        "&": r"\&",
+        "%": r"\%",
+        "$": r"\$",
+        "#": r"\#",
+        "_": r"\_",
+        "{": r"\{",
+        "}": r"\}",
+    }
+    return "".join(replacements.get(character, character) for character in value)
+
+
+def _write_tex(path: Path, content: str) -> None:
+    path.write_text(content.rstrip() + "\n", encoding="utf-8")
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
