@@ -27,7 +27,7 @@ Memi reads the product you already have, identifies accessibility, hierarchy, st
 Run one audit in any frontend repository:
 
 ```bash
-npx -y @memi-design/cli@2.7.0 diagnose . --json --no-write --fail-on none
+npx -y @memi-design/cli@2.7.1 diagnose . --json --no-write --fail-on none
 ```
 
 You get a score, normalized finding IDs, confidence, provenance, and `file:line` evidence. No account, API key, Figma file, global install, or daemon is required.
@@ -156,10 +156,10 @@ and its [unexecuted cross-harness protocol](docs/research/designworkbench-v2-pap
 
 | Surface | Start here | Best for |
 | --- | --- | --- |
-| One-time CLI audit | `npx -y @memi-design/cli@2.7.0 diagnose . --no-write` | Trying Memi without installing |
+| One-time CLI audit | `npx -y @memi-design/cli@2.7.1 diagnose . --no-write` | Trying Memi without installing |
 | Global CLI | `npm i -g @memi-design/cli` | Daily local use |
 | Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude, Cursor, and compatible agents |
-| GitHub Action | `uses: memi-design/memi@00be64b9bd49fab57f4f54f678550a2021f6d1ae` | Pull-request design CI |
+| GitHub Action | `uses: memi-design/memi@5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f` | Pull-request design CI |
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
 | Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
 
@@ -186,9 +186,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: memi-design/memi@00be64b9bd49fab57f4f54f678550a2021f6d1ae # v2.7.0
+      - uses: memi-design/memi@5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f # v2.7.1
         with:
-          version: "2.7.0"
+          version: "2.7.1"
           report: true
           upload-sarif: true
 ```
