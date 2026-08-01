@@ -487,9 +487,12 @@ def _remediation_tex(summary: Mapping[str, Any]) -> str:
         "immutable blinded-quality evidence v2, fail-closed legacy-v1 handling, chronological "
         "no-look-ahead replay, immediate regression suppression, three-later-pair prospective "
         "recovery, corrupt/duplicate event rejection, and repository-only fallback for "
-        "suppressed routes. The hardening chain is anchored by commits \\texttt{8cfd3498} "
-        "through \\texttt{dfd98328}; this source-level statement does not establish a "
-        "published release.\n\n"
+        "suppressed routes. The published 2.7.4 code artifact is anchored at exact source "
+        "commit \\texttt{8aa4649f}; post-release evidence synchronization at "
+        "\\texttt{b1b8b7ef} does not alter the published package bytes. The final "
+        "evidence-bound parity clearance merged at \\texttt{a7261456} and is anchored "
+        "to the immutable public-gate receipt whose SHA-256 begins "
+        "\\texttt{ca45f11f}; neither commit changes the npm tarball.\n\n"
         f"The sealed dry-run artifacts contain {summary['qualityEntryCount']} complete "
         "model-graded v2 quality pairs and "
         f"{summary['chronologyEntryCount']} chronological ingestion events. "
@@ -497,8 +500,10 @@ def _remediation_tex(summary: Mapping[str, Any]) -> str:
         "policy inputs and chronology without mutating a production fitness store. Public "
         "release channels and final cross-platform package bytes remain subject to the "
         "separate fail-closed release gate.\n\n"
-        "At reviewed tip \\texttt{dfd98328}, the local full suite passed 2,241 tests across "
-        "310 files; typecheck and build passed. The replay harness additionally pins frozen "
+        "At exact published source \\texttt{8aa4649f}, the local full suite passed 2,241 "
+        "tests across 310 files; typecheck and build passed. Clean-install CI also passed "
+        "nine Linux, macOS, and Windows cells spanning Node 20, 22, and 24. The replay "
+        "harness additionally pins frozen "
         "source and engine digests, rejects path and symlink escapes, and caps combined "
         "subprocess output at 10 MiB with process-group termination. The final security "
         "review reported no actionable findings. These are local engineering checks, not "
@@ -639,7 +644,7 @@ def _verified_release_gates_tex(summary: Mapping[str, Any]) -> str:
     rows = []
     for channel_id, label in _LIVE_RELEASE_CHANNELS.items():
         state = "DETACHED LEDGER" if channel_id == "website-pdf" else "VERIFIED"
-        rows.append(f"{_tex(label)} & {state} \\")
+        rows.append(f"{_tex(label)} & {state} \\\\")
     return (
         "% Generated from release-2.7.4-live-verification.json; do not edit.\n"
         "\\begin{center}\n"

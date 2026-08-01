@@ -27,9 +27,12 @@ study unless the corresponding preregistered gate passes.
 - No billing observations were collected, so no dollar-savings claim is made.
 - The controlled website remediation removed the serious Lighthouse
   `label-content-name-mismatch` finding and passed the unchanged blocking gate.
-- Memi 2.7.4 publication remains **pending live verification** across every
-  public channel. Local commits, tests, and dry-run policy artifacts are not
-  release proof.
+- Memi 2.7.4 publication is verified across npm, the nine-cell Node/platform
+  install matrix, GitHub release assets, Action `v2`, Homebrew, GHCR, and the
+  MCP Registry. The evidence-bound public gate records `failures: []` and
+  `parityEligible: true`. The PDF and website checksum remain deliberately
+  detached post-build evidence so the paper never claims to contain its own
+  checksum.
 
 ## Deterministic report package
 

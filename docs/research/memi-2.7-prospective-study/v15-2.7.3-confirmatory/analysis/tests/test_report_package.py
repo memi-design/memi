@@ -39,7 +39,11 @@ class ReportPackageTests(unittest.TestCase):
             self.assertIn("chronological", remediation_tex)
             self.assertIn("repository-only", remediation_tex)
             self.assertIn("2,241 tests across 310 files", remediation_tex)
-            self.assertIn("dfd98328", remediation_tex)
+            self.assertIn("8aa4649f", remediation_tex)
+            self.assertIn("b1b8b7ef", remediation_tex)
+            self.assertIn("a7261456", remediation_tex)
+            self.assertIn("ca45f11f", remediation_tex)
+            self.assertIn("nine Linux, macOS, and Windows", remediation_tex)
             self.assertIn("frozen source and engine digests", remediation_tex)
             self.assertIn("10 MiB", remediation_tex)
             self.assertIn("typecheck and build passed", remediation_tex)
@@ -93,6 +97,8 @@ class ReportPackageTests(unittest.TestCase):
             self.assertIn("VERIFIED", release_tex)
             self.assertIn("DETACHED LEDGER", release_tex)
             self.assertNotIn("PENDING LIVE VERIFICATION", release_tex)
+            self.assertIn("exact packed bytes & VERIFIED \\\\", release_tex)
+            self.assertIn("checksum parity & DETACHED LEDGER \\\\", release_tex)
             self.assertIn("PUBLIC SOFTWARE CHANNELS VERIFIED", release_status)
             self.assertIn("detached", release_status.lower())
 
@@ -208,7 +214,7 @@ class ReportPackageTests(unittest.TestCase):
     def test_cli_build_and_check_round_trip(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            _write_fixture(root)
+            paths = _write_fixture(root)
             script = Path(__file__).parents[2] / "build-report-package.py"
 
             built = subprocess.run(
@@ -228,6 +234,17 @@ class ReportPackageTests(unittest.TestCase):
             )
             self.assertEqual(checked.returncode, 0, checked.stderr)
             self.assertIn("current and deterministic", checked.stdout)
+
+            _write_json(paths.live_release_verification_path, _live_release_fixture())
+            live_built = subprocess.run(
+                [sys.executable, str(script), "--study-root", str(root)],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(live_built.returncode, 0, live_built.stderr)
+            self.assertIn("public software channels verified", live_built.stdout.lower())
+            self.assertNotIn("pending live release verification", live_built.stdout.lower())
 
 
 def _write_fixture(root: Path) -> object:
