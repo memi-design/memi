@@ -139,7 +139,8 @@ describe("skill fitness empirical identity security", () => {
     });
 
     await expect(access(lock)).rejects.toMatchObject({ code: "ENOENT" });
-    expect((await lstat(store)).mode & 0o777).toBe(0o600);
+    const mode = (await lstat(store)).mode & 0o777;
+    if (process.platform !== "win32") expect(mode).toBe(0o600);
   });
 
   it("fails closed on a symlinked lock without touching its target", async () => {

@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
@@ -161,7 +161,7 @@ async function sortedFiles(root: string, prefix = ""): Promise<string[]> {
   for (const entry of entries) {
     const relativePath = join(prefix, entry.name);
     if (entry.isDirectory()) files.push(...await sortedFiles(root, relativePath));
-    else files.push(relativePath);
+    else files.push(relativePath.split(sep).join("/"));
   }
 
   return files;

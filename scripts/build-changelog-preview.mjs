@@ -36,6 +36,7 @@ export async function syncChangelogPreview(options = {}) {
 }
 
 export function parseChangelogMarkdown(markdown) {
+  markdown = markdown.replace(/\r\n/g, "\n");
   const releases = [];
   const releasePattern = /^##\s+(v[^\s]+)\s+—\s+(\d{4}-\d{2}-\d{2})$/gm;
   const matches = [...markdown.matchAll(releasePattern)];

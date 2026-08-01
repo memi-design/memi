@@ -55,26 +55,26 @@ describe("export --json", () => {
     });
     expect(payload.exports).toEqual([
       {
-        source: "components/molecules/MetricCard.tsx",
+        source: join("components", "molecules", "MetricCard.tsx"),
         kind: "components",
-        targetBase: "src/components",
-        destination: "src/components/molecules/MetricCard.tsx",
+        targetBase: join("src", "components"),
+        destination: join("src", "components", "molecules", "MetricCard.tsx"),
         status: "would-write",
         reason: null,
       },
       {
-        source: "dataviz/ActivityChart.tsx",
+        source: join("dataviz", "ActivityChart.tsx"),
         kind: "dataviz",
-        targetBase: "src/components/dataviz",
-        destination: "src/components/dataviz/ActivityChart.tsx",
+        targetBase: join("src", "components", "dataviz"),
+        destination: join("src", "components", "dataviz", "ActivityChart.tsx"),
         status: "would-write",
         reason: null,
       },
       {
-        source: "pages/Dashboard.tsx",
+        source: join("pages", "Dashboard.tsx"),
         kind: "pages",
-        targetBase: "src/pages",
-        destination: "src/pages/Dashboard.tsx",
+        targetBase: join("src", "pages"),
+        destination: join("src", "pages", "Dashboard.tsx"),
         status: "would-write",
         reason: null,
       },
@@ -101,7 +101,7 @@ describe("export --json", () => {
       skipped: 1,
       failed: 0,
     });
-    expect(payload.exports.find((entry: { source: string }) => entry.source === "components/molecules/MetricCard.tsx")).toMatchObject({
+    expect(payload.exports.find((entry: { source: string }) => entry.source === join("components", "molecules", "MetricCard.tsx"))).toMatchObject({
       status: "skipped",
       reason: "exists",
     });

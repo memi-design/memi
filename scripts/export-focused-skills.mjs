@@ -2,7 +2,7 @@
 
 import { lstat } from "node:fs/promises";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join, relative, resolve, sep } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -278,7 +278,12 @@ function assertOutputDoesNotContainSource(sourceRoot, outputRoot) {
   const source = resolve(sourceRoot);
   const output = resolve(outputRoot);
   const sourceToOutput = relative(source, output);
-  if (!sourceToOutput || (!sourceToOutput.startsWith(`..${sep}`) && sourceToOutput !== ".." && !sourceToOutput.startsWith("../"))) {
+  if (!sourceToOutput || (
+    !isAbsolute(sourceToOutput)
+    && !sourceToOutput.startsWith(`..${sep}`)
+    && sourceToOutput !== ".."
+    && !sourceToOutput.startsWith("../")
+  )) {
     throw new Error(`Output root must not be the source root or inside it: ${output}`);
   }
 }

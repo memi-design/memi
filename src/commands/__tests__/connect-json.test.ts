@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { mkdir, rm, writeFile } from "fs/promises";
+import { mkdir, realpath, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { Command } from "commander";
@@ -12,6 +12,7 @@ let originalHome: string | undefined;
 beforeEach(async () => {
   projectRoot = join(tmpdir(), `memoire-connect-json-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   await mkdir(join(projectRoot, "plugin"), { recursive: true });
+  projectRoot = await realpath(projectRoot);
   await writePluginBundle(join(projectRoot, "plugin"), { packageVersion: "0.2.1", widgetVersion: "2" });
   originalHome = process.env.HOME;
   process.env.HOME = join(projectRoot, "fake-home");

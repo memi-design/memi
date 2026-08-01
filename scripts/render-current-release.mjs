@@ -20,7 +20,7 @@ const expected = renderCurrentRelease(manifest);
 
 if (checkOnly) {
   const current = await readFile(outputPath, "utf8").catch(() => "");
-  if (current !== expected) {
+  if (normalizeNewlines(current) !== expected) {
     console.error("docs/CURRENT_RELEASE.md is stale; run npm run sync:current-release");
     process.exit(1);
   }
@@ -28,6 +28,10 @@ if (checkOnly) {
 } else {
   await writeFile(outputPath, expected, "utf8");
   console.log("Generated docs/CURRENT_RELEASE.md.");
+}
+
+function normalizeNewlines(value) {
+  return value.replace(/\r\n/g, "\n");
 }
 
 function renderCurrentRelease(value) {

@@ -131,7 +131,7 @@ describe("audit scorecard release surfaces", () => {
     expect(workflow).toContain('git rev-parse "${RELEASE_TAG}^{commit}"');
     expect(workflow).toContain('test "$(git rev-parse HEAD)" = "$(git rev-parse "${RELEASE_TAG}^{commit}")"');
     expect(workflow).toMatch(
-      /publish-docker:\n\s+needs: \[release-gate, publish-checksums\]/,
+      /publish-docker:\r?\n\s+needs: \[release-gate, publish-checksums\]/,
     );
   });
 

@@ -155,11 +155,17 @@ export async function runWorkflowTrial(input: {
     }));
     await requireSuccessfulProcess({
       command: "git",
-      args: ["clone", "--quiet", "--no-hardlinks", sourceRepository, workspaceRoot],
+      args: ["clone", "--quiet", "--no-checkout", "--no-hardlinks", sourceRepository, workspaceRoot],
       cwd: workspaceParent,
       timeoutMs: 2 * 60_000,
       retries: 2,
       retryDelayMs: 2_000,
+    });
+    await requireSuccessfulProcess({
+      command: "git",
+      args: ["config", "core.autocrlf", "false"],
+      cwd: workspaceRoot,
+      timeoutMs: 30_000,
     });
     await requireSuccessfulProcess({
       command: "git",
@@ -414,11 +420,17 @@ export async function runWorkflowTrial(input: {
       const verificationRoot = path.join(verificationParent, "workspace");
       await requireSuccessfulProcess({
         command: "git",
-        args: ["clone", "--quiet", "--no-hardlinks", sourceRepository, verificationRoot],
+        args: ["clone", "--quiet", "--no-checkout", "--no-hardlinks", sourceRepository, verificationRoot],
         cwd: verificationParent,
         timeoutMs: 2 * 60_000,
         retries: 2,
         retryDelayMs: 2_000,
+      });
+      await requireSuccessfulProcess({
+        command: "git",
+        args: ["config", "core.autocrlf", "false"],
+        cwd: verificationRoot,
+        timeoutMs: 30_000,
       });
       await requireSuccessfulProcess({
         command: "git",

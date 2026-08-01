@@ -80,7 +80,7 @@ describe("studio runtime server", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           harness: "memoire",
-          cwd: "/tmp",
+          cwd: join(root, "..", "outside-workspace"),
           prompt: "hello",
         }),
       });

@@ -4,10 +4,10 @@ import { describe, expect, it } from "vitest";
 
 describe("prospective runner CLI separation", () => {
   it("uses a hash-pinned current harness for admission while preserving the candidate runtime", async () => {
-    const source = await readFile(
+    const source = (await readFile(
       path.resolve("scripts/run-empirical-40.ts"),
       "utf8",
-    );
+    )).replace(/\r\n/g, "\n");
 
     expect(source).toContain("const candidateCliEntry = path.join(");
     expect(source).toContain("const harnessCliEntry = path.resolve(options.harnessCli);");

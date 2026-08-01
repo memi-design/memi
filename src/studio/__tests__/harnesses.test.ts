@@ -63,8 +63,14 @@ describe("studio harnesses", () => {
       await mkdir(join(root, "src"), { recursive: true });
       await mkdir(join(root, "node_modules", ".bin"), { recursive: true });
       await writeFile(join(root, "src", "index.ts"), "console.log('local memoire')\n");
-      await writeFile(join(root, "node_modules", ".bin", "tsx"), "#!/bin/sh\n");
-      await chmod(join(root, "node_modules", ".bin", "tsx"), 0o755);
+      const tsxBin = join(
+        root,
+        "node_modules",
+        ".bin",
+        process.platform === "win32" ? "tsx.cmd" : "tsx",
+      );
+      await writeFile(tsxBin, process.platform === "win32" ? "@exit /b 0\r\n" : "#!/bin/sh\n");
+      await chmod(tsxBin, 0o755);
       const config = enableHarness(defaultStudioConfig(root), "memoire");
 
       const command = buildHarnessCommand(config, {
@@ -73,7 +79,7 @@ describe("studio harnesses", () => {
         prompt: "create a dashboard",
       });
 
-      expect(command.command).toContain(join(root, "node_modules", ".bin", "tsx"));
+      expect(command.command).toContain(tsxBin);
       expect(command.args).toEqual(["src/index.ts", "compose", "create a dashboard", "--json", "--no-figma"]);
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -290,9 +296,10 @@ describe("studio harnesses", () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-auth-cache-"));
     try {
       const probeLog = join(root, "probe-count.txt");
-      const codexProbe = join(root, "codex");
-      await writeFile(codexProbe, `#!/bin/sh\nprintf x >> "${probeLog}"\necho "logged in"\n`);
-      await chmod(codexProbe, 0o755);
+      const codexProbe = await writeCommandFixture(root, "codex", [
+        `require("node:fs").appendFileSync(${JSON.stringify(probeLog)}, "x");`,
+        'console.log("logged in");',
+      ]);
       const config = defaultStudioConfig(root);
       const resolveCommand = (command: string) => command === "codex" ? codexProbe : null;
 
@@ -310,9 +317,10 @@ describe("studio harnesses", () => {
   it("surfaces Codex config parse failures separately from login failures", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-codex-config-error-"));
     try {
-      const codexProbe = join(root, "codex");
-      await writeFile(codexProbe, `#!/bin/sh\necho "Error loading configuration: ${root}/.codex/config.toml:38:16: unknown variant \\\`default\\\`, expected \\\`fast\\\` or \\\`flex\\\`" >&2\nexit 1\n`);
-      await chmod(codexProbe, 0o755);
+      const codexProbe = await writeCommandFixture(root, "codex", [
+        `console.error(${JSON.stringify(`Error loading configuration: ${root}/.codex/config.toml:38:16: unknown variant \`default\`, expected \`fast\` or \`flex\``)});`,
+        "process.exit(1);",
+      ]);
       const config = defaultStudioConfig(root);
       const harnesses = listHarnesses(config, {
         resolveCommand: (command) => command === "codex" ? codexProbe : null,
@@ -328,3 +336,21 @@ describe("studio harnesses", () => {
     }
   });
 });
+
+async function writeCommandFixture(
+  root: string,
+  name: string,
+  statements: readonly string[],
+): Promise<string> {
+  const script = join(root, `${name}-fixture.cjs`);
+  await writeFile(script, `${statements.join("\n")}\n`);
+  if (process.platform === "win32") {
+    const command = join(root, `${name}.cmd`);
+    await writeFile(command, `@echo off\r\n"${process.execPath}" "${script}" %*\r\n`);
+    return command;
+  }
+  const command = join(root, name);
+  await writeFile(command, `#!/usr/bin/env node\n${statements.join("\n")}\n`);
+  await chmod(command, 0o755);
+  return command;
+}

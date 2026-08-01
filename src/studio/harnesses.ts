@@ -136,7 +136,7 @@ function probeCliAuth(command: string, args: string[], label: string): HarnessAu
   const result = spawnSync(command, args, {
     encoding: "utf-8",
     timeout: 1500,
-    shell: false,
+    shell: process.platform === "win32",
     env: {
       PATH: process.env.PATH,
       HOME: process.env.HOME,

@@ -26,6 +26,8 @@ describe("preview changelog sync", () => {
       ]),
     });
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
-    expect(currentHtml).toBe(generatedHtml);
+    expect(currentHtml.replace(/\r\n/g, "\n")).toBe(
+      generatedHtml.replace(/\r\n/g, "\n"),
+    );
   });
 });
