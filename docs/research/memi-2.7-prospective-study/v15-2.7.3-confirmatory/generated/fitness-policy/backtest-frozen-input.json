@@ -1,6 +1,9 @@
 {
-  "engineCliSha256": "sha256:5a511f55d230c309dcb2401a3bda1a721c9fc6b233b11f14d410264fd88fdd3e",
+  "engineCliSha256": "sha256:133972e75ff6be73138a276dd41b288e4261c33b9b9ab3fbc4e05fe3a5cc0235",
   "kind": "memi-v15-fitness-backtest-frozen-provenance",
+  "reboundAt": "2026-08-01T12:53:33Z",
+  "reboundFromEngineCliSha256": "sha256:5a511f55d230c309dcb2401a3bda1a721c9fc6b233b11f14d410264fd88fdd3e",
+  "reboundReason": "Re-execute the unchanged frozen chronology against the final cross-platform 2.7.4 candidate CLI after Windows portability and symlink-containment repairs.",
   "schemaVersion": 1,
   "sourceDigest": "sha256:747e625a5303f7cbf779e782222b4743fda4634b6bede42ad9c90821a86e76f6",
   "studyId": "memi-2.7-v15-2.7.3-confirmatory-protocol"
