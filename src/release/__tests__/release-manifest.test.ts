@@ -33,8 +33,12 @@ describe("release manifest", () => {
             sha256: "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d",
           },
           verification: {
-            eligibleForParity: false,
-            reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
+            eligibleForParity: true,
+            reason: "independent public-release gate passed on 2026-08-01 across npm, GitHub release, Action v2, MCP Registry, Studio, website artifact, and fresh install",
+            publicGate: {
+              path: "release-artifacts/public-gate/2.7.4.parity.json",
+              sha256: "ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a",
+            },
           },
         },
         studio: { version: "2.5.0" },
@@ -91,8 +95,12 @@ describe("release manifest", () => {
             sha256: "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d",
           },
           verification: {
-            eligibleForParity: false,
-            reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
+            eligibleForParity: true,
+            reason: "independent public-release gate passed on 2026-08-01 across npm, GitHub release, Action v2, MCP Registry, Studio, website artifact, and fresh install",
+            publicGate: {
+              path: "release-artifacts/public-gate/2.7.4.parity.json",
+              sha256: "ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a",
+            },
           },
         },
       },

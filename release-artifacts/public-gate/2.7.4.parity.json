@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "kind": "memi-public-release-parity-receipt",
+  "verifiedAt": "2026-08-01T15:00:46Z",
+  "gate": {
+    "packageName": "@memi-design/cli",
+    "expectedVersion": "2.7.4",
+    "latest": "2.7.4",
+    "expectedPhrase": "read-only design engineering audit and skill layer for coding agents",
+    "expectedInstall": "npm i -g @memi-design/cli",
+    "registrySmoke": {
+      "ok": true,
+      "registryUrl": "https://registry.npmjs.org/%40memi-design%2Fcli",
+      "latest": "2.7.4",
+      "error": null,
+      "failures": []
+    },
+    "siteSmoke": {
+      "ok": true,
+      "siteUrl": "https://www.memoire.cv",
+      "expectedStudioVersion": "2.5.0",
+      "expectedCommunityNotes": 5,
+      "minCommunityCatalogDate": "2026-07-04T00:00:00.000Z",
+      "communityNotes": 78,
+      "generatedAt": "2026-07-15T17:54:03.579Z",
+      "failures": []
+    },
+    "installSmoke": {
+      "ok": true,
+      "version": "2.7.4"
+    },
+    "status": "passed",
+    "failures": [],
+    "releaseState": "published",
+    "releaseRecord": {
+      "path": "release-artifacts/npm/2.7.4.release.json",
+      "sha256": "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d"
+    },
+    "evidence": {
+      "transition": {
+        "verified": true,
+        "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "failures": []
+      },
+      "npm": {
+        "verified": true,
+        "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "invocationId": "https://github.com/memi-design/memi/actions/runs/30702302571/attempts/1",
+        "integrity": "sha512-6bksTLz+3YRV0QgH69lWPQ2EVPgKlvnTdrx9MH0F69GhRVfwLqDKf6na8D8qKcV5YafMF+cMdOS3DAX4xQEQvw==",
+        "shasum": "e16d4770b72e1323603f41188104fc02c0c6851d",
+        "tarball": {
+          "url": "https://registry.npmjs.org/@memi-design/cli/-/cli-2.7.4.tgz",
+          "sha512": "e9b92c4cbcfedd8455d10807ebd9563d0d8454f80a96f9d376bc7d307d05ebd1a14557f02ea0ca7fa9daf03f2a29c57961a7cc17e70c74e4b70c05f8c50110bf",
+          "sha1": "e16d4770b72e1323603f41188104fc02c0c6851d",
+          "bytes": 579612
+        }
+      },
+      "githubRelease": {
+        "verified": true,
+        "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "checksumsVerified": true,
+        "tag": "v2.7.4",
+        "assets": [
+          "memi-darwin-arm64.tar.gz",
+          "memi-darwin-x64.tar.gz",
+          "memi-linux-x64.tar.gz",
+          "memi-win-x64.zip",
+          "memi-darwin-arm64.tar.gz.sha256",
+          "memi-darwin-x64.tar.gz.sha256",
+          "memi-linux-x64.tar.gz.sha256",
+          "memi-win-x64.zip.sha256",
+          "SHA256SUMS.txt"
+        ]
+      },
+      "githubAction": {
+        "verified": true,
+        "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "tag": "v2"
+      },
+      "mcp": {
+        "verified": true,
+        "version": "2.7.4",
+        "serverName": "io.github.sarveshsea/memi"
+      },
+      "studio": {
+        "verified": true,
+        "version": "2.5.0",
+        "tag": "v2.5.0",
+        "assets": [
+          "Memoire.Studio_2.5.0_aarch64.dmg",
+          "Memoire.Studio_2.5.0_x64.dmg",
+          "SHA256SUMS"
+        ]
+      },
+      "website": {
+        "verified": true,
+        "manifestSha256": "b0fc586e2078b26c71395f05e09d6bd1d2cac7dc4217b62190cb987caa755698",
+        "sourceCommit": "b1b8b7ef57d5df17f676ac160a5b45e23682e2a4",
+        "url": "https://www.memoire.cv/release/memi-release.json"
+      }
+    },
+    "parityEligible": true
+  }
+}
