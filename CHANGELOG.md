@@ -8,6 +8,27 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ## Unreleased
 
+## v2.7.3 — 2026-07-31
+
+### Release renumbering and deterministic verification
+
+- `b6beb464` chore: declare 2.7.3 release candidate
+- Promoted the unpublished 2.7.2 candidate code as 2.7.3 so the public release
+  contains the sealed prospective-study harness and its bounded workflow
+  contracts without rewriting the version recorded by the completed V14 study.
+- Stabilized the workflow-adapter timeout fixture by using an immediate shell
+  emitter that remains observable under full-suite parallel load. Production
+  timeout behavior and provider process handling are unchanged.
+- Aligned the npm package, MCP bundle, GitHub Action, agent kits, packaged
+  skills, example registries, release manifest, and public candidate metadata
+  on the exact 2.7.3 version.
+
+#### Architectural decisions
+
+- Preserve the V14 evidence bundle as an exact 2.7.2-candidate result. Do not
+  relabel historical receipts as 2.7.3; establish 2.7.3 independently through
+  release-gate and packed-artifact verification.
+
 ## v2.7.2 — 2026-07-31
 
 ### Sealed prospective workflow studies

@@ -391,7 +391,7 @@ a:hover { text-decoration: underline; }
     </nav>
     <div class="hdr-stats">
       <span><span class="n" id="stat-commits">242</span> commits</span>
-      <span><span class="n" id="stat-versions">35</span> versions</span>
+      <span><span class="n" id="stat-versions">36</span> versions</span>
       <span><span class="n" id="stat-latest">2026-07-31</span> latest</span>
     </div>
   </header>
@@ -407,8 +407,8 @@ a:hover { text-decoration: underline; }
         <div class="hero-kpis">
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
-            <strong class="summary-value">v2.7.2</strong>
-            <div class="summary-caption">0 commits tracked in v2.7.2 from CHANGELOG.md.</div>
+            <strong class="summary-value">v2.7.3</strong>
+            <div class="summary-caption">0 commits tracked in v2.7.3 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -434,10 +434,25 @@ a:hover { text-decoration: underline; }
     <section class="release-list" id="release-list"></section>
   </main>
 
-  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v2.7.2</footer>
+  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v2.7.3</footer>
 
 <script>
 const releases = [
+  {
+    "version": "v2.7.3",
+    "date": "2026-07-31",
+    "tag": "fix",
+    "summary": "b6beb464 chore: declare 2.7.3 release candidate; Promoted the unpublished 2.7.2 candidate code as 2.7.3 so the public release; Stabilized the workflow-adapter timeout fixture by using an immediate shell.",
+    "commits": [],
+    "decisions": [],
+    "changes": [
+      "b6beb464 chore: declare 2.7.3 release candidate",
+      "Promoted the unpublished 2.7.2 candidate code as 2.7.3 so the public release",
+      "Stabilized the workflow-adapter timeout fixture by using an immediate shell",
+      "Aligned the npm package, MCP bundle, GitHub Action, agent kits, packaged",
+      "Preserve the V14 evidence bundle as an exact 2.7.2-candidate result. Do not"
+    ]
+  },
   {
     "version": "v2.7.2",
     "date": "2026-07-31",

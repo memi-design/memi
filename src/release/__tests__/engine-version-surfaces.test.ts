@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const candidateVersion = "2.7.2";
+const candidateVersion = "2.7.3";
 const publicVersion = "2.7.1";
 const publicSourceCommit = "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f";
 const releaseRecord = {
@@ -16,7 +16,7 @@ async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.7.2 candidate release surfaces", () => {
+describe("2.7.3 candidate release surfaces", () => {
   it("keeps the candidate unpublished until immutable release evidence exists", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toEqual({
@@ -30,7 +30,7 @@ describe("2.7.2 candidate release surfaces", () => {
       },
       verification: {
         eligibleForParity: false,
-        reason: "2.7.1 remains public while 2.7.2 is an unpublished candidate",
+        reason: "2.7.1 remains public while 2.7.3 is an unpublished candidate",
       },
     });
     expect(manifest.surfaces.githubRelease.url.endsWith(`/v${candidateVersion}`)).toBe(true);

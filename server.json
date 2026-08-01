@@ -3,7 +3,7 @@
   "name": "io.github.sarveshsea/memi",
   "title": "memi",
   "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "websiteUrl": "https://memoire.cv",
   "repository": {
     "url": "https://github.com/memi-design/memi",
@@ -14,7 +14,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@memi-design/cli",
-      "version": "2.7.2",
+      "version": "2.7.3",
       "transport": {
         "type": "stdio"
       },
@@ -37,7 +37,7 @@
   "_meta": {
     "io.modelcontextprotocol.registry/publisher-provided": {
       "tool": "memi-release",
-      "version": "2.7.2"
+      "version": "2.7.3"
     }
   }
 }
