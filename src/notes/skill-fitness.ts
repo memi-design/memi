@@ -228,7 +228,10 @@ export function buildSkillFitnessEvent(
     contentHash,
   })));
   const common = {
-    createdAt: input.memi.timing.completedAt,
+    createdAt: laterTimestamp(
+      input.baseline.timing.completedAt,
+      input.memi.timing.completedAt,
+    ),
     routerVersion: route.routerVersion,
     repositoryFingerprintHash: route.repositoryFingerprintHash,
     taskClass: input.taskClass,
@@ -771,6 +774,10 @@ function compareEvents(left: SkillFitnessEvent, right: SkillFitnessEvent): numbe
 
 function timestampMillis(value: string): number {
   return new Date(value).getTime();
+}
+
+function laterTimestamp(left: string, right: string): string {
+  return timestampMillis(left) >= timestampMillis(right) ? left : right;
 }
 
 function fitnessEventId(input: unknown): string {
