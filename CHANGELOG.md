@@ -13,6 +13,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `8cfd3498` test: define fail-closed route fitness contract
 - `9a141092` feat: add fail-closed route fitness evidence v2
 - `16a15cc6` fix: separate candidate runtime from admission harness
+- `88ef6fda` fix: resume incomplete prospective pairs safely
 - Added RED contract coverage for full-identity fitness isolation, blinded
   quality evidence v2, immediate regression suppression, prospective recovery,
   legacy v1 compatibility, and chronological no-look-ahead replay.
