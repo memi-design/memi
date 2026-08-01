@@ -201,10 +201,14 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .description("Verify clean, pinned V2 fixtures and native capture contracts before freezing")
     .requiredOption("--fixtures <path>", "Task-to-fixture repository mapping JSON")
     .requiredOption("--task-root <path>", "Directory containing <task-id>.json workflow manifests")
+    .option("--out <path>", "Write a hash-verified preflight receipt JSON")
+    .option("--checked-at <timestamp>", "Explicit preflight timestamp")
     .option("--json", "Output JSON")
     .action(async (planPath: string, opts: {
       fixtures: string;
       taskRoot: string;
+      out?: string;
+      checkedAt?: string;
       json?: boolean;
     }) => {
       const plan = prospectiveStudyPlanSchema.parse(JSON.parse(
@@ -265,12 +269,23 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           nativeCaptureKinds,
         };
       }));
-      const payload = {
+      const checkedAt = opts.checkedAt ?? new Date().toISOString();
+      if (Number.isNaN(Date.parse(checkedAt))) {
+        throw new Error(`checked-at must be an ISO-8601 timestamp: ${checkedAt}`);
+      }
+      const content = {
+        schemaVersion: 1,
         status: "ready",
         planId: plan.planId,
         planHash: hashValue(plan),
+        checkedAt,
         fixtures,
       };
+      const payload = {
+        ...content,
+        preflightHash: hashValue(content),
+      };
+      if (opts.out) await writeJson(resolve(opts.out), payload);
       if (opts.json) console.log(JSON.stringify(payload, null, 2));
       else {
         console.log(ui.ok(`Prospective V2 preflight ready: ${plan.planId}`));
