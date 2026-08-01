@@ -17,6 +17,13 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `5d300979` test: define sealed V15 route import contract
 - `b961ea88` feat: import manifest-sealed V15 route evidence
 - `12813de0` ci: test supported platforms and Node versions
+- `986ef81f` test: define recovery probe and task class contracts
+- `82f64311` fix: add prospective fitness recovery probes
+- `b0c17cd1` test: define sealed fitness evidence boundary
+- `612103ca` fix: seal skill fitness empirical evidence
+- `becadd2e` test: seal fitness command fixtures
+- `0dbd668f` test: bind fitness event execution mode
+- `ad97c0ab` fix: bind fitness execution provenance
 - Added RED contract coverage for full-identity fitness isolation, blinded
   quality evidence v2, immediate regression suppression, prospective recovery,
   legacy v1 compatibility, and chronological no-look-ahead replay.
@@ -42,12 +49,24 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Promoted the existing Linux, macOS, and Windows Node 20/22/24 clean-install
   matrix into a complete typecheck, test, build, pack, install, and invocation
   gate.
+- Kept suppressed production routes repository-only while adding an explicit
+  frozen prospective `--recovery-probe` path. Only three later, healthy,
+  blinded v2 probe pairs with the exact route identity may recover a route.
+- Made stable task classes independently addressable from task IDs while
+  preserving task-ID defaults for compatible receipts.
+- Required both paired runs and the bound route receipt to match sealed
+  prospective manifests, and rejected reuse of any exact-route run or trial
+  pair even when a caller supplies a different quality-evidence hash.
 
 #### Architectural decisions
 
 - Automation-only v1 evidence remains loadable and can suppress a harmful
   route, but only hash-verified blinded v2 prospective pairs may promote or
   recover a route.
+- Hashes provide tamper evidence inside the file-owner trust boundary, not
+  third-party authorship. Recovery therefore requires sealed prospective
+  artifacts and explicitly marked probe execution; writable-store compromise
+  remains outside the evidence-authentication claim.
 
 ## v2.7.3 — 2026-07-31
 
