@@ -43,6 +43,7 @@ export const benchmarkRunRecordSchema = z.object({
   }).strict(),
   tools: z.object({
     calls: z.number().int().nonnegative(),
+    outputBytes: z.number().int().nonnegative().optional(),
     errors: z.number().int().nonnegative(),
     retries: z.number().int().nonnegative(),
   }).strict(),

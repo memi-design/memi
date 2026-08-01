@@ -39,6 +39,18 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Added an ORCID field without inventing an identifier; it remains marked
   `not supplied` until the author provides one.
 
+## v2.7.1 — 2026-07-31
+
+### Durable benchmark receipt compatibility
+
+- `c16ed4ce` fix: accept measured workflow tool output bytes
+
+#### Architectural decisions
+
+- Preserve strict receipt validation while allowing adapters to record the
+  optional non-negative byte volume of their tool output. The field is
+  additive, so receipts emitted by earlier adapters remain compatible.
+
 ### 2.7 claim firewall and release evidence
 
 - `d4bc7cc5` feat: separate 2.7 evidence and release gates

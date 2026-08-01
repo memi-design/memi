@@ -3637,6 +3637,10 @@
               "type": "integer",
               "minimum": 0
             },
+            "outputBytes": {
+              "type": "integer",
+              "minimum": 0
+            },
             "errors": {
               "type": "integer",
               "minimum": 0

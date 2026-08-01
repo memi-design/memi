@@ -1,7 +1,7 @@
 {
   "name": "memi",
   "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "author": {
     "name": "Sarvesh Chidambaram",
     "url": "https://github.com/sarveshsea"
