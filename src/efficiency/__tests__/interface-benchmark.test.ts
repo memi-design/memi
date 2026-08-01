@@ -91,7 +91,7 @@ describe("Memi InterfaceBench", () => {
     expect(readme).toContain("Memi InterfaceBench");
     expect(readme).toContain("100 target tasks");
     expect(readme).toContain("5 pinned seed tasks");
-    expect(readme).toContain("2,154/2,154 tests");
+    expect(readme).toContain("2,187/2,187 tests");
     expect(readme).toContain("70.57% statements");
     expect(readme).toContain("The greater-than-25% claim remains **not verified**");
     expect(readme).toContain("benchmarks/interfacebench-v1.json");

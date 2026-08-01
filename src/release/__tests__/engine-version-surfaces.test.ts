@@ -5,32 +5,28 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const candidateVersion = "2.7.3";
-const publicVersion = "2.7.1";
-const publicSourceCommit = "5c694ba7a64ab395bdf5bfe7aedc0f6b3e81612f";
+const publicVersion = "2.7.3";
+const publicSourceCommit = "2e29c5c656ac34242369eac9840838619ad113e1";
 const releaseRecord = {
-  path: "release-artifacts/npm/2.7.1.release.json",
-  sha256: "9daa1a0008332654ffabec001b432693c09bda4a80a27bec29e272d126386129",
+  path: "release-artifacts/npm/2.7.3.release.json",
+  sha256: "0ad0a6d774bf206d057876cd53b5f393852f08ce7dd9f8c5ff2d9c5e0c6e6c02",
 };
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.7.3 candidate release surfaces", () => {
-  it("keeps the candidate unpublished until immutable release evidence exists", async () => {
+describe("2.7.3 published release surfaces", () => {
+  it("binds the published version to its immutable source and release record", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toEqual({
       version: candidateVersion,
-      state: "candidate",
-      sourceCommit: null,
-      releaseRecord: null,
-      previousPublicRelease: {
-        version: publicVersion,
-        sourceCommit: publicSourceCommit,
-      },
+      state: "published",
+      sourceCommit: publicSourceCommit,
+      releaseRecord,
       verification: {
         eligibleForParity: false,
-        reason: "2.7.1 remains public while 2.7.3 is an unpublished candidate",
+        reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
       },
     });
     expect(manifest.surfaces.githubRelease.url.endsWith(`/v${candidateVersion}`)).toBe(true);
@@ -110,11 +106,11 @@ describe("2.7.3 candidate release surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
   });
 
-  it("labels the candidate while keeping the public activation path fail closed", async () => {
+  it("labels 2.7.3 as published while keeping parity fail closed", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Release state: `candidate`");
-    expect(currentRelease).toContain("Engine candidate (unreleased)");
-    expect(currentRelease).toContain("Source commit: Not assigned.");
+    expect(currentRelease).toContain("Release state: `published`");
+    expect(currentRelease).toContain("Engine published (parity pending)");
+    expect(currentRelease).toContain(`Source commit: \`${publicSourceCommit}\``);
     expect(currentRelease).toContain(`npx -y @memi-design/cli@${publicVersion}`);
     expect(currentRelease).not.toContain("npx -y @memi-design/cli@2.6.3");
   });
