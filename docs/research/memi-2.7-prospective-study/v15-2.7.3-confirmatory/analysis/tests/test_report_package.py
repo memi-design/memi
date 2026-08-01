@@ -11,6 +11,7 @@ from pathlib import Path
 from analysis.report_package import (
     ReportPackageInputError,
     build_outputs,
+    _verify_checksum_inventory,
     study_report_paths,
     verify_outputs,
     write_outputs,
@@ -37,6 +38,11 @@ class ReportPackageTests(unittest.TestCase):
             self.assertIn("immutable blinded-quality evidence", remediation_tex)
             self.assertIn("chronological", remediation_tex)
             self.assertIn("repository-only", remediation_tex)
+            self.assertIn("2,223 tests across 308 files", remediation_tex)
+            self.assertIn("typecheck and build passed", remediation_tex)
+            self.assertIn("no actionable findings", remediation_tex)
+            self.assertIn("same-owner", remediation_tex)
+            self.assertIn("weakly consistent NFS", remediation_tex)
 
             release_tex = outputs[paths.release_gates_tex_path]
             self.assertIn("PENDING LIVE VERIFICATION", release_tex)
@@ -133,6 +139,27 @@ class ReportPackageTests(unittest.TestCase):
             self.assertEqual(len(mismatches), 2)
             self.assertEqual(mismatches[0].path, paths.website_audit_tex_path)
             self.assertEqual(mismatches[1].path, paths.checksum_inventory_path)
+
+    def test_checksum_verification_rejects_path_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temporary_root = Path(directory)
+            paths = _write_fixture(temporary_root / "report")
+            outputs = build_outputs(paths)
+            write_outputs(paths, outputs)
+            outside = temporary_root / "outside.txt"
+            outside.write_text("outside\n", encoding="utf-8")
+            manifest = json.loads(paths.checksum_inventory_path.read_text(encoding="utf-8"))
+            manifest["entries"][0] = {
+                "path": "../outside.txt",
+                "bytes": outside.stat().st_size,
+                "sha256": "sha256:" + sha256(outside.read_bytes()).hexdigest(),
+            }
+            _write_json(paths.checksum_inventory_path, manifest)
+
+            self.assertEqual(
+                _verify_checksum_inventory(paths),
+                ["unsafe checksum path ../outside.txt"],
+            )
 
     def test_cli_build_and_check_round_trip(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

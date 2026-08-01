@@ -94,6 +94,13 @@ were not measured.
 
 \textbf{Evidence completion.} \FreshCellStatus
 
+The receipt ledger validates 36 of 36 frozen cells with no admission failure.
+Fourteen cell-level exclusions apply only to rendered frontend grading; they
+retain functional and resource outcomes without imputation.  Of 22 cells with
+grades, 20 form 10 complete matched pairs: five Buzzr pairs and five Paraform
+pairs.  Buzzr repeat 6 baseline and Paraform repeat 5 Memi remain graded but
+unpaired after their siblings' exclusions.  Nate has no renderable graded pair.
+
 \textbf{Primary gate.} \PrimaryGateStatus
 
 \textbf{Release gate.} \ReleaseGateStatus
@@ -198,7 +205,9 @@ isolated verification, evidence manifest, and run receipt.  Hash, fixture,
 condition, timestamp, candidate, and environment mismatches fail closed.
 Duplicate or corrupt receipts are errors, not replicates.
 
-\textbf{Missingness and exclusions.} No value is imputed.  A cell may retain
+\textbf{Missingness and exclusions.} No value is imputed.  Fourteen cells are
+excluded from rendered grading: all 12 Nate cells, Buzzr repeat 6 Memi, and
+Paraform repeat 5 baseline.  A cell may retain
 its functional and resource outcome while being excluded from rendered grading
 when the exclusion ledger records, for example, a build failure, absent
 renderable patch, or budget breach.  Provider failures and retries remain
@@ -213,6 +222,13 @@ hierarchy (15), design-system consistency (15), responsive/adaptive behavior
 (15), and implementation quality (10).  Panel medians, absolute disagreement,
 and ICC(2,1), where estimable, are reported.  The label remains
 \emph{model-graded}.
+
+\textbf{Rendered-capture boundary.} Buzzr evidence is a testing-library
+renderer tree, not Expo Simulator or native pixel proof.  Paraform has browser
+captures for the registered desktop states, but its mobile breakpoint blocks
+the desktop workspace; the phone capture therefore shows the desktop-only
+placeholder rather than the command-menu workspace.  These limitations cap
+what the panel can infer about native pixels and phone adaptation.
 
 \section{Functional and design-quality results}
 \sectionrule
@@ -247,7 +263,8 @@ superiority.}
 Only renderable, ledger-admitted evidence enters blinded quality grading.
 Model graders are not independent practitioners, excluded pairs are not
 imputed, and cross-task aggregation is descriptive because task semantics and
-platforms differ.
+platforms differ.  The result supports only the preregistered task-level
+non-inferiority statement; it is not a superiority claim.
 \end{minipage}
 \end{figure*}
 
@@ -336,9 +353,12 @@ dark modes, keyboard/focus behavior, reduced motion, responsive states, size
 budgets, Lighthouse, and production smoke tests.  Screenshot review covers
 empty/error states and available light/dark variants.
 
-Only observed defects are eligible for repair.  Infrastructure that prevents a
-test from executing is reported separately from a product defect, and a green
-local test is not treated as deployment proof.
+Only observed defects are eligible for repair.  The controlled before condition
+reproduced one serious \texttt{label-content-name-mismatch} finding in every
+registered Lighthouse report.  The footer accessible-name correction removed
+that finding and the unchanged blocking gate then passed cleanly.
+Infrastructure that prevents a test from executing is reported separately from
+a product defect, and a green local test is not treated as deployment proof.
 
 \InputOrPending{generated/tex/website-audit-results.tex}{Insert source-scoped
 before/after scores, verified fixes, remaining findings, Lighthouse/axe output,
@@ -413,6 +433,10 @@ outputs are expected at:
 The protocol, plan, environment, rubric, candidate/release provenance,
 exclusion/deviation ledgers, receipt ledger, grading records, tables, figures,
 notebook, TeX source, and final PDF require a checksum inventory before public
-release.
+release.  \artifact{generated/report-package-checksums.json} inventories the
+current source package deterministically while excluding PDFs and its own path
+to avoid cyclic self-hashing.  The final PDF must be compiled and hashed only
+after live release evidence is admitted; it is intentionally not rebuilt by
+the report-package command.
 
 \end{document}

@@ -20,11 +20,17 @@
 claim is authorized while generated analysis artifacts are absent.}
 \newcommand{\FreshCellStatus}{Pending receipt-ledger validation.}
 \newcommand{\PrimaryGateStatus}{Pending blinded grading and executed analysis.}
-\newcommand{\ReleaseGateStatus}{Memi 2.7.4 publication is not established by this draft.}
+\newcommand{\ReleaseGateStatus}{PENDING LIVE VERIFICATION --- Memi 2.7.4
+publication and public-channel parity are not established.}
 
 \IfFileExists{generated/tex/report-macros.tex}{%
   \input{generated/tex/report-macros.tex}%
 }{}
+
+% Analysis output may authorize only study claims. Release authorization is a
+% separate live-evidence gate and therefore remains fail-closed here.
+\renewcommand{\ReleaseGateStatus}{PENDING LIVE VERIFICATION --- Memi 2.7.4
+publication and public-channel parity are not established.}
 
 \newcommand{\FigurePlaceholder}[1]{%
   \fbox{\begin{minipage}[c][43mm][c]{0.94\linewidth}
