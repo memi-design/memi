@@ -95,6 +95,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 | `5dc13ebb` | merge: close V15 process and JSON bounds |
 | `aa4b39c5` | test: reproduce Windows tools RPC endpoint failure |
 | `15756b00` | fix: use named pipes for Windows tools RPC |
+| `de900a60` | test: reproduce Windows tsx shim execution failure |
+| `dd45ce31` | fix: launch execute-code portably on Windows |
 | `0744774b` | fix: make Windows test contracts portable |
 
 ### Exact-match fail-closed route fitness
