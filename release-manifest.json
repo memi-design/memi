@@ -4,20 +4,15 @@
   "releaseGroups": {
     "engine": {
       "version": "2.7.7",
-      "state": "candidate",
-      "sourceCommit": null,
-      "releaseRecord": null,
-      "previousPublicRelease": {
-        "version": "2.7.6",
-        "sourceCommit": "3d07c5476715ce25efbeef356f298bbd958f7f58",
-        "releaseRecord": {
-          "path": "release-artifacts/npm/2.7.6.release.json",
-          "sha256": "6af07e6a812492cd05c81296baaf6c485a114f543577eafe33a2a829ff2d115b"
-        }
+      "state": "published",
+      "sourceCommit": "74fc6ce8c66182b4aa06e1250cb169da8b1fc54c",
+      "releaseRecord": {
+        "path": "release-artifacts/npm/2.7.7.release.json",
+          "sha256": "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c"
       },
       "verification": {
         "eligibleForParity": false,
-        "reason": "Candidate fixes MCP Registry organization ownership; do not claim public parity before trusted publishing and independent verification."
+        "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
       }
     },
     "studio": {
