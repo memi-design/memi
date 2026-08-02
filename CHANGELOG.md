@@ -35,6 +35,21 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   homepage, moves current MCP bundle and plugin metadata to organization URLs,
   and aligns the generated Homebrew formula copy with the read-only CLI.
 
+### Release provenance hardening
+
+- `1bb86d71` — test: harden ecosystem release provenance
+- `694a2a87` — fix: harden ecosystem release provenance
+- Separates Memi's deprecated support policy for
+  `io.github.sarveshsea/memi` from the upstream registry's observed `active`
+  state across 12 historical versions through `2.7.4`.
+- Derives the packaged ecosystem identity receipt from the release version,
+  recomputes the npm receipt digest, and rejects stale packaged identities.
+- Moves Homebrew release automation and growth checks to `memi-design`, updates
+  npm troubleshooting to the organization scope, and points Codex marketplace
+  legal metadata at the verified `/legal` route.
+- Adds a Homebrew tap CI contract for exact 2.7.7 platform assets, checksums,
+  Ruby syntax, Homebrew style, and strict formula audit.
+
 Website and Studio parity remain separate release-group checks; this entry does
 not claim a broader quality or performance result.
 
