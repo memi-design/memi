@@ -645,7 +645,7 @@ export function compileSafeRoutingPattern(
     /\([^)]*[+*][^)]*\)[+*{]/,
     /(?:\+|\*|\?|\{\d+(?:,\d*)?\})(?:\+|\*|\?|\{)/,
   ];
-  if (unsafe.some((guard) => guard.test(pattern))) {
+  if (unsafe.some((guard) => guard.test(pattern)) || hasAmbiguousQuantifiedGroup(pattern)) {
     throw new Error("unsafe routing pattern: unsupported backtracking construct");
   }
   try {
@@ -655,6 +655,65 @@ export function compileSafeRoutingPattern(
       `unsafe routing pattern: ${error instanceof Error ? error.message : "invalid regex"}`,
     );
   }
+}
+
+function hasAmbiguousQuantifiedGroup(pattern: string): boolean {
+  const groups: Array<{
+    readonly hasAlternation: boolean;
+    readonly hasNestedGroup: boolean;
+    readonly hasQuantifier: boolean;
+  }> = [];
+  let escaped = false;
+  let inCharacterClass = false;
+
+  for (let index = 0; index < pattern.length; index += 1) {
+    const character = pattern[index]!;
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === "[") {
+      inCharacterClass = true;
+      continue;
+    }
+    if (character === "]") {
+      inCharacterClass = false;
+      continue;
+    }
+    if (inCharacterClass) continue;
+    if (character === "(") {
+      const parent = groups.at(-1);
+      if (parent) {
+        groups[groups.length - 1] = { ...parent, hasNestedGroup: true };
+      }
+      groups.push({ hasAlternation: false, hasNestedGroup: false, hasQuantifier: false });
+      continue;
+    }
+    if (character === "|") {
+      const current = groups.at(-1);
+      if (current) groups[groups.length - 1] = { ...current, hasAlternation: true };
+      continue;
+    }
+    if (character === "+" || character === "*" || character === "{" || (
+      character === "?" && !(pattern[index - 1] === "(" && pattern[index + 1] === ":")
+    )) {
+      const current = groups.at(-1);
+      if (current) groups[groups.length - 1] = { ...current, hasQuantifier: true };
+      continue;
+    }
+    if (character !== ")") continue;
+
+    const group = groups.pop();
+    const repeated = pattern[index + 1] === "+" || pattern[index + 1] === "*" || pattern[index + 1] === "{";
+    if (repeated && group && (group.hasAlternation || group.hasNestedGroup || group.hasQuantifier)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function scoreMetadata(
