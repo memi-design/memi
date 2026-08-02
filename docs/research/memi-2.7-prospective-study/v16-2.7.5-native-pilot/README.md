@@ -154,3 +154,8 @@ confirmatory analysis, including if an implementation outcome looks favorable.
 The current [preflight audit](preflight-audit.json) records the observed local
 fixture revisions and the remaining freeze prerequisites. It is a readiness
 ledger, not a study result.
+
+[deviations.jsonl](deviations.jsonl) is append-only. It records every attempted
+cell that did not earn a receipt, including the retained raw-evidence hashes and
+whether the reason was a protocol, provider, platform, or host-environment
+failure. Excluded cells never contribute a quality, efficiency, or cost result.
