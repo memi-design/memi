@@ -57,6 +57,13 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `38eaca7e` — fix: handle malformed workflow usage events
 - `80b8134a` — fix: describe observable token budget enforcement
 - `79ef9d9e` — fix: reject ambiguous repeated routing groups
+- `14779603` — test: define safe routing pattern grammar
+- `38cbd522` — feat: replace routing regex with safe patterns
+- `ababa67b` — test: require routing pattern migration diagnostics
+- `09863bd9` — feat: diagnose routing pattern migrations
+- `d192735b` — test: define trusted fingerprint and env boundaries
+- `90fba02e` — fix: harden fingerprint and dotenv parsing
+- `9151ffe3` — test: add routing safety evaluation corpus
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -93,6 +100,16 @@ Skill-routing patterns now reject repeated groups that combine alternation,
 nested groups, or inner repetition, preventing these user-supplied matching
 rules from creating exponential JavaScript-regex backtracking during route
 selection.
+Repository eligibility rules now use a bounded pattern language rather than
+executing Note-supplied regular expressions: exact, prefix, suffix, contains,
+glob, and literal one-of matching are supported, while unsafe legacy syntax
+fails closed with an explicit migration target in `memi notes doctor`.
+Repository fingerprints now use a lexical import scanner so comment, string,
+and template content cannot create routing evidence. Shared dotenv helpers now
+validate keys, reject multiline values, safely quote values, and update only an
+exact assignment. The V17 routing-quality protocol is preregistered separately
+from implementation tests; it records no agent-performance result until paired
+receipts and blinded grades are collected.
 The V16 protocol now separates the evidentiary gates for preserved quality,
 task-specific superiority, runtime, measured USD cost, and practitioner-grade
 design claims so an engineering safeguard is never mistaken for an outcome.

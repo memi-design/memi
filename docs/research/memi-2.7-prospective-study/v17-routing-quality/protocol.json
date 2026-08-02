@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v17-routing-quality",
+  "status": "preregistered-unexecuted",
+  "candidate": {
+    "packageVersion": "PENDING",
+    "tarballSha256": "PENDING",
+    "commit": "PENDING"
+  },
+  "routingVariants": [
+    "repository-only-discovery",
+    "legacy-bounded-pattern-router",
+    "safe-pattern-router"
+  ],
+  "primaryOutcomes": [
+    "blinded_paired_design_quality",
+    "route_precision",
+    "route_recall",
+    "abstention_correctness"
+  ],
+  "secondaryOutcomes": [
+    "functional_acceptance",
+    "critical_defects",
+    "input_tokens",
+    "output_tokens",
+    "reasoning_tokens",
+    "wall_time_ms",
+    "tool_calls",
+    "retries",
+    "provider_failures"
+  ],
+  "controls": {
+    "pairedConditions": true,
+    "sameModelWithinPair": true,
+    "sameEffortWithinPair": true,
+    "cleanClonePerCell": true,
+    "isolatedVerification": true,
+    "blindedQualityPanel": 3,
+    "receiptRequired": true,
+    "providerBillingArtifactsRequiredForUsdClaims": true
+  },
+  "statistics": {
+    "qualityNonInferiorityMargin": -5,
+    "pairedBootstrapResamples": 10000,
+    "secondaryMultiplicity": "Holm",
+    "pooledHeterogeneousTasks": "descriptive-only"
+  },
+  "claimPolicy": {
+    "noSuperiorityWithoutPrespecifiedGate": true,
+    "noUsdClaimWithoutMeasuredBilling": true,
+    "reportExclusionsWithoutImputation": true
+  }
+}

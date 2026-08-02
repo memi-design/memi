@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Deterministic safety regression corpus, not a model-quality benchmark.",
+  "expected": "reject-before-match",
+  "patterns": [
+    "(a+)+$",
+    "^(a|aa)+$",
+    "(?:a|a?)+$",
+    "((a|aa))+",
+    "(a*)*",
+    "a{1,3}{1,3}",
+    "(foo)\\1",
+    "(?<=a)b",
+    "(?<!a)b",
+    "[a-z]+",
+    "expo.*",
+    "^.*router$"
+  ],
+  "permittedExamples": [
+    "exact:expo-router",
+    "prefix:expo-",
+    "suffix:-router",
+    "contains:router",
+    "glob:expo-*",
+    "oneOf:expo,react-native",
+    "^app/\\(tabs\\)/_layout\\.tsx$"
+  ]
+}
