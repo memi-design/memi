@@ -125,6 +125,30 @@ describe("prospective evidence v2", () => {
     });
   });
 
+  it("admits native quality and resource evidence without billing only when the frozen plan excludes a USD claim", () => {
+    const unbilled = receipt({
+      billing: {
+        source: "unavailable",
+        currency: "USD",
+        amount: null,
+        sourceSha256: null,
+        priceCardSha256: null,
+        sourceArtifact: null,
+        priceCardArtifact: null,
+      },
+    });
+
+    expect(validateProspectiveEvidenceV2({
+      receipt: unbilled,
+      expected,
+      requireMeasuredBilling: false,
+    })).toEqual({ valid: true, reasons: [] });
+    expect(validateProspectiveEvidenceV2({
+      receipt: unbilled,
+      expected,
+    })).toEqual({ valid: false, reasons: ["billing-unmeasured"] });
+  });
+
   it("rejects duplicate capture identities before a receipt can be admitted", () => {
     expect(() => receipt({
       native: {
