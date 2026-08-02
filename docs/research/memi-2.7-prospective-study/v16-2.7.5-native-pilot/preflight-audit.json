@@ -15,6 +15,13 @@
     "candidateProvenance": "candidate-provenance.json",
     "reason": "An exact local 2.7.5 tarball from the repaired candidate commit is retained and hash-recorded. It is an unpublished study candidate, not an npm release."
   },
+  "mobileCalibrationDevice": {
+    "name": "iPhone 17",
+    "udid": "EAEF843E-B99A-42C2-BE5E-6E480B899F5C",
+    "runtime": "iOS 26.5",
+    "status": "user-authorized-reset-and-exclusive",
+    "observedAt": "2026-08-02T03:21:00.000Z"
+  },
   "fixtures": [
     {
       "id": "buzzr-tab-unread-badge",

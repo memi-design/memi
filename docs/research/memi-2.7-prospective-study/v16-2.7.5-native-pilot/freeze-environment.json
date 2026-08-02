@@ -4,7 +4,7 @@
   "arch": "arm64",
   "node": "v22.22.3",
   "xcode": "26.6 (17F113)",
-  "simulator": "Memi V12 iPhone 17; iOS 26.5; FED7FB9E-13D5-4383-93EA-7FFE0111A496; exclusive reset required",
+  "simulator": "iPhone 17; iOS 26.5; EAEF843E-B99A-42C2-BE5E-6E480B899F5C; user-authorized exclusive reset required",
   "workspaceVolume": "ExtremeSSD APFS",
   "temporaryRoot": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v16-2.7.5-native-confirmatory/tmp"
 }

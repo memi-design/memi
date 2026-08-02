@@ -143,7 +143,7 @@ cell. Billing evidence remains required only for the separate USD-cost lane.
 
 [environment.json](environment.json) freezes the intended browser and exclusive
 Simulator environment. The named simulator must be erased/reset before each
-mobile pair; the separately booted system simulator is not part of V16.
+mobile pair; the user-authorized generic iPhone 17 is now the V16 device.
 `freeze-environment.json` is its intentionally narrow, schema-compatible
 projection consumed by `memi benchmark prospective-freeze`.
 

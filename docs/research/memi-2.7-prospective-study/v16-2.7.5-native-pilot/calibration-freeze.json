@@ -3,7 +3,7 @@
   "studyId": "memi-2.7-prospective-v16-275-calibration",
   "planId": "memi-2.7-v16-2.7.5-native-calibration",
   "planHash": "sha256:84ed43c6e354fe6b1c5592c7b5aaca4090843897314a62580e797a5ed06020bf",
-  "frozenAt": "2026-08-02T00:43:00.000Z",
+  "frozenAt": "2026-08-02T03:22:00.000Z",
   "candidate": {
     "version": "2.7.5",
     "revision": "0c95d57066e1cd8fa0f97cbda92609aadc7751f7",
@@ -27,7 +27,7 @@
     "arch": "arm64",
     "node": "v22.22.3",
     "xcode": "26.6 (17F113)",
-    "simulator": "Memi V12 iPhone 17; iOS 26.5; FED7FB9E-13D5-4383-93EA-7FFE0111A496; exclusive reset required",
+    "simulator": "iPhone 17; iOS 26.5; EAEF843E-B99A-42C2-BE5E-6E480B899F5C; user-authorized exclusive reset required",
     "workspaceVolume": "ExtremeSSD APFS",
     "temporaryRoot": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v16-2.7.5-native-confirmatory/tmp"
   },
@@ -116,5 +116,5 @@
       "sequence": 5
     }
   ],
-  "freezeHash": "sha256:fe049646618c13003e1c41581cbbed70c308dd682e53e17ae9e21737b1732b46"
+  "freezeHash": "sha256:9b95fa9a55f9335c91ba4565c769970d6a6fbfa40d63183363d1b7e4420e0f9d"
 }
