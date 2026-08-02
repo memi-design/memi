@@ -54,11 +54,14 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 - `8428baff` — test: pin organization brand contract
 - `eef9d527` — fix: pin organization brand contract
-- Vendors byte-exact copies of the organization profile's revision-2 brand
+- `212dc3a5` — test: require current npm package identity
+- `194f4560` — fix: pin current package brand identity
+- Vendors byte-exact copies of the organization profile's final revision-3 brand
   manifest and schema into the CLI package, pinned by SHA-256.
 - Extends the offline ecosystem identity gate to reject drift in the CLI name,
-  availability, repository, npm package, or license, and in Canvas's M0
-  development status or canonical single-heart icon.
+  availability, repository, current `@memi-design/cli` npm package identity, or
+  license, and in Canvas's M0 development status or canonical single-heart
+  icon. Revision 3 supersedes the intermediate revision-2 snapshot.
 
 Website and Studio parity remain separate release-group checks; this entry does
 not claim a broader quality or performance result.
