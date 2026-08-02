@@ -12,15 +12,15 @@
 
 # Memi
 
-**Read-only design engineering for coding agents.**
+**Design CI for coding agents.**
 
-Memi is the **read-only design engineering audit and skill layer for coding agents**. It gives Codex, Claude Code, Cursor, Grok Build, and MCP clients file-anchored interface evidence before they edit UI.
+Memi gives Codex, Claude Code, Cursor, Grok Build, and MCP clients **read-only, file-anchored UI evidence before merge**.
 
 The first pass reads the product you already have, identifies accessibility, hierarchy, state, responsive, motion, and token risks, then reruns the same deterministic check after a scoped fix. Your code remains the source of truth.
 
 **Supported today:** Node 20, 22, and 24 on macOS, Linux, and Windows. Figma and [Studio](https://memoire.cv/download) are optional companions.
 
-[npm](https://www.npmjs.com/package/@memi-design/cli) · [memoire.cv](https://memoire.cv) · [current versions](docs/CURRENT_RELEASE.md) · [MCP Registry](https://registry.modelcontextprotocol.io) · [Agent Skills](https://skills.sh/memi-design/memi)
+[npm](https://www.npmjs.com/package/@memi-design/cli) · [memoire.cv](https://memoire.cv) · [current versions](https://github.com/memi-design/memi/blob/main/docs/CURRENT_RELEASE.md) · [MCP Registry](https://registry.modelcontextprotocol.io) · [Agent Skills](https://skills.sh/memi-design/memi)
 
 ## Quickstart
 
@@ -65,7 +65,7 @@ The default workflow is deliberately read-only. Write-capable scaffolds and Figm
 
 ## Research, stated plainly
 
-The [V15 confirmatory audit](docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/README.md) is a reproducible release study, not a product claim page.
+The [V15 confirmatory audit](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/README.md) is a reproducible release study, not a product claim page.
 
 | What the audit observed | What it does **not** establish |
 | --- | --- |
@@ -76,12 +76,12 @@ The [V15 confirmatory audit](docs/research/memi-2.7-prospective-study/v15-2.7.3-
 
 **No superiority, speed, or dollar-savings claim is made.** The study reports exclusions without imputation and keeps functional, rendered-quality, and resource evidence separate.
 
-Read the [conference-style audit PDF](docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/memi-2.7.3-confirmatory-audit.pdf), inspect the [protocol and receipts](docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/), or review the [V17 preregistration](docs/research/memi-2.7-prospective-study/v17-routing-quality/README.md) for the next routing-quality study. The complete [InterfaceBench contract](benchmarks/interfacebench-v1.json) and [DesignWorkBench v2 readiness report](docs/audits/memi-designworkbench-v2-readiness.md) remain separate from release evidence.
+Read the [conference-style audit PDF](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/memi-2.7.3-confirmatory-audit.pdf), inspect the [protocol and receipts](https://github.com/memi-design/memi/tree/main/docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory), or review the [V17 preregistration](https://github.com/memi-design/memi/blob/main/docs/research/memi-2.7-prospective-study/v17-routing-quality/README.md) for the next routing-quality study. The complete [InterfaceBench contract](https://github.com/memi-design/memi/blob/main/benchmarks/interfacebench-v1.json) and [DesignWorkBench v2 readiness report](https://github.com/memi-design/memi/blob/main/docs/audits/memi-designworkbench-v2-readiness.md) remain separate from release evidence.
 
 <details>
 <summary><strong>Memi InterfaceBench and historical candidate record</strong></summary>
 
-Memi InterfaceBench is a 100 target tasks specification with 5 pinned seed tasks; it is not a published performance score. The historical 2.7 candidate record reported 2,187/2,187 tests and 70.57% statements coverage. The greater-than-25% claim remains **not verified**. Memi DesignWorkBench v2 holds 300 task contracts and requires practitioner calibration before any certification claim. Inspect the [benchmark contract](benchmarks/interfacebench-v1.json) and [workflow evidence](docs/case-studies/memi-2.7-workflow-proof/results.json).
+Memi InterfaceBench is a 100 target tasks specification with 5 pinned seed tasks; it is not a published performance score. The historical 2.7 candidate record reported 2,187/2,187 tests and 70.57% statements coverage. The greater-than-25% claim remains **not verified**. Memi DesignWorkBench v2 holds 300 task contracts and requires practitioner calibration before any certification claim. Inspect the [benchmark contract](https://github.com/memi-design/memi/blob/main/benchmarks/interfacebench-v1.json) and [workflow evidence](https://github.com/memi-design/memi/blob/main/docs/case-studies/memi-2.7-workflow-proof/results.json).
 
 </details>
 
@@ -135,7 +135,7 @@ jobs:
 
 The Action adds code-scanning annotations, a step summary, and a `memi-design-health` artifact. Existing debt can be baselined while new debt fails the gate.
 
-[GitHub Action guide](docs/GITHUB_ACTION_MARKETPLACE.md) · [CI recipes](docs/CI_RECIPES.md) · [team rollout](docs/TEAM_ROLLOUT.md)
+[GitHub Action guide](https://github.com/memi-design/memi/blob/main/docs/GITHUB_ACTION_MARKETPLACE.md) · [CI recipes](https://github.com/memi-design/memi/blob/main/docs/CI_RECIPES.md) · [team rollout](https://github.com/memi-design/memi/blob/main/docs/TEAM_ROLLOUT.md)
 
 ## Agent and MCP setup
 
@@ -163,14 +163,15 @@ Codex plugin marketplace:
 codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire
 ```
 
-[Agent stack guide](docs/AGENT_STACKS.md) · [copy-paste recipes](docs/AGENT_RECIPES.md) · [full skill router](skills/memoire-design-tooling/SKILL.md)
+[Agent stack guide](docs/AGENT_STACKS.md) · [copy-paste recipes](https://github.com/memi-design/memi/blob/main/docs/AGENT_RECIPES.md) · [full skill router](skills/memoire-design-tooling/SKILL.md)
 
 ## Trust and proof
 
-- [Release gates](docs/RELEASE_GATES.md) — package, provenance, clean-install, MCP, plugin, binary, and public-surface checks.
-- [Current release truth](docs/CURRENT_RELEASE.md) — one source for npm, GitHub, Action, Studio, and website versions.
-- [Reproducible case studies](docs/case-studies/README.md) — pinned evidence, abstentions, and paired protocols.
-- [Audit reports](docs/audits/) — timestamped findings, evidence gaps, score caps, and owners.
+- [Release gates](https://github.com/memi-design/memi/blob/main/docs/RELEASE_GATES.md) — package, provenance, clean-install, MCP, plugin, binary, and public-surface checks.
+- [Current release truth](https://github.com/memi-design/memi/blob/main/docs/CURRENT_RELEASE.md) — one source for npm, GitHub, Action, Studio, and website versions.
+- [Reproducible case studies](https://github.com/memi-design/memi/tree/main/docs/case-studies) — pinned evidence, abstentions, and paired protocols.
+- [Audit reports](https://github.com/memi-design/memi/tree/main/docs/audits) — timestamped findings, evidence gaps, score caps, and owners.
+- [Dependency trust ledger](docs/DEPENDENCY_TRUST.md) — direct dependency purpose, dynamic boundaries, and review policy.
 - [`llms.txt`](llms.txt) — compact machine-readable product map.
 
 Trust defaults: read-only audit; no npm install-time lifecycle scripts; no source upload or covert telemetry; explicit Figma connection; agent-kit `--dry-run --json`; immutable Action pins; and documented third-party boundaries in [NOTICE](NOTICE).
