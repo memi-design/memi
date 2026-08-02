@@ -14,6 +14,29 @@ import { join } from "path";
 
 /** The env files we scan in priority order. */
 const ENV_FILES = [".env.local", ".env"] as const;
+const ENVIRONMENT_KEY = /^[A-Za-z_][A-Za-z0-9_]*$/u;
+
+export function assertEnvKey(key: string): void {
+  if (!ENVIRONMENT_KEY.test(key)) {
+    throw new Error(`Invalid environment key: ${key}`);
+  }
+}
+
+export function upsertEnvValue(content: string, key: string, value: string): string {
+  assertEnvKey(key);
+  if (/[\r\n]/u.test(value)) {
+    throw new Error("Environment values must be single line");
+  }
+  const line = `${key}="${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
+  const normalized = content.replaceAll("\r\n", "\n");
+  const lines = normalized.split("\n");
+  const existing = lines.findIndex((candidate) => parseEnvAssignment(candidate)?.key === key);
+  if (existing >= 0) {
+    lines[existing] = line;
+    return lines.join("\n");
+  }
+  return `${normalized}${normalized.length > 0 && !normalized.endsWith("\n") ? "\n" : ""}${line}\n`;
+}
 
 /**
  * Read a single `.env`-style file and merge KEY=VALUE pairs into `process.env`.
@@ -60,6 +83,7 @@ export interface EnvValue {
  * in the given project root. Returns the value and the source it was found in.
  */
 export async function readEnvValue(root: string, key: string): Promise<EnvValue> {
+  assertEnvKey(key);
   if (process.env[key]?.trim()) {
     return { value: process.env[key]!.trim(), source: "process" };
   }
@@ -67,9 +91,11 @@ export async function readEnvValue(root: string, key: string): Promise<EnvValue>
   for (const file of ENV_FILES) {
     try {
       const content = await readFile(join(root, file), "utf-8");
-      const match = content.match(new RegExp(`^${key}\\s*=\\s*"?([^"\\n]+)"?`, "m"));
-      if (match) {
-        return { value: match[1].trim(), source: file };
+      const assignment = content.split(/\r?\n/u)
+        .map(parseEnvAssignment)
+        .find((candidate) => candidate?.key === key);
+      if (assignment) {
+        return { value: assignment.value, source: file };
       }
     } catch {
       // File doesn't exist — try next
@@ -85,4 +111,19 @@ export async function readEnvValue(root: string, key: string): Promise<EnvValue>
  */
 export async function readEnvValueRaw(root: string, key: string): Promise<string | null> {
   return (await readEnvValue(root, key)).value;
+}
+
+function parseEnvAssignment(line: string): { key: string; value: string } | null {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith("#")) return null;
+  const equals = trimmed.indexOf("=");
+  if (equals <= 0) return null;
+  const key = trimmed.slice(0, equals).trim();
+  if (!ENVIRONMENT_KEY.test(key)) return null;
+  const rawValue = trimmed.slice(equals + 1).trim();
+  const quoted = rawValue.length >= 2 && rawValue.startsWith('"') && rawValue.endsWith('"');
+  const value = quoted
+    ? rawValue.slice(1, -1).replaceAll('\\"', '"').replaceAll("\\\\", "\\")
+    : rawValue;
+  return { key, value };
 }

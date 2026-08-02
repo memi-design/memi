@@ -29,7 +29,7 @@ import {
 import { resolvePluginHealth } from "../plugin/install-info.js";
 import { installPluginToHome } from "../plugin/installer.js";
 import { ui } from "../tui/format.js";
-import { readEnvValueRaw } from "../utils/env.js";
+import { readEnvValueRaw, upsertEnvValue } from "../utils/env.js";
 
 // ── Helpers ───────────────────────────────────────────────
 
@@ -53,12 +53,7 @@ async function writeEnvVar(root: string, key: string, value: string): Promise<vo
   const envPath = join(root, ".env.local");
   let content = "";
   try { content = await readFile(envPath, "utf-8"); } catch { /* new file */ }
-  const regex = new RegExp(`^${key}\\s*=.*$`, "m");
-  const line = `${key}="${value}"`;
-  content = regex.test(content)
-    ? content.replace(regex, line)
-    : content.trim() + (content.trim() ? "\n" : "") + line + "\n";
-  await writeFile(envPath, content);
+  await writeFile(envPath, upsertEnvValue(content, key, value));
 }
 
 function copyToClipboard(text: string): boolean {

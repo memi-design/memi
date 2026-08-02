@@ -11,7 +11,7 @@ import chalk from "chalk";
 import { resolvePluginHealth, type PluginInstallHealth } from "../plugin/install-info.js";
 import { validateFigmaToken } from "../figma/rest-client.js";
 import { ui } from "../tui/format.js";
-import { readEnvValue, type EnvValue, type EnvSource } from "../utils/env.js";
+import { readEnvValue, upsertEnvValue, type EnvValue, type EnvSource } from "../utils/env.js";
 import { readBridgeLock, writeBridgeLock, clearBridgeLock } from "../figma/bridge-lock.js";
 
 // Alias shared type so ConnectJsonPayload signatures remain readable
@@ -199,16 +199,7 @@ async function setEnvVar(root: string, key: string, value: string): Promise<void
     // new file
   }
 
-  const regex = new RegExp(`^${key}\\s*=.*$`, "m");
-  const line = `${key}="${value}"`;
-
-  if (regex.test(content)) {
-    content = content.replace(regex, line);
-  } else {
-    content = content.trim() + (content.trim() ? "\n" : "") + line + "\n";
-  }
-
-  await writeFile(envPath, content);
+  await writeFile(envPath, upsertEnvValue(content, key, value));
 }
 
 export function registerConnectCommand(program: Command, engine: MemoireEngine) {
