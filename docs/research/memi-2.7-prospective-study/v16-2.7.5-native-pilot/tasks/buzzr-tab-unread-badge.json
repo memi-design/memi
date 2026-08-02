@@ -29,6 +29,13 @@
   ],
   "preparation": [
     {
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-ios-exclusive-reset.mjs"
+      ],
+      "timeoutMs": 420000
+    },
+    {
       "command": "npm",
       "args": [
         "ci",
@@ -47,6 +54,11 @@
     {
       "path": "scripts/memi-v16-ios-capture.mjs",
       "content": "import { execFile } from \"node:child_process\";\nimport { copyFile, lstat, mkdir, writeFile } from \"node:fs/promises\";\nimport { dirname } from \"node:path\";\nimport { promisify } from \"node:util\";\n\nconst exec = promisify(execFile);\nconst options = new Map(process.argv.slice(2).reduce((pairs, value, index, values) => {\n  if (value.startsWith(\"--\")) pairs.push([value.slice(2), values[index + 1]]);\n  return pairs;\n}, []));\nconst kind = options.get(\"kind\");\nconst flow = options.get(\"flow\");\nconst output = options.get(\"output\");\nconst udid = process.env.MEMI_V16_IOS_UDID;\nconst maestro = process.env.MEMI_V16_MAESTRO_BIN || \"maestro\";\n\nif (!kind || !flow || !output) throw new Error(\"kind, flow, and output are required\");\nif (!udid || !/^[A-F0-9-]{36}$/i.test(udid)) {\n  throw new Error(\"MEMI_V16_IOS_UDID must name the reset, exclusive iOS Simulator\");\n}\nif (!new Set([\"screenshot\", \"interaction-trace\", \"accessibility-tree\"]).has(kind)) {\n  throw new Error(\"unsupported native capture kind: \" + kind);\n}\nconst existing = await lstat(output).catch(() => null);\nif (existing) throw new Error(\"refusing to overwrite native capture: \" + output);\nawait mkdir(dirname(output), { recursive: true });\n\nconst trace = output.replace(/[^/]+$/, \"memi-v16-maestro-junit.xml\");\nasync function runJourney() {\n  await exec(maestro, [\"--udid\", udid, \"test\", flow, \"--format\", \"junit\", \"--output\", trace], {\n    timeout: 300000,\n    maxBuffer: 4_000_000,\n  });\n  const result = await lstat(trace).catch(() => null);\n  if (!result?.isFile() || result.size === 0) throw new Error(\"Maestro did not emit a journey trace\");\n}\n\nawait runJourney();\nif (kind === \"screenshot\") {\n  await exec(\"xcrun\", [\"simctl\", \"io\", udid, \"screenshot\", output], { timeout: 60000 });\n} else if (kind === \"interaction-trace\") {\n  const source = await lstat(trace).catch(() => null);\n  if (!source?.isFile()) throw new Error(\"Maestro did not emit its JUnit journey trace\");\n  await copyFile(trace, output);\n} else {\n  const hierarchy = await exec(maestro, [\"--udid\", udid, \"hierarchy\"], {\n    timeout: 60000,\n    maxBuffer: 8_000_000,\n  });\n  if (!hierarchy.stdout.trim()) throw new Error(\"Maestro returned an empty accessibility hierarchy\");\n  await writeFile(output, JSON.stringify({\n    schemaVersion: 1,\n    collector: \"maestro-hierarchy\",\n    udid,\n    capturedAt: new Date().toISOString(),\n    hierarchy: hierarchy.stdout,\n  }, null, 2) + \"\\n\", { mode: 0o600 });\n}\n",
+      "executable": false
+    },
+    {
+      "path": "scripts/memi-v16-ios-exclusive-reset.mjs",
+      "content": "import { execFile } from \"node:child_process\";\nimport { promisify } from \"node:util\";\n\nconst exec = promisify(execFile);\nconst udid = process.env.MEMI_V16_IOS_UDID;\nif (!udid || !/^[A-F0-9-]{36}$/i.test(udid)) {\n  throw new Error(\"MEMI_V16_IOS_UDID must name the dedicated V16 Simulator\");\n}\n\nasync function bootedDevices() {\n  const { stdout } = await exec(\"xcrun\", [\"simctl\", \"list\", \"devices\", \"--json\"], {\n    timeout: 60000,\n    maxBuffer: 4_000_000,\n  });\n  const payload = JSON.parse(stdout);\n  return Object.values(payload.devices).flat().filter((device) => device.state === \"Booted\");\n}\n\nconst before = await bootedDevices();\nconst other = before.filter((device) => device.udid !== udid);\nif (other.length > 0) {\n  throw new Error(\"exclusive-simulator-required: other booted device(s): \" + other.map((device) => device.name + \" \" + device.udid).join(\", \"));\n}\nawait exec(\"xcrun\", [\"simctl\", \"shutdown\", udid], { timeout: 60000 }).catch(() => undefined);\nawait exec(\"xcrun\", [\"simctl\", \"erase\", udid], { timeout: 180000 });\nawait exec(\"xcrun\", [\"simctl\", \"boot\", udid], { timeout: 120000 });\nawait exec(\"xcrun\", [\"simctl\", \"bootstatus\", udid, \"-b\"], { timeout: 300000 });\nconst after = await bootedDevices();\nif (after.length !== 1 || after[0].udid !== udid) {\n  throw new Error(\"exclusive-simulator-required: dedicated device was not the only booted device after reset\");\n}\n",
       "executable": false
     },
     {

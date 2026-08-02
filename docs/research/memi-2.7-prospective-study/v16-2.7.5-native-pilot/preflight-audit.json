@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-08-02T00:35:00.000Z",
+  "checkedAt": "2026-08-02T00:42:00.000Z",
   "status": "not-ready-to-freeze",
   "contractPreflight": {
     "status": "ready-but-not-calibrated",
     "receipt": "preflight-attestation.json",
-    "sha256": "sha256:6747f44676bf82920f4e7d1d2c70d8916e9a2727d0ff66968c2b0dabb0c55807",
+    "sha256": "sha256:520d7699272bcfbe37852e56e66a133f9ca6250f1a0a0c0fafe3510fd19ce008",
     "meaning": "All three clean, pinned fixtures match their declared origins and V16 task manifests declare the required capture kinds. This is configuration admission only; no collector, model cell, or claim has been admitted. USD billing is required only by a separately frozen cost extension."
   },
   "candidate": {
@@ -42,6 +42,7 @@
   ],
   "remainingPrerequisites": [
     "Use the verified Buzzr Expo fixture revision and hash a V16 task manifest with native Simulator collectors.",
+    "Shut down every non-V16 Simulator before each mobile cell; the task now fails before provider invocation if exclusivity cannot be established.",
     "Perform one unscored native-capture calibration pair per fixture.",
     "Freeze and retain per-cell provider usage exports or invoice allocations and price-card artifacts before any separately billed-cost extension; the native quality/resource study does not infer USD cost."
   ],

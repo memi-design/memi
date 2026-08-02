@@ -64,8 +64,11 @@ Required capture kinds for every cell:
 The platform collector command belongs in the task manifest, not in a shell
 history. It must write its declared filename in the isolated verification clone
 and exit nonzero on launch, interaction, or capture failure. For mobile cells,
-the Simulator is erased/reset and receives exclusive machine access before each
-pair; no host screenshots are admissible.
+the first preparation command checks that no other Simulator is booted, erases
+and boots the dedicated V16 device, then verifies that it is the only booted
+device before provider invocation. It preserves a preparation failure rather
+than consuming model quota when exclusivity cannot be established; no host
+screenshots are admissible.
 
 ## Measured billing contract
 

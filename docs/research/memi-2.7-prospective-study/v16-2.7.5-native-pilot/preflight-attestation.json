@@ -3,14 +3,14 @@
   "status": "ready",
   "planId": "memi-2.7-v16-2.7.5-native-confirmatory",
   "planHash": "sha256:514991cd1a5c8d44ab501ba27b56cd7b0ae327381a077d41ebc3017a3aa043eb",
-  "checkedAt": "2026-08-02T00:35:00.000Z",
+  "checkedAt": "2026-08-02T00:42:00.000Z",
   "fixtures": [
     {
       "taskId": "buzzr-tab-unread-badge",
       "repository": "/Volumes/ExtremeSSD/Projects/_benchmarks/memi-2.7-cases/buzzr",
       "origin": "https://github.com/Buzzr-app/Buzzr",
       "revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
-      "taskManifestSha256": "sha256:f5f4928145730be1036257a147365e7691d39809d1fcd23af6751ddef345bc3b",
+      "taskManifestSha256": "sha256:04e25a96ea51f5087ded60809e749d1f05971340126626b3c586bc3bb468d9e8",
       "nativeCaptureKinds": [
         "accessibility-tree",
         "interaction-trace",
@@ -34,7 +34,7 @@
       "repository": "/Volumes/ExtremeSSD/Projects/_worktrees/nate-memi-validation",
       "origin": "https://github.com/sarveshsea/nate-the-bait",
       "revision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
-      "taskManifestSha256": "sha256:0731b300ea27f0033d0119017394d95c7ec52e9e44652aed864d4e97f41cd725",
+      "taskManifestSha256": "sha256:2985f872e30864d5a08598092bee685fadafd5c7cb778a724a4e11b37b21a2af",
       "nativeCaptureKinds": [
         "accessibility-tree",
         "interaction-trace",
@@ -42,5 +42,5 @@
       ]
     }
   ],
-  "preflightHash": "sha256:6747f44676bf82920f4e7d1d2c70d8916e9a2727d0ff66968c2b0dabb0c55807"
+  "preflightHash": "sha256:520d7699272bcfbe37852e56e66a133f9ca6250f1a0a0c0fafe3510fd19ce008"
 }

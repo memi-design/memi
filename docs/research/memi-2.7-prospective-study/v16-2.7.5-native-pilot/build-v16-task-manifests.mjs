@@ -69,6 +69,39 @@ if (kind === "screenshot") {
 }
 `;
 
+const iosExclusiveReset = String.raw`import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const exec = promisify(execFile);
+const udid = process.env.MEMI_V16_IOS_UDID;
+if (!udid || !/^[A-F0-9-]{36}$/i.test(udid)) {
+  throw new Error("MEMI_V16_IOS_UDID must name the dedicated V16 Simulator");
+}
+
+async function bootedDevices() {
+  const { stdout } = await exec("xcrun", ["simctl", "list", "devices", "--json"], {
+    timeout: 60000,
+    maxBuffer: 4_000_000,
+  });
+  const payload = JSON.parse(stdout);
+  return Object.values(payload.devices).flat().filter((device) => device.state === "Booted");
+}
+
+const before = await bootedDevices();
+const other = before.filter((device) => device.udid !== udid);
+if (other.length > 0) {
+  throw new Error("exclusive-simulator-required: other booted device(s): " + other.map((device) => device.name + " " + device.udid).join(", "));
+}
+await exec("xcrun", ["simctl", "shutdown", udid], { timeout: 60000 }).catch(() => undefined);
+await exec("xcrun", ["simctl", "erase", udid], { timeout: 180000 });
+await exec("xcrun", ["simctl", "boot", udid], { timeout: 120000 });
+await exec("xcrun", ["simctl", "bootstatus", udid, "-b"], { timeout: 300000 });
+const after = await bootedDevices();
+if (after.length !== 1 || after[0].udid !== udid) {
+  throw new Error("exclusive-simulator-required: dedicated device was not the only booted device after reset");
+}
+`;
+
 const webCollector = String.raw`import { spawn } from "node:child_process";
 import { lstat, mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -183,11 +216,23 @@ async function buildTask(taskId) {
   const collectorName = isWeb ? "scripts/memi-v16-web-capture.mjs" : "scripts/memi-v16-ios-capture.mjs";
   return {
     ...source,
+    preparation: isWeb ? source.preparation : [
+      {
+        command: "node",
+        args: ["scripts/memi-v16-ios-exclusive-reset.mjs"],
+        timeoutMs: 420000,
+      },
+      ...source.preparation,
+    ],
     nativeCaptures: captures(taskId),
     fixtures: [
       ...source.fixtures,
       { path: collectorName, content: collector, executable: false },
       ...isWeb ? [] : [{
+        path: "scripts/memi-v16-ios-exclusive-reset.mjs",
+        content: iosExclusiveReset,
+        executable: false,
+      }, {
         path: "scripts/memi-v16-journey.yaml",
         content: iosFlows[taskId],
         executable: false,
