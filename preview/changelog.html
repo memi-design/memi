@@ -390,7 +390,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">416</span> commits</span>
+      <span><span class="n" id="stat-commits">418</span> commits</span>
       <span><span class="n" id="stat-versions">43</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-02</span> latest</span>
     </div>
@@ -408,7 +408,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Candidate release</span>
             <strong class="summary-value">v2.7.5</strong>
-            <div class="summary-caption">42 commits tracked in v2.7.5 from CHANGELOG.md.</div>
+            <div class="summary-caption">44 commits tracked in v2.7.5 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -611,6 +611,14 @@ const releases = [
       [
         "79b80538",
         "fix: append fitness evidence on Windows"
+      ],
+      [
+        "ff697f59",
+        "test: reproduce streamed input budget breach"
+      ],
+      [
+        "8b90796b",
+        "fix: stop adapters at streamed token caps"
       ]
     ],
     "decisions": [],
@@ -656,7 +664,9 @@ const releases = [
       "6d54a9a1 — test: stabilize harness auth cache coverage",
       "56042961 — fix: cache injected harness auth probes",
       "d5e7e5f0 — test: cover Windows fitness append flags",
-      "79b80538 — fix: append fitness evidence on Windows"
+      "79b80538 — fix: append fitness evidence on Windows",
+      "ff697f59 — test: reproduce streamed input budget breach",
+      "8b90796b — fix: stop adapters at streamed token caps"
     ]
   },
   {

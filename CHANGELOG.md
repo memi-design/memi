@@ -52,6 +52,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `56042961` — fix: cache injected harness auth probes
 - `d5e7e5f0` — test: cover Windows fitness append flags
 - `79b80538` — fix: append fitness evidence on Windows
+- `ff697f59` — test: reproduce streamed input budget breach
+- `8b90796b` — fix: stop adapters at streamed token caps
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -92,6 +94,9 @@ CLI probe, making cache behavior deterministic and directly testable.
 Windows evidence-store appends now omit the unsupported POSIX `O_NOFOLLOW`
 open flag while retaining the regular-file and path-identity checks before any
 write, restoring fail-closed route-evidence persistence on that platform.
+The workflow adapters now stop the provider at the first streamed input,
+output, or reasoning-token limit breach, retaining the trace while rejecting
+the over-budget run before it can be admitted into a prospective comparison.
 
 ## v2.7.4 — 2026-08-01
 
