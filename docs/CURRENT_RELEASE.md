@@ -4,20 +4,22 @@
 
 Manifest updated: 2026-08-02
 
+> Engine 2.7.8 is not the current public release. The public activation path remains 2.7.7 until independent live-release verification passes.
+
 
 Memi is the design layer for agentic AI. The CLI and focused skills are available today; Studio is the macOS workbench, and Canvas is in development.
 
 | Release group | Version | Canonical evidence |
 |---|---:|---|
-| CLI, npm, MCP, and Action | `2.7.7` | [GitHub release](https://github.com/memi-design/memi/releases/tag/v2.7.7) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
+| Engine candidate (unreleased) | `2.7.8` | [GitHub release](https://github.com/memi-design/memi/releases/tag/v2.7.7) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
 | Studio | `2.5.0` | [Studio release](https://github.com/memi-design/memi-studio/releases/tag/v2.5.0) |
 | Website | `1.0.4` | [memoire.cv](https://www.memoire.cv) |
 
 ## Immutable engine identity
 
-- Release state: `published`
-- Source commit: `74fc6ce8c66182b4aa06e1250cb169da8b1fc54c`
-- GitHub tag: `v2.7.7`
+- Release state: `candidate`
+- Source commit: Not assigned. npm provenance must bind the eventual publish commit.
+- GitHub tag: `v2.7.8`
 - GitHub Action major channel: `v2`
 - MCP server: `io.github.memi-design/memi`
 

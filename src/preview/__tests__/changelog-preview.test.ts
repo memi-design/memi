@@ -26,9 +26,7 @@ describe("preview changelog sync", () => {
     };
     expect(releases[0]).toMatchObject({
       version: `v${engine.version}`,
-      commits: expect.arrayContaining([
-        ["0bad800b", "fix: align MCP registry identity with organization"],
-      ]),
+      commits: [],
     });
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
     const expectedKicker = engine.state === "candidate" ? "Candidate release" : "Current release";
