@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/memi-brand-banner.png" alt="Memi — the design layer for agentic AI." width="100%" />
+  <img src="assets/memi-brand-banner.webp" alt="Memi — the design layer for agentic AI." width="100%" />
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@
 
 **Design CI for coding agents.**
 
-Memi gives Codex, Claude Code, Cursor, Grok Build, and MCP clients **read-only, file-anchored UI evidence before merge**.
+Memi is the **read-only design engineering audit and skill layer for coding agents**. It gives Codex, Claude Code, Cursor, Grok Build, and MCP clients file-anchored UI evidence before merge.
 
 The first pass reads the product you already have, identifies accessibility, hierarchy, state, responsive, motion, and token risks, then reruns the same deterministic check after a scoped fix. Your code remains the source of truth.
 
