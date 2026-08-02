@@ -3,14 +3,14 @@
   "version": "2.7.8",
   "description": "Memi is the design layer for agentic AI.",
   "author": {
-    "name": "Sarvesh Chidambaram",
-    "url": "https://github.com/sarveshsea"
+    "name": "Memi Design",
+    "url": "https://github.com/memi-design"
   },
   "homepage": "https://www.memoire.cv/codex-plugin",
-  "repository": "https://github.com/sarveshsea/memi",
+  "repository": "https://github.com/memi-design/memi",
   "license": "MIT",
-  "privacyPolicyURL": "https://www.memoire.cv/privacy",
-  "termsOfServiceURL": "https://www.memoire.cv/terms",
+  "privacyPolicyURL": "https://www.memoire.cv/legal",
+  "termsOfServiceURL": "https://www.memoire.cv/legal",
   "keywords": [
     "codex",
     "memoire",
@@ -30,7 +30,7 @@
     "displayName": "memi",
     "shortDescription": "Agent design CI, file scaffolds, and UI quality tools for Codex.",
     "longDescription": "memi gives Codex design-system memory, MCP tools, spec-first web and SwiftUI file scaffolds, compact agent briefs, Figma context, Tailwind and shadcn/ui diagnostics, Apple-platform guidance, and research-backed UI audits before interface edits.",
-    "developerName": "Sarvesh Chidambaram",
+    "developerName": "Memi Design",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
@@ -38,8 +38,8 @@
       "Write"
     ],
     "websiteURL": "https://www.memoire.cv/codex-plugin",
-    "privacyPolicyURL": "https://www.memoire.cv/privacy",
-    "termsOfServiceURL": "https://www.memoire.cv/terms",
+    "privacyPolicyURL": "https://www.memoire.cv/legal",
+    "termsOfServiceURL": "https://www.memoire.cv/legal",
     "defaultPrompt": [
       "Audit this UI with memi before editing.",
       "Extract tokens and shadcn registry context.",

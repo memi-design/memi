@@ -393,7 +393,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">431</span> commits</span>
+      <span><span class="n" id="stat-commits">443</span> commits</span>
       <span><span class="n" id="stat-versions">46</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-02</span> latest</span>
     </div>
@@ -411,7 +411,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Candidate release</span>
             <strong class="summary-value">v2.7.8</strong>
-            <div class="summary-caption">0 commits tracked in v2.7.8 from CHANGELOG.md.</div>
+            <div class="summary-caption">1 commits tracked in v2.7.8 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -446,12 +446,21 @@ const releases = [
     "date": "2026-08-02",
     "tag": "fix",
     "summary": "Aligns the npm package description and distributed product metadata with the; Synchronizes bundled skills, presets, action defaults, MCP metadata, and; This is a metadata release; it makes no new quality, speed, cost, or feature.",
-    "commits": [],
+    "commits": [
+      [
+        "821cf969",
+        "merge: reconcile 2.7.8 candidate with ecosystem identity"
+      ]
+    ],
     "decisions": [],
     "changes": [
       "Aligns the npm package description and distributed product metadata with the",
       "Synchronizes bundled skills, presets, action defaults, MCP metadata, and",
-      "This is a metadata release; it makes no new quality, speed, cost, or feature"
+      "This is a metadata release; it makes no new quality, speed, cost, or feature",
+      "821cf969 — merge: reconcile 2.7.8 candidate with ecosystem identity",
+      "Keeps package and generated candidate metadata on 2.7.8 while deriving the",
+      "This makes the release gate explicit: candidate metadata cannot erase or",
+      "Retains memi-design/memi as the next Smithery publish target while the"
     ]
   },
   {
@@ -463,6 +472,50 @@ const releases = [
       [
         "0bad800b",
         "fix: align MCP registry identity with organization"
+      ],
+      [
+        "15a5e3c5",
+        "test: define ecosystem identity release contract"
+      ],
+      [
+        "d9ca3286",
+        "fix: reconcile ecosystem release identity"
+      ],
+      [
+        "1bb86d71",
+        "test: harden ecosystem release provenance"
+      ],
+      [
+        "694a2a87",
+        "fix: harden ecosystem release provenance"
+      ],
+      [
+        "8428baff",
+        "test: pin organization brand contract"
+      ],
+      [
+        "eef9d527",
+        "fix: pin organization brand contract"
+      ],
+      [
+        "212dc3a5",
+        "test: require current npm package identity"
+      ],
+      [
+        "194f4560",
+        "fix: pin current package brand identity"
+      ],
+      [
+        "bcd7f8e9",
+        "test: reject stale Canvas brand revision"
+      ],
+      [
+        "6de199ad",
+        "fix: report current Canvas brand revision"
+      ],
+      [
+        "87bb8a39",
+        "fix: make README release gate section-aware"
       ]
     ],
     "decisions": [],
@@ -471,7 +524,28 @@ const releases = [
       "Corrects the official MCP Registry identity from the personal namespace to",
       "Published through npm trusted publishing with verified provenance, signatures,",
       "Published to the MCP Registry through GitHub OIDC; the organization-owned",
-      "Released verified macOS, Linux, and Windows binaries with checksums, then"
+      "Released verified macOS, Linux, and Windows binaries with checksums, then",
+      "15a5e3c5 — test: define ecosystem identity release contract",
+      "d9ca3286 — fix: reconcile ecosystem release identity",
+      "Makes the organization-owned Official MCP record the canonical operational",
+      "Changes future Smithery publishes to target memi-design/memi while",
+      "Adds a machine-readable 2.7.7 identity receipt, fixes the malformed Glama",
+      "1bb86d71 — test: harden ecosystem release provenance",
+      "694a2a87 — fix: harden ecosystem release provenance",
+      "Separates Memi's deprecated support policy for",
+      "Derives the packaged ecosystem identity receipt from the release version,",
+      "Moves Homebrew release automation and growth checks to memi-design, updates",
+      "Adds a Homebrew tap CI contract for exact 2.7.7 platform assets, checksums,",
+      "8428baff — test: pin organization brand contract",
+      "eef9d527 — fix: pin organization brand contract",
+      "212dc3a5 — test: require current npm package identity",
+      "194f4560 — fix: pin current package brand identity",
+      "bcd7f8e9 — test: reject stale Canvas brand revision",
+      "6de199ad — fix: report current Canvas brand revision",
+      "Vendors byte-exact copies of the organization profile's final revision-3 brand",
+      "Extends the offline ecosystem identity gate to reject drift in the CLI name,",
+      "87bb8a39 — fix: make README release gate section-aware",
+      "Defines the conversion-focused README fold by its semantic section boundary"
     ]
   },
   {

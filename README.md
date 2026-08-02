@@ -16,11 +16,11 @@
 
 Memi gives coding agents the product context, interface checks, and verification loops they need to ship UI that fits the system already in your repository. Use the CLI and [Memi Studio](https://memoire.cv/download) today; [Memi Canvas](#one-product-layer-three-surfaces) is currently in development. Memi works with Codex, Claude Code, Cursor, MCP clients, and CI.
 
-<p align="center">
-  <a href="#quickstart"><strong>Start with your next interface</strong></a> ·
-  <a href="https://memoire.cv/download">Get Memi Studio</a> ·
-  <a href="#research-and-benchmarks">Read the research</a>
-</p>
+The first pass reads the product you already have, identifies accessibility, hierarchy, state, responsive, motion, and token risks, then reruns the same deterministic check after a scoped fix. Your code remains the source of truth.
+
+**Supported today:** Node 20, 22, and 24 on macOS, Linux, and Windows. Figma and [Studio](https://memoire.cv/download) are optional companions.
+
+[npm](https://www.npmjs.com/package/@memi-design/cli) · [memoire.cv](https://memoire.cv) · [current versions](https://github.com/memi-design/memi/blob/main/docs/CURRENT_RELEASE.md) · [Official MCP record](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.memi-design%2Fmemi) · [Agent Skills](https://skills.sh/memi-design/memi)
 
 ## Quickstart
 
@@ -124,7 +124,24 @@ The research is disclosure material, not a product leaderboard. It keeps functio
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
 | Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
 
-### GitHub Action
+### Registry identity
+
+The Official MCP Registry record is organization-owned and published as
+`io.github.memi-design/memi@2.7.7`.
+
+**Smithery migration pending:** new publishes target `memi-design/memi`, but the
+organization listing is not yet live. The working
+[`sarveshsea/memi`](https://smithery.ai/servers/sarveshsea/memi) listing remains
+available only as a deprecated compatibility alias until the organization
+publication passes a post-publish check. Do not use the personal namespace in
+new integrations or directory submissions.
+
+See the [ecosystem identity guide](docs/ECOSYSTEM_IDENTITY.md) and its
+[machine-readable 2.7.7 receipt](release-artifacts/identity/2.7.7.identity.json).
+
+## Design CI
+
+Pin the release commit so every pull request runs the same code:
 
 ```yaml
 name: design

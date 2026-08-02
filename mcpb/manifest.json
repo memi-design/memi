@@ -6,8 +6,8 @@
   "description": "Memi is the design layer for agentic AI.",
   "long_description": "memi gives MCP-compatible agents design-system memory and interface-quality tools. It exposes Apple-platform briefs, approval-gated SwiftUI scaffolds, UI audits, Tailwind tokens, shadcn registry workflows, Figma context, design docs, and implementation diagnostics through the @memi-design/cli npm package.",
   "author": {
-    "name": "Sarvesh Chidambaram",
-    "url": "https://github.com/sarveshsea"
+    "name": "Memi Design",
+    "url": "https://github.com/memi-design"
   },
   "repository": {
     "type": "git",

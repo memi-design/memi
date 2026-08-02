@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/memi-design/.github/main/brand/brand-manifest.v1.schema.json",
+  "title": "Memi brand manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "brandRevision", "updatedAt", "organization", "products", "legacyProvenanceAllowlist"],
+  "properties": {
+    "$schema": { "const": "./brand-manifest.v1.schema.json" },
+    "schemaVersion": { "const": 1 },
+    "brandRevision": { "type": "integer", "minimum": 1 },
+    "updatedAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "organization": { "$ref": "#/$defs/organization" },
+    "products": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/product" }
+    },
+    "legacyProvenanceAllowlist": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/legacyEntry" }
+    }
+  },
+  "$defs": {
+    "httpsUrl": { "type": "string", "pattern": "^https://[^\\s]+$" },
+    "slug": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "tagline", "urls"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "name": { "type": "string", "minLength": 1 },
+        "tagline": { "type": "string", "minLength": 1 },
+        "urls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["github", "website"],
+          "properties": {
+            "github": { "$ref": "#/$defs/httpsUrl" },
+            "website": { "$ref": "#/$defs/httpsUrl" }
+          }
+        }
+      }
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "development" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "statusNote": { "type": "string", "minLength": 1 }
+            },
+            "required": ["statusNote"]
+          }
+        }
+      ],
+      "required": ["id", "name", "role", "status", "urls", "packages", "license", "icons", "aliases"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["available", "development"] },
+        "statusNote": { "type": "string", "minLength": 1 },
+        "urls": { "$ref": "#/$defs/productUrls" },
+        "packages": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/packageIdentity" }
+        },
+        "license": { "$ref": "#/$defs/license" },
+        "icons": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/icon" }
+        },
+        "aliases": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "productUrls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository"],
+      "properties": {
+        "repository": { "$ref": "#/$defs/httpsUrl" },
+        "documentation": { "$ref": "#/$defs/httpsUrl" },
+        "package": { "$ref": "#/$defs/httpsUrl" },
+        "download": { "$ref": "#/$defs/httpsUrl" },
+        "install": { "$ref": "#/$defs/httpsUrl" }
+      }
+    },
+    "packageIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "registry", "status", "url"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "registry": { "enum": ["npm", "workspace"] },
+        "status": { "enum": ["current", "legacy-compatibility"] },
+        "url": { "$ref": "#/$defs/httpsUrl" },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spdx", "name", "url"],
+      "properties": {
+        "spdx": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "url": { "$ref": "#/$defs/httpsUrl" },
+        "futureLicense": { "$ref": "#/$defs/futureLicense" }
+      }
+    },
+    "futureLicense": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spdx", "effectiveDate", "url"],
+      "properties": {
+        "spdx": { "type": "string", "minLength": 1 },
+        "effectiveDate": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "url": { "$ref": "#/$defs/httpsUrl" }
+      }
+    },
+    "icon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "purpose", "url", "sha256", "alt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "purpose": { "enum": ["primary", "app", "mark"] },
+        "url": { "$ref": "#/$defs/httpsUrl" },
+        "sourceUrl": { "$ref": "#/$defs/httpsUrl" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "alt": { "type": "string", "minLength": 1 }
+      }
+    },
+    "legacyEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "label", "value", "permittedContexts", "operational", "reason"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "kind": { "enum": ["name", "url-prefix", "package-prefix", "asset-prefix"] },
+        "label": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 },
+        "permittedContexts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["historical-release", "license-provenance", "immutable-archive"] }
+        },
+        "operational": { "const": false },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

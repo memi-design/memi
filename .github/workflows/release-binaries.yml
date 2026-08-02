@@ -346,13 +346,13 @@ jobs:
             echo "::error::HOMEBREW_TAP_TOKEN secret is required to publish the tap"
             exit 1
           fi
-          git clone "https://x-access-token:${GH_TOKEN}@github.com/sarveshsea/homebrew-memi.git" tap
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/memi-design/homebrew-memi.git" tap
           mkdir -p tap/Formula
           cp memoire.rb tap/Formula/memoire.rb
           cd tap
           VERSION="${RELEASE_TAG#v}"
           grep -Fq "version \"${VERSION}\"" Formula/memoire.rb
-          git config user.name "sarveshsea-bot"
+          git config user.name "memi-design-bot"
           git config user.email "bot@memoire.cv"
           git add Formula/memoire.rb
           if ! git diff --cached --quiet; then

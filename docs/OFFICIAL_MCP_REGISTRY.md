@@ -12,6 +12,14 @@ memi uses:
 - npm package: `@memi-design/cli`
 - transport: `stdio`
 - package arguments: `mcp start --no-figma`
+- published record: <https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.memi-design%2Fmemi>
+
+The previous `io.github.sarveshsea/memi` support policy is deprecated, but the
+public registry still reports 12 historical versions as `active`, through
+`2.7.4`. That observed upstream status is not a support claim. Keep the personal
+identifier only in immutable historical evidence and explicit compatibility
+records; all current metadata, publishing, and install guidance must use
+`io.github.memi-design/memi`.
 
 ## Install `mcp-publisher`
 
@@ -57,6 +65,11 @@ Expected registry result after publish:
 - `mcp-publisher: command not found`: install the publisher binary above and reopen the terminal.
 - `Registry validation failed for package`: publish the matching npm version first and verify `mcpName`.
 - `Invalid or expired Registry JWT token`: run `mcp-publisher login github` again.
-- `You do not have permission`: GitHub login must match the `io.github.sarveshsea/*` namespace.
+- `You do not have permission`: GitHub login must be authorized to publish the
+  `io.github.memi-design/*` organization namespace.
+
+Smithery has a separate namespace migration. See
+[ECOSYSTEM_IDENTITY.md](./ECOSYSTEM_IDENTITY.md) before publishing or linking a
+Smithery listing.
 
 Source: https://modelcontextprotocol.io/registry/quickstart

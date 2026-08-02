@@ -89,6 +89,15 @@ const expectedMcpName = "io.github.memi-design/memi";
 if (packageJson.mcpName !== expectedMcpName) {
   fail(`package.json mcpName ${packageJson.mcpName} does not match ${expectedMcpName}`);
 }
+const ecosystemIdentity = spawnSync(process.execPath, [
+  join(root, "scripts", "check-ecosystem-identity.mjs"),
+], {
+  cwd: root,
+  encoding: "utf-8",
+});
+if (ecosystemIdentity.status !== 0) {
+  fail(`ecosystem identity gate failed: ${spawnFailureMessage(ecosystemIdentity, "failed")}`);
+}
 
 for (const lifecycle of ["preinstall", "install", "postinstall", "prepare"]) {
   if (packageJson.scripts?.[lifecycle]) {
@@ -129,7 +138,7 @@ for (const file of await collectPackagedFiles(packageJson.files ?? [])) {
 }
 
 const readme = await readFile(join(root, "README.md"), "utf-8");
-const readmeTopFold = readme.slice(0, 3000);
+const [readmeTopFold] = readme.split("\n## Evidence at a glance", 1);
 const skillsPackageInstallCommand = "npx skills add memi-design/memi --skill audit-frontend-design";
 const requiredReadmeTerms = [
   "The design layer for agentic AI",
@@ -154,6 +163,7 @@ const requiredPackagedDocs = [
   ["docs/V2_PACKAGE_POSITIONING.md", "High-download package bar"],
   ["docs/IOS_SWIFT.md", "Apple-platform design CI"],
   ["docs/PROOF.md", "No-Figma"],
+  ["docs/ECOSYSTEM_IDENTITY.md", "Smithery migration pending"],
 ];
 for (const [docPath, requiredTerm] of requiredPackagedDocs) {
   if (!packageJson.files?.includes(docPath)) {
@@ -234,12 +244,13 @@ for (const skillName of ["memoire-design-tooling", "audit-frontend-design", "rem
 if (codexPluginManifest.homepage !== "https://www.memoire.cv/codex-plugin") {
   fail("Codex plugin manifest homepage must point to https://www.memoire.cv/codex-plugin");
 }
+const legalUrl = "https://www.memoire.cv/legal";
 for (const field of ["privacyPolicyURL", "termsOfServiceURL"]) {
-  if (typeof codexPluginManifest[field] !== "string" || !codexPluginManifest[field].startsWith("https://www.memoire.cv/")) {
-    fail(`Codex plugin manifest is missing ${field}`);
+  if (codexPluginManifest[field] !== legalUrl) {
+    fail(`Codex plugin manifest ${field} must point to ${legalUrl}`);
   }
-  if (typeof codexInterface[field] !== "string" || !codexInterface[field].startsWith("https://www.memoire.cv/")) {
-    fail(`Codex plugin interface is missing ${field}`);
+  if (codexInterface[field] !== legalUrl) {
+    fail(`Codex plugin interface ${field} must point to ${legalUrl}`);
   }
 }
 for (const field of ["logo", "composerIcon", "screenshots"]) {

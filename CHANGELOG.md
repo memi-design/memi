@@ -18,6 +18,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   claim. The candidate remains unpublished until the trusted npm publish and
   public-surface verification records are complete.
 
+### Candidate and public identity separation
+
+- `821cf969` — merge: reconcile 2.7.8 candidate with ecosystem identity
+- Keeps package and generated candidate metadata on 2.7.8 while deriving the
+  packaged organization identity receipt from `previousPublicRelease` 2.7.7.
+- This makes the release gate explicit: candidate metadata cannot erase or
+  mislabel the last npm-, GitHub-, and MCP-verified public identity.
+- Retains `memi-design/memi` as the next Smithery publish target while the
+  legacy personal listing remains a deprecated compatibility alias.
+
 ## v2.7.7 — 2026-08-02 — Published
 
 ### MCP Registry organization ownership
@@ -32,6 +42,57 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Released verified macOS, Linux, and Windows binaries with checksums, then
   promoted the GitHub release, `v2` Action channel, GHCR `latest`, and the
   Homebrew formula.
+
+### Post-release ecosystem identity reconciliation
+
+- `15a5e3c5` — test: define ecosystem identity release contract
+- `d9ca3286` — fix: reconcile ecosystem release identity
+- Makes the organization-owned Official MCP record the canonical operational
+  link and records the previous personal registry name as provenance-only.
+- Changes future Smithery publishes to target `memi-design/memi` while
+  explicitly retaining the working `sarveshsea/memi` listing only as deprecated
+  compatibility. The organization listing remains `migration_pending` until a
+  publish and post-publish verification succeed.
+- Adds a machine-readable 2.7.7 identity receipt, fixes the malformed Glama
+  homepage, moves current MCP bundle and plugin metadata to organization URLs,
+  and aligns the generated Homebrew formula copy with the read-only CLI.
+
+### Release provenance hardening
+
+- `1bb86d71` — test: harden ecosystem release provenance
+- `694a2a87` — fix: harden ecosystem release provenance
+- Separates Memi's deprecated support policy for
+  `io.github.sarveshsea/memi` from the upstream registry's observed `active`
+  state across 12 historical versions through `2.7.4`.
+- Derives the packaged ecosystem identity receipt from the release version,
+  recomputes the npm receipt digest, and rejects stale packaged identities.
+- Moves Homebrew release automation and growth checks to `memi-design`, updates
+  npm troubleshooting to the organization scope, and points Codex marketplace
+  legal metadata at the verified `/legal` route.
+- Adds a Homebrew tap CI contract for exact 2.7.7 platform assets, checksums,
+  Ruby syntax, Homebrew style, and strict formula audit.
+
+### Pinned organization brand contract
+
+- `8428baff` — test: pin organization brand contract
+- `eef9d527` — fix: pin organization brand contract
+- `212dc3a5` — test: require current npm package identity
+- `194f4560` — fix: pin current package brand identity
+- `bcd7f8e9` — test: reject stale Canvas brand revision
+- `6de199ad` — fix: report current Canvas brand revision
+- Vendors byte-exact copies of the organization profile's final revision-3 brand
+  manifest and schema into the CLI package, pinned by SHA-256.
+- Extends the offline ecosystem identity gate to reject drift in the CLI name,
+  availability, repository, current `@memi-design/cli` npm package identity, or
+  license, and in Canvas's M0 development status or canonical single-heart
+  icon. Revision 3 supersedes the intermediate revision-2 snapshot.
+
+### Section-aware README release gate
+
+- `87bb8a39` — fix: make README release gate section-aware
+- Defines the conversion-focused README fold by its semantic section boundary
+  instead of a brittle byte count, so organization-identity copy can grow
+  without hiding already-present shadcn or v0 compatibility evidence from CI.
 
 Website and Studio parity remain separate release-group checks; this entry does
 not claim a broader quality or performance result.

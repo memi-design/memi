@@ -1,0 +1,223 @@
+{
+  "$schema": "./brand-manifest.v1.schema.json",
+  "schemaVersion": 1,
+  "brandRevision": 3,
+  "updatedAt": "2026-08-02",
+  "organization": {
+    "id": "memi-design",
+    "name": "memi",
+    "tagline": "The design layer for agentic AI.",
+    "urls": {
+      "github": "https://github.com/memi-design",
+      "website": "https://memoire.cv"
+    }
+  },
+  "products": [
+    {
+      "id": "cli",
+      "name": "memi CLI",
+      "role": "Read-only design engineering audit and skill layer for coding agents.",
+      "status": "available",
+      "urls": {
+        "repository": "https://github.com/memi-design/memi",
+        "documentation": "https://github.com/memi-design/memi/blob/main/docs/README.md",
+        "package": "https://www.npmjs.com/package/@memi-design/cli"
+      },
+      "packages": [
+        {
+          "name": "@memi-design/cli",
+          "registry": "npm",
+          "status": "current",
+          "url": "https://www.npmjs.com/package/@memi-design/cli"
+        }
+      ],
+      "license": {
+        "spdx": "MIT",
+        "name": "MIT License",
+        "url": "https://github.com/memi-design/memi/blob/main/LICENSE"
+      },
+      "icons": [
+        {
+          "id": "memi-mark",
+          "purpose": "primary",
+          "url": "https://raw.githubusercontent.com/memi-design/.github/main/brand/memi-avatar.png",
+          "sha256": "64b988527b6e5dd8a5d4ad13166aa944b8522f5adf8264d115aab0e4bc54ecad",
+          "alt": "Memi pixel-heart mark"
+        }
+      ],
+      "aliases": [
+        "Memi",
+        "Memi Engine",
+        "Mémoire",
+        "Mémoire CLI",
+        "Mémoire Engine"
+      ]
+    },
+    {
+      "id": "studio",
+      "name": "memi Studio",
+      "role": "Native macOS companion for supervised agent workflows and artifact review.",
+      "status": "available",
+      "urls": {
+        "repository": "https://github.com/memi-design/memi-studio",
+        "documentation": "https://github.com/memi-design/memi-studio#readme",
+        "download": "https://github.com/memi-design/memi-studio/releases/latest"
+      },
+      "packages": [],
+      "license": {
+        "spdx": "FSL-1.1-ALv2",
+        "name": "Functional Source License 1.1 with Apache-2.0 future license",
+        "url": "https://github.com/memi-design/memi-studio/blob/main/LICENSE",
+        "futureLicense": {
+          "spdx": "Apache-2.0",
+          "effectiveDate": "2028-05-09",
+          "url": "https://github.com/memi-design/memi-studio/blob/main/LICENSE"
+        }
+      },
+      "icons": [
+        {
+          "id": "studio-app-icon",
+          "purpose": "app",
+          "url": "https://raw.githubusercontent.com/memi-design/memi-studio/main/docs/assets/memi-icon-dark.png",
+          "sha256": "87cd2c6467ab58387d7eb2597ee2d56605cb89f1e7380d874895d63a890de5c8",
+          "alt": "Memi Studio app icon"
+        }
+      ],
+      "aliases": [
+        "Mémoire Studio"
+      ]
+    },
+    {
+      "id": "design-skills",
+      "name": "memi Design Skills",
+      "role": "Governed catalog of portable and capability-gated design workflows for coding agents.",
+      "status": "available",
+      "urls": {
+        "repository": "https://github.com/memi-design/design-skills",
+        "documentation": "https://github.com/memi-design/design-skills#readme",
+        "install": "https://github.com/memi-design/design-skills#installation"
+      },
+      "packages": [
+        {
+          "name": "@memoire/design-skills",
+          "registry": "workspace",
+          "status": "legacy-compatibility",
+          "url": "https://github.com/memi-design/design-skills",
+          "note": "Repository tooling identifier only; not a public npm installation surface."
+        }
+      ],
+      "license": {
+        "spdx": "MIT",
+        "name": "MIT License",
+        "url": "https://github.com/memi-design/design-skills/blob/main/LICENSE"
+      },
+      "icons": [
+        {
+          "id": "memi-mark",
+          "purpose": "primary",
+          "url": "https://raw.githubusercontent.com/memi-design/.github/main/brand/memi-avatar.png",
+          "sha256": "64b988527b6e5dd8a5d4ad13166aa944b8522f5adf8264d115aab0e4bc54ecad",
+          "alt": "Memi pixel-heart mark"
+        }
+      ],
+      "aliases": [
+        "Design Skills",
+        "Memi Skills",
+        "Mémoire Design Skills"
+      ]
+    },
+    {
+      "id": "canvas",
+      "name": "memi Canvas",
+      "role": "Local-first canvas workbench for understanding, creating, and verifying software interfaces.",
+      "status": "development",
+      "statusNote": "Open-source M0 development snapshot; not yet a production importer or source editor.",
+      "urls": {
+        "repository": "https://github.com/memi-design/memi-canvas",
+        "documentation": "https://github.com/memi-design/memi-canvas#readme"
+      },
+      "packages": [],
+      "license": {
+        "spdx": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "https://github.com/memi-design/memi-canvas/blob/main/LICENSE"
+      },
+      "icons": [
+        {
+          "id": "canvas-single-heart",
+          "purpose": "app",
+          "url": "https://raw.githubusercontent.com/memi-design/memi-canvas/main/apps/macos/src-tauri/icons/icon.png",
+          "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi-canvas/main/apps/macos/src-tauri/icons/source/MemiCanvas-Iteration-02.icon/icon.json",
+          "sha256": "da068f20ba9e0e43f59ebde8602b43342f8c77fef2c080155a18d5a8fd0e25c2",
+          "alt": "Ruby single pixel-heart memi Canvas icon"
+        }
+      ],
+      "aliases": [
+        "Mémoire Canvas"
+      ]
+    }
+  ],
+  "legacyProvenanceAllowlist": [
+    {
+      "id": "legacy-memoire-name",
+      "kind": "name",
+      "label": "Legacy Mémoire name",
+      "value": "Mémoire",
+      "permittedContexts": [
+        "historical-release",
+        "license-provenance"
+      ],
+      "operational": false,
+      "reason": "Preserves accurate attribution for releases and source records created before this brand revision."
+    },
+    {
+      "id": "legacy-personal-github",
+      "kind": "url-prefix",
+      "label": "Legacy personal GitHub namespace",
+      "value": "https://github.com/sarveshsea/",
+      "permittedContexts": [
+        "historical-release",
+        "license-provenance",
+        "immutable-archive"
+      ],
+      "operational": false,
+      "reason": "May identify immutable historical artifacts or upstream provenance, but never a current install, support, source, or release route."
+    },
+    {
+      "id": "legacy-personal-ghcr",
+      "kind": "url-prefix",
+      "label": "Legacy personal container namespace",
+      "value": "https://ghcr.io/sarveshsea/",
+      "permittedContexts": [
+        "historical-release",
+        "immutable-archive"
+      ],
+      "operational": false,
+      "reason": "May identify immutable historical container provenance, but never the target for a current release."
+    },
+    {
+      "id": "legacy-memoire-package-scope",
+      "kind": "package-prefix",
+      "label": "Legacy Mémoire package scope",
+      "value": "@memoire/",
+      "permittedContexts": [
+        "historical-release",
+        "license-provenance"
+      ],
+      "operational": false,
+      "reason": "Records historical package identities without presenting them as current installation targets."
+    },
+    {
+      "id": "legacy-studio-asset-prefix",
+      "kind": "asset-prefix",
+      "label": "Legacy Studio release asset prefix",
+      "value": "Memoire.Studio_",
+      "permittedContexts": [
+        "historical-release",
+        "immutable-archive"
+      ],
+      "operational": false,
+      "reason": "Existing signed release assets retain their published filenames for checksum and provenance continuity."
+    }
+  ]
+}

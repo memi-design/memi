@@ -24,10 +24,8 @@ describe("preview changelog sync", () => {
       version: string;
       state: string;
     };
-    expect(releases[0]).toMatchObject({
-      version: `v${engine.version}`,
-      commits: [],
-    });
+    expect(releases[0].version).toBe(`v${engine.version}`);
+    expect(Array.isArray(releases[0].commits)).toBe(true);
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
     const expectedKicker = engine.state === "candidate" ? "Candidate release" : "Current release";
     expect(generatedHtml).toContain(`<span class="summary-kicker">${expectedKicker}</span>`);
