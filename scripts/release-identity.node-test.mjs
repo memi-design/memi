@@ -154,7 +154,7 @@ test("identity validation rejects stale versions, paths, and npm receipt digests
   staleCanvasBrand.products.find(({ id }) => id === "canvas").status = "available";
   assert.match(
     validateEcosystemIdentity({ ...context, brandManifest: staleCanvasBrand }).join("\n"),
-    /brand Canvas development status and canonical icon/,
+    /brand Canvas development status and canonical icon must match revision-3 truth/,
   );
 });
 
