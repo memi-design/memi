@@ -6,30 +6,33 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
-## v2.7.7 — 2026-08-02 — Candidate (unpublished)
+## v2.7.7 — 2026-08-02 — Published
 
 ### MCP Registry organization ownership
 
 - `0bad800b` — fix: align MCP registry identity with organization
 - Corrects the official MCP Registry identity from the personal namespace to
   `io.github.memi-design/memi`, the namespace authorized for this repository.
-- Keeps the verified 2.7.6 npm receipt immutable; this patch is required
-  because npm package metadata cannot be changed in place after publication.
+- Published through npm trusted publishing with verified provenance, signatures,
+  attestation, and an immutable release receipt.
+- Published to the MCP Registry through GitHub OIDC; the organization-owned
+  server identity is now the canonical registry record.
+- Released verified macOS, Linux, and Windows binaries with checksums, then
+  promoted the GitHub release, `v2` Action channel, GHCR `latest`, and the
+  Homebrew formula.
 
-This candidate is not a parity claim. It must complete trusted npm publishing,
-MCP Registry OIDC publishing, the GitHub binary release, and the independent
-public-release gate before it is announced.
+Website and Studio parity remain separate release-group checks; this entry does
+not claim a broader quality or performance result.
 
-## v2.7.6 — 2026-08-02 — Candidate (unpublished)
+## v2.7.6 — 2026-08-02 — Published npm baseline (superseded)
 
 ### Evidence-led onboarding and package boundary
 
 - `10a5416f` — docs: publish evidence-led Memi onboarding
 - `ed8163e7` — chore: stage 2.7.6 release candidate
 
-This candidate adds the public evidence summary, reproducible study link, and
-leaner package boundary. It remains a candidate until the trusted npm publish,
-provenance verification, and public-release gate have completed.
+This release added the public evidence summary, reproducible study link, and a
+leaner package boundary. It is retained as an immutable npm provenance baseline.
 
 ## v2.7.5 — 2026-08-02 — Candidate (unpublished)
 
