@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import test from "node:test";
@@ -9,6 +10,8 @@ import {
 } from "./lib/ecosystem-identity.mjs";
 
 const root = process.cwd();
+const EXPECTED_BRAND_MANIFEST_SHA256 = "98cd5224d31466a86d3f2d102bf6f160a195aed9c393d29a7f09eb75ecc90ff3";
+const EXPECTED_BRAND_SCHEMA_SHA256 = "6968bf5e5884530b47ecf31702f020d4d957b6aa4f4d1e82d9b8cd3fd44a2d0d";
 
 async function readJson(path) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
@@ -58,6 +61,46 @@ test("current release derives and validates its packaged ecosystem identity rece
     latestObservedVersion: "2.7.4",
     claimBoundary: "The registry status is observed upstream state; Memi policy deprecates this identity for new integrations.",
   });
+});
+
+test("release identity pins the exact revision-2 organization brand contract", async () => {
+  const [manifestBytes, schemaBytes] = await Promise.all([
+    readFile(join(root, "brand", "brand-manifest.v1.json")),
+    readFile(join(root, "brand", "brand-manifest.v1.schema.json")),
+  ]);
+  assert.equal(createHash("sha256").update(manifestBytes).digest("hex"), EXPECTED_BRAND_MANIFEST_SHA256);
+  assert.equal(createHash("sha256").update(schemaBytes).digest("hex"), EXPECTED_BRAND_SCHEMA_SHA256);
+
+  const context = await loadAndValidateEcosystemIdentity(root);
+  const cli = context.brandManifest.products.find(({ id }) => id === "cli");
+  assert.deepEqual({
+    name: cli.name,
+    status: cli.status,
+    repository: cli.urls.repository,
+    package: cli.urls.package,
+    license: cli.license,
+  }, {
+    name: "memi CLI",
+    status: "available",
+    repository: "https://github.com/memi-design/memi",
+    package: "https://www.npmjs.com/package/@memi-design/cli",
+    license: {
+      spdx: "MIT",
+      name: "MIT License",
+      url: "https://github.com/memi-design/memi/blob/main/LICENSE",
+    },
+  });
+  const canvas = context.brandManifest.products.find(({ id }) => id === "canvas");
+  assert.equal(canvas.status, "development");
+  assert.equal(canvas.statusNote, "Open-source M0 development snapshot; not yet a production importer or source editor.");
+  assert.deepEqual(canvas.icons, [{
+    id: "canvas-single-heart",
+    purpose: "app",
+    url: "https://raw.githubusercontent.com/memi-design/memi-canvas/main/apps/macos/src-tauri/icons/icon.png",
+    sourceUrl: "https://raw.githubusercontent.com/memi-design/memi-canvas/main/apps/macos/src-tauri/icons/source/MemiCanvas-Iteration-02.icon/icon.json",
+    sha256: "da068f20ba9e0e43f59ebde8602b43342f8c77fef2c080155a18d5a8fd0e25c2",
+    alt: "Ruby single pixel-heart memi Canvas icon",
+  }]);
 });
 
 test("identity validation rejects stale versions, paths, and npm receipt digests", async () => {
