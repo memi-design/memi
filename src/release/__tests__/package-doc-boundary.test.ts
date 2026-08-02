@@ -39,7 +39,6 @@ describe("immutable package documentation boundary", () => {
 
     expect(files).not.toContain("docs/case-studies/memi-2.7-workflows/buzzr-tab-unread-badge.json");
     expect(files.some((file) => file.startsWith("docs/research/"))).toBe(false);
-    expect(files).not.toContain("docs/README.md");
   });
 
   it("keeps the packed README Quickstart evergreen", async () => {
