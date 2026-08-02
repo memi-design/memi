@@ -30,10 +30,15 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.7",
-          state: "published",
-          sourceCommit: publishedEngineSourceCommit,
-          releaseRecord: publishedReleaseRecord,
+          version: "2.7.8",
+          state: "candidate",
+          sourceCommit: null,
+          releaseRecord: null,
+          previousPublicRelease: {
+            version: "2.7.7",
+            sourceCommit: publishedEngineSourceCommit,
+            releaseRecord: publishedReleaseRecord,
+          },
         },
         studio: { version: "2.5.0" },
         site: { version: "1.0.4" },
@@ -44,7 +49,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.7",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.8",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.memi-design/memi" },
