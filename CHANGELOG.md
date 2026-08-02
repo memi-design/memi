@@ -18,6 +18,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   claim. The candidate remains unpublished until the trusted npm publish and
   public-surface verification records are complete.
 
+### Candidate and public identity separation
+
+- `821cf969` — merge: reconcile 2.7.8 candidate with ecosystem identity
+- Keeps package and generated candidate metadata on 2.7.8 while deriving the
+  packaged organization identity receipt from `previousPublicRelease` 2.7.7.
+- This makes the release gate explicit: candidate metadata cannot erase or
+  mislabel the last npm-, GitHub-, and MCP-verified public identity.
+- Retains `memi-design/memi` as the next Smithery publish target while the
+  legacy personal listing remains a deprecated compatibility alias.
+
 ## v2.7.7 — 2026-08-02 — Published
 
 ### MCP Registry organization ownership

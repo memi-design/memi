@@ -393,7 +393,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">442</span> commits</span>
+      <span><span class="n" id="stat-commits">443</span> commits</span>
       <span><span class="n" id="stat-versions">46</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-02</span> latest</span>
     </div>
@@ -411,7 +411,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Candidate release</span>
             <strong class="summary-value">v2.7.8</strong>
-            <div class="summary-caption">0 commits tracked in v2.7.8 from CHANGELOG.md.</div>
+            <div class="summary-caption">1 commits tracked in v2.7.8 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -446,12 +446,21 @@ const releases = [
     "date": "2026-08-02",
     "tag": "fix",
     "summary": "Aligns the npm package description and distributed product metadata with the; Synchronizes bundled skills, presets, action defaults, MCP metadata, and; This is a metadata release; it makes no new quality, speed, cost, or feature.",
-    "commits": [],
+    "commits": [
+      [
+        "821cf969",
+        "merge: reconcile 2.7.8 candidate with ecosystem identity"
+      ]
+    ],
     "decisions": [],
     "changes": [
       "Aligns the npm package description and distributed product metadata with the",
       "Synchronizes bundled skills, presets, action defaults, MCP metadata, and",
-      "This is a metadata release; it makes no new quality, speed, cost, or feature"
+      "This is a metadata release; it makes no new quality, speed, cost, or feature",
+      "821cf969 — merge: reconcile 2.7.8 candidate with ecosystem identity",
+      "Keeps package and generated candidate metadata on 2.7.8 while deriving the",
+      "This makes the release gate explicit: candidate metadata cannot erase or",
+      "Retains memi-design/memi as the next Smithery publish target while the"
     ]
   },
   {
