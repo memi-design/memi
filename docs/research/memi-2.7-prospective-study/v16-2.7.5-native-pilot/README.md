@@ -157,6 +157,12 @@ boundary, so the stream guard may not prevent every excess token from being
 consumed; it does ensure the run is stopped when a breach becomes observable,
 and the final trace still excludes it from admission.
 
+The first Buzzr/Memi calibration is recorded as excluded in the deviations
+ledger. Its historical freeze is deliberately preserved but cannot be rerun:
+the new pre-provider host-launch probe changes each task hash. The exact
+requirements for the next clean calibration freeze are in
+[recalibration-status.json](recalibration-status.json).
+
 The current [preflight audit](preflight-audit.json) records the observed local
 fixture revisions and the remaining freeze prerequisites. It is a readiness
 ledger, not a study result.
