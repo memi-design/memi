@@ -45,17 +45,15 @@ describe("runtime dependency boundary", () => {
     expect(packageJson.description).toBe(
       "Read-only design engineering audit and skill layer for coding agents: file-anchored UI evidence before merge.",
     );
-    expect(packageJson.keywords).toEqual(
-      expect.arrayContaining([
-        "design-ci",
-        "ui-audit",
-        "tailwindcss",
-        "shadcn",
-        "mcp-server",
-        "agent-skills",
-        "github-actions",
-      ]),
-    );
+    expect(packageJson.keywords).toEqual(expect.arrayContaining([
+      "design-ci",
+      "ui-audit",
+      "tailwindcss",
+      "shadcn",
+      "mcp-server",
+      "agent-skills",
+      "github-actions",
+    ]));
   });
 
   it("does not ship React when it only emits React source for consumer projects", async () => {
@@ -78,9 +76,8 @@ describe("runtime dependency boundary", () => {
   it("keeps installed-package README references inside the packed boundary", async () => {
     const readme = await readFile(join(root, "README.md"), "utf8");
     const packagedFiles = new Set(dryRunPackageFiles());
-    const relativeDocs = [
-      ...readme.matchAll(/\]\((docs\/[^)#]+(?:\.md|\/))\)/g),
-    ].map((match) => match[1]);
+    const relativeDocs = [...readme.matchAll(/\]\((docs\/[^)#]+(?:\.md|\/))\)/g)]
+      .map((match) => match[1]);
 
     expect(relativeDocs).not.toEqual([]);
     for (const path of relativeDocs) {
@@ -99,12 +96,8 @@ describe("runtime dependency boundary", () => {
     expect(readme).toContain("## Prompts that map to real workflows");
     expect(readme).toContain("Audit this frontend before editing it.");
     expect(readme).toContain("Turn the findings into a scoped UI change plan.");
-    expect(readme).toContain(
-      "Set up a deterministic design CI gate for this pull request.",
-    );
-    expect(readme).toContain(
-      "No superiority, speed, or dollar-savings claim is made.",
-    );
+    expect(readme).toContain("Set up a deterministic design CI gate for this pull request.");
+    expect(readme).toContain("No superiority, speed, or dollar-savings claim is made.");
 
     const evidenceBlock = readme.match(
       /## Evidence at a glance([\s\S]*?)## Benchmarks and paper/,
@@ -158,8 +151,7 @@ describe("runtime dependency boundary", () => {
     expect(summary.nonInferiorityMargin).toBe(-5);
     expect(summary.secondaryTests).toHaveLength(26);
     const resourceTests = summary.secondaryTests.filter(
-      (result) =>
-        !["functional_acceptance", "critical_defects"].includes(result.metric),
+      (result) => !["functional_acceptance", "critical_defects"].includes(result.metric),
     );
     expect(resourceTests).toHaveLength(21);
     expect(resourceTests.some((result) => result.reject_holm_0p05)).toBe(false);
