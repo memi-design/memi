@@ -57,6 +57,9 @@ export interface WorkflowAdapter {
     readonly timeoutMs: number;
     readonly maximumToolCalls: number;
     readonly maximumToolOutputBytes: number;
+    readonly maximumInputTokens?: number;
+    readonly maximumOutputTokens?: number;
+    readonly maximumReasoningTokens?: number;
   }): Promise<Readonly<WorkflowAdapterResult>>;
 }
 
@@ -369,6 +372,9 @@ export async function runWorkflowTrial(input: {
           timeoutMs: task.maximumDurationMs,
           maximumToolCalls: task.agentBudget.maxToolCalls,
           maximumToolOutputBytes: task.agentBudget.maxToolOutputBytes ?? 160_000,
+          maximumInputTokens: task.agentBudget.maxInputTokens,
+          maximumOutputTokens: task.agentBudget.maxOutputTokens,
+          maximumReasoningTokens: task.agentBudget.maxReasoningTokens,
         }),
         workflowAdapterWatchdogMs(task.maximumDurationMs),
         `workflow adapter ${input.adapter.id}`,

@@ -66,6 +66,9 @@ export function createCodexWorkflowAdapter(
           timeoutMs: input.timeoutMs,
           maximumToolCalls: input.maximumToolCalls,
           maximumToolOutputBytes: input.maximumToolOutputBytes,
+          maximumInputTokens: input.maximumInputTokens,
+          maximumOutputTokens: input.maximumOutputTokens,
+          maximumReasoningTokens: input.maximumReasoningTokens,
         });
         const trace = parseCodexJsonl(execution.stdout);
         return freeze({
@@ -126,6 +129,9 @@ export function createClaudeWorkflowAdapter(
           timeoutMs: input.timeoutMs,
           maximumToolCalls: input.maximumToolCalls,
           maximumToolOutputBytes: input.maximumToolOutputBytes,
+          maximumInputTokens: input.maximumInputTokens,
+          maximumOutputTokens: input.maximumOutputTokens,
+          maximumReasoningTokens: input.maximumReasoningTokens,
         });
         const trace = parseClaudeStreamJson(execution.stdout);
         return freeze({
@@ -369,6 +375,9 @@ async function executeProcess(input: {
   readonly timeoutMs: number;
   readonly maximumToolCalls?: number;
   readonly maximumToolOutputBytes?: number;
+  readonly maximumInputTokens?: number;
+  readonly maximumOutputTokens?: number;
+  readonly maximumReasoningTokens?: number;
 }): Promise<{
   exitCode: number;
   stdout: string;
@@ -392,6 +401,9 @@ async function executeProcess(input: {
     const toolMonitor = createToolCallBudgetMonitor({
       maximumToolCalls: input.maximumToolCalls,
       maximumToolOutputBytes: input.maximumToolOutputBytes,
+      maximumInputTokens: input.maximumInputTokens,
+      maximumOutputTokens: input.maximumOutputTokens,
+      maximumReasoningTokens: input.maximumReasoningTokens,
     });
 
     const cleanup = (): void => {
@@ -482,6 +494,9 @@ async function executeProcess(input: {
 export function createToolCallBudgetMonitor(input: number | Readonly<{
   maximumToolCalls?: number;
   maximumToolOutputBytes?: number;
+  maximumInputTokens?: number;
+  maximumOutputTokens?: number;
+  maximumReasoningTokens?: number;
 }>): {
   ingest(chunk: string): boolean;
   finish(): boolean;
@@ -489,7 +504,7 @@ export function createToolCallBudgetMonitor(input: number | Readonly<{
     observedToolCalls: number;
     observedToolOutputBytes: number;
     exceeded: boolean;
-    exceededDimensions: readonly ("max-tool-calls" | "max-tool-output-bytes")[];
+    exceededDimensions: readonly WorkflowExecutionBudgetDimension[];
   }>;
 } {
   const limits = typeof input === "number"
@@ -499,7 +514,10 @@ export function createToolCallBudgetMonitor(input: number | Readonly<{
   let remainder = "";
   let observedToolCalls = 0;
   let observedToolOutputBytes = 0;
-  const exceededDimensions = new Set<"max-tool-calls" | "max-tool-output-bytes">();
+  let observedInputTokens = 0;
+  let observedOutputTokens = 0;
+  let observedReasoningTokens = 0;
+  const exceededDimensions = new Set<WorkflowExecutionBudgetDimension>();
   const processLine = (line: string): void => {
     let event: Record<string, unknown> | null = null;
     try {
@@ -515,6 +533,12 @@ export function createToolCallBudgetMonitor(input: number | Readonly<{
     for (const output of toolOutputs(event)) {
       observedToolOutputBytes += Buffer.byteLength(output);
     }
+    const usage = usageSnapshot(event);
+    if (usage) {
+      observedInputTokens = Math.max(observedInputTokens, usage.inputTokens);
+      observedOutputTokens = Math.max(observedOutputTokens, usage.outputTokens);
+      observedReasoningTokens = Math.max(observedReasoningTokens, usage.reasoningTokens);
+    }
     if (
       limits.maximumToolCalls !== undefined
       && observedToolCalls > limits.maximumToolCalls
@@ -526,6 +550,24 @@ export function createToolCallBudgetMonitor(input: number | Readonly<{
       && observedToolOutputBytes > limits.maximumToolOutputBytes
     ) {
       exceededDimensions.add("max-tool-output-bytes");
+    }
+    if (
+      limits.maximumInputTokens !== undefined
+      && observedInputTokens > limits.maximumInputTokens
+    ) {
+      exceededDimensions.add("max-input-tokens");
+    }
+    if (
+      limits.maximumOutputTokens !== undefined
+      && observedOutputTokens > limits.maximumOutputTokens
+    ) {
+      exceededDimensions.add("max-output-tokens");
+    }
+    if (
+      limits.maximumReasoningTokens !== undefined
+      && observedReasoningTokens > limits.maximumReasoningTokens
+    ) {
+      exceededDimensions.add("max-reasoning-tokens");
     }
   };
   return {
@@ -554,6 +596,28 @@ export function createToolCallBudgetMonitor(input: number | Readonly<{
         exceededDimensions: [...exceededDimensions],
       });
     },
+  };
+}
+
+type WorkflowExecutionBudgetDimension =
+  | "max-tool-calls"
+  | "max-tool-output-bytes"
+  | "max-input-tokens"
+  | "max-output-tokens"
+  | "max-reasoning-tokens";
+
+function usageSnapshot(event: Record<string, unknown>): {
+  inputTokens: number;
+  outputTokens: number;
+  reasoningTokens: number;
+} | null {
+  const usage = asRecord(event.usage);
+  if (!usage) return null;
+  if (event.type !== "turn.completed" && event.type !== "result") return null;
+  return {
+    inputTokens: numberOrZero(usage.input_tokens),
+    outputTokens: numberOrZero(usage.output_tokens),
+    reasoningTokens: numberOrZero(usage.reasoning_output_tokens),
   };
 }
 

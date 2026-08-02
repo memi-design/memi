@@ -94,6 +94,11 @@ describe("workflow trial runner", () => {
     const adapter: WorkflowAdapter = {
       id: "fixture",
       async execute(input) {
+        expect(input).toMatchObject({
+          maximumInputTokens: 375_000,
+          maximumOutputTokens: 10_000,
+          maximumReasoningTokens: 4_000,
+        });
         expect(await readFile(path.join(input.workspaceRoot, "prepared.txt"), "utf8"))
           .toBe("yes\n");
         expect(await readFile(
