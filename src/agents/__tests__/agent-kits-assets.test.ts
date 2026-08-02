@@ -100,9 +100,10 @@ describe("packaged agent kits", () => {
     expect(manifest.references?.proofRepo).toBe("memi-design/design-sandbox");
 
     for (const target of manifest.targets) {
-      const sourcePath = target.sourceBase === "package"
-        ? join(root, target.source)
-        : join(root, "agent-kits", target.source);
+      const sourcePath =
+        target.sourceBase === "package"
+          ? join(root, target.source)
+          : join(root, "agent-kits", target.source);
       const sourceStat = await stat(sourcePath);
       expect(sourceStat.isFile() || sourceStat.isDirectory()).toBe(true);
     }
@@ -110,8 +111,14 @@ describe("packaged agent kits", () => {
 
   it("ships a root Agent Skills package discoverable by npx skills add", async () => {
     const root = process.cwd();
-    const rootSkill = await readFile(join(root, "skills", "memoire-design-tooling", "SKILL.md"), "utf-8");
-    const codexSkill = await readFile(join(root, "agent-kits", "codex", "memoire-design-tooling", "SKILL.md"), "utf-8");
+    const rootSkill = await readFile(
+      join(root, "skills", "memoire-design-tooling", "SKILL.md"),
+      "utf-8",
+    );
+    const codexSkill = await readFile(
+      join(root, "agent-kits", "codex", "memoire-design-tooling", "SKILL.md"),
+      "utf-8",
+    );
     const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
 
     expect(pkg.files).toContain("skills");
@@ -137,7 +144,9 @@ describe("packaged agent kits", () => {
       );
       const lines = skill.split("\n");
 
-      expect(skill).toMatch(new RegExp(`^---\\nname: ${name}\\ndescription: Use when `));
+      expect(skill).toMatch(
+        new RegExp(`^---\\nname: ${name}\\ndescription: Use when `),
+      );
       expect(skill).toContain(`npx -y @memi-design/cli@${pkg.version}`);
       expect(skill).not.toContain("npm i -g");
       expect(skill).not.toContain("daemon start");
@@ -149,8 +158,30 @@ describe("packaged agent kits", () => {
   it("ships valid SKILL.md frontmatter for Hermes and OpenClaw", async () => {
     const root = process.cwd();
     const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
-    const hermesSkill = normalizeNewlines(await readFile(join(root, "agent-kits", "hermes", "memoire-design-tooling", "SKILL.md"), "utf-8"));
-    const openClawSkill = normalizeNewlines(await readFile(join(root, "agent-kits", "openclaw", "memoire-design-tooling", "SKILL.md"), "utf-8"));
+    const hermesSkill = normalizeNewlines(
+      await readFile(
+        join(
+          root,
+          "agent-kits",
+          "hermes",
+          "memoire-design-tooling",
+          "SKILL.md",
+        ),
+        "utf-8",
+      ),
+    );
+    const openClawSkill = normalizeNewlines(
+      await readFile(
+        join(
+          root,
+          "agent-kits",
+          "openclaw",
+          "memoire-design-tooling",
+          "SKILL.md",
+        ),
+        "utf-8",
+      ),
+    );
 
     for (const skill of [hermesSkill, openClawSkill]) {
       expect(skill).toMatch(/^---\n/);
@@ -164,46 +195,88 @@ describe("packaged agent kits", () => {
       expect(skill).toContain("memi");
     }
     expect(openClawSkill).toContain("metadata:");
-    expect(openClawSkill).toContain("\"openclaw\"");
+    expect(openClawSkill).toContain('"openclaw"');
   });
 
   it("keeps the npm runtime focused while retaining core skills and evidence", async () => {
-    const pkg = JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf-8"));
-    expect(pkg.files).toEqual(expect.arrayContaining([
-      "dist",
-      "skills",
-      "mcpb",
-      "schemas/memi-runtime-trace-v1.schema.json",
-      "docs/case-studies/memi-2.7-six-repo/README.md",
-      "docs/case-studies/memi-2.7-six-repo/results.json",
-    ]));
-    expect(pkg.files).not.toEqual(expect.arrayContaining([
-      "agent-kits",
-      "plugins",
-      "notes",
-      "plugin",
-      "assets",
-      "docs/case-studies",
-    ]));
+    const pkg = JSON.parse(
+      await readFile(join(process.cwd(), "package.json"), "utf-8"),
+    );
+    expect(pkg.files).toEqual(
+      expect.arrayContaining([
+        "dist",
+        "skills",
+        "mcpb",
+        "schemas/memi-runtime-trace-v1.schema.json",
+        "docs/case-studies/memi-2.7-six-repo/README.md",
+        "docs/case-studies/memi-2.7-six-repo/results.json",
+      ]),
+    );
+    expect(pkg.files).not.toEqual(
+      expect.arrayContaining([
+        "agent-kits",
+        "plugins",
+        "notes",
+        "plugin",
+        "assets",
+        "docs/case-studies",
+      ]),
+    );
   });
 
   it("ships registry-safe MCP config templates", async () => {
     const root = process.cwd();
-    const claude = JSON.parse(await readFile(join(root, "agent-kits", "mcp", "claude-code", "mcp.json"), "utf-8"));
-    const cursor = JSON.parse(await readFile(join(root, "agent-kits", "mcp", "cursor", "mcp.json"), "utf-8"));
-    expect(claude.mcpServers.memoire.args).toEqual(["mcp", "start", "--no-figma"]);
-    expect(cursor.mcpServers.memoire.args).toEqual(["mcp", "start", "--no-figma"]);
+    const claude = JSON.parse(
+      await readFile(
+        join(root, "agent-kits", "mcp", "claude-code", "mcp.json"),
+        "utf-8",
+      ),
+    );
+    const cursor = JSON.parse(
+      await readFile(
+        join(root, "agent-kits", "mcp", "cursor", "mcp.json"),
+        "utf-8",
+      ),
+    );
+    expect(claude.mcpServers.memoire.args).toEqual([
+      "mcp",
+      "start",
+      "--no-figma",
+    ]);
+    expect(cursor.mcpServers.memoire.args).toEqual([
+      "mcp",
+      "start",
+      "--no-figma",
+    ]);
   });
 
   it("ships a Codex plugin manifest, MCP config, and synced skill", async () => {
     const root = process.cwd();
     const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
     const manifest = JSON.parse(
-      await readFile(join(root, "plugins", "memoire", ".codex-plugin", "plugin.json"), "utf-8"),
+      await readFile(
+        join(root, "plugins", "memoire", ".codex-plugin", "plugin.json"),
+        "utf-8",
+      ),
     ) as CodexPluginManifest;
-    const mcpConfig = JSON.parse(await readFile(join(root, "plugins", "memoire", ".mcp.json"), "utf-8"));
-    const pluginSkill = await readFile(join(root, "plugins", "memoire", "skills", "memoire-design-tooling", "SKILL.md"), "utf-8");
-    const codexSkill = await readFile(join(root, "agent-kits", "codex", "memoire-design-tooling", "SKILL.md"), "utf-8");
+    const mcpConfig = JSON.parse(
+      await readFile(join(root, "plugins", "memoire", ".mcp.json"), "utf-8"),
+    );
+    const pluginSkill = await readFile(
+      join(
+        root,
+        "plugins",
+        "memoire",
+        "skills",
+        "memoire-design-tooling",
+        "SKILL.md",
+      ),
+      "utf-8",
+    );
+    const codexSkill = await readFile(
+      join(root, "agent-kits", "codex", "memoire-design-tooling", "SKILL.md"),
+      "utf-8",
+    );
 
     expect(manifest).toMatchObject({
       name: "memoire",
@@ -223,7 +296,9 @@ describe("packaged agent kits", () => {
       "read-only design engineering audit and skill layer for coding agents",
     );
     expect(manifest.interface.defaultPrompt.length).toBeLessThanOrEqual(4);
-    expect(manifest.interface.defaultPrompt).toContain("Audit this UI with memi before editing.");
+    expect(manifest.interface.defaultPrompt).toContain(
+      "Audit this UI with memi before editing.",
+    );
     expect(manifest.interface.logo).toBeUndefined();
     expect(manifest.interface.composerIcon).toBeUndefined();
     expect(manifest.interface.screenshots).toBeUndefined();
@@ -236,9 +311,20 @@ describe("packaged agent kits", () => {
       },
     });
     expect(pluginSkill).toBe(codexSkill);
-    for (const skillName of ["audit-frontend-design", "remember-design-system", "enforce-design-ci", "build-swiftui-interface"]) {
-      const focusedPluginSkill = await readFile(join(root, "plugins", "memoire", "skills", skillName, "SKILL.md"), "utf-8");
-      const focusedRootSkill = await readFile(join(root, "skills", skillName, "SKILL.md"), "utf-8");
+    for (const skillName of [
+      "audit-frontend-design",
+      "remember-design-system",
+      "enforce-design-ci",
+      "build-swiftui-interface",
+    ]) {
+      const focusedPluginSkill = await readFile(
+        join(root, "plugins", "memoire", "skills", skillName, "SKILL.md"),
+        "utf-8",
+      );
+      const focusedRootSkill = await readFile(
+        join(root, "skills", skillName, "SKILL.md"),
+        "utf-8",
+      );
       expect(focusedPluginSkill).toBe(focusedRootSkill);
     }
   });
@@ -246,12 +332,26 @@ describe("packaged agent kits", () => {
   it("ships the Claude plugin with the same five zero-setup skills", async () => {
     const root = process.cwd();
     const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
-    const manifest = JSON.parse(await readFile(join(root, "plugins", "memi-claude", ".claude-plugin", "plugin.json"), "utf-8"));
-    const skillNames = ["memoire-design-tooling", "audit-frontend-design", "remember-design-system", "enforce-design-ci", "build-swiftui-interface"];
+    const manifest = JSON.parse(
+      await readFile(
+        join(root, "plugins", "memi-claude", ".claude-plugin", "plugin.json"),
+        "utf-8",
+      ),
+    );
+    const skillNames = [
+      "memoire-design-tooling",
+      "audit-frontend-design",
+      "remember-design-system",
+      "enforce-design-ci",
+      "build-swiftui-interface",
+    ];
 
     expect(manifest.version).toBe(pkg.version);
     for (const skillName of skillNames) {
-      const skill = await readFile(join(root, "plugins", "memi-claude", "skills", skillName, "SKILL.md"), "utf-8");
+      const skill = await readFile(
+        join(root, "plugins", "memi-claude", "skills", skillName, "SKILL.md"),
+        "utf-8",
+      );
       expect(skill).toContain(`name: ${skillName}`);
       expect(skill).toContain(`npx -y @memi-design/cli@${pkg.version}`);
       expect(skill).not.toContain("npm i -g");
@@ -262,9 +362,16 @@ describe("packaged agent kits", () => {
   it("documents public Git-backed Codex marketplace installation", async () => {
     const root = process.cwd();
     const readme = await readFile(join(root, "README.md"), "utf-8");
-    const codexPage = await readFile(join(root, "docs", "CODEX_PLUGIN.md"), "utf-8");
-    const smokeScript = await readFile(join(root, "scripts", "smoke-codex-plugin-marketplace.mjs"), "utf-8");
-    const installCommand = "codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
+    const codexPage = await readFile(
+      join(root, "docs", "CODEX_PLUGIN.md"),
+      "utf-8",
+    );
+    const smokeScript = await readFile(
+      join(root, "scripts", "smoke-codex-plugin-marketplace.mjs"),
+      "utf-8",
+    );
+    const installCommand =
+      "codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire";
 
     expect(readme).toContain(installCommand);
     expect(codexPage).toContain(installCommand);
@@ -275,9 +382,14 @@ describe("packaged agent kits", () => {
   it("declares the repo-local Codex plugin marketplace entry", async () => {
     const root = process.cwd();
     const marketplace = JSON.parse(
-      await readFile(join(root, ".agents", "plugins", "marketplace.json"), "utf-8"),
+      await readFile(
+        join(root, ".agents", "plugins", "marketplace.json"),
+        "utf-8",
+      ),
     ) as PluginMarketplace;
-    const entry = marketplace.plugins.find((plugin) => plugin.name === "memoire");
+    const entry = marketplace.plugins.find(
+      (plugin) => plugin.name === "memoire",
+    );
 
     expect(marketplace).toMatchObject({
       name: "memoire-local",
@@ -301,16 +413,20 @@ describe("packaged agent kits", () => {
 
   it("excludes repository-only integration assets from npm pack output", () => {
     const npmCache = mkdtempSync(join(tmpdir(), "memoire-npm-cache-"));
-    const pack = spawnPortableSync(process.platform === "win32" ? "npm.cmd" : "npm", ["pack", "--dry-run", "--json"], {
-      cwd: process.cwd(),
-      encoding: "utf-8",
-      env: {
-        ...process.env,
-        npm_config_cache: npmCache,
-        npm_config_update_notifier: "false",
+    const pack = spawnPortableSync(
+      process.platform === "win32" ? "npm.cmd" : "npm",
+      ["pack", "--dry-run", "--json"],
+      {
+        cwd: process.cwd(),
+        encoding: "utf-8",
+        env: {
+          ...process.env,
+          npm_config_cache: npmCache,
+          npm_config_update_notifier: "false",
+        },
+        maxBuffer: 8 * 1024 * 1024,
       },
-      maxBuffer: 8 * 1024 * 1024,
-    });
+    );
     try {
       expect(pack.status, pack.stderr || pack.stdout).toBe(0);
     } finally {
@@ -325,7 +441,15 @@ describe("packaged agent kits", () => {
     expect(paths).toContain("schemas/memi-runtime-trace-v1.schema.json");
     expect(paths).toContain("docs/case-studies/README.md");
     expect(paths).toContain("mcpb/manifest.json");
-    expect([...paths].filter((path) => /^(agent-kits|plugins|notes|plugin|assets)\//.test(path))).toEqual([]);
+    // The public README uses these two self-contained evidence assets. All
+    // other integration-only assets must remain outside the installed package.
+    expect(
+      [...paths]
+        .filter((path) =>
+          /^(agent-kits|plugins|notes|plugin|assets)\//.test(path),
+        )
+        .sort(),
+    ).toEqual(["assets/memi-brand-banner.webp", "assets/readme-benchmark.svg"]);
   });
 });
 
