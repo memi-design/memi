@@ -53,7 +53,7 @@
     "check:certification": "npm run check:designwork-release",
     "check:site-bundle": "node scripts/check-site-bundle-urls.mjs",
     "check:community-notes": "node scripts/check-community-notes.mjs",
-    "check:ecosystem-identity": "node --test scripts/release-identity.node-test.mjs",
+    "check:ecosystem-identity": "node scripts/check-ecosystem-identity.mjs",
     "check:public-release": "node scripts/check-public-release-gate.mjs",
     "publish:smithery": "npm run build:mcpb && npx -y smithery@latest mcp publish .dist/memi-2.7.7.mcpb -n memi-design/memi",
     "security:audit": "npm audit --omit=dev --audit-level=high",

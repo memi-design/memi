@@ -51,6 +51,13 @@ test("current release derives and validates its packaged ecosystem identity rece
       observedAt: "2026-08-02",
     },
   });
+  assert.deepEqual(identity.verification.mcpRegistryLegacyRecord, {
+    httpStatus: 200,
+    observedStatus: "active",
+    resultCount: 12,
+    latestObservedVersion: "2.7.4",
+    claimBoundary: "The registry status is observed upstream state; Memi policy deprecates this identity for new integrations.",
+  });
 });
 
 test("identity validation rejects stale versions, paths, and npm receipt digests", async () => {

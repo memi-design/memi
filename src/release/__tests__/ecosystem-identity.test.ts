@@ -66,6 +66,12 @@ describe("current ecosystem identity", () => {
       "2.7.4",
     ]);
     expect(identity.surfaces.mcpRegistry.legacy).not.toHaveProperty("provenanceOnly");
+    expect(identity.verification.mcpRegistryLegacyRecord).toMatchObject({
+      httpStatus: 200,
+      observedStatus: "active",
+      resultCount: 12,
+      latestObservedVersion: "2.7.4",
+    });
   });
 
   it("targets organization metadata and the working legal route", async () => {

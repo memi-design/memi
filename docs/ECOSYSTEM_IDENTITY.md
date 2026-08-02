@@ -16,6 +16,12 @@ live-check receipt is
 | Smithery | `memi-design/memi` | Migration pending; organization listing is not live |
 | Homebrew | [`memi-design/homebrew-memi`](https://github.com/memi-design/homebrew-memi) | Canonical tap |
 
+The legacy Official MCP Registry identity has two deliberately separate states:
+Memi policy marks `io.github.sarveshsea/memi` deprecated for new integrations,
+while the upstream registry still reports 12 historical versions as `active`,
+through `2.7.4`. The observed registry state is evidence, not current ownership
+or support policy.
+
 ## Smithery migration pending
 
 `memi-design/memi` is the intended Smithery publish target. The package command

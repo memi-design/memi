@@ -55,7 +55,7 @@ if (!skipAuth) {
     check(false, [
       "npm is not logged in as the package owner.",
       "Run `npm logout --registry=https://registry.npmjs.org/` then `npm login --auth-type=web --registry=https://registry.npmjs.org/`.",
-      "If `npm publish` returns E404 on PUT for @memi-design/cli, you are logged into the wrong npm account or using an invalid token for the @sarveshsea scope.",
+      "If `npm publish` returns E404 on PUT for @memi-design/cli, you are logged into the wrong npm account or using credentials without access to the @memi-design scope.",
     ].join(" "));
   } else {
     const user = whoami.stdout.trim();

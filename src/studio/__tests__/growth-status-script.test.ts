@@ -102,7 +102,7 @@ describe("growth status script contract", () => {
 
   it("parses skills.sh discovery and install counts", () => {
     const page = `
-      <meta name="description" content="4 agent skills from sarveshsea/memi — including audit-frontend-design.">
+      <meta name="description" content="4 agent skills from memi-design/memi — including audit-frontend-design.">
       <span>27<!-- --> total installs</span>
     `;
 

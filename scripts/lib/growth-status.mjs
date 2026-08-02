@@ -8,7 +8,7 @@ export const LEGACY_PACKAGE_ALIASES = [LEGACY_PACKAGE_NAME];
 export const STUDIO_REPO = "memi-design/memi-studio";
 export const ENGINE_REPO = "memi-design/memi";
 export const SKILLS_SH_URL = "https://skills.sh/memi-design/memi";
-export const HOMEBREW_STUDIO_CASK_URL = "https://raw.githubusercontent.com/sarveshsea/homebrew-memi/main/Casks/memi-studio.rb";
+export const HOMEBREW_STUDIO_CASK_URL = "https://raw.githubusercontent.com/memi-design/homebrew-memi/main/Casks/memi-studio.rb";
 export const DEFAULT_STALE_REFERENCE_PATTERNS = [LEGACY_REPO_NAME, LEGACY_PACKAGE_NAME, LEGACY_FORK_NAME];
 export const WEEKLY_NPM_DOWNLOAD_TARGET = 7_830;
 
@@ -199,7 +199,7 @@ export function parseHomebrewStudioCask(raw) {
 }
 
 export function parseSkillsShPage(raw) {
-  const discoveredSkills = Number(String(raw).match(/content="(\d+) agent skills? from sarveshsea\/memi\b/i)?.[1]);
+  const discoveredSkills = Number(String(raw).match(/content="(\d+) agent skills? from memi-design\/memi\b/i)?.[1]);
   const totalInstalls = Number(String(raw).match(/>([\d,]+)(?:<!-- -->)?\s*total installs\b/i)?.[1]?.replaceAll(",", ""));
   if (!Number.isFinite(discoveredSkills) || discoveredSkills < 1 || !Number.isFinite(totalInstalls)) {
     return { ok: false, url: SKILLS_SH_URL, discoveredSkills: 0, totalInstalls: 0 };

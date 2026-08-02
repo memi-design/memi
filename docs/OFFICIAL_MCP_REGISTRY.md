@@ -14,9 +14,12 @@ memi uses:
 - package arguments: `mcp start --no-figma`
 - published record: <https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.memi-design%2Fmemi>
 
-The previous `io.github.sarveshsea/memi` is deprecated. Keep that identifier
-only in immutable historical evidence; all current metadata, publishing, and
-install guidance must use `io.github.memi-design/memi`.
+The previous `io.github.sarveshsea/memi` support policy is deprecated, but the
+public registry still reports 12 historical versions as `active`, through
+`2.7.4`. That observed upstream status is not a support claim. Keep the personal
+identifier only in immutable historical evidence and explicit compatibility
+records; all current metadata, publishing, and install guidance must use
+`io.github.memi-design/memi`.
 
 ## Install `mcp-publisher`
 

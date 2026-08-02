@@ -9,8 +9,8 @@
   "homepage": "https://www.memoire.cv/codex-plugin",
   "repository": "https://github.com/memi-design/memi",
   "license": "MIT",
-  "privacyPolicyURL": "https://www.memoire.cv/privacy",
-  "termsOfServiceURL": "https://www.memoire.cv/terms",
+  "privacyPolicyURL": "https://www.memoire.cv/legal",
+  "termsOfServiceURL": "https://www.memoire.cv/legal",
   "keywords": [
     "codex",
     "memoire",
@@ -38,8 +38,8 @@
       "Write"
     ],
     "websiteURL": "https://www.memoire.cv/codex-plugin",
-    "privacyPolicyURL": "https://www.memoire.cv/privacy",
-    "termsOfServiceURL": "https://www.memoire.cv/terms",
+    "privacyPolicyURL": "https://www.memoire.cv/legal",
+    "termsOfServiceURL": "https://www.memoire.cv/legal",
     "defaultPrompt": [
       "Audit this UI with memi before editing.",
       "Extract tokens and shadcn registry context.",

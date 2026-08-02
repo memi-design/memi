@@ -20,8 +20,24 @@
       "url": "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.memi-design%2Fmemi",
       "legacy": {
         "identifier": "io.github.sarveshsea/memi",
-        "status": "deprecated",
-        "provenanceOnly": true
+        "policyStatus": "deprecated",
+        "observedStatus": "active",
+        "latestObservedVersion": "2.7.4",
+        "observedVersions": [
+          "1.0.1",
+          "1.1.0",
+          "1.1.1",
+          "2.3.1",
+          "2.4.0",
+          "2.4.1",
+          "2.5.0",
+          "2.6.0",
+          "2.6.1",
+          "2.6.3",
+          "2.7.3",
+          "2.7.4"
+        ],
+        "observedAt": "2026-08-02"
       }
     },
     "smithery": {
@@ -42,6 +58,13 @@
     "mcpRegistryOrganizationRecord": {
       "httpStatus": 200,
       "observedVersion": "2.7.7"
+    },
+    "mcpRegistryLegacyRecord": {
+      "httpStatus": 200,
+      "observedStatus": "active",
+      "resultCount": 12,
+      "latestObservedVersion": "2.7.4",
+      "claimBoundary": "The registry status is observed upstream state; Memi policy deprecates this identity for new integrations."
     },
     "smitheryOrganizationRecord": {
       "httpStatus": 404,

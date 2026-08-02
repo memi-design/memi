@@ -209,14 +209,14 @@ describe("packaged agent kits", () => {
       name: "memoire",
       version: pkg.version,
       homepage: "https://www.memoire.cv/codex-plugin",
-      privacyPolicyURL: "https://www.memoire.cv/privacy",
-      termsOfServiceURL: "https://www.memoire.cv/terms",
+      privacyPolicyURL: "https://www.memoire.cv/legal",
+      termsOfServiceURL: "https://www.memoire.cv/legal",
       skills: "./skills/",
       mcpServers: "./.mcp.json",
       interface: {
         displayName: "memi",
-        privacyPolicyURL: "https://www.memoire.cv/privacy",
-        termsOfServiceURL: "https://www.memoire.cv/terms",
+        privacyPolicyURL: "https://www.memoire.cv/legal",
+        termsOfServiceURL: "https://www.memoire.cv/legal",
       },
     });
     expect(manifest.description).toContain(
