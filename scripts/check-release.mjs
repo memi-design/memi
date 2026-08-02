@@ -138,7 +138,7 @@ for (const file of await collectPackagedFiles(packageJson.files ?? [])) {
 }
 
 const readme = await readFile(join(root, "README.md"), "utf-8");
-const readmeTopFold = readme.slice(0, 3000);
+const [readmeTopFold] = readme.split("\n## Evidence at a glance", 1);
 const skillsPackageInstallCommand = "npx skills add memi-design/memi --skill audit-frontend-design";
 const requiredReadmeTerms = [
   "read-only design engineering audit and skill layer for coding agents",
