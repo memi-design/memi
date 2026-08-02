@@ -84,7 +84,9 @@ describe("public documentation release truth", () => {
     expect(releaseGates).toContain("[current release truth](./CURRENT_RELEASE.md)");
 
     const readme = await readFile(join(root, "README.md"), "utf8");
-    expect(readme).toContain("[current versions](docs/CURRENT_RELEASE.md)");
+    expect(readme).toContain(
+      "[current versions](https://github.com/memi-design/memi/blob/main/docs/CURRENT_RELEASE.md)",
+    );
   });
 
   it("keeps the primary product story aligned across current public guidance", async () => {
@@ -133,7 +135,7 @@ describe("public documentation release truth", () => {
     const quickstartIndex = readme.indexOf("## Quickstart");
     const deeperPathsIndex = readme.indexOf("## Choose your integration");
 
-    expect(readme).toContain("assets/readme-hero.svg");
+    expect(readme).toContain("assets/memi-brand-banner.webp");
     expect(readme).toContain("img.shields.io/npm/dw/@memi-design/cli");
     expect(readme).toContain(
       "npx -y @memi-design/cli@latest diagnose . --json --no-write --fail-on none",
