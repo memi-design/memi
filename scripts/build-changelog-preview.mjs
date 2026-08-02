@@ -45,7 +45,7 @@ export async function syncChangelogPreview(options = {}) {
 export function parseChangelogMarkdown(markdown) {
   markdown = markdown.replace(/\r\n/g, "\n");
   const releases = [];
-  const releasePattern = /^##\s+(v[^\s]+)\s+—\s+(\d{4}-\d{2}-\d{2})$/gm;
+  const releasePattern = /^##\s+(v[^\s]+)\s+—\s+(\d{4}-\d{2}-\d{2})(?:\s+—\s+.+)?$/gm;
   const matches = [...markdown.matchAll(releasePattern)];
 
   for (let index = 0; index < matches.length; index += 1) {
@@ -139,6 +139,12 @@ function parseCommitTable(section) {
     commits.push([match[1], normalizeMarkdownText(match[2])]);
   }
 
+  if (commits.length > 0) return commits;
+
+  for (const line of section.split("\n")) {
+    const match = line.trim().match(/^- `([a-f0-9]{7,40})` — (.+)$/i);
+    if (match) commits.push([match[1], normalizeMarkdownText(match[2])]);
+  }
   return commits;
 }
 

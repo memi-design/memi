@@ -20,17 +20,21 @@ describe("preview changelog sync", () => {
       releaseState: releaseManifest.releaseGroups.engine.state,
     });
 
+    const engine = releaseManifest.releaseGroups.engine as {
+      version: string;
+      state: string;
+    };
     expect(releases[0]).toMatchObject({
-      version: "v2.7.4",
+      version: `v${engine.version}`,
       commits: expect.arrayContaining([
-        ["0568964b", "test: define 2.7.4 candidate release surfaces"],
-        ["289bd728", "chore: prepare Memi 2.7.4 candidate"],
-        ["cd5335b1", "chore: sync 2.7.4 candidate artifacts"],
+        ["9fbf7be8", "chore: stage 2.7.5 evidence candidate"],
+        ["c15fde6d", "chore: synchronize 2.7.5 candidate surfaces"],
+        ["417c834d", "fix: bind candidate release surfaces"],
       ]),
     });
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
-    expect(generatedHtml).toContain('<span class="summary-kicker">Current release</span>');
-    expect(generatedHtml).not.toContain('<span class="summary-kicker">Candidate release</span>');
+    const expectedKicker = engine.state === "candidate" ? "Candidate release" : "Current release";
+    expect(generatedHtml).toContain(`<span class="summary-kicker">${expectedKicker}</span>`);
     expect(currentHtml.replace(/\r\n/g, "\n")).toBe(
       generatedHtml.replace(/\r\n/g, "\n"),
     );

@@ -6,7 +6,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
-## v2.7.5 — Candidate (unpublished)
+## v2.7.5 — 2026-08-02 — Candidate (unpublished)
 
 ### Prospective evidence foundation
 
