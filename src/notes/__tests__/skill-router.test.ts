@@ -9,6 +9,7 @@ import {
   resolveRoutedSkills,
   routeInstalledSkills,
   searchCatalogSkills,
+  validateRoutingPattern,
 } from "../skill-router.js";
 
 const tempDirs: string[] = [];
@@ -446,12 +447,27 @@ describe("deterministic skill router", () => {
     });
   });
 
-  it("compiles bounded routing regexes and rejects catastrophic or stateful patterns", () => {
+  it("compiles bounded routing patterns and rejects executable regex syntax", () => {
     expect(compileSafeRoutingPattern("^expo-router$").test("expo-router")).toBe(true);
+    expect(compileSafeRoutingPattern("exact:expo-router").test("expo-router")).toBe(true);
+    expect(compileSafeRoutingPattern("prefix:expo-").test("expo-router")).toBe(true);
+    expect(compileSafeRoutingPattern("suffix:-router").test("expo-router")).toBe(true);
+    expect(compileSafeRoutingPattern("contains:router").test("expo-router")).toBe(true);
+    expect(compileSafeRoutingPattern("glob:expo-*").test("expo-router")).toBe(true);
     expect(() => compileSafeRoutingPattern("(a+)+$")).toThrow(/unsafe routing pattern/);
     expect(() => compileSafeRoutingPattern("^(a|aa)+$")).toThrow(/unsafe routing pattern/);
     expect(() => compileSafeRoutingPattern("(foo)\\1")).toThrow(/unsafe routing pattern/);
+    expect(() => compileSafeRoutingPattern("expo.*")).toThrow(/routing pattern syntax/);
     expect(() => compileSafeRoutingPattern("expo", "g")).toThrow(/unsupported routing flags/);
+    expect(validateRoutingPattern("^expo-router$")).toMatchObject({
+      valid: true,
+      mode: "exact",
+      canonical: "exact:expo-router",
+    });
+    expect(validateRoutingPattern("expo.*")).toMatchObject({
+      valid: false,
+      migration: "contains:expo.",
+    });
   });
 
   it("does not route on one-character or generic procedural token noise", async () => {
