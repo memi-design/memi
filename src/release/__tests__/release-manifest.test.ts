@@ -17,6 +17,10 @@ const root = join(import.meta.dirname, "..", "..", "..");
 const manifestPath = join(root, "release-manifest.json");
 const webArtifactPath = join(root, "release-artifacts", "memoire-web.release.json");
 const publicEngineSourceCommit = "8aa4649f412bbcaaf2af4ee209bf79016566f035";
+const publicReleaseRecord = {
+  path: "release-artifacts/npm/2.7.4.release.json",
+  sha256: "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d",
+};
 
 describe("release manifest", () => {
   it("is the canonical source for every public release surface", async () => {
@@ -26,20 +30,17 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.4",
-          state: "published",
-          sourceCommit: publicEngineSourceCommit,
-          releaseRecord: {
-            path: "release-artifacts/npm/2.7.4.release.json",
-            sha256: "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d",
+          version: "2.7.5",
+          state: "candidate",
+          sourceCommit: null,
+          releaseRecord: null,
+          previousPublicRelease: {
+            version: "2.7.4",
+            sourceCommit: publicEngineSourceCommit,
+            releaseRecord: publicReleaseRecord,
           },
           verification: {
-            eligibleForParity: true,
-            reason: "independent public-release gate passed on 2026-08-01 across npm, GitHub release, Action v2, MCP Registry, Studio, website artifact, and fresh install",
-            publicGate: {
-              path: "release-artifacts/public-gate/2.7.4.parity.json",
-              sha256: "ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a",
-            },
+            eligibleForParity: false,
           },
         },
         studio: { version: "2.5.0" },
@@ -51,7 +52,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.4",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.5",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
@@ -75,7 +76,7 @@ describe("release manifest", () => {
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
     expect(artifact.publicTruth).toEqual({
-      source: "currentRelease",
+      source: "previousPublicRelease",
       engine: {
         version: "2.7.4",
         sourceCommit: publicEngineSourceCommit,
@@ -89,20 +90,14 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.7.4",
-          state: "published",
+          state: "historical",
           sourceCommit: publicEngineSourceCommit,
-          releaseRecord: {
-            path: "release-artifacts/npm/2.7.4.release.json",
-            sha256: "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d",
-          },
+          releaseRecord: publicReleaseRecord,
           verification: {
-            eligibleForParity: true,
-            reason: "independent public-release gate passed on 2026-08-01 across npm, GitHub release, Action v2, MCP Registry, Studio, website artifact, and fresh install",
-            publicGate: {
-              path: "release-artifacts/public-gate/2.7.4.parity.json",
-              sha256: "ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a",
-            },
+            eligibleForParity: false,
+            reason: "2.7.4 remains public while 2.7.5 is an unpublished candidate",
           },
+          plannedSuccessor: "2.7.5",
         },
       },
       surfaces: {
@@ -166,18 +161,18 @@ describe("release manifest", () => {
     expect(result.status, result.stderr || result.stdout).toBe(0);
   });
 
-  it("fails closed when published release evidence is not byte- and identity-bound", async () => {
+  it("fails closed when the retained public release evidence is not byte- and identity-bound", async () => {
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
     const wrongDigest = structuredClone(manifest);
-    wrongDigest.releaseGroups.engine.releaseRecord.sha256 = "f".repeat(64);
+    wrongDigest.releaseGroups.engine.previousPublicRelease.releaseRecord.sha256 = "f".repeat(64);
     await expect(verifyCoreReleaseSurfaces(root, wrongDigest)).resolves.toContain(
-      "published engine release record SHA-256 does not match its committed bytes",
+      "candidate previousPublicRelease release record SHA-256 does not match its committed bytes",
     );
 
     const wrongSource = structuredClone(manifest);
-    wrongSource.releaseGroups.engine.sourceCommit = "a".repeat(40);
+    wrongSource.releaseGroups.engine.previousPublicRelease.sourceCommit = "a".repeat(40);
     await expect(verifyCoreReleaseSurfaces(root, wrongSource)).resolves.toContain(
-      "published engine release record source commit does not match the manifest",
+      "candidate previousPublicRelease release record source commit does not match the manifest",
     );
   });
 

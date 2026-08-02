@@ -3,20 +3,21 @@
   "updatedAt": "2026-08-01",
   "releaseGroups": {
     "engine": {
-      "version": "2.7.4",
-      "state": "published",
-      "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
-      "releaseRecord": {
-        "path": "release-artifacts/npm/2.7.4.release.json",
-        "sha256": "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d"
+      "version": "2.7.5",
+      "state": "candidate",
+      "sourceCommit": null,
+      "releaseRecord": null,
+      "previousPublicRelease": {
+        "version": "2.7.4",
+        "sourceCommit": "8aa4649f412bbcaaf2af4ee209bf79016566f035",
+        "releaseRecord": {
+          "path": "release-artifacts/npm/2.7.4.release.json",
+          "sha256": "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d"
+        }
       },
       "verification": {
-        "eligibleForParity": true,
-        "reason": "independent public-release gate passed on 2026-08-01 across npm, GitHub release, Action v2, MCP Registry, Studio, website artifact, and fresh install",
-        "publicGate": {
-          "path": "release-artifacts/public-gate/2.7.4.parity.json",
-          "sha256": "ca45f11fc42ceeb2c7653f0aba6b4b4ff2291b36a4f6b8183bd47d4dd388209a"
-        }
+        "eligibleForParity": false,
+        "reason": "unpublished 2.7.5 candidate for the V16 native confirmatory study; 2.7.4 remains the verified public release until candidate evidence, release provenance, and the public-release gate pass"
       }
     },
     "studio": {
@@ -40,7 +41,7 @@
       "releaseGroup": "engine",
       "repository": "memi-design/memi",
       "tagPrefix": "v",
-      "url": "https://github.com/memi-design/memi/releases/tag/v2.7.4"
+      "url": "https://github.com/memi-design/memi/releases/tag/v2.7.5"
     },
     "githubAction": {
       "releaseGroup": "engine",
