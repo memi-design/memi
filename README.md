@@ -81,7 +81,7 @@ Read the [conference-style audit PDF](docs/research/memi-2.7-prospective-study/v
 <details>
 <summary><strong>Memi InterfaceBench and historical candidate record</strong></summary>
 
-Memi InterfaceBench is a 100 target tasks specification with 5 pinned seed tasks; it is not a published performance score. The historical 2.7 candidate record reported 2,187/2,187 tests and 70.57% statements coverage. The greater-than-25% claim remains **not verified**. Inspect the [benchmark contract](benchmarks/interfacebench-v1.json) and [workflow evidence](docs/case-studies/memi-2.7-workflow-proof/results.json).
+Memi InterfaceBench is a 100 target tasks specification with 5 pinned seed tasks; it is not a published performance score. The historical 2.7 candidate record reported 2,187/2,187 tests and 70.57% statements coverage. The greater-than-25% claim remains **not verified**. Memi DesignWorkBench v2 holds 300 task contracts and requires practitioner calibration before any certification claim. Inspect the [benchmark contract](benchmarks/interfacebench-v1.json) and [workflow evidence](docs/case-studies/memi-2.7-workflow-proof/results.json).
 
 </details>
 
