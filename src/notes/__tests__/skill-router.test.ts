@@ -449,6 +449,7 @@ describe("deterministic skill router", () => {
   it("compiles bounded routing regexes and rejects catastrophic or stateful patterns", () => {
     expect(compileSafeRoutingPattern("^expo-router$").test("expo-router")).toBe(true);
     expect(() => compileSafeRoutingPattern("(a+)+$")).toThrow(/unsafe routing pattern/);
+    expect(() => compileSafeRoutingPattern("^(a|aa)+$")).toThrow(/unsafe routing pattern/);
     expect(() => compileSafeRoutingPattern("(foo)\\1")).toThrow(/unsafe routing pattern/);
     expect(() => compileSafeRoutingPattern("expo", "g")).toThrow(/unsupported routing flags/);
   });
