@@ -44,7 +44,9 @@ const prospectiveTaskSchema = z.object({
 const evidenceV2ContractSchema = z.object({
   required: z.literal(true),
   requiredCaptureKinds: z.array(nativeCaptureKindSchema).min(3),
-  measuredBillingRequired: z.literal(true),
+  // Native quality and resource claims can be evaluated from their own sealed
+  // evidence. A USD claim is separately gated on provider billing artifacts.
+  measuredBillingRequired: z.boolean(),
   structuredStopReasonsRequired: z.literal(true),
 }).strict().superRefine((contract, context) => {
   const required = new Set(contract.requiredCaptureKinds);

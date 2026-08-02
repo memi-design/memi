@@ -97,6 +97,8 @@ export async function materializeProspectiveEvidenceV2(input: {
   readonly evidenceDirectory: string;
   readonly draft: ProspectiveEvidenceDraft;
   readonly expected: ProspectiveEvidenceV2Expectation;
+  /** Preserve the historical fail-closed default for studies that claim USD cost. */
+  readonly requireMeasuredBilling?: boolean;
   readonly execution: z.infer<typeof executionSchema>;
 }): Promise<Readonly<ProspectiveEvidenceV2>> {
   const draft = prospectiveEvidenceDraftSchema.parse(input.draft);
@@ -183,7 +185,11 @@ export async function materializeProspectiveEvidenceV2(input: {
       verifierWallTimeMs: execution.verifierWallTimeMs,
     },
   });
-  const validation = validateProspectiveEvidenceV2({ receipt, expected });
+  const validation = validateProspectiveEvidenceV2({
+    receipt,
+    expected,
+    requireMeasuredBilling: input.requireMeasuredBilling,
+  });
   if (!validation.valid) {
     throw new Error(`prospective evidence draft is not admissible: ${validation.reasons.join(", ")}`);
   }

@@ -157,6 +157,8 @@ export interface ProspectiveEvidenceV2Expectation {
 export function validateProspectiveEvidenceV2(input: {
   readonly receipt: ProspectiveEvidenceV2;
   readonly expected: ProspectiveEvidenceV2Expectation;
+  /** A USD claim must opt in to billing as an admission requirement. */
+  readonly requireMeasuredBilling?: boolean;
 }): Readonly<{ valid: boolean; reasons: readonly string[] }> {
   const receipt = prospectiveEvidenceV2Schema.parse(input.receipt);
   const expected = expectationSchema.parse(input.expected);
@@ -189,7 +191,7 @@ export function validateProspectiveEvidenceV2(input: {
       reasons.push(`native-capture-missing:${kind}`);
     }
   }
-  if (receipt.billing.source === "unavailable") {
+  if (input.requireMeasuredBilling !== false && receipt.billing.source === "unavailable") {
     reasons.push("billing-unmeasured");
   }
   return deepFreeze({ valid: reasons.length === 0, reasons });

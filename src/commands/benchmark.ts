@@ -837,6 +837,7 @@ function canonicalRepositoryOrigin(origin: string): string {
                 0,
               ),
             },
+            requireMeasuredBilling: freeze.evidenceV2.measuredBillingRequired,
           });
         }
       }
@@ -1755,6 +1756,7 @@ async function verifyProspectiveEvidenceV2Receipt(input: {
       platform,
       requiredCaptureKinds: input.freeze.evidenceV2.requiredCaptureKinds,
     },
+    requireMeasuredBilling: input.freeze.evidenceV2.measuredBillingRequired,
   });
   if (!binding.valid) return binding;
   const artifacts = prospectiveEvidenceV2Artifacts(receipt);
