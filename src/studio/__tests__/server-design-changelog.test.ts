@@ -14,8 +14,9 @@ afterEach(async () => {
 describe("studio design changelog APIs", () => {
   it("lists, creates, updates, archives, restores, and exports entries", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-design-changelog-api-"));
+    let server: StudioRuntimeServer | null = null;
     try {
-      const server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
+      server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
       servers.push(server);
       const runtime = await server.start();
 
@@ -47,14 +48,19 @@ describe("studio design changelog APIs", () => {
       expect(exported).toContain("# Mémoire Studio Design Changelog");
       expect(exported).toContain("Spacing pass");
     } finally {
+      if (server) {
+        await server.stop();
+        servers.splice(servers.indexOf(server), 1);
+      }
       await rm(root, { recursive: true, force: true });
     }
   });
 
   it("captures and deduplicates session-driven changelog entries", async () => {
     const root = await mkdtemp(join(tmpdir(), "memoire-studio-design-changelog-capture-api-"));
+    let server: StudioRuntimeServer | null = null;
     try {
-      const server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
+      server = new StudioRuntimeServer({ projectRoot: root, port: 0 });
       servers.push(server);
       const runtime = await server.start();
       const session = makeSession(root);
@@ -80,6 +86,10 @@ describe("studio design changelog APIs", () => {
       expect(second.entry.eventIds).toContain("session_result-changelog-complete");
       expect(listed.entries).toHaveLength(1);
     } finally {
+      if (server) {
+        await server.stop();
+        servers.splice(servers.indexOf(server), 1);
+      }
       await rm(root, { recursive: true, force: true });
     }
   });
