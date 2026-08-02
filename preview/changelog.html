@@ -390,7 +390,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">420</span> commits</span>
+      <span><span class="n" id="stat-commits">421</span> commits</span>
       <span><span class="n" id="stat-versions">43</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-02</span> latest</span>
     </div>
@@ -408,7 +408,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Candidate release</span>
             <strong class="summary-value">v2.7.5</strong>
-            <div class="summary-caption">46 commits tracked in v2.7.5 from CHANGELOG.md.</div>
+            <div class="summary-caption">47 commits tracked in v2.7.5 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -627,6 +627,10 @@ const releases = [
       [
         "80b8134a",
         "fix: describe observable token budget enforcement"
+      ],
+      [
+        "79ef9d9e",
+        "fix: reject ambiguous repeated routing groups"
       ]
     ],
     "decisions": [],
@@ -676,7 +680,8 @@ const releases = [
       "ff697f59 — test: reproduce streamed input budget breach",
       "8b90796b — fix: stop adapters at streamed token caps",
       "38eaca7e — fix: handle malformed workflow usage events",
-      "80b8134a — fix: describe observable token budget enforcement"
+      "80b8134a — fix: describe observable token budget enforcement",
+      "79ef9d9e — fix: reject ambiguous repeated routing groups"
     ]
   },
   {

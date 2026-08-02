@@ -56,6 +56,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `8b90796b` — fix: stop adapters at streamed token caps
 - `38eaca7e` — fix: handle malformed workflow usage events
 - `80b8134a` — fix: describe observable token budget enforcement
+- `79ef9d9e` — fix: reject ambiguous repeated routing groups
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,
@@ -88,6 +89,10 @@ than an unrelated active repository, while preserving the requirement for new
 Simulator capture and calibration evidence.
 Preflight additionally canonicalizes GitHub SSH and HTTPS remotes and rejects
 any checkout whose origin differs from the preregistered fixture identity.
+Skill-routing patterns now reject repeated groups that combine alternation,
+nested groups, or inner repetition, preventing these user-supplied matching
+rules from creating exponential JavaScript-regex backtracking during route
+selection.
 The V16 protocol now separates the evidentiary gates for preserved quality,
 task-specific superiority, runtime, measured USD cost, and practitioner-grade
 design claims so an engineering safeguard is never mistaken for an outcome.
