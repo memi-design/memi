@@ -1,5 +1,7 @@
 # memi design CI for GitHub Actions
 
+> Memi is the design layer for agentic AI. Use this Action to bring interface checks into pull requests.
+
 `memi design CI` is the supported GitHub distribution surface for the deterministic `memi ci` gate. It defaults to the reviewed `@memi-design/cli@2.7.7` pin, scans the checked-out repository, writes a GitHub step summary, uploads design-health evidence, and can publish SARIF annotations to code scanning.
 
 The action does not accept API keys, Figma credentials, model credentials, or a GitHub token input. The design gate does not invoke an LLM, and the action sets `DO_NOT_TRACK=1` and `MEMI_TELEMETRY_DISABLED=1` for CLI execution.

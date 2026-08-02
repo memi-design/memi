@@ -32,7 +32,7 @@ const publicEngineSourceCommit = manifest.releaseGroups.engine.state === "candid
 if (!publicEngineSourceCommit) {
   throw new Error("Published manifest must identify its immutable source commit");
 }
-const primaryStory = "read-only design engineering audit and skill layer for coding agents";
+const primaryStory = "the design layer for agentic ai";
 
 const engineDocs = [
   "docs/RELEASE_GATES.md",
@@ -129,7 +129,7 @@ describe("public documentation release truth", () => {
     }
   });
 
-  it("keeps the README focused on one visual proof and one first-run path", async () => {
+  it("keeps the README focused on a clear first-run path and honest product previews", async () => {
     const readme = await readFile(join(root, "README.md"), "utf8");
     const lines = readme.split("\n");
     const quickstartIndex = readme.indexOf("## Quickstart");
@@ -143,6 +143,12 @@ describe("public documentation release truth", () => {
       "npx -y @memi-design/cli@latest diagnose . --json --no-write --fail-on none",
     );
     expect(readme).toContain("If Memi catches a real interface issue");
+    expect(readme).toContain("Memi Studio");
+    expect(readme).toContain("Memi Canvas");
+    expect(readme).toContain("currently in development");
+    expect(readme).toContain("studio-real-01-workbench.png");
+    expect(readme).toContain("memi-canvas-workspace.png");
+    expect(readme.toLowerCase()).not.toContain("read-only");
     expect(readme).toContain("## Research, stated plainly");
     expect(readme).toContain("36 / 36 frozen receipts admitted");
     expect(readme).toContain("No superiority, speed, or dollar-savings claim is made.");

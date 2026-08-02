@@ -220,7 +220,7 @@ describe("packaged agent kits", () => {
       },
     });
     expect(manifest.description).toContain(
-      "read-only design engineering audit and skill layer for coding agents",
+      "design layer for agentic AI",
     );
     expect(manifest.interface.defaultPrompt.length).toBeLessThanOrEqual(4);
     expect(manifest.interface.defaultPrompt).toContain("Audit this UI with memi before editing.");

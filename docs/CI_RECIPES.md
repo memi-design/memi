@@ -1,5 +1,7 @@
 # CI recipes
 
+> Memi is the design layer for agentic AI. These recipes keep agent and human UI changes grounded in the existing product system.
+
 `memi ci` is the one-command design gate: full-tree scan → PR scope → baseline filter → severity/score/regression gates → SARIF + step summary + report artifact. Exit code 1 when the gate fails. Deterministic by construction — same commit + same policy = same result.
 
 ## GitHub Actions — the shipped action (recommended)

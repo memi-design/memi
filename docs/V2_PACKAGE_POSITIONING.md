@@ -4,7 +4,7 @@ Memoire v2 should be judged like a mature developer package, not a demo repo. Th
 
 ## Category
 
-**Memi is the read-only design engineering audit and skill layer for coding agents.**
+**Memi is the design layer for agentic AI.**
 
 Adjacent categories:
 
@@ -27,7 +27,7 @@ Adjacent categories:
 
 ## Message hierarchy
 
-1. **One-line promise**: Memi is the read-only design engineering audit and skill layer for coding agents.
+1. **One-line promise**: Memi is the design layer for agentic AI.
 2. **Five-minute proof**: `memi diagnose`, `memi ux audit`, `memi craft audit`, `memi tokens`, `memi shadcn export`.
 3. **Agent-native distribution**: universal Agent Skills, MCP, Codex plugin, Hermes, OpenClaw, OpenCode, Claude Code, Cursor.
 4. **Deep workflow**: user research, UX traps, Atomic Design specs, Figma/FigJam, registry publish.

@@ -6,7 +6,7 @@ memi v2 needs public proof repos, not only package claims. Use this file to keep
 
 | Repo | Role | Public promise |
 | --- | --- | --- |
-| [`memi-design/memi`](https://github.com/memi-design/memi) | Engine, CLI, MCP server, Agent Skills, Codex plugin, examples, release gates | Memi is the read-only design engineering audit and skill layer for coding agents. |
+| [`memi-design/memi`](https://github.com/memi-design/memi) | Engine, CLI, MCP server, Agent Skills, Codex plugin, examples, release gates | Memi is the design layer for agentic AI. |
 | [`memi-design/design-sandbox`](https://github.com/memi-design/design-sandbox) | Proof workspace | memi-ready Next.js, Tailwind, shadcn, MCP, and Agent Skills sandbox for design-to-code exploration. |
 | [`memi-design/memi-studio`](https://github.com/memi-design/memi-studio) | macOS workbench | Supervised Codex and Claude Code runs with project memory, receipts, artifacts, and Figma/FigJam handoff. |
 | [`sarveshsea/memoire-agent-skills`](https://github.com/sarveshsea/memoire-agent-skills) | Skill mirror | Mirror-ready Hermes/OpenClaw skill packages generated from the npm engine. |
@@ -21,7 +21,7 @@ memi v2 needs public proof repos, not only package claims. Use this file to keep
 `memi-design/memi`:
 
 ```text
-Memi is the read-only design engineering audit and skill layer for coding agents.
+Memi is the design layer for agentic AI.
 ```
 
 `memi-design/design-sandbox`:
@@ -155,7 +155,7 @@ These issue-first proposals follow each upstream repository's contribution polic
 
 - [`southleft/design-systems-mcp#12`](https://github.com/southleft/design-systems-mcp/issues/12): compact category manifest for deterministic MCP clients.
 - [`onlook-dev/onlook#3128`](https://github.com/onlook-dev/onlook/issues/3128): local project design context for external coding agents.
-- [`CopilotKit/CopilotKit#5991`](https://github.com/CopilotKit/CopilotKit/issues/5991): document MCP Apps versus read-only context servers.
+- [`CopilotKit/CopilotKit#5991`](https://github.com/CopilotKit/CopilotKit/issues/5991): document MCP Apps versus non-mutating context servers.
 
 Do not open implementation pull requests until maintainers confirm the proposed surface. The Memi-side design-systems adapter and `design_systems_context` MCP tool are already implemented and tested.
 

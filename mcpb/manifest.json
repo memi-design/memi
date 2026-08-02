@@ -3,7 +3,7 @@
   "name": "memi",
   "display_name": "memi",
   "version": "2.7.7",
-  "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
+  "description": "Memi is the design layer for agentic AI.",
   "long_description": "memi gives MCP-compatible agents design-system memory and interface-quality tools. It exposes Apple-platform briefs, approval-gated SwiftUI scaffolds, UI audits, Tailwind tokens, shadcn registry workflows, Figma context, design docs, and implementation diagnostics through the @memi-design/cli npm package.",
   "author": {
     "name": "Sarvesh Chidambaram",

@@ -13,7 +13,7 @@ const root = join(import.meta.dirname, "..", "..", "..");
 const baseOptions = {
   packageName: "@memi-design/cli",
   expectedVersion: "2.6.2",
-  expectedPhrase: "read-only design engineering audit and skill layer for coding agents",
+  expectedPhrase: "the design layer for agentic AI",
   expectedInstall: "npm i -g @memi-design/cli",
   expectedSiteUrl: "https://www.memoire.cv",
   expectedStudioVersion: "2.5.0",
@@ -27,13 +27,13 @@ const baseOptions = {
 const registryMetadata = {
   "dist-tags": { latest: "2.6.2" },
   readme: [
-    "Memi is the read-only design engineering audit and skill layer for coding agents.",
+    "Memi is the design layer for agentic AI.",
     "npm i -g @memi-design/cli",
   ].join("\n"),
   versions: {
     "2.6.2": {
       readme: [
-        "Memi is the read-only design engineering audit and skill layer for coding agents.",
+        "Memi is the design layer for agentic AI.",
         "npm i -g @memi-design/cli",
       ].join("\n"),
     },

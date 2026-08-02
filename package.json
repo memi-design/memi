@@ -2,7 +2,7 @@
   "name": "@memi-design/cli",
   "version": "2.7.7",
   "mcpName": "io.github.memi-design/memi",
-  "description": "Read-only design engineering audit and skill layer for coding agents: file-anchored UI evidence before merge.",
+  "description": "The design layer for agentic AI: design context, interface checks, and workflows for coding agents.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

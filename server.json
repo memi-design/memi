@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.memi-design/memi",
   "title": "memi",
-  "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
+  "description": "Memi is the design layer for agentic AI.",
   "version": "2.7.7",
   "websiteUrl": "https://memoire.cv",
   "repository": {

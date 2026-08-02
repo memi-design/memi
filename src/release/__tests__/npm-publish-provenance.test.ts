@@ -202,8 +202,8 @@ describe("npm release verification", () => {
 
   it("matches the required README phrase across Markdown emphasis", () => {
     const emphasizedPhrase = DEFAULT_README_PHRASE.replace(
-      "the read-only design engineering audit and skill layer for coding agents",
-      "the **read-only design engineering audit and skill layer for coding agents**",
+      "the design layer for agentic AI",
+      "the **design layer for agentic AI**",
     );
 
     expect(() => validateRegistryVersion({
