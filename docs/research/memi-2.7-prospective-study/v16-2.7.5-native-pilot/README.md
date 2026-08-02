@@ -110,9 +110,26 @@ root. The receipt draft must use only those five files.
 7. Generate blinded packets only from admitted cells. Preserve all rejected
    cells and their reasons in the deviations ledger.
 
-The accompanying [protocol.json](protocol.json) is the source-of-record plan;
-it remains a draft until it includes the exact candidate SHA-256 and verified
-fixture revisions.
+The accompanying [protocol.json](protocol.json) is the source-of-record plan.
+The exact local candidate is recorded in
+[candidate-provenance.json](candidate-provenance.json); the protocol remains a
+draft until it also binds V16 task-manifest hashes, verified fixture revisions,
+and working collectors.
+
+The draft [plan.json](plan.json) defines the 18 confirmatory pairs and makes
+V2 receipts mandatory. [fixtures.json](fixtures.json) identifies the three
+local pinned checkouts for the preflight command; it is machine-local research
+configuration, never a public package surface.
+
+`node build-v16-task-manifests.mjs` derives the V16 task manifests from the
+preserved V15 contracts and appends platform-native collectors. The generated
+tasks are checked with `node build-v16-task-manifests.mjs --check`; collectors
+remain uncalibrated until their first unscored matched pair passes.
+
+[preflight-attestation.json](preflight-attestation.json) proves only that those
+declarations match clean, pinned fixtures and their origins. Its `ready` status
+is deliberately narrower than study readiness: a missing launch, journey,
+native capture, billing file, or blinded packet still prevents a scored cell.
 
 The current [preflight audit](preflight-audit.json) records the observed local
 fixture revisions and the remaining freeze prerequisites. It is a readiness

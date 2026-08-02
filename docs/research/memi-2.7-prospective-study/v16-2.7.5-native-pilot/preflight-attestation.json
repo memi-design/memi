@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "status": "ready",
+  "planId": "memi-2.7-v16-2.7.5-native-confirmatory",
+  "planHash": "sha256:56b8d37ca82bfdbd37db7176ebc5ad25baf1826279cc4e349df96f738165d329",
+  "checkedAt": "2026-08-02T00:06:29Z",
+  "fixtures": [
+    {
+      "taskId": "buzzr-tab-unread-badge",
+      "repository": "/Volumes/ExtremeSSD/Projects/_benchmarks/memi-2.7-cases/buzzr",
+      "origin": "https://github.com/Buzzr-app/Buzzr",
+      "revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+      "taskManifestSha256": "sha256:f5f4928145730be1036257a147365e7691d39809d1fcd23af6751ddef345bc3b",
+      "nativeCaptureKinds": [
+        "accessibility-tree",
+        "interaction-trace",
+        "screenshot"
+      ]
+    },
+    {
+      "taskId": "paraform-command-menu",
+      "repository": "/Volumes/ExtremeSSD/Projects/_active/paraform",
+      "origin": "https://github.com/sarveshsea/paraform",
+      "revision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+      "taskManifestSha256": "sha256:de0aa945013f1330461dd79a9c707986387a34d1aa7fa75bb1fb7e0ded9af02a",
+      "nativeCaptureKinds": [
+        "accessibility-tree",
+        "interaction-trace",
+        "screenshot"
+      ]
+    },
+    {
+      "taskId": "nate-options-reduce-motion",
+      "repository": "/Volumes/ExtremeSSD/Projects/_worktrees/nate-memi-validation",
+      "origin": "https://github.com/sarveshsea/nate-the-bait",
+      "revision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+      "taskManifestSha256": "sha256:0731b300ea27f0033d0119017394d95c7ec52e9e44652aed864d4e97f41cd725",
+      "nativeCaptureKinds": [
+        "accessibility-tree",
+        "interaction-trace",
+        "screenshot"
+      ]
+    }
+  ],
+  "preflightHash": "sha256:c8366e04e018d3fec1e183d10b636ed37a7cde8cafdc5e967356eb32e8e031c1"
+}

@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "id": "paraform-command-menu",
+  "intent": "Apply emil-design-eng and interaction-design craft to implement an accessible keyboard command menu in Paraform's existing React recruiter and hiring-manager workspaces. Preserve the current Paraform visual system, open the menu from a compact chrome trigger or Control/Command-K, filter destinations without mutating navigation state, support keyboard selection, close with Escape, restore focus to the opener, and respect reduced-motion preferences without adding a production dependency.",
+  "maximumDurationMs": 720000,
+  "focusPaths": [
+    "src/app/Chrome.tsx",
+    "src/app/recruiter/RecruiterApp.tsx",
+    "src/app/manager/ManagerApp.tsx",
+    "src/ui/kit.tsx",
+    "src/App.tsx",
+    "playwright.memi.config.ts"
+  ],
+  "agentBudget": {
+    "maxToolCalls": 16,
+    "maxToolOutputBytes": 160000,
+    "maxInputTokens": 450000,
+    "maxOutputTokens": 10000,
+    "maxReasoningTokens": 4000
+  },
+  "steps": [
+    "Inspect only Chrome, the direct recruiter and manager navigation it composes, shared UI primitives, and the supplied browser contract.",
+    "Implement the smallest reusable command-menu component inside the existing application boundaries.",
+    "Expose a compact chrome trigger named Open command menu and keep the existing sidebar navigation intact.",
+    "Open the same menu with Control-K or Command-K only when focus is outside editable controls.",
+    "Filter the destinations for the active role, support keyboard selection, navigate on Enter, and never expose a destination the current role cannot open.",
+    "Close with Escape, restore focus to the opener, preserve the established Paraform tokens, and disable decorative motion when reduced motion is requested.",
+    "Run only the production build and rendered recruiter keyboard journey; report unrelated failures without broadening scope."
+  ],
+  "preparation": [
+    {
+      "command": "npm",
+      "args": [
+        "ci",
+        "--prefer-offline",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "command": "npm",
+      "args": [
+        "install",
+        "--no-save",
+        "--package-lock=false",
+        "--prefer-offline",
+        "--no-audit",
+        "--no-fund",
+        "@playwright/test@1.60.0"
+      ],
+      "timeoutMs": 300000
+    },
+    {
+      "command": "npx",
+      "args": [
+        "playwright",
+        "install",
+        "chromium"
+      ],
+      "timeoutMs": 900000
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "playwright.memi.config.ts",
+      "content": "import { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './tests/memi',\n  fullyParallel: false,\n  retries: 0,\n  reporter: 'list',\n  use: {\n    ...devices['Desktop Chrome'],\n    baseURL: 'http://127.0.0.1:43173',\n    trace: 'retain-on-failure',\n    screenshot: 'only-on-failure',\n  },\n  webServer: {\n    command: 'npm run dev -- --host 127.0.0.1 --port 43173',\n    url: 'http://127.0.0.1:43173',\n    reuseExistingServer: false,\n    timeout: 120_000,\n  },\n});\n"
+    },
+    {
+      "path": "tests/memi/command-menu.spec.ts",
+      "content": "import { expect, test } from '@playwright/test';\n\ntest('recruiter command menu supports the complete keyboard journey', async ({ page }) => {\n  await page.goto('/');\n  await page.getByRole('button', { name: 'Recruiter' }).click();\n\n  const trigger = page.getByTestId('command-menu-trigger');\n  await expect(trigger).toBeVisible();\n  await expect(trigger).toHaveAccessibleName('Open command menu');\n\n  await page.keyboard.press('ControlOrMeta+K');\n  const dialog = page.getByRole('dialog', { name: 'Navigate Paraform' });\n  await expect(dialog).toBeVisible();\n  const search = dialog.getByRole('combobox', { name: 'Search destinations' });\n  await expect(search).toBeFocused();\n  await search.fill('Candidates');\n  await page.keyboard.press('Enter');\n  await expect(dialog).toBeHidden();\n  await expect(page.getByRole('heading', { name: 'Candidates' })).toBeVisible();\n\n  await trigger.click();\n  await expect(dialog).toBeVisible();\n  await page.keyboard.press('Escape');\n  await expect(dialog).toBeHidden();\n  await expect(trigger).toBeFocused();\n\n  await page.getByPlaceholder('Search candidates').focus();\n  await page.keyboard.press('ControlOrMeta+K');\n  await expect(dialog).toBeHidden();\n});\n\ntest('command menu remains functional with reduced motion', async ({ page }) => {\n  await page.emulateMedia({ reducedMotion: 'reduce' });\n  await page.goto('/');\n  await page.getByRole('button', { name: 'Recruiter' }).click();\n  await page.getByTestId('command-menu-trigger').click();\n  await expect(page.getByRole('dialog', { name: 'Navigate Paraform' })).toBeVisible();\n});\n"
+    },
+    {
+      "path": "scripts/memi-v16-web-capture.mjs",
+      "content": "import { spawn } from \"node:child_process\";\nimport { lstat, mkdir, writeFile } from \"node:fs/promises\";\nimport { dirname } from \"node:path\";\nimport { chromium } from \"@playwright/test\";\n\nconst options = new Map(process.argv.slice(2).reduce((pairs, value, index, values) => {\n  if (value.startsWith(\"--\")) pairs.push([value.slice(2), values[index + 1]]);\n  return pairs;\n}, []));\nconst kind = options.get(\"kind\");\nconst output = options.get(\"output\");\nif (!kind || !output) throw new Error(\"kind and output are required\");\nif (!new Set([\"screenshot\", \"interaction-trace\", \"accessibility-tree\"]).has(kind)) {\n  throw new Error(\"unsupported native capture kind: \" + kind);\n}\nif (await lstat(output).catch(() => null)) throw new Error(\"refusing to overwrite native capture: \" + output);\nawait mkdir(dirname(output), { recursive: true });\n\nconst server = spawn(\"npm\", [\"run\", \"dev\", \"--\", \"--host\", \"127.0.0.1\", \"--port\", \"43173\"], {\n  stdio: \"ignore\",\n});\nconst stop = () => { if (!server.killed) server.kill(\"SIGTERM\"); };\ntry {\n  for (let attempt = 0; attempt < 120; attempt += 1) {\n    try {\n      const response = await fetch(\"http://127.0.0.1:43173\");\n      if (response.ok) break;\n    } catch {}\n    await new Promise((resolve) => setTimeout(resolve, 500));\n    if (attempt === 119) throw new Error(\"Paraform dev server did not become ready\");\n  }\n  const browser = await chromium.launch();\n  const context = await browser.newContext({ viewport: { width: 1440, height: 960 } });\n  const page = await context.newPage();\n  await context.tracing.start({ screenshots: true, snapshots: true, sources: false });\n  await page.goto(\"http://127.0.0.1:43173\", { waitUntil: \"networkidle\" });\n  await page.getByRole(\"button\", { name: \"Recruiter\" }).click();\n  const trigger = page.getByTestId(\"command-menu-trigger\");\n  await trigger.waitFor();\n  await page.keyboard.press(\"ControlOrMeta+K\");\n  const dialog = page.getByRole(\"dialog\", { name: \"Navigate Paraform\" });\n  await dialog.waitFor();\n  const search = dialog.getByRole(\"combobox\", { name: \"Search destinations\" });\n  await search.fill(\"Candidates\");\n  await page.keyboard.press(\"Enter\");\n  await page.getByRole(\"heading\", { name: \"Candidates\" }).waitFor();\n  await trigger.click();\n  await dialog.waitFor();\n  if (kind === \"screenshot\") {\n    await page.screenshot({ path: output, fullPage: true });\n  } else if (kind === \"interaction-trace\") {\n    await context.tracing.stop({ path: output });\n  } else {\n    const session = await context.newCDPSession(page);\n    const tree = await session.send(\"Accessibility.getFullAXTree\");\n    await writeFile(output, JSON.stringify({\n      schemaVersion: 1,\n      collector: \"chromium-cdp-accessibility\",\n      capturedAt: new Date().toISOString(),\n      tree,\n    }, null, 2) + \"\\n\", { mode: 0o600 });\n    await context.tracing.stop();\n  }\n  await browser.close();\n} finally {\n  stop();\n}\n",
+      "executable": false
+    }
+  ],
+  "verification": [
+    {
+      "kind": "build",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "kind": "rendered-flow",
+      "preflightExpectedExitCode": 1,
+      "command": "npx",
+      "args": [
+        "playwright",
+        "test",
+        "--config",
+        "playwright.memi.config.ts"
+      ],
+      "timeoutMs": 900000
+    }
+  ],
+  "requiredArtifacts": [
+    "git.patch",
+    "verification.json",
+    "events.jsonl"
+  ],
+  "nativeCaptures": [
+    {
+      "kind": "screenshot",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-web-capture.mjs",
+        "--kind",
+        "screenshot",
+        "--output",
+        "evidence/native-screenshot.png"
+      ],
+      "timeoutMs": 300000,
+      "sourcePath": "evidence/native-screenshot.png",
+      "artifactName": "native-screenshot.png"
+    },
+    {
+      "kind": "interaction-trace",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-web-capture.mjs",
+        "--kind",
+        "interaction-trace",
+        "--output",
+        "evidence/native-interaction-trace.zip"
+      ],
+      "timeoutMs": 300000,
+      "sourcePath": "evidence/native-interaction-trace.zip",
+      "artifactName": "native-interaction-trace.zip"
+    },
+    {
+      "kind": "accessibility-tree",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-web-capture.mjs",
+        "--kind",
+        "accessibility-tree",
+        "--output",
+        "evidence/native-accessibility-tree.json"
+      ],
+      "timeoutMs": 300000,
+      "sourcePath": "evidence/native-accessibility-tree.json",
+      "artifactName": "native-accessibility-tree.json"
+    }
+  ]
+}

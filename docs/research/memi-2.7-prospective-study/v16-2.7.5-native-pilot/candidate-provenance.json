@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "kind": "memi-v16-local-candidate-provenance",
+  "status": "unpublished-candidate",
+  "recordedAt": "2026-08-02T00:06:29Z",
+  "candidate": {
+    "packageName": "@memi-design/cli",
+    "version": "2.7.5",
+    "sourceRevision": "d97fec751408b8ee3c39a529d737b7a6c74d9b82",
+    "sourceState": "clean",
+    "dirtyFileCount": 0,
+    "sourceSnapshot": {
+      "method": "git archive --format=tar HEAD | shasum -a 256",
+      "sha256": "sha256:88acf444d1adadc55263f00ff4898d6956feed1a46fa370cb3c14e84f73ba633"
+    },
+    "artifact": {
+      "filename": "memi-design-cli-2.7.5.tgz",
+      "bytes": 584836,
+      "sha256": "sha256:a416d99eb368d734f9f5d4cadb040c02961ca1078722924336753df84f1617a6",
+      "sha512": "sha512:b431ad22020d6282177e29ad4847a1e8566d2d34b3bbb6e428d30636e9bc63784b9bf29932b6a6a2c57e582241566301954a8c3b5db7b67f15d932f851320abe",
+      "sha1": "28565d8c5efb731cc90ee21281c2fdeeb600eb28",
+      "retention": "External immutable study-evidence root; not an npm-published tarball."
+    }
+  },
+  "claimBoundary": "This receipt identifies the candidate used by V16. It provides no outcome, quality, speed, cost, or public-release evidence."
+}

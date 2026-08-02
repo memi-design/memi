@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "taskId": "buzzr-tab-unread-badge",
+      "repository": "/Volumes/ExtremeSSD/Projects/_benchmarks/memi-2.7-cases/buzzr",
+      "origin": "https://github.com/Buzzr-app/Buzzr.git"
+    },
+    {
+      "taskId": "paraform-command-menu",
+      "repository": "/Volumes/ExtremeSSD/Projects/_active/paraform",
+      "origin": "https://github.com/sarveshsea/paraform.git"
+    },
+    {
+      "taskId": "nate-options-reduce-motion",
+      "repository": "/Volumes/ExtremeSSD/Projects/_worktrees/nate-memi-validation",
+      "origin": "https://github.com/sarveshsea/nate-the-bait.git"
+    }
+  ]
+}

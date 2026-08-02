@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "buzzr-tab-unread-badge",
+  "intent": "Implement a compact React Native and Expo unread-count badge for Buzzr's existing icon-only chat bottom tab. Preserve the current Buzzr design system and selected indicator, show exact counts from 1 through 99 and 99+ above that, keep the visual badge hidden from screen readers because the tab's accessibility label already announces the full count, preserve the pulse activity dot, and add focused component coverage without adding a dependency.",
+  "maximumDurationMs": 720000,
+  "focusPaths": [
+    "components/ui/CustomTabBar.tsx",
+    "tests/components/ui/custom-tab-bar.test.tsx",
+    "tests/components/ui/memi-custom-tab-bar-unread.test.tsx",
+    "src/theme/layout.ts",
+    "src/theme/palette.ts",
+    "app/(protected)/(tabs)/_layout.tsx"
+  ],
+  "agentBudget": {
+    "maxToolCalls": 16,
+    "maxToolOutputBytes": 160000,
+    "maxInputTokens": 450000,
+    "maxOutputTokens": 10000,
+    "maxReasoningTokens": 4000
+  },
+  "steps": [
+    "Inspect only the listed CustomTabBar, direct test, token, and call-site evidence before editing.",
+    "Implement the smallest reusable unread-count presentation inside the existing tab item.",
+    "Render no numeric badge for zero or undefined counts and preserve the pulse activity-dot behavior.",
+    "Expose stable test identifiers while keeping decorative badge content out of the accessibility tree. Do not change global Jest or React Native Testing Library configuration; query the decorative hidden badge with an explicit includeHiddenElements option.",
+    "Use existing spacing, color, radius, and typography tokens without adding dependencies or visible text labels.",
+    "Use the supplied focused contract for exact counts, the 99+ cap, selected state, and accessible full-count labels; add a test only for an uncovered behavior.",
+    "Run only the manifest typecheck and rendered React Native contract. Report unrelated Expo web-export failures without attempting to repair them."
+  ],
+  "preparation": [
+    {
+      "command": "npm",
+      "args": [
+        "ci",
+        "--prefer-offline",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "timeoutMs": 900000
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "tests/components/ui/memi-custom-tab-bar-unread.test.tsx",
+      "content": "import React from 'react';\nimport { render } from '@testing-library/react-native';\n\njest.mock('@/src/lib/haptics', () => ({ haptic: { selection: jest.fn() } }));\njest.mock('@expo/vector-icons/Feather', () => {\n  const React = require('react');\n  const { Text } = require('react-native');\n  return ({ name }: { name: string }) => React.createElement(Text, null, `feather:${name}`);\n});\njest.mock('@expo/vector-icons/MaterialCommunityIcons', () => {\n  const React = require('react');\n  const { Text } = require('react-native');\n  return ({ name }: { name: string }) => React.createElement(Text, null, `mci:${name}`);\n});\n\nimport { CustomTabBar, VISIBLE_TAB_NAMES } from '@/components/ui/CustomTabBar';\nimport { getAppPalette } from '@/src/theme/palette';\n\nconst routes = VISIBLE_TAB_NAMES.map((name) => ({ key: `${name}-key`, name, params: undefined, path: undefined }));\n\nfunction renderTabs(chatUnreadCount?: number, hasUnreadFeed = false) {\n  const descriptors = Object.fromEntries(routes.map((route) => [route.key, { options: { title: route.name } }]));\n  return render(\n    <CustomTabBar\n      chatUnreadCount={chatUnreadCount}\n      descriptors={descriptors as any}\n      dynamicDockGradient={['transparent', 'transparent', 'transparent']}\n      feedUnreadIndicatorEnabled\n      glossColor=\"transparent\"\n      hasUnreadFeed={hasUnreadFeed}\n      insets={{ bottom: 0, left: 0, right: 0, top: 0 }}\n      navigation={{ emit: jest.fn(() => ({ defaultPrevented: false })), navigate: jest.fn() } as any}\n      palette={getAppPalette()}\n      responsiveMaxContentWidth={480}\n      selectedVisibleRoute=\"chat\"\n      state={{ history: [], index: 4, key: 'tabs', routeNames: [...VISIBLE_TAB_NAMES], routes, stale: false, type: 'tab' } as any}\n      tabBarHeight={72}\n      bottomPadding={8}\n    />,\n  );\n}\n\ndescribe('Buzzr chat unread badge contract', () => {\n  it('shows exact unread counts and announces the full count on the tab', () => {\n    const screen = renderTabs(7);\n    expect(screen.getByTestId('tab-unread-count-chat', { includeHiddenElements: true })).toHaveTextContent('7');\n    expect(screen.getByLabelText('chat, 7 unread')).toBeTruthy();\n    expect(screen.getByTestId('tab-button-chat').props.accessibilityState).toEqual({ selected: true });\n  });\n\n  it('caps only the visual badge while preserving the full accessible count', () => {\n    const screen = renderTabs(120);\n    expect(screen.getByTestId('tab-unread-count-chat', { includeHiddenElements: true })).toHaveTextContent('99+');\n    expect(screen.getByLabelText('chat, 120 unread')).toBeTruthy();\n    expect(screen.getByTestId('tab-unread-count-chat', { includeHiddenElements: true }).props.accessibilityElementsHidden).toBe(true);\n  });\n\n  it('renders no chat count for zero and preserves the pulse activity dot', () => {\n    const screen = renderTabs(0, true);\n    expect(screen.queryByTestId('tab-unread-count-chat', { includeHiddenElements: true })).toBeNull();\n    expect(screen.getByTestId('tab-unread-dot-pulse')).toBeTruthy();\n  });\n});\n"
+    },
+    {
+      "path": "scripts/memi-v16-ios-capture.mjs",
+      "content": "import { execFile } from \"node:child_process\";\nimport { copyFile, lstat, mkdir, writeFile } from \"node:fs/promises\";\nimport { dirname } from \"node:path\";\nimport { promisify } from \"node:util\";\n\nconst exec = promisify(execFile);\nconst options = new Map(process.argv.slice(2).reduce((pairs, value, index, values) => {\n  if (value.startsWith(\"--\")) pairs.push([value.slice(2), values[index + 1]]);\n  return pairs;\n}, []));\nconst kind = options.get(\"kind\");\nconst flow = options.get(\"flow\");\nconst output = options.get(\"output\");\nconst udid = process.env.MEMI_V16_IOS_UDID;\nconst maestro = process.env.MEMI_V16_MAESTRO_BIN || \"maestro\";\n\nif (!kind || !flow || !output) throw new Error(\"kind, flow, and output are required\");\nif (!udid || !/^[A-F0-9-]{36}$/i.test(udid)) {\n  throw new Error(\"MEMI_V16_IOS_UDID must name the reset, exclusive iOS Simulator\");\n}\nif (!new Set([\"screenshot\", \"interaction-trace\", \"accessibility-tree\"]).has(kind)) {\n  throw new Error(\"unsupported native capture kind: \" + kind);\n}\nconst existing = await lstat(output).catch(() => null);\nif (existing) throw new Error(\"refusing to overwrite native capture: \" + output);\nawait mkdir(dirname(output), { recursive: true });\n\nconst trace = output.replace(/[^/]+$/, \"memi-v16-maestro-junit.xml\");\nasync function runJourney() {\n  await exec(maestro, [\"--udid\", udid, \"test\", flow, \"--format\", \"junit\", \"--output\", trace], {\n    timeout: 300000,\n    maxBuffer: 4_000_000,\n  });\n  const result = await lstat(trace).catch(() => null);\n  if (!result?.isFile() || result.size === 0) throw new Error(\"Maestro did not emit a journey trace\");\n}\n\nawait runJourney();\nif (kind === \"screenshot\") {\n  await exec(\"xcrun\", [\"simctl\", \"io\", udid, \"screenshot\", output], { timeout: 60000 });\n} else if (kind === \"interaction-trace\") {\n  const source = await lstat(trace).catch(() => null);\n  if (!source?.isFile()) throw new Error(\"Maestro did not emit its JUnit journey trace\");\n  await copyFile(trace, output);\n} else {\n  const hierarchy = await exec(maestro, [\"--udid\", udid, \"hierarchy\"], {\n    timeout: 60000,\n    maxBuffer: 8_000_000,\n  });\n  if (!hierarchy.stdout.trim()) throw new Error(\"Maestro returned an empty accessibility hierarchy\");\n  await writeFile(output, JSON.stringify({\n    schemaVersion: 1,\n    collector: \"maestro-hierarchy\",\n    udid,\n    capturedAt: new Date().toISOString(),\n    hierarchy: hierarchy.stdout,\n  }, null, 2) + \"\\n\", { mode: 0o600 });\n}\n",
+      "executable": false
+    },
+    {
+      "path": "scripts/memi-v16-journey.yaml",
+      "content": "appId: com.buzzr.app\n---\n- launchApp:\n    clearState: true\n- tapOn:\n    id: tab-button-chat\n- assertVisible:\n    id: tab-unread-count-chat\n",
+      "executable": false
+    }
+  ],
+  "verification": [
+    {
+      "kind": "build",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "timeoutMs": 900000
+    },
+    {
+      "kind": "rendered-flow",
+      "preflightExpectedExitCode": 1,
+      "command": "npm",
+      "args": [
+        "test",
+        "--",
+        "--runInBand",
+        "--forceExit",
+        "tests/components/ui/memi-custom-tab-bar-unread.test.tsx"
+      ],
+      "timeoutMs": 300000
+    }
+  ],
+  "requiredArtifacts": [
+    "git.patch",
+    "verification.json",
+    "events.jsonl"
+  ],
+  "nativeCaptures": [
+    {
+      "kind": "screenshot",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-ios-capture.mjs",
+        "--kind",
+        "screenshot",
+        "--output",
+        "evidence/native-screenshot.png",
+        "--flow",
+        "scripts/memi-v16-journey.yaml"
+      ],
+      "timeoutMs": 420000,
+      "sourcePath": "evidence/native-screenshot.png",
+      "artifactName": "native-screenshot.png"
+    },
+    {
+      "kind": "interaction-trace",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-ios-capture.mjs",
+        "--kind",
+        "interaction-trace",
+        "--output",
+        "evidence/native-interaction-trace.xml",
+        "--flow",
+        "scripts/memi-v16-journey.yaml"
+      ],
+      "timeoutMs": 420000,
+      "sourcePath": "evidence/native-interaction-trace.xml",
+      "artifactName": "native-interaction-trace.xml"
+    },
+    {
+      "kind": "accessibility-tree",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-ios-capture.mjs",
+        "--kind",
+        "accessibility-tree",
+        "--output",
+        "evidence/native-accessibility-tree.json",
+        "--flow",
+        "scripts/memi-v16-journey.yaml"
+      ],
+      "timeoutMs": 420000,
+      "sourcePath": "evidence/native-accessibility-tree.json",
+      "artifactName": "native-accessibility-tree.json"
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "id": "nate-options-reduce-motion",
+  "intent": "Implement a read-only SwiftUI system-status row in Nate the Bait's existing Options sheet that reports whether the iOS Reduce Motion accessibility setting is On or Off. Read the real accessibilityReduceMotion environment value, do not pretend the app can toggle the system setting, preserve the LightWood visual system and existing settings, provide a stable identifier and a combined accessible label, meet a 44-point minimum target size, and verify the journey in the real iOS app on Simulator.",
+  "maximumDurationMs": 720000,
+  "focusPaths": [
+    "NateTheBait/App/GameRootView.swift",
+    "NateTheBaitUITests/MemiReduceMotionStatusUITests.swift",
+    "project.yml"
+  ],
+  "agentBudget": {
+    "maxToolCalls": 16,
+    "maxToolOutputBytes": 160000,
+    "maxInputTokens": 450000,
+    "maxOutputTokens": 10000,
+    "maxReasoningTokens": 4000
+  },
+  "steps": [
+    "Inspect only OptionsSheet, the direct LightWood controls it uses, and the supplied UI contract before editing.",
+    "Implement the smallest reusable read-only status row inside the existing SwiftUI component boundaries.",
+    "Read the real accessibilityReduceMotion environment value and display a truthful On or Off status without adding a fake toggle.",
+    "Use the existing LightWood palette, spacing, iconography, typography, and panel treatment without adding dependencies.",
+    "Expose the options-reduce-motion-status identifier and one combined accessible label containing Reduce Motion and On or Off.",
+    "Keep the production target at 44 points or more; the UI fixture uses a half-point XCTest accessibility-frame projection tolerance for simulator coordinate quantization.",
+    "Preserve existing settings, legal links, sheet behavior, and navigation.",
+    "Run only the generated Xcode build and protected Options journey on the pinned iOS Simulator."
+  ],
+  "preparation": [
+    {
+      "command": "/opt/homebrew/bin/xcodegen",
+      "args": [
+        "generate"
+      ],
+      "timeoutMs": 300000
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "NateTheBaitUITests/MemiReduceMotionStatusUITests.swift",
+      "content": "import XCTest\n\nfinal class MemiReduceMotionStatusUITests: XCTestCase {\n    @MainActor\n    func testOptionsExposeTruthfulSystemReduceMotionStatus() {\n        let app = XCUIApplication()\n        app.launchArguments = [\"-ui-testing\"]\n        app.launch()\n\n        let options = app.buttons[\"Options\"]\n        XCTAssertTrue(options.waitForExistence(timeout: 5))\n        options.tap()\n\n        let status = app.descendants(matching: .any)[\"options-reduce-motion-status\"]\n        XCTAssertTrue(status.waitForExistence(timeout: 3))\n        XCTAssertTrue(status.label.localizedCaseInsensitiveContains(\"Reduce Motion\"))\n        XCTAssertTrue(\n            status.label.localizedCaseInsensitiveContains(\"On\") ||\n            status.label.localizedCaseInsensitiveContains(\"Off\")\n        )\n        XCTAssertGreaterThanOrEqual(status.frame.height, 43.5)\n        XCTAssertTrue(status.isHittable)\n        XCTAssertGreaterThanOrEqual(status.frame.minX, 0)\n        XCTAssertLessThanOrEqual(status.frame.maxX, app.frame.maxX)\n\n        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())\n        attachment.name = \"Nate Options Reduce Motion status\"\n        attachment.lifetime = .keepAlways\n        add(attachment)\n    }\n}\n"
+    },
+    {
+      "path": "scripts/memi-v16-ios-capture.mjs",
+      "content": "import { execFile } from \"node:child_process\";\nimport { copyFile, lstat, mkdir, writeFile } from \"node:fs/promises\";\nimport { dirname } from \"node:path\";\nimport { promisify } from \"node:util\";\n\nconst exec = promisify(execFile);\nconst options = new Map(process.argv.slice(2).reduce((pairs, value, index, values) => {\n  if (value.startsWith(\"--\")) pairs.push([value.slice(2), values[index + 1]]);\n  return pairs;\n}, []));\nconst kind = options.get(\"kind\");\nconst flow = options.get(\"flow\");\nconst output = options.get(\"output\");\nconst udid = process.env.MEMI_V16_IOS_UDID;\nconst maestro = process.env.MEMI_V16_MAESTRO_BIN || \"maestro\";\n\nif (!kind || !flow || !output) throw new Error(\"kind, flow, and output are required\");\nif (!udid || !/^[A-F0-9-]{36}$/i.test(udid)) {\n  throw new Error(\"MEMI_V16_IOS_UDID must name the reset, exclusive iOS Simulator\");\n}\nif (!new Set([\"screenshot\", \"interaction-trace\", \"accessibility-tree\"]).has(kind)) {\n  throw new Error(\"unsupported native capture kind: \" + kind);\n}\nconst existing = await lstat(output).catch(() => null);\nif (existing) throw new Error(\"refusing to overwrite native capture: \" + output);\nawait mkdir(dirname(output), { recursive: true });\n\nconst trace = output.replace(/[^/]+$/, \"memi-v16-maestro-junit.xml\");\nasync function runJourney() {\n  await exec(maestro, [\"--udid\", udid, \"test\", flow, \"--format\", \"junit\", \"--output\", trace], {\n    timeout: 300000,\n    maxBuffer: 4_000_000,\n  });\n  const result = await lstat(trace).catch(() => null);\n  if (!result?.isFile() || result.size === 0) throw new Error(\"Maestro did not emit a journey trace\");\n}\n\nawait runJourney();\nif (kind === \"screenshot\") {\n  await exec(\"xcrun\", [\"simctl\", \"io\", udid, \"screenshot\", output], { timeout: 60000 });\n} else if (kind === \"interaction-trace\") {\n  const source = await lstat(trace).catch(() => null);\n  if (!source?.isFile()) throw new Error(\"Maestro did not emit its JUnit journey trace\");\n  await copyFile(trace, output);\n} else {\n  const hierarchy = await exec(maestro, [\"--udid\", udid, \"hierarchy\"], {\n    timeout: 60000,\n    maxBuffer: 8_000_000,\n  });\n  if (!hierarchy.stdout.trim()) throw new Error(\"Maestro returned an empty accessibility hierarchy\");\n  await writeFile(output, JSON.stringify({\n    schemaVersion: 1,\n    collector: \"maestro-hierarchy\",\n    udid,\n    capturedAt: new Date().toISOString(),\n    hierarchy: hierarchy.stdout,\n  }, null, 2) + \"\\n\", { mode: 0o600 });\n}\n",
+      "executable": false
+    },
+    {
+      "path": "scripts/memi-v16-journey.yaml",
+      "content": "appId: com.sarveshsea.NateTheBait\n---\n- launchApp:\n    clearState: true\n- tapOn: Options\n- assertVisible:\n    id: options-reduce-motion-status\n",
+      "executable": false
+    }
+  ],
+  "verification": [
+    {
+      "kind": "build",
+      "command": "xcodebuild",
+      "args": [
+        "-project",
+        "NateTheBait.xcodeproj",
+        "-scheme",
+        "NateTheBait",
+        "-destination",
+        "id=FED7FB9E-13D5-4383-93EA-7FFE0111A496",
+        "-derivedDataPath",
+        "DerivedData/memi-workflow",
+        "build"
+      ],
+      "timeoutMs": 900000
+    },
+    {
+      "kind": "ios-simulator",
+      "preflightExpectedExitCode": 65,
+      "command": "xcodebuild",
+      "args": [
+        "-project",
+        "NateTheBait.xcodeproj",
+        "-scheme",
+        "NateTheBait",
+        "-destination",
+        "id=FED7FB9E-13D5-4383-93EA-7FFE0111A496",
+        "-derivedDataPath",
+        "DerivedData/memi-workflow",
+        "test",
+        "-only-testing:NateTheBaitUITests/MemiReduceMotionStatusUITests/testOptionsExposeTruthfulSystemReduceMotionStatus"
+      ],
+      "timeoutMs": 900000
+    }
+  ],
+  "requiredArtifacts": [
+    "git.patch",
+    "verification.json",
+    "events.jsonl"
+  ],
+  "nativeCaptures": [
+    {
+      "kind": "screenshot",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-ios-capture.mjs",
+        "--kind",
+        "screenshot",
+        "--output",
+        "evidence/native-screenshot.png",
+        "--flow",
+        "scripts/memi-v16-journey.yaml"
+      ],
+      "timeoutMs": 420000,
+      "sourcePath": "evidence/native-screenshot.png",
+      "artifactName": "native-screenshot.png"
+    },
+    {
+      "kind": "interaction-trace",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-ios-capture.mjs",
+        "--kind",
+        "interaction-trace",
+        "--output",
+        "evidence/native-interaction-trace.xml",
+        "--flow",
+        "scripts/memi-v16-journey.yaml"
+      ],
+      "timeoutMs": 420000,
+      "sourcePath": "evidence/native-interaction-trace.xml",
+      "artifactName": "native-interaction-trace.xml"
+    },
+    {
+      "kind": "accessibility-tree",
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-ios-capture.mjs",
+        "--kind",
+        "accessibility-tree",
+        "--output",
+        "evidence/native-accessibility-tree.json",
+        "--flow",
+        "scripts/memi-v16-journey.yaml"
+      ],
+      "timeoutMs": 420000,
+      "sourcePath": "evidence/native-accessibility-tree.json",
+      "artifactName": "native-accessibility-tree.json"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-2.7-prospective-v16-275-native",
+  "planId": "memi-2.7-v16-2.7.5-native-confirmatory",
+  "status": "draft",
+  "currentScore": 0,
+  "targetScore": 23,
+  "claimBoundary": "Exact unpublished 2.7.5 candidate evidence on three named frozen fixtures. No quality, speed, cost, or practitioner-design claim is admitted unless its separately preregistered task-level gate passes.",
+  "scoreBudget": [
+    {
+      "dimension": "prospective-registration",
+      "currentCredit": 0,
+      "targetCredit": 5,
+      "unlock": "A V16 freeze binds the exact candidate, fixture/task hashes, environment, and 36 future provider cells."
+    },
+    {
+      "dimension": "complete-native-matched-pairs",
+      "currentCredit": 0,
+      "targetCredit": 18,
+      "maximumCredit": 18,
+      "unlock": "All three fixtures complete six valid, accepted, native-evidence matched pairs."
+    },
+    {
+      "dimension": "blinded-quality-panel",
+      "currentCredit": 0,
+      "targetCredit": 0,
+      "unlock": "Reported separately through the preregistered blinded rubric and statistical decision gate."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "buzzr-tab-unread-badge",
+      "platformFamily": "react-native-expo",
+      "nativePlatform": "expo",
+      "revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+      "pairs": 6,
+      "interimCredit": 6,
+      "risk": "Native Expo/iOS Simulator task journey, rendered screenshot, Maestro interaction trace, and Maestro accessibility hierarchy under a 450000-input-token ceiling."
+    },
+    {
+      "id": "paraform-command-menu",
+      "platformFamily": "web-design-engineering",
+      "nativePlatform": "web",
+      "revision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+      "pairs": 6,
+      "interimCredit": 6,
+      "risk": "Production web build plus Chromium screenshot, traced keyboard/focus journey, and CDP accessibility tree."
+    },
+    {
+      "id": "nate-options-reduce-motion",
+      "platformFamily": "native-swiftui",
+      "nativePlatform": "swiftui",
+      "revision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+      "pairs": 6,
+      "interimCredit": 6,
+      "risk": "Xcode build plus a protected iOS Simulator journey with an attached screenshot, result-bundle trace, and exported accessibility hierarchy."
+    }
+  ],
+  "runContract": {
+    "seed": 2716,
+    "matchedPairs": 18,
+    "trials": 36,
+    "conditions": ["baseline", "memi"],
+    "freshClonePerTrial": true,
+    "counterbalancedOrder": true,
+    "requiredArtifacts": [
+      "git.patch",
+      "preparation.json",
+      "events.jsonl",
+      "usage.json",
+      "route.json",
+      "tools.json",
+      "tool-profile.json",
+      "verification.json",
+      "native-capture.json",
+      "environment.json",
+      "verification-isolation.json",
+      "prospective-evidence-v2.json",
+      "evidence-manifest.json",
+      "run.json"
+    ],
+    "evidenceV2": {
+      "required": true,
+      "requiredCaptureKinds": ["screenshot", "interaction-trace", "accessibility-tree"],
+      "measuredBillingRequired": true,
+      "structuredStopReasonsRequired": true
+    },
+    "acceptance": {
+      "requiredValidPairsPerTask": 6,
+      "requiredPassingPairsPerTask": 6,
+      "fixtureMutationAllowed": false,
+      "providerErrorAllowed": false,
+      "missingOrDuplicateConditionAllowed": false,
+      "postPatchIsolatedVerificationRequired": true
+    }
+  },
+  "creditPolicy": {
+    "planningEarnsCredit": false,
+    "manualCreditEditsAllowed": false,
+    "prospectiveRegistrationCredit": "all-or-none",
+    "independentRepeatInterimCreditPerQualifiedPlatform": 6,
+    "independentRepeatInterimCreditCap": 18,
+    "fullRepeatCreditRequiresAllReleaseCriticalTasks": true
+  }
+}

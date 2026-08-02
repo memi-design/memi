@@ -2,11 +2,18 @@
   "schemaVersion": 1,
   "checkedAt": "2026-08-01T23:00:00.000Z",
   "status": "not-ready-to-freeze",
+  "contractPreflight": {
+    "status": "ready-but-not-calibrated",
+    "receipt": "preflight-attestation.json",
+    "sha256": "sha256:c8366e04e018d3fec1e183d10b636ed37a7cde8cafdc5e967356eb32e8e031c1",
+    "meaning": "All three clean, pinned fixtures match their declared origins and V16 task manifests declare the required capture kinds. This is configuration admission only; no collector, billing receipt, model cell, or claim has been admitted."
+  },
   "candidate": {
     "requiredVersion": "2.7.5",
-    "observedWorkspaceVersion": "2.7.4",
-    "candidateTarballSha256": null,
-    "reason": "No exact 2.7.5 package artifact exists yet."
+    "observedWorkspaceVersion": "2.7.5",
+    "candidateTarballSha256": "sha256:a416d99eb368d734f9f5d4cadb040c02961ca1078722924336753df84f1617a6",
+    "candidateProvenance": "candidate-provenance.json",
+    "reason": "An exact local 2.7.5 tarball is retained and hash-recorded. It is an unpublished study candidate, not an npm release."
   },
   "fixtures": [
     {
@@ -34,9 +41,7 @@
     }
   ],
   "remainingPrerequisites": [
-    "Build an exact 2.7.5 candidate tarball and record its SHA-256.",
     "Use the verified Buzzr Expo fixture revision and hash a V16 task manifest with native Simulator collectors.",
-    "Commit a task-defined screenshot, interaction-trace, and accessibility collector for every fixture.",
     "Perform one unscored native-capture calibration pair per fixture.",
     "Retain per-cell provider usage exports or invoice allocations and price-card artifacts before scored execution."
   ],
