@@ -11,6 +11,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 ### Prospective evidence foundation
 
 - `9fbf7be8` — chore: stage 2.7.5 evidence candidate
+- `c15fde6d` — chore: synchronize 2.7.5 candidate surfaces
 - `81c48042` — test: define prospective evidence v2 contract
 - `2ac21650` — feat: define prospective evidence v2 receipt
 - `fa8d8a64` — test: require frozen native evidence contract
