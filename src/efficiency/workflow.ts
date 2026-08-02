@@ -207,7 +207,7 @@ export function buildWorkflowPrompt(input: {
       "Do not perform a repository-wide search, inspect lockfile bodies, or investigate unrelated product areas.",
     ];
   const budgetContract = [
-    `Hard execution limits: at most ${task.agentBudget.maxToolCalls} tool calls, ${task.agentBudget.maxInputTokens} input tokens, ${task.agentBudget.maxOutputTokens} output tokens, and ${task.agentBudget.maxReasoningTokens} reasoning tokens.`,
+    `Execution limits: at most ${task.agentBudget.maxToolCalls} tool calls, ${task.agentBudget.maxInputTokens} input tokens, ${task.agentBudget.maxOutputTokens} output tokens, and ${task.agentBudget.maxReasoningTokens} reasoning tokens. The harness stops at the first streamed provider report above a token limit and rejects any final trace above a limit.`,
     "Make one minimal scoped patch. Run each named verification command at most once unless its own failure directly identifies the requested change.",
     "Do not repair unrelated dependency, platform, or pre-existing build failures. Record them concisely and stop.",
     "Keep file reads and searches narrow: request at most 160 lines or one direct symbol per command.",
