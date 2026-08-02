@@ -111,10 +111,11 @@ describe("2.7.8 metadata release candidate surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
   });
 
-  it("uses the published activation path after independent parity verification", async () => {
+  it("keeps the public activation path on the last verified release while the candidate is fenced", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Release state: `published`");
-    expect(currentRelease).toContain("| CLI, npm, MCP, and Action | `2.7.7` |");
+    expect(currentRelease).toContain("Engine 2.7.8 is not the current public release");
+    expect(currentRelease).toContain("Release state: `candidate`");
+    expect(currentRelease).toContain("| Engine candidate (unreleased) | `2.7.8` |");
     expect(currentRelease).toContain("npx -y @memi-design/cli@2.7.7");
     expect(currentRelease).toContain("Do not announce parity until npm, GitHub, MCP, the Action, Studio, and the deployed website match their release groups.");
   });
