@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-2.7-prospective-v16-275-calibration",
+  "planId": "memi-2.7-v16-2.7.5-native-calibration",
+  "planHash": "sha256:84ed43c6e354fe6b1c5592c7b5aaca4090843897314a62580e797a5ed06020bf",
+  "frozenAt": "2026-08-02T03:22:00.000Z",
+  "candidate": {
+    "version": "2.7.5",
+    "revision": "0c95d57066e1cd8fa0f97cbda92609aadc7751f7",
+    "sourceState": "clean",
+    "dirtyFileCount": 0,
+    "sourceTreeSha256": "sha256:2ef4f37b7f7ec9e9a22462cde5e3503082a66df5e0b1755aa42be9560dfa2b46",
+    "artifactSha256": "sha256:83ad01b997d8b7bc59f4190f83072b0cf215065b9bdf98f36e0ac16e62ae72de"
+  },
+  "harness": {
+    "provider": "codex",
+    "modelId": "gpt-5.6-luna",
+    "reasoningEffort": "low",
+    "harnessVersion": "codex-cli-0.145.0",
+    "permissionPolicy": "workspace-write",
+    "maximumSkills": 1,
+    "maximumContextBytes": 4096
+  },
+  "environment": {
+    "machine": "MacBook Pro Mac15,7; Apple M3 Pro; arm64",
+    "os": "macOS 26.2 (25C56)",
+    "arch": "arm64",
+    "node": "v22.22.3",
+    "xcode": "26.6 (17F113)",
+    "simulator": "iPhone 17; iOS 26.5; EAEF843E-B99A-42C2-BE5E-6E480B899F5C; user-authorized exclusive reset required",
+    "workspaceVolume": "ExtremeSSD APFS",
+    "temporaryRoot": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v16-2.7.5-native-confirmatory/tmp"
+  },
+  "taskRevisions": {
+    "buzzr-tab-unread-badge": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+    "paraform-command-menu": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+    "nate-options-reduce-motion": "9cde918e309d74943457ad6def8a9c14db7ea01b"
+  },
+  "taskManifestHashes": {
+    "buzzr-tab-unread-badge": "sha256:04e25a96ea51f5087ded60809e749d1f05971340126626b3c586bc3bb468d9e8",
+    "paraform-command-menu": "sha256:de0aa945013f1330461dd79a9c707986387a34d1aa7fa75bb1fb7e0ded9af02a",
+    "nate-options-reduce-motion": "sha256:2985f872e30864d5a08598092bee685fadafd5c7cb778a724a4e11b37b21a2af"
+  },
+  "taskNativePlatforms": {
+    "buzzr-tab-unread-badge": "expo",
+    "paraform-command-menu": "web",
+    "nate-options-reduce-motion": "swiftui"
+  },
+  "evidenceV2": {
+    "required": true,
+    "requiredCaptureKinds": [
+      "screenshot",
+      "interaction-trace",
+      "accessibility-tree"
+    ],
+    "measuredBillingRequired": false,
+    "structuredStopReasonsRequired": true
+  },
+  "requiredArtifacts": [
+    "git.patch",
+    "preparation.json",
+    "events.jsonl",
+    "usage.json",
+    "route.json",
+    "tools.json",
+    "tool-profile.json",
+    "verification.json",
+    "native-capture.json",
+    "environment.json",
+    "verification-isolation.json",
+    "prospective-evidence-v2.json",
+    "evidence-manifest.json",
+    "run.json"
+  ],
+  "trials": [
+    {
+      "trialId": "memi-2.7-v16-2.7.5-native-calibration:buzzr-tab-unread-badge:r1:memi",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 1,
+      "condition": "memi",
+      "sequence": 0
+    },
+    {
+      "trialId": "memi-2.7-v16-2.7.5-native-calibration:buzzr-tab-unread-badge:r1:baseline",
+      "taskId": "buzzr-tab-unread-badge",
+      "repeat": 1,
+      "condition": "baseline",
+      "sequence": 1
+    },
+    {
+      "trialId": "memi-2.7-v16-2.7.5-native-calibration:paraform-command-menu:r1:baseline",
+      "taskId": "paraform-command-menu",
+      "repeat": 1,
+      "condition": "baseline",
+      "sequence": 2
+    },
+    {
+      "trialId": "memi-2.7-v16-2.7.5-native-calibration:paraform-command-menu:r1:memi",
+      "taskId": "paraform-command-menu",
+      "repeat": 1,
+      "condition": "memi",
+      "sequence": 3
+    },
+    {
+      "trialId": "memi-2.7-v16-2.7.5-native-calibration:nate-options-reduce-motion:r1:memi",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 1,
+      "condition": "memi",
+      "sequence": 4
+    },
+    {
+      "trialId": "memi-2.7-v16-2.7.5-native-calibration:nate-options-reduce-motion:r1:baseline",
+      "taskId": "nate-options-reduce-motion",
+      "repeat": 1,
+      "condition": "baseline",
+      "sequence": 5
+    }
+  ],
+  "freezeHash": "sha256:9b95fa9a55f9335c91ba4565c769970d6a6fbfa40d63183363d1b7e4420e0f9d"
+}

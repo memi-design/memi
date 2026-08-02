@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-02T03:58:00.000Z",
+  "status": "recalibration-required",
+  "reason": "The excluded Buzzr/Memi calibration identified a host process-launch failure after provider execution. V16 task manifests now contain a pre-provider host launch probe, changing their content hashes. The historical calibration freeze remains immutable evidence of the exclusion and cannot be reused.",
+  "historicalFreeze": {
+    "path": "calibration-freeze.json",
+    "freezeHash": "sha256:9b95fa9a55f9335c91ba4565c769970d6a6fbfa40d63183363d1b7e4420e0f9d",
+    "eligibleForRerun": false
+  },
+  "beforeAnyNewProviderInvocation": [
+    "Build and hash a clean tarball from the token-guard candidate revision.",
+    "Create a new calibration plan ID and freeze bound to the updated task-manifest hashes.",
+    "Run the fixture preflight again and retain its new attestation.",
+    "Require the host process-launch probe to pass before dependency setup and provider invocation.",
+    "Run a fresh serialized unscored calibration pair for each fixture."
+  ],
+  "claimBoundary": "This status record supports no quality, efficiency, cost, or product-performance claim."
+}

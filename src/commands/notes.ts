@@ -19,6 +19,7 @@ import {
   loadNotesCatalog,
   routeInstalledSkills,
   searchCatalogSkills,
+  validateRoutingPattern,
   removeNote,
   scaffoldNote,
   getNoteInfo,
@@ -416,6 +417,24 @@ export function registerNotesCommand(program: Command, engine: MemoireEngine) {
         }
         if (opts.community && !note.manifest.freshnessDays) {
           noteIssues.push({ name: note.manifest.name, level: "error", message: "freshnessDays metadata is required for community review" });
+        }
+        const repositoryRules = note.manifest.memoire?.routing?.repository;
+        const routingFields = repositoryRules
+          ? Object.entries(repositoryRules) as Array<[string, readonly string[] | undefined]>
+          : [];
+        for (const [field, patterns] of routingFields) {
+          for (const pattern of patterns ?? []) {
+            const validation = validateRoutingPattern(pattern);
+            if (!validation.valid) {
+              noteIssues.push({
+                name: note.manifest.name,
+                level: "error",
+                message: `routing.${field} pattern ${JSON.stringify(pattern)} is invalid: ${validation.reason ?? "invalid pattern"}${
+                  validation.migration ? `; migrate to ${validation.migration}` : ""
+                }`,
+              });
+            }
+          }
         }
         return noteIssues;
       });

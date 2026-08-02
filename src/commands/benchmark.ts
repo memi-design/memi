@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import type { Command } from "commander";
+import { z } from "zod";
 import type { MemoireEngine } from "../engine/core.js";
 import {
   benchmarkConditionSchema,
@@ -13,6 +14,7 @@ import {
 import { gradeAutomatedAcceptance } from "../efficiency/automated-acceptance.js";
 import {
   benchmarkRepositoryRevision,
+  benchmarkRepositoryOrigin,
   benchmarkRepositoryStatus,
   runCodexCaseStudy,
 } from "../efficiency/codex-runner.js";
@@ -27,10 +29,22 @@ import {
 import { runWorkflowTrial } from "../efficiency/workflow-runner.js";
 import {
   createEvidenceManifest,
+  evidenceReferenceHasArtifact,
   EVIDENCE_MANIFEST_HASH_PLACEHOLDER,
   hashFile,
   verifyEvidenceManifest,
 } from "../efficiency/prospective-files.js";
+import {
+  materializeProspectiveEvidenceV2,
+  prospectiveEvidenceDraftArtifactNames,
+  prospectiveEvidenceDraftSchema,
+  type ProspectiveEvidenceDraft,
+} from "../efficiency/prospective-evidence-materialization.js";
+import {
+  prospectiveEvidenceV2Artifacts,
+  prospectiveEvidenceV2Schema,
+  validateProspectiveEvidenceV2,
+} from "../efficiency/prospective-evidence-v2.js";
 import {
   buildProspectiveFreeze,
   evaluateProspectiveStudy,
@@ -38,6 +52,7 @@ import {
   prospectiveFreezeSchema,
   prospectiveStudyPlanSchema,
   selectProspectiveTrial,
+  type ProspectiveFreeze,
 } from "../efficiency/prospective-study.js";
 import {
   createWorkflowBenchmarkPlan,
@@ -66,6 +81,24 @@ import {
   type SkillFitnessBoundRouteReceipt,
 } from "../notes/index.js";
 import { ui } from "../tui/format.js";
+
+const prospectiveFixtureRootsSchema = z.object({
+  schemaVersion: z.literal(1),
+  fixtures: z.array(z.object({
+    taskId: z.string().min(1),
+    repository: z.string().min(1),
+    origin: z.string().url(),
+  }).strict()).min(1),
+}).strict().superRefine((value, context) => {
+  const ids = value.fixtures.map((fixture) => fixture.taskId);
+  if (new Set(ids).size !== ids.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["fixtures"],
+      message: "fixture task ids must be unique",
+    });
+  }
+});
 
 export function registerBenchmarkCommand(program: Command, engine: MemoireEngine): void {
   const benchmark = program
@@ -166,6 +199,119 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     });
 
   benchmark
+    .command("prospective-preflight <plan>")
+    .description("Verify clean, pinned V2 fixtures and native capture contracts before freezing")
+    .requiredOption("--fixtures <path>", "Task-to-fixture repository mapping JSON")
+    .requiredOption("--task-root <path>", "Directory containing <task-id>.json workflow manifests")
+    .option("--out <path>", "Write a hash-verified preflight receipt JSON")
+    .option("--checked-at <timestamp>", "Explicit preflight timestamp")
+    .option("--json", "Output JSON")
+    .action(async (planPath: string, opts: {
+      fixtures: string;
+      taskRoot: string;
+      out?: string;
+      checkedAt?: string;
+      json?: boolean;
+    }) => {
+      const plan = prospectiveStudyPlanSchema.parse(JSON.parse(
+        await readFile(resolve(planPath), "utf8"),
+      ));
+      const evidenceV2 = plan.runContract.evidenceV2;
+      if (!evidenceV2) {
+        throw new Error("prospective preflight requires a plan with evidenceV2 enabled");
+      }
+      const fixtureManifest = prospectiveFixtureRootsSchema.parse(JSON.parse(
+        await readFile(resolve(opts.fixtures), "utf8"),
+      ));
+      const rootsByTask = new Map(fixtureManifest.fixtures.map((fixture) => [
+        fixture.taskId,
+        resolve(fixture.repository),
+      ]));
+      const expectedTaskIds = new Set(plan.tasks.map((task) => task.id));
+      const unexpected = fixtureManifest.fixtures.find((fixture) =>
+        !expectedTaskIds.has(fixture.taskId));
+      if (unexpected) {
+        throw new Error(`fixture is not declared by prospective plan: ${unexpected.taskId}`);
+      }
+      const taskRoot = resolve(opts.taskRoot);
+      const fixtures = await Promise.all(plan.tasks.map(async (task) => {
+        const repository = rootsByTask.get(task.id);
+        if (!repository) throw new Error(`fixture repository missing for task: ${task.id}`);
+        const revision = await benchmarkRepositoryRevision(repository);
+        if (revision !== task.revision) {
+          throw new Error(
+            `fixture revision mismatch for ${task.id}: expected ${task.revision}, received ${revision}`,
+          );
+        }
+        const sourceStatus = await benchmarkRepositoryStatus(repository);
+        if (sourceStatus) {
+          throw new Error(`fixture repository must be clean: ${task.id}`);
+        }
+        const origin = await benchmarkRepositoryOrigin(repository);
+        if (canonicalRepositoryOrigin(origin) !== canonicalRepositoryOrigin(fixtureManifest.fixtures
+          .find((fixture) => fixture.taskId === task.id)?.origin ?? "")) {
+          throw new Error(`fixture origin mismatch for ${task.id}: received ${origin}`);
+        }
+        const taskPath = join(taskRoot, `${task.id}.json`);
+        const workflowTask = workflowTaskSchema.parse(JSON.parse(
+          await readFile(taskPath, "utf8"),
+        ));
+        if (workflowTask.id !== task.id) {
+          throw new Error(`workflow task id mismatch: expected ${task.id}, received ${workflowTask.id}`);
+        }
+        const nativeCaptureKinds = [...new Set(workflowTask.nativeCaptures.map(
+          (capture) => capture.kind,
+        ))].sort();
+        const missingCapture = evidenceV2.requiredCaptureKinds.find(
+          (kind) => !nativeCaptureKinds.includes(kind),
+        );
+        if (missingCapture) {
+          throw new Error(`native capture missing for ${task.id}: ${missingCapture}`);
+        }
+        return {
+          taskId: task.id,
+          repository,
+          origin: canonicalRepositoryOrigin(origin),
+          revision,
+          taskManifestSha256: await hashFile(taskPath),
+          nativeCaptureKinds,
+        };
+      }));
+      const checkedAt = opts.checkedAt ?? new Date().toISOString();
+      if (Number.isNaN(Date.parse(checkedAt))) {
+        throw new Error(`checked-at must be an ISO-8601 timestamp: ${checkedAt}`);
+      }
+      const content = {
+        schemaVersion: 1,
+        status: "ready",
+        planId: plan.planId,
+        planHash: hashValue(plan),
+        checkedAt,
+        fixtures,
+      };
+      const payload = {
+        ...content,
+        preflightHash: hashValue(content),
+      };
+      if (opts.out) await writeJson(resolve(opts.out), payload);
+      if (opts.json) console.log(JSON.stringify(payload, null, 2));
+      else {
+        console.log(ui.ok(`Prospective V2 preflight ready: ${plan.planId}`));
+        fixtures.forEach((fixture) => console.log(ui.dots(
+          fixture.taskId,
+          fixture.revision,
+        )));
+      }
+});
+
+function canonicalRepositoryOrigin(origin: string): string {
+  return origin.trim()
+    .replace(/^git@github\.com:/, "https://github.com/")
+    .replace(/\.git$/, "")
+    .replace(/\/$/, "");
+}
+
+  benchmark
     .command("prospective-evaluate <plan> <freeze>")
     .description("Evaluate prospective receipts without granting credit to invalid evidence")
     .requiredOption("--store-root <path>", "External immutable run store root")
@@ -195,7 +341,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       }> = [];
       for (const run of candidates) {
         const runRef = run.evidenceRefs.find((reference) =>
-          reference.endsWith("/run.json"));
+          evidenceReferenceHasArtifact(reference, "run.json"));
         if (!runRef || !run.prospective) {
           evidenceFailures.push({
             runId: run.runId,
@@ -244,6 +390,20 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
             runId: run.runId,
             trialId: run.prospective.trialId,
             reasons: ["store-run-mismatch"],
+          });
+          continue;
+        }
+        const v2Verification = await verifyProspectiveEvidenceV2Receipt({
+          evidenceDirectory,
+          run: sealedRun,
+          freeze,
+          evidenceRoot: resolve(opts.evidenceRoot),
+        });
+        if (!v2Verification.valid) {
+          evidenceFailures.push({
+            runId: run.runId,
+            trialId: run.prospective.trialId,
+            reasons: v2Verification.reasons,
           });
           continue;
         }
@@ -390,6 +550,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
     .option("--claude <path>", "Claude Code path", "claude")
     .option("--freeze <path>", "Prospective freeze receipt")
     .option("--trial <id>", "Frozen prospective trial id")
+    .option("--evidence-draft <path>", "V2 native-capture and billing receipt draft")
+    .option("--artifact-root <path>", "Bounded root containing V2 capture and billing files")
     .option("--task-class <id>", "Stable route-fitness task class (defaults to task id)")
     .option(
       "--recovery-probe",
@@ -415,6 +577,8 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       claude: string;
       freeze?: string;
       trial?: string;
+      evidenceDraft?: string;
+      artifactRoot?: string;
       taskClass?: string;
       recoveryProbe?: boolean;
       execute?: boolean;
@@ -441,13 +605,70 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         provider === "codex" ? "gpt-5.6-sol" : "claude-sonnet-4-6"
       );
       const taskManifestSha256 = await hashFile(resolve(taskPath));
-      const repositoryRoot = resolve(opts.repository);
-      const repositoryRevision = await benchmarkRepositoryRevision(repositoryRoot);
       const freeze = opts.freeze
         ? prospectiveFreezeSchema.parse(JSON.parse(
           await readFile(resolve(opts.freeze), "utf8"),
         ))
         : null;
+      if (Boolean(opts.evidenceDraft) !== Boolean(opts.artifactRoot)) {
+        throw new Error("--evidence-draft and --artifact-root must be provided together");
+      }
+      let evidenceDraft: Readonly<{
+        draft: ProspectiveEvidenceDraft;
+        artifactRoot: string;
+      }> | null = null;
+      if (freeze?.evidenceV2) {
+        if (!opts.evidenceDraft || !opts.artifactRoot) {
+          throw new Error(
+            "prospective evidence V2 requires --evidence-draft and --artifact-root before model execution",
+          );
+        }
+        const artifactRoot = resolve(opts.artifactRoot);
+        const draft = prospectiveEvidenceDraftSchema.parse(JSON.parse(
+            await readFile(resolve(opts.evidenceDraft), "utf8"),
+          ));
+        const reservedArtifact = prospectiveEvidenceDraftArtifactNames(draft).find(
+          (name) => workflowReservedEvidenceArtifacts.has(name),
+        );
+        if (reservedArtifact) {
+          throw new Error(`prospective evidence artifact name is reserved: ${reservedArtifact}`);
+        }
+        const taskCaptureKeys = task.nativeCaptures.map((capture) =>
+          `${capture.kind}:${capture.artifactName}:${capture.artifactName}`,
+        ).sort();
+        const draftCaptureKeys = draft.native.captures.map((capture) =>
+          `${capture.kind}:${capture.name}:${capture.source}`,
+        ).sort();
+        if (
+          taskCaptureKeys.length === 0
+          || JSON.stringify(taskCaptureKeys) !== JSON.stringify(draftCaptureKeys)
+        ) {
+          throw new Error("prospective evidence V2 requires nativeCaptures matching the draft");
+        }
+        const preexistingCapture = await Promise.all(task.nativeCaptures.map(
+          async (capture) => ({
+            artifactName: capture.artifactName,
+            exists: await lstat(join(artifactRoot, capture.artifactName)).then(
+              () => true,
+              () => false,
+            ),
+          }),
+        ));
+        const staleCapture = preexistingCapture.find((capture) => capture.exists);
+        if (staleCapture) {
+          throw new Error(
+            `prospective evidence V2 capture artifact already exists: ${staleCapture.artifactName}`,
+          );
+        }
+        evidenceDraft = {
+          draft,
+          artifactRoot,
+        };
+      } else if (opts.evidenceDraft || opts.artifactRoot) {
+        throw new Error("V2 evidence inputs require a freeze with evidenceV2 enabled");
+      }
+      const repositoryRoot = resolve(opts.repository);
+      const repositoryRevision = await benchmarkRepositoryRevision(repositoryRoot);
       const frozenTrial = freeze && opts.trial
         ? selectProspectiveTrial({
           freeze,
@@ -539,6 +760,7 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
         condition,
         routedContext,
         adapter,
+        ...(evidenceDraft ? { captureRoot: evidenceDraft.artifactRoot } : {}),
       });
       const completedAt = new Date();
       const routePath = route && route.route.selected.length > 0
@@ -560,6 +782,9 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
       let evidenceManifestSha256: string | null = freeze && frozenTrial
         ? EVIDENCE_MANIFEST_HASH_PLACEHOLDER
         : null;
+      let prospectiveEvidenceReceipt: ReturnType<
+        typeof prospectiveEvidenceV2Schema.parse
+      > | null = null;
       if (freeze && frozenTrial) {
         await Promise.all([
           writeJson(join(result.evidenceDirectory, "environment.json"), {
@@ -585,6 +810,36 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
             result.verificationIsolation,
           ),
         ]);
+        if (freeze.evidenceV2) {
+          if (!evidenceDraft || !freeze.taskNativePlatforms?.[task.id]) {
+            throw new Error("prospective evidence V2 materialization prerequisites are missing");
+          }
+          prospectiveEvidenceReceipt = await materializeProspectiveEvidenceV2({
+            artifactRoot: evidenceDraft.artifactRoot,
+            evidenceDirectory: result.evidenceDirectory,
+            draft: evidenceDraft.draft,
+            expected: {
+              runId: result.runId,
+              trialId: frozenTrial.trialId,
+              taskId: task.id,
+              repeat: positiveInteger(opts.repeat, "repeat"),
+              condition,
+              repositoryRevision: result.sourceRevision,
+              candidateArtifactSha256: freeze.candidate.artifactSha256,
+              platform: freeze.taskNativePlatforms[task.id],
+              requiredCaptureKinds: freeze.evidenceV2.requiredCaptureKinds,
+            },
+            execution: {
+              stopReason: workflowStopReason(result),
+              agentWallTimeMs: result.adapterWallTimeMs,
+              verifierWallTimeMs: result.verification.reduce(
+                (sum, check) => sum + check.durationMs,
+                0,
+              ),
+            },
+            requireMeasuredBilling: freeze.evidenceV2.measuredBillingRequired,
+          });
+        }
       }
       const evidenceRefs = freeze
         ? [...new Set([
@@ -645,6 +900,11 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
           ...(routePolicyPath && !evidenceRefs.includes(routePolicyPath)
             ? [routePolicyPath]
             : []),
+          ...(prospectiveEvidenceReceipt
+            ? prospectiveEvidenceV2Artifacts(prospectiveEvidenceReceipt).map(
+              (artifact) => join(result.evidenceDirectory, artifact.name),
+            )
+            : []),
           ...(result.adapter.usage.estimatedCostUsd === null
             ? [`estimatedCostUsd:unassessed-${provider}-subscription`]
             : []),
@@ -694,6 +954,11 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
               artifact !== "evidence-manifest.json"),
             ...(routePath ? ["skill-route.json"] : []),
             ...(routePolicyPath ? ["skill-fitness-policy.json"] : []),
+            ...(prospectiveEvidenceReceipt
+              ? prospectiveEvidenceV2Artifacts(prospectiveEvidenceReceipt).map(
+                (artifact) => artifact.name,
+              )
+              : []),
             "run.json",
           ],
         });
@@ -1414,6 +1679,114 @@ function stableTaskClass(value: string): string {
     throw new Error("task-class must use lowercase kebab-case");
   }
   return value;
+}
+
+function workflowStopReason(result: Awaited<ReturnType<typeof runWorkflowTrial>>):
+  | "verification-passed"
+  | "verification-failed"
+  | "provider-failed"
+  | "token-budget-exhausted"
+  | "preflight-failed" {
+  if (!result.verificationIsolation.preparationPassed) return "preflight-failed";
+  if (result.budget.exceeded.some((dimension) =>
+    dimension === "max-input-tokens"
+    || dimension === "max-output-tokens"
+    || dimension === "max-reasoning-tokens",
+  )) {
+    return "token-budget-exhausted";
+  }
+  if (result.adapter.exitCode !== 0) return "provider-failed";
+  return result.accepted ? "verification-passed" : "verification-failed";
+}
+
+const workflowReservedEvidenceArtifacts = new Set([
+  "git.patch",
+  "preparation.json",
+  "verification.json",
+  "events.jsonl",
+  "adapter.stdout.log",
+  "adapter.stderr.log",
+  "tool-profile.json",
+  "budget.json",
+  "environment.json",
+  "usage.json",
+  "tools.json",
+  "route.json",
+  "verification-isolation.json",
+  "skill-route.json",
+  "skill-fitness-policy.json",
+  "run.json",
+  "evidence-manifest.json",
+  "prospective-evidence-v2.json",
+]);
+
+async function verifyProspectiveEvidenceV2Receipt(input: {
+  readonly evidenceDirectory: string;
+  readonly evidenceRoot: string;
+  readonly freeze: ProspectiveFreeze;
+  readonly run: BenchmarkRunRecord;
+}): Promise<Readonly<{ valid: boolean; reasons: readonly string[] }>> {
+  if (!input.freeze.evidenceV2) return { valid: true, reasons: [] };
+  if (!input.run.prospective) {
+    return { valid: false, reasons: ["prospective-evidence-v2-run-missing"] };
+  }
+  const platform = input.freeze.taskNativePlatforms?.[input.run.taskId];
+  if (!platform) {
+    return { valid: false, reasons: ["prospective-evidence-v2-platform-missing"] };
+  }
+  let receipt;
+  try {
+    receipt = prospectiveEvidenceV2Schema.parse(JSON.parse(await readFile(
+      join(input.evidenceDirectory, "prospective-evidence-v2.json"),
+      "utf8",
+    )));
+  } catch {
+    return { valid: false, reasons: ["prospective-evidence-v2-invalid"] };
+  }
+  const binding = validateProspectiveEvidenceV2({
+    receipt,
+    expected: {
+      runId: input.run.runId,
+      trialId: input.run.prospective.trialId,
+      taskId: input.run.taskId,
+      repeat: input.run.repeat,
+      condition: input.run.condition,
+      repositoryRevision: input.run.repository.revision,
+      candidateArtifactSha256: input.freeze.candidate.artifactSha256,
+      platform,
+      requiredCaptureKinds: input.freeze.evidenceV2.requiredCaptureKinds,
+    },
+    requireMeasuredBilling: input.freeze.evidenceV2.measuredBillingRequired,
+  });
+  if (!binding.valid) return binding;
+  const artifacts = prospectiveEvidenceV2Artifacts(receipt);
+  const manifest = await verifyEvidenceManifest({
+    evidenceDirectory: input.evidenceDirectory,
+    expectedManifestSha256: input.run.prospective.evidenceManifestSha256,
+    requiredArtifacts: [
+      ...input.freeze.requiredArtifacts,
+      ...artifacts.map((artifact) => artifact.name),
+    ],
+    expectedBinding: {
+      trialId: input.run.prospective.trialId,
+      taskId: input.run.taskId,
+      repeat: input.run.repeat,
+      condition: input.run.condition,
+      sequence: input.run.prospective.sequence,
+    },
+    allowedEvidenceRoot: input.evidenceRoot,
+  });
+  if (!manifest.valid) return manifest;
+  const mismatches: string[] = [];
+  for (const artifact of artifacts) {
+    const actual = await hashFile(join(input.evidenceDirectory, artifact.name)).catch(
+      () => null,
+    );
+    if (actual !== artifact.sha256) {
+      mismatches.push(`prospective-evidence-v2-artifact-hash-mismatch:${artifact.name}`);
+    }
+  }
+  return { valid: mismatches.length === 0, reasons: mismatches };
 }
 
 function integer(value: string, label: string): number {

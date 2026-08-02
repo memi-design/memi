@@ -1,6 +1,8 @@
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
+import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerBenchmarkCommand } from "../benchmark.js";
@@ -8,11 +10,18 @@ import type { BenchmarkRunRecord } from "../../efficiency/contracts.js";
 import {
   createEvidenceManifest,
   EVIDENCE_MANIFEST_HASH_PLACEHOLDER,
+  hashFile,
 } from "../../efficiency/prospective-files.js";
+import {
+  buildProspectiveFreeze,
+  prospectiveFreezeSchema,
+  type ProspectiveFreeze,
+} from "../../efficiency/prospective-study.js";
 import { createSkillFitnessQualityEvidence } from "../../notes/skill-fitness.js";
 import { captureLogs, lastLog } from "./test-helpers.js";
 
 let projectRoot: string;
+const execFileAsync = promisify(execFile);
 
 beforeEach(async () => {
   projectRoot = await mkdtemp(join(tmpdir(), "memi-benchmark-command-"));
@@ -56,6 +65,72 @@ describe("benchmark command", () => {
     expect(payload.status).toBe("planned");
     expect(payload.plan.trials).toHaveLength(12);
     await expect(readFile(outPath, "utf-8")).resolves.toContain("nate-efficiency-v1");
+  });
+
+  it("preflights clean, pinned V2 fixtures and their native capture contracts", async () => {
+    const repository = await fixtureRepository("v2-fixture");
+    const revision = (await execFileAsync("git", ["rev-parse", "HEAD"], {
+      cwd: repository,
+    })).stdout.trim();
+    const plan = {
+      ...prospectivePlanV2(),
+      tasks: [{
+        ...prospectivePlanV2().tasks[0],
+        revision,
+      }],
+    };
+    const planPath = join(projectRoot, "plan.json");
+    const taskRoot = join(projectRoot, "tasks");
+    const fixturesPath = join(projectRoot, "fixtures.json");
+    const preflightPath = join(projectRoot, "preflight.json");
+    await mkdir(taskRoot, { recursive: true });
+    await writeFile(planPath, JSON.stringify(plan));
+    await writeFile(join(taskRoot, "web-task.json"), JSON.stringify({
+      ...workflowTask(),
+      id: "web-task",
+      nativeCaptures: [
+        captureContract("screenshot", "desktop.png"),
+        captureContract("interaction-trace", "flow.json"),
+        captureContract("accessibility-tree", "a11y.json"),
+      ],
+    }));
+    await writeFile(fixturesPath, JSON.stringify({
+      schemaVersion: 1,
+      fixtures: [{
+        taskId: "web-task",
+        repository,
+        origin: "https://example.test/v2-fixture.git",
+      }],
+    }));
+    const logs = captureLogs();
+    const program = new Command();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await program.parseAsync([
+      "benchmark", "prospective-preflight", planPath,
+      "--fixtures", fixturesPath,
+      "--task-root", taskRoot,
+      "--out", preflightPath,
+      "--checked-at", "2026-08-02T00:00:00.000Z",
+      "--json",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload).toMatchObject({
+      status: "ready",
+      checkedAt: "2026-08-02T00:00:00.000Z",
+      preflightHash: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
+      fixtures: [{
+        taskId: "web-task",
+        revision,
+        nativeCaptureKinds: [
+          "accessibility-tree",
+          "interaction-trace",
+          "screenshot",
+        ],
+      }],
+    });
+    expect(JSON.parse(await readFile(preflightPath, "utf8"))).toEqual(payload);
   });
 
   it("records runs and reports an evidence-qualified result", async () => {
@@ -504,6 +579,209 @@ describe("benchmark command", () => {
     );
   });
 
+  it("refuses a frozen V2 workflow before model execution without an evidence draft", async () => {
+    const taskPath = join(projectRoot, "workflow-task.json");
+    const freezePath = join(projectRoot, "v2-freeze.json");
+    const task = { ...workflowTask(), id: "web-task" };
+    await writeFile(taskPath, JSON.stringify(task));
+    const freeze = buildProspectiveFreeze({
+      plan: prospectivePlanV2(),
+      frozenAt: "2026-07-30T12:00:00.000Z",
+      candidate: {
+        version: "2.7.5",
+        revision: "d".repeat(40),
+        sourceState: "clean",
+        dirtyFileCount: 0,
+        sourceTreeSha256: `sha256:${"e".repeat(64)}`,
+        artifactSha256: `sha256:${"f".repeat(64)}`,
+      },
+      harness: {
+        provider: "codex",
+        modelId: "gpt-5.6-sol",
+        reasoningEffort: "medium",
+        harnessVersion: "test-harness",
+        permissionPolicy: "workspace-write",
+        maximumSkills: 2,
+        maximumContextBytes: 8_000,
+      },
+      environment: {
+        machine: "test-mac",
+        os: "macOS 26.0",
+        arch: "arm64",
+        node: "v22.22.3",
+        xcode: "26.6",
+        simulator: "iPhone 17 / iOS 26.5",
+        workspaceVolume: "external-ssd",
+        temporaryRoot: "/Volumes/External/evidence/tmp",
+      },
+      taskManifestHashes: { "web-task": await hashFile(taskPath) },
+    });
+    await writeFile(freezePath, JSON.stringify(freeze));
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await expect(program.parseAsync([
+      "benchmark", "workflow-run", taskPath,
+      "--condition", "baseline",
+      "--provider", "codex",
+      "--repository", projectRoot,
+      "--evidence-root", join(projectRoot, "evidence"),
+      "--store-root", join(projectRoot, "store"),
+      "--suite", "prospective-v2",
+      "--experiment", "v2-gate",
+      "--repeat", "1",
+      "--freeze", freezePath,
+      "--trial", freeze.trials[0].trialId,
+      "--execute",
+    ], { from: "user" })).rejects.toThrow(
+      "prospective evidence V2 requires --evidence-draft and --artifact-root",
+    );
+  });
+
+  it("requires V2 workflow tasks to generate the frozen native capture set", async () => {
+    const taskPath = join(projectRoot, "workflow-task.json");
+    const freezePath = join(projectRoot, "v2-freeze.json");
+    const draftPath = join(projectRoot, "evidence-draft.json");
+    const artifactRoot = join(projectRoot, "captured");
+    const task = { ...workflowTask(), id: "web-task" };
+    await mkdir(artifactRoot, { recursive: true });
+    await writeFile(taskPath, JSON.stringify(task));
+    const freeze = buildProspectiveFreeze({
+      plan: prospectivePlanV2(),
+      frozenAt: "2026-07-30T12:00:00.000Z",
+      candidate: {
+        version: "2.7.5",
+        revision: "d".repeat(40),
+        sourceState: "clean",
+        dirtyFileCount: 0,
+        sourceTreeSha256: `sha256:${"e".repeat(64)}`,
+        artifactSha256: `sha256:${"f".repeat(64)}`,
+      },
+      harness: {
+        provider: "codex",
+        modelId: "gpt-5.6-sol",
+        reasoningEffort: "medium",
+        harnessVersion: "test-harness",
+        permissionPolicy: "workspace-write",
+        maximumSkills: 2,
+        maximumContextBytes: 8_000,
+      },
+      environment: {
+        machine: "test-mac",
+        os: "macOS 26.0",
+        arch: "arm64",
+        node: "v22.22.3",
+        xcode: "26.6",
+        simulator: "iPhone 17 / iOS 26.5",
+        workspaceVolume: "external-ssd",
+        temporaryRoot: "/Volumes/External/evidence/tmp",
+      },
+      taskManifestHashes: { "web-task": await hashFile(taskPath) },
+    });
+    await writeFile(freezePath, JSON.stringify(freeze));
+    await writeFile(draftPath, JSON.stringify(evidenceDraft()));
+    const program = new Command();
+    program.exitOverride();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await expect(program.parseAsync([
+      "benchmark", "workflow-run", taskPath,
+      "--condition", "baseline",
+      "--provider", "codex",
+      "--repository", projectRoot,
+      "--evidence-root", join(projectRoot, "evidence"),
+      "--store-root", join(projectRoot, "store"),
+      "--suite", "prospective-v2",
+      "--experiment", "v2-gate",
+      "--repeat", "1",
+      "--freeze", freezePath,
+      "--trial", freeze.trials[0].trialId,
+      "--evidence-draft", draftPath,
+      "--artifact-root", artifactRoot,
+      "--execute",
+    ], { from: "user" })).rejects.toThrow(
+      "prospective evidence V2 requires nativeCaptures matching the draft",
+    );
+  });
+
+  it("excludes a V2 receipt when a declared billing artifact is not manifest-sealed", async () => {
+    const planPath = join(projectRoot, "v2-plan.json");
+    const environmentPath = join(projectRoot, "environment.json");
+    const artifactPath = join(projectRoot, "memi-2.7.5.tgz");
+    const taskRoot = join(projectRoot, "tasks");
+    const freezePath = join(projectRoot, "v2-freeze.json");
+    const storeRoot = projectRoot;
+    const evidenceRoot = join(projectRoot, "evidence");
+    const outPath = join(projectRoot, "v2-evaluation.json");
+    const plan = prospectivePlanV2();
+    await mkdir(taskRoot, { recursive: true });
+    await writeFile(planPath, JSON.stringify(plan));
+    await writeFile(environmentPath, JSON.stringify({
+      machine: "test-mac",
+      os: "macOS 26.0",
+      arch: "arm64",
+      node: "v22.22.3",
+      xcode: "26.6",
+      simulator: "iPhone 17 / iOS 26.5",
+      workspaceVolume: "external-ssd",
+      temporaryRoot: "/Volumes/External/evidence/tmp",
+    }));
+    await writeFile(artifactPath, "candidate");
+    await writeFile(join(taskRoot, "web-task.json"), JSON.stringify({ id: "web-task" }));
+
+    const program = new Command();
+    registerBenchmarkCommand(program, engine() as never);
+    await program.parseAsync([
+      "benchmark", "prospective-freeze", planPath,
+      "--candidate-artifact", artifactPath,
+      "--candidate-version", "2.7.5",
+      "--candidate-revision", "d".repeat(40),
+      "--candidate-source-hash", `sha256:${"e".repeat(64)}`,
+      "--candidate-source-state", "clean",
+      "--candidate-dirty-files", "0",
+      "--environment", environmentPath,
+      "--task-root", taskRoot,
+      "--out", freezePath,
+      "--frozen-at", "2026-07-30T12:00:00.000Z",
+      "--json",
+    ], { from: "user" });
+    const freeze = prospectiveFreezeSchema.parse(JSON.parse(
+      await readFile(freezePath, "utf8"),
+    ));
+    const baseline = await sealProspectiveV2Run({
+      freeze,
+      condition: "baseline",
+      evidenceRoot,
+      omitFromManifest: null,
+    });
+    const memi = await sealProspectiveV2Run({
+      freeze,
+      condition: "memi",
+      evidenceRoot,
+      omitFromManifest: "price-card.json",
+    });
+    await recordRuns(program, baseline, memi);
+
+    const logs = captureLogs();
+    await program.parseAsync([
+      "benchmark", "prospective-evaluate", planPath, freezePath,
+      "--store-root", storeRoot,
+      "--evidence-root", evidenceRoot,
+      "--out", outPath,
+      "--json",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload.report.candidates).toBe(2);
+    expect(payload.report.verifiedRuns).toBe(1);
+    expect(payload.report.evidenceFailures).toEqual([{
+      runId: memi.runId,
+      trialId: memi.prospective?.trialId,
+      reasons: ["artifact-not-in-manifest:price-card.json"],
+    }]);
+  });
+
   it("freezes the prospective 40-point study before any scored run", async () => {
     const planPath = join(projectRoot, "empirical-40-plan.json");
     const environmentPath = join(projectRoot, "environment.json");
@@ -940,4 +1218,252 @@ function prospectivePlan() {
       fullRepeatCreditRequiresAllReleaseCriticalTasks: true,
     },
   };
+}
+
+function prospectivePlanV2() {
+  const task = {
+    id: "web-task",
+    platformFamily: "web-design-engineering",
+    nativePlatform: "web",
+    revision: "a".repeat(40),
+    pairs: 1,
+    interimCredit: 6,
+    risk: "rendered interaction and accessibility evidence",
+  };
+  return {
+    ...prospectivePlan(),
+    planId: "memi-2.7-evidence-v2-admission",
+    tasks: [task],
+    runContract: {
+      ...prospectivePlan().runContract,
+      matchedPairs: 1,
+      trials: 2,
+      requiredArtifacts: [
+        "git.patch",
+        "events.jsonl",
+        "verification.json",
+        "environment.json",
+        "run.json",
+        "prospective-evidence-v2.json",
+      ],
+      evidenceV2: {
+        required: true,
+        requiredCaptureKinds: [
+          "screenshot",
+          "interaction-trace",
+          "accessibility-tree",
+        ],
+        measuredBillingRequired: true,
+        structuredStopReasonsRequired: true,
+      },
+      acceptance: {
+        ...prospectivePlan().runContract.acceptance,
+        requiredValidPairsPerTask: 1,
+        requiredPassingPairsPerTask: 1,
+      },
+    },
+    creditPolicy: {
+      ...prospectivePlan().creditPolicy,
+      independentRepeatInterimCreditCap: 6,
+    },
+  };
+}
+
+function evidenceDraft() {
+  return {
+    schemaVersion: 1,
+    kind: "memi-prospective-evidence-draft-v1",
+    native: {
+      captures: [
+        { kind: "screenshot", name: "desktop.png", source: "desktop.png" },
+        { kind: "interaction-trace", name: "flow.json", source: "flow.json" },
+        { kind: "accessibility-tree", name: "a11y.json", source: "a11y.json" },
+      ],
+    },
+    billing: {
+      source: "provider-usage-export",
+      currency: "USD",
+      amount: 0.42,
+      sourceArtifact: { name: "provider-usage.json", source: "usage.json" },
+      priceCardArtifact: { name: "price-card.json", source: "price-card.json" },
+    },
+    execution: { retryReasons: [] },
+  };
+}
+
+function captureContract(
+  kind: "screenshot" | "interaction-trace" | "accessibility-tree",
+  artifactName: string,
+) {
+  return {
+    kind,
+    command: process.execPath,
+    args: ["-e", `require('fs').writeFileSync(${JSON.stringify(artifactName)}, 'capture')`],
+    timeoutMs: 60_000,
+    sourcePath: artifactName,
+    artifactName,
+  };
+}
+
+async function fixtureRepository(name: string): Promise<string> {
+  const repository = join(projectRoot, name);
+  await mkdir(repository, { recursive: true });
+  await execFileAsync("git", ["init", "--quiet"], { cwd: repository });
+  await execFileAsync("git", ["config", "user.name", "Memi Test"], { cwd: repository });
+  await execFileAsync("git", ["config", "user.email", "test@memi.invalid"], { cwd: repository });
+  await execFileAsync("git", ["remote", "add", "origin", `https://example.test/${name}.git`], {
+    cwd: repository,
+  });
+  await writeFile(join(repository, "README.md"), "fixture\n");
+  await execFileAsync("git", ["add", "README.md"], { cwd: repository });
+  await execFileAsync("git", ["commit", "--quiet", "-m", "fixture"], { cwd: repository });
+  return repository;
+}
+
+async function sealProspectiveV2Run(input: {
+  readonly freeze: ProspectiveFreeze;
+  readonly condition: "baseline" | "memi";
+  readonly evidenceRoot: string;
+  readonly omitFromManifest: "price-card.json" | null;
+}): Promise<BenchmarkRunRecord> {
+  const trial = input.freeze.trials.find((candidate) =>
+    candidate.taskId === "web-task" && candidate.repeat === 1
+    && candidate.condition === input.condition,
+  );
+  if (!trial) throw new Error("expected V2 trial is missing");
+  const evidenceDirectory = join(input.evidenceRoot, input.condition);
+  await mkdir(evidenceDirectory, { recursive: true });
+  const artifacts = {
+    "git.patch": "patch",
+    "events.jsonl": "{}\n",
+    "verification.json": "{}\n",
+    "environment.json": "{}\n",
+    "desktop.png": "PNG",
+    "flow.json": "{\"steps\":[]}\n",
+    "a11y.json": "{\"tree\":[]}\n",
+    "provider-usage.json": "{\"costUsd\":0.42}\n",
+    "price-card.json": "{\"currency\":\"USD\"}\n",
+  } as const;
+  await Promise.all(Object.entries(artifacts).map(([name, content]) =>
+    writeFile(join(evidenceDirectory, name), content),
+  ));
+  const runId = `v2-${input.condition}-1`;
+  const receipt = {
+    schemaVersion: 2,
+    kind: "memi-prospective-evidence-v2",
+    runId,
+    trial: {
+      trialId: trial.trialId,
+      taskId: trial.taskId,
+      repeat: trial.repeat,
+      condition: trial.condition,
+      repositoryRevision: input.freeze.taskRevisions[trial.taskId],
+      candidateArtifactSha256: input.freeze.candidate.artifactSha256,
+    },
+    native: {
+      platform: input.freeze.taskNativePlatforms?.[trial.taskId],
+      captures: [
+        { kind: "screenshot", name: "desktop.png", sha256: await hashFile(join(evidenceDirectory, "desktop.png")) },
+        { kind: "interaction-trace", name: "flow.json", sha256: await hashFile(join(evidenceDirectory, "flow.json")) },
+        { kind: "accessibility-tree", name: "a11y.json", sha256: await hashFile(join(evidenceDirectory, "a11y.json")) },
+      ],
+    },
+    billing: {
+      source: "provider-usage-export",
+      currency: "USD",
+      amount: 0.42,
+      sourceSha256: await hashFile(join(evidenceDirectory, "provider-usage.json")),
+      priceCardSha256: await hashFile(join(evidenceDirectory, "price-card.json")),
+      sourceArtifact: {
+        name: "provider-usage.json",
+        sha256: await hashFile(join(evidenceDirectory, "provider-usage.json")),
+      },
+      priceCardArtifact: {
+        name: "price-card.json",
+        sha256: await hashFile(join(evidenceDirectory, "price-card.json")),
+      },
+    },
+    execution: {
+      stopReason: "verification-passed",
+      retryReasons: [],
+      agentWallTimeMs: 30_000,
+      verifierWallTimeMs: 8_000,
+    },
+  };
+  await writeFile(
+    join(evidenceDirectory, "prospective-evidence-v2.json"),
+    `${JSON.stringify(receipt)}\n`,
+  );
+  const runPath = join(evidenceDirectory, "run.json");
+  let record = {
+    ...run(input.condition, 1, 100_000, 60_000),
+    runId,
+    taskId: trial.taskId,
+    repository: {
+      pathHash: "sha256:repo",
+      revision: input.freeze.taskRevisions[trial.taskId],
+      dirty: false,
+    },
+    harness: {
+      id: input.freeze.harness.provider,
+      modelId: input.freeze.harness.modelId,
+      reasoningEffort: input.freeze.harness.reasoningEffort,
+    },
+    timing: {
+      startedAt: "2026-07-31T12:00:00.000Z",
+      completedAt: "2026-07-31T12:01:00.000Z",
+      wallTimeMs: 60_000,
+      toolTimeMs: 10_000,
+    },
+    outcome: {
+      accepted: true,
+      testsPassed: true,
+      qualityScore: 95,
+      qualityEvidence: "automated_acceptance",
+      defects: 0,
+      humanInterventions: 0,
+    },
+    evidenceRefs: [
+      join(evidenceDirectory, "evidence-manifest.json"),
+      runPath,
+      join(evidenceDirectory, "prospective-evidence-v2.json"),
+    ],
+    prospective: {
+      planHash: input.freeze.planHash,
+      freezeHash: input.freeze.freezeHash,
+      candidateArtifactSha256: input.freeze.candidate.artifactSha256,
+      taskManifestSha256: input.freeze.taskManifestHashes[trial.taskId],
+      evidenceManifestSha256: EVIDENCE_MANIFEST_HASH_PLACEHOLDER,
+      trialId: trial.trialId,
+      sequence: trial.sequence,
+    },
+  } satisfies BenchmarkRunRecord;
+  await writeFile(runPath, JSON.stringify(record));
+  const artifactNames = [
+    "git.patch",
+    "events.jsonl",
+    "verification.json",
+    "environment.json",
+    "run.json",
+    "prospective-evidence-v2.json",
+    "desktop.png",
+    "flow.json",
+    "a11y.json",
+    "provider-usage.json",
+    ...(input.omitFromManifest ? [] : ["price-card.json"]),
+  ];
+  const manifest = await createEvidenceManifest({
+    evidenceDirectory,
+    trialId: trial.trialId,
+    artifactNames,
+  });
+  record = {
+    ...record,
+    prospective: {
+      ...record.prospective,
+      evidenceManifestSha256: manifest.manifestSha256,
+    },
+  };
+  await writeFile(runPath, JSON.stringify(record));
+  return record;
 }

@@ -1,4 +1,5 @@
 import {
+  constants,
   access,
   lstat,
   mkdir,
@@ -18,6 +19,7 @@ import {
   type SkillFitnessEvent,
   type SkillFitnessRouteIdentity,
 } from "../skill-fitness.js";
+import { privateAppendFlags } from "../skill-fitness-lock.js";
 import type { BenchmarkRunRecord } from "../../efficiency/contracts.js";
 
 const HASH_A = `sha256:${"a".repeat(64)}`;
@@ -31,6 +33,11 @@ afterEach(async () => {
 });
 
 describe("skill fitness empirical identity security", () => {
+  it("omits unsupported O_NOFOLLOW on Windows secure appends", () => {
+    const noFollow = typeof constants.O_NOFOLLOW === "number" ? constants.O_NOFOLLOW : 0;
+    expect(privateAppendFlags("win32") & noFollow).toBe(0);
+  });
+
   it("rejects a second event for the same exact-route run pair despite a new event and quality hash", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-pair-security-"));
     tempDirectories.push(root);

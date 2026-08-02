@@ -113,11 +113,22 @@ function extractImports(content: string, extension: string): readonly string[] {
     }
     return [...imports];
   }
-  const pattern = /(?:import\s+(?:[\s\S]*?\s+from\s+)?|require\s*\(|import\s*\()\s*["']([^"']+)["']/g;
-  for (const match of content.matchAll(pattern)) {
-    if (match[1]) imports.add(match[1]);
+  const code = maskJavaScriptNonCode(content);
+  for (const token of code.matchAll(/\b(?:import|require)\b/gu)) {
+    if (token.index === undefined) continue;
+    const source = content.slice(token.index);
+    const match = /^(?:import\s*(?:\(\s*)?|require\s*\()\s*["']([^"']+)["']/u.exec(source)
+      ?? /^import\s+(?:type\s+)?(?:[^;]*?\s+from\s+)?["']([^"']+)["']/u.exec(source);
+    if (match?.[1]) imports.add(match[1]);
   }
   return [...imports];
+}
+
+function maskJavaScriptNonCode(content: string): string {
+  return content.replace(
+    /\/\/[^\n]*|\/\*[\s\S]*?\*\/|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`/gu,
+    (match) => match.replace(/[^\r\n]/gu, " "),
+  );
 }
 
 function detectFrameworks(

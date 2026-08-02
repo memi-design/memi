@@ -11,7 +11,10 @@ import type {
 export const SKILL_ROUTER_VERSION = "skill-router-v2";
 const MINIMUM_STACK_SCORE_RATIO = 0.65;
 const ROUTING_PATTERN_MAX_LENGTH = 160;
-const ROUTING_PATTERN_MAX_ALTERNATIONS = 12;
+type RoutingPatternMode = "exact" | "prefix" | "suffix" | "contains" | "glob" | "oneOf";
+const ROUTING_PATTERN_MODES = new Set<RoutingPatternMode>([
+  "exact", "prefix", "suffix", "contains", "glob", "oneOf",
+]);
 
 const TOKEN_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   a11y: "accessibility",
@@ -625,36 +628,139 @@ function firstPatternMatch(
   return null;
 }
 
-export function compileSafeRoutingPattern(
-  pattern: string,
-  flags = "i",
-): RegExp {
+export interface RoutingPatternValidation {
+  readonly valid: boolean;
+  readonly mode?: RoutingPatternMode;
+  readonly value?: string;
+  readonly canonical?: string;
+  readonly reason?: string;
+  readonly migration?: string;
+}
+
+export function validateRoutingPattern(pattern: string): RoutingPatternValidation {
+  if (pattern.length === 0 || pattern.length > ROUTING_PATTERN_MAX_LENGTH) {
+    return { valid: false, reason: "pattern length must be between 1 and 160 characters" };
+  }
+
+  const typed = /^([a-z]+):(.*)$/u.exec(pattern);
+  if (typed) {
+    const mode = typed[1]!;
+    const value = typed[2]!;
+    if (!isRoutingPatternMode(mode)) {
+      return {
+        valid: false,
+        reason: `unsupported pattern mode: ${mode}`,
+        migration: `contains:${value}`,
+      };
+    }
+    if (value.length === 0 || (mode === "oneOf" && value.split(",").some((item) => item.length === 0))) {
+      return { valid: false, reason: "pattern value must not be empty" };
+    }
+    return {
+      valid: true,
+      mode,
+      value,
+      canonical: `${mode}:${value}`,
+    };
+  }
+
+  const anchoredStart = pattern.startsWith("^");
+  const anchoredEnd = pattern.endsWith("$");
+  const rawValue = pattern.slice(anchoredStart ? 1 : 0, anchoredEnd ? -1 : undefined);
+  if (rawValue.length === 0) {
+    return { valid: false, reason: "legacy pattern must contain a literal value" };
+  }
+  const legacyAlternation = anchoredStart && anchoredEnd
+    ? /^\(\?:([^()]+)\)$/u.exec(rawValue)
+    : null;
+  if (legacyAlternation) {
+    const alternatives = legacyAlternation[1]!.split("|").map(decodeLegacyRoutingLiteral);
+    if (alternatives.every((alternative): alternative is string => alternative !== null && alternative.length > 0)) {
+      const value = alternatives.join(",");
+      return { valid: true, mode: "oneOf", value, canonical: `oneOf:${value}` };
+    }
+  }
+  const value = decodeLegacyRoutingLiteral(rawValue);
+  if (value === null) {
+    return {
+      valid: false,
+      reason: "legacy executable regex syntax is not supported",
+      migration: `contains:${rawValue.replace(/[\\^$()[\]{}+?|*]/gu, "")}`,
+    };
+  }
+  const mode = anchoredStart && anchoredEnd
+    ? "exact"
+    : anchoredStart
+      ? "prefix"
+      : anchoredEnd
+        ? "suffix"
+        : "contains";
+  return { valid: true, mode, value, canonical: `${mode}:${value}` };
+}
+
+export function compileSafeRoutingPattern(pattern: string, flags = "i"): RegExp {
   if (!/^(?:i|u|iu|ui)?$/.test(flags)) {
     throw new Error(`unsupported routing flags: ${flags}`);
   }
-  if (pattern.length === 0 || pattern.length > ROUTING_PATTERN_MAX_LENGTH) {
-    throw new Error("unsafe routing pattern: invalid length");
-  }
-  if ((pattern.match(/\|/g) ?? []).length > ROUTING_PATTERN_MAX_ALTERNATIONS) {
-    throw new Error("unsafe routing pattern: too many alternatives");
-  }
-  const unsafe = [
-    /\\[1-9]/,
-    /\\k</,
-    /\(\?<[=!]/,
-    /\([^)]*[+*][^)]*\)[+*{]/,
-    /(?:\+|\*|\?|\{\d+(?:,\d*)?\})(?:\+|\*|\?|\{)/,
-  ];
-  if (unsafe.some((guard) => guard.test(pattern))) {
-    throw new Error("unsafe routing pattern: unsupported backtracking construct");
-  }
-  try {
-    return new RegExp(pattern, flags);
-  } catch (error) {
+  const validation = validateRoutingPattern(pattern);
+  if (!validation.valid || !validation.mode || validation.value === undefined) {
     throw new Error(
-      `unsafe routing pattern: ${error instanceof Error ? error.message : "invalid regex"}`,
+      `unsafe routing pattern syntax: ${validation.reason ?? "invalid pattern"}${
+        validation.migration ? `; migrate to ${validation.migration}` : ""
+      }`,
     );
   }
+  const escaped = validation.mode === "glob"
+    ? escapeGlobPattern(validation.value)
+    : validation.mode === "oneOf"
+      ? validation.value.split(",").map(escapeRoutingLiteral).join("|")
+    : escapeRoutingLiteral(validation.value);
+  const source = validation.mode === "exact"
+    ? `^${escaped}$`
+    : validation.mode === "oneOf"
+      ? `^(?:${escaped})$`
+    : validation.mode === "prefix"
+      ? `^${escaped}`
+      : validation.mode === "suffix"
+        ? `${escaped}$`
+        : escaped;
+  return new RegExp(source, flags);
+}
+
+function isRoutingPatternMode(value: string): value is RoutingPatternMode {
+  return ROUTING_PATTERN_MODES.has(value as RoutingPatternMode);
+}
+
+function decodeLegacyRoutingLiteral(value: string): string | null {
+  let literal = "";
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index]!;
+    if (character === "\\") {
+      const escaped = value[index + 1];
+      if (!escaped || !/^[\\^$()[\]{}+*?|.]$/u.test(escaped)) return null;
+      literal += escaped;
+      index += 1;
+      continue;
+    }
+    if (/^[^$^()[\]{}+*?|]$/u.test(character)) {
+      literal += character;
+      continue;
+    }
+    return null;
+  }
+  return literal;
+}
+
+function escapeRoutingLiteral(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+function escapeGlobPattern(value: string): string {
+  return [...value].map((character) => {
+    if (character === "*") return ".*";
+    if (character === "?") return ".";
+    return escapeRoutingLiteral(character);
+  }).join("");
 }
 
 function scoreMetadata(

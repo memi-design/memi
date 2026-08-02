@@ -90,7 +90,12 @@ export function listHarnesses(config: StudioConfig, options: ListHarnessOptions 
     const checkedAt = Math.max(...harness.installProbe.map((command) => commandProbeCache.get(command)?.checkedAt ?? now), now);
     const installed = Boolean(resolvedPath);
     const auth = installed
-      ? (options.probeAuth ?? ((candidate, path) => probeHarnessAuthCached(candidate, path, options.forceRefresh ?? false)))(harness, resolvedPath)
+      ? probeHarnessAuthCached(
+        harness,
+        resolvedPath,
+        options.forceRefresh ?? false,
+        options.probeAuth,
+      )
       : { authStatus: "missing" as const, authMessage: "Command not found" };
     return {
       ...harness,
@@ -102,13 +107,20 @@ export function listHarnesses(config: StudioConfig, options: ListHarnessOptions 
   });
 }
 
-function probeHarnessAuthCached(harness: StudioHarnessConfig, resolvedPath: string | null, forceRefresh: boolean): HarnessAuthProbeResult {
+function probeHarnessAuthCached(
+  harness: StudioHarnessConfig,
+  resolvedPath: string | null,
+  forceRefresh: boolean,
+  probeAuth?: (harness: StudioHarnessConfig, resolvedPath: string | null) => HarnessAuthProbeResult,
+): HarnessAuthProbeResult {
   if (!resolvedPath) return { authStatus: "missing", authMessage: "Command not found" };
   const now = Date.now();
   const cacheKey = `${harness.id}:${resolvedPath}`;
   const cached = authProbeCache.get(cacheKey);
   if (!forceRefresh && cached && now - cached.checkedAt < PROBE_TTL_MS) return cached.result;
-  const result = probeHarnessAuth(harness, resolvedPath);
+  const result = probeAuth
+    ? probeAuth(harness, resolvedPath)
+    : probeHarnessAuth(harness, resolvedPath);
   authProbeCache.set(cacheKey, { result, checkedAt: now });
   return result;
 }

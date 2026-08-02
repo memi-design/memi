@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { benchmarkConditionSchema, type BenchmarkCondition } from "./contracts.js";
+import { nativeCaptureKindSchema } from "./prospective-evidence-v2.js";
 import type { WorkflowAgentBudget } from "./workflow-budget.js";
 
 const verificationKindSchema = z.enum([
@@ -48,6 +49,18 @@ export const workflowVerificationSchema = z.object({
   preflightExpectedExitCode: z.number().int().min(0).max(255).default(0),
 }).strict();
 
+export const workflowNativeCaptureSchema = z.object({
+  kind: nativeCaptureKindSchema,
+  ...workflowProcessSchema.shape,
+  sourcePath: z.string().min(1).refine(isSafeRelativePath, {
+    message: "capture source path must remain inside the isolated verification checkout",
+  }),
+  artifactName: z.string().min(1).refine((value) =>
+    !value.includes("/") && !value.includes("\\"), {
+    message: "capture artifact name must be a single filename",
+  }),
+}).strict();
+
 export const workflowTaskSchema = z.object({
   schemaVersion: z.literal(1),
   id: z.string().regex(/^[a-z][a-z0-9-]*$/),
@@ -75,8 +88,19 @@ export const workflowTaskSchema = z.object({
       });
     }
   }),
+  nativeCaptures: z.array(workflowNativeCaptureSchema).max(8).default([]),
   requiredArtifacts: z.array(z.string().min(1)).min(3),
-}).strict();
+}).strict().superRefine((task, context) => {
+  const identities = task.nativeCaptures.map((capture) =>
+    `${capture.kind}:${capture.artifactName}`);
+  if (new Set(identities).size !== identities.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["nativeCaptures"],
+      message: "native capture kind and artifact identities must be unique",
+    });
+  }
+});
 
 export type WorkflowTask = z.infer<typeof workflowTaskSchema>;
 export type WorkflowProvider = "codex" | "claude";
@@ -183,7 +207,7 @@ export function buildWorkflowPrompt(input: {
       "Do not perform a repository-wide search, inspect lockfile bodies, or investigate unrelated product areas.",
     ];
   const budgetContract = [
-    `Hard execution limits: at most ${task.agentBudget.maxToolCalls} tool calls, ${task.agentBudget.maxInputTokens} input tokens, ${task.agentBudget.maxOutputTokens} output tokens, and ${task.agentBudget.maxReasoningTokens} reasoning tokens.`,
+    `Execution limits: at most ${task.agentBudget.maxToolCalls} tool calls, ${task.agentBudget.maxInputTokens} input tokens, ${task.agentBudget.maxOutputTokens} output tokens, and ${task.agentBudget.maxReasoningTokens} reasoning tokens. The harness stops at the first streamed provider report above a token limit and rejects any final trace above a limit.`,
     "Make one minimal scoped patch. Run each named verification command at most once unless its own failure directly identifies the requested change.",
     "Do not repair unrelated dependency, platform, or pre-existing build failures. Record them concisely and stop.",
     "Keep file reads and searches narrow: request at most 160 lines or one direct symbol per command.",

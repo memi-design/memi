@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-08-02T00:42:00.000Z",
+  "status": "not-ready-to-freeze",
+  "contractPreflight": {
+    "status": "ready-but-not-calibrated",
+    "receipt": "preflight-attestation.json",
+    "sha256": "sha256:520d7699272bcfbe37852e56e66a133f9ca6250f1a0a0c0fafe3510fd19ce008",
+    "meaning": "All three clean, pinned fixtures match their declared origins and V16 task manifests declare the required capture kinds. This is configuration admission only; no collector, model cell, or claim has been admitted. USD billing is required only by a separately frozen cost extension."
+  },
+  "candidate": {
+    "requiredVersion": "2.7.5",
+    "observedWorkspaceVersion": "2.7.5",
+    "candidateTarballSha256": "sha256:83ad01b997d8b7bc59f4190f83072b0cf215065b9bdf98f36e0ac16e62ae72de",
+    "candidateProvenance": "candidate-provenance.json",
+    "reason": "An exact local 2.7.5 tarball from the repaired candidate commit is retained and hash-recorded. It is an unpublished study candidate, not an npm release."
+  },
+  "mobileCalibrationDevice": {
+    "name": "iPhone 17",
+    "udid": "EAEF843E-B99A-42C2-BE5E-6E480B899F5C",
+    "runtime": "iOS 26.5",
+    "status": "user-authorized-reset-and-exclusive",
+    "observedAt": "2026-08-02T03:21:00.000Z"
+  },
+  "fixtures": [
+    {
+      "id": "buzzr-tab-unread-badge",
+      "repository": "https://github.com/Buzzr-app/Buzzr.git",
+      "verifiedCheckout": "/Volumes/ExtremeSSD/Projects/_benchmarks/memi-2.7-cases/buzzr",
+      "observedRevision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+      "previousV15Revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba",
+      "status": "available-to-reverify",
+      "reason": "The verified checkout is the Expo benchmark fixture used by V15 and remains clean at its frozen revision. V15 rendered only a testing-library tree, so native Simulator collectors and calibration are still required."
+    },
+    {
+      "id": "paraform-command-menu",
+      "repository": "https://github.com/sarveshsea/paraform.git",
+      "observedRevision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+      "previousV15Revision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b",
+      "status": "available-to-reverify"
+    },
+    {
+      "id": "nate-options-reduce-motion",
+      "repository": "https://github.com/sarveshsea/nate-the-bait.git",
+      "observedRevision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+      "previousV15Revision": "9cde918e309d74943457ad6def8a9c14db7ea01b",
+      "status": "available-to-reverify"
+    }
+  ],
+  "remainingPrerequisites": [
+    "Use the verified Buzzr Expo fixture revision and hash a V16 task manifest with native Simulator collectors.",
+    "Shut down every non-V16 Simulator before each mobile cell; the task now fails before provider invocation if exclusivity cannot be established.",
+    "Perform one unscored native-capture calibration pair per fixture.",
+    "Freeze and retain per-cell provider usage exports or invoice allocations and price-card artifacts before any separately billed-cost extension; the native quality/resource study does not infer USD cost."
+  ],
+  "claimDecision": "No claim is admitted; this is a readiness audit only."
+}

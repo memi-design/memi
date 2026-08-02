@@ -1,7 +1,7 @@
 import { mkdtemp, readFile, rm, writeFile, mkdir, chmod } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildHarnessCommand,
   classifyCliAuthResult,
@@ -298,25 +298,20 @@ describe("studio harnesses", () => {
   });
 
   it("caches CLI auth probes inside the harness probe TTL", async () => {
-    const root = await mkdtemp(join(tmpdir(), "memoire-studio-auth-cache-"));
-    try {
-      const probeLog = join(root, "probe-count.txt");
-      const codexProbe = await writeCommandFixture(root, "codex", [
-        `require("node:fs").appendFileSync(${JSON.stringify(probeLog)}, "x");`,
-        'console.log("logged in");',
-      ]);
-      const config = defaultStudioConfig(root);
-      const resolveCommand = (command: string) => command === "codex" ? codexProbe : null;
+    const root = "/tmp/memoire-studio-auth-cache";
+    const probeAuth = vi.fn(() => ({
+      authStatus: "signed_in" as const,
+      authMessage: "Codex logged in",
+    }));
+    const config = defaultStudioConfig(root);
+    const resolveCommand = (command: string) => command === "codex" ? "/usr/local/bin/codex" : null;
 
-      const first = listHarnesses(config, { resolveCommand });
-      const second = listHarnesses(config, { resolveCommand });
+    const first = listHarnesses(config, { resolveCommand, probeAuth });
+    const second = listHarnesses(config, { resolveCommand, probeAuth });
 
-      expect(first.find((harness) => harness.id === "codex")?.authStatus).toBe("signed_in");
-      expect(second.find((harness) => harness.id === "codex")?.authStatus).toBe("signed_in");
-      expect(await readFile(probeLog, "utf-8")).toBe("x");
-    } finally {
-      await rm(root, { recursive: true, force: true });
-    }
+    expect(first.find((harness) => harness.id === "codex")?.authStatus).toBe("signed_in");
+    expect(second.find((harness) => harness.id === "codex")?.authStatus).toBe("signed_in");
+    expect(probeAuth).toHaveBeenCalledTimes(1);
   });
 
   it("surfaces Codex config parse failures separately from login failures", () => {
@@ -333,21 +328,3 @@ describe("studio harnesses", () => {
     expect(result.authMessage).not.toMatch(/login/i);
   });
 });
-
-async function writeCommandFixture(
-  root: string,
-  name: string,
-  statements: readonly string[],
-): Promise<string> {
-  const script = join(root, `${name}-fixture.cjs`);
-  await writeFile(script, `${statements.join("\n")}\n`);
-  if (process.platform === "win32") {
-    const command = join(root, `${name}.cmd`);
-    await writeFile(command, `@echo off\r\n"${process.execPath}" "${script}" %*\r\n`);
-    return command;
-  }
-  const command = join(root, name);
-  await writeFile(command, `#!/usr/bin/env node\n${statements.join("\n")}\n`);
-  await chmod(command, 0o755);
-  return command;
-}

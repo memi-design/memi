@@ -59,10 +59,9 @@ export async function withSkillFitnessFileLock<T>(
 }
 
 export async function appendPrivateLine(file: string, line: string): Promise<void> {
-  const noFollow = typeof constants.O_NOFOLLOW === "number" ? constants.O_NOFOLLOW : 0;
   const handle = await open(
     file,
-    constants.O_APPEND | constants.O_CREAT | constants.O_WRONLY | noFollow,
+    privateAppendFlags(),
     0o600,
   );
   try {
@@ -86,6 +85,13 @@ export async function appendPrivateLine(file: string, line: string): Promise<voi
   } finally {
     await handle.close();
   }
+}
+
+export function privateAppendFlags(platform = process.platform): number {
+  const noFollow = platform === "win32" || typeof constants.O_NOFOLLOW !== "number"
+    ? 0
+    : constants.O_NOFOLLOW;
+  return constants.O_APPEND | constants.O_CREAT | constants.O_WRONLY | noFollow;
 }
 
 function normalizeOptions(input: SkillFitnessLockOptions): NormalizedLockOptions {

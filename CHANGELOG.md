@@ -6,7 +6,121 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
-## Unreleased
+## v2.7.5 — 2026-08-02 — Candidate (unpublished)
+
+### Prospective evidence foundation
+
+- `9fbf7be8` — chore: stage 2.7.5 evidence candidate
+- `c15fde6d` — chore: synchronize 2.7.5 candidate surfaces
+- `417c834d` — fix: bind candidate release surfaces
+- `a7f182ec` — fix: render candidate changelog releases
+- `f36e6843` — test: separate billing from native evidence admission
+- `0c95d570` — fix: separate USD billing from native evidence admission
+- `81c48042` — test: define prospective evidence v2 contract
+- `2ac21650` — feat: define prospective evidence v2 receipt
+- `fa8d8a64` — test: require frozen native evidence contract
+- `3348e637` — feat: freeze native evidence requirements
+- `ef9c6761` — test: require retained billing artifacts
+- `a499e1a6` — feat: bind billing evidence artifacts
+- `b964117f` — docs: record billing evidence binding
+- `7a3fabdd` — test: require sealed V2 billing artifacts
+- `5e2dc9c7` — feat: verify sealed V2 study evidence
+- `e502dbc8` — docs: record sealed V2 evidence gate
+- `9c3e676d` — test: define prospective evidence materialization
+- `ae3c41c5` — feat: materialize prospective evidence receipts
+- `254ca8e6` — test: record workflow adapter wall time
+- `1c78d5b1` — test: require V2 workflow evidence inputs
+- `3cb2ba11` — feat: materialize V2 workflow evidence
+- `a91f3069` — test: require native capture execution
+- `85004c72` — feat: capture native evidence after isolated verification
+- `eebf45c9` — test: bind V2 drafts to native capture tasks
+- `58a5dd7b` — feat: bind V2 drafts to native captures
+- `853a15ad` — fix: preserve bounded V2 artifact root
+- `6e6026a0` — test: support Windows prospective evidence paths
+- `31b8d5be` — fix: admit Windows prospective run receipts
+- `12178d19` — docs: record Windows evidence-path fix
+- `680df05f` — research: audit V16 freeze readiness
+- `8bc5fd4f` — test: define V2 prospective fixture preflight
+- `47c3b1a5` — feat: preflight pinned V2 study fixtures
+- `5ee13ea2` — test: seal V2 fixture preflight receipts
+- `b2d9508c` — feat: attest V2 fixture preflight state
+- `25b1af4c` — research: correct V16 Expo fixture provenance
+- `093fb537` — test: bind V2 fixtures to repository origins
+- `445f3430` — feat: verify V2 fixture repository origins
+- `e7357fe0` — research: clarify V16 claim support gates
+- `6d54a9a1` — test: stabilize harness auth cache coverage
+- `56042961` — fix: cache injected harness auth probes
+- `d5e7e5f0` — test: cover Windows fitness append flags
+- `79b80538` — fix: append fitness evidence on Windows
+- `ff697f59` — test: reproduce streamed input budget breach
+- `8b90796b` — fix: stop adapters at streamed token caps
+- `38eaca7e` — fix: handle malformed workflow usage events
+- `80b8134a` — fix: describe observable token budget enforcement
+- `79ef9d9e` — fix: reject ambiguous repeated routing groups
+- `14779603` — test: define safe routing pattern grammar
+- `38cbd522` — feat: replace routing regex with safe patterns
+- `ababa67b` — test: require routing pattern migration diagnostics
+- `09863bd9` — feat: diagnose routing pattern migrations
+- `d192735b` — test: define trusted fingerprint and env boundaries
+- `90fba02e` — fix: harden fingerprint and dotenv parsing
+- `9151ffe3` — test: add routing safety evaluation corpus
+
+The next prospective-study format can now freeze per-task native platforms and
+require hash-addressable screenshots, interaction traces, accessibility trees,
+measured USD billing with retained provider-usage and price-card artifacts, and
+structured stop/retry telemetry. These requirements
+are part of the freeze hash and cannot be relaxed after outcomes are observed.
+The evaluator now treats every receipt-declared capture, provider-usage export,
+and price card as a manifest-sealed and independently hash-checked artifact;
+an adjacent but unsealed file earns no study credit.
+Frozen V2 workflow executions now fail before provider invocation unless the
+operator supplies a bounded draft and artifact root. After isolated verification,
+the harness copies the declared regular files, records separate adapter and
+verifier times, produces the receipt, and seals all declared files in the manifest.
+Native capture commands now run only after isolated post-patch verification and
+must copy their regular output into an empty per-cell capture root that exactly
+matches the V2 receipt draft; stale capture files fail before provider execution.
+Prospective evaluation now recognizes both POSIX and Windows evidence-reference
+separators before applying the same manifest and receipt validation path.
+The V16 readiness ledger records the observed fixture revisions and explicitly
+keeps the native study unfreezable until an exact candidate, repinned Buzzr
+fixture, collectors, calibration receipts, and measured billing artifacts exist.
+The harness now also provides a preflight gate which refuses to freeze unless
+each repository is clean at its preregistered revision and each task manifest
+contains the capture kinds required by the sealed V2 evidence contract.
+Each successful preflight can now persist a timestamped, content-addressed
+receipt with the plan hash, fixture revisions, task-manifest hashes, and
+admitted capture kinds for independent reconstruction.
+The V16 readiness ledger now identifies the verified Buzzr Expo fixture rather
+than an unrelated active repository, while preserving the requirement for new
+Simulator capture and calibration evidence.
+Preflight additionally canonicalizes GitHub SSH and HTTPS remotes and rejects
+any checkout whose origin differs from the preregistered fixture identity.
+Skill-routing patterns now reject repeated groups that combine alternation,
+nested groups, or inner repetition, preventing these user-supplied matching
+rules from creating exponential JavaScript-regex backtracking during route
+selection.
+Repository eligibility rules now use a bounded pattern language rather than
+executing Note-supplied regular expressions: exact, prefix, suffix, contains,
+glob, and literal one-of matching are supported, while unsafe legacy syntax
+fails closed with an explicit migration target in `memi notes doctor`.
+Repository fingerprints now use a lexical import scanner so comment, string,
+and template content cannot create routing evidence. Shared dotenv helpers now
+validate keys, reject multiline values, safely quote values, and update only an
+exact assignment. The V17 routing-quality protocol is preregistered separately
+from implementation tests; it records no agent-performance result until paired
+receipts and blinded grades are collected.
+The V16 protocol now separates the evidentiary gates for preserved quality,
+task-specific superiority, runtime, measured USD cost, and practitioner-grade
+design claims so an engineering safeguard is never mistaken for an outcome.
+Studio's injectable auth-probe seam now shares the same TTL cache as the real
+CLI probe, making cache behavior deterministic and directly testable.
+Windows evidence-store appends now omit the unsupported POSIX `O_NOFOLLOW`
+open flag while retaining the regular-file and path-identity checks before any
+write, restoring fail-closed route-evidence persistence on that platform.
+The workflow adapters now stop the provider at the first streamed input,
+output, or reasoning-token limit breach, retaining the trace while rejecting
+the over-budget run before it can be admitted into a prospective comparison.
 
 ## v2.7.4 — 2026-08-01
 

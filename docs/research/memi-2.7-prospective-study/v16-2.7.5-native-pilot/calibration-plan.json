@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-2.7-prospective-v16-275-calibration",
+  "planId": "memi-2.7-v16-2.7.5-native-calibration",
+  "status": "draft",
+  "currentScore": 0,
+  "targetScore": 0,
+  "claimBoundary": "One unscored baseline/Memi pair per fixture. These six cells test native capture and blind-packet plumbing only; they are excluded from confirmatory statistics and cannot support a product claim. USD billing is out of scope until a separately frozen billed-cost extension is available.",
+  "scoreBudget": [
+    { "dimension": "calibration-registration", "currentCredit": 0, "targetCredit": 0, "unlock": "Frozen before the six calibration cells." },
+    { "dimension": "native-capture-calibration", "currentCredit": 0, "targetCredit": 0, "maximumCredit": 3, "unlock": "Each fixture retains every required native artifact." },
+    { "dimension": "blinded-packet-usability", "currentCredit": 0, "targetCredit": 0, "unlock": "A blinded packet can be built without revealing the condition." }
+  ],
+  "tasks": [
+    { "id": "buzzr-tab-unread-badge", "platformFamily": "react-native-expo", "nativePlatform": "expo", "revision": "7583ab4788e5f3554c479ce886d9d75e8eefb0ba", "pairs": 1, "interimCredit": 1, "risk": "One reset Expo/iOS Simulator capture calibration." },
+    { "id": "paraform-command-menu", "platformFamily": "web-design-engineering", "nativePlatform": "web", "revision": "0bbcacfc71fb3d383f66b20b5e2babd5f3063a1b", "pairs": 1, "interimCredit": 1, "risk": "One Chromium capture calibration." },
+    { "id": "nate-options-reduce-motion", "platformFamily": "native-swiftui", "nativePlatform": "swiftui", "revision": "9cde918e309d74943457ad6def8a9c14db7ea01b", "pairs": 1, "interimCredit": 1, "risk": "One reset SwiftUI/iOS Simulator capture calibration." }
+  ],
+  "runContract": {
+    "seed": 2716,
+    "matchedPairs": 3,
+    "trials": 6,
+    "conditions": ["baseline", "memi"],
+    "freshClonePerTrial": true,
+    "counterbalancedOrder": true,
+    "requiredArtifacts": ["git.patch", "preparation.json", "events.jsonl", "usage.json", "route.json", "tools.json", "tool-profile.json", "verification.json", "native-capture.json", "environment.json", "verification-isolation.json", "prospective-evidence-v2.json", "evidence-manifest.json", "run.json"],
+    "evidenceV2": { "required": true, "requiredCaptureKinds": ["screenshot", "interaction-trace", "accessibility-tree"], "measuredBillingRequired": false, "structuredStopReasonsRequired": true },
+    "acceptance": { "requiredValidPairsPerTask": 1, "requiredPassingPairsPerTask": 1, "fixtureMutationAllowed": false, "providerErrorAllowed": false, "missingOrDuplicateConditionAllowed": false, "postPatchIsolatedVerificationRequired": true }
+  },
+  "creditPolicy": { "planningEarnsCredit": false, "manualCreditEditsAllowed": false, "prospectiveRegistrationCredit": "all-or-none", "independentRepeatInterimCreditPerQualifiedPlatform": 1, "independentRepeatInterimCreditCap": 3, "fullRepeatCreditRequiresAllReleaseCriticalTasks": true }
+}

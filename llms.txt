@@ -70,7 +70,7 @@ memi init --team
 memi ci
 ```
 
-GitHub Action: `uses: memi-design/memi@v2` with `version: "2.7.4"`.
+GitHub Action: `uses: memi-design/memi@v2` with `version: "2.7.5"`.
 
 ## Dependency graph
 

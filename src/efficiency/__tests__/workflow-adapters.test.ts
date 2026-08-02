@@ -234,6 +234,41 @@ describe("model-agnostic workflow adapters", () => {
     expect(durationMs).toBeLessThan(900);
   });
 
+  it("stops Codex at the first reported input-token budget breach", async () => {
+    const root = await temporaryDirectory();
+    const authHome = path.join(root, "auth");
+    const executable = path.join(root, "input-budget-codex.cjs");
+    await mkdir(authHome, { recursive: true });
+    await writeFile(path.join(authHome, "auth.json"), "{}\n");
+    await writeFile(executable, [
+      "process.on('SIGTERM', () => process.exit(0));",
+      "process.stdout.write(JSON.stringify({type:'turn.completed',usage:{input_tokens:451,output_tokens:2,reasoning_output_tokens:1}})+'\\n');",
+      "setTimeout(() => process.exit(0), 1200);",
+    ].join("\n"));
+    const adapter = createCodexWorkflowAdapter({
+      executable: process.execPath,
+      executableArgs: [executable],
+      modelId: "fixture-model",
+      reasoningEffort: "low",
+      authHome,
+    });
+
+    const result = await adapter.execute({
+      workspaceRoot: root,
+      prompt: "fixture prompt",
+      timeoutMs: 5_000,
+      maximumToolCalls: 4,
+      maximumToolOutputBytes: 1_024,
+      maximumInputTokens: 450,
+      maximumOutputTokens: 20,
+      maximumReasoningTokens: 20,
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toContain("budget-exhausted:max-input-tokens");
+    expect(result.usage).toMatchObject({ inputTokens: 451 });
+  });
+
   it("preserves partial output when the adapter deadline terminates a stubborn child", async () => {
     const root = await temporaryDirectory();
     const authHome = path.join(root, "auth");

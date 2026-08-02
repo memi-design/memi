@@ -43,6 +43,15 @@ export async function hashFile(file: string): Promise<`sha256:${string}`> {
   return `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
 }
 
+export function evidenceReferenceHasArtifact(
+  reference: string,
+  artifactName: string,
+): boolean {
+  validateArtifactName(artifactName);
+  const normalized = reference.replaceAll("\\", "/");
+  return normalized === artifactName || normalized.endsWith(`/${artifactName}`);
+}
+
 export async function createEvidenceManifest(input: {
   readonly evidenceDirectory: string;
   readonly trialId: string;

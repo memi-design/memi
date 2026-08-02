@@ -34,6 +34,7 @@ export {
   resolveRoutedSkills,
   routeInstalledSkills,
   searchCatalogSkills,
+  validateRoutingPattern,
   type ResolvedSkillRoute,
   type RouteInstalledSkillsInput,
   type SkillRouteResult,

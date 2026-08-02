@@ -48,6 +48,7 @@ describe("workflow trial runner", () => {
   it("uses a disposable clone, verifies the product flow, and preserves source", async () => {
     const source = await fixtureRepository();
     const evidenceRoot = await temporaryDirectory("memi-workflow-evidence-");
+    const captureRoot = await temporaryDirectory("memi-workflow-captures-");
     const task = workflowTaskSchema.parse({
       schemaVersion: 1,
       id: "rendered-feature",
@@ -80,11 +81,24 @@ describe("workflow trial runner", () => {
           timeoutMs: 60_000,
         },
       ],
+      nativeCaptures: [{
+        kind: "screenshot",
+        command: process.execPath,
+        args: ["-e", "require('fs').writeFileSync('captured-screen.png','captured\\n')"],
+        timeoutMs: 60_000,
+        sourcePath: "captured-screen.png",
+        artifactName: "desktop.png",
+      }],
       requiredArtifacts: ["git.patch", "verification.json", "events.jsonl"],
     });
     const adapter: WorkflowAdapter = {
       id: "fixture",
       async execute(input) {
+        expect(input).toMatchObject({
+          maximumInputTokens: 375_000,
+          maximumOutputTokens: 10_000,
+          maximumReasoningTokens: 4_000,
+        });
         expect(await readFile(path.join(input.workspaceRoot, "prepared.txt"), "utf8"))
           .toBe("yes\n");
         expect(await readFile(
@@ -92,6 +106,7 @@ describe("workflow trial runner", () => {
           "utf8",
         )).toBe("ready\n");
         await writeFile(path.join(input.workspaceRoot, "implemented.txt"), "ready\n");
+        await new Promise((resolve) => setTimeout(resolve, 20));
         return {
           exitCode: 0,
           stdout: "implemented",
@@ -115,9 +130,16 @@ describe("workflow trial runner", () => {
       condition: "memi",
       routedContext: "{\"decision\":\"single\"}",
       adapter,
+      captureRoot,
     });
 
     expect(result.accepted).toBe(true);
+    expect(result.nativeCaptures).toEqual([expect.objectContaining({
+      kind: "screenshot",
+      artifactName: "desktop.png",
+      passed: true,
+    })]);
+    expect(result.adapterWallTimeMs).toBeGreaterThan(0);
     expect(result.verification).toHaveLength(2);
     expect(result.verificationIsolation).toMatchObject({
       mode: "fresh-clone-post-patch",
@@ -132,6 +154,8 @@ describe("workflow trial runner", () => {
     expect(result.patch).not.toContain("prepared.txt");
     expect(result.patch).not.toContain("verification-generated.txt");
     await expect(readFile(path.join(source, "implemented.txt"), "utf8")).rejects.toThrow();
+    await expect(readFile(path.join(captureRoot, "desktop.png"), "utf8"))
+      .resolves.toBe("captured\n");
     expect(await readFile(path.join(result.evidenceDirectory, "verification.json"), "utf8"))
       .toContain("\"passed\": true");
     const toolProfile = JSON.parse(

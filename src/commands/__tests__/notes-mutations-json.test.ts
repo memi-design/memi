@@ -191,6 +191,47 @@ Use clipboard-first capture flows.
     expect(payload.issues.map((issue: { message: string }) => issue.message).join("\n")).toMatch(/sourceUrls|lastResearchedAt|freshnessDays/i);
     expect(process.exitCode).toBe(1);
   });
+
+  it("reports executable legacy routing syntax with a migration target", async () => {
+    const logs = captureLogs();
+    const program = new Command();
+    registerNotesCommand(program, makeNotesEngine(projectRoot, [{
+      manifest: {
+        name: "unsafe-route",
+        version: "0.1.0",
+        description: "A note with a legacy executable routing expression.",
+        category: "craft",
+        tags: [],
+        skills: [{ file: "unsafe-route.md", name: "Unsafe Route", activateOn: "always", freedomLevel: "high" }],
+        dependencies: [],
+        memoire: {
+          harnessExtensions: [],
+          routing: {
+            intents: [],
+            excludes: [],
+            capabilities: [],
+            platforms: [],
+            priority: 0,
+            repository: { dependenciesAny: ["expo.*"] },
+          },
+        },
+      },
+      path: projectRoot,
+      builtIn: false,
+      enabled: true,
+    }]) as never);
+
+    await program.parseAsync(["notes", "doctor", "--json"], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload).toMatchObject({ status: "failed", notesChecked: 1 });
+    expect(payload.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        name: "unsafe-route",
+        message: expect.stringMatching(/dependenciesAny.*contains:expo\./i),
+      }),
+    ]));
+  });
 });
 
 function makeNotesEngine(projectRootPath: string, notes: unknown[] = []) {
