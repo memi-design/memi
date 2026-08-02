@@ -4,14 +4,14 @@
 
 Manifest updated: 2026-08-01
 
-> Engine 2.7.5 is not the current public release. The public activation path remains 2.7.4 until independent live-release verification passes.
+> Engine 2.7.6 is not the current public release. The public activation path remains 2.7.4 until independent live-release verification passes.
 
 
 Memi is the read-only design engineering audit and skill layer for coding agents. The CLI and focused skills are primary; Studio is a companion.
 
 | Release group | Version | Canonical evidence |
 |---|---:|---|
-| Engine candidate (unreleased) | `2.7.5` | [GitHub release](https://github.com/memi-design/memi/releases/tag/v2.7.4) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
+| Engine candidate (unreleased) | `2.7.6` | [GitHub release](https://github.com/memi-design/memi/releases/tag/v2.7.4) · [npm](https://www.npmjs.com/package/@memi-design/cli) |
 | Studio | `2.5.0` | [Studio release](https://github.com/memi-design/memi-studio/releases/tag/v2.5.0) |
 | Website | `1.0.4` | [memoire.cv](https://www.memoire.cv) |
 
@@ -19,7 +19,7 @@ Memi is the read-only design engineering audit and skill layer for coding agents
 
 - Release state: `candidate`
 - Source commit: Not assigned. npm provenance must bind the eventual publish commit.
-- GitHub tag: `v2.7.5`
+- GitHub tag: `v2.7.6`
 - GitHub Action major channel: `v2`
 - MCP server: `io.github.sarveshsea/memi`
 

@@ -30,7 +30,7 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.5",
+          version: "2.7.6",
           state: "candidate",
           sourceCommit: null,
           releaseRecord: null,
@@ -52,7 +52,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.5",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.6",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
@@ -95,9 +95,9 @@ describe("release manifest", () => {
           releaseRecord: publicReleaseRecord,
           verification: {
             eligibleForParity: false,
-            reason: "2.7.4 remains public while 2.7.5 is an unpublished candidate",
+            reason: "2.7.4 remains public while 2.7.6 is an unpublished candidate",
           },
-          plannedSuccessor: "2.7.5",
+          plannedSuccessor: "2.7.6",
         },
       },
       surfaces: {

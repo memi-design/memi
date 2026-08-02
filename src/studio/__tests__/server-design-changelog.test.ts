@@ -52,7 +52,7 @@ describe("studio design changelog APIs", () => {
         await server.stop();
         servers.splice(servers.indexOf(server), 1);
       }
-      await rm(root, { recursive: true, force: true });
+      await removeTempProject(root);
     }
   });
 
@@ -90,7 +90,7 @@ describe("studio design changelog APIs", () => {
         await server.stop();
         servers.splice(servers.indexOf(server), 1);
       }
-      await rm(root, { recursive: true, force: true });
+      await removeTempProject(root);
     }
   });
 });
@@ -110,6 +110,17 @@ function makeSession(root: string): StudioSession {
     pendingPrompt: null,
     events: [],
   };
+}
+
+async function removeTempProject(root: string): Promise<void> {
+  // Windows can retain a just-closed HTTP or filesystem handle briefly after
+  // the runtime server stops. Node retries EBUSY/EPERM for recursive removal.
+  await rm(root, {
+    recursive: true,
+    force: true,
+    maxRetries: 3,
+    retryDelay: 100,
+  });
 }
 
 function makeEvent(sessionId: string, type: StudioEvent["type"], message: string): StudioEvent {
