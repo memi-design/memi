@@ -18,7 +18,7 @@ const serverJson = await readJson("server.json");
 
 check(packageJson.name === "@memi-design/cli", `package name is ${packageJson.name}`);
 check(packageJson.version === serverJson.version, `server.json version ${serverJson.version} does not match package.json ${packageJson.version}`);
-check(packageJson.mcpName === "io.github.sarveshsea/memi", `package.json mcpName is ${packageJson.mcpName}`);
+check(packageJson.mcpName === "io.github.memi-design/memi", `package.json mcpName is ${packageJson.mcpName}`);
 check(serverJson.name === packageJson.mcpName, `server.json name ${serverJson.name} does not match package.json mcpName ${packageJson.mcpName}`);
 for (const lifecycle of ["preinstall", "install", "postinstall", "prepare"]) {
   check(!packageJson.scripts?.[lifecycle], `package.json must not define npm lifecycle script "${lifecycle}" for the public package`);

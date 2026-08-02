@@ -22,7 +22,7 @@ Primary CTA: <https://www.memoire.cv>
 - Release target: `@memi-design/cli@2.5.0`.
 - Studio download: `memi-studio v2.4.0` signed macOS companion app from GitHub Releases.
 - Homebrew: `brew install --cask memi-design/memi/memi-studio`.
-- MCP Registry: `io.github.sarveshsea/memi`.
+- MCP Registry: `io.github.memi-design/memi`.
 - Codex plugin: `codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`.
 - Public proof repo: `https://github.com/memi-design/design-sandbox`.
 

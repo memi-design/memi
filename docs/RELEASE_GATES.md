@@ -140,7 +140,7 @@ Before any public distribution push, verify every external surface points to the
 - npm latest: current `package.json` version, currently `2.7.6`
 - npm README phrase: `read-only design engineering audit and skill layer for coding agents`
 - npm install command: `npm i -g @memi-design/cli`
-- MCP name: `io.github.sarveshsea/memi`
+- MCP name: `io.github.memi-design/memi`
 - Agent Skills command: `npx skills add memi-design/memi --skill memoire-design-tooling`
 - Codex marketplace command: `codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`
 - GitHub description: `Memi is the read-only design engineering audit and skill layer for coding agents.`

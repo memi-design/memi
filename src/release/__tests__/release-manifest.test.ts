@@ -16,7 +16,7 @@ import {
 const root = join(import.meta.dirname, "..", "..", "..");
 const manifestPath = join(root, "release-manifest.json");
 const webArtifactPath = join(root, "release-artifacts", "memoire-web.release.json");
-const publishedEngineSourceCommit = "3d07c5476715ce25efbeef356f298bbd958f7f58";
+const previousEngineSourceCommit = "3d07c5476715ce25efbeef356f298bbd958f7f58";
 const publishedReleaseRecord = {
   path: "release-artifacts/npm/2.7.6.release.json",
   sha256: "6af07e6a812492cd05c81296baaf6c485a114f543577eafe33a2a829ff2d115b",
@@ -30,12 +30,14 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.6",
-          state: "published",
-          sourceCommit: publishedEngineSourceCommit,
-          releaseRecord: publishedReleaseRecord,
-          verification: {
-            eligibleForParity: false,
+          version: "2.7.7",
+          state: "candidate",
+          sourceCommit: null,
+          releaseRecord: null,
+          previousPublicRelease: {
+            version: "2.7.6",
+            sourceCommit: previousEngineSourceCommit,
+            releaseRecord: publishedReleaseRecord,
           },
         },
         studio: { version: "2.5.0" },
@@ -47,10 +49,10 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.6",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.7",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
-        mcp: { releaseGroup: "engine", serverName: "io.github.sarveshsea/memi" },
+        mcp: { releaseGroup: "engine", serverName: "io.github.memi-design/memi" },
         studio: { releaseGroup: "studio", repository: "memi-design/memi-studio" },
         website: {
           releaseGroup: "site",
@@ -70,33 +72,34 @@ describe("release manifest", () => {
 
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
+    const publicEngine = manifest.releaseGroups.engine.state === "candidate"
+      ? manifest.releaseGroups.engine.previousPublicRelease
+      : manifest.releaseGroups.engine;
     expect(artifact.publicTruth).toEqual({
-      source: "currentRelease",
+      source: manifest.releaseGroups.engine.state === "candidate"
+        ? "previousPublicRelease"
+        : "currentRelease",
       engine: {
-        version: "2.7.6",
-        sourceCommit: publishedEngineSourceCommit,
+        version: publicEngine.version,
+        sourceCommit: publicEngine.sourceCommit,
         packageName: "@memi-design/cli",
         npmUrl: "https://www.npmjs.com/package/@memi-design/cli",
-        githubReleaseUrl: "https://github.com/memi-design/memi/releases/tag/v2.7.6",
+        githubReleaseUrl: `https://github.com/memi-design/memi/releases/tag/v${publicEngine.version}`,
       },
     });
     expect(artifact.release).toMatchObject({
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.6",
-          state: "published",
-          sourceCommit: publishedEngineSourceCommit,
-          releaseRecord: publishedReleaseRecord,
-          verification: {
-            eligibleForParity: false,
-            reason: "npm publish provenance is recorded; independent public-surface parity verification is pending",
-          },
+          version: publicEngine.version,
+          state: manifest.releaseGroups.engine.state === "candidate" ? "historical" : publicEngine.state,
+          sourceCommit: publicEngine.sourceCommit,
+          releaseRecord: publicEngine.releaseRecord,
         },
       },
       surfaces: {
         githubRelease: {
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.6",
+          url: `https://github.com/memi-design/memi/releases/tag/v${publicEngine.version}`,
         },
       },
     });
@@ -157,6 +160,7 @@ describe("release manifest", () => {
 
   it("fails closed when published release evidence is not byte- and identity-bound", async () => {
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    if (manifest.releaseGroups.engine.state !== "published") return;
     const wrongDigest = structuredClone(manifest);
     wrongDigest.releaseGroups.engine.releaseRecord.sha256 = "f".repeat(64);
     await expect(verifyCoreReleaseSurfaces(root, wrongDigest)).resolves.toContain(

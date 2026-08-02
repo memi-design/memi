@@ -27,8 +27,7 @@ describe("preview changelog sync", () => {
     expect(releases[0]).toMatchObject({
       version: `v${engine.version}`,
       commits: expect.arrayContaining([
-        ["10a5416f", "docs: publish evidence-led Memi onboarding"],
-        ["ed8163e7", "chore: stage 2.7.6 release candidate"],
+        ["0bad800b", "fix: align MCP registry identity with organization"],
       ]),
     });
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);

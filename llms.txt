@@ -2,7 +2,7 @@
 
 Interface understanding for AI coding agents. Design-system memory for coding agents.
 npm: https://www.npmjs.com/package/@memi-design/cli
-MCP registry: io.github.sarveshsea/memi
+MCP registry: io.github.memi-design/memi
 GitHub: https://github.com/memi-design/memi
 Proof: https://github.com/memi-design/design-sandbox
 Craft skills (upstream): https://github.com/emilkowalski/skills
@@ -70,7 +70,7 @@ memi init --team
 memi ci
 ```
 
-GitHub Action: `uses: memi-design/memi@v2` with `version: "2.7.6"`.
+GitHub Action: `uses: memi-design/memi@v2` with `version: "2.7.7"`.
 
 ## Dependency graph
 

@@ -182,7 +182,7 @@ Start with surfaces we control, then move outward only when the target accepts i
 | P0 | `memoire.cv` | Keep docs, changelog, footer, downloads, and `/notes/community/catalog.v1.json` synchronized with npm and Studio. | `npm run check:public-release` |
 | P0 | `memi-design/design-sandbox` | Refresh the sandbox so it proves the 2.3 mandate loop, not only older diagnose/token commands. | `pnpm memi:agent && pnpm verify` |
 | P0 | `sarveshsea/memoire-community-notes` | Keep the five starter Notes published and linked from the website catalog. | `npm run check:community-notes && npm run build:community-notes-catalog` |
-| P1 | MCP Registry and MCP directories | Submit or refresh `io.github.sarveshsea/memi` as the local design-system MCP server for coding agents. | `memi mcp start --no-figma` |
+| P1 | MCP Registry and MCP directories | Submit or refresh `io.github.memi-design/memi` as the local design-system MCP server for coding agents. | `memi mcp start --no-figma` |
 | P1 | Agent Skills directories | Submit `memoire-design-tooling` as the design-system memory skill for Codex, Claude Code, Cursor, and OpenCode. | `npx skills add memi-design/memi --skill memoire-design-tooling` |
 | P1 | shadcn registry directories | Add memi as a registry-quality and design-audit companion for GitHub registries. | `memi shadcn export --out public/r` |
 | P2 | AI UI templates | Add memi to templates that already ship Tailwind/shadcn agent interfaces. | `memi craft audit --json` |

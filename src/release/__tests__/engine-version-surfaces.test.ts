@@ -4,26 +4,24 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const candidateVersion = "2.7.6";
+const candidateVersion = "2.7.7";
 const publishedSourceCommit = "3d07c5476715ce25efbeef356f298bbd958f7f58";
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("published 2.7.6 release surfaces", () => {
-  it("binds the published release to immutable npm evidence", async () => {
+describe("2.7.7 MCP Registry ownership candidate surfaces", () => {
+  it("keeps the prior immutable npm release while staging the corrective candidate", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toMatchObject({
       version: candidateVersion,
-      state: "published",
-      sourceCommit: publishedSourceCommit,
-      releaseRecord: {
-        path: "release-artifacts/npm/2.7.6.release.json",
-        sha256: "6af07e6a812492cd05c81296baaf6c485a114f543577eafe33a2a829ff2d115b",
-      },
-      verification: {
-        eligibleForParity: false,
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+      previousPublicRelease: {
+        version: "2.7.6",
+        sourceCommit: publishedSourceCommit,
       },
     });
     expect(manifest.surfaces.githubRelease.url.endsWith(`/v${candidateVersion}`)).toBe(true);
@@ -68,6 +66,8 @@ describe("published 2.7.6 release surfaces", () => {
     ]).toEqual(Array(12).fill(candidateVersion));
     expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${candidateVersion}.mcpb`);
     expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${candidateVersion}.mcpb`);
+    expect(packageJson.mcpName).toBe("io.github.memi-design/memi");
+    expect(server.name).toBe("io.github.memi-design/memi");
     expect(await readFile(join(root, "mcpb/server/index.cjs"), "utf8"))
       .toContain(`@memi-design/cli@${candidateVersion}`);
     const action = await readFile(join(root, "action.yml"), "utf8");
@@ -105,12 +105,11 @@ describe("published 2.7.6 release surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
   });
 
-  it("uses the published release in the public activation path while retaining the parity boundary", async () => {
+  it("uses the candidate activation path while retaining the parity boundary", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Release state: `published`");
-    expect(currentRelease).toContain("Engine published (parity pending)");
-    expect(currentRelease).toContain(`Source commit: \`${publishedSourceCommit}\``);
-    expect(currentRelease).toContain(`npx -y @memi-design/cli@${candidateVersion}`);
+    expect(currentRelease).toContain("Release state: `candidate`");
+    expect(currentRelease).toContain("Engine candidate");
+    expect(currentRelease).toContain("npx -y @memi-design/cli@2.7.6");
     expect(currentRelease).toContain("Do not announce parity until npm, GitHub, MCP, the Action, Studio, and the deployed website match their release groups.");
   });
 });
