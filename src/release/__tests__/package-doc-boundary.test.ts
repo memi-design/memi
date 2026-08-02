@@ -34,6 +34,13 @@ describe("immutable package documentation boundary", () => {
     expect(files).not.toContain("docs/RELEASE_GATES.md");
   });
 
+  it("keeps raw study contracts and research receipts out of the runtime package", () => {
+    const files = dryRunPackageFiles();
+
+    expect(files).not.toContain("docs/case-studies/memi-2.7-workflows/buzzr-tab-unread-badge.json");
+    expect(files.some((file) => file.startsWith("docs/research/"))).toBe(false);
+  });
+
   it("keeps the packed README Quickstart evergreen", async () => {
     const manifest = JSON.parse(
       await readFile(join(root, "release-manifest.json"), "utf8"),
