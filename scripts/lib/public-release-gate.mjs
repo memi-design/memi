@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  buildPublicReleaseManifest,
   serializeJson,
   validateWebReleaseArtifact,
   validateWebReleaseArtifactSourceBytes,
@@ -98,8 +99,8 @@ export async function verifyWebsiteArtifactEvidence(options, dependencies) {
       `deployed website release artifact provenance is invalid: ${sourceFailures.join("; ")}`,
     );
   }
-  if (serializeJson(artifact.release) !== serializeJson(manifest)) {
-    throw new Error("deployed website release payload does not match the canonical manifest");
+  if (serializeJson(artifact.release) !== serializeJson(buildPublicReleaseManifest(manifest))) {
+    throw new Error("deployed website release payload does not match the canonical public manifest");
   }
 
   const manifestSha256 = createHash("sha256").update(serializeJson(manifest)).digest("hex");

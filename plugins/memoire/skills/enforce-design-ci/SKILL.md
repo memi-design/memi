@@ -44,7 +44,7 @@ jobs:
           fetch-depth: 0
       - uses: memi-design/memi@v2
         with:
-          version: "2.7.4"
+          version: "2.7.5"
 ```
 
 ## Completion Criteria
