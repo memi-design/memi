@@ -3,9 +3,9 @@
   "provenance": {
     "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "ae32c73a5eed4efbae06efa6be9dde234caea205",
-    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/ae32c73a5eed4efbae06efa6be9dde234caea205/release-manifest.json",
-    "manifestSha256": "4ad01767d8b3801bc37c0c96253c68a44ac39ded1cfea6543376dc24b98f45c3"
+    "sourceCommit": "886aa15e172bcd49befb0a4fe24c7d9932e0681a",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/886aa15e172bcd49befb0a4fe24c7d9932e0681a/release-manifest.json",
+    "manifestSha256": "f621e2251eadf88ea2f40325628e065c0fef567617898048de71c5739d6955ce"
   },
   "orchestration": {
     "schemaVersion": 1,
@@ -20,8 +20,12 @@
           "sha256": "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c"
         },
         "verification": {
-          "eligibleForParity": false,
-          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+          "eligibleForParity": true,
+          "reason": "independent public-release gate passed with zero failures",
+          "publicGate": {
+            "path": "release-artifacts/public-gate/2.7.7.parity.json",
+            "sha256": "1719e4224de2d0cac46b7ec45467e749d000af78b2279a1252714bd7c599a334"
+          }
         }
       },
       "studio": {
@@ -95,8 +99,12 @@
           "sha256": "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c"
         },
         "verification": {
-          "eligibleForParity": false,
-          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+          "eligibleForParity": true,
+          "reason": "independent public-release gate passed with zero failures",
+          "publicGate": {
+            "path": "release-artifacts/public-gate/2.7.7.parity.json",
+            "sha256": "1719e4224de2d0cac46b7ec45467e749d000af78b2279a1252714bd7c599a334"
+          }
         }
       },
       "studio": {
