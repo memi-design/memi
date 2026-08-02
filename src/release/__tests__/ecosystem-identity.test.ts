@@ -16,14 +16,16 @@ describe("current ecosystem identity", () => {
       readJson("package.json"),
       readJson("release-manifest.json"),
     ]);
-    const version = packageJson.version;
+    const engine = releaseManifest.releaseGroups.engine;
+    const publicRelease = engine.state === "candidate" ? engine.previousPublicRelease : engine;
+    const version = publicRelease.version;
     const identityPath = `release-artifacts/identity/${version}.identity.json`;
     const identity = await readJson(identityPath);
-    const npmReceiptPath = releaseManifest.releaseGroups.engine.releaseRecord.path;
+    const npmReceiptPath = publicRelease.releaseRecord.path;
     const npmReceipt = await readFile(join(root, npmReceiptPath));
     const npmReceiptSha256 = createHash("sha256").update(npmReceipt).digest("hex");
 
-    expect(releaseManifest.releaseGroups.engine.version).toBe(version);
+    expect(releaseManifest.releaseGroups.engine.version).toBe(packageJson.version);
     expect(identity.release).toMatchObject({
       version,
       npmReceipt: npmReceiptPath,
@@ -34,15 +36,20 @@ describe("current ecosystem identity", () => {
   });
 
   it("separates deprecated policy from active legacy MCP registry observations", async () => {
-    const packageJson = await readJson("package.json");
+    const [packageJson, releaseManifest] = await Promise.all([
+      readJson("package.json"),
+      readJson("release-manifest.json"),
+    ]);
+    const engine = releaseManifest.releaseGroups.engine;
+    const publicRelease = engine.state === "candidate" ? engine.previousPublicRelease : engine;
     const identity = await readJson(
-      `release-artifacts/identity/${packageJson.version}.identity.json`,
+      `release-artifacts/identity/${publicRelease.version}.identity.json`,
     );
 
     expect(identity.surfaces.mcpRegistry).toMatchObject({
       identifier: "io.github.memi-design/memi",
       status: "published",
-      version: packageJson.version,
+      version: publicRelease.version,
       legacy: {
         identifier: "io.github.sarveshsea/memi",
         policyStatus: "deprecated",
