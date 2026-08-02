@@ -31,6 +31,13 @@
     {
       "command": "node",
       "args": [
+        "scripts/memi-v16-host-process-probe.mjs"
+      ],
+      "timeoutMs": 20000
+    },
+    {
+      "command": "node",
+      "args": [
         "scripts/memi-v16-ios-exclusive-reset.mjs"
       ],
       "timeoutMs": 420000
@@ -50,6 +57,11 @@
     {
       "path": "tests/components/ui/memi-custom-tab-bar-unread.test.tsx",
       "content": "import React from 'react';\nimport { render } from '@testing-library/react-native';\n\njest.mock('@/src/lib/haptics', () => ({ haptic: { selection: jest.fn() } }));\njest.mock('@expo/vector-icons/Feather', () => {\n  const React = require('react');\n  const { Text } = require('react-native');\n  return ({ name }: { name: string }) => React.createElement(Text, null, `feather:${name}`);\n});\njest.mock('@expo/vector-icons/MaterialCommunityIcons', () => {\n  const React = require('react');\n  const { Text } = require('react-native');\n  return ({ name }: { name: string }) => React.createElement(Text, null, `mci:${name}`);\n});\n\nimport { CustomTabBar, VISIBLE_TAB_NAMES } from '@/components/ui/CustomTabBar';\nimport { getAppPalette } from '@/src/theme/palette';\n\nconst routes = VISIBLE_TAB_NAMES.map((name) => ({ key: `${name}-key`, name, params: undefined, path: undefined }));\n\nfunction renderTabs(chatUnreadCount?: number, hasUnreadFeed = false) {\n  const descriptors = Object.fromEntries(routes.map((route) => [route.key, { options: { title: route.name } }]));\n  return render(\n    <CustomTabBar\n      chatUnreadCount={chatUnreadCount}\n      descriptors={descriptors as any}\n      dynamicDockGradient={['transparent', 'transparent', 'transparent']}\n      feedUnreadIndicatorEnabled\n      glossColor=\"transparent\"\n      hasUnreadFeed={hasUnreadFeed}\n      insets={{ bottom: 0, left: 0, right: 0, top: 0 }}\n      navigation={{ emit: jest.fn(() => ({ defaultPrevented: false })), navigate: jest.fn() } as any}\n      palette={getAppPalette()}\n      responsiveMaxContentWidth={480}\n      selectedVisibleRoute=\"chat\"\n      state={{ history: [], index: 4, key: 'tabs', routeNames: [...VISIBLE_TAB_NAMES], routes, stale: false, type: 'tab' } as any}\n      tabBarHeight={72}\n      bottomPadding={8}\n    />,\n  );\n}\n\ndescribe('Buzzr chat unread badge contract', () => {\n  it('shows exact unread counts and announces the full count on the tab', () => {\n    const screen = renderTabs(7);\n    expect(screen.getByTestId('tab-unread-count-chat', { includeHiddenElements: true })).toHaveTextContent('7');\n    expect(screen.getByLabelText('chat, 7 unread')).toBeTruthy();\n    expect(screen.getByTestId('tab-button-chat').props.accessibilityState).toEqual({ selected: true });\n  });\n\n  it('caps only the visual badge while preserving the full accessible count', () => {\n    const screen = renderTabs(120);\n    expect(screen.getByTestId('tab-unread-count-chat', { includeHiddenElements: true })).toHaveTextContent('99+');\n    expect(screen.getByLabelText('chat, 120 unread')).toBeTruthy();\n    expect(screen.getByTestId('tab-unread-count-chat', { includeHiddenElements: true }).props.accessibilityElementsHidden).toBe(true);\n  });\n\n  it('renders no chat count for zero and preserves the pulse activity dot', () => {\n    const screen = renderTabs(0, true);\n    expect(screen.queryByTestId('tab-unread-count-chat', { includeHiddenElements: true })).toBeNull();\n    expect(screen.getByTestId('tab-unread-dot-pulse')).toBeTruthy();\n  });\n});\n"
+    },
+    {
+      "path": "scripts/memi-v16-host-process-probe.mjs",
+      "content": "import { spawn } from \"node:child_process\";\n\nconst probeCode = \"process.stdout.write('memi-host-process-probe-ok\\\\n')\";\nconst command = process.platform === \"win32\" ? process.execPath : \"/usr/bin/env\";\nconst args = process.platform === \"win32\"\n  ? [\"-e\", probeCode]\n  : [\"node\", \"-e\", probeCode];\nconst child = spawn(command, args, { stdio: [\"ignore\", \"pipe\", \"pipe\"] });\nlet stdout = \"\";\nlet stderr = \"\";\nlet settled = false;\nawait new Promise((resolve, reject) => {\n  const fail = (reason) => {\n    if (settled) return;\n    settled = true;\n    clearTimeout(timeout);\n    child.kill(\"SIGTERM\");\n    reject(new Error(\"host-process-launch-unavailable: \" + reason));\n  };\n  const timeout = setTimeout(() => fail(\"probe timed out after 10000ms\"), 10000);\n  child.stdout.setEncoding(\"utf8\");\n  child.stderr.setEncoding(\"utf8\");\n  child.stdout.on(\"data\", (chunk) => { stdout += chunk; });\n  child.stderr.on(\"data\", (chunk) => { stderr += chunk; });\n  child.on(\"error\", (error) => fail(error.message));\n  child.on(\"close\", (code, signal) => {\n    if (settled) return;\n    settled = true;\n    clearTimeout(timeout);\n    if (code !== 0 || stdout.trim() !== \"memi-host-process-probe-ok\") {\n      reject(new Error(\"host-process-launch-unavailable: \" + (stderr.trim() || signal || \"exit \" + code)));\n      return;\n    }\n    resolve();\n  });\n});\n",
+      "executable": false
     },
     {
       "path": "scripts/memi-v16-ios-capture.mjs",

@@ -102,6 +102,44 @@ if (after.length !== 1 || after[0].udid !== udid) {
 }
 `;
 
+const hostProcessProbe = String.raw`import { spawn } from "node:child_process";
+
+const probeCode = "process.stdout.write('memi-host-process-probe-ok\\n')";
+const command = process.platform === "win32" ? process.execPath : "/usr/bin/env";
+const args = process.platform === "win32"
+  ? ["-e", probeCode]
+  : ["node", "-e", probeCode];
+const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
+let stdout = "";
+let stderr = "";
+let settled = false;
+await new Promise((resolve, reject) => {
+  const fail = (reason) => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timeout);
+    child.kill("SIGTERM");
+    reject(new Error("host-process-launch-unavailable: " + reason));
+  };
+  const timeout = setTimeout(() => fail("probe timed out after 10000ms"), 10000);
+  child.stdout.setEncoding("utf8");
+  child.stderr.setEncoding("utf8");
+  child.stdout.on("data", (chunk) => { stdout += chunk; });
+  child.stderr.on("data", (chunk) => { stderr += chunk; });
+  child.on("error", (error) => fail(error.message));
+  child.on("close", (code, signal) => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timeout);
+    if (code !== 0 || stdout.trim() !== "memi-host-process-probe-ok") {
+      reject(new Error("host-process-launch-unavailable: " + (stderr.trim() || signal || "exit " + code)));
+      return;
+    }
+    resolve();
+  });
+});
+`;
+
 const webCollector = String.raw`import { spawn } from "node:child_process";
 import { lstat, mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -216,17 +254,29 @@ async function buildTask(taskId) {
   const collectorName = isWeb ? "scripts/memi-v16-web-capture.mjs" : "scripts/memi-v16-ios-capture.mjs";
   return {
     ...source,
-    preparation: isWeb ? source.preparation : [
+    preparation: [
+      {
+        command: "node",
+        args: ["scripts/memi-v16-host-process-probe.mjs"],
+        timeoutMs: 20_000,
+      },
+      ...isWeb ? [] : [
       {
         command: "node",
         args: ["scripts/memi-v16-ios-exclusive-reset.mjs"],
         timeoutMs: 420000,
       },
+      ],
       ...source.preparation,
     ],
     nativeCaptures: captures(taskId),
     fixtures: [
       ...source.fixtures,
+      {
+        path: "scripts/memi-v16-host-process-probe.mjs",
+        content: hostProcessProbe,
+        executable: false,
+      },
       { path: collectorName, content: collector, executable: false },
       ...isWeb ? [] : [{
         path: "scripts/memi-v16-ios-exclusive-reset.mjs",

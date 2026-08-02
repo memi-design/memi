@@ -29,6 +29,13 @@
   ],
   "preparation": [
     {
+      "command": "node",
+      "args": [
+        "scripts/memi-v16-host-process-probe.mjs"
+      ],
+      "timeoutMs": 20000
+    },
+    {
       "command": "npm",
       "args": [
         "ci",
@@ -69,6 +76,11 @@
     {
       "path": "tests/memi/command-menu.spec.ts",
       "content": "import { expect, test } from '@playwright/test';\n\ntest('recruiter command menu supports the complete keyboard journey', async ({ page }) => {\n  await page.goto('/');\n  await page.getByRole('button', { name: 'Recruiter' }).click();\n\n  const trigger = page.getByTestId('command-menu-trigger');\n  await expect(trigger).toBeVisible();\n  await expect(trigger).toHaveAccessibleName('Open command menu');\n\n  await page.keyboard.press('ControlOrMeta+K');\n  const dialog = page.getByRole('dialog', { name: 'Navigate Paraform' });\n  await expect(dialog).toBeVisible();\n  const search = dialog.getByRole('combobox', { name: 'Search destinations' });\n  await expect(search).toBeFocused();\n  await search.fill('Candidates');\n  await page.keyboard.press('Enter');\n  await expect(dialog).toBeHidden();\n  await expect(page.getByRole('heading', { name: 'Candidates' })).toBeVisible();\n\n  await trigger.click();\n  await expect(dialog).toBeVisible();\n  await page.keyboard.press('Escape');\n  await expect(dialog).toBeHidden();\n  await expect(trigger).toBeFocused();\n\n  await page.getByPlaceholder('Search candidates').focus();\n  await page.keyboard.press('ControlOrMeta+K');\n  await expect(dialog).toBeHidden();\n});\n\ntest('command menu remains functional with reduced motion', async ({ page }) => {\n  await page.emulateMedia({ reducedMotion: 'reduce' });\n  await page.goto('/');\n  await page.getByRole('button', { name: 'Recruiter' }).click();\n  await page.getByTestId('command-menu-trigger').click();\n  await expect(page.getByRole('dialog', { name: 'Navigate Paraform' })).toBeVisible();\n});\n"
+    },
+    {
+      "path": "scripts/memi-v16-host-process-probe.mjs",
+      "content": "import { spawn } from \"node:child_process\";\n\nconst probeCode = \"process.stdout.write('memi-host-process-probe-ok\\\\n')\";\nconst command = process.platform === \"win32\" ? process.execPath : \"/usr/bin/env\";\nconst args = process.platform === \"win32\"\n  ? [\"-e\", probeCode]\n  : [\"node\", \"-e\", probeCode];\nconst child = spawn(command, args, { stdio: [\"ignore\", \"pipe\", \"pipe\"] });\nlet stdout = \"\";\nlet stderr = \"\";\nlet settled = false;\nawait new Promise((resolve, reject) => {\n  const fail = (reason) => {\n    if (settled) return;\n    settled = true;\n    clearTimeout(timeout);\n    child.kill(\"SIGTERM\");\n    reject(new Error(\"host-process-launch-unavailable: \" + reason));\n  };\n  const timeout = setTimeout(() => fail(\"probe timed out after 10000ms\"), 10000);\n  child.stdout.setEncoding(\"utf8\");\n  child.stderr.setEncoding(\"utf8\");\n  child.stdout.on(\"data\", (chunk) => { stdout += chunk; });\n  child.stderr.on(\"data\", (chunk) => { stderr += chunk; });\n  child.on(\"error\", (error) => fail(error.message));\n  child.on(\"close\", (code, signal) => {\n    if (settled) return;\n    settled = true;\n    clearTimeout(timeout);\n    if (code !== 0 || stdout.trim() !== \"memi-host-process-probe-ok\") {\n      reject(new Error(\"host-process-launch-unavailable: \" + (stderr.trim() || signal || \"exit \" + code)));\n      return;\n    }\n    resolve();\n  });\n});\n",
+      "executable": false
     },
     {
       "path": "scripts/memi-v16-web-capture.mjs",

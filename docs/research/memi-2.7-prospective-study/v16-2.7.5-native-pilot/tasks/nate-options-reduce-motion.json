@@ -29,6 +29,13 @@
     {
       "command": "node",
       "args": [
+        "scripts/memi-v16-host-process-probe.mjs"
+      ],
+      "timeoutMs": 20000
+    },
+    {
+      "command": "node",
+      "args": [
         "scripts/memi-v16-ios-exclusive-reset.mjs"
       ],
       "timeoutMs": 420000
@@ -45,6 +52,11 @@
     {
       "path": "NateTheBaitUITests/MemiReduceMotionStatusUITests.swift",
       "content": "import XCTest\n\nfinal class MemiReduceMotionStatusUITests: XCTestCase {\n    @MainActor\n    func testOptionsExposeTruthfulSystemReduceMotionStatus() {\n        let app = XCUIApplication()\n        app.launchArguments = [\"-ui-testing\"]\n        app.launch()\n\n        let options = app.buttons[\"Options\"]\n        XCTAssertTrue(options.waitForExistence(timeout: 5))\n        options.tap()\n\n        let status = app.descendants(matching: .any)[\"options-reduce-motion-status\"]\n        XCTAssertTrue(status.waitForExistence(timeout: 3))\n        XCTAssertTrue(status.label.localizedCaseInsensitiveContains(\"Reduce Motion\"))\n        XCTAssertTrue(\n            status.label.localizedCaseInsensitiveContains(\"On\") ||\n            status.label.localizedCaseInsensitiveContains(\"Off\")\n        )\n        XCTAssertGreaterThanOrEqual(status.frame.height, 43.5)\n        XCTAssertTrue(status.isHittable)\n        XCTAssertGreaterThanOrEqual(status.frame.minX, 0)\n        XCTAssertLessThanOrEqual(status.frame.maxX, app.frame.maxX)\n\n        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())\n        attachment.name = \"Nate Options Reduce Motion status\"\n        attachment.lifetime = .keepAlways\n        add(attachment)\n    }\n}\n"
+    },
+    {
+      "path": "scripts/memi-v16-host-process-probe.mjs",
+      "content": "import { spawn } from \"node:child_process\";\n\nconst probeCode = \"process.stdout.write('memi-host-process-probe-ok\\\\n')\";\nconst command = process.platform === \"win32\" ? process.execPath : \"/usr/bin/env\";\nconst args = process.platform === \"win32\"\n  ? [\"-e\", probeCode]\n  : [\"node\", \"-e\", probeCode];\nconst child = spawn(command, args, { stdio: [\"ignore\", \"pipe\", \"pipe\"] });\nlet stdout = \"\";\nlet stderr = \"\";\nlet settled = false;\nawait new Promise((resolve, reject) => {\n  const fail = (reason) => {\n    if (settled) return;\n    settled = true;\n    clearTimeout(timeout);\n    child.kill(\"SIGTERM\");\n    reject(new Error(\"host-process-launch-unavailable: \" + reason));\n  };\n  const timeout = setTimeout(() => fail(\"probe timed out after 10000ms\"), 10000);\n  child.stdout.setEncoding(\"utf8\");\n  child.stderr.setEncoding(\"utf8\");\n  child.stdout.on(\"data\", (chunk) => { stdout += chunk; });\n  child.stderr.on(\"data\", (chunk) => { stderr += chunk; });\n  child.on(\"error\", (error) => fail(error.message));\n  child.on(\"close\", (code, signal) => {\n    if (settled) return;\n    settled = true;\n    clearTimeout(timeout);\n    if (code !== 0 || stdout.trim() !== \"memi-host-process-probe-ok\") {\n      reject(new Error(\"host-process-launch-unavailable: \" + (stderr.trim() || signal || \"exit \" + code)));\n      return;\n    }\n    resolve();\n  });\n});\n",
+      "executable": false
     },
     {
       "path": "scripts/memi-v16-ios-capture.mjs",
