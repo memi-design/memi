@@ -10,8 +10,8 @@ import {
 } from "./lib/ecosystem-identity.mjs";
 
 const root = process.cwd();
-const EXPECTED_BRAND_MANIFEST_SHA256 = "98cd5224d31466a86d3f2d102bf6f160a195aed9c393d29a7f09eb75ecc90ff3";
-const EXPECTED_BRAND_SCHEMA_SHA256 = "6968bf5e5884530b47ecf31702f020d4d957b6aa4f4d1e82d9b8cd3fd44a2d0d";
+const EXPECTED_BRAND_MANIFEST_SHA256 = "8b7ca68e836ee0362fe1763b067dacb8e500d5037cd12791f6c5aaf0e80a2755";
+const EXPECTED_BRAND_SCHEMA_SHA256 = "ef3eaed367e20c3d54ef8284d84c8195d40fb5916fcd525fcd77243a0353e473";
 
 async function readJson(path) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
@@ -63,7 +63,7 @@ test("current release derives and validates its packaged ecosystem identity rece
   });
 });
 
-test("release identity pins the exact revision-2 organization brand contract", async () => {
+test("release identity pins the exact revision-3 organization brand contract", async () => {
   const [manifestBytes, schemaBytes] = await Promise.all([
     readFile(join(root, "brand", "brand-manifest.v1.json")),
     readFile(join(root, "brand", "brand-manifest.v1.schema.json")),
@@ -72,18 +72,26 @@ test("release identity pins the exact revision-2 organization brand contract", a
   assert.equal(createHash("sha256").update(schemaBytes).digest("hex"), EXPECTED_BRAND_SCHEMA_SHA256);
 
   const context = await loadAndValidateEcosystemIdentity(root);
+  assert.equal(context.brandManifest.brandRevision, 3);
   const cli = context.brandManifest.products.find(({ id }) => id === "cli");
   assert.deepEqual({
     name: cli.name,
     status: cli.status,
     repository: cli.urls.repository,
     package: cli.urls.package,
+    packages: cli.packages,
     license: cli.license,
   }, {
     name: "memi CLI",
     status: "available",
     repository: "https://github.com/memi-design/memi",
     package: "https://www.npmjs.com/package/@memi-design/cli",
+    packages: [{
+      name: "@memi-design/cli",
+      registry: "npm",
+      status: "current",
+      url: "https://www.npmjs.com/package/@memi-design/cli",
+    }],
     license: {
       spdx: "MIT",
       name: "MIT License",
