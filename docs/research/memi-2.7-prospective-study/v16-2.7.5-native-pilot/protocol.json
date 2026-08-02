@@ -30,7 +30,8 @@
     ],
     "billing": "not part of native quality/resource admission; a separately frozen USD-cost extension requires a retained provider usage export or invoice allocation plus immutable price card",
     "timing": "separate adapter and verifier wall times",
-    "admission": "exact trial binding plus file-level and manifest-level SHA-256 verification"
+    "admission": "exact trial binding plus file-level and manifest-level SHA-256 verification",
+    "tokenEnforcement": "The adapter stops at the first streamed provider usage report over a frozen token ceiling. A final trace is the admission authority; because a provider may report only at a turn boundary, streaming enforcement cannot prove that no unreported excess was consumed."
   },
   "analysis": {
     "primaryOutcome": "blinded paired design-quality score on a 0-100 rubric",

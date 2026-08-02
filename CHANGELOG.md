@@ -55,6 +55,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `ff697f59` — test: reproduce streamed input budget breach
 - `8b90796b` — fix: stop adapters at streamed token caps
 - `38eaca7e` — fix: handle malformed workflow usage events
+- `80b8134a` — fix: describe observable token budget enforcement
 
 The next prospective-study format can now freeze per-task native platforms and
 require hash-addressable screenshots, interaction traces, accessibility trees,

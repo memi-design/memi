@@ -151,6 +151,12 @@ The [calibration-plan.json](calibration-plan.json) is frozen and executed before
 the 36-cell [plan.json](plan.json). Its cells are explicitly excluded from the
 confirmatory analysis, including if an implementation outcome looks favorable.
 
+Token ceilings are enforced at the first streamed provider usage report and are
+always rechecked from the final trace. A provider can report only at a turn
+boundary, so the stream guard may not prevent every excess token from being
+consumed; it does ensure the run is stopped when a breach becomes observable,
+and the final trace still excludes it from admission.
+
 The current [preflight audit](preflight-audit.json) records the observed local
 fixture revisions and the remaining freeze prerequisites. It is a readiness
 ledger, not a study result.
