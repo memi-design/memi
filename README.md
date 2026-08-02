@@ -59,10 +59,30 @@ These are the measured results currently available in the [V15 confirmatory audi
 | --- | --- | --- |
 | **36 / 36** frozen execution receipts admitted | Every preregistered agent cell had an auditable receipt | Receipt admission, not universal performance |
 | **10 complete model-graded matched pairs** | Rendered design-quality comparisons survived the prespecified screen | Model-graded evidence, not independent practitioner review |
-| **2,187 / 2,187** historical candidate tests passed | The 2.7 candidate record completed its recorded test suite | Historical release evidence, not proof that every project benefits |
 | **0** model calls required in deterministic CI enforcement | The pull-request gate can rerun file-anchored checks without an LLM | This describes the CI path, not every optional workflow |
 
 The full study also reports exclusions, failures, and limits. **No superiority, speed, or dollar-savings claim is made.**
+
+**Separate historical release record:** the 2.7 candidate record reported **2,187 / 2,187** tests passed. It is release evidence, not part of V15 and not proof that every project benefits.
+
+## Benchmarks and paper
+
+<p align="center">
+  <a href="https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf">
+    <img src="assets/readme-benchmark.svg" alt="V15 benchmark preview. Blinded quality non-inferiority passed for the scoped Buzzr and Paraform tasks, while 0 of 21 corrected resource tests rejected the null. The study does not establish general superiority, speed, or cost savings." width="100%" />
+  </a>
+</p>
+
+The graphic is a compact reading guide to the [public technical paper](https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf), not a leaderboard. The primary measure was a blinded, model-graded 100-point design-quality rubric. The preregistered question was narrow: could Memi stay within five points of its paired baseline on each renderable task?
+
+| Benchmark result | Exact reading |
+| --- | --- |
+| Buzzr / Expo: mean **+1.4**, one-sided lower bound **+0.2** | Above the −5 non-inferiority margin; the scoped gate passed. |
+| Paraform / web: mean **−0.4**, one-sided lower bound **−3.4** | Still above the −5 margin; the scoped gate passed. |
+| Resource estimates: **0 / 21** task-by-resource estimates had a Holm-corrected test reject | No supported claim that Memi is faster, cheaper, or uses fewer tokens. |
+| Nate / SwiftUI | Functional and resource receipts are retained, but there is no admitted visual-quality pair. |
+
+**Benchmark contracts are separate from study results.** [InterfaceBench v1](https://github.com/memi-design/memi/blob/main/benchmarks/interfacebench-v1.json) specifies 100 target tasks with 5 pinned seed tasks; it is not an aggregate performance score. [DesignWorkBench v2](https://github.com/memi-design/memi/blob/main/docs/audits/memi-designworkbench-v2-readiness.md) holds 300 task contracts and still requires practitioner calibration before any certification claim.
 
 ## What you get
 
@@ -97,7 +117,7 @@ The [V15 confirmatory audit](https://github.com/memi-design/memi/blob/main/docs/
 | **36 / 36 frozen receipts admitted** across Buzzr/Expo, Paraform/web, and Nate/SwiftUI | A pooled cross-product performance claim |
 | **10 complete model-graded matched pairs**; model grades are not independent practitioner evidence | That Memi is professionally superior overall |
 | **Quality non-inferiority passed** for the two graded task families: Buzzr and Paraform | That every interface, platform, or task benefits |
-| **0 corrected resource tests rejected**; billing records were not collected | Faster, cheaper, or dollar-saving operation |
+| **0 / 26 secondary tests rejected after Holm correction**; billing records were not collected | Faster, cheaper, or dollar-saving operation |
 
 **No superiority, speed, or dollar-savings claim is made.** The study reports exclusions without imputation and keeps functional, rendered-quality, and resource evidence separate.
 

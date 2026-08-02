@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title description">
+  <title id="title">Memi V15 confirmatory benchmark preview</title>
+  <desc id="description">A research-style summary of two scoped blinded quality non-inferiority results and the corrected resource result. It makes no general superiority, speed, or cost claim.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#fffdfb"/>
+      <stop offset="1" stop-color="#f8f4f0"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#4a3933" flood-opacity=".10"/>
+    </filter>
+    <style>
+      .eyebrow{font:700 15px Arial,Helvetica,sans-serif;letter-spacing:2.1px;fill:#8b6f64}
+      .title{font:700 39px Arial,Helvetica,sans-serif;letter-spacing:-1.35px;fill:#1e262d}
+      .body{font:400 16px Arial,Helvetica,sans-serif;fill:#58636d}
+      .label{font:700 16px Arial,Helvetica,sans-serif;fill:#27313a}
+      .small{font:400 14px Arial,Helvetica,sans-serif;fill:#68747d}
+      .metric{font:700 28px Arial,Helvetica,sans-serif;letter-spacing:-.7px;fill:#222b33}
+      .micro{font:700 12px Arial,Helvetica,sans-serif;letter-spacing:1.1px;fill:#7b8890}
+    </style>
+  </defs>
+
+  <rect width="1200" height="700" fill="url(#paper)"/>
+  <path d="M0 0H1200V6H0z" fill="#cf6a7c"/>
+  <g filter="url(#shadow)">
+    <rect x="46" y="46" width="1108" height="608" rx="20" fill="#ffffff" stroke="#e6ddd7"/>
+  </g>
+
+  <text class="eyebrow" x="92" y="98">MEMI · V15 CONFIRMATORY STUDY</text>
+  <text class="title" x="92" y="144">What the benchmark actually says</text>
+  <text class="body" x="92" y="174">18 matched pairs · 36 serialized cells · blinded model-graded quality on a 100-point rubric</text>
+
+  <g transform="translate(92 214)">
+    <rect width="736" height="290" rx="13" fill="#fcfbfa" stroke="#d8e0e3"/>
+    <text class="micro" x="30" y="34">PRIMARY OUTCOME · MEMI MINUS PAIRED BASELINE</text>
+    <text class="small" x="30" y="59">A task passes when its one-sided 95% lower bound stays to the right of −5.</text>
+
+    <line x1="188" y1="91" x2="188" y2="244" stroke="#e7ecee"/>
+    <line x1="332" y1="91" x2="332" y2="244" stroke="#d46f46" stroke-width="2" stroke-dasharray="7 6"/>
+    <line x1="572" y1="91" x2="572" y2="244" stroke="#c8d1d5" stroke-width="2" stroke-dasharray="5 5"/>
+    <line x1="700" y1="91" x2="700" y2="244" stroke="#e7ecee"/>
+
+    <text class="small" x="176" y="270">−8</text>
+    <text class="small" x="313" y="270">−5</text>
+    <text class="small" x="565" y="270">0</text>
+    <text class="small" x="691" y="270">+4</text>
+    <text class="small" x="349" y="286">blinded score difference (points)</text>
+    <text class="small" x="300" y="82" fill="#b95732">non-inferiority margin</text>
+
+    <text class="label" x="30" y="128">Buzzr / Expo</text>
+    <text class="small" x="30" y="149">n = 5 matched pairs</text>
+    <line x1="578" y1="132" x2="656" y2="132" stroke="#aebdc4" stroke-width="8" stroke-linecap="round"/>
+    <line x1="578" y1="120" x2="578" y2="144" stroke="#316a96" stroke-width="3"/>
+    <circle cx="616" cy="132" r="8" fill="#316a96"/>
+    <text class="small" x="670" y="128">mean +1.4</text>
+    <text class="small" x="670" y="147">lower +0.2</text>
+
+    <text class="label" x="30" y="203">Paraform / web</text>
+    <text class="small" x="30" y="224">n = 5 matched pairs</text>
+    <line x1="409" y1="207" x2="560" y2="207" stroke="#d6c0b5" stroke-width="8" stroke-linecap="round"/>
+    <line x1="409" y1="195" x2="409" y2="219" stroke="#c5663b" stroke-width="3"/>
+    <circle cx="553" cy="207" r="8" fill="#c5663b"/>
+    <text class="small" x="570" y="203">mean −0.4</text>
+    <text class="small" x="570" y="222">lower −3.4</text>
+  </g>
+
+  <g transform="translate(858 214)">
+    <rect width="250" height="290" rx="13" fill="#f4f8f4" stroke="#c9d9c8"/>
+    <text class="micro" x="26" y="35">DECISION</text>
+    <text class="metric" x="26" y="82">2 / 2</text>
+    <text class="label" x="26" y="110">scoped quality gates</text>
+    <text class="label" x="26" y="131">passed</text>
+    <line x1="26" y1="158" x2="224" y2="158" stroke="#c9d9c8"/>
+    <text class="small" x="26" y="189">No general quality win.</text>
+    <text class="small" x="26" y="212">Model graders, not</text>
+    <text class="small" x="26" y="233">practitioner evidence.</text>
+    <text class="small" x="26" y="262">Nate has no admitted</text>
+    <text class="small" x="26" y="283">visual-quality pair.</text>
+  </g>
+
+  <g transform="translate(92 533)">
+    <rect width="1016" height="82" rx="13" fill="#252f37"/>
+    <text class="micro" x="28" y="30" fill="#b9c9d1">SECONDARY RESOURCE OUTCOMES</text>
+    <text x="28" y="62" fill="#fff" style="font:700 25px Arial,Helvetica,sans-serif;letter-spacing:-.6px">0 / 21</text>
+    <text x="130" y="60" fill="#d7e0e4" style="font:400 15px Arial,Helvetica,sans-serif">task-by-resource estimates rejected after Holm correction</text>
+    <line x1="524" y1="18" x2="524" y2="64" stroke="#586770"/>
+    <text x="552" y="42" fill="#fff" style="font:700 16px Arial,Helvetica,sans-serif">No speed, cost, or token-savings claim.</text>
+    <text x="552" y="64" fill="#b9c9d1" style="font:400 14px Arial,Helvetica,sans-serif">No billing observations were collected.</text>
+  </g>
+
+  <text class="small" x="92" y="637">Open the technical paper for protocol, receipts, exclusions, bootstrap analysis, and reproducible figures.</text>
+</svg>
