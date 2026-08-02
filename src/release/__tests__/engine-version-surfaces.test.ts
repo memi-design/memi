@@ -5,28 +5,22 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const candidateVersion = "2.7.6";
-const publicVersion = "2.7.4";
-const publicSourceCommit = "8aa4649f412bbcaaf2af4ee209bf79016566f035";
+const publishedSourceCommit = "3d07c5476715ce25efbeef356f298bbd958f7f58";
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("unpublished 2.7.6 candidate surfaces", () => {
-  it("keeps the candidate distinct from immutable public npm evidence", async () => {
+describe("published 2.7.6 release surfaces", () => {
+  it("binds the published release to immutable npm evidence", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toMatchObject({
       version: candidateVersion,
-      state: "candidate",
-      sourceCommit: null,
-      releaseRecord: null,
-      previousPublicRelease: {
-        version: publicVersion,
-        sourceCommit: publicSourceCommit,
-        releaseRecord: {
-          path: "release-artifacts/npm/2.7.4.release.json",
-          sha256: "6ea111d391429761ccd38ff648869131138ee276934d0914699bba26f64d055d",
-        },
+      state: "published",
+      sourceCommit: publishedSourceCommit,
+      releaseRecord: {
+        path: "release-artifacts/npm/2.7.6.release.json",
+        sha256: "6af07e6a812492cd05c81296baaf6c485a114f543577eafe33a2a829ff2d115b",
       },
       verification: {
         eligibleForParity: false,
@@ -111,13 +105,12 @@ describe("unpublished 2.7.6 candidate surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
   });
 
-  it("labels the candidate without replacing the public activation path", async () => {
+  it("uses the published release in the public activation path while retaining the parity boundary", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Release state: `candidate`");
-    expect(currentRelease).toContain("Engine candidate (unreleased)");
-    expect(currentRelease).toContain("Source commit: Not assigned.");
-    expect(currentRelease).toContain(`npx -y @memi-design/cli@${publicVersion}`);
-    expect(currentRelease).not.toContain(`npx -y @memi-design/cli@${candidateVersion}`);
-    expect(currentRelease).not.toContain("Engine published (parity pending)");
+    expect(currentRelease).toContain("Release state: `published`");
+    expect(currentRelease).toContain("Engine published (parity pending)");
+    expect(currentRelease).toContain(`Source commit: \`${publishedSourceCommit}\``);
+    expect(currentRelease).toContain(`npx -y @memi-design/cli@${candidateVersion}`);
+    expect(currentRelease).toContain("Do not announce parity until npm, GitHub, MCP, the Action, Studio, and the deployed website match their release groups.");
   });
 });
