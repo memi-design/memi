@@ -139,6 +139,12 @@ describe("public documentation release truth", () => {
       "npx -y @memi-design/cli@latest diagnose . --json --no-write --fail-on none",
     );
     expect(readme).toContain("If Memi catches a real interface issue");
+    expect(readme).toContain("## Research, stated plainly");
+    expect(readme).toContain("36 / 36 frozen receipts admitted");
+    expect(readme).toContain("No superiority, speed, or dollar-savings claim is made.");
+    expect(readme).toContain(
+      "docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/memi-2.7.3-confirmatory-audit.pdf",
+    );
     expect(quickstartIndex).toBeGreaterThan(-1);
     expect(deeperPathsIndex).toBeGreaterThan(quickstartIndex);
     expect(lines.length).toBeLessThanOrEqual(300);
