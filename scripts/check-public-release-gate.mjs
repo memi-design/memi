@@ -27,7 +27,7 @@ const packageName = process.env.PACKAGE_NAME || pkg.name;
 const expectedVersion = process.env.EXPECTED_VERSION || engine.version;
 const expectedPhrase =
   process.env.EXPECTED_README_PHRASE
-  || "read-only design engineering audit and skill layer for coding agents";
+  || "the design layer for agentic AI";
 const expectedInstall = process.env.EXPECTED_INSTALL_COMMAND || `npm i -g ${packageName}`;
 const expectedSiteUrl = trimTrailingSlash(
   process.env.EXPECTED_SITE_URL || manifest.surfaces.website.publicUrl,

@@ -5,7 +5,7 @@
 Manifest updated: 2026-08-02
 
 
-Memi is the read-only design engineering audit and skill layer for coding agents. The CLI and focused skills are primary; Studio is a companion.
+Memi is the design layer for agentic AI. The CLI and focused skills are available today; Studio is the macOS workbench, and Canvas is in development.
 
 | Release group | Version | Canonical evidence |
 |---|---:|---|
@@ -33,7 +33,7 @@ Memi is the read-only design engineering audit and skill layer for coding agents
 npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 ```
 
-This command is read-only. A successful first audit must return file-anchored findings or an explicit evidence-backed unsupported state; an empty or unassessed result is never a whole-product pass.
+This command inspects the project without modifying source. A successful first audit must return file-anchored findings or an explicit evidence-backed unsupported state; an empty or unassessed result is never a whole-product pass.
 
 ## Release rules
 

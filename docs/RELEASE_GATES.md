@@ -4,7 +4,7 @@ The generated [current release truth](./CURRENT_RELEASE.md) defines the active
 engine, Studio, and website release groups. Do not infer parity from a single
 package version.
 
-The primary public story is: `Memi is the read-only design engineering audit and skill layer for coding agents.` Studio is a companion.
+The primary public story is: `Memi is the design layer for agentic AI.` The CLI and Studio are available today; Canvas is in development.
 
 Current published engine release: `2.7.7`; public-surface parity remains pending.
 
@@ -110,7 +110,7 @@ npm publish --dry-run --access public --ignore-scripts --json
 `npm run check:public-release` verifies the live npm surface after publish:
 
 - npm `dist-tags.latest` matches `package.json`.
-- npm README includes `read-only design engineering audit and skill layer for coding agents`.
+- npm README includes `the design layer for agentic AI`.
 - npm README includes `npm i -g @memi-design/cli`.
 - Website homepage still links to the npm package and does not contain stale Studio 1.0.4 copy.
 - Website docs mention the current CLI version and do not contain the old `Current npm target: 0.14.1` line.
@@ -138,14 +138,14 @@ For the current public engine line, npm must report the current `package.json` v
 Before any public distribution push, verify every external surface points to the same current release story:
 
 - npm latest: current `package.json` version, currently `2.7.7`
-- npm README phrase: `read-only design engineering audit and skill layer for coding agents`
+- npm README phrase: `the design layer for agentic AI`
 - npm install command: `npm i -g @memi-design/cli`
 - MCP name: `io.github.memi-design/memi`
 - Agent Skills command: `npx skills add memi-design/memi --skill memoire-design-tooling`
 - Codex marketplace command: `codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugins --sparse plugins/memoire`
-- GitHub description: `Memi is the read-only design engineering audit and skill layer for coding agents.`
-- GitHub topics: `interface-understanding`, `design-system`, `shadcn-registry`, `tailwind-audit`, `ux-audit`, `mcp-server`, `agent-skills`, `codex-plugin`, `design-tokens`, `figma-to-code`
-- Website hero or first-fold proof line: the current read-only audit story and current release metadata
+- GitHub description: `The design layer for agentic AI — design context, interface checks, and verification for coding agents.`
+- GitHub topics: `agentic-ai`, `ai-agents`, `coding-agents`, `frontend`, `design-engineering`, `design-systems`, `design-tokens`, `figma`, `figma-to-code`, `mcp`, `mcp-server`, `cli`, `shadcn`, `shadcn-registry`, `tailwindcss`, `ui-quality`, `ux-audit`, `agent-skills`, `codex-plugin`, `typescript`
+- Website hero or first-fold proof line: the current design-layer story and current release metadata
 - Website `/components`: non-empty registry catalog with npm install commands and shadcn item URLs
 - Website `/notes/community/catalog.v1.json`: non-empty community Notes catalog with the public starter Notes
 

@@ -2,7 +2,7 @@
 
 Current release: `@memi-design/cli@2.7.7`
 Primary link: <https://github.com/memi-design/memi>
-Primary story: Memi is the read-only design engineering audit and skill layer for coding agents.
+Primary story: Memi is the design layer for agentic AI.
 
 ## Rules
 
@@ -19,7 +19,7 @@ Primary story: Memi is the read-only design engineering audit and skill layer fo
 Title:
 
 ```text
-Show HN: Memi - read-only design audits before coding agents edit UI
+Show HN: Memi - the design layer for coding agents
 ```
 
 Body:
@@ -56,7 +56,7 @@ and whether the finding evidence is enough to guide a safe agent patch.
 Title:
 
 ```text
-I built a read-only design preflight for coding agents
+I built a design layer for coding agents
 ```
 
 Body:
@@ -70,7 +70,7 @@ Memi runs before the edit and reports the evidence it found:
 
   npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 
-The first path is deterministic and read-only. It needs no account, API key,
+The first path is deterministic and does not modify source. It needs no account, API key,
 Figma file, global install, or daemon. Findings cite file:line so the agent can
 make a scoped fix and rerun the same check.
 
@@ -103,7 +103,7 @@ file:line evidence.
 
   npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 
-The command is read-only and deterministic. The same engine can run as a pinned
+The command inspects the project without modifying source and produces deterministic results. The same engine can run as a pinned
 GitHub Action, so accepted debt can stay visible while new debt fails a PR.
 
 GitHub: https://github.com/memi-design/memi
@@ -121,7 +121,7 @@ But they usually start without the product rules that are spread across the
 repository: tokens, reduced-motion behavior, empty states, responsive
 conventions, and component boundaries.
 
-I built Memi as a read-only design engineering preflight.
+I built Memi as the design layer for agentic AI.
 
 npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 
@@ -146,7 +146,7 @@ Post 1:
 ```text
 Coding agents move fast, but they usually start without the product's design rules.
 
-I built Memi: a read-only design audit before the agent edits UI.
+I built Memi: a grounded design brief before the agent edits UI.
 
 npx -y @memi-design/cli@2.7.7 diagnose . --no-write
 
@@ -191,7 +191,7 @@ If it catches something real, share the finding. That is the proof I care about.
 Title:
 
 ```text
-Memi 2.7.7: one read-only command before your agent edits UI
+Memi 2.7.7: one grounded command before your agent edits UI
 ```
 
 Body:
@@ -232,7 +232,7 @@ rerun it after the patch so the agent cannot declare success from prose alone.
 I maintain Memi, which implements that pattern for frontend design checks:
 https://github.com/memi-design/memi
 
-The one-command trial is read-only. If you have a public reproduction, I would
+The one-command trial does not modify source. If you have a public reproduction, I would
 be happy to test whether the current rule catches it.
 ```
 

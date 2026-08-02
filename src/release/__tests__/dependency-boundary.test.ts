@@ -43,7 +43,7 @@ describe("runtime dependency boundary", () => {
     ) as { description?: string; keywords?: string[] };
 
     expect(packageJson.description).toBe(
-      "Read-only design engineering audit and skill layer for coding agents: file-anchored UI evidence before merge.",
+      "The design layer for agentic AI: design context, interface checks, and workflows for coding agents.",
     );
     expect(packageJson.keywords).toEqual(expect.arrayContaining([
       "design-ci",
