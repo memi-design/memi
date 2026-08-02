@@ -99,7 +99,7 @@ describe("release manifest", () => {
       },
       surfaces: {
         githubRelease: {
-          url: manifest.surfaces.githubRelease.url,
+          url: `https://github.com/memi-design/memi/releases/tag/v${publicEngine.version}`,
         },
       },
     });
