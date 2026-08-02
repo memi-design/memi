@@ -10,6 +10,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ### MCP Registry organization ownership
 
+- `0bad800b` — fix: align MCP registry identity with organization
 - Corrects the official MCP Registry identity from the personal namespace to
   `io.github.memi-design/memi`, the namespace authorized for this repository.
 - Keeps the verified 2.7.6 npm receipt immutable; this patch is required

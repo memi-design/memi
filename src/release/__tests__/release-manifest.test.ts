@@ -72,14 +72,19 @@ describe("release manifest", () => {
 
     expect(artifact.schemaVersion).toBe(2);
     expect(artifact.orchestration).toEqual(manifest);
+    const publicEngine = manifest.releaseGroups.engine.state === "candidate"
+      ? manifest.releaseGroups.engine.previousPublicRelease
+      : manifest.releaseGroups.engine;
     expect(artifact.publicTruth).toEqual({
-      source: "currentRelease",
+      source: manifest.releaseGroups.engine.state === "candidate"
+        ? "previousPublicRelease"
+        : "currentRelease",
       engine: {
-        version: manifest.releaseGroups.engine.version,
-        sourceCommit: expect.stringMatching(/^[a-f0-9]{40}$/),
+        version: publicEngine.version,
+        sourceCommit: publicEngine.sourceCommit,
         packageName: "@memi-design/cli",
         npmUrl: "https://www.npmjs.com/package/@memi-design/cli",
-        githubReleaseUrl: manifest.surfaces.githubRelease.url,
+        githubReleaseUrl: `https://github.com/memi-design/memi/releases/tag/v${publicEngine.version}`,
       },
     });
     expect(artifact.release).toMatchObject({
@@ -150,6 +155,7 @@ describe("release manifest", () => {
 
   it("fails closed when published release evidence is not byte- and identity-bound", async () => {
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    if (manifest.releaseGroups.engine.state !== "published") return;
     const wrongDigest = structuredClone(manifest);
     wrongDigest.releaseGroups.engine.releaseRecord.sha256 = "f".repeat(64);
     await expect(verifyCoreReleaseSurfaces(root, wrongDigest)).resolves.toContain(

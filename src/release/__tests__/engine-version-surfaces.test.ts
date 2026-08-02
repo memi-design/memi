@@ -109,7 +109,7 @@ describe("2.7.7 MCP Registry ownership candidate surfaces", () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
     expect(currentRelease).toContain("Release state: `candidate`");
     expect(currentRelease).toContain("Engine candidate");
-    expect(currentRelease).toContain(`npx -y @memi-design/cli@${candidateVersion}`);
+    expect(currentRelease).toContain("npx -y @memi-design/cli@2.7.6");
     expect(currentRelease).toContain("Do not announce parity until npm, GitHub, MCP, the Action, Studio, and the deployed website match their release groups.");
   });
 });
