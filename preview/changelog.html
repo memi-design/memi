@@ -393,7 +393,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">435</span> commits</span>
+      <span><span class="n" id="stat-commits">437</span> commits</span>
       <span><span class="n" id="stat-versions">45</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-02</span> latest</span>
     </div>
@@ -411,7 +411,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v2.7.7</strong>
-            <div class="summary-caption">5 commits tracked in v2.7.7 from CHANGELOG.md.</div>
+            <div class="summary-caption">7 commits tracked in v2.7.7 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -466,6 +466,14 @@ const releases = [
       [
         "694a2a87",
         "fix: harden ecosystem release provenance"
+      ],
+      [
+        "8428baff",
+        "test: pin organization brand contract"
+      ],
+      [
+        "eef9d527",
+        "fix: pin organization brand contract"
       ]
     ],
     "decisions": [],
@@ -485,7 +493,11 @@ const releases = [
       "Separates Memi's deprecated support policy for",
       "Derives the packaged ecosystem identity receipt from the release version,",
       "Moves Homebrew release automation and growth checks to memi-design, updates",
-      "Adds a Homebrew tap CI contract for exact 2.7.7 platform assets, checksums,"
+      "Adds a Homebrew tap CI contract for exact 2.7.7 platform assets, checksums,",
+      "8428baff — test: pin organization brand contract",
+      "eef9d527 — fix: pin organization brand contract",
+      "Vendors byte-exact copies of the organization profile's revision-2 brand",
+      "Extends the offline ecosystem identity gate to reject drift in the CLI name,"
     ]
   },
   {

@@ -50,6 +50,16 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - Adds a Homebrew tap CI contract for exact 2.7.7 platform assets, checksums,
   Ruby syntax, Homebrew style, and strict formula audit.
 
+### Pinned organization brand contract
+
+- `8428baff` — test: pin organization brand contract
+- `eef9d527` — fix: pin organization brand contract
+- Vendors byte-exact copies of the organization profile's revision-2 brand
+  manifest and schema into the CLI package, pinned by SHA-256.
+- Extends the offline ecosystem identity gate to reject drift in the CLI name,
+  availability, repository, npm package, or license, and in Canvas's M0
+  development status or canonical single-heart icon.
+
 Website and Studio parity remain separate release-group checks; this entry does
 not claim a broader quality or performance result.
 
