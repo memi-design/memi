@@ -235,14 +235,46 @@ async function runInstallSmoke(name, version) {
   const dir = await mkdtemp(join(tmpdir(), "memoire-release-gate-"));
   try {
     const pkgRef = `${name}@${version}`;
-    const result = spawnSync("npm", ["exec", "--yes", "--package", pkgRef, "--", "memi", "--version"], {
+    const npmCache = join(dir, "npm-cache");
+    const install = spawnSync("npm", [
+      "install",
+      "--ignore-scripts",
+      "--no-package-lock",
+      "--no-save",
+      "--prefix",
+      dir,
+      pkgRef,
+    ], {
       cwd: dir,
       encoding: "utf8",
       maxBuffer: 1024 * 1024,
+      timeout: 60_000,
+      env: {
+        ...process.env,
+        npm_config_cache: npmCache,
+        NPM_CONFIG_CACHE: npmCache,
+      },
+    });
+    if (install.status !== 0) {
+      return {
+        ok: false,
+        error: `package install failed: ${install.stderr.trim() || install.error?.message || install.status}`,
+      };
+    }
+
+    const entrypoint = join(dir, "node_modules", ...name.split("/"), "dist", "index.js");
+    const result = spawnSync(process.execPath, [entrypoint, "--version"], {
+      cwd: dir,
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024,
+      timeout: 15_000,
     });
     const stdout = result.stdout.trim();
     if (result.status !== 0) {
-      return { ok: false, error: `install smoke failed: ${result.stderr.trim() || result.status}` };
+      return {
+        ok: false,
+        error: `installed CLI failed: ${result.stderr.trim() || result.error?.message || result.status}`,
+      };
     }
     if (stdout !== version) {
       return { ok: false, error: `memi --version returned ${stdout}, expected ${version}` };

@@ -11,8 +11,12 @@
         "sha256": "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c"
       },
       "verification": {
-        "eligibleForParity": false,
-        "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+        "eligibleForParity": true,
+        "reason": "independent public-release gate passed with zero failures",
+        "publicGate": {
+          "path": "release-artifacts/public-gate/2.7.7.parity.json",
+          "sha256": "1719e4224de2d0cac46b7ec45467e749d000af78b2279a1252714bd7c599a334"
+        }
       }
     },
     "studio": {
