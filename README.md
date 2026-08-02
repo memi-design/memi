@@ -78,6 +78,13 @@ The [V15 confirmatory audit](docs/research/memi-2.7-prospective-study/v15-2.7.3-
 
 Read the [conference-style audit PDF](docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/memi-2.7.3-confirmatory-audit.pdf), inspect the [protocol and receipts](docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory/), or review the [V17 preregistration](docs/research/memi-2.7-prospective-study/v17-routing-quality/README.md) for the next routing-quality study. The complete [InterfaceBench contract](benchmarks/interfacebench-v1.json) and [DesignWorkBench v2 readiness report](docs/audits/memi-designworkbench-v2-readiness.md) remain separate from release evidence.
 
+<details>
+<summary><strong>Memi InterfaceBench and historical candidate record</strong></summary>
+
+Memi InterfaceBench is a 100 target tasks specification with 5 pinned seed tasks; it is not a published performance score. The historical 2.7 candidate record reported 2,187/2,187 tests and 70.57% statements coverage. The greater-than-25% claim remains **not verified**. Inspect the [benchmark contract](benchmarks/interfacebench-v1.json) and [workflow evidence](docs/case-studies/memi-2.7-workflow-proof/results.json).
+
+</details>
+
 ## How the audit works
 
 1. **Inspect** — build an evidence graph from source, routes, styles, and local design-system files.
@@ -179,5 +186,7 @@ Trust defaults: read-only audit; no npm install-time lifecycle scripts; no sourc
 Useful contributions include reproducible audit fixtures, framework adapters, skill improvements, accessible UI cases, motion checks, and real before/after reports.
 
 ## License
+
+Studio interface references and adapted components include Hermes WebUI and the MIT Warp UI framework boundary around `warpui_core` and `warpui`; Warp AGPL application and client code is not copied into Memi.
 
 MIT. See [NOTICE](NOTICE) for optional adapters and complete third-party attribution.
