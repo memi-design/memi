@@ -58,4 +58,26 @@ describe("repository fingerprint", () => {
     expect(fingerprint.imports).toEqual(["SwiftUI"]);
     expect(fingerprint.languages).toEqual(["swift"]);
   });
+
+  it("does not treat comments or string content as repository import evidence", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fingerprint-lexer-"));
+    tempDirs.push(root);
+    await writeFile(path.join(root, "index.ts"), `
+// import { CommentOnly } from "comment-only";
+/* require("block-comment-only"); */
+const sample = "import('string-only')";
+const template = \`require('template-only')\`;
+import { Tabs } from "expo-router";
+const lazy = import("real-dynamic");
+const cjs = require("real-commonjs");
+`);
+
+    const fingerprint = await buildRepositoryFingerprint(root);
+
+    expect(fingerprint.imports).toEqual([
+      "expo-router",
+      "real-commonjs",
+      "real-dynamic",
+    ]);
+  });
 });
