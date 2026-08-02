@@ -4,7 +4,8 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const releasedVersion = "2.7.7";
+const candidateVersion = "2.7.8";
+const publishedVersion = "2.7.7";
 const publishedSourceCommit = "74fc6ce8c66182b4aa06e1250cb169da8b1fc54c";
 const publishedReleaseRecord = {
   path: "release-artifacts/npm/2.7.7.release.json",
@@ -15,16 +16,21 @@ async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.7.7 MCP Registry ownership release surfaces", () => {
-  it("binds the corrective release to its immutable npm receipt", async () => {
+describe("2.7.8 metadata release candidate surfaces", () => {
+  it("keeps the candidate fenced behind the last immutable npm receipt", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toMatchObject({
-      version: releasedVersion,
-      state: "published",
-      sourceCommit: publishedSourceCommit,
-      releaseRecord: publishedReleaseRecord,
+      version: candidateVersion,
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+      previousPublicRelease: {
+        version: publishedVersion,
+        sourceCommit: publishedSourceCommit,
+        releaseRecord: publishedReleaseRecord,
+      },
     });
-    expect(manifest.surfaces.githubRelease.url.endsWith(`/v${releasedVersion}`)).toBe(true);
+    expect(manifest.surfaces.githubRelease.url.endsWith(`/v${candidateVersion}`)).toBe(true);
   });
 
   it("aligns every executable and packaged version surface", async () => {
@@ -63,18 +69,18 @@ describe("2.7.7 MCP Registry ownership release surfaces", () => {
       widget.packageVersion,
       skillRegistry.version,
       agentMirror.version,
-    ]).toEqual(Array(12).fill(releasedVersion));
-    expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${releasedVersion}.mcpb`);
-    expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${releasedVersion}.mcpb`);
+    ]).toEqual(Array(12).fill(candidateVersion));
+    expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${candidateVersion}.mcpb`);
+    expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${candidateVersion}.mcpb`);
     expect(packageJson.mcpName).toBe("io.github.memi-design/memi");
     expect(server.name).toBe("io.github.memi-design/memi");
     expect(await readFile(join(root, "mcpb/server/index.cjs"), "utf8"))
-      .toContain(`@memi-design/cli@${releasedVersion}`);
+      .toContain(`@memi-design/cli@${candidateVersion}`);
     const action = await readFile(join(root, "action.yml"), "utf8");
-    expect(action).toContain(`default: "${releasedVersion}"`);
-    expect(action).toContain(`reviewed ${releasedVersion} pin`);
+    expect(action).toContain(`default: "${candidateVersion}"`);
+    expect(action).toContain(`reviewed ${candidateVersion} pin`);
     expect(await readFile(join(root, "llms.txt"), "utf8"))
-      .toContain(`version: "${releasedVersion}"`);
+      .toContain(`version: "${candidateVersion}"`);
   });
 
   it("keeps packaged skills, generated examples, and changelog aligned", async () => {
@@ -94,15 +100,15 @@ describe("2.7.7 MCP Registry ownership release surfaces", () => {
     ];
     for (const path of skillPaths) {
       expect(await readFile(join(root, path), "utf8"), path)
-        .toContain(`@memi-design/cli@${releasedVersion}`);
+        .toContain(`@memi-design/cli@${candidateVersion}`);
     }
 
     const preset = await readJson("examples/presets/starter/registry.json");
-    expect(preset.meta.memoireVersion).toBe(releasedVersion);
+    expect(preset.meta.memoireVersion).toBe(candidateVersion);
     expect(await readFile(join(root, "examples/presets/starter/README.md"), "utf8"))
-      .toContain(`Memoire v${releasedVersion}`);
+      .toContain(`Memoire v${candidateVersion}`);
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
-    expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(releasedVersion);
+    expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
   });
 
   it("uses the published activation path after independent parity verification", async () => {
