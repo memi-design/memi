@@ -470,6 +470,73 @@ describe("deterministic skill router", () => {
     });
   });
 
+  it("rejects a corpus of executable regex syntax before it reaches the matcher", () => {
+    const executablePatterns = [
+      "(a+)+$",
+      "^(a|aa)+$",
+      "(?:a|a?)+$",
+      "((a|aa))+",
+      "(a*)*",
+      "a{1,3}{1,3}",
+      "(foo)\\1",
+      "(?<=a)b",
+      "(?<!a)b",
+      "[a-z]+",
+      "expo.*",
+      "^.*router$",
+    ];
+
+    for (const pattern of executablePatterns) {
+      expect(validateRoutingPattern(pattern), pattern).toMatchObject({ valid: false });
+      expect(() => compileSafeRoutingPattern(pattern), pattern).toThrow(/unsafe routing pattern/i);
+    }
+  });
+
+  it("routes a 10,000-note catalog deterministically within the bounded selection budget", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-skill-router-scale-"));
+    tempDirs.push(root);
+    const skillFile = path.join(root, "SKILL.md");
+    await writeFile(skillFile, "# Routing scale\n\nUse exact repository evidence.");
+    const makeScaleNote = (id: string, intent: string): InstalledNote => ({
+      path: root,
+      builtIn: false,
+      enabled: true,
+      manifest: {
+        name: id,
+        version: "1.0.0",
+        description: `${intent} design guidance`,
+        category: "craft",
+        tags: [],
+        sourceUrls: [],
+        skills: [{ file: "SKILL.md", name: id, activateOn: intent, freedomLevel: "read-only" }],
+        dependencies: [],
+        memoire: {
+          harnessExtensions: [],
+          routing: {
+            intents: [intent], excludes: [], capabilities: [], platforms: [], priority: 0,
+          },
+        },
+        createdAt: "2026-07-29T00:00:00.000Z",
+        updatedAt: "2026-07-29T00:00:00.000Z",
+      },
+    });
+    const notes = Array.from({ length: 9_999 }, (_, index) =>
+      makeScaleNote(`unrelated-route-${index}`, `unrelated workflow ${index}`));
+    notes.push(makeScaleNote("routing-scale-target", "routing scale target"));
+
+    const startedAt = performance.now();
+    const first = await routeInstalledSkills({
+      intent: "Routing scale target", notes, capabilities: [], maximumSkills: 1,
+    });
+    const second = await routeInstalledSkills({
+      intent: "Routing scale target", notes, capabilities: [], maximumSkills: 1,
+    });
+
+    expect(first.selected.map((skill) => skill.id)).toEqual(["routing-scale-target"]);
+    expect(second).toEqual(first);
+    expect(performance.now() - startedAt).toBeLessThan(3_000);
+  });
+
   it("does not route on one-character or generic procedural token noise", async () => {
     const result = await routeInstalledSkills({
       intent: "Apply the current production fix after tests",
