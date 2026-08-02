@@ -21,6 +21,20 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   promoted the GitHub release, `v2` Action channel, GHCR `latest`, and the
   Homebrew formula.
 
+### Post-release ecosystem identity reconciliation
+
+- `15a5e3c5` — test: define ecosystem identity release contract
+- `d9ca3286` — fix: reconcile ecosystem release identity
+- Makes the organization-owned Official MCP record the canonical operational
+  link and records the previous personal registry name as provenance-only.
+- Changes future Smithery publishes to target `memi-design/memi` while
+  explicitly retaining the working `sarveshsea/memi` listing only as deprecated
+  compatibility. The organization listing remains `migration_pending` until a
+  publish and post-publish verification succeed.
+- Adds a machine-readable 2.7.7 identity receipt, fixes the malformed Glama
+  homepage, moves current MCP bundle and plugin metadata to organization URLs,
+  and aligns the generated Homebrew formula copy with the read-only CLI.
+
 Website and Studio parity remain separate release-group checks; this entry does
 not claim a broader quality or performance result.
 

@@ -393,7 +393,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">431</span> commits</span>
+      <span><span class="n" id="stat-commits">433</span> commits</span>
       <span><span class="n" id="stat-versions">45</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-02</span> latest</span>
     </div>
@@ -411,7 +411,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v2.7.7</strong>
-            <div class="summary-caption">1 commits tracked in v2.7.7 from CHANGELOG.md.</div>
+            <div class="summary-caption">3 commits tracked in v2.7.7 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -450,6 +450,14 @@ const releases = [
       [
         "0bad800b",
         "fix: align MCP registry identity with organization"
+      ],
+      [
+        "15a5e3c5",
+        "test: define ecosystem identity release contract"
+      ],
+      [
+        "d9ca3286",
+        "fix: reconcile ecosystem release identity"
       ]
     ],
     "decisions": [],
@@ -458,7 +466,12 @@ const releases = [
       "Corrects the official MCP Registry identity from the personal namespace to",
       "Published through npm trusted publishing with verified provenance, signatures,",
       "Published to the MCP Registry through GitHub OIDC; the organization-owned",
-      "Released verified macOS, Linux, and Windows binaries with checksums, then"
+      "Released verified macOS, Linux, and Windows binaries with checksums, then",
+      "15a5e3c5 — test: define ecosystem identity release contract",
+      "d9ca3286 — fix: reconcile ecosystem release identity",
+      "Makes the organization-owned Official MCP record the canonical operational",
+      "Changes future Smithery publishes to target memi-design/memi while",
+      "Adds a machine-readable 2.7.7 identity receipt, fixes the malformed Glama"
     ]
   },
   {
