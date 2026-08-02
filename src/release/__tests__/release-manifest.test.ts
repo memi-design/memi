@@ -90,7 +90,12 @@ describe("release manifest", () => {
     expect(artifact.release).toMatchObject({
       schemaVersion: 1,
       releaseGroups: {
-        engine: manifest.releaseGroups.engine,
+        engine: {
+          version: publicEngine.version,
+          state: manifest.releaseGroups.engine.state === "candidate" ? "historical" : publicEngine.state,
+          sourceCommit: publicEngine.sourceCommit,
+          releaseRecord: publicEngine.releaseRecord,
+        },
       },
       surfaces: {
         githubRelease: {
