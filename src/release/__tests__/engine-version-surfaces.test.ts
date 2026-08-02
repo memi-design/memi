@@ -109,7 +109,7 @@ describe("published 2.7.6 release surfaces", () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
     expect(currentRelease).toContain("Release state: `published`");
     expect(currentRelease).toContain("Engine published (parity pending)");
-    expect(currentRelease).toContain(`Source commit: ${publishedSourceCommit}`);
+    expect(currentRelease).toContain(`Source commit: \`${publishedSourceCommit}\``);
     expect(currentRelease).toContain(`npx -y @memi-design/cli@${candidateVersion}`);
     expect(currentRelease).toContain("Do not announce parity until npm, GitHub, MCP, the Action, Studio, and the deployed website match their release groups.");
   });
