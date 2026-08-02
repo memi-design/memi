@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const candidateVersion = "2.7.5";
+const candidateVersion = "2.7.6";
 const publicVersion = "2.7.4";
 const publicSourceCommit = "8aa4649f412bbcaaf2af4ee209bf79016566f035";
 
@@ -12,7 +12,7 @@ async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("unpublished 2.7.5 candidate surfaces", () => {
+describe("unpublished 2.7.6 candidate surfaces", () => {
   it("keeps the candidate distinct from immutable public npm evidence", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toMatchObject({

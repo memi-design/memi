@@ -6,6 +6,17 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v2.7.6 — 2026-08-02 — Candidate (unpublished)
+
+### Evidence-led onboarding and package boundary
+
+- `10a5416f` — docs: publish evidence-led Memi onboarding
+- `ed8163e7` — chore: stage 2.7.6 release candidate
+
+This candidate adds the public evidence summary, reproducible study link, and
+leaner package boundary. It remains a candidate until the trusted npm publish,
+provenance verification, and public-release gate have completed.
+
 ## v2.7.5 — 2026-08-02 — Candidate (unpublished)
 
 ### Prospective evidence foundation
