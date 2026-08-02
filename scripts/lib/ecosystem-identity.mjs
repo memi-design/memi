@@ -175,7 +175,7 @@ function validateBrandContract({
   if (canvas?.status !== "development"
     || canvas?.statusNote !== "Open-source M0 development snapshot; not yet a production importer or source editor."
     || !sameJson(canvas?.icons, expectedCanvasIcons)) {
-    failures.push("brand Canvas development status and canonical icon must match revision-2 truth");
+    failures.push("brand Canvas development status and canonical icon must match revision-3 truth");
   }
 }
 
