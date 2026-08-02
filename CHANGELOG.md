@@ -56,6 +56,8 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 - `eef9d527` — fix: pin organization brand contract
 - `212dc3a5` — test: require current npm package identity
 - `194f4560` — fix: pin current package brand identity
+- `bcd7f8e9` — test: reject stale Canvas brand revision
+- `6de199ad` — fix: report current Canvas brand revision
 - Vendors byte-exact copies of the organization profile's final revision-3 brand
   manifest and schema into the CLI package, pinned by SHA-256.
 - Extends the offline ecosystem identity gate to reject drift in the CLI name,
