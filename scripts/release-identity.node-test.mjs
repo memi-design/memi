@@ -17,15 +17,19 @@ async function readJson(path) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-test("current release derives and validates its packaged ecosystem identity receipt", async () => {
+test("public release derives and validates its packaged ecosystem identity receipt", async () => {
   const context = await loadAndValidateEcosystemIdentity(root);
   const { identity, identityPath, packageJson, releaseManifest } = context;
-  const version = packageJson.version;
+  const candidate = releaseManifest.releaseGroups.engine;
+  const publicRelease = candidate.state === "candidate"
+    ? candidate.previousPublicRelease
+    : candidate;
+  const version = publicRelease.version;
 
-  assert.equal(version, releaseManifest.releaseGroups.engine.version);
+  assert.equal(packageJson.version, candidate.version);
   assert.equal(identityPath, `release-artifacts/identity/${version}.identity.json`);
   assert.equal(identity.release.version, version);
-  assert.equal(identity.release.npmReceipt, releaseManifest.releaseGroups.engine.releaseRecord.path);
+  assert.equal(identity.release.npmReceipt, publicRelease.releaseRecord.path);
   assert.equal(identity.publisher.organization, "memi-design");
   assert.deepEqual(identity.surfaces.mcpRegistry, {
     identifier: "io.github.memi-design/memi",
@@ -119,7 +123,7 @@ test("identity validation rejects stale versions, paths, and npm receipt digests
   staleIdentity.release.version = "2.7.6";
   assert.match(
     validateEcosystemIdentity({ ...context, identity: staleIdentity }).join("\n"),
-    /identity release version must match package\.json/,
+    /identity release version must match the public release/,
   );
 
   const stalePackage = structuredClone(context.packageJson);

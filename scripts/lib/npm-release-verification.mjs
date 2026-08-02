@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 
 export const DEFAULT_README_PHRASE =
-  "Memi is the read-only design engineering audit and skill layer for coding agents.";
+  "Memi is the design layer for agentic AI.";
 export const SLSA_PROVENANCE_V1 = "https://slsa.dev/provenance/v1";
 
 const NPM_REGISTRY_ORIGIN = "https://registry.npmjs.org";

@@ -43,7 +43,7 @@ function shouldFail(gatingIssues: AppQualityIssue[], failOn: string): boolean {
 export function registerDiagnoseCommand(program: Command, engine: MemoireEngine): void {
   program
     .command("diagnose [target]")
-    .description("Run a read-only design engineering audit on web or SwiftUI source, or a web URL")
+    .description("Audit web or SwiftUI source, or a web URL")
     .option("--json", "Output the diagnosis as JSON")
     .option("--agent-context", "Emit bounded repository intelligence for a coding agent (implies JSON)")
     .option("--context-files <count>", "Maximum high-signal files in --agent-context", "40")
@@ -203,7 +203,7 @@ function positiveInteger(value: string, label: string): number {
 }
 
 function printDiagnosis(diagnosis: AppQualityDiagnosis, wroteReports: boolean): void {
-  console.log(ui.brand("Read-only design engineering audit"));
+  console.log(ui.brand("Design engineering audit"));
   console.log(ui.dots("Target", diagnosis.target));
   console.log(ui.dots("Score", `${diagnosis.summary.score}/100`));
   console.log(ui.dots("Verdict", diagnosis.summary.verdict));

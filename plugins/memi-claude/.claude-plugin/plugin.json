@@ -1,7 +1,7 @@
 {
   "name": "memi",
-  "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
-  "version": "2.7.7",
+  "description": "Memi is the design layer for agentic AI.",
+  "version": "2.7.8",
   "author": {
     "name": "Memi Design",
     "url": "https://github.com/memi-design"

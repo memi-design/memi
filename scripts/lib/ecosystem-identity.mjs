@@ -18,16 +18,21 @@ export async function loadAndValidateEcosystemIdentity(root) {
     readFile(join(root, BRAND_MANIFEST_PATH)),
     readFile(join(root, BRAND_SCHEMA_PATH)),
   ]);
-  const version = packageJson.version;
-  if (!SEMVER.test(version ?? "")) {
+  const packageVersion = packageJson.version;
+  if (!SEMVER.test(packageVersion ?? "")) {
     throw new Error("package.json version must be exact semver before loading ecosystem identity");
   }
+  const publicEngine = resolvePublicEngine(releaseManifest);
+  const publicVersion = publicEngine?.version;
+  if (!SEMVER.test(publicVersion ?? "")) {
+    throw new Error("release manifest must identify an exact-semver public engine release");
+  }
 
-  const identityPath = `release-artifacts/identity/${version}.identity.json`;
+  const identityPath = `release-artifacts/identity/${publicVersion}.identity.json`;
   const identity = await readJson(join(root, identityPath));
   const npmReceiptPath = await resolveReleaseRecordPath(
     root,
-    releaseManifest?.releaseGroups?.engine?.releaseRecord?.path,
+    publicEngine?.releaseRecord?.path,
   );
   const npmReceiptBytes = await readFile(npmReceiptPath);
   const context = {
@@ -58,19 +63,24 @@ export function validateEcosystemIdentity({
   releaseManifest,
 }) {
   const failures = [];
-  const version = packageJson?.version;
+  const packageVersion = packageJson?.version;
   const engine = releaseManifest?.releaseGroups?.engine;
-  const expectedIdentityPath = `release-artifacts/identity/${version}.identity.json`;
-  const expectedNpmReceiptPath = engine?.releaseRecord?.path;
+  const publicEngine = resolvePublicEngine(releaseManifest);
+  const publicVersion = publicEngine?.version;
+  const expectedIdentityPath = `release-artifacts/identity/${publicVersion}.identity.json`;
+  const expectedNpmReceiptPath = publicEngine?.releaseRecord?.path;
   const npmReceiptSha256 = createHash("sha256").update(npmReceiptBytes ?? "").digest("hex");
   const packagedIdentityPaths = (packageJson?.files ?? [])
     .filter((path) => path.startsWith("release-artifacts/identity/"));
 
-  if (!SEMVER.test(version ?? "")) {
+  if (!SEMVER.test(packageVersion ?? "")) {
     failures.push("package.json version must be exact semver");
   }
-  if (engine?.version !== version) {
+  if (engine?.version !== packageVersion) {
     failures.push("release manifest engine version must match package.json");
+  }
+  if (!SEMVER.test(publicVersion ?? "")) {
+    failures.push("release manifest must identify an exact-semver public engine release");
   }
   if (identityPath !== expectedIdentityPath) {
     failures.push(`identity receipt path must be derived as ${expectedIdentityPath}`);
@@ -81,11 +91,11 @@ export function validateEcosystemIdentity({
   if (identity?.schemaVersion !== 1) {
     failures.push("ecosystem identity schemaVersion must be 1");
   }
-  if (identity?.release?.version !== version) {
-    failures.push("identity release version must match package.json");
+  if (identity?.release?.version !== publicVersion) {
+    failures.push("identity release version must match the public release");
   }
-  if (identity?.release?.sourceCommit !== engine?.sourceCommit) {
-    failures.push("identity release source commit must match the release manifest");
+  if (identity?.release?.sourceCommit !== publicEngine?.sourceCommit) {
+    failures.push("identity release source commit must match the public release manifest entry");
   }
   if (identity?.release?.npmReceipt !== expectedNpmReceiptPath) {
     failures.push("identity npm receipt path must match the release manifest pointer");
@@ -94,12 +104,12 @@ export function validateEcosystemIdentity({
     || identity?.release?.npmReceiptSha256 !== npmReceiptSha256) {
     failures.push("identity npm receipt SHA-256 does not match the committed receipt bytes");
   }
-  if (engine?.releaseRecord?.sha256 !== npmReceiptSha256) {
-    failures.push("release manifest npm receipt SHA-256 does not match the committed receipt bytes");
+  if (publicEngine?.releaseRecord?.sha256 !== npmReceiptSha256) {
+    failures.push("public release manifest npm receipt SHA-256 does not match the committed receipt bytes");
   }
 
-  validateNpmReceipt({ failures, npmReceiptBytes, version, engine });
-  validatePublisherIdentity({ failures, identity, packageJson, releaseManifest });
+  validateNpmReceipt({ failures, npmReceiptBytes, version: publicVersion, engine: publicEngine });
+  validatePublisherIdentity({ failures, identity, packageJson, publicVersion, releaseManifest });
   validateBrandContract({
     brandManifest,
     brandManifestBytes,
@@ -195,7 +205,7 @@ function validateNpmReceipt({ failures, npmReceiptBytes, version, engine }) {
   }
 }
 
-function validatePublisherIdentity({ failures, identity, packageJson, releaseManifest }) {
+function validatePublisherIdentity({ failures, identity, packageJson, publicVersion, releaseManifest }) {
   const mcp = identity?.surfaces?.mcpRegistry;
   const legacyMcp = mcp?.legacy;
   const smithery = identity?.surfaces?.smithery;
@@ -208,7 +218,7 @@ function validatePublisherIdentity({ failures, identity, packageJson, releaseMan
     failures.push("ecosystem identity publisher must be the canonical memi-design package owner");
   }
   if (mcp?.identifier !== releaseManifest?.surfaces?.mcp?.serverName
-    || mcp?.version !== packageJson?.version
+    || mcp?.version !== publicVersion
     || mcp?.status !== "published") {
     failures.push("ecosystem identity MCP record must match the published release manifest");
   }
@@ -236,6 +246,11 @@ function validatePublisherIdentity({ failures, identity, packageJson, releaseMan
   if (smithery?.legacy?.status !== "deprecated_compatibility") {
     failures.push("legacy Smithery identity must be explicit deprecated compatibility");
   }
+}
+
+function resolvePublicEngine(releaseManifest) {
+  const engine = releaseManifest?.releaseGroups?.engine;
+  return engine?.state === "candidate" ? engine.previousPublicRelease : engine;
 }
 
 async function readJson(path) {

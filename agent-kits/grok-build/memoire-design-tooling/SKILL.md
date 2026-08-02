@@ -10,8 +10,8 @@ Give Grok repository-specific interface evidence before broad frontend changes. 
 ## Start
 
 ```bash
-npx -y @memi-design/cli@2.7.7 agent brief . --agent grok-build --intent "<interface task>" --detail compact --json
-npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
+npx -y @memi-design/cli@2.7.8 agent brief . --agent grok-build --intent "<interface task>" --detail compact --json
+npx -y @memi-design/cli@2.7.8 diagnose . --json --no-write --fail-on none
 ```
 
 When the repository already uses the installed Grok kit, verify MCP with `grok mcp doctor memoire`. Use [REFERENCES.md](REFERENCES.md) only when the task needs deeper craft guidance.

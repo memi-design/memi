@@ -6,6 +6,18 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v2.7.8 — 2026-08-02 — Candidate
+
+### Public product metadata alignment
+
+- Aligns the npm package description and distributed product metadata with the
+  merged GitHub positioning: **the design layer for agentic AI**.
+- Synchronizes bundled skills, presets, action defaults, MCP metadata, and
+  plugin manifests to the exact candidate version.
+- This is a metadata release; it makes no new quality, speed, cost, or feature
+  claim. The candidate remains unpublished until the trusted npm publish and
+  public-surface verification records are complete.
+
 ## v2.7.7 — 2026-08-02 — Published
 
 ### MCP Registry organization ownership

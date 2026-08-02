@@ -4,7 +4,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 
 ## Primary search phrase
 
-`Memi is the read-only design engineering audit and skill layer for coding agents.`
+`Memi is the design layer for agentic AI.`
 
 ## Secondary search phrases
 
@@ -27,15 +27,15 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 
 ## Title tags
 
-- Homepage: `memi - Read-only design engineering audits for coding agents`
+- Homepage: `memi - The design layer for agentic AI`
 - npm/docs: `memi docs - Design-system memory for AI coding agents`
 - Components: `shadcn registry marketplace - memi`
 - Codex plugin: `memi Codex plugin - Design-system memory before frontend edits`
-- Launch page: `memi - Read-only design engineering audit and skill layer`
+- Launch page: `memi - The design layer for agentic AI`
 
 ## Meta descriptions
 
-- Homepage: `Memi is the read-only design engineering audit and skill layer for coding agents: file-anchored UI findings, design-system memory, focused skills, MCP tools, and deterministic CI gates.`
+- Homepage: `Memi is the design layer for agentic AI: design context, interface checks, focused skills, MCP tools, and deterministic CI gates for coding agents.`
 - Docs: `Install memi, run diagnose and UX audits, extract Tailwind tokens, export shadcn registries, and install agent kits for Codex, Claude Code, Cursor, Hermes, OpenClaw, OpenCode, and Agent Skills.`
 - Components: `Explore installable shadcn/Tailwind design systems for SaaS, docs, dashboards, landing pages, auth, AI chat, ecommerce, and tweakcn-inspired themes.`
 - Codex plugin: `Install memi in Codex to audit UI quality, inspect Tailwind tokens, use shadcn registry context, and ground frontend edits in design-system evidence.`
@@ -44,7 +44,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 
 ## OpenGraph
 
-- `og:title`: `memi - Read-only design engineering audits for coding agents`
+- `og:title`: `memi - The design layer for agentic AI`
 - `og:description`: `Run UX audits, extract Tailwind tokens, export shadcn registries, and give Codex, Claude Code, Cursor, Hermes, OpenClaw, OpenCode, and MCP clients design-system memory.`
 - `og:url`: `https://www.npmjs.com/package/@memi-design/cli`
 - `og:type`: `website`
@@ -53,7 +53,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 ## Twitter Card
 
 - `twitter:card`: `summary_large_image`
-- `twitter:title`: `memi - Read-only design engineering audits for coding agents`
+- `twitter:title`: `memi - The design layer for agentic AI`
 - `twitter:description`: `Design-system memory, UX audit evidence, Tailwind tokens, shadcn registries, MCP tools, Agent Skills, and research-backed specs before agents edit UI.`
 - `twitter:image`: `https://raw.githubusercontent.com/memi-design/memi/main/assets/theme-workflow-demo.svg`
 
@@ -66,7 +66,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
   "name": "memi",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS, Linux, Windows",
-  "description": "Memi is the read-only design engineering audit and skill layer for coding agents: file-anchored UI findings, design-system memory, MCP tools, and deterministic CI gates.",
+  "description": "Memi is the design layer for agentic AI: design context, interface checks, MCP tools, and deterministic CI gates for coding agents.",
   "softwareVersion": "2.7.7",
   "url": "https://www.npmjs.com/package/@memi-design/cli",
   "codeRepository": "https://github.com/memi-design/memi",
@@ -97,7 +97,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
 
 ## Website acceptance criteria
 
-- The first screen says `Memi is the read-only design engineering audit and skill layer for coding agents.`
+- The first screen says `Memi is the design layer for agentic AI.`
 - The primary command block starts with `npm i -g @memi-design/cli`.
 - The first proof path works without Figma: `memi diagnose`, `memi ux audit --json`, `memi craft audit --json`, `memi tokens --from ./src --report`, `memi shadcn export --out public/r`.
 - Agent setup links include `npx skills add memi-design/memi --skill memoire-design-tooling`.

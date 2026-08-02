@@ -13,7 +13,7 @@ Use this every Friday during the current public-growth window. Record the value,
 - Benchmark context: CodeAlmanac has 709 stars and 65 forks, but its retired npm package recorded only 23 downloads in the matching week. Its current PyPI badge showed 630 weekly downloads. Memi's immediate gap is GitHub discovery and social proof, not package activity.
 - 10x target from the 2026-07-08 baseline: 7,830 weekly downloads and 13,060 monthly downloads.
 - Primary CTA: `https://www.npmjs.com/package/@memi-design/cli`
-- Primary story: `Memi is the read-only design engineering audit and skill layer for coding agents.`
+- Primary story: `Memi is the design layer for agentic AI.`
 - Secondary phrase: `File-anchored design QA evidence before coding agents edit UI`
 - Core proof: `memi diagnose`, `memi ux audit --json`, `memi craft audit --json`, `memi tokens --from ./src --report`, `memi shadcn export --out public/r`
 - Agent proof: `npx skills add memi-design/memi --skill memoire-design-tooling`
@@ -33,7 +33,7 @@ Use this every Friday during the current public-growth window. Record the value,
 | Baseline | `1.1.1` | TBD | TBD | TBD | v2 draft | local pass | pending v2 | Publish v2 and run public gates |
 | 2026-07-08 | `2.4.1` | `783` | `1306` | `17` | live v2 | local pass | current at `2.4.1` | Seed proof repos and MCP directories |
 | 2026-07-18 | `2.6.2` | `354` | `2151` | `29` | design QA skills | 4 published / index catching up | current at `2.6.2` | Convert direct trials and reproducible proof dependencies |
-| 2026-07-27 | `2.6.3` | `697` | `2787` | `28` | read-only audit | 4 published / 7 installs | current at `2.6.3` | Ship focused README and problem-led community launch |
+| 2026-07-27 | `2.6.3` | `697` | `2787` | `28` | deterministic audit | 4 published / 7 installs | current at `2.6.3` | Ship focused README and problem-led community launch |
 | Week 3 | | | | | | | | |
 | Week 4 | | | | | | | | |
 | Week 8 | | | | | | | | |
@@ -60,7 +60,7 @@ npm run check:public-release
 ## Weekly review questions
 
 - Did npm latest match the repo release?
-- Did the first README screen still say `read-only design engineering audit and skill layer for coding agents`?
+- Did the first README screen say `the design layer for agentic AI` and present one clear start path?
 - Did the first code block still prove value without Figma?
 - Did Agent Skills install and MCP startup still work?
 - Which post, directory, agent stack, example, or tutorial created the most clicks?

@@ -141,13 +141,12 @@ const readme = await readFile(join(root, "README.md"), "utf-8");
 const [readmeTopFold] = readme.split("\n## Evidence at a glance", 1);
 const skillsPackageInstallCommand = "npx skills add memi-design/memi --skill audit-frontend-design";
 const requiredReadmeTerms = [
-  "read-only design engineering audit and skill layer for coding agents",
-  "remember-design-system",
-  "enforce-design-ci",
+  "The design layer for agentic AI",
+  "Memi Studio",
+  "Memi Canvas",
+  "currently in development",
   "No account, API key, Figma file, global install, or daemon is required",
-  "memoire.cv",
-  "https://ui.shadcn.com/docs/registry/getting-started",
-  "https://v0.app/docs/design-systems",
+  "npx skills add memi-design/memi --skill audit-frontend-design",
 ];
 for (const term of requiredReadmeTerms) {
   if (!readmeTopFold.includes(term)) {
