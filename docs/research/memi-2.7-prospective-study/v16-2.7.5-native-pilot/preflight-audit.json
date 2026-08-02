@@ -11,9 +11,9 @@
   "candidate": {
     "requiredVersion": "2.7.5",
     "observedWorkspaceVersion": "2.7.5",
-    "candidateTarballSha256": "sha256:a416d99eb368d734f9f5d4cadb040c02961ca1078722924336753df84f1617a6",
+    "candidateTarballSha256": "sha256:f6220e59b9b2a7794d51cab842b827c76783952de275fcddd673e952785f77af",
     "candidateProvenance": "candidate-provenance.json",
-    "reason": "An exact local 2.7.5 tarball is retained and hash-recorded. It is an unpublished study candidate, not an npm release."
+    "reason": "An exact local 2.7.5 tarball from the repaired candidate commit is retained and hash-recorded. It is an unpublished study candidate, not an npm release."
   },
   "fixtures": [
     {

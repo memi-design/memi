@@ -2,24 +2,29 @@
   "schemaVersion": 1,
   "kind": "memi-v16-local-candidate-provenance",
   "status": "unpublished-candidate",
-  "recordedAt": "2026-08-02T00:06:29Z",
+  "recordedAt": "2026-08-02T00:19:00Z",
   "candidate": {
     "packageName": "@memi-design/cli",
     "version": "2.7.5",
-    "sourceRevision": "d97fec751408b8ee3c39a529d737b7a6c74d9b82",
+    "sourceRevision": "46e9ae85d2d8796be06f08bdc009f17c47ad24f2",
     "sourceState": "clean",
     "dirtyFileCount": 0,
     "sourceSnapshot": {
       "method": "git archive --format=tar HEAD | shasum -a 256",
-      "sha256": "sha256:88acf444d1adadc55263f00ff4898d6956feed1a46fa370cb3c14e84f73ba633"
+      "sha256": "sha256:22c4e0629c67511d359a455eef739771731a00283e202902a85851f80ef14c5d"
     },
     "artifact": {
       "filename": "memi-design-cli-2.7.5.tgz",
-      "bytes": 584836,
-      "sha256": "sha256:a416d99eb368d734f9f5d4cadb040c02961ca1078722924336753df84f1617a6",
-      "sha512": "sha512:b431ad22020d6282177e29ad4847a1e8566d2d34b3bbb6e428d30636e9bc63784b9bf29932b6a6a2c57e582241566301954a8c3b5db7b67f15d932f851320abe",
-      "sha1": "28565d8c5efb731cc90ee21281c2fdeeb600eb28",
+      "bytes": 584837,
+      "sha256": "sha256:f6220e59b9b2a7794d51cab842b827c76783952de275fcddd673e952785f77af",
+      "sha512": "sha512:c1e4c6937ddaaaa9a7861f6f219d5b24da242d1dcd23eae6d8a4562b7ca3658f5f382f013d3f44d69304b78873550e623ec8ab55c881819869c3d72bbc2fefb1",
+      "sha1": "4150b425de9b561d944e760c62b254dec7575cd6",
       "retention": "External immutable study-evidence root; not an npm-published tarball."
+    },
+    "supersedes": {
+      "sourceRevision": "d97fec751408b8ee3c39a529d737b7a6c74d9b82",
+      "artifactSha256": "sha256:a416d99eb368d734f9f5d4cadb040c02961ca1078722924336753df84f1617a6",
+      "reason": "Candidate surface and public-artifact validation repairs were committed before study freeze. The earlier tarball remains retained but is not eligible for V16."
     }
   },
   "claimBoundary": "This receipt identifies the candidate used by V16. It provides no outcome, quality, speed, cost, or public-release evidence."

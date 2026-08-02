@@ -131,6 +131,16 @@ declarations match clean, pinned fixtures and their origins. Its `ready` status
 is deliberately narrower than study readiness: a missing launch, journey,
 native capture, billing file, or blinded packet still prevents a scored cell.
 
+[environment.json](environment.json) freezes the intended browser and exclusive
+Simulator environment. The named simulator must be erased/reset before each
+mobile pair; the separately booted system simulator is not part of V16.
+`freeze-environment.json` is its intentionally narrow, schema-compatible
+projection consumed by `memi benchmark prospective-freeze`.
+
+The [calibration-plan.json](calibration-plan.json) is frozen and executed before
+the 36-cell [plan.json](plan.json). Its cells are explicitly excluded from the
+confirmatory analysis, including if an implementation outcome looks favorable.
+
 The current [preflight audit](preflight-audit.json) records the observed local
 fixture revisions and the remaining freeze prerequisites. It is a readiness
 ledger, not a study result.

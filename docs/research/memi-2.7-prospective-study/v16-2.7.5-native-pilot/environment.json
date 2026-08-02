@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-02T00:19:00Z",
+  "machine": "MacBook Pro Mac15,7; Apple M3 Pro; arm64",
+  "os": "macOS 26.2 (25C56)",
+  "node": "v22.22.3",
+  "xcode": "26.6 (17F113)",
+  "simulator": {
+    "name": "Memi V12 iPhone 17",
+    "udid": "FED7FB9E-13D5-4383-93EA-7FFE0111A496",
+    "runtime": "iOS 26.5",
+    "exclusiveAccessRequired": true,
+    "resetRequiredBeforeEachPair": true
+  },
+  "web": {
+    "browser": "Playwright Chromium installed by the task preparation step",
+    "desktopViewport": { "width": 1440, "height": 960 }
+  },
+  "workspaceVolume": "ExtremeSSD APFS",
+  "evidenceRoot": "/Volumes/ExtremeSSD/Projects/_evidence/memi-2.7-v16-2.7.5-native-confirmatory",
+  "claimBoundary": "This environment receipt supports only a future frozen protocol. It contains no model outcomes."
+}
