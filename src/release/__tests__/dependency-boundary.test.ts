@@ -74,4 +74,25 @@ describe("runtime dependency boundary", () => {
       expect(packagedFiles).toContain(path);
     }
   });
+
+  it("keeps measured evidence and copy-paste prompts claim-bounded", async () => {
+    const readme = await readFile(join(root, "README.md"), "utf8");
+
+    expect(readme).toContain("## Evidence at a glance");
+    expect(readme).toContain("36 / 36");
+    expect(readme).toContain("10 complete model-graded matched pairs");
+    expect(readme).toContain("2,187 / 2,187");
+    expect(readme).toContain("## Prompts that map to real workflows");
+    expect(readme).toContain("Audit this frontend before editing it.");
+    expect(readme).toContain("Turn the findings into a scoped UI change plan.");
+    expect(readme).toContain("Set up a deterministic design CI gate for this pull request.");
+    expect(readme).toContain("No superiority, speed, or dollar-savings claim is made.");
+
+    const evidenceBlock = readme.match(
+      /## Evidence at a glance([\s\S]*?)## What you get/,
+    )?.[1];
+    expect(evidenceBlock).toBeDefined();
+    expect(evidenceBlock).not.toMatch(/Memi is (?:better|faster|cheaper)/i);
+    expect(evidenceBlock).not.toMatch(/superior(?:ity)? (?:to|than|overall)/i);
+  });
 });

@@ -51,6 +51,19 @@ Compatible with the [shadcn registry](https://ui.shadcn.com/docs/registry/gettin
 
 If Memi catches a real interface issue in your project, [star the repository](https://github.com/memi-design/memi) and [share the finding](https://github.com/memi-design/memi/discussions/categories/show-and-tell). That is the most useful signal for deciding what to improve next.
 
+## Evidence at a glance
+
+These are the measured results currently available in the [V15 confirmatory audit](https://github.com/memi-design/memi/tree/main/docs/research/memi-2.7-prospective-study/v15-2.7.3-confirmatory). They describe that study; they are not estimates for your repository.
+
+| Measured record | What it means | Boundary |
+| --- | --- | --- |
+| **36 / 36** frozen execution receipts admitted | Every preregistered agent cell had an auditable receipt | Receipt admission, not universal performance |
+| **10 complete model-graded matched pairs** | Rendered design-quality comparisons survived the prespecified screen | Model-graded evidence, not independent practitioner review |
+| **2,187 / 2,187** historical candidate tests passed | The 2.7 candidate record completed its recorded test suite | Historical release evidence, not proof that every project benefits |
+| **0** model calls required in deterministic CI enforcement | The pull-request gate can rerun file-anchored checks without an LLM | This describes the CI path, not every optional workflow |
+
+The full study also reports exclusions, failures, and limits. **No superiority, speed, or dollar-savings claim is made.**
+
 ## What you get
 
 | Evidence layer | What it surfaces |
@@ -62,6 +75,18 @@ If Memi catches a real interface issue in your project, [star the repository](ht
 | Pull requests | New debt only, SARIF annotations, step summary, and HTML report |
 
 The default workflow is deliberately read-only. Write-capable scaffolds and Figma operations are separate, explicit workflows.
+
+## Prompts that map to real workflows
+
+After installing a skill, paste one of these into Codex, Claude Code, Cursor, or another compatible agent.
+
+| Goal | Copy-paste prompt | Supporting workflow |
+| --- | --- | --- |
+| Establish a baseline before a UI change | **Audit this frontend before editing it.** Prioritize the five changes with the clearest `file:line` evidence. | `audit-frontend-design` and a read-only `memi diagnose` pass |
+| Turn evidence into a small, consistent plan | **Turn the findings into a scoped UI change plan.** Reuse the existing tokens and components; do not edit until the plan is explicit. | `remember-design-system` context for a reviewed implementation plan |
+| Protect a pull request from new interface debt | **Set up a deterministic design CI gate for this pull request.** Fail only on newly introduced interface debt and save SARIF plus the HTML report. | `enforce-design-ci` and the GitHub Action workflow |
+
+The first three workflows are evidence, planning, and CI gates. Write-capable scaffolds and Figma actions remain explicit choices.
 
 ## Research, stated plainly
 
