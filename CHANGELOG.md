@@ -65,6 +65,13 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   license, and in Canvas's M0 development status or canonical single-heart
   icon. Revision 3 supersedes the intermediate revision-2 snapshot.
 
+### Section-aware README release gate
+
+- `87bb8a39` — fix: make README release gate section-aware
+- Defines the conversion-focused README fold by its semantic section boundary
+  instead of a brittle byte count, so organization-identity copy can grow
+  without hiding already-present shadcn or v0 compatibility evidence from CI.
+
 Website and Studio parity remain separate release-group checks; this entry does
 not claim a broader quality or performance result.
 
