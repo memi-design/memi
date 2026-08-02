@@ -89,6 +89,16 @@ const expectedMcpName = "io.github.memi-design/memi";
 if (packageJson.mcpName !== expectedMcpName) {
   fail(`package.json mcpName ${packageJson.mcpName} does not match ${expectedMcpName}`);
 }
+const ecosystemIdentity = spawnSync(process.execPath, [
+  "--test",
+  join(root, "scripts", "release-identity.node-test.mjs"),
+], {
+  cwd: root,
+  encoding: "utf-8",
+});
+if (ecosystemIdentity.status !== 0) {
+  fail(`ecosystem identity gate failed: ${spawnFailureMessage(ecosystemIdentity, "failed")}`);
+}
 
 for (const lifecycle of ["preinstall", "install", "postinstall", "prepare"]) {
   if (packageJson.scripts?.[lifecycle]) {
@@ -155,6 +165,7 @@ const requiredPackagedDocs = [
   ["docs/V2_PACKAGE_POSITIONING.md", "High-download package bar"],
   ["docs/IOS_SWIFT.md", "Apple-platform design CI"],
   ["docs/PROOF.md", "No-Figma"],
+  ["docs/ECOSYSTEM_IDENTITY.md", "Smithery migration pending"],
 ];
 for (const [docPath, requiredTerm] of requiredPackagedDocs) {
   if (!packageJson.files?.includes(docPath)) {

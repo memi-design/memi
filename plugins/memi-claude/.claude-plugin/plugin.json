@@ -3,10 +3,10 @@
   "description": "Memi is the read-only design engineering audit and skill layer for coding agents.",
   "version": "2.7.7",
   "author": {
-    "name": "Sarvesh Chidambaram",
-    "url": "https://github.com/sarveshsea"
+    "name": "Memi Design",
+    "url": "https://github.com/memi-design"
   },
   "homepage": "https://www.memoire.cv/docs",
-  "repository": "https://github.com/sarveshsea/memi",
+  "repository": "https://github.com/memi-design/memi",
   "license": "MIT"
 }

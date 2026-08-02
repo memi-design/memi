@@ -46,9 +46,33 @@ test("current publisher metadata targets memi-design", async () => {
 
   assert.match(packageJson.scripts["publish:smithery"], /-n memi-design\/memi(?:\s|$)/);
   assert.doesNotMatch(packageJson.scripts["publish:smithery"], /-n sarveshsea\/memi(?:\s|$)/);
-  assert.equal(mcpb.author.url, "https://github.com/memi-design");
+  assert.deepEqual(mcpb.author, {
+    name: "Memi Design",
+    url: "https://github.com/memi-design",
+  });
+  assert.equal(mcpb.repository.url, "https://github.com/memi-design/memi.git");
+  assert.equal(codexPlugin.author.url, "https://github.com/memi-design");
   assert.equal(codexPlugin.repository, "https://github.com/memi-design/memi");
+  assert.equal(claudePlugin.author.url, "https://github.com/memi-design");
   assert.equal(claudePlugin.repository, "https://github.com/memi-design/memi");
   assert.equal(glama.homepage, "https://www.memoire.cv");
   assert.equal(glama.author, "memi-design");
+});
+
+test("current documentation separates canonical, pending, and deprecated identities", async () => {
+  const [readme, officialMcp, identityGuide] = await Promise.all([
+    readFile(join(root, "README.md"), "utf8"),
+    readFile(join(root, "docs", "OFFICIAL_MCP_REGISTRY.md"), "utf8"),
+    readFile(join(root, "docs", "ECOSYSTEM_IDENTITY.md"), "utf8"),
+  ]);
+
+  assert.match(readme, /io\.github\.memi-design\/memi/);
+  assert.match(readme, /Smithery migration pending/);
+  assert.match(officialMcp, /io\.github\.sarveshsea\/memi` is deprecated/);
+  assert.doesNotMatch(officialMcp, /login must match the `io\.github\.sarveshsea\/\*` namespace/);
+  assert.match(identityGuide, /`memi-design\/memi` is the intended Smithery publish target/);
+  assert.match(
+    identityGuide,
+    /`sarveshsea\/memi` remains operational only as a deprecated compatibility alias/,
+  );
 });

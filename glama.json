@@ -1,10 +1,10 @@
 {
   "name": "memi",
   "display_name": "memi",
-  "description": "Design-memory MCP server and CLI behind memi agent design CI for AI coding agents.",
+  "description": "Read-only design engineering audit and skill layer for coding agents.",
   "repository": "https://github.com/memi-design/memi",
-  "homepage": "https:/-design/cli.cv",
-  "author": "sarveshsea",
+  "homepage": "https://www.memoire.cv",
+  "author": "memi-design",
   "license": "MIT",
   "categories": ["Design Tools", "Developer Tools"],
   "tags": ["ai-workbench", "figma", "figjam", "design-memory", "design-system", "codex", "claude-code", "tailwind", "mcp"]

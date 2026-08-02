@@ -20,7 +20,7 @@ The first pass reads the product you already have, identifies accessibility, hie
 
 **Supported today:** Node 20, 22, and 24 on macOS, Linux, and Windows. Figma and [Studio](https://memoire.cv/download) are optional companions.
 
-[npm](https://www.npmjs.com/package/@memi-design/cli) · [memoire.cv](https://memoire.cv) · [current versions](https://github.com/memi-design/memi/blob/main/docs/CURRENT_RELEASE.md) · [MCP Registry](https://registry.modelcontextprotocol.io) · [Agent Skills](https://skills.sh/memi-design/memi)
+[npm](https://www.npmjs.com/package/@memi-design/cli) · [memoire.cv](https://memoire.cv) · [current versions](https://github.com/memi-design/memi/blob/main/docs/CURRENT_RELEASE.md) · [Official MCP record](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.memi-design%2Fmemi) · [Agent Skills](https://skills.sh/memi-design/memi)
 
 ## Quickstart
 
@@ -149,6 +149,21 @@ No LLM is used in the deterministic CI enforcement path.
 | GitHub Action | `uses: memi-design/memi@74fc6ce8c66182b4aa06e1250cb169da8b1fc54c` | Pull-request design CI |
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
 | Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
+
+### Registry identity
+
+The Official MCP Registry record is organization-owned and published as
+`io.github.memi-design/memi@2.7.7`.
+
+**Smithery migration pending:** new publishes target `memi-design/memi`, but the
+organization listing is not yet live. The working
+[`sarveshsea/memi`](https://smithery.ai/servers/sarveshsea/memi) listing remains
+available only as a deprecated compatibility alias until the organization
+publication passes a post-publish check. Do not use the personal namespace in
+new integrations or directory submissions.
+
+See the [ecosystem identity guide](docs/ECOSYSTEM_IDENTITY.md) and its
+[machine-readable 2.7.7 receipt](release-artifacts/identity/2.7.7.identity.json).
 
 ## Design CI
 

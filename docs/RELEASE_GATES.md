@@ -16,6 +16,9 @@ Memi uses two explicit gates:
 
 - `npm run check:release` validates the package, generated release surfaces,
   benchmark integrity, and the current DesignWorkBench readiness artifact.
+- `npm run check:ecosystem-identity` verifies the organization-owned MCP and
+  intended Smithery identities, including the explicit deprecated-compatibility
+  boundary while the Smithery migration is pending.
 - `npm run check:certification` requires the complete blinded practitioner,
   private-test, and holdout evidence.
 
