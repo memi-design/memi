@@ -173,7 +173,7 @@
   "finalBacktestCommand": {
     "argv": [
       "node",
-      "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+      "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
       "benchmark",
       "fitness-backtest",
       "--store-root",
@@ -192,7 +192,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -225,7 +225,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -258,7 +258,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -291,7 +291,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -324,7 +324,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -357,7 +357,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -390,7 +390,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -423,7 +423,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -456,7 +456,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -489,7 +489,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -520,7 +520,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",
@@ -551,7 +551,7 @@
     {
       "argv": [
         "node",
-        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-engine/dist/index.js",
+        "/Volumes/ExtremeSSD/Projects/_worktrees/memi-2.7.4-frozen-engine/dist/index.js",
         "benchmark",
         "fitness-record",
         "--baseline",

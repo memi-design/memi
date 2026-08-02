@@ -122,6 +122,22 @@ The workflow adapters now stop the provider at the first streamed input,
 output, or reasoning-token limit breach, retaining the trace while rejecting
 the over-budget run before it can be admitted into a prospective comparison.
 
+### Research artifacts
+
+- Reframed the V15 Memi 2.7.3 confirmatory audit as a public, conference-style
+  systems and ML paper with explicit research questions, related-work
+  positioning, inferential boundaries, threats to validity, reproducibility
+  disclosures, and a detached conflict-of-interest statement.
+- Replaced internal gate-oriented graphics with five reproducible figures for
+  study admission, paired quality inference, task-level resources, fail-closed
+  route transitions, and chronological no-look-ahead replay. Added executable
+  figure contracts and regression tests for the public paper surface.
+- Put the claim boundary first in the V15 paper: the reported non-inferiority
+  result rules out only a large observed quality decline on two gradable tasks,
+  not a claim that Memi is better, faster, or cheaper. Added an evidence-led
+  2.7.5 plan for native frontend evaluation, independent human grading,
+  measured billing, and narrower exact-match skills.
+
 ## v2.7.4 — 2026-08-01
 
 ### Commits

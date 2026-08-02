@@ -17,10 +17,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Sequence
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+try:
+    from analysis.paper_figures import render_backtest_timeline
+except ModuleNotFoundError:  # Direct execution via run-fitness-backtest.py.
+    from paper_figures import render_backtest_timeline
 
 
 SHA256_PATTERN = re.compile(r"^sha256:[a-f0-9]{64}$")
@@ -530,40 +530,28 @@ def render_backtest_artifacts(
     figure_path: Path,
     results_tex_path: Path,
     interpretation_tex_path: Path,
+    chronology: Sequence[dict[str, Any]] | None = None,
 ) -> None:
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     results_tex_path.parent.mkdir(parents=True, exist_ok=True)
-    labels = ["Buzzr / atomic-design", "Paraform / design-extract"]
     routes = summary["routes"]
-    states = [1 if route["finalState"] == "suppressed" else 0 for route in routes]
-    fig, axis = plt.subplots(figsize=(8.2, 3.2), dpi=160)
-    colors = ["#b42318" if state else "#067647" for state in states]
-    axis.barh(labels, [1, 1], color=colors, height=0.48)
-    axis.set_xlim(0, 1)
-    axis.set_xticks([])
-    axis.set_title("V15 exact-route state after chronological replay", loc="left", weight="bold")
-    axis.set_xlabel("12 eligible pair events replayed; 7 rows retained as chronology-only")
-    for index, route in enumerate(routes):
-        axis.text(
-            0.5,
-            index,
-            f"{route['finalState']} · {route['finalDecision']} · {route['matchingEvents']} events",
-            ha="center",
-            va="center",
-            color="white",
-            weight="bold",
-            fontsize=9,
-        )
-    for spine in axis.spines.values():
-        spine.set_visible(False)
-    fig.tight_layout()
-    fig.savefig(
-        figure_path,
-        format="png",
-        dpi=160,
-        metadata={"Software": "Memi V15 deterministic fitness backtest"},
-    )
-    plt.close(fig)
+    timeline_summary = {
+        **summary,
+        "routes": [
+            route
+            if route.get("timeline")
+            else {
+                **route,
+                "timeline": [{
+                    "createdAt": route["suppressedAt"],
+                    "schemaVersion": 2,
+                    "stateAfter": route["finalState"],
+                }],
+            }
+            for route in routes
+        ],
+    }
+    render_backtest_timeline(figure_path, timeline_summary, list(chronology or ()))
 
     route_text = " ".join(
         f"\\texttt{{{_tex(route['taskClass'])}/{_tex(route['skillId'])}}} finishes "
@@ -800,11 +788,26 @@ def write_execution_artifacts(paths: BacktestPaths, result: dict[str, Any]) -> N
         "".join(json.dumps(event, separators=(",", ":")) + "\n" for event in result["storeEvents"]),
         encoding="utf-8",
     )
+    timeline_by_route = {
+        route["routeKey"]: route.get("timeline", [])
+        for route in result["finalBacktest"].get("routes", [])
+    }
+    render_summary = {
+        **result["summary"],
+        "routes": [
+            {
+                **route,
+                "timeline": timeline_by_route.get(route["routeKey"], []),
+            }
+            for route in result["summary"]["routes"]
+        ],
+    }
     render_backtest_artifacts(
-        result["summary"],
+        render_summary,
         paths.figure_path,
         paths.results_tex_path,
         paths.interpretation_tex_path,
+        result["inputs"].chronology,
     )
 
 

@@ -49,6 +49,18 @@ publication and public-channel parity are not established.}
   }{\FigurePlaceholder{Paired quality comparisons by task.}}}%
 }
 
+\newcommand{\ClaimDecisionFigure}{%
+  \IfFileExists{generated/figures/claim-decision.png}{%
+    \includegraphics[width=\linewidth]{generated/figures/claim-decision.png}%
+  }{\FigurePlaceholder{What the V15 study establishes and does not establish.}}%
+}
+
+\newcommand{\StudyDesignFigure}{%
+  \IfFileExists{generated/figures/study_design.png}{%
+    \includegraphics[width=\linewidth]{generated/figures/study_design.png}%
+  }{\FigurePlaceholder{Prospective matched-pair design and evidence boundary.}}%
+}
+
 \newcommand{\ResourceFigure}{%
   \IfFileExists{generated/figures/task_resource_intervals.png}{%
     \includegraphics[width=\linewidth]{generated/figures/task_resource_intervals.png}%
@@ -61,4 +73,10 @@ publication and public-channel parity are not established.}
   }{\IfFileExists{generated/figures/chronological_fitness_backtest.png}{%
     \includegraphics[width=\linewidth]{generated/figures/chronological_fitness_backtest.png}%
   }{\FigurePlaceholder{Chronological, no-look-ahead routing-policy replay.}}}%
+}
+
+\newcommand{\PolicyFigure}{%
+  \IfFileExists{generated/figures/routing_policy_state_machine.png}{%
+    \includegraphics[width=\linewidth]{generated/figures/routing_policy_state_machine.png}%
+  }{\FigurePlaceholder{Fail-closed exact-route routing policy.}}%
 }

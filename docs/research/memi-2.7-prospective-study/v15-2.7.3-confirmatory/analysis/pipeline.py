@@ -15,6 +15,23 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+try:
+    from analysis.paper_figures import (
+        render_claim_decision,
+        render_policy_state_machine,
+        render_quality_results,
+        render_resource_results,
+        render_study_design,
+    )
+except ModuleNotFoundError:  # Direct execution via analysis/run_analysis.py.
+    from paper_figures import (
+        render_claim_decision,
+        render_policy_state_machine,
+        render_quality_results,
+        render_resource_results,
+        render_study_design,
+    )
+
 
 BOOTSTRAP_SAMPLES = 10_000
 BOOTSTRAP_BASE_SEED = 2715
@@ -160,7 +177,16 @@ def run_confirmatory_analysis(write_outputs: bool = True) -> dict[str, Any]:
     }
 
     if write_outputs:
-        _write_outputs(paths, summary)
+        _write_outputs(
+            paths,
+            summary,
+            source_context={
+                "protocol": protocol,
+                "receipts": receipts,
+                "exclusions": exclusions,
+                "grading": {"gradedTrials": sorted(grading)},
+            },
+        )
 
     return summary
 
@@ -623,7 +649,11 @@ def _pooled_descriptives(
     return pooled
 
 
-def _write_outputs(paths: StudyPaths, summary: dict[str, Any]) -> None:
+def _write_outputs(
+    paths: StudyPaths,
+    summary: dict[str, Any],
+    source_context: dict[str, Any] | None = None,
+) -> None:
     paths.tables_root.mkdir(parents=True, exist_ok=True)
     paths.figures_root.mkdir(parents=True, exist_ok=True)
     paths.tex_root.mkdir(parents=True, exist_ok=True)
@@ -664,8 +694,14 @@ def _write_outputs(paths: StudyPaths, summary: dict[str, Any]) -> None:
             summary["primarySummary"],
         )
     if summary["primaryPairRows"]:
-        _plot_paired_quality_comparisons(
+        render_claim_decision(
+            paths.figures_root / "claim-decision.png",
+            summary["primarySummary"],
+            secondary_test_count=len(summary["secondaryTests"]),
+        )
+        render_quality_results(
             paths.figures_root / "paired_quality_comparisons.png",
+            summary["primarySummary"],
             summary["primaryPairRows"],
         )
     resource_rows = [
@@ -673,9 +709,18 @@ def _write_outputs(paths: StudyPaths, summary: dict[str, Any]) -> None:
         if row["metric"] in RESOURCE_FIGURE_METRICS
     ]
     if resource_rows:
-        _plot_task_resource_intervals(
+        render_resource_results(
             paths.figures_root / "task_resource_intervals.png",
             resource_rows,
+        )
+    render_policy_state_machine(paths.figures_root / "routing_policy_state_machine.png")
+    if source_context is not None:
+        render_study_design(
+            paths.figures_root / "study_design.png",
+            source_context["protocol"],
+            source_context["receipts"],
+            source_context["exclusions"],
+            source_context["grading"],
         )
     _write_tex_outputs(paths.tex_root, summary)
 
