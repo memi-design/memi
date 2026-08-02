@@ -84,7 +84,9 @@ describe("public documentation release truth", () => {
     expect(releaseGates).toContain("[current release truth](./CURRENT_RELEASE.md)");
 
     const readme = await readFile(join(root, "README.md"), "utf8");
-    expect(readme).toContain("[current versions](docs/CURRENT_RELEASE.md)");
+    expect(readme).toContain(
+      "[current versions](https://github.com/memi-design/memi/blob/main/docs/CURRENT_RELEASE.md)",
+    );
   });
 
   it("keeps the primary product story aligned across current public guidance", async () => {
