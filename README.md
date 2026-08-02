@@ -143,7 +143,7 @@ No LLM is used in the deterministic CI enforcement path.
 
 | Surface | Start here | Best for |
 | --- | --- | --- |
-| One-time CLI audit | `npx -y @memi-design/cli@2.7.6 diagnose . --no-write` | Trying Memi without installing |
+| One-time CLI audit | `npx -y @memi-design/cli@2.7.7 diagnose . --no-write` | Trying Memi without installing |
 | Global CLI | `npm i -g @memi-design/cli` | Daily local use |
 | Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude, Cursor, and compatible agents |
 | GitHub Action | `uses: memi-design/memi@3d07c5476715ce25efbeef356f298bbd958f7f58` | Pull-request design CI |
@@ -171,9 +171,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: memi-design/memi@3d07c5476715ce25efbeef356f298bbd958f7f58 # v2.7.6
+      - uses: memi-design/memi@3d07c5476715ce25efbeef356f298bbd958f7f58 # v2.7.7
         with:
-          version: "2.7.6"
+          version: "2.7.7"
           report: true
           upload-sarif: true
 ```

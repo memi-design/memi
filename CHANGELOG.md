@@ -6,6 +6,19 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## v2.7.7 — 2026-08-02 — Candidate (unpublished)
+
+### MCP Registry organization ownership
+
+- Corrects the official MCP Registry identity from the personal namespace to
+  `io.github.memi-design/memi`, the namespace authorized for this repository.
+- Keeps the verified 2.7.6 npm receipt immutable; this patch is required
+  because npm package metadata cannot be changed in place after publication.
+
+This candidate is not a parity claim. It must complete trusted npm publishing,
+MCP Registry OIDC publishing, the GitHub binary release, and the independent
+public-release gate before it is announced.
+
 ## v2.7.6 — 2026-08-02 — Candidate (unpublished)
 
 ### Evidence-led onboarding and package boundary

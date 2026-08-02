@@ -85,7 +85,7 @@ if (designWorkReadiness.status !== 0) {
   fail(`DesignWorkBench readiness artifact gate failed: ${spawnFailureMessage(designWorkReadiness, "failed")}`);
 }
 const version = packageJson.version;
-const expectedMcpName = "io.github.sarveshsea/memi";
+const expectedMcpName = "io.github.memi-design/memi";
 if (packageJson.mcpName !== expectedMcpName) {
   fail(`package.json mcpName ${packageJson.mcpName} does not match ${expectedMcpName}`);
 }
