@@ -8,8 +8,8 @@ const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const BRAND_MANIFEST_PATH = "brand/brand-manifest.v1.json";
 const BRAND_SCHEMA_PATH = "brand/brand-manifest.v1.schema.json";
-const BRAND_MANIFEST_SHA256 = "98cd5224d31466a86d3f2d102bf6f160a195aed9c393d29a7f09eb75ecc90ff3";
-const BRAND_SCHEMA_SHA256 = "6968bf5e5884530b47ecf31702f020d4d957b6aa4f4d1e82d9b8cd3fd44a2d0d";
+const BRAND_MANIFEST_SHA256 = "8b7ca68e836ee0362fe1763b067dacb8e500d5037cd12791f6c5aaf0e80a2755";
+const BRAND_SCHEMA_SHA256 = "ef3eaed367e20c3d54ef8284d84c8195d40fb5916fcd525fcd77243a0353e473";
 
 export async function loadAndValidateEcosystemIdentity(root) {
   const [packageJson, releaseManifest, brandManifestBytes, brandSchemaBytes] = await Promise.all([
@@ -120,13 +120,13 @@ function validateBrandContract({
   packageJson,
 }) {
   if (sha256(brandManifestBytes) !== BRAND_MANIFEST_SHA256) {
-    failures.push("vendored organization brand manifest must match canonical revision-2 bytes");
+    failures.push("vendored organization brand manifest must match canonical revision-3 bytes");
   }
   if (sha256(brandSchemaBytes) !== BRAND_SCHEMA_SHA256) {
-    failures.push("vendored organization brand schema must match canonical revision-2 bytes");
+    failures.push("vendored organization brand schema must match canonical revision-3 bytes");
   }
-  if (brandManifest?.schemaVersion !== 1 || brandManifest?.brandRevision !== 2) {
-    failures.push("organization brand contract must use schemaVersion 1 and brandRevision 2");
+  if (brandManifest?.schemaVersion !== 1 || brandManifest?.brandRevision !== 3) {
+    failures.push("organization brand contract must use schemaVersion 1 and brandRevision 3");
   }
   for (const path of [BRAND_MANIFEST_PATH, BRAND_SCHEMA_PATH]) {
     if (!packageJson?.files?.includes(path)) {
@@ -140,15 +140,24 @@ function validateBrandContract({
     name: "MIT License",
     url: "https://github.com/memi-design/memi/blob/main/LICENSE",
   };
+  const expectedCliPackages = [{
+    name: "@memi-design/cli",
+    registry: "npm",
+    status: "current",
+    url: "https://www.npmjs.com/package/@memi-design/cli",
+  }];
   if (cli?.name !== "memi CLI"
     || cli?.status !== "available"
     || cli?.urls?.repository !== "https://github.com/memi-design/memi"
     || cli?.urls?.package !== "https://www.npmjs.com/package/@memi-design/cli"
+    || !sameJson(cli?.packages, expectedCliPackages)
     || !sameJson(cli?.license, expectedCliLicense)) {
-    failures.push("brand CLI name, status, repository, package, and license must match revision-2 truth");
+    failures.push("brand CLI name, status, repository, current npm package, and license must match revision-3 truth");
   }
   if (cli?.urls?.repository !== identity?.publisher?.repository
     || cli?.urls?.package !== `https://www.npmjs.com/package/${packageJson?.name}`
+    || cli?.packages?.[0]?.name !== packageJson?.name
+    || cli?.packages?.[0]?.url !== cli?.urls?.package
     || cli?.license?.spdx !== packageJson?.license
     || packageJson?.repository?.url !== "git+https://github.com/memi-design/memi.git") {
     failures.push("package and release identity surfaces must agree with the pinned CLI brand product");

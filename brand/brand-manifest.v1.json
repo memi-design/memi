@@ -1,7 +1,7 @@
 {
   "$schema": "./brand-manifest.v1.schema.json",
   "schemaVersion": 1,
-  "brandRevision": 2,
+  "brandRevision": 3,
   "updatedAt": "2026-08-02",
   "organization": {
     "id": "memi-design",
@@ -23,6 +23,14 @@
         "documentation": "https://github.com/memi-design/memi/blob/main/docs/README.md",
         "package": "https://www.npmjs.com/package/@memi-design/cli"
       },
+      "packages": [
+        {
+          "name": "@memi-design/cli",
+          "registry": "npm",
+          "status": "current",
+          "url": "https://www.npmjs.com/package/@memi-design/cli"
+        }
+      ],
       "license": {
         "spdx": "MIT",
         "name": "MIT License",
@@ -55,6 +63,7 @@
         "documentation": "https://github.com/memi-design/memi-studio#readme",
         "download": "https://github.com/memi-design/memi-studio/releases/latest"
       },
+      "packages": [],
       "license": {
         "spdx": "FSL-1.1-ALv2",
         "name": "Functional Source License 1.1 with Apache-2.0 future license",
@@ -88,6 +97,15 @@
         "documentation": "https://github.com/memi-design/design-skills#readme",
         "install": "https://github.com/memi-design/design-skills#installation"
       },
+      "packages": [
+        {
+          "name": "@memoire/design-skills",
+          "registry": "workspace",
+          "status": "legacy-compatibility",
+          "url": "https://github.com/memi-design/design-skills",
+          "note": "Repository tooling identifier only; not a public npm installation surface."
+        }
+      ],
       "license": {
         "spdx": "MIT",
         "name": "MIT License",
@@ -118,6 +136,7 @@
         "repository": "https://github.com/memi-design/memi-canvas",
         "documentation": "https://github.com/memi-design/memi-canvas#readme"
       },
+      "packages": [],
       "license": {
         "spdx": "Apache-2.0",
         "name": "Apache License 2.0",

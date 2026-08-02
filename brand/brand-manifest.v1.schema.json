@@ -62,7 +62,7 @@
           }
         }
       ],
-      "required": ["id", "name", "role", "status", "urls", "license", "icons", "aliases"],
+      "required": ["id", "name", "role", "status", "urls", "packages", "license", "icons", "aliases"],
       "properties": {
         "id": { "$ref": "#/$defs/slug" },
         "name": { "type": "string", "minLength": 1 },
@@ -70,6 +70,10 @@
         "status": { "enum": ["available", "development"] },
         "statusNote": { "type": "string", "minLength": 1 },
         "urls": { "$ref": "#/$defs/productUrls" },
+        "packages": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/packageIdentity" }
+        },
         "license": { "$ref": "#/$defs/license" },
         "icons": {
           "type": "array",
@@ -94,6 +98,18 @@
         "package": { "$ref": "#/$defs/httpsUrl" },
         "download": { "$ref": "#/$defs/httpsUrl" },
         "install": { "$ref": "#/$defs/httpsUrl" }
+      }
+    },
+    "packageIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "registry", "status", "url"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "registry": { "enum": ["npm", "workspace"] },
+        "status": { "enum": ["current", "legacy-compatibility"] },
+        "url": { "$ref": "#/$defs/httpsUrl" },
+        "note": { "type": "string", "minLength": 1 }
       }
     },
     "license": {

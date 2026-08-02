@@ -140,7 +140,14 @@ test("identity validation rejects stale versions, paths, and npm receipt digests
   staleCliBrand.products.find(({ id }) => id === "cli").name = "Memi Engine";
   assert.match(
     validateEcosystemIdentity({ ...context, brandManifest: staleCliBrand }).join("\n"),
-    /brand CLI name, status, repository, package, and license/,
+    /brand CLI name, status, repository, current npm package, and license/,
+  );
+
+  const staleCliPackage = structuredClone(context.brandManifest);
+  staleCliPackage.products.find(({ id }) => id === "cli").packages[0].status = "legacy-compatibility";
+  assert.match(
+    validateEcosystemIdentity({ ...context, brandManifest: staleCliPackage }).join("\n"),
+    /brand CLI name, status, repository, current npm package, and license/,
   );
 
   const staleCanvasBrand = structuredClone(context.brandManifest);
