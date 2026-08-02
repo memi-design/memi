@@ -162,7 +162,7 @@ describe("runtime dependency boundary", () => {
     expect(preview).toContain("0 / 21");
     expect(preview).toContain("Nate has no admitted");
     expect(preview).toContain("No speed, cost, or token-savings claim.");
-    expect(dryRunPackageFiles()).toContain("assets/readme-hero.svg");
+    expect(dryRunPackageFiles()).toContain("assets/memi-brand-banner.png");
     expect(dryRunPackageFiles()).toContain("assets/readme-benchmark.svg");
   });
 });

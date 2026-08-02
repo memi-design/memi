@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/readme-hero.svg" alt="Memi reads an interface, records a file-anchored finding, and verifies the rerun without writing source files." width="100%" />
+  <img src="assets/memi-brand-banner.png" alt="Memi — the design layer for agentic AI." width="100%" />
 </p>
 
 <p align="center">
