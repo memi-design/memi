@@ -646,7 +646,7 @@ export function validateRoutingPattern(pattern: string): RoutingPatternValidatio
   if (typed) {
     const mode = typed[1]!;
     const value = typed[2]!;
-    if (!ROUTING_PATTERN_MODES.has(mode)) {
+    if (!isRoutingPatternMode(mode)) {
       return {
         valid: false,
         reason: `unsupported pattern mode: ${mode}`,
@@ -658,7 +658,7 @@ export function validateRoutingPattern(pattern: string): RoutingPatternValidatio
     }
     return {
       valid: true,
-      mode: mode as RoutingPatternMode,
+      mode,
       value,
       canonical: `${mode}:${value}`,
     };
@@ -725,6 +725,10 @@ export function compileSafeRoutingPattern(pattern: string, flags = "i"): RegExp 
         ? `${escaped}$`
         : escaped;
   return new RegExp(source, flags);
+}
+
+function isRoutingPatternMode(value: string): value is RoutingPatternMode {
+  return ROUTING_PATTERN_MODES.has(value as RoutingPatternMode);
 }
 
 function decodeLegacyRoutingLiteral(value: string): string | null {
