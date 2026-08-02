@@ -533,7 +533,7 @@ export function createToolCallBudgetMonitor(input: number | Readonly<{
     for (const output of toolOutputs(event)) {
       observedToolOutputBytes += Buffer.byteLength(output);
     }
-    const usage = usageSnapshot(event);
+    const usage = event ? usageSnapshot(event) : null;
     if (usage) {
       observedInputTokens = Math.max(observedInputTokens, usage.inputTokens);
       observedOutputTokens = Math.max(observedOutputTokens, usage.outputTokens);
