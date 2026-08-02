@@ -117,6 +117,8 @@
     "!plugin/*.png",
     "README.md",
     "release-artifacts/identity/2.7.7.identity.json",
+    "brand/brand-manifest.v1.json",
+    "brand/brand-manifest.v1.schema.json",
     "server.json",
     "NOTICE",
     "LICENSE"

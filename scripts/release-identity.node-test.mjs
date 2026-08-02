@@ -127,6 +127,20 @@ test("identity validation rejects stale versions, paths, and npm receipt digests
     validateEcosystemIdentity({ ...context, identity: staleReceipt }).join("\n"),
     /npm receipt SHA-256 does not match the committed receipt bytes/,
   );
+
+  const staleCliBrand = structuredClone(context.brandManifest);
+  staleCliBrand.products.find(({ id }) => id === "cli").name = "Memi Engine";
+  assert.match(
+    validateEcosystemIdentity({ ...context, brandManifest: staleCliBrand }).join("\n"),
+    /brand CLI name, status, repository, package, and license/,
+  );
+
+  const staleCanvasBrand = structuredClone(context.brandManifest);
+  staleCanvasBrand.products.find(({ id }) => id === "canvas").status = "available";
+  assert.match(
+    validateEcosystemIdentity({ ...context, brandManifest: staleCanvasBrand }).join("\n"),
+    /brand Canvas development status and canonical icon/,
+  );
 });
 
 test("current publisher metadata targets memi-design and working legal routes", async () => {
