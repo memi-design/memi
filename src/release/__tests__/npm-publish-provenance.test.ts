@@ -156,6 +156,10 @@ describe("npm publish workflow provenance contract", () => {
 });
 
 describe("npm release verification", () => {
+  it("uses the exact public product tagline as the default README proof", () => {
+    expect(DEFAULT_README_PHRASE).toBe("The design layer for agentic AI.");
+  });
+
   it("accepts a workflow invocation from the configured organization repository", () => {
     expect(extractProvenanceInvocation({
       payload: provenancePayload(),
