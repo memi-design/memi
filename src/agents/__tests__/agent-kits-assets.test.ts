@@ -325,13 +325,7 @@ describe("packaged agent kits", () => {
     expect(paths).toContain("schemas/memi-runtime-trace-v1.schema.json");
     expect(paths).toContain("docs/case-studies/README.md");
     expect(paths).toContain("mcpb/manifest.json");
-    // The public README uses these two self-contained evidence assets. All
-    // other integration-only assets must remain outside the installed package.
-    expect(
-      [...paths]
-        .filter((path) => /^(agent-kits|plugins|notes|plugin|assets)\//.test(path))
-        .sort(),
-    ).toEqual(["assets/memi-brand-banner.webp", "assets/readme-benchmark.svg"]);
+    expect([...paths].filter((path) => /^(agent-kits|plugins|notes|plugin|assets)\//.test(path))).toEqual([]);
   });
 });
 

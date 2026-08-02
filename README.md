@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/memi-brand-banner.webp" alt="Memi — the design layer for agentic AI." width="100%" />
+  <img src="https://raw.githubusercontent.com/memi-design/memi/main/assets/memi-brand-banner.png" alt="Memi — the design layer for agentic AI." width="100%" />
 </p>
 
 <p align="center">
@@ -69,7 +69,7 @@ The full study also reports exclusions, failures, and limits. **No superiority, 
 
 <p align="center">
   <a href="https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf">
-    <img src="assets/readme-benchmark.svg" alt="V15 benchmark preview. Blinded quality non-inferiority passed for the scoped Buzzr and Paraform tasks, while 0 of 21 corrected resource tests rejected the null. The study does not establish general superiority, speed, or cost savings." width="100%" />
+    <img src="https://raw.githubusercontent.com/memi-design/memi/main/assets/readme-benchmark.svg" alt="V15 benchmark preview. Blinded quality non-inferiority passed for the scoped Buzzr and Paraform tasks, while 0 of 21 corrected resource tests rejected the null. The study does not establish general superiority, speed, or cost savings." width="100%" />
   </a>
 </p>
 

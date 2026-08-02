@@ -135,7 +135,9 @@ describe("public documentation release truth", () => {
     const quickstartIndex = readme.indexOf("## Quickstart");
     const deeperPathsIndex = readme.indexOf("## Choose your integration");
 
-    expect(readme).toContain("assets/memi-brand-banner.webp");
+    expect(readme).toContain(
+      "https://raw.githubusercontent.com/memi-design/memi/main/assets/memi-brand-banner.png",
+    );
     expect(readme).toContain("img.shields.io/npm/dw/@memi-design/cli");
     expect(readme).toContain(
       "npx -y @memi-design/cli@latest diagnose . --json --no-write --fail-on none",

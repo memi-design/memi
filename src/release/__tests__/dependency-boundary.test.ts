@@ -131,7 +131,9 @@ describe("runtime dependency boundary", () => {
     );
 
     expect(readme).toContain("## Benchmarks and paper");
-    expect(readme).toContain("assets/readme-benchmark.svg");
+    expect(readme).toContain(
+      "https://raw.githubusercontent.com/memi-design/memi/main/assets/readme-benchmark.svg",
+    );
     expect(readme).toContain(
       "https://github.com/memi-design/memi/releases/download/v2.7.4/memi-2.7.3-confirmatory-audit.pdf",
     );
@@ -162,7 +164,7 @@ describe("runtime dependency boundary", () => {
     expect(preview).toContain("0 / 21");
     expect(preview).toContain("Nate has no admitted");
     expect(preview).toContain("No speed, cost, or token-savings claim.");
-    expect(dryRunPackageFiles()).toContain("assets/memi-brand-banner.webp");
-    expect(dryRunPackageFiles()).toContain("assets/readme-benchmark.svg");
+    expect(dryRunPackageFiles()).not.toContain("assets/memi-brand-banner.webp");
+    expect(dryRunPackageFiles()).not.toContain("assets/readme-benchmark.svg");
   });
 });
