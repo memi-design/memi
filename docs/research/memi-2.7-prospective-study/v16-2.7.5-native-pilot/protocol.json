@@ -28,7 +28,7 @@
       "interaction-trace",
       "accessibility-tree"
     ],
-    "billing": "retained provider usage export or invoice allocation plus immutable price card, measured in USD",
+    "billing": "not part of native quality/resource admission; a separately frozen USD-cost extension requires a retained provider usage export or invoice allocation plus immutable price card",
     "timing": "separate adapter and verifier wall times",
     "admission": "exact trial binding plus file-level and manifest-level SHA-256 verification"
   },

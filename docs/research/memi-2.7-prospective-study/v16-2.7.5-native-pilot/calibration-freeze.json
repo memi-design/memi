@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "studyId": "memi-2.7-prospective-v16-275-calibration",
   "planId": "memi-2.7-v16-2.7.5-native-calibration",
-  "planHash": "sha256:3b6adeacc9854ca29fdbe08caf9bdd6d138b1c67c94223b6a19665d104ebade9",
-  "frozenAt": "2026-08-02T00:20:00.000Z",
+  "planHash": "sha256:84ed43c6e354fe6b1c5592c7b5aaca4090843897314a62580e797a5ed06020bf",
+  "frozenAt": "2026-08-02T00:34:00.000Z",
   "candidate": {
     "version": "2.7.5",
-    "revision": "46e9ae85d2d8796be06f08bdc009f17c47ad24f2",
+    "revision": "0c95d57066e1cd8fa0f97cbda92609aadc7751f7",
     "sourceState": "clean",
     "dirtyFileCount": 0,
-    "sourceTreeSha256": "sha256:22c4e0629c67511d359a455eef739771731a00283e202902a85851f80ef14c5d",
-    "artifactSha256": "sha256:f6220e59b9b2a7794d51cab842b827c76783952de275fcddd673e952785f77af"
+    "sourceTreeSha256": "sha256:2ef4f37b7f7ec9e9a22462cde5e3503082a66df5e0b1755aa42be9560dfa2b46",
+    "artifactSha256": "sha256:83ad01b997d8b7bc59f4190f83072b0cf215065b9bdf98f36e0ac16e62ae72de"
   },
   "harness": {
     "provider": "codex",
@@ -53,7 +53,7 @@
       "interaction-trace",
       "accessibility-tree"
     ],
-    "measuredBillingRequired": true,
+    "measuredBillingRequired": false,
     "structuredStopReasonsRequired": true
   },
   "requiredArtifacts": [
@@ -116,5 +116,5 @@
       "sequence": 5
     }
   ],
-  "freezeHash": "sha256:07e6478d2d4f7a8fb81edb8a8b8f53fc2749764b69ca0d3673df11eefe268d6b"
+  "freezeHash": "sha256:7cf78406a5ae72e21616594272996f4f787b7865a1025cfd2965c0faa0409128"
 }

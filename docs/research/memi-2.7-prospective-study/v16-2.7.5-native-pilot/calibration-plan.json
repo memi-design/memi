@@ -5,10 +5,10 @@
   "status": "draft",
   "currentScore": 0,
   "targetScore": 0,
-  "claimBoundary": "One unscored baseline/Memi pair per fixture. These six cells test capture, billing, and blind-packet plumbing only; they are excluded from confirmatory statistics and cannot support a product claim.",
+  "claimBoundary": "One unscored baseline/Memi pair per fixture. These six cells test native capture and blind-packet plumbing only; they are excluded from confirmatory statistics and cannot support a product claim. USD billing is out of scope until a separately frozen billed-cost extension is available.",
   "scoreBudget": [
     { "dimension": "calibration-registration", "currentCredit": 0, "targetCredit": 0, "unlock": "Frozen before the six calibration cells." },
-    { "dimension": "native-capture-calibration", "currentCredit": 0, "targetCredit": 0, "maximumCredit": 3, "unlock": "Each fixture retains all required native and billing artifacts." },
+    { "dimension": "native-capture-calibration", "currentCredit": 0, "targetCredit": 0, "maximumCredit": 3, "unlock": "Each fixture retains every required native artifact." },
     { "dimension": "blinded-packet-usability", "currentCredit": 0, "targetCredit": 0, "unlock": "A blinded packet can be built without revealing the condition." }
   ],
   "tasks": [
@@ -24,7 +24,7 @@
     "freshClonePerTrial": true,
     "counterbalancedOrder": true,
     "requiredArtifacts": ["git.patch", "preparation.json", "events.jsonl", "usage.json", "route.json", "tools.json", "tool-profile.json", "verification.json", "native-capture.json", "environment.json", "verification-isolation.json", "prospective-evidence-v2.json", "evidence-manifest.json", "run.json"],
-    "evidenceV2": { "required": true, "requiredCaptureKinds": ["screenshot", "interaction-trace", "accessibility-tree"], "measuredBillingRequired": true, "structuredStopReasonsRequired": true },
+    "evidenceV2": { "required": true, "requiredCaptureKinds": ["screenshot", "interaction-trace", "accessibility-tree"], "measuredBillingRequired": false, "structuredStopReasonsRequired": true },
     "acceptance": { "requiredValidPairsPerTask": 1, "requiredPassingPairsPerTask": 1, "fixtureMutationAllowed": false, "providerErrorAllowed": false, "missingOrDuplicateConditionAllowed": false, "postPatchIsolatedVerificationRequired": true }
   },
   "creditPolicy": { "planningEarnsCredit": false, "manualCreditEditsAllowed": false, "prospectiveRegistrationCredit": "all-or-none", "independentRepeatInterimCreditPerQualifiedPlatform": 1, "independentRepeatInterimCreditCap": 3, "fullRepeatCreditRequiresAllReleaseCriticalTasks": true }

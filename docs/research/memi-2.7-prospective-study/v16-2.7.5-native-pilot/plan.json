@@ -5,7 +5,7 @@
   "status": "draft",
   "currentScore": 0,
   "targetScore": 23,
-  "claimBoundary": "Exact unpublished 2.7.5 candidate evidence on three named frozen fixtures. No quality, speed, cost, or practitioner-design claim is admitted unless its separately preregistered task-level gate passes.",
+  "claimBoundary": "Exact unpublished 2.7.5 candidate evidence on three named frozen fixtures. This plan evaluates native quality and resource outcomes only; it cannot support a USD-cost claim without a separately frozen billed-cost extension.",
   "scoreBudget": [
     {
       "dimension": "prospective-registration",
@@ -82,7 +82,7 @@
     "evidenceV2": {
       "required": true,
       "requiredCaptureKinds": ["screenshot", "interaction-trace", "accessibility-tree"],
-      "measuredBillingRequired": true,
+      "measuredBillingRequired": false,
       "structuredStopReasonsRequired": true
     },
     "acceptance": {

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "status": "ready",
   "planId": "memi-2.7-v16-2.7.5-native-confirmatory",
-  "planHash": "sha256:56b8d37ca82bfdbd37db7176ebc5ad25baf1826279cc4e349df96f738165d329",
-  "checkedAt": "2026-08-02T00:06:29Z",
+  "planHash": "sha256:514991cd1a5c8d44ab501ba27b56cd7b0ae327381a077d41ebc3017a3aa043eb",
+  "checkedAt": "2026-08-02T00:35:00.000Z",
   "fixtures": [
     {
       "taskId": "buzzr-tab-unread-badge",
@@ -42,5 +42,5 @@
       ]
     }
   ],
-  "preflightHash": "sha256:c8366e04e018d3fec1e183d10b636ed37a7cde8cafdc5e967356eb32e8e031c1"
+  "preflightHash": "sha256:6747f44676bf82920f4e7d1d2c70d8916e9a2727d0ff66968c2b0dabb0c55807"
 }

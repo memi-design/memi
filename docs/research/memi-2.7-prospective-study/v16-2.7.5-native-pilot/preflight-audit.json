@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-08-01T23:00:00.000Z",
+  "checkedAt": "2026-08-02T00:35:00.000Z",
   "status": "not-ready-to-freeze",
   "contractPreflight": {
     "status": "ready-but-not-calibrated",
     "receipt": "preflight-attestation.json",
-    "sha256": "sha256:c8366e04e018d3fec1e183d10b636ed37a7cde8cafdc5e967356eb32e8e031c1",
-    "meaning": "All three clean, pinned fixtures match their declared origins and V16 task manifests declare the required capture kinds. This is configuration admission only; no collector, billing receipt, model cell, or claim has been admitted."
+    "sha256": "sha256:6747f44676bf82920f4e7d1d2c70d8916e9a2727d0ff66968c2b0dabb0c55807",
+    "meaning": "All three clean, pinned fixtures match their declared origins and V16 task manifests declare the required capture kinds. This is configuration admission only; no collector, model cell, or claim has been admitted. USD billing is required only by a separately frozen cost extension."
   },
   "candidate": {
     "requiredVersion": "2.7.5",
     "observedWorkspaceVersion": "2.7.5",
-    "candidateTarballSha256": "sha256:f6220e59b9b2a7794d51cab842b827c76783952de275fcddd673e952785f77af",
+    "candidateTarballSha256": "sha256:83ad01b997d8b7bc59f4190f83072b0cf215065b9bdf98f36e0ac16e62ae72de",
     "candidateProvenance": "candidate-provenance.json",
     "reason": "An exact local 2.7.5 tarball from the repaired candidate commit is retained and hash-recorded. It is an unpublished study candidate, not an npm release."
   },
@@ -43,7 +43,7 @@
   "remainingPrerequisites": [
     "Use the verified Buzzr Expo fixture revision and hash a V16 task manifest with native Simulator collectors.",
     "Perform one unscored native-capture calibration pair per fixture.",
-    "Retain per-cell provider usage exports or invoice allocations and price-card artifacts before scored execution."
+    "Freeze and retain per-cell provider usage exports or invoice allocations and price-card artifacts before any separately billed-cost extension; the native quality/resource study does not infer USD cost."
   ],
   "claimDecision": "No claim is admitted; this is a readiness audit only."
 }

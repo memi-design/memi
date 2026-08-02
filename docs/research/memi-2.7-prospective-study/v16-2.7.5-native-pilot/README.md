@@ -4,10 +4,11 @@ Status: preregistration draft. This directory contains no outcomes and does not
 support a quality, speed, or cost claim.
 
 V16 closes the known V15 evidence gaps before a new study begins. Every admitted
-cell must have an exact candidate artifact, immutable fixture revision, a fresh
-post-patch verification clone, and a V2 evidence receipt. The receipt is only
-admitted when its native captures and measured billing files are copied from a
-bounded source root, individually hashed, and included in the cell manifest.
+native-quality/resource cell must have an exact candidate artifact, immutable
+fixture revision, a fresh post-patch verification clone, and a V2 evidence
+receipt. Its native captures are copied from a bounded source root, individually
+hashed, and included in the cell manifest. USD cost is a separate analysis lane:
+it is not inferred from a subscription, tokens, or a manually typed amount.
 
 ## What would make a claim supported
 
@@ -25,9 +26,10 @@ V16 treats each statement as a separate gate:
 | "Memi produces professionally better frontend work" | Not established | The native evidence above plus blinded practitioner grading; model graders alone are explicitly insufficient |
 
 The engineering gates already implemented are narrower but real: V2 receipts
-require the native capture and billing files, manifests seal every declared
-file, fresh capture roots reject stale artifacts, preflight refuses dirty or
+require the declared native capture files, manifests seal every declared file,
+fresh capture roots reject stale artifacts, preflight refuses dirty or
 wrong-origin fixture repositories, and it can emit a hash-verified attestation.
+A study that requests a USD claim additionally requires retained billing files.
 Those controls improve whether the next data are trustworthy; they do not turn
 the old data into positive evidence.
 
@@ -37,7 +39,7 @@ the old data into positive evidence.
    platform. It proves the collector can capture the declared states and that
    the blind packet is usable. Pilot cells are marked `calibration` and are
    excluded from every confirmatory statistic, regardless of outcome.
-2. **Confirmatory study.** After the pilot’s capture and billing receipts pass
+2. **Confirmatory study.** After the pilot’s native-capture receipts pass
    independent audit, freeze a new V16 confirmatory receipt and run six matched
    pairs for each of Buzzr/Expo, Paraform/web, and Nate/SwiftUI (18 pairs / 36
    agent cells), serially. No cell is replaced, imputed, or silently retried.
@@ -67,12 +69,14 @@ pair; no host screenshots are admissible.
 
 ## Measured billing contract
 
-Before each cell, the operator places a provider usage export and the immutable
-price-card or invoice-allocation document in that cell's empty capture root.
-The source must identify the run/window and report USD; token-based estimates,
+The native quality/resource protocol intentionally does not require an invented
+USD value for subscription-backed runs. Instead, the run receipt records cost as
+unmeasured and the resulting study has no cost conclusion. A later, separately
+frozen billed-cost extension must retain a provider usage export or invoice
+allocation and an immutable price card after the provider invocation, then bind
+both files to that specific cell before cost analysis. Token-based estimates,
 subscription assumptions, and manually typed dollar figures are not admissible.
-The native collectors then populate the three fresh capture files in the same
-root. The receipt draft must use only those five files.
+The three native capture files remain mandatory in every V16 cell.
 
 ## Confirmatory decision rules
 
@@ -99,14 +103,16 @@ root. The receipt draft must use only those five files.
 1. Build and hash the exact candidate tarball; record its source commit and
    clean/dirtied snapshot state.
 2. Pin each fixture at its commit and run the platform-specific preflight.
-3. Create a fresh, empty per-cell capture root. Add the two billing files.
+3. Create a fresh, empty per-cell capture root for the declared native files.
 4. Freeze the protocol, environment, task-manifest hashes, candidate hash, and
    counterbalanced trial matrix before the first scored provider invocation.
 5. Invoke `memi benchmark workflow-run` with `--freeze`, `--trial`,
    `--evidence-draft`, and `--artifact-root`. The command fails before provider
    use when the V2 draft, task collectors, or freshness boundary do not match.
 6. Run `memi benchmark prospective-evaluate` over the immutable run store. A
-   cell is excluded on any manifest, hash, capture, binding, or billing defect.
+   native-quality/resource cell is excluded on any manifest, hash, capture, or
+   binding defect. A billed-cost extension separately excludes a cell on any
+   billing defect.
 7. Generate blinded packets only from admitted cells. Preserve all rejected
    cells and their reasons in the deviations ledger.
 
@@ -129,7 +135,8 @@ remain uncalibrated until their first unscored matched pair passes.
 [preflight-attestation.json](preflight-attestation.json) proves only that those
 declarations match clean, pinned fixtures and their origins. Its `ready` status
 is deliberately narrower than study readiness: a missing launch, journey,
-native capture, billing file, or blinded packet still prevents a scored cell.
+native capture, or blinded packet still prevents a scored native-quality/resource
+cell. Billing evidence remains required only for the separate USD-cost lane.
 
 [environment.json](environment.json) freezes the intended browser and exclusive
 Simulator environment. The named simulator must be erased/reset before each

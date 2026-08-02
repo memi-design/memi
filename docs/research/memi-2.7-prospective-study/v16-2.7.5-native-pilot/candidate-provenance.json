@@ -2,29 +2,29 @@
   "schemaVersion": 1,
   "kind": "memi-v16-local-candidate-provenance",
   "status": "unpublished-candidate",
-  "recordedAt": "2026-08-02T00:19:00Z",
+  "recordedAt": "2026-08-02T00:34:00Z",
   "candidate": {
     "packageName": "@memi-design/cli",
     "version": "2.7.5",
-    "sourceRevision": "46e9ae85d2d8796be06f08bdc009f17c47ad24f2",
+    "sourceRevision": "0c95d57066e1cd8fa0f97cbda92609aadc7751f7",
     "sourceState": "clean",
     "dirtyFileCount": 0,
     "sourceSnapshot": {
       "method": "git archive --format=tar HEAD | shasum -a 256",
-      "sha256": "sha256:22c4e0629c67511d359a455eef739771731a00283e202902a85851f80ef14c5d"
+      "sha256": "sha256:2ef4f37b7f7ec9e9a22462cde5e3503082a66df5e0b1755aa42be9560dfa2b46"
     },
     "artifact": {
       "filename": "memi-design-cli-2.7.5.tgz",
-      "bytes": 584837,
-      "sha256": "sha256:f6220e59b9b2a7794d51cab842b827c76783952de275fcddd673e952785f77af",
-      "sha512": "sha512:c1e4c6937ddaaaa9a7861f6f219d5b24da242d1dcd23eae6d8a4562b7ca3658f5f382f013d3f44d69304b78873550e623ec8ab55c881819869c3d72bbc2fefb1",
-      "sha1": "4150b425de9b561d944e760c62b254dec7575cd6",
+      "bytes": 584882,
+      "sha256": "sha256:83ad01b997d8b7bc59f4190f83072b0cf215065b9bdf98f36e0ac16e62ae72de",
+      "sha512": "sha512:7de654a4dfd847d24f0f249ffae32174b3e237c0cfdd63074d1ac9373564c1fdf1cdfcc6050ffa361febe8bc65ddfc769f719da9321c507af72a2d3b05a3bfce",
+      "sha1": "4ba635c7263aeffa5631c141fc43c6dab27eadd6",
       "retention": "External immutable study-evidence root; not an npm-published tarball."
     },
     "supersedes": {
-      "sourceRevision": "d97fec751408b8ee3c39a529d737b7a6c74d9b82",
-      "artifactSha256": "sha256:a416d99eb368d734f9f5d4cadb040c02961ca1078722924336753df84f1617a6",
-      "reason": "Candidate surface and public-artifact validation repairs were committed before study freeze. The earlier tarball remains retained but is not eligible for V16."
+      "sourceRevision": "46e9ae85d2d8796be06f08bdc009f17c47ad24f2",
+      "artifactSha256": "sha256:f6220e59b9b2a7794d51cab842b827c76783952de275fcddd673e952785f77af",
+      "reason": "Candidate-surface validation and the claim-specific billing-admission repair were committed before study freeze. Earlier tarballs remain retained but are not eligible for V16."
     }
   },
   "claimBoundary": "This receipt identifies the candidate used by V16. It provides no outcome, quality, speed, cost, or public-release evidence."
