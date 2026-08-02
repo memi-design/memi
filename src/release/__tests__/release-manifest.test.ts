@@ -16,10 +16,10 @@ import {
 const root = join(import.meta.dirname, "..", "..", "..");
 const manifestPath = join(root, "release-manifest.json");
 const webArtifactPath = join(root, "release-artifacts", "memoire-web.release.json");
-const previousEngineSourceCommit = "3d07c5476715ce25efbeef356f298bbd958f7f58";
+const publishedEngineSourceCommit = "74fc6ce8c66182b4aa06e1250cb169da8b1fc54c";
 const publishedReleaseRecord = {
-  path: "release-artifacts/npm/2.7.6.release.json",
-  sha256: "6af07e6a812492cd05c81296baaf6c485a114f543577eafe33a2a829ff2d115b",
+  path: "release-artifacts/npm/2.7.7.release.json",
+  sha256: "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c",
 };
 
 describe("release manifest", () => {
@@ -31,14 +31,9 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.7.7",
-          state: "candidate",
-          sourceCommit: null,
-          releaseRecord: null,
-          previousPublicRelease: {
-            version: "2.7.6",
-            sourceCommit: previousEngineSourceCommit,
-            releaseRecord: publishedReleaseRecord,
-          },
+          state: "published",
+          sourceCommit: publishedEngineSourceCommit,
+          releaseRecord: publishedReleaseRecord,
         },
         studio: { version: "2.5.0" },
         site: { version: "1.0.4" },

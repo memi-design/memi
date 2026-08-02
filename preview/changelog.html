@@ -409,7 +409,7 @@ a:hover { text-decoration: underline; }
         </p>
         <div class="hero-kpis">
           <div class="summary-card">
-            <span class="summary-kicker">Candidate release</span>
+            <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v2.7.7</strong>
             <div class="summary-caption">1 commits tracked in v2.7.7 from CHANGELOG.md.</div>
           </div>
@@ -445,7 +445,7 @@ const releases = [
     "version": "v2.7.7",
     "date": "2026-08-02",
     "tag": "fix",
-    "summary": "0bad800b — fix: align MCP registry identity with organization; Corrects the official MCP Registry identity from the personal namespace to; Keeps the verified 2.7.6 npm receipt immutable; this patch is required.",
+    "summary": "0bad800b — fix: align MCP registry identity with organization; Corrects the official MCP Registry identity from the personal namespace to; Published through npm trusted publishing with verified provenance, signatures,.",
     "commits": [
       [
         "0bad800b",
@@ -456,7 +456,9 @@ const releases = [
     "changes": [
       "0bad800b — fix: align MCP registry identity with organization",
       "Corrects the official MCP Registry identity from the personal namespace to",
-      "Keeps the verified 2.7.6 npm receipt immutable; this patch is required"
+      "Published through npm trusted publishing with verified provenance, signatures,",
+      "Published to the MCP Registry through GitHub OIDC; the organization-owned",
+      "Released verified macOS, Linux, and Windows binaries with checksums, then"
     ]
   },
   {

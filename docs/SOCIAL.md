@@ -1,6 +1,6 @@
 # Memi Community Launch Kit
 
-Current release: `@memi-design/cli@2.7.6`
+Current release: `@memi-design/cli@2.7.7`
 Primary link: <https://github.com/memi-design/memi>
 Primary story: Memi is the read-only design engineering audit and skill layer for coding agents.
 
@@ -32,7 +32,7 @@ repo but not in one prompt.
 
 I built Memi to give the agent a deterministic preflight:
 
-  npx -y @memi-design/cli@2.7.6 diagnose . --json --no-write --fail-on none
+  npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 
 It reads the current repository, writes no source files, and returns normalized
 findings with file:line evidence. Run the same command after the fix to verify
@@ -68,7 +68,7 @@ rules, empty states, or motion accessibility.
 
 Memi runs before the edit and reports the evidence it found:
 
-  npx -y @memi-design/cli@2.7.6 diagnose . --json --no-write --fail-on none
+  npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 
 The first path is deterministic and read-only. It needs no account, API key,
 Figma file, global install, or daemon. Findings cite file:line so the agent can
@@ -101,7 +101,7 @@ It looks for accessibility, missing product states, token drift, weak hierarchy,
 responsive issues, and motion problems, then reports normalized findings with
 file:line evidence.
 
-  npx -y @memi-design/cli@2.7.6 diagnose . --json --no-write --fail-on none
+  npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 
 The command is read-only and deterministic. The same engine can run as a pinned
 GitHub Action, so accepted debt can stay visible while new debt fails a PR.
@@ -123,7 +123,7 @@ conventions, and component boundaries.
 
 I built Memi as a read-only design engineering preflight.
 
-npx -y @memi-design/cli@2.7.6 diagnose . --json --no-write --fail-on none
+npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 
 It returns deterministic, file-anchored findings before the agent edits UI.
 Then you rerun the same command to verify the correction.
@@ -148,7 +148,7 @@ Coding agents move fast, but they usually start without the product's design rul
 
 I built Memi: a read-only design audit before the agent edits UI.
 
-npx -y @memi-design/cli@2.7.6 diagnose . --no-write
+npx -y @memi-design/cli@2.7.7 diagnose . --no-write
 
 https://github.com/memi-design/memi
 ```
@@ -191,19 +191,19 @@ If it catches something real, share the finding. That is the proof I care about.
 Title:
 
 ```text
-Memi 2.7.6: one read-only command before your agent edits UI
+Memi 2.7.7: one read-only command before your agent edits UI
 ```
 
 Body:
 
 ```text
-Memi 2.7.6 is published on npm. GitHub release, the v2 Action channel, MCP
+Memi 2.7.7 is published on npm. GitHub release, the v2 Action channel, MCP
 Registry, Studio, and website parity are separately verified release gates;
 this announcement does not claim they have cleared.
 
 Try the smallest useful path:
 
-  npx -y @memi-design/cli@2.7.6 diagnose . --json --no-write --fail-on none
+  npx -y @memi-design/cli@2.7.7 diagnose . --json --no-write --fail-on none
 
 If it reports a useful finding, share the finding ID, framework, and correction
 in Show and Tell. If it misses something important, open a fixture-backed issue.
