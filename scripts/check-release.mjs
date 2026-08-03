@@ -235,8 +235,8 @@ if (codexPluginManifest.homepage !== "https://www.memoire.cv/codex-plugin") {
   fail("Codex plugin manifest homepage must point to https://www.memoire.cv/codex-plugin");
 }
 for (const field of ["privacyPolicyURL", "termsOfServiceURL"]) {
-  if (typeof codexPluginManifest[field] !== "string" || !codexPluginManifest[field].startsWith("https://www.memoire.cv/")) {
-    fail(`Codex plugin manifest is missing ${field}`);
+  if (Object.hasOwn(codexPluginManifest, field)) {
+    fail(`Codex plugin manifest must keep ${field} inside interface`);
   }
   if (typeof codexInterface[field] !== "string" || !codexInterface[field].startsWith("https://www.memoire.cv/")) {
     fail(`Codex plugin interface is missing ${field}`);

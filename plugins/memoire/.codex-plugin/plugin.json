@@ -9,8 +9,6 @@
   "homepage": "https://www.memoire.cv/codex-plugin",
   "repository": "https://github.com/sarveshsea/memi",
   "license": "MIT",
-  "privacyPolicyURL": "https://www.memoire.cv/privacy",
-  "termsOfServiceURL": "https://www.memoire.cv/terms",
   "keywords": [
     "codex",
     "memoire",

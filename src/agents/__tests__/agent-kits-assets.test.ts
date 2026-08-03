@@ -34,8 +34,6 @@ interface CodexPluginManifest {
   version: string;
   description: string;
   homepage: string;
-  privacyPolicyURL: string;
-  termsOfServiceURL: string;
   skills: string;
   mcpServers: string;
   interface: {
@@ -209,8 +207,6 @@ describe("packaged agent kits", () => {
       name: "memoire",
       version: pkg.version,
       homepage: "https://www.memoire.cv/codex-plugin",
-      privacyPolicyURL: "https://www.memoire.cv/privacy",
-      termsOfServiceURL: "https://www.memoire.cv/terms",
       skills: "./skills/",
       mcpServers: "./.mcp.json",
       interface: {
@@ -219,6 +215,8 @@ describe("packaged agent kits", () => {
         termsOfServiceURL: "https://www.memoire.cv/terms",
       },
     });
+    expect(manifest).not.toHaveProperty("privacyPolicyURL");
+    expect(manifest).not.toHaveProperty("termsOfServiceURL");
     expect(manifest.description).toContain(
       "design layer for agentic AI",
     );
