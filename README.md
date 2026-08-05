@@ -56,7 +56,7 @@ Copy [`examples/github-actions/memi-design.yml`](examples/github-actions/memi-de
 
 The workflow does not need an API key or a Memi secret. Fork pull requests still receive the check and report; SARIF upload is skipped automatically when GitHub does not grant that permission.
 
-If you prefer to configure it by hand, the complete [GitHub Action guide](docs/GITHUB_ACTION_MARKETPLACE.md) documents every input, output, permission, and evidence file.
+If you prefer to configure it by hand, the complete [GitHub Action guide](https://github.com/memi-design/memi/blob/main/docs/GITHUB_ACTION_MARKETPLACE.md) documents every input, output, permission, and evidence file.
 
 ## One product layer, three surfaces
 
