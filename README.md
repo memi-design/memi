@@ -16,6 +16,8 @@
 
 Give your coding agent an interface brief before it edits. Memi maps the UI already in your repository, surfaces file-anchored accessibility and design-system risks, and gives you a deterministic check to rerun before merge. Start with the CLI, then add the same gate to every pull request.
 
+Memi Studio is available today; Memi Canvas is currently in development. No account, API key, Figma file, global install, or daemon is required for the first audit.
+
 <p align="center">
   <a href="#quickstart"><strong>Start with your next interface</strong></a> ·
   <a href="https://memoire.cv/download">Get Memi Studio</a> ·
