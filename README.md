@@ -62,7 +62,7 @@ If you prefer to configure it by hand, the complete [GitHub Action guide](docs/G
 | --- | --- | --- |
 | **Memi CLI** | Interface intelligence and deterministic checks for local repositories, agents, and CI. | Available today |
 | **Memi Studio** | A macOS workbench for bringing project context, agent workflows, and verification together. | [Available today](https://memoire.cv/download) |
-| **Memi Canvas** | A visual workspace for design-system context and controlled agent proposals. | Currently in development |
+| **Memi Canvas** | A visual workspace for design-system context and controlled agent proposals. | currently in development |
 
 ## See the product
 
