@@ -164,6 +164,33 @@ describe("Expo native verification adapter", () => {
     expect(result.artifacts).toEqual([]);
   });
 
+  it("releases an acquired Simulator lease whose descriptor is invalid", async () => {
+    const root = await evidenceRoot("memi-expo-invalid-lease-");
+    const driver = fixtureDriver();
+    const release = vi.fn(async () => undefined);
+    driver.acquireExclusiveSimulatorLease.mockResolvedValueOnce({
+      descriptor: {
+        leaseId: "lease-fixture",
+        simulatorId: "simulator-fixture",
+        acquiredAt: "2026-08-06T12:00:01.000Z",
+        exclusive: false,
+      },
+      reset: vi.fn(),
+      capture: vi.fn(),
+      release,
+    });
+
+    const result = await runExpoNativeVerification({
+      evidenceRoot: root,
+      runStartedAt: STARTED_AT,
+      runCompletedAt: COMPLETED_AT,
+    }, driver);
+
+    expect(result.status).toBe("rejected");
+    expect(result.reasons).toEqual(["simulator-lease-invalid"]);
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects stale candidate timestamps", async () => {
     const root = await evidenceRoot("memi-expo-stale-");
     const candidates = await writeCompleteEvidence(
