@@ -239,6 +239,11 @@ describe("release manifest", () => {
         "utf8",
       );
       await writeFile(
+        join(fixtureRoot, "action.yml"),
+        'default: "2.6.4"\ndescription: "reviewed 2.6.4 pin"\n',
+        "utf8",
+      );
+      await writeFile(
         join(fixtureRoot, "release-artifacts/memoire-web.release.json"),
         serializeJson(buildWebReleaseArtifact(candidateManifest, "a".repeat(40))),
         "utf8",
