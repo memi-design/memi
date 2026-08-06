@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   WorkflowReceiptV3Schema,
   assertCandidateIndependentReceiptFields,
+  assertExactRouteReceiptFields,
   createWorkflowReceiptV3,
   verifyWorkflowReceiptV3,
   type WorkflowReceiptV3Input,
@@ -471,5 +472,29 @@ describe("WorkflowReceiptV3", () => {
       .toThrow(/candidate-independent/i);
     expect(() => assertCandidateIndependentReceiptFields([memi, memi]))
       .toThrow(/duplicate/i);
+  });
+
+  it("requires identical route identity for exact-route recovery evidence", () => {
+    const first = createWorkflowReceiptV3(receiptInput());
+    const second = createWorkflowReceiptV3(receiptInput({
+      receiptId: "receipt-web-002",
+      sequence: 2,
+    }));
+    expect(assertExactRouteReceiptFields([first, second])).toEqual({
+      routeIdentitySha256: first.route.identitySha256,
+      receiptIds: ["receipt-web-001", "receipt-web-002"],
+    });
+
+    const route = receiptInput().route;
+    if (route.decision !== "selected") throw new Error("test fixture must select a route");
+    const changed = createWorkflowReceiptV3(receiptInput({
+      receiptId: "receipt-web-003",
+      sequence: 3,
+      route: {
+        ...route,
+        skill: { ...route.skill, contentSha256: sha("f") },
+      },
+    }));
+    expect(() => assertExactRouteReceiptFields([first, changed])).toThrow(/exact route/i);
   });
 });
