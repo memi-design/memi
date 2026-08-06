@@ -426,6 +426,14 @@ export class AgentOrchestrator {
     budget?: ExecutionBudgetGuard,
     signal?: AbortSignal,
   ): Promise<unknown> {
+    if (budget && SubAgentRunner.MUTATION_CAPABLE_AGENT_TYPES.has(task.agentType)) {
+      budget.startImplementationAttempt(1);
+      budget.finishImplementationAttempt(1, "fatal-failure");
+      budget.markAttemptLimitReached();
+      throw new Error(
+        `Contracted mutation route ${task.agentType} requires a transaction-safe adapter`,
+      );
+    }
     const role = task.agentType as import("../plugin/shared/contracts.js").AgentRole;
     const externalAgent = this.engine.agentRegistry.getAvailableAgent(role);
 
