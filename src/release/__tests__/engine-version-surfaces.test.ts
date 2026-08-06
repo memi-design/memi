@@ -57,7 +57,7 @@ describe("2.7.9 stabilization release candidate surfaces", () => {
       agentMirror,
     ] = await Promise.all([
       readJson("package.json"),
-      readJson("package-lock.json"),
+      readJson("npm-shrinkwrap.json"),
       readJson("server.json"),
       readJson("mcpb/manifest.json"),
       readJson("plugins/memoire/.codex-plugin/plugin.json"),

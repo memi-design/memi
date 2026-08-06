@@ -312,7 +312,7 @@ describe("verified engine release state machine", () => {
           "publish:smithery": "publish .dist/memi-2.6.3.mcpb",
         },
       },
-      "package-lock.json": { version: "2.6.3", packages: { "": { version: "2.6.3" } } },
+      "npm-shrinkwrap.json": { version: "2.6.3", packages: { "": { version: "2.6.3" } } },
       "server.json": {
         name: "io.github.sarveshsea/memi",
         version: "2.6.3",

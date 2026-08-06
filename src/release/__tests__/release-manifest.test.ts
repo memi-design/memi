@@ -192,7 +192,7 @@ describe("release manifest", () => {
       "release-manifest.json",
       "release-artifacts/memoire-web.release.json",
       "package.json",
-      "package-lock.json",
+      "npm-shrinkwrap.json",
       "server.json",
       "action.yml",
       "mcpb/manifest.json",

@@ -22,7 +22,7 @@ describe("public package supply-chain defaults", () => {
 
   it("pins patched production dependency ranges in the lockfile", async () => {
     const root = process.cwd();
-    const lock = JSON.parse(await readFile(join(root, "package-lock.json"), "utf-8"));
+    const lock = JSON.parse(await readFile(join(root, "npm-shrinkwrap.json"), "utf-8"));
 
     expect(lock.packages["node_modules/@chenglou/pretext"]?.version).toBe("0.0.6");
     expect(lock.packages["node_modules/path-to-regexp"]?.version).toMatch(/^8\.[4-9]\./);
@@ -52,7 +52,7 @@ describe("public package supply-chain defaults", () => {
 
   it("pins patched production dependency resolutions", async () => {
     const pkg = JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf-8"));
-    const lock = JSON.parse(await readFile(join(process.cwd(), "package-lock.json"), "utf-8"));
+    const lock = JSON.parse(await readFile(join(process.cwd(), "npm-shrinkwrap.json"), "utf-8"));
 
     expect(pkg.dependencies.tar).toBe("7.5.22");
     expect(pkg.dependencies["@modelcontextprotocol/sdk"]).toBe("^1.30.0");
