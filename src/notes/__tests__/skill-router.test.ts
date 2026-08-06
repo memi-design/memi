@@ -220,7 +220,7 @@ describe("deterministic skill router", () => {
 
     const context = formatRoutedSkillContext(routed);
 
-    expect(context).toContain("\"routerVersion\": \"skill-router-v2\"");
+    expect(context).toContain("\"routerVersion\": \"skill-router-v3\"");
     expect(context).toContain("# accessibility-audit");
     expect(context).toContain(routed.route.selected[0].contentHash);
     expect(context).toContain("The task manifest and closest repository evidence are authoritative.");
