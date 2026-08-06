@@ -134,7 +134,7 @@ export async function writeComposeReceiptV3(input: {
     execution: {
       startedAt,
       completedAt,
-      stopReason: input.dryRun ? "preflight-failed" : "verification-failed",
+      stopReason: deriveComposeStopReason(input.dryRun, input.result.status),
       attempts: input.dryRun ? [] : [{
         attemptId: "attempt-1",
         startedAt,
@@ -182,6 +182,14 @@ export async function writeComposeReceiptV3(input: {
     receiptSha256: receipt.receiptSha256,
     file,
   });
+}
+
+export function deriveComposeStopReason(
+  dryRun: boolean,
+  status: AgentExecutionResult["status"],
+): "preflight-failed" | "attempt-limit-reached" | "verification-failed" {
+  if (dryRun) return "preflight-failed";
+  return status === "completed" ? "verification-failed" : "attempt-limit-reached";
 }
 
 async function nextReceiptSequence(root: string): Promise<number> {
