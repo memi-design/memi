@@ -65,6 +65,24 @@ describe("chronological WorkflowReceiptV3 replay", () => {
     expect(reduce).toHaveBeenCalledTimes(2);
   });
 
+  it("supports an exact ledger-position cutoff for equal timestamps", () => {
+    const result = replayWorkflowReceiptsChronologically({
+      receipts: [
+        receipt("first", "2026-08-06T12:00:00.000Z", 0),
+        receipt("same-instant-future", "2026-08-06T12:00:00.000Z", 1),
+      ],
+      asOf: "2026-08-06T12:00:00.000Z",
+      asOfSequence: 0,
+      initialState: [] as string[],
+      reduce: ({ current, state }) => [...state, current.receiptId],
+    });
+
+    expect(result.receiptsReplayed).toBe(1);
+    expect(result.finalState).toEqual(["first"]);
+    expect(result.asOfSequence).toBe(0);
+  });
+
+
   it("rejects duplicate receipt IDs, duplicate sequence positions, and malformed cutoffs", () => {
     const first = receipt("duplicate", "2026-08-06T12:00:00.000Z", 0);
     const duplicateId = receipt("duplicate", "2026-08-06T12:00:01.000Z", 1);
