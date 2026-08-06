@@ -321,9 +321,7 @@ export class AgentOrchestrator {
         break;
       }
 
-      // Execute ready tasks in parallel
-      await Promise.all(
-        ready.map(async (task) => {
+      const executeReadyTask = async (task: SubTask): Promise<void> => {
           const taskIndex = plan.subTasks.findIndex((candidate) => candidate.id === task.id);
           task.status = "running";
           task.startedAt = new Date().toISOString();
@@ -379,8 +377,14 @@ export class AgentOrchestrator {
 
           completed.add(task.id);
           this.onUpdate?.(plan);
-        }),
-      );
+      };
+      if (options?.budget) {
+        // A contracted run has one ordered attempt ledger. Serial execution is
+        // required so retry chronology and usage deltas remain unambiguous.
+        for (const task of ready) await executeReadyTask(task);
+      } else {
+        await Promise.all(ready.map(executeReadyTask));
+      }
       if (signal?.aborted) break;
     }
 
@@ -388,7 +392,7 @@ export class AgentOrchestrator {
     let figmaSynced = false;
     if (!signal?.aborted && options?.autoSync && plan.context.figmaConnected && mutations.length > 0) {
       try {
-        await this.subAgentRunner.syncMutationsToFigma(mutations);
+        await this.subAgentRunner.syncMutationsToFigma(mutations, signal);
         figmaSynced = true;
       } catch (err) {
         log.warn({ err }, "Auto-sync to Figma failed");
@@ -424,8 +428,13 @@ export class AgentOrchestrator {
     const externalAgent = this.engine.agentRegistry.getAvailableAgent(role);
 
     if (externalAgent) {
-      budget?.markMeasurementUnavailable("reasoningTokens");
-      budget?.markMeasurementUnavailable("toolCalls");
+      for (const dimension of [
+        "inputTokens",
+        "outputTokens",
+        "reasoningTokens",
+        "toolCalls",
+      ] as const) budget?.markMeasurementUnavailable(dimension);
+      budget?.startImplementationAttempt(1);
       log.info({ taskId: task.id, agentId: externalAgent.id, role }, "Dispatching to external agent");
       this.engine.agentRegistry.markBusy(externalAgent.id);
 
@@ -446,6 +455,7 @@ export class AgentOrchestrator {
       try {
         const queueTask = await this.engine.taskQueue.waitForTask(queueTaskId, 120_000);
         if (queueTask.status === "completed") {
+          budget?.finishImplementationAttempt(1, "completed");
           return queueTask.result;
         }
         // External failed — fall through to internal
@@ -453,9 +463,18 @@ export class AgentOrchestrator {
       } catch {
         log.warn({ taskId: task.id }, "External agent timed out, falling back to internal");
       }
+      if (budget) {
+        if (budget.maximumImplementationAttempts === 1) {
+          budget.finishImplementationAttempt(1, "fatal-failure");
+          budget.markAttemptLimitReached();
+          throw new Error("External agent failed and the implementation-attempt limit was reached");
+        }
+        budget.finishImplementationAttempt(1, "retryable-failure");
+        budget.recordRetry(1, "provider-transient");
+      }
     }
 
-    return this.executeWithRetry(task, ctx, budget, signal);
+    return this.executeWithRetry(task, ctx, budget, signal, externalAgent && budget ? 1 : 0);
   }
 
   private async executeWithRetry(
@@ -463,15 +482,17 @@ export class AgentOrchestrator {
     ctx: AgentContext,
     budget?: ExecutionBudgetGuard,
     signal?: AbortSignal,
+    attemptOffset = 0,
   ): Promise<unknown> {
     let lastError: Error | undefined;
     const maximumAttempts = budget?.maximumImplementationAttempts
       ?? AgentOrchestrator.MAX_RETRIES + 1;
     const ai = getAI();
-    for (let attempt = 0; attempt < maximumAttempts; attempt++) {
+    for (let attempt = attemptOffset; attempt < maximumAttempts; attempt++) {
+      const attemptNumber = attempt + 1;
       try {
+        budget?.startImplementationAttempt(attemptNumber);
         signal?.throwIfAborted();
-        budget?.recordImplementationAttempt(attempt + 1);
         const observeProviderUsage = () => {
           if (!budget || !ai) return;
           budget.observeProviderUsageTotals({
@@ -486,18 +507,32 @@ export class AgentOrchestrator {
           beforeApplyAIResult: observeProviderUsage,
         });
         observeProviderUsage();
+        budget?.finishImplementationAttempt(attemptNumber, "completed");
         return result;
       } catch (err) {
-        if (signal?.aborted) throw signal.reason;
+        if (signal?.aborted) {
+          budget?.finishImplementationAttempt(attemptNumber, "timed-out");
+          throw signal.reason;
+        }
         lastError = err instanceof Error ? err : new Error(String(err));
-        if (lastError instanceof ExecutionBudgetExceededError) throw lastError;
+        if (lastError instanceof ExecutionBudgetExceededError) {
+          budget?.finishImplementationAttempt(
+            attemptNumber,
+            lastError.stopReason === "time-budget-exhausted" ? "timed-out" : "fatal-failure",
+          );
+          throw lastError;
+        }
         if (attempt < maximumAttempts - 1) {
+          budget?.finishImplementationAttempt(attemptNumber, "retryable-failure");
+          budget?.recordRetry(attemptNumber, "provider-transient");
           const delayMs = AgentOrchestrator.RETRY_BASE_MS * Math.pow(2, attempt);
           log.warn(
             { taskId: task.id, attempt: attempt + 1, delayMs, err: lastError.message },
             "Sub-task failed, retrying",
           );
           await new Promise((resolve) => setTimeout(resolve, delayMs));
+        } else {
+          budget?.finishImplementationAttempt(attemptNumber, "fatal-failure");
         }
       }
     }

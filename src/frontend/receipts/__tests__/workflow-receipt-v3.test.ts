@@ -280,6 +280,19 @@ describe("WorkflowReceiptV3", () => {
             toolCalls: "measured",
           },
           implementationAttempts: 1,
+          attempts: [{
+            attemptId: input.execution.attempts[0].attemptId,
+            startedAt: input.execution.attempts[0].startedAt,
+            completedAt: input.execution.attempts[0].completedAt,
+            outcome: "fatal-failure",
+            usage: {
+              inputTokens: input.execution.usage.inputTokens,
+              outputTokens: input.execution.usage.outputTokens,
+              reasoningTokens: 0,
+              toolCalls: 3,
+            },
+          }],
+          retries: [],
           exceededDimensions: ["tool-calls"],
           stopReason: "tool-budget-exhausted",
           limitations: [
@@ -325,6 +338,19 @@ describe("WorkflowReceiptV3", () => {
             toolCalls: "measured",
           },
           implementationAttempts: 1,
+          attempts: [{
+            attemptId: input.execution.attempts[0].attemptId,
+            startedAt: input.execution.attempts[0].startedAt,
+            completedAt: input.execution.attempts[0].completedAt,
+            outcome: input.execution.attempts[0].outcome,
+            usage: {
+              inputTokens: input.execution.usage.inputTokens,
+              outputTokens: input.execution.usage.outputTokens,
+              reasoningTokens: input.execution.usage.reasoningTokens,
+              toolCalls: input.execution.usage.toolCalls,
+            },
+          }],
+          retries: [],
           exceededDimensions: ["input-tokens"],
           stopReason: "token-budget-exhausted",
           limitations: [

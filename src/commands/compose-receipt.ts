@@ -15,7 +15,10 @@ import { buildRepositoryFingerprint } from "../notes/repository-fingerprint.js";
 import { packageRoot } from "../utils/asset-path.js";
 import { getMemoirePackageVersion } from "../utils/package-version.js";
 import { hashPackedPackageSurface } from "../utils/package-artifact.js";
-import type { ExecutionBudgetStopReason } from "../agents/execution-budget.js";
+import type {
+  ExecutionBudgetReport,
+  ExecutionBudgetStopReason,
+} from "../agents/execution-budget.js";
 
 export interface ComposeReceiptSummary {
   readonly status: "written";
@@ -61,17 +64,15 @@ export async function writeComposeReceiptV3(input: {
   const startedAt = new Date(input.startedAtMs).toISOString();
   const completedAt = new Date(completedAtMs).toISOString();
   const budget = input.result.executionBudget;
-  const usage = {
-    inputTokens: budget?.observed.inputTokens ?? input.tracker?.totalInput ?? 0,
-    cachedInputTokens: 0,
-    outputTokens: budget?.observed.outputTokens ?? input.tracker?.totalOutput ?? 0,
-    reasoningTokens: budget?.observed.reasoningTokens ?? 0,
-    toolCalls: budget?.observed.toolCalls ?? 0,
-    toolErrors: 0,
-    toolOutputBytes: 0,
-    agentWallTimeMs: budget?.observed.wallTimeMs ?? completedAtMs - input.startedAtMs,
-    toolWallTimeMs: 0,
-  };
+  const ledger = budget
+    ? buildComposeAttemptLedger(budget)
+    : buildUncontractedAttemptLedger({
+      startedAt,
+      completedAt,
+      status: input.result.status,
+      tracker: input.tracker,
+    });
+  const usage = sumComposeUsage(ledger.attempts.map((attempt) => attempt.usage));
   const packageVersion = getMemoirePackageVersion();
   const candidateArtifactSha256 = await hashPackedPackageSurface(packageRoot());
   const route = selected ? {
@@ -150,16 +151,8 @@ export async function writeComposeReceiptV3(input: {
         input.result.status,
         budget?.stopReason ?? undefined,
       ),
-      attempts: input.dryRun ? [] : [{
-        attemptId: "attempt-1",
-        startedAt,
-        completedAt,
-        outcome: budget?.stopReason === "time-budget-exhausted"
-          ? "timed-out"
-          : input.result.status === "completed" ? "completed" : "fatal-failure",
-        usage,
-      }],
-      retries: [],
+      attempts: input.dryRun ? [] : ledger.attempts,
+      retries: input.dryRun ? [] : ledger.retries,
       usage: input.dryRun ? zeroUsage() : usage,
       billing: {
         status: "unavailable",
@@ -199,6 +192,35 @@ export async function writeComposeReceiptV3(input: {
     schemaVersion: receipt.schemaVersion,
     receiptSha256: receipt.receiptSha256,
     file,
+  });
+}
+
+export function buildComposeAttemptLedger(report: ExecutionBudgetReport): Readonly<{
+  attempts: readonly ComposeAttempt[];
+  retries: readonly ComposeRetry[];
+}> {
+  return Object.freeze({
+    attempts: Object.freeze(report.attempts.map((attempt) => Object.freeze({
+      attemptId: attempt.attemptId,
+      startedAt: attempt.startedAt,
+      completedAt: attempt.completedAt,
+      outcome: attempt.outcome,
+      usage: Object.freeze({
+        ...attempt.usage,
+        cachedInputTokens: 0,
+        toolErrors: 0,
+        toolOutputBytes: 0,
+        agentWallTimeMs: Math.max(
+          0,
+          new Date(attempt.completedAt).getTime() - new Date(attempt.startedAt).getTime(),
+        ),
+        toolWallTimeMs: 0,
+      }),
+    }))),
+    retries: Object.freeze(report.retries.map((retry) => Object.freeze({
+      ...retry,
+      evidenceSha256: hashValue(retry),
+    }))),
   });
 }
 
@@ -283,4 +305,62 @@ function zeroUsage() {
     agentWallTimeMs: 0,
     toolWallTimeMs: 0,
   };
+}
+
+type ComposeUsage = ReturnType<typeof zeroUsage>;
+
+interface ComposeAttempt {
+  readonly attemptId: string;
+  readonly startedAt: string;
+  readonly completedAt: string;
+  readonly outcome: "completed" | "retryable-failure" | "fatal-failure" | "timed-out";
+  readonly usage: ComposeUsage;
+}
+
+interface ComposeRetry {
+  readonly retryId: string;
+  readonly afterAttemptId: string;
+  readonly requestedAt: string;
+  readonly reason: "provider-transient" | "tool-transient" | "verification-actionable" | "missing-skill-context" | "harness-recovery";
+  readonly evidenceSha256: string;
+}
+
+function buildUncontractedAttemptLedger(input: {
+  readonly startedAt: string;
+  readonly completedAt: string;
+  readonly status: AgentExecutionResult["status"];
+  readonly tracker: TokenTracker | null;
+}): Readonly<{ attempts: readonly ComposeAttempt[]; retries: readonly ComposeRetry[] }> {
+  return Object.freeze({
+    attempts: Object.freeze([Object.freeze({
+      attemptId: "attempt-1",
+      startedAt: input.startedAt,
+      completedAt: input.completedAt,
+      outcome: input.status === "completed" ? "completed" : "fatal-failure",
+      usage: Object.freeze({
+        ...zeroUsage(),
+        inputTokens: input.tracker?.totalInput ?? 0,
+        outputTokens: input.tracker?.totalOutput ?? 0,
+        agentWallTimeMs: Math.max(
+          0,
+          new Date(input.completedAt).getTime() - new Date(input.startedAt).getTime(),
+        ),
+      }),
+    })]),
+    retries: Object.freeze([]),
+  });
+}
+
+function sumComposeUsage(usages: readonly ComposeUsage[]): ComposeUsage {
+  return usages.reduce<ComposeUsage>((total, usage) => ({
+    inputTokens: total.inputTokens + usage.inputTokens,
+    cachedInputTokens: total.cachedInputTokens + usage.cachedInputTokens,
+    outputTokens: total.outputTokens + usage.outputTokens,
+    reasoningTokens: total.reasoningTokens + usage.reasoningTokens,
+    toolCalls: total.toolCalls + usage.toolCalls,
+    toolErrors: total.toolErrors + usage.toolErrors,
+    toolOutputBytes: total.toolOutputBytes + usage.toolOutputBytes,
+    agentWallTimeMs: total.agentWallTimeMs + usage.agentWallTimeMs,
+    toolWallTimeMs: total.toolWallTimeMs + usage.toolWallTimeMs,
+  }), zeroUsage());
 }

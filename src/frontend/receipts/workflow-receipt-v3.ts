@@ -182,6 +182,34 @@ const BudgetStopReasonSchema = z.enum([
   "attempt-limit-reached",
 ]);
 
+const BudgetUsageSchema = z.object({
+  inputTokens: z.number().int().nonnegative(),
+  outputTokens: z.number().int().nonnegative(),
+  reasoningTokens: z.number().int().nonnegative(),
+  toolCalls: z.number().int().nonnegative(),
+}).strict();
+
+const BudgetAttemptSchema = z.object({
+  attemptId: IdentifierSchema,
+  startedAt: TimestampSchema,
+  completedAt: TimestampSchema,
+  outcome: z.enum(["completed", "retryable-failure", "fatal-failure", "timed-out"]),
+  usage: BudgetUsageSchema,
+}).strict();
+
+const BudgetRetrySchema = z.object({
+  retryId: IdentifierSchema,
+  afterAttemptId: IdentifierSchema,
+  requestedAt: TimestampSchema,
+  reason: z.enum([
+    "provider-transient",
+    "tool-transient",
+    "verification-actionable",
+    "missing-skill-context",
+    "harness-recovery",
+  ]),
+}).strict();
+
 const BudgetEnforcementSchema = z.object({
   ceilings: z.object({
     inputTokens: z.number().int().positive(),
@@ -205,6 +233,8 @@ const BudgetEnforcementSchema = z.object({
     toolCalls: z.enum(["measured", "unavailable"]),
   }).strict(),
   implementationAttempts: z.number().int().nonnegative().max(2),
+  attempts: z.array(BudgetAttemptSchema).max(2),
+  retries: z.array(BudgetRetrySchema).max(1),
   exceededDimensions: z.array(z.enum([
     "input-tokens",
     "output-tokens",
@@ -215,13 +245,21 @@ const BudgetEnforcementSchema = z.object({
   stopReason: BudgetStopReasonSchema.nullable(),
   limitations: z.array(z.enum([
     "provider-request-cancellation-unavailable",
+    "input-token-usage-unavailable",
+    "output-token-usage-unavailable",
     "reasoning-token-usage-unavailable",
     "tool-call-usage-unavailable",
-  ])).max(3),
+  ])).max(5),
 }).strict().superRefine((budget, context) => {
   const expected: Array<"input-tokens" | "output-tokens" | "reasoning-tokens" | "tool-calls" | "wall-time"> = [];
-  if (budget.observed.inputTokens > budget.ceilings.inputTokens) expected.push("input-tokens");
-  if (budget.observed.outputTokens > budget.ceilings.outputTokens) expected.push("output-tokens");
+  if (
+    budget.measurement.inputTokens === "measured"
+    && budget.observed.inputTokens > budget.ceilings.inputTokens
+  ) expected.push("input-tokens");
+  if (
+    budget.measurement.outputTokens === "measured"
+    && budget.observed.outputTokens > budget.ceilings.outputTokens
+  ) expected.push("output-tokens");
   if (
     budget.measurement.reasoningTokens === "measured"
     && budget.observed.reasoningTokens > budget.ceilings.reasoningTokens
@@ -250,6 +288,30 @@ const BudgetEnforcementSchema = z.object({
       path: ["implementationAttempts"],
       message: "budget implementation attempts exceed the contracted ceiling",
     });
+  }
+  if (budget.implementationAttempts !== budget.attempts.length) {
+    context.addIssue({
+      code: "custom",
+      path: ["attempts"],
+      message: "budget attempt history must match implementation attempts",
+    });
+  }
+  if (budget.retries.length !== Math.max(0, budget.attempts.length - 1)) {
+    context.addIssue({
+      code: "custom",
+      path: ["retries"],
+      message: "budget retry history must match attempts after the first",
+    });
+  }
+  const attemptedUsage = sumBudgetUsage(budget.attempts.map((attempt) => attempt.usage));
+  for (const key of Object.keys(attemptedUsage) as (keyof typeof attemptedUsage)[]) {
+    if (attemptedUsage[key] !== budget.observed[key]) {
+      context.addIssue({
+        code: "custom",
+        path: ["attempts"],
+        message: `budget attempt ${key} usage does not match observed usage`,
+      });
+    }
   }
   const expectedStopReason = expected.some((dimension) => dimension.endsWith("tokens"))
     ? "token-budget-exhausted"
@@ -568,9 +630,35 @@ function validateExecution(
         issue(context, ["execution", "usage", key], "execution usage does not match budget evidence");
       }
     }
-    if (execution.usage.agentWallTimeMs !== observedUsage.wallTimeMs) {
-      issue(context, ["execution", "usage", "agentWallTimeMs"], "execution wall time does not match budget evidence");
+    if (execution.attempts.length !== budget.attempts.length) {
+      issue(context, ["execution", "attempts"], "execution attempts do not match budget history");
     }
+    execution.attempts.forEach((attempt, index) => {
+      const budgetAttempt = budget.attempts[index];
+      if (!budgetAttempt) return;
+      for (const key of ["attemptId", "startedAt", "completedAt", "outcome"] as const) {
+        if (attempt[key] !== budgetAttempt[key]) {
+          issue(context, ["execution", "attempts", index, key], `execution attempt ${key} does not match budget history`);
+        }
+      }
+      for (const key of ["inputTokens", "outputTokens", "reasoningTokens", "toolCalls"] as const) {
+        if (attempt.usage[key] !== budgetAttempt.usage[key]) {
+          issue(context, ["execution", "attempts", index, "usage", key], "execution attempt usage does not match budget history");
+        }
+      }
+    });
+    if (execution.retries.length !== budget.retries.length) {
+      issue(context, ["execution", "retries"], "execution retries do not match budget history");
+    }
+    execution.retries.forEach((retry, index) => {
+      const budgetRetry = budget.retries[index];
+      if (!budgetRetry) return;
+      for (const key of ["retryId", "afterAttemptId", "requestedAt", "reason"] as const) {
+        if (retry[key] !== budgetRetry[key]) {
+          issue(context, ["execution", "retries", index, key], `execution retry ${key} does not match budget history`);
+        }
+      }
+    });
   }
 }
 
@@ -680,6 +768,17 @@ function sumUsage(usages: readonly z.infer<typeof UsageSchema>[]): z.infer<typeo
     for (const key of Object.keys(total) as (keyof typeof total)[]) total[key] += usage[key];
   }
   return total;
+}
+
+function sumBudgetUsage(
+  usages: readonly z.infer<typeof BudgetUsageSchema>[],
+): z.infer<typeof BudgetUsageSchema> {
+  return usages.reduce<z.infer<typeof BudgetUsageSchema>>((total, usage) => ({
+    inputTokens: total.inputTokens + usage.inputTokens,
+    outputTokens: total.outputTokens + usage.outputTokens,
+    reasoningTokens: total.reasoningTokens + usage.reasoningTokens,
+    toolCalls: total.toolCalls + usage.toolCalls,
+  }), { inputTokens: 0, outputTokens: 0, reasoningTokens: 0, toolCalls: 0 });
 }
 
 function assertUniqueIds(ids: readonly string[], label: string): void {
