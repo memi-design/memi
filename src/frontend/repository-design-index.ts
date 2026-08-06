@@ -1,5 +1,8 @@
 import { Buffer } from "node:buffer";
+import { lstat, readFile, realpath } from "node:fs/promises";
+import path from "node:path";
 import { z } from "zod";
+import type { FrontendTaskContractV1 } from "./task-contract.js";
 import {
   RepositoryRelativePathSchema,
   Sha256Schema,
@@ -72,6 +75,17 @@ export const RepositoryDesignIndexV1Schema = RepositoryDesignIndexContentSchema.
 });
 
 export type RepositoryDesignIndexV1 = z.infer<typeof RepositoryDesignIndexV1Schema>;
+
+const repositoryDesignIndexCache = new Map<string, Readonly<RepositoryDesignIndexV1>>();
+const LOCKFILE_CANDIDATES = Object.freeze([
+  "npm-shrinkwrap.json",
+  "package-lock.json",
+  "pnpm-lock.yaml",
+  "yarn.lock",
+  "bun.lock",
+  "bun.lockb",
+] as const);
+const MAX_RELEVANT_SOURCE_BYTES = 512_000;
 
 export function repositoryDesignIndexCacheKey(input: unknown): string {
   const index = RepositoryDesignIndexV1Schema.parse(input);
@@ -173,6 +187,54 @@ export function createRepositoryDesignIndex(
   }));
 }
 
+export async function buildRepositoryDesignIndexForTask(input: {
+  readonly root: string;
+  readonly repositoryRevision: string;
+  readonly contract: FrontendTaskContractV1;
+}): Promise<Readonly<RepositoryDesignIndexV1>> {
+  const absoluteRoot = await realpath(path.resolve(input.root));
+  const lockfile = await readFirstIncludedFile(absoluteRoot, LOCKFILE_CANDIDATES, true);
+  const relevantSources = await Promise.all(
+    [...input.contract.targetFiles]
+      .sort(compareText)
+      .map(async (sourcePath) => ({
+        path: sourcePath,
+        content: await readIncludedFile(absoluteRoot, sourcePath),
+      })),
+  );
+  const packageManifest = await readJsonObject(path.join(absoluteRoot, "package.json"));
+  const directDependencies = Object.entries({
+    ...jsonStringRecord(packageManifest?.dependencies),
+    ...jsonStringRecord(packageManifest?.peerDependencies),
+  }).map(([name, version]) => ({ name, version }));
+  const dependencyNames = new Set(directDependencies.map((dependency) => dependency.name));
+  const frameworkConventions = [
+    dependencyNames.has("next") ? "nextjs" : null,
+    dependencyNames.has("react") ? "react" : null,
+    dependencyNames.has("expo") ? "expo" : null,
+    dependencyNames.has("react-native") ? "react-native" : null,
+    input.contract.platform === "swiftui" ? "swiftui" : null,
+  ].filter((value): value is string => value !== null);
+  const index = createRepositoryDesignIndex({
+    repositoryRevision: input.repositoryRevision,
+    lockfile,
+    relevantSources,
+    components: [],
+    designTokens: [],
+    frameworkConventions,
+    directDependencies,
+    testCommands: input.contract.verificationCommands.map((command, index) => ({
+      name: `verification-${index + 1}`,
+      command,
+    })),
+  });
+  const cacheKey = repositoryDesignIndexCacheKey(index);
+  const cached = repositoryDesignIndexCache.get(cacheKey);
+  if (cached) return cached;
+  repositoryDesignIndexCache.set(cacheKey, index);
+  return index;
+}
+
 export function isExcludedRepositoryPath(value: string): boolean {
   let normalized: string;
   try {
@@ -222,6 +284,60 @@ function normalizeSources(sources: readonly SourceContentInput[]): ContentIdenti
     byPath.set(path, identity);
   }
   return [...byPath.values()].sort((left, right) => compareText(left.path, right.path));
+}
+
+async function readFirstIncludedFile(
+  root: string,
+  candidates: readonly string[],
+  required: boolean,
+): Promise<SourceContentInput> {
+  for (const candidate of candidates) {
+    try {
+      return { path: candidate, content: await readIncludedFile(root, candidate) };
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "ENOENT") throw error;
+    }
+  }
+  if (required) throw new Error("No supported lockfile exists for the repository design index");
+  throw new Error("No included file found");
+}
+
+async function readIncludedFile(root: string, relativePath: string): Promise<string> {
+  const normalized = normalizeRepositoryPath(relativePath);
+  if (isExcludedRepositoryPath(normalized)) {
+    throw new Error(`Repository evidence path is excluded: ${normalized}`);
+  }
+  const absolutePath = path.resolve(root, normalized);
+  const entry = await lstat(absolutePath);
+  if (!entry.isFile() || entry.isSymbolicLink()) {
+    throw new Error(`Repository evidence path must be a regular file: ${normalized}`);
+  }
+  if (entry.size > MAX_RELEVANT_SOURCE_BYTES) {
+    throw new Error(`Repository evidence file exceeds ${MAX_RELEVANT_SOURCE_BYTES} bytes: ${normalized}`);
+  }
+  const canonicalPath = await realpath(absolutePath);
+  if (canonicalPath !== root && !canonicalPath.startsWith(`${root}${path.sep}`)) {
+    throw new Error(`Repository evidence path escapes the repository: ${normalized}`);
+  }
+  return readFile(canonicalPath, "utf8");
+}
+
+async function readJsonObject(file: string): Promise<Record<string, unknown> | null> {
+  try {
+    const value: unknown = JSON.parse(await readFile(file, "utf8"));
+    return value && typeof value === "object" && !Array.isArray(value)
+      ? value as Record<string, unknown>
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function jsonStringRecord(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value)
+    .filter((entry): entry is [string, string] => typeof entry[1] === "string"));
 }
 
 type ContentIdentity = z.infer<typeof ContentIdentitySchema>;
