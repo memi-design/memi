@@ -39,13 +39,17 @@ const CandidateSchema = z.object({
   artifactSha256: Sha256Schema,
 }).strict();
 
-const RouteInputSchema = z.object({
+const RouteBindingSchema = z.object({
   routerVersion: IdentifierSchema,
   taskClass: FrontendTaskClassSchema,
   repositoryFingerprintSha256: Sha256Schema,
   provider: IdentifierSchema,
   model: z.string().min(1).max(256),
   effort: z.string().min(1).max(64),
+}).strict();
+
+const SelectedRouteInputSchema = RouteBindingSchema.extend({
+  decision: z.literal("selected"),
   skill: z.object({
     id: IdentifierSchema,
     file: RepositoryRelativePathSchema,
@@ -53,9 +57,26 @@ const RouteInputSchema = z.object({
   }).strict(),
 }).strict();
 
-const RouteSchema = RouteInputSchema.extend({
-  identitySha256: Sha256Schema,
+const RepositoryOnlyRouteInputSchema = RouteBindingSchema.extend({
+  decision: z.literal("repository-only"),
+  skill: z.null(),
+  abstentionReason: z.enum([
+    "incomplete-evidence",
+    "ambiguous-classification",
+    "suppressed-route",
+    "unsupported-route",
+  ]),
 }).strict();
+
+const RouteInputSchema = z.discriminatedUnion("decision", [
+  SelectedRouteInputSchema,
+  RepositoryOnlyRouteInputSchema,
+]);
+
+const RouteSchema = z.discriminatedUnion("decision", [
+  SelectedRouteInputSchema.extend({ identitySha256: Sha256Schema }).strict(),
+  RepositoryOnlyRouteInputSchema.extend({ identitySha256: Sha256Schema }).strict(),
+]);
 
 const CapsuleHashSchema = z.object({
   identitySha256: Sha256Schema,
