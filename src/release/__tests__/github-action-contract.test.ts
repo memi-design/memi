@@ -4,7 +4,11 @@ import { describe, expect, it } from "vitest";
 
 const action = readFileSync(join(process.cwd(), "action.yml"), "utf8")
   .replace(/\r\n/g, "\n");
-const packageVersion = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")).version as string;
+const manifest = JSON.parse(readFileSync(join(process.cwd(), "release-manifest.json"), "utf8"));
+const engine = manifest.releaseGroups.engine;
+const actionVersion = engine.state === "candidate"
+  ? (engine.supersededPartialReleases?.at(-1)?.version ?? engine.previousPublicRelease.version)
+  : engine.version;
 
 function runBlocks(source: string): string[] {
   return [...source.matchAll(/^\s+run:\s*\|\n((?:\s{8}.*(?:\n|$))*)/gm)].map(
@@ -15,7 +19,7 @@ function runBlocks(source: string): string[] {
 describe("GitHub Action distribution contract", () => {
   it("keeps the backward-compatible design CI inputs and pins the release CLI", () => {
     expect(action).toMatch(/^name: ["']?memi design CI["']?$/m);
-    expect(action).toContain(`default: "${packageVersion}"`);
+    expect(action).toContain(`default: "${actionVersion}"`);
 
     for (const input of [
       "version",

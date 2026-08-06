@@ -318,7 +318,7 @@ describe("verified engine release state machine", () => {
       "plugins/memoire/.codex-plugin/plugin.json": { version: "2.6.3" },
       "plugins/memi-claude/.claude-plugin/plugin.json": { version: "2.6.3" },
       "plugin/widget-meta.json": { packageVersion: "2.6.3" },
-      "action.yml": 'default: "2.6.3"\ndescription: "reviewed 2.6.3 pin"',
+      "action.yml": 'default: "2.6.2"\ndescription: "reviewed 2.6.2 pin"',
     };
 
     expect(validateEngineSurfaceSnapshot(manifest, snapshot)).toEqual([]);

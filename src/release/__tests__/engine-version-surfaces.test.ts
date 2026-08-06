@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const candidateVersion = "2.7.9";
+const candidateActionVersion = "2.7.8";
 const publishedVersion = "2.7.7";
 const publishedSourceCommit = "74fc6ce8c66182b4aa06e1250cb169da8b1fc54c";
 const publishedReleaseRecord = {
@@ -87,8 +88,8 @@ describe("2.7.9 stabilization release candidate surfaces", () => {
     expect(await readFile(join(root, "mcpb/server/index.cjs"), "utf8"))
       .toContain(`@memi-design/cli@${candidateVersion}`);
     const action = await readFile(join(root, "action.yml"), "utf8");
-    expect(action).toContain(`default: "${candidateVersion}"`);
-    expect(action).toContain(`reviewed ${candidateVersion} pin`);
+    expect(action).toContain(`default: "${candidateActionVersion}"`);
+    expect(action).toContain(`reviewed ${candidateActionVersion} pin`);
     expect(await readFile(join(root, "llms.txt"), "utf8"))
       .toContain(`version: "${candidateVersion}"`);
   });
