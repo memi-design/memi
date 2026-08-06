@@ -465,12 +465,17 @@ function validateNativeEvidence(
   uniqueIssues(artifacts.map((artifact) => artifact.evidenceId), "native evidence", ["nativeEvidence", "artifacts"], context);
   uniqueIssues(artifacts.map((artifact) => artifact.file), "native evidence file", ["nativeEvidence", "artifacts"], context);
   const recordedAt = timestampMillis(receipt.recordedAt);
+  const executionStart = timestampMillis(receipt.execution.startedAt);
+  const executionEnd = timestampMillis(receipt.execution.completedAt);
   artifacts.forEach((artifact, index) => {
     const captured = timestampMillis(artifact.capturedAt);
     const verified = timestampMillis(artifact.verifiedAt);
     const freshUntil = timestampMillis(artifact.freshUntil);
     if (captured > verified) {
       issue(context, ["nativeEvidence", "artifacts", index], "native evidence must be captured before verification");
+    }
+    if (captured < executionStart || verified > executionEnd) {
+      issue(context, ["nativeEvidence", "artifacts", index], "native evidence falls outside execution");
     }
     if (freshUntil - captured !== artifact.freshnessWindowMs) {
       issue(context, ["nativeEvidence", "artifacts", index, "freshnessWindowMs"], "native evidence freshness window does not match timestamps");
