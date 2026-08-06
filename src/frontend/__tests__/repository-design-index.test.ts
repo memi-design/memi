@@ -1,10 +1,15 @@
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   RepositoryDesignIndexV1Schema,
+  buildRepositoryDesignIndexForTask,
   createRepositoryDesignIndex,
   isExcludedRepositoryPath,
   repositoryDesignIndexCacheKey,
 } from "../repository-design-index.js";
+import { createFrontendTaskContract } from "../task-contract.js";
 
 const REVISION_A = "a".repeat(40);
 const REVISION_B = "b".repeat(40);
@@ -195,5 +200,60 @@ describe("RepositoryDesignIndexV1", () => {
       ...index,
       identitySha256: `sha256:${"0".repeat(64)}`,
     })).toThrow(/identitySha256/i);
+  });
+
+  it("builds and caches a revision-bound index from only contracted source files", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-design-index-"));
+    await mkdir(path.join(root, "src"), { recursive: true });
+    await writeFile(path.join(root, "package-lock.json"), JSON.stringify({ lockfileVersion: 3 }));
+    await writeFile(path.join(root, "package.json"), JSON.stringify({
+      dependencies: { react: "19.0.0" },
+      scripts: { test: "vitest run" },
+    }));
+    await writeFile(path.join(root, "src", "SettingsPanel.tsx"), "export const SettingsPanel = () => null;\n");
+    await writeFile(path.join(root, ".env"), "SECRET=do-not-index\n");
+    const contract = createFrontendTaskContract({
+      taskId: "settings-panel",
+      taskClass: "frontend-modification",
+      platform: "web",
+      intent: "Improve the settings panel",
+      targetFiles: ["src/SettingsPanel.tsx"],
+      targetComponents: ["SettingsPanel"],
+      requiredStates: ["desktop", "mobile"],
+      constraints: [],
+      verificationCommands: ["npm test"],
+      resourceCeilings: {
+        inputTokens: 10_000,
+        outputTokens: 2_000,
+        reasoningTokens: 2_000,
+        wallTimeMs: 120_000,
+        toolCalls: 20,
+        implementationAttempts: 2,
+      },
+      contextExpansion: { state: "unused" },
+    });
+
+    const first = await buildRepositoryDesignIndexForTask({
+      root,
+      repositoryRevision: REVISION_A,
+      contract,
+    });
+    const cached = await buildRepositoryDesignIndexForTask({
+      root,
+      repositoryRevision: REVISION_A,
+      contract,
+    });
+    await writeFile(path.join(root, "src", "SettingsPanel.tsx"), "export const SettingsPanel = 2;\n");
+    const changed = await buildRepositoryDesignIndexForTask({
+      root,
+      repositoryRevision: REVISION_A,
+      contract,
+    });
+
+    expect(cached).toBe(first);
+    expect(first.relevantSources.map((source) => source.path)).toEqual(["src/SettingsPanel.tsx"]);
+    expect(first.directDependencies).toEqual([{ name: "react", version: "19.0.0" }]);
+    expect(first.testCommands).toEqual([{ name: "verification-1", command: "npm test" }]);
+    expect(changed.identitySha256).not.toBe(first.identitySha256);
   });
 });
