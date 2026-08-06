@@ -290,7 +290,7 @@ export class AgentOrchestrator {
 
   // ── Sub-Agent Execution ────────────────────────────────
 
-  private static readonly MAX_RETRIES = 2;
+  private static readonly MAX_RETRIES = 1;
   private static readonly RETRY_BASE_MS = 500;
 
   /**
