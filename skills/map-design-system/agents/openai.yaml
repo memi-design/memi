@@ -1,0 +1,4 @@
+interface:
+  display_name: "Map Design System"
+  short_description: "Map repository design evidence before edits"
+  default_prompt: "Use $map-design-system to map the existing design system for this interface task."

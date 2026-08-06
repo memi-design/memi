@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 import { parseSkillMarkdown } from "../frontmatter.js";
+import { NoteLoader } from "../loader.js";
+import { resolveForIntent } from "../resolver.js";
 
 const execFileAsync = promisify(execFile);
 const projectRoot = process.cwd();
@@ -42,6 +44,22 @@ describe("frontend execution skill capsules", () => {
     }
 
     expect(new Set(expectedSkills.map((skill) => skill.activateOn)).size).toBe(expectedSkills.length);
+
+    const loader = new NoteLoader(projectRoot);
+    const builtIns = await loader.loadBuiltInNotes();
+    const routes = [
+      ["component-modify", "map-design-system"],
+      ["page-layout", "implement-adaptive-interface"],
+      ["accessibility-check", "verify-interface-accessibility"],
+    ] as const;
+
+    for (const [intent, expectedId] of routes) {
+      const resolvedIds = (await resolveForIntent(intent, builtIns)).map((skill) => skill.noteId);
+      expect(resolvedIds).toContain(expectedId);
+      expect(resolvedIds.filter((id) => expectedSkills.some((skill) => skill.id === id))).toEqual([
+        expectedId,
+      ]);
+    }
   });
 
   it("keeps every skill self-contained and within the focused capsule budget", async () => {

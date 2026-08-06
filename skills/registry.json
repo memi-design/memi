@@ -110,6 +110,36 @@
       "activateOn": "apple-platform-interface",
       "freedomLevel": "guarded",
       "prerequisite": null
+    },
+    {
+      "id": "map-design-system",
+      "name": "Map Design System",
+      "file": "skills/map-design-system/SKILL.md",
+      "description": "Map repository-backed design tokens, components, conventions, and verification commands before a frontend edit.",
+      "activateOn": "component-creation",
+      "freedomLevel": "read-only",
+      "prerequisite": null,
+      "taskClasses": ["design-system-map", "component-map", "token-map"]
+    },
+    {
+      "id": "implement-adaptive-interface",
+      "name": "Implement Adaptive Interface",
+      "file": "skills/implement-adaptive-interface/SKILL.md",
+      "description": "Implement responsive layout, adaptive interaction, and complete interface states using repository evidence.",
+      "activateOn": "design-creation",
+      "freedomLevel": "high",
+      "prerequisite": "map-design-system",
+      "taskClasses": ["responsive-layout", "adaptive-interaction", "interface-state-implementation"]
+    },
+    {
+      "id": "verify-interface-accessibility",
+      "name": "Verify Interface Accessibility",
+      "file": "skills/verify-interface-accessibility/SKILL.md",
+      "description": "Verify frontend semantics, keyboard and focus behavior, contrast, motion, and native accessibility evidence.",
+      "activateOn": "design-review",
+      "freedomLevel": "read-only",
+      "prerequisite": null,
+      "taskClasses": ["accessibility-check", "keyboard-focus-verification", "semantic-interface-verification"]
     }
   ],
   "activationContexts": {

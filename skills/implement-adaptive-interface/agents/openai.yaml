@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement Adaptive Interface"
+  short_description: "Build verified responsive interface behavior"
+  default_prompt: "Use $implement-adaptive-interface to implement this responsive and adaptive interaction."
