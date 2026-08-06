@@ -200,6 +200,19 @@ describe("WorkflowReceiptV3", () => {
       execution: {
         ...input.execution,
         stopReason: "preflight-failed",
+        attempts: [],
+        retries: [],
+        usage: {
+          inputTokens: 0,
+          cachedInputTokens: 0,
+          outputTokens: 0,
+          reasoningTokens: 0,
+          toolCalls: 0,
+          toolErrors: 0,
+          toolOutputBytes: 0,
+          agentWallTimeMs: 0,
+          toolWallTimeMs: 0,
+        },
       },
       nativeEvidence: {
         status: "excluded",
@@ -207,6 +220,11 @@ describe("WorkflowReceiptV3", () => {
         artifacts: [],
         reason: "preflight-failed",
       },
+      verification: [{
+        ...input.verification[0],
+        status: "skipped",
+        exitCode: null,
+      }],
     });
 
     expect(receipt.nativeEvidence).toEqual({
