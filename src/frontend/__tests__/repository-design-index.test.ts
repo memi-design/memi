@@ -3,6 +3,7 @@ import {
   RepositoryDesignIndexV1Schema,
   createRepositoryDesignIndex,
   isExcludedRepositoryPath,
+  repositoryDesignIndexCacheKey,
 } from "../repository-design-index.js";
 
 const REVISION_A = "a".repeat(40);
@@ -56,6 +57,30 @@ function validIndexInput() {
 }
 
 describe("RepositoryDesignIndexV1", () => {
+  it("keys the local cache only by revision, lockfile, and relevant source hashes", () => {
+    const original = createRepositoryDesignIndex(validIndexInput());
+    const metadataOnly = createRepositoryDesignIndex({
+      ...validIndexInput(),
+      components: [],
+      designTokens: [],
+      frameworkConventions: ["different"],
+      directDependencies: [],
+      testCommands: [],
+    });
+    const changedSource = createRepositoryDesignIndex({
+      ...validIndexInput(),
+      relevantSources: validIndexInput().relevantSources.map((source) =>
+        source.path === "src/z.tsx" ? { ...source, content: "changed" } : source),
+    });
+
+    expect(repositoryDesignIndexCacheKey(original)).toBe(
+      repositoryDesignIndexCacheKey(metadataOnly),
+    );
+    expect(repositoryDesignIndexCacheKey(changedSource)).not.toBe(
+      repositoryDesignIndexCacheKey(original),
+    );
+  });
+
   it("derives identity from revision, lockfile content, and included source content", () => {
     const original = createRepositoryDesignIndex(validIndexInput());
     const same = createRepositoryDesignIndex({
