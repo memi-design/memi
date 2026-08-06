@@ -138,7 +138,7 @@ describe("release manifest", () => {
     const manifest = JSON.parse(manifestText);
     const artifact = JSON.parse(await readFile(webArtifactPath, "utf8"));
     const sourceManifestText = manifestText.replace(
-      "\"updatedAt\": \"2026-08-02\"",
+      "\"updatedAt\": \"2026-08-06\"",
       "\"updatedAt\": \"2099-01-01\"",
     );
 
