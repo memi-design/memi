@@ -1,4 +1,5 @@
-import { mkdir, rm, writeFile } from "fs/promises";
+import { execFile } from "node:child_process";
+import { mkdir, readFile, readdir, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -7,6 +8,10 @@ import { MemoireEngine } from "../../engine/core.js";
 import { registerComposeCommand } from "../compose.js";
 import { captureLogs, lastLog } from "./test-helpers.js";
 import { createFrontendTaskContract } from "../../frontend/task-contract.js";
+import { WorkflowReceiptV3Schema } from "../../frontend/receipts/workflow-receipt-v3.js";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 vi.mock("../../ai/index.js", () => ({
   hasAI: () => false,
@@ -104,6 +109,12 @@ describe("compose --json", () => {
     });
     const contractPath = join(engine.config.projectRoot, "task-contract.json");
     await writeFile(contractPath, JSON.stringify(contract));
+    await execFileAsync("git", ["init", "--quiet"], { cwd: engine.config.projectRoot });
+    await execFileAsync("git", ["config", "user.name", "Memi Test"], { cwd: engine.config.projectRoot });
+    await execFileAsync("git", ["config", "user.email", "test@memi.invalid"], { cwd: engine.config.projectRoot });
+    await execFileAsync("git", ["add", "package.json", "task-contract.json"], { cwd: engine.config.projectRoot });
+    await execFileAsync("git", ["commit", "--quiet", "-m", "fixture"], { cwd: engine.config.projectRoot });
+    const receiptRoot = join(engine.config.projectRoot, "receipts");
     const logs = captureLogs();
     const program = new Command();
 
@@ -121,6 +132,8 @@ describe("compose --json", () => {
       "strict",
       "--routing-policy",
       "repository-only",
+      "--receipt-root",
+      receiptRoot,
       "--dry-run",
       "--json",
     ], { from: "user" });
@@ -134,9 +147,20 @@ describe("compose --json", () => {
         taskClass: "responsive-layout",
         platform: "web",
       },
-      receiptRoot: false,
+      receiptRoot: true,
     });
     expect(payload.plan.skillRoute).toBeNull();
+    expect(payload.receipt).toMatchObject({
+      status: "written",
+      schemaVersion: "workflow-receipt.v3",
+    });
+    const receiptFiles = await readdir(receiptRoot);
+    expect(receiptFiles).toHaveLength(1);
+    const receipt = WorkflowReceiptV3Schema.parse(JSON.parse(
+      await readFile(join(receiptRoot, receiptFiles[0]!), "utf8"),
+    ));
+    expect(receipt.route.decision).toBe("repository-only");
+    expect(receipt.nativeEvidence.status).toBe("excluded");
   });
 
   it("reports autoSync false when compose runs with --no-figma", async () => {
