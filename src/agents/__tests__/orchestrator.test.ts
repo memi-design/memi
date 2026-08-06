@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AgentOrchestrator } from "../orchestrator.js";
 import type { AnySpec, ComponentSpec, DesignSystem, PageSpec } from "../../specs/types.js";
 import type { AgentPlan } from "../plan-builder.js";
@@ -127,6 +127,27 @@ async function makeNote(
 }
 
 describe("AgentOrchestrator compose targeting", () => {
+  it("never exceeds two implementation attempts", async () => {
+    const { engine } = makeEngine([]);
+    const orchestrator = new AgentOrchestrator(engine as never);
+    const executeSubTask = vi.fn().mockRejectedValue(new Error("provider failure"));
+    const internals = orchestrator as unknown as {
+      subAgentRunner: { executeSubTask: typeof executeSubTask };
+      executeWithRetry(task: unknown, context: unknown): Promise<unknown>;
+    };
+    const staticInternals = AgentOrchestrator as unknown as { RETRY_BASE_MS: number };
+    const originalDelay = staticInternals.RETRY_BASE_MS;
+    staticInternals.RETRY_BASE_MS = 0;
+    internals.subAgentRunner.executeSubTask = executeSubTask;
+
+    try {
+      await expect(internals.executeWithRetry({}, {})).rejects.toThrow("provider failure");
+      expect(executeSubTask).toHaveBeenCalledTimes(2);
+    } finally {
+      staticInternals.RETRY_BASE_MS = originalDelay;
+    }
+  });
+
   it("creates and generates only the requested page spec for page-layout intents", async () => {
     const { engine, generated, saved } = makeEngine([makeComponentSpec("ExistingCard")]);
     const orchestrator = new AgentOrchestrator(engine as never);
