@@ -9,7 +9,10 @@ import path from "node:path";
 import { createFrontendTaskContract } from "../../frontend/task-contract.js";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { ExecutionBudgetGuard } from "../execution-budget.js";
+import {
+  ExecutionBudgetExceededError,
+  ExecutionBudgetGuard,
+} from "../execution-budget.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -182,6 +185,68 @@ describe("AgentOrchestrator compose targeting", () => {
     await expect(internals.executeWithRetry({}, {}, budget)).rejects.toThrow("provider failure");
     expect(executeSubTask).toHaveBeenCalledOnce();
     expect(budget.report().implementationAttempts).toBe(1);
+  });
+
+  it("stops the contracted plan immediately after budget exhaustion", async () => {
+    const { engine } = makeEngine([]);
+    const orchestrator = new AgentOrchestrator(engine as never);
+    const executeTask = vi.fn().mockRejectedValue(new ExecutionBudgetExceededError(
+      "token-budget-exhausted",
+      ["output-tokens"],
+    ));
+    const internals = orchestrator as unknown as {
+      tryExternalOrInternal: typeof executeTask;
+      executePlanBody(
+        plan: AgentPlan,
+        options: { budget: ExecutionBudgetGuard },
+      ): Promise<unknown>;
+    };
+    internals.tryExternalOrInternal = executeTask;
+    const budget = new ExecutionBudgetGuard({
+      inputTokens: 10_000,
+      outputTokens: 2_000,
+      reasoningTokens: 2_000,
+      wallTimeMs: 120_000,
+      toolCalls: 20,
+      implementationAttempts: 1,
+    });
+    const context = {
+      designSystem: { tokens: [], components: [], styles: [], lastSync: "never" },
+      specs: [],
+      figmaConnected: false,
+    };
+    const plan: AgentPlan = {
+      id: "budget-stop-plan",
+      intent: "Audit then mutate",
+      category: "general",
+      context,
+      createdAt: "2026-08-06T12:00:00.000Z",
+      subTasks: [
+        {
+          id: "task-1",
+          name: "Exhaust budget",
+          agentType: "design-auditor",
+          prompt: "Audit",
+          dependencies: [],
+          status: "pending",
+        },
+        {
+          id: "task-2",
+          name: "Would mutate later",
+          agentType: "token-engineer",
+          prompt: "Create token primary #000000",
+          dependencies: [],
+          status: "pending",
+        },
+      ],
+    };
+
+    await expect(internals.executePlanBody(plan, { budget })).rejects.toMatchObject({
+      name: "ExecutionBudgetExceededError",
+      stopReason: "token-budget-exhausted",
+    });
+    expect(executeTask).toHaveBeenCalledOnce();
+    expect(plan.subTasks[1]?.status).toBe("pending");
   });
 
   it("marks every external-agent usage dimension unavailable without trusted totals", async () => {
