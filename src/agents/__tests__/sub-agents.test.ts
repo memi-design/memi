@@ -70,6 +70,23 @@ function makeHarness(tokens: DesignToken[] = []) {
 }
 
 describe("SubAgentRunner release contracts", () => {
+  it("refuses mutating heuristics in contracted shadow mode", async () => {
+    const { context, registry, runner } = makeHarness();
+
+    await expect(runner.executeSubTask(
+      makeTask({
+        agentType: "component-architect",
+        name: "Create component",
+        prompt: "Create a notification card component",
+      }),
+      context,
+      null,
+      { mutationsAllowed: false },
+    )).rejects.toThrow("transaction-safe adapter");
+    expect(registry.getSpec).not.toHaveBeenCalled();
+    expect(registry.saveSpec).not.toHaveBeenCalled();
+  });
+
   it("checks cancellation again after awaiting heuristic discovery and before mutation", async () => {
     const { context, registry, runner } = makeHarness();
     const controller = new AbortController();
