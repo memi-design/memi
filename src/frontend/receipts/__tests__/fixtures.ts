@@ -96,6 +96,7 @@ export function makeReceiptInput(
       },
     },
     nativeEvidence: {
+      status: "admitted",
       platform: "web",
       artifacts: [{
         evidenceId: "render-1",

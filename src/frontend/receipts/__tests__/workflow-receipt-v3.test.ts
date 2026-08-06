@@ -138,6 +138,7 @@ function receiptInput(
       },
     },
     nativeEvidence: {
+      status: "admitted",
       platform: "web",
       artifacts: [{
         evidenceId: "desktop-render",
@@ -166,6 +167,30 @@ function receiptInput(
 }
 
 describe("WorkflowReceiptV3", () => {
+  it("records native exclusion without fabricating artifacts", () => {
+    const input = receiptInput();
+    const receipt = createWorkflowReceiptV3({
+      ...input,
+      execution: {
+        ...input.execution,
+        stopReason: "preflight-failed",
+      },
+      nativeEvidence: {
+        status: "excluded",
+        platform: "expo",
+        artifacts: [],
+        reason: "preflight-failed",
+      },
+    });
+
+    expect(receipt.nativeEvidence).toEqual({
+      status: "excluded",
+      platform: "expo",
+      artifacts: [],
+      reason: "preflight-failed",
+    });
+  });
+
   it("binds exact task classes shared with the public task contract", () => {
     const input = receiptInput();
     const receipt = createWorkflowReceiptV3({
