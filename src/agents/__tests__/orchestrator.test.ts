@@ -93,6 +93,11 @@ async function makeNote(
   name: string,
   description: string,
   intents: string[],
+  routing: {
+    taskClasses?: string[];
+    platforms?: string[];
+    actions?: string[];
+  } = {},
 ): Promise<InstalledNote> {
   const notePath = path.join(root, name);
   await mkdir(notePath, { recursive: true });
@@ -121,8 +126,10 @@ async function makeNote(
           intents,
           excludes: [],
           capabilities: [],
-          platforms: [],
+          platforms: routing.platforms ?? [],
+          taskClasses: routing.taskClasses ?? [],
           priority: 0,
+          actions: routing.actions,
         },
       },
       createdAt: "2026-07-29T00:00:00.000Z",
@@ -179,19 +186,53 @@ describe("AgentOrchestrator compose targeting", () => {
     expect(generated).toEqual(["MetricCard", "TrendBadge"]);
   });
 
-  it("routes at most two skills when they cover distinct task requirements", async () => {
+  it("routes one exact skill from a complete uncontracted classification", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-routing-"));
     const notes = await Promise.all([
       makeNote(root, "accessibility-audit", "Audit WCAG and VoiceOver behavior.", [
         "accessibility-audit",
         "wcag-review",
-      ]),
+      ], {
+        taskClasses: ["accessibility-check"],
+        platforms: ["web"],
+        actions: ["audit"],
+      }),
       makeNote(root, "better-typography", "Improve responsive typography and type scale.", [
         "typography-system",
         "responsive-typography",
-      ]),
+      ], {
+        taskClasses: ["responsive-layout"],
+        platforms: ["web"],
+        actions: ["modify"],
+      }),
       makeNote(root, "docker", "Configure Docker containers and images.", ["docker-environment"]),
     ]);
+    const { engine } = makeEngine([], notes);
+    let plan: AgentPlan | undefined;
+    const orchestrator = new AgentOrchestrator(engine as never, (nextPlan) => {
+      plan = nextPlan;
+    });
+
+    await orchestrator.execute(
+      "Audit web accessibility and WCAG issues",
+      { dryRun: true },
+    );
+
+    expect(plan?.skillRoute?.decision).toBe("single");
+    expect(plan?.skillRoute?.selected).toHaveLength(1);
+    expect(plan?.subTasks[0].prompt).toContain("accessibility-audit");
+    expect(plan?.subTasks[0].prompt).not.toContain("better-typography");
+    expect(plan?.subTasks[0].prompt).not.toContain("# docker");
+  });
+
+  it("fails an ambiguous uncontracted route closed to repository-only discovery", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-abstention-"));
+    const notes = [await makeNote(
+      root,
+      "accessibility-audit",
+      "Audit responsive typography, WCAG, and VoiceOver behavior.",
+      ["accessibility-audit", "responsive-typography", "wcag-review"],
+    )];
     const { engine } = makeEngine([], notes);
     let plan: AgentPlan | undefined;
     const orchestrator = new AgentOrchestrator(engine as never, (nextPlan) => {
@@ -203,11 +244,36 @@ describe("AgentOrchestrator compose targeting", () => {
       { dryRun: true },
     );
 
-    expect(plan?.skillRoute?.decision).toBe("stack");
-    expect(plan?.skillRoute?.selected).toHaveLength(2);
-    expect(plan?.subTasks[0].prompt).toContain("accessibility-audit");
-    expect(plan?.subTasks[0].prompt).toContain("better-typography");
-    expect(plan?.subTasks[0].prompt).not.toContain("# docker");
+    expect(plan?.skillRoute).toBeUndefined();
+    expect(plan?.subTasks[0].prompt).not.toContain("# accessibility-audit");
+  });
+
+  it("uses classified state evidence to route an uncontracted implementation", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-state-route-"));
+    const notes = [await makeNote(
+      root,
+      "adaptive-interface",
+      "Implement complete loading, empty, and error interface states.",
+      ["adaptive-interface", "interface-states"],
+      {
+        taskClasses: ["interface-state-implementation"],
+        platforms: ["web"],
+        actions: ["modify"],
+      },
+    )];
+    const { engine } = makeEngine([], notes);
+    let plan: AgentPlan | undefined;
+    const orchestrator = new AgentOrchestrator(engine as never, (nextPlan) => {
+      plan = nextPlan;
+    });
+
+    await orchestrator.execute(
+      "Repair the web settings screen loading, empty, and error states",
+      { dryRun: true },
+    );
+
+    expect(plan?.skillRoute?.decision).toBe("single");
+    expect(plan?.skillRoute?.selected[0]?.id).toBe("adaptive-interface");
   });
 
   it("injects the exact bounded context capsule used by a contracted execution", async () => {

@@ -36,6 +36,7 @@ describe("multi-signal intent classifier", () => {
       taskFamily: "layout",
       platforms: ["swiftui"],
       targetSurfaces: ["screen"],
+      inferredTaskClass: "interface-state-implementation",
       ambiguous: false,
       abstain: false,
     });
@@ -65,6 +66,7 @@ describe("multi-signal intent classifier", () => {
       taskFamily: "dataviz",
       platforms: ["react-native"],
       targetSurfaces: ["dataviz", "screen"],
+      inferredTaskClass: "interface-state-implementation",
       ambiguous: false,
       abstain: false,
     });
@@ -85,6 +87,7 @@ describe("multi-signal intent classifier", () => {
       category: "design-audit",
       action: "audit",
       taskFamily: "general",
+      inferredTaskClass: null,
       ambiguous: true,
       abstain: true,
     });
@@ -98,9 +101,34 @@ describe("multi-signal intent classifier", () => {
     );
 
     expect(result.platforms).toEqual(["react-native", "swiftui"]);
+    expect(result.inferredTaskClass).toBeNull();
     expect(result.ambiguous).toBe(true);
     expect(result.abstain).toBe(true);
     expect(result.confidence).toBeLessThan(0.7);
+  });
+
+  it.each([
+    [
+      "Audit keyboard focus on the web checkout form",
+      "keyboard-focus-verification",
+    ],
+    [
+      "Inspect the web CSS variable palette",
+      "token-map",
+    ],
+    [
+      "Implement responsive breakpoints for the web checkout screen",
+      "responsive-layout",
+    ],
+    [
+      "Modify the web checkout form navigation interaction",
+      "adaptive-interaction",
+    ],
+  ] as const)("infers the exact supported route for %s", (intent, taskClass) => {
+    const result = classifyIntentSignals(intent);
+
+    expect(result.abstain).toBe(false);
+    expect(result.inferredTaskClass).toBe(taskClass);
   });
 
   it("fails closed on oversized input", () => {
@@ -110,6 +138,7 @@ describe("multi-signal intent classifier", () => {
       category: "general",
       action: null,
       taskFamily: "general",
+      inferredTaskClass: null,
       confidence: 0,
       ambiguous: true,
       abstain: true,
