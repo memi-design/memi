@@ -175,6 +175,100 @@ const BillingSchema = z.discriminatedUnion("status", [
   }).strict(),
 ]);
 
+const BudgetStopReasonSchema = z.enum([
+  "token-budget-exhausted",
+  "tool-budget-exhausted",
+  "time-budget-exhausted",
+  "attempt-limit-reached",
+]);
+
+const BudgetEnforcementSchema = z.object({
+  ceilings: z.object({
+    inputTokens: z.number().int().positive(),
+    outputTokens: z.number().int().positive(),
+    reasoningTokens: z.number().int().nonnegative(),
+    wallTimeMs: z.number().int().positive(),
+    toolCalls: z.number().int().positive(),
+    implementationAttempts: z.union([z.literal(1), z.literal(2)]),
+  }).strict(),
+  observed: z.object({
+    inputTokens: z.number().int().nonnegative(),
+    outputTokens: z.number().int().nonnegative(),
+    reasoningTokens: z.number().int().nonnegative(),
+    toolCalls: z.number().int().nonnegative(),
+    wallTimeMs: z.number().int().nonnegative(),
+  }).strict(),
+  measurement: z.object({
+    inputTokens: z.enum(["measured", "unavailable"]),
+    outputTokens: z.enum(["measured", "unavailable"]),
+    reasoningTokens: z.enum(["measured", "unavailable"]),
+    toolCalls: z.enum(["measured", "unavailable"]),
+  }).strict(),
+  implementationAttempts: z.number().int().nonnegative().max(2),
+  exceededDimensions: z.array(z.enum([
+    "input-tokens",
+    "output-tokens",
+    "reasoning-tokens",
+    "tool-calls",
+    "wall-time",
+  ])).max(5),
+  stopReason: BudgetStopReasonSchema.nullable(),
+  limitations: z.array(z.enum([
+    "provider-request-cancellation-unavailable",
+    "reasoning-token-usage-unavailable",
+    "tool-call-usage-unavailable",
+  ])).max(3),
+}).strict().superRefine((budget, context) => {
+  const expected: Array<"input-tokens" | "output-tokens" | "reasoning-tokens" | "tool-calls" | "wall-time"> = [];
+  if (budget.observed.inputTokens > budget.ceilings.inputTokens) expected.push("input-tokens");
+  if (budget.observed.outputTokens > budget.ceilings.outputTokens) expected.push("output-tokens");
+  if (
+    budget.measurement.reasoningTokens === "measured"
+    && budget.observed.reasoningTokens > budget.ceilings.reasoningTokens
+  ) expected.push("reasoning-tokens");
+  if (
+    budget.measurement.toolCalls === "measured"
+    && budget.observed.toolCalls > budget.ceilings.toolCalls
+  ) expected.push("tool-calls");
+  if (
+    budget.observed.wallTimeMs > budget.ceilings.wallTimeMs
+    || (
+      budget.stopReason === "time-budget-exhausted"
+      && budget.observed.wallTimeMs >= budget.ceilings.wallTimeMs
+    )
+  ) expected.push("wall-time");
+  if (JSON.stringify(expected) !== JSON.stringify(budget.exceededDimensions)) {
+    context.addIssue({
+      code: "custom",
+      path: ["exceededDimensions"],
+      message: "budget exceeded dimensions do not match measured usage",
+    });
+  }
+  if (budget.implementationAttempts > budget.ceilings.implementationAttempts) {
+    context.addIssue({
+      code: "custom",
+      path: ["implementationAttempts"],
+      message: "budget implementation attempts exceed the contracted ceiling",
+    });
+  }
+  const expectedStopReason = expected.some((dimension) => dimension.endsWith("tokens"))
+    ? "token-budget-exhausted"
+    : expected.includes("tool-calls")
+      ? "tool-budget-exhausted"
+      : expected.includes("wall-time")
+        ? "time-budget-exhausted"
+        : budget.stopReason === "attempt-limit-reached"
+          ? "attempt-limit-reached"
+          : null;
+  if (budget.stopReason !== expectedStopReason) {
+    context.addIssue({
+      code: "custom",
+      path: ["stopReason"],
+      message: "budget stop reason does not match measured usage",
+    });
+  }
+});
+
 const ExecutionSchema = z.object({
   startedAt: TimestampSchema,
   completedAt: TimestampSchema,
@@ -184,6 +278,7 @@ const ExecutionSchema = z.object({
     "provider-failed",
     "tool-failed",
     "token-budget-exhausted",
+    "tool-budget-exhausted",
     "time-budget-exhausted",
     "attempt-limit-reached",
     "preflight-failed",
@@ -192,6 +287,7 @@ const ExecutionSchema = z.object({
   retries: z.array(RetrySchema).max(1),
   usage: UsageSchema,
   billing: BillingSchema,
+  budgetEnforcement: BudgetEnforcementSchema.optional(),
 }).strict();
 
 const NativeEvidenceArtifactSchema = z.object({
@@ -459,6 +555,21 @@ function validateExecution(
   for (const key of Object.keys(expectedUsage) as (keyof typeof expectedUsage)[]) {
     if (execution.usage[key] !== expectedUsage[key]) {
       issue(context, ["execution", "usage", key], "aggregate usage does not equal attempt usage");
+    }
+  }
+  const budget = execution.budgetEnforcement;
+  if (budget) {
+    if (budget.stopReason !== null && budget.stopReason !== execution.stopReason) {
+      issue(context, ["execution", "stopReason"], "execution stop reason does not match budget evidence");
+    }
+    const observedUsage = budget.observed;
+    for (const key of ["inputTokens", "outputTokens", "reasoningTokens", "toolCalls"] as const) {
+      if (execution.usage[key] !== observedUsage[key]) {
+        issue(context, ["execution", "usage", key], "execution usage does not match budget evidence");
+      }
+    }
+    if (execution.usage.agentWallTimeMs !== observedUsage.wallTimeMs) {
+      issue(context, ["execution", "usage", "agentWallTimeMs"], "execution wall time does not match budget evidence");
     }
   }
 }

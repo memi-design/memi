@@ -242,6 +242,21 @@ describe("WorkflowReceiptV3", () => {
       execution: {
         ...input.execution,
         stopReason: "tool-budget-exhausted",
+        attempts: [{
+          ...input.execution.attempts[0],
+          outcome: "fatal-failure",
+          usage: {
+            ...input.execution.usage,
+            reasoningTokens: 0,
+            toolCalls: 3,
+          },
+        }],
+        retries: [],
+        usage: {
+          ...input.execution.usage,
+          reasoningTokens: 0,
+          toolCalls: 3,
+        },
         budgetEnforcement: {
           ceilings: {
             inputTokens: 1_000,
@@ -252,11 +267,11 @@ describe("WorkflowReceiptV3", () => {
             implementationAttempts: 1,
           },
           observed: {
-            inputTokens: 100,
-            outputTokens: 20,
+            inputTokens: input.execution.usage.inputTokens,
+            outputTokens: input.execution.usage.outputTokens,
             reasoningTokens: 0,
             toolCalls: 3,
-            wallTimeMs: 1_000,
+            wallTimeMs: input.execution.usage.agentWallTimeMs,
           },
           measurement: {
             inputTokens: "measured",
@@ -293,20 +308,20 @@ describe("WorkflowReceiptV3", () => {
             outputTokens: 200,
             reasoningTokens: 100,
             wallTimeMs: 60_000,
-            toolCalls: 2,
+            toolCalls: 10,
             implementationAttempts: 1,
           },
           observed: {
-            inputTokens: 100,
-            outputTokens: 20,
-            reasoningTokens: 0,
-            toolCalls: 0,
-            wallTimeMs: 1_000,
+            inputTokens: input.execution.usage.inputTokens,
+            outputTokens: input.execution.usage.outputTokens,
+            reasoningTokens: input.execution.usage.reasoningTokens,
+            toolCalls: input.execution.usage.toolCalls,
+            wallTimeMs: input.execution.usage.agentWallTimeMs,
           },
           measurement: {
             inputTokens: "measured",
             outputTokens: "measured",
-            reasoningTokens: "unavailable",
+            reasoningTokens: "measured",
             toolCalls: "measured",
           },
           implementationAttempts: 1,
@@ -314,7 +329,6 @@ describe("WorkflowReceiptV3", () => {
           stopReason: "token-budget-exhausted",
           limitations: [
             "provider-request-cancellation-unavailable",
-            "reasoning-token-usage-unavailable",
           ],
         },
       },

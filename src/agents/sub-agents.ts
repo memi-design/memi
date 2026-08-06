@@ -11,6 +11,10 @@ import type { DesignToken } from "../engine/registry.js";
 import type { AnySpec, ComponentSpec, PageSpec, DataVizSpec } from "../specs/types.js";
 import type { SubTask, SubAgentType, AgentContext } from "./plan-builder.js";
 import type { AIClient } from "../ai/index.js";
+import {
+  ExecutionBudgetExceededError,
+  type ExecutionBudgetReport,
+} from "./execution-budget.js";
 
 const log = createLogger("sub-agent-runner");
 
@@ -31,6 +35,13 @@ export interface AgentExecutionResult {
   totalTasks: number;
   mutations: DesignMutation[];
   figmaSynced: boolean;
+  executionBudget?: Readonly<ExecutionBudgetReport>;
+}
+
+export interface SubAgentExecutionOptions {
+  readonly signal?: AbortSignal;
+  readonly maxOutputTokens?: number;
+  readonly beforeApplyAIResult?: () => void;
 }
 
 // ── Sub-Agent Runner ─────────────────────────────────────
@@ -54,15 +65,23 @@ export class SubAgentRunner {
 
   // ── Main Dispatch ──────────────────────────────────────
 
-  async executeSubTask(task: SubTask, ctx: AgentContext, ai?: AIClient | null): Promise<unknown> {
+  async executeSubTask(
+    task: SubTask,
+    ctx: AgentContext,
+    ai?: AIClient | null,
+    options: SubAgentExecutionOptions = {},
+  ): Promise<unknown> {
     log.info({ taskId: task.id, agent: task.agentType, name: task.name }, "Executing sub-task");
+    options.signal?.throwIfAborted();
 
     // Try AI-powered execution first if available
     if (ai && SubAgentRunner.AI_AGENT_TYPES.includes(task.agentType)) {
       try {
-        const aiResult = await this.aiExecuteSubTask(ai, task, ctx);
+        const aiResult = await this.aiExecuteSubTask(ai, task, ctx, options);
         if (aiResult) return aiResult;
       } catch (err) {
+        if (options.signal?.aborted) throw options.signal.reason;
+        if (err instanceof ExecutionBudgetExceededError) throw err;
         log.warn({ taskId: task.id, err: err instanceof Error ? err.message : String(err) }, "AI execution failed, falling back to heuristic");
       }
     }
@@ -646,7 +665,12 @@ export class SubAgentRunner {
 
   // ── AI-Powered Execution ───────────────────────────────
 
-  private async aiExecuteSubTask(ai: AIClient, task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async aiExecuteSubTask(
+    ai: AIClient,
+    task: SubTask,
+    ctx: AgentContext,
+    options: SubAgentExecutionOptions,
+  ): Promise<unknown> {
     const systemPrompt = this.buildAgentSystemPrompt(task.agentType, ctx);
 
     const result = await ai.completeJSON<{
@@ -661,11 +685,18 @@ export class SubAgentRunner {
         { role: "user", content: task.prompt },
       ],
       model: "fast",
+      ...(options.maxOutputTokens !== undefined
+        ? { maxTokens: Math.max(1, options.maxOutputTokens) }
+        : {}),
     });
+
+    options.signal?.throwIfAborted();
+    options.beforeApplyAIResult?.();
 
     // Apply any mutations from the AI result
     if (result.mutations && result.mutations.length > 0) {
       for (const m of result.mutations) {
+        options.signal?.throwIfAborted();
         await this.applyAIResult(m, ctx);
       }
     }

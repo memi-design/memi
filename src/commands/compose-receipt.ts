@@ -15,6 +15,7 @@ import { buildRepositoryFingerprint } from "../notes/repository-fingerprint.js";
 import { packageRoot } from "../utils/asset-path.js";
 import { getMemoirePackageVersion } from "../utils/package-version.js";
 import { hashPackedPackageSurface } from "../utils/package-artifact.js";
+import type { ExecutionBudgetStopReason } from "../agents/execution-budget.js";
 
 export interface ComposeReceiptSummary {
   readonly status: "written";
@@ -59,15 +60,16 @@ export async function writeComposeReceiptV3(input: {
   const completedAtMs = Math.max(input.startedAtMs, input.completedAtMs);
   const startedAt = new Date(input.startedAtMs).toISOString();
   const completedAt = new Date(completedAtMs).toISOString();
+  const budget = input.result.executionBudget;
   const usage = {
-    inputTokens: input.tracker?.totalInput ?? 0,
+    inputTokens: budget?.observed.inputTokens ?? input.tracker?.totalInput ?? 0,
     cachedInputTokens: 0,
-    outputTokens: input.tracker?.totalOutput ?? 0,
-    reasoningTokens: 0,
-    toolCalls: 0,
+    outputTokens: budget?.observed.outputTokens ?? input.tracker?.totalOutput ?? 0,
+    reasoningTokens: budget?.observed.reasoningTokens ?? 0,
+    toolCalls: budget?.observed.toolCalls ?? 0,
     toolErrors: 0,
     toolOutputBytes: 0,
-    agentWallTimeMs: completedAtMs - input.startedAtMs,
+    agentWallTimeMs: budget?.observed.wallTimeMs ?? completedAtMs - input.startedAtMs,
     toolWallTimeMs: 0,
   };
   const packageVersion = getMemoirePackageVersion();
@@ -143,12 +145,18 @@ export async function writeComposeReceiptV3(input: {
     execution: {
       startedAt,
       completedAt,
-      stopReason: deriveComposeStopReason(input.dryRun, input.result.status),
+      stopReason: deriveComposeStopReason(
+        input.dryRun,
+        input.result.status,
+        budget?.stopReason ?? undefined,
+      ),
       attempts: input.dryRun ? [] : [{
         attemptId: "attempt-1",
         startedAt,
         completedAt,
-        outcome: input.result.status === "completed" ? "completed" : "fatal-failure",
+        outcome: budget?.stopReason === "time-budget-exhausted"
+          ? "timed-out"
+          : input.result.status === "completed" ? "completed" : "fatal-failure",
         usage,
       }],
       retries: [],
@@ -161,6 +169,7 @@ export async function writeComposeReceiptV3(input: {
         priceCardSha256: null,
         reason: "provider-unsupported",
       },
+      ...(budget ? { budgetEnforcement: budget } : {}),
     },
     nativeEvidence: {
       status: "excluded",
@@ -196,8 +205,10 @@ export async function writeComposeReceiptV3(input: {
 export function deriveComposeStopReason(
   dryRun: boolean,
   status: AgentExecutionResult["status"],
-): "preflight-failed" | "attempt-limit-reached" | "verification-failed" {
+  budgetStopReason?: ExecutionBudgetStopReason,
+): "preflight-failed" | ExecutionBudgetStopReason | "verification-failed" {
   if (dryRun) return "preflight-failed";
+  if (budgetStopReason) return budgetStopReason;
   return status === "completed" ? "verification-failed" : "attempt-limit-reached";
 }
 

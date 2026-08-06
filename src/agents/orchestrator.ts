@@ -45,6 +45,10 @@ import { PlanBuilder } from "./plan-builder.js";
 import type { AgentPlan, SubTask, AgentContext } from "./plan-builder.js";
 import { SubAgentRunner } from "./sub-agents.js";
 import type { DesignMutation } from "./sub-agents.js";
+import {
+  ExecutionBudgetExceededError,
+  ExecutionBudgetGuard,
+} from "./execution-budget.js";
 import type { FrontendTaskContractV1 } from "../frontend/task-contract.js";
 import type { ContextCapsuleV1 } from "../frontend/context-capsule.js";
 import {
@@ -193,7 +197,17 @@ export class AgentOrchestrator {
       };
     }
 
-    return this.executePlan(plan, options);
+    const budget = options?.taskContract
+      ? new ExecutionBudgetGuard(options.taskContract.resourceCeilings)
+      : undefined;
+    const budgetAI = budget ? getAI() : null;
+    if (budget && budgetAI) {
+      budget.registerProviderUsageBaseline({
+        inputTokens: budgetAI.tracker.totalInput,
+        outputTokens: budgetAI.tracker.totalOutput,
+      });
+    }
+    return this.executePlan(plan, { ...options, budget });
   }
 
   private async buildContext(): Promise<AgentContext> {
@@ -242,7 +256,34 @@ export class AgentOrchestrator {
 
   // ── Plan Execution Engine ──────────────────────────────
 
-  private async executePlan(plan: AgentPlan, options?: { autoSync?: boolean }): Promise<import("./sub-agents.js").AgentExecutionResult> {
+  private async executePlan(
+    plan: AgentPlan,
+    options?: { autoSync?: boolean; budget?: ExecutionBudgetGuard },
+  ): Promise<import("./sub-agents.js").AgentExecutionResult> {
+    if (!options?.budget) return this.executePlanBody(plan, options);
+    try {
+      const result = await options.budget.runWithinWallTime((signal) =>
+        this.executePlanBody(plan, options, signal));
+      return { ...result, executionBudget: options.budget.report() };
+    } catch (error) {
+      if (!(error instanceof ExecutionBudgetExceededError)) throw error;
+      return {
+        planId: plan.id,
+        status: "failed",
+        completedTasks: plan.subTasks.filter((task) => task.status === "completed").length,
+        totalTasks: plan.subTasks.length,
+        mutations: [],
+        figmaSynced: false,
+        executionBudget: options.budget.report(),
+      };
+    }
+  }
+
+  private async executePlanBody(
+    plan: AgentPlan,
+    options?: { autoSync?: boolean; budget?: ExecutionBudgetGuard },
+    signal?: AbortSignal,
+  ): Promise<import("./sub-agents.js").AgentExecutionResult> {
     const mutations: DesignMutation[] = [];
     let completedTasks = 0;
     const completed = new Set<string>();
@@ -256,6 +297,7 @@ export class AgentOrchestrator {
 
     // Topological execution — respect dependencies
     while (completed.size < plan.subTasks.length) {
+      if (signal?.aborted) break;
       const ready = plan.subTasks.filter(
         (t) => t.status === "pending" && t.dependencies.every((d) => completed.has(d)),
       );
@@ -290,7 +332,14 @@ export class AgentOrchestrator {
           await this.updateAgentBox(this.makeAgentBoxUpdate(plan, task, taskIndex, "busy"));
 
           try {
-            const result = await this.tryExternalOrInternal(task, plan.context);
+            signal?.throwIfAborted();
+            const result = await this.tryExternalOrInternal(
+              task,
+              plan.context,
+              options?.budget,
+              signal,
+            );
+            signal?.throwIfAborted();
             task.status = "completed";
             task.result = result;
             task.completedAt = new Date().toISOString();
@@ -332,11 +381,12 @@ export class AgentOrchestrator {
           this.onUpdate?.(plan);
         }),
       );
+      if (signal?.aborted) break;
     }
 
     // Auto-sync to Figma if requested
     let figmaSynced = false;
-    if (options?.autoSync && plan.context.figmaConnected && mutations.length > 0) {
+    if (!signal?.aborted && options?.autoSync && plan.context.figmaConnected && mutations.length > 0) {
       try {
         await this.subAgentRunner.syncMutationsToFigma(mutations);
         figmaSynced = true;
@@ -364,11 +414,18 @@ export class AgentOrchestrator {
    * Try to dispatch a task to an external agent first; fall back to internal execution.
    * External agents are matched by role via the AgentRegistry.
    */
-  private async tryExternalOrInternal(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async tryExternalOrInternal(
+    task: SubTask,
+    ctx: AgentContext,
+    budget?: ExecutionBudgetGuard,
+    signal?: AbortSignal,
+  ): Promise<unknown> {
     const role = task.agentType as import("../plugin/shared/contracts.js").AgentRole;
     const externalAgent = this.engine.agentRegistry.getAvailableAgent(role);
 
     if (externalAgent) {
+      budget?.markMeasurementUnavailable("reasoningTokens");
+      budget?.markMeasurementUnavailable("toolCalls");
       log.info({ taskId: task.id, agentId: externalAgent.id, role }, "Dispatching to external agent");
       this.engine.agentRegistry.markBusy(externalAgent.id);
 
@@ -398,18 +455,43 @@ export class AgentOrchestrator {
       }
     }
 
-    return this.executeWithRetry(task, ctx);
+    return this.executeWithRetry(task, ctx, budget, signal);
   }
 
-  private async executeWithRetry(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async executeWithRetry(
+    task: SubTask,
+    ctx: AgentContext,
+    budget?: ExecutionBudgetGuard,
+    signal?: AbortSignal,
+  ): Promise<unknown> {
     let lastError: Error | undefined;
-    for (let attempt = 0; attempt <= AgentOrchestrator.MAX_RETRIES; attempt++) {
+    const maximumAttempts = budget?.maximumImplementationAttempts
+      ?? AgentOrchestrator.MAX_RETRIES + 1;
+    const ai = getAI();
+    for (let attempt = 0; attempt < maximumAttempts; attempt++) {
       try {
-        const ai = getAI();
-        return await this.subAgentRunner.executeSubTask(task, ctx, ai);
+        signal?.throwIfAborted();
+        budget?.recordImplementationAttempt(attempt + 1);
+        const observeProviderUsage = () => {
+          if (!budget || !ai) return;
+          budget.observeProviderUsageTotals({
+            inputTokens: ai.tracker.totalInput,
+            outputTokens: ai.tracker.totalOutput,
+          });
+          budget.assertWithinLimits();
+        };
+        const result = await this.subAgentRunner.executeSubTask(task, ctx, ai, {
+          signal,
+          ...(budget ? { maxOutputTokens: budget.remainingOutputTokens } : {}),
+          beforeApplyAIResult: observeProviderUsage,
+        });
+        observeProviderUsage();
+        return result;
       } catch (err) {
+        if (signal?.aborted) throw signal.reason;
         lastError = err instanceof Error ? err : new Error(String(err));
-        if (attempt < AgentOrchestrator.MAX_RETRIES) {
+        if (lastError instanceof ExecutionBudgetExceededError) throw lastError;
+        if (attempt < maximumAttempts - 1) {
           const delayMs = AgentOrchestrator.RETRY_BASE_MS * Math.pow(2, attempt);
           log.warn(
             { taskId: task.id, attempt: attempt + 1, delayMs, err: lastError.message },
@@ -419,6 +501,7 @@ export class AgentOrchestrator {
         }
       }
     }
+    budget?.markAttemptLimitReached();
     throw lastError ?? new Error("Sub-task failed with no error captured");
   }
 

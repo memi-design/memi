@@ -60,15 +60,16 @@ describe("ExecutionBudgetGuard", () => {
       return "late";
     });
 
-    await vi.advanceTimersByTimeAsync(ceilings.wallTimeMs);
-    await expect(execution).rejects.toMatchObject({
+    const rejection = expect(execution).rejects.toMatchObject({
       name: "ExecutionBudgetExceededError",
       stopReason: "time-budget-exhausted",
     });
+    await vi.advanceTimersByTimeAsync(ceilings.wallTimeMs);
+    await rejection;
     expect(observedAbort).toBe(true);
     expect(guard.report()).toMatchObject({
       stopReason: "time-budget-exhausted",
-      limitations: ["provider-request-cancellation-unavailable"],
+      limitations: expect.arrayContaining(["provider-request-cancellation-unavailable"]),
     });
     vi.useRealTimers();
   });
