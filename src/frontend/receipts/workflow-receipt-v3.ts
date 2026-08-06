@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FrontendTaskClassSchema } from "../task-contract.js";
 import {
   IdentifierSchema,
   RepositoryRelativePathSchema,
@@ -8,13 +9,6 @@ import {
   hashValue,
   timestampMillis,
 } from "./foundation.js";
-
-const TaskClassSchema = z.enum([
-  "frontend-creation",
-  "frontend-modification",
-  "frontend-repair",
-  "frontend-audit",
-]);
 
 const RuntimeSchema = z.object({
   provider: IdentifierSchema,
@@ -29,7 +23,7 @@ const StableFieldsSchema = z.object({
   pairId: IdentifierSchema,
   taskId: IdentifierSchema,
   repeat: z.number().int().positive().max(10_000),
-  taskClass: TaskClassSchema,
+  taskClass: FrontendTaskClassSchema,
   taskContractSha256: Sha256Schema,
   repository: z.object({
     fingerprintSha256: Sha256Schema,
@@ -47,7 +41,7 @@ const CandidateSchema = z.object({
 
 const RouteInputSchema = z.object({
   routerVersion: IdentifierSchema,
-  taskClass: TaskClassSchema,
+  taskClass: FrontendTaskClassSchema,
   repositoryFingerprintSha256: Sha256Schema,
   provider: IdentifierSchema,
   model: z.string().min(1).max(256),
