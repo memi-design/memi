@@ -266,6 +266,7 @@ describe("WorkflowReceiptV3", () => {
           },
           implementationAttempts: 1,
           exceededDimensions: ["tool-calls"],
+          stopReason: "tool-budget-exhausted",
           limitations: [
             "provider-request-cancellation-unavailable",
             "reasoning-token-usage-unavailable",
@@ -277,6 +278,47 @@ describe("WorkflowReceiptV3", () => {
     expect(receipt.execution.stopReason).toBe("tool-budget-exhausted");
     expect(receipt.execution.budgetEnforcement?.measurement.reasoningTokens).toBe("unavailable");
     expect(receipt.execution.budgetEnforcement?.exceededDimensions).toEqual(["tool-calls"]);
+  });
+
+  it("rejects budget evidence that disagrees with measured usage", () => {
+    const input = receiptInput();
+    expect(() => createWorkflowReceiptV3({
+      ...input,
+      execution: {
+        ...input.execution,
+        stopReason: "token-budget-exhausted",
+        budgetEnforcement: {
+          ceilings: {
+            inputTokens: 1_000,
+            outputTokens: 200,
+            reasoningTokens: 100,
+            wallTimeMs: 60_000,
+            toolCalls: 2,
+            implementationAttempts: 1,
+          },
+          observed: {
+            inputTokens: 100,
+            outputTokens: 20,
+            reasoningTokens: 0,
+            toolCalls: 0,
+            wallTimeMs: 1_000,
+          },
+          measurement: {
+            inputTokens: "measured",
+            outputTokens: "measured",
+            reasoningTokens: "unavailable",
+            toolCalls: "measured",
+          },
+          implementationAttempts: 1,
+          exceededDimensions: ["input-tokens"],
+          stopReason: "token-budget-exhausted",
+          limitations: [
+            "provider-request-cancellation-unavailable",
+            "reasoning-token-usage-unavailable",
+          ],
+        },
+      },
+    })).toThrow(/budget/i);
   });
 
   it("binds exact task classes shared with the public task contract", () => {
