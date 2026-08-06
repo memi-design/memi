@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-02",
+  "updatedAt": "2026-08-06",
   "releaseGroups": {
     "engine": {
-      "version": "2.7.8",
+      "version": "2.7.9",
       "state": "candidate",
       "sourceCommit": null,
       "releaseRecord": null,
@@ -15,9 +15,21 @@
           "sha256": "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c"
         }
       },
+      "supersededPartialReleases": [
+        {
+          "version": "2.7.8",
+          "scope": "npm-only",
+          "sourceCommit": "d290484535198c1f328c57986f600af544cc867a",
+          "releaseRecord": {
+            "path": "release-artifacts/npm/2.7.8.release.json",
+            "sha256": "8b1adb07d57f71eccf372444539b7b61841547d47c255593d66af9eebe7eb3de"
+          },
+          "supersededBy": "2.7.9"
+        }
+      ],
       "verification": {
         "eligibleForParity": false,
-        "reason": "Candidate updates the published npm metadata to match the merged public product story; 2.7.7 remains the verified public release until npm provenance and public-surface verification complete."
+        "reason": "Final 2.7 stabilization candidate closes production dependency advisories and supersedes the npm-only 2.7.8 partial release; 2.7.7 remains the verified parity release until 2.7.9 provenance and every public surface pass."
       }
     },
     "studio": {
@@ -41,7 +53,7 @@
       "releaseGroup": "engine",
       "repository": "memi-design/memi",
       "tagPrefix": "v",
-      "url": "https://github.com/memi-design/memi/releases/tag/v2.7.8"
+      "url": "https://github.com/memi-design/memi/releases/tag/v2.7.9"
     },
     "githubAction": {
       "releaseGroup": "engine",

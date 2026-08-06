@@ -6,7 +6,20 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
-## v2.7.8 — 2026-08-02 — Candidate
+## v2.7.9 — 2026-08-06 — Candidate
+
+### Final 2.7 stabilization
+
+- Updates the Model Context Protocol SDK and locks patched Hono, node-server,
+  URI parser, and IP parser versions so the production dependency audit has no
+  high or critical advisories.
+- Stages one synchronized npm, GitHub, Action, MCP, Homebrew/GHCR, and website
+  release identity. No public parity claim is made before every live surface is
+  independently verified.
+- Preserves the immutable 2.7.8 npm OIDC receipt while recording 2.7.8 as an
+  npm-only partial release superseded by 2.7.9.
+
+## v2.7.8 — 2026-08-02 — Published to npm only (superseded)
 
 ### Public product metadata alignment
 
@@ -14,9 +27,10 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   merged GitHub positioning: **the design layer for agentic AI**.
 - Synchronizes bundled skills, presets, action defaults, MCP metadata, and
   plugin manifests to the exact candidate version.
-- This is a metadata release; it makes no new quality, speed, cost, or feature
-  claim. The candidate remains unpublished until the trusted npm publish and
-  public-surface verification records are complete.
+- Published through trusted npm OIDC, but not promoted to GitHub, MCP, Action
+  `v2`, Homebrew/GHCR, or the website. Its immutable receipt is retained under
+  `release-artifacts/npm/2.7.8.release.json`; 2.7.9 supersedes it rather than
+  retroactively claiming cross-channel parity.
 
 ## v2.7.7 — 2026-08-02 — Published
 
