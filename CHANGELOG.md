@@ -119,6 +119,8 @@ confirmatory study is preregistered but unexecuted until exact 2.7.9 and
 - `f12c8879` — feat: route compose from deterministic intent signals
 - `9c5959b5` — test: preserve distinct two-skill compose routes
 - `41ba4dd1` — test: enforce frontend reliability coverage
+- `ecc9a422` — test: require exact admissible evidence provenance
+- `226eeda7` — fix: preserve exact admissible evidence provenance
 
 ## v2.7.9 — 2026-08-06 — Candidate
 
