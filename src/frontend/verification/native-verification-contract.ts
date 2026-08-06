@@ -289,6 +289,16 @@ async function captureAndAdmit(
   }
   const parsedLease = leaseSchema.safeParse(lease?.descriptor);
   if (!parsedLease.success || !hasLeaseMethods(lease)) {
+    try {
+      if (typeof lease?.release === "function") await lease.release();
+    } catch (error) {
+      return rejectedResult(
+        input,
+        plan,
+        evidenceRoot,
+        `simulator-release-failed:${errorName(error)}`,
+      );
+    }
     return rejectedResult(input, plan, evidenceRoot, "simulator-lease-invalid");
   }
 
