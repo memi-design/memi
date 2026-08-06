@@ -118,6 +118,7 @@ confirmatory study is preregistered but unexecuted until exact 2.7.9 and
 - `4109111c` — test: recognize auxiliary design requests
 - `f12c8879` — feat: route compose from deterministic intent signals
 - `9c5959b5` — test: preserve distinct two-skill compose routes
+- `41ba4dd1` — test: enforce frontend reliability coverage
 
 ## v2.7.9 — 2026-08-06 — Candidate
 
