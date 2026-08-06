@@ -66,6 +66,11 @@ export interface ComposePlanPayload {
   createdAt: string;
   totalTasks: number;
   skillRoute: AgentPlan["skillRoute"] | null;
+  contextCapsule: {
+    schemaVersion: "context-capsule.v1";
+    identitySha256: string;
+    contentByteLength: number;
+  } | null;
   tasks: ComposeTaskPayload[];
 }
 
@@ -125,6 +130,7 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
       const startedAt = Date.now();
       const autoSync = opts.figma !== false;
       let capturedPlan: ComposePlanPayload | null = null;
+      let capturedAgentPlan: AgentPlan | null = null;
 
       try {
         const budgetProfile = parseBudgetProfile(opts.budgetProfile);
@@ -152,6 +158,7 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
 
         const category = classifyIntent(intent);
         const orchestrator = new AgentOrchestrator(engine, (plan: AgentPlan) => {
+          capturedAgentPlan = plan;
           capturedPlan = serializePlan(plan);
 
           if (opts.json) return;
@@ -174,6 +181,8 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
           taskClass: taskContract?.taskClass,
           platforms: taskContract ? [taskContract.platform] : undefined,
           routingPolicy,
+          taskContract: taskContract ?? undefined,
+          budgetProfile,
         });
 
         const elapsedMs = Date.now() - startedAt;
@@ -189,7 +198,7 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
             contract: taskContract,
             budgetProfile,
             routingPolicy,
-            plan: planPayload,
+            plan: requireCapturedPlan(capturedAgentPlan),
             result,
             dryRun: Boolean(opts.dryRun),
             startedAtMs: startedAt,
@@ -319,8 +328,20 @@ function serializePlan(plan: AgentPlan): ComposePlanPayload {
     createdAt: plan.createdAt,
     totalTasks: plan.subTasks.length,
     skillRoute: plan.skillRoute ?? null,
+    contextCapsule: plan.contextCapsule ? {
+      schemaVersion: plan.contextCapsule.schemaVersion,
+      identitySha256: plan.contextCapsule.identitySha256,
+      contentByteLength: plan.contextCapsule.contentByteLength,
+    } : null,
     tasks: plan.subTasks.map(serializeTask),
   };
+}
+
+function requireCapturedPlan(plan: AgentPlan | null): AgentPlan {
+  if (!plan?.contextCapsule) {
+    throw new Error("Contracted compose execution did not produce a context capsule");
+  }
+  return plan;
 }
 
 function serializeTask(task: SubTask): ComposeTaskPayload {
@@ -401,6 +422,7 @@ function emptyPlanPayload(intent: string, category: string): ComposePlanPayload 
     createdAt: new Date().toISOString(),
     totalTasks: 0,
     skillRoute: null,
+    contextCapsule: null,
     tasks: [],
   };
 }

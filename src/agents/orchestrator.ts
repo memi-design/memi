@@ -45,6 +45,12 @@ import { PlanBuilder } from "./plan-builder.js";
 import type { AgentPlan, SubTask, AgentContext } from "./plan-builder.js";
 import { SubAgentRunner } from "./sub-agents.js";
 import type { DesignMutation } from "./sub-agents.js";
+import type { FrontendTaskContractV1 } from "../frontend/task-contract.js";
+import type { ContextCapsuleV1 } from "../frontend/context-capsule.js";
+import {
+  buildExecutionContextCapsule,
+  formatExecutionContextCapsule,
+} from "./execution-context-capsule.js";
 
 const log = createLogger("agent-orchestrator");
 
@@ -86,6 +92,8 @@ export class AgentOrchestrator {
     taskClass?: string;
     platforms?: readonly string[];
     routingPolicy?: "repository-only" | "v3";
+    taskContract?: FrontendTaskContractV1;
+    budgetProfile?: "strict" | "balanced" | "deep";
   }): Promise<import("./sub-agents.js").AgentExecutionResult> {
     const category = classifyIntent(intent);
     log.info({ intent, category }, "Classified design intent");
@@ -108,6 +116,15 @@ export class AgentOrchestrator {
       })
       : null;
     const resolvedNotes = routed?.skills ?? [];
+    const contextCapsule = options?.taskContract
+      ? await buildExecutionContextCapsule({
+        projectRoot: this.engine.config.projectRoot,
+        contract: options.taskContract,
+        budgetProfile: options.budgetProfile ?? "balanced",
+        routingPolicy: options.routingPolicy ?? "v3",
+        route: routed?.route ?? null,
+      })
+      : undefined;
     if (resolvedNotes.length > 0) {
       log.info({
         route: routed?.route,
@@ -122,6 +139,7 @@ export class AgentOrchestrator {
       context,
       resolvedNotes,
       routed?.route,
+      contextCapsule,
     );
 
     log.info({ planId: plan.id, tasks: plan.subTasks.length }, "Execution plan ready");
@@ -160,13 +178,16 @@ export class AgentOrchestrator {
     context: AgentContext,
     resolvedNotes: readonly ResolvedSkill[] = [],
     skillRoute?: SkillRouteResult,
+    contextCapsule?: ContextCapsuleV1,
   ): AgentPlan {
     const planId = `plan-${++this.planCounter}-${Date.now()}`;
 
     const subTasks = this.planBuilder.decompose(intent, category, context);
 
     // Inject resolved Note skills into the first task's prompt
-    if (resolvedNotes.length > 0 && subTasks.length > 0) {
+    if (contextCapsule && subTasks.length > 0) {
+      subTasks[0].prompt = `${formatExecutionContextCapsule(contextCapsule)}\n\n---\n\n${subTasks[0].prompt}`;
+    } else if (resolvedNotes.length > 0 && subTasks.length > 0) {
       subTasks[0].prompt = wrapWithNotes(subTasks[0].prompt, resolvedNotes);
     }
 
@@ -177,6 +198,7 @@ export class AgentOrchestrator {
       subTasks,
       context,
       skillRoute,
+      contextCapsule,
       createdAt: new Date().toISOString(),
     };
   }

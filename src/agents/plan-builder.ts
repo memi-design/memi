@@ -50,6 +50,7 @@ export interface AgentPlan {
   subTasks: SubTask[];
   context: AgentContext;
   skillRoute?: import("../notes/skill-router.js").SkillRouteResult;
+  contextCapsule?: import("../frontend/context-capsule.js").ContextCapsuleV1;
   createdAt: string;
 }
 

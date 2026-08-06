@@ -7,6 +7,10 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createFrontendTaskContract } from "../../frontend/task-contract.js";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 function makeComponentSpec(name: string): ComponentSpec {
   const now = new Date().toISOString();
@@ -214,6 +218,17 @@ describe("AgentOrchestrator compose targeting", () => {
       "Audit WCAG, keyboard focus, and reduced-motion behavior.",
       ["accessibility-audit", "wcag-review"],
     )];
+    await mkdir(path.join(root, "src"), { recursive: true });
+    await writeFile(path.join(root, "package-lock.json"), "{\"lockfileVersion\":3}\n");
+    await writeFile(
+      path.join(root, "src", "SettingsPanel.tsx"),
+      "export const SettingsPanel = () => null;\n",
+    );
+    await execFileAsync("git", ["init", "--quiet"], { cwd: root });
+    await execFileAsync("git", ["config", "user.name", "Memi Test"], { cwd: root });
+    await execFileAsync("git", ["config", "user.email", "test@memi.invalid"], { cwd: root });
+    await execFileAsync("git", ["add", "."], { cwd: root });
+    await execFileAsync("git", ["commit", "--quiet", "-m", "fixture"], { cwd: root });
     const { engine } = makeEngine([], notes);
     let plan: AgentPlan | undefined;
     const orchestrator = new AgentOrchestrator(engine as never, (nextPlan) => {

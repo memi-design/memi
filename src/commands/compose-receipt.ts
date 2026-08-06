@@ -4,7 +4,6 @@ import type { AgentPlan } from "../agents/plan-builder.js";
 import type { AgentExecutionResult } from "../agents/sub-agents.js";
 import type { TokenTracker } from "../ai/token-tracker.js";
 import { benchmarkRepositoryRevision } from "../efficiency/codex-runner.js";
-import { createContextCapsule } from "../frontend/context-capsule.js";
 import { hashText, hashValue } from "../frontend/foundation.js";
 import {
   WorkflowReceiptV3Schema,
@@ -31,6 +30,7 @@ export async function writeComposeReceiptV3(input: {
   readonly plan: {
     readonly id: AgentPlan["id"];
     readonly skillRoute?: AgentPlan["skillRoute"] | null;
+    readonly contextCapsule?: AgentPlan["contextCapsule"];
   };
   readonly result: AgentExecutionResult;
   readonly dryRun: boolean;
@@ -44,40 +44,10 @@ export async function writeComposeReceiptV3(input: {
   const selected = input.routingPolicy === "v3"
     ? input.plan.skillRoute?.selected[0]
     : undefined;
-  const skillEvidence = selected ? [{
-    id: `skill:${selected.id}`,
-    content: await readFile(selected.file, "utf8"),
-  }] : [];
-  const capsule = createContextCapsule({
-    taskRoute: [{
-      id: `task:${input.contract.taskId}`,
-      content: JSON.stringify({
-        taskClass: input.contract.taskClass,
-        platform: input.contract.platform,
-        intent: input.contract.intent,
-        budgetProfile: input.budgetProfile,
-        routingPolicy: input.routingPolicy,
-      }),
-    }],
-    skills: skillEvidence,
-    repositoryEvidence: [{
-      id: "repository:fingerprint",
-      content: JSON.stringify({
-        sha256: repositoryFingerprintSha256,
-        languages: repositoryFingerprint.languages,
-        frameworks: repositoryFingerprint.frameworks,
-        targetFiles: input.contract.targetFiles,
-      }),
-    }],
-    verification: [{
-      id: "verification:contract",
-      content: JSON.stringify({
-        commands: input.contract.verificationCommands,
-        states: input.contract.requiredStates,
-        ceilings: input.contract.resourceCeilings,
-      }),
-    }],
-  });
+  const capsule = input.plan.contextCapsule;
+  if (!capsule) {
+    throw new Error("WorkflowReceiptV3 requires the pre-execution context capsule");
+  }
   const receiptRoot = resolve(input.receiptRoot);
   await mkdir(receiptRoot, { recursive: true });
   const sequence = await nextReceiptSequence(receiptRoot);
