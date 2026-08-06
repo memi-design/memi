@@ -11,6 +11,9 @@ import type {
 export const SKILL_ROUTER_VERSION = "skill-router-v2";
 const MINIMUM_STACK_SCORE_RATIO = 0.65;
 const ROUTING_PATTERN_MAX_LENGTH = 160;
+const GENERIC_STACK_EVIDENCE = new Set([
+  "analyze", "audit", "design", "interface", "review", "test", "validate", "verify",
+]);
 type RoutingPatternMode = "exact" | "prefix" | "suffix" | "contains" | "glob" | "oneOf";
 const ROUTING_PATTERN_MODES = new Set<RoutingPatternMode>([
   "exact", "prefix", "suffix", "contains", "glob", "oneOf",
@@ -128,7 +131,7 @@ export interface RoutedSkillResource {
 export async function routeInstalledSkills(
   input: RouteInstalledSkillsInput,
 ): Promise<Readonly<SkillRouteResult>> {
-  const maximumSkills = boundedInteger(input.maximumSkills ?? 2, 1, 4, "maximumSkills");
+  const maximumSkills = boundedInteger(input.maximumSkills ?? 1, 1, 4, "maximumSkills");
   const maximumContextBytes = boundedInteger(
     input.maximumContextBytes ?? 8_000,
     1,
@@ -190,10 +193,15 @@ export async function routeInstalledSkills(
       });
       continue;
     }
-    const candidateEvidence = new Set(candidate.matchedTerms.map(normalizeToken));
+    const candidateEvidence = new Set(candidate.matchedTerms
+      .map(normalizeToken)
+      .filter((term) => !GENERIC_STACK_EVIDENCE.has(term)));
     if (
       selected.length > 0
-      && [...candidateEvidence].every((term) => coveredEvidence.has(term))
+      && (
+        candidateEvidence.size === 0
+        || [...candidateEvidence].every((term) => coveredEvidence.has(term))
+      )
     ) {
       excluded.push({
         id: candidate.id,
@@ -542,7 +550,7 @@ function routeCandidates(
       id: note.manifest.name,
       skillName: skill.name,
       file: path.resolve(note.path, skill.file),
-      score: evidence.score + repositoryMatch.evidence.length * 6 + (routing?.priority ?? 0),
+      score: evidence.score + (routing?.priority ?? 0),
       priority: routing?.priority ?? 0,
       matchedTerms: evidence.matchedTerms,
       excludes: routing?.excludes ?? [],

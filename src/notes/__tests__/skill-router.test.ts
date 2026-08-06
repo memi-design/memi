@@ -210,10 +210,11 @@ describe("deterministic skill router", () => {
         note("keyboard-accessibility", {
           description: "Audit accessibility and keyboard behavior.",
           intents: ["keyboard-accessibility"],
+          priority: 20,
         }),
         note("accessibility-review", {
-          description: "Review interface accessibility.",
-          intents: ["accessibility-audit", "interface-review"],
+          description: "Review interface accessibility and keyboard behavior.",
+          intents: ["keyboard-accessibility", "interface-review"],
         }),
       ]),
       capabilities: [],
