@@ -5,7 +5,8 @@ import { join } from "path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { MemoireEngine } from "../../engine/core.js";
-import { registerComposeCommand } from "../compose.js";
+import { registerComposeCommand, serializeComposePlan } from "../compose.js";
+import type { AgentPlan } from "../../agents/plan-builder.js";
 import { captureLogs, lastLog } from "./test-helpers.js";
 import { createFrontendTaskContract } from "../../frontend/task-contract.js";
 import { WorkflowReceiptV3Schema } from "../../frontend/receipts/workflow-receipt-v3.js";
@@ -29,6 +30,50 @@ afterEach(async () => {
 });
 
 describe("compose --json", () => {
+  it("serializes routed skill paths without machine-local absolute paths", async () => {
+    const root = join(tmpdir(), `memoire-compose-route-${Date.now()}`);
+    tempDirs.push(root);
+    await mkdir(join(root, "skills", "accessibility"), { recursive: true });
+    const skillFile = join(root, "skills", "accessibility", "SKILL.md");
+    await writeFile(skillFile, "# accessibility\n");
+    const payload = serializeComposePlan({
+      id: "plan-1",
+      intent: "Audit accessibility",
+      category: "accessibility-check",
+      subTasks: [],
+      context: {
+        designSystem: { tokens: [], components: [], styles: [], lastSync: "2026-08-06T00:00:00.000Z" },
+        specs: [],
+        figmaConnected: false,
+      },
+      skillRoute: {
+        schemaVersion: 2,
+        routerVersion: "skill-router-v3",
+        decision: "single",
+        intentHash: `sha256:${"1".repeat(64)}`,
+        repositoryFingerprintHash: `sha256:${"2".repeat(64)}`,
+        selected: [{
+          id: "accessibility",
+          skillName: "accessibility",
+          file: skillFile,
+          score: 10,
+          matchedTerms: ["accessibility"],
+          contentHash: `sha256:${"3".repeat(64)}`,
+          contextBytes: 16,
+          explanation: { intentEvidence: ["accessibility"], repositoryEvidence: [] },
+        }],
+        excluded: [],
+        candidates: [],
+        contextBytes: 16,
+        maximumContextBytes: 4_096,
+      },
+      createdAt: "2026-08-06T00:00:00.000Z",
+    } satisfies AgentPlan, root);
+
+    expect(payload.skillRoute?.selected[0]?.file).toBe("skills/accessibility/SKILL.md");
+    expect(JSON.stringify(payload)).not.toContain(root);
+  });
+
   it("emits a structured dry-run payload with plan tasks", async () => {
     const engine = await createEngine();
     const logs = captureLogs();
