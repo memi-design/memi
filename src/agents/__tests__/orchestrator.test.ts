@@ -303,6 +303,53 @@ describe("AgentOrchestrator compose targeting", () => {
     });
   });
 
+  it("does not dispatch mutation-capable external agents in contracted shadow mode", async () => {
+    const { engine } = makeEngine([]);
+    const enqueue = vi.fn().mockReturnValue("queue-1");
+    engine.agentRegistry = {
+      getAvailableAgent() { return { id: "external-1" }; },
+      markBusy: vi.fn(),
+    } as never;
+    engine.taskQueue = {
+      enqueue,
+      claim() { return null; },
+      markRunning() {},
+      async waitForTask() { return { status: "completed", result: { status: "completed" } }; },
+    } as never;
+    const orchestrator = new AgentOrchestrator(engine as never);
+    const internals = orchestrator as unknown as {
+      tryExternalOrInternal(task: unknown, context: unknown, budget: ExecutionBudgetGuard): Promise<unknown>;
+    };
+    const budget = new ExecutionBudgetGuard({
+      inputTokens: 10_000,
+      outputTokens: 2_000,
+      reasoningTokens: 2_000,
+      wallTimeMs: 120_000,
+      toolCalls: 20,
+      implementationAttempts: 2,
+    });
+
+    await expect(internals.tryExternalOrInternal({
+      id: "task-1",
+      name: "Create component",
+      agentType: "component-architect",
+      prompt: "Create a card",
+      dependencies: [],
+      status: "pending",
+    }, {
+      designSystem: { tokens: [], components: [], styles: [], lastSync: "never" },
+      specs: [],
+      figmaConnected: false,
+    }, budget)).rejects.toThrow("transaction-safe adapter");
+
+    expect(enqueue).not.toHaveBeenCalled();
+    expect(budget.report()).toMatchObject({
+      implementationAttempts: 1,
+      stopReason: "attempt-limit-reached",
+      attempts: [{ outcome: "fatal-failure" }],
+    });
+  });
+
   it("creates and generates only the requested page spec for page-layout intents", async () => {
     const { engine, generated, saved } = makeEngine([makeComponentSpec("ExistingCard")]);
     const orchestrator = new AgentOrchestrator(engine as never);
