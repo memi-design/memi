@@ -185,7 +185,7 @@ const ExecutionSchema = z.object({
     "attempt-limit-reached",
     "preflight-failed",
   ]),
-  attempts: z.array(AttemptSchema).min(1).max(2),
+  attempts: z.array(AttemptSchema).max(2),
   retries: z.array(RetrySchema).max(1),
   usage: UsageSchema,
   billing: BillingSchema,
@@ -409,7 +409,11 @@ function validateExecution(
   }
   uniqueIssues(execution.attempts.map((attempt) => attempt.attemptId), "attempt", ["execution", "attempts"], context);
   uniqueIssues(execution.retries.map((retry) => retry.retryId), "retry", ["execution", "retries"], context);
-  if (execution.retries.length !== execution.attempts.length - 1) {
+  if (execution.attempts.length === 0 && execution.stopReason !== "preflight-failed") {
+    issue(context, ["execution", "attempts"], "only preflight-failed execution may have zero attempts");
+  }
+  const expectedRetryCount = Math.max(0, execution.attempts.length - 1);
+  if (execution.retries.length !== expectedRetryCount) {
     issue(context, ["execution", "retries"], "retry count must equal attempts after the first");
   }
   for (let index = 0; index < execution.attempts.length; index += 1) {
