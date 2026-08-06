@@ -20,6 +20,26 @@ afterEach(async () => {
 });
 
 describe("deterministic skill router", () => {
+  it("defaults to one skill even when two complementary routes qualify", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Audit responsive typography for WCAG keyboard accessibility",
+      notes: await Promise.all([
+        note("accessibility-audit", {
+          description: "Audit WCAG, keyboard, VoiceOver, contrast, and accessible UI states.",
+          intents: ["accessibility-audit", "wcag-review"],
+        }),
+        note("better-typography", {
+          description: "Improve type scale, line height, responsive text, and typography tokens.",
+          intents: ["typography-system", "responsive-typography"],
+        }),
+      ]),
+      capabilities: [],
+    });
+
+    expect(result.decision).toBe("single");
+    expect(result.selected).toHaveLength(1);
+  });
+
   it("stacks two complementary skills in stable score order", async () => {
     const notes = await Promise.all([
       note("accessibility-audit", {
@@ -179,6 +199,33 @@ describe("deterministic skill router", () => {
     expect(routed.selected.map((skill) => skill.id)).toEqual(["accessibility-audit"]);
     expect(routed.excluded).toContainEqual({
       id: "motion-performance",
+      reason: "redundant-evidence",
+    });
+  });
+
+  it("does not count generic action words as distinct stack evidence", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Audit accessibility keyboard behavior and review the interface",
+      notes: await Promise.all([
+        note("keyboard-accessibility", {
+          description: "Audit accessibility and keyboard behavior.",
+          intents: ["keyboard-accessibility"],
+        }),
+        note("accessibility-review", {
+          description: "Review interface accessibility.",
+          intents: ["accessibility-audit", "interface-review"],
+        }),
+      ]),
+      capabilities: [],
+      maximumSkills: 2,
+    });
+
+    expect(result.decision).toBe("single");
+    expect(result.selected.map((skill) => skill.id)).toEqual([
+      "keyboard-accessibility",
+    ]);
+    expect(result.excluded).toContainEqual({
+      id: "accessibility-review",
       reason: "redundant-evidence",
     });
   });
@@ -445,6 +492,36 @@ describe("deterministic skill router", () => {
       id: "expo-router-bottom-tabs",
       reason: "repository-mismatch:dependenciesAny",
     });
+  });
+
+  it("uses safe repository patterns only for eligibility, never promotion", async () => {
+    const expo = await note("expo-router-bottom-tabs", {
+      description: "Implement Expo Router bottom tabs and badges.",
+      intents: ["expo-router-bottom-tabs", "bottom-tab-badge"],
+      repository: {
+        dependenciesAny: ["exact:expo-router"],
+        filesAny: ["exact:app/(tabs)/_layout.tsx"],
+      },
+    });
+
+    const result = await routeInstalledSkills({
+      intent: "Optimize a PostgreSQL query plan",
+      notes: [expo],
+      capabilities: [],
+      repositoryFingerprint: {
+        schemaVersion: 1,
+        languages: ["typescript"],
+        frameworks: ["expo", "react-native"],
+        dependencies: ["expo-router"],
+        files: ["app/(tabs)/_layout.tsx"],
+        imports: ["expo-router"],
+        scripts: ["test"],
+      },
+    });
+
+    expect(result.decision).toBe("abstain");
+    expect(result.selected).toEqual([]);
+    expect(result.candidates).toEqual([]);
   });
 
   it("compiles bounded routing patterns and rejects executable regex syntax", () => {
