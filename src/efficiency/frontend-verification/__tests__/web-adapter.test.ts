@@ -127,6 +127,35 @@ describe("web frontend verification adapter", () => {
     expect(result.reasons).toContain("artifact-invalid-content:mobile-default");
   });
 
+  it("rejects truncated files that only contain a valid format signature", async () => {
+    const root = await evidenceRoot();
+    const candidates = await writeCompleteEvidence(root);
+    const screenshot = candidates.find((candidate) =>
+      candidate.requirementId === "desktop-default")!;
+    const trace = candidates.find((candidate) =>
+      candidate.requirementId === "interaction-trace")!;
+    await writeFile(
+      join(root, screenshot.path),
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    );
+    await writeFile(
+      join(root, trace.path),
+      Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+    );
+    await setFresh(join(root, screenshot.path));
+    await setFresh(join(root, trace.path));
+
+    const result = await runWebVerificationAdapter({
+      evidenceRoot: root,
+      runStartedAt: STARTED_AT,
+      runCompletedAt: COMPLETED_AT,
+    }, fixtureDriver(candidates));
+
+    expect(result.status).toBe("rejected");
+    expect(result.reasons).toContain("artifact-invalid-content:desktop-default");
+    expect(result.reasons).toContain("artifact-invalid-content:interaction-trace");
+  });
+
   it("distinguishes complete failing checks from inadmissible evidence", async () => {
     const root = await evidenceRoot();
     const candidates = await writeCompleteEvidence(root, {
@@ -171,6 +200,23 @@ describe("web frontend verification adapter", () => {
 
     expect(result.status).toBe("rejected");
     expect(result.reasons).toEqual(["capture-failed:browser crashed"]);
+    expect(result.artifacts).toEqual([]);
+  });
+
+  it("fails closed when a driver returns a malformed candidate collection", async () => {
+    const root = await evidenceRoot();
+    const driver = {
+      capture: vi.fn(async () => null),
+    } as unknown as WebVerificationDriver;
+
+    const result = await runWebVerificationAdapter({
+      evidenceRoot: root,
+      runStartedAt: STARTED_AT,
+      runCompletedAt: COMPLETED_AT,
+    }, driver);
+
+    expect(result.status).toBe("rejected");
+    expect(result.reasons).toEqual(["capture-invalid:candidates-must-be-an-array"]);
     expect(result.artifacts).toEqual([]);
   });
 });
@@ -233,9 +279,20 @@ async function setFresh(path: string): Promise<void> {
 }
 
 function pngBytes(): Buffer {
-  return Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  return Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+    "base64",
+  );
 }
 
 function zipBytes(): Buffer {
-  return Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00, 0x00, 0x00]);
+  // Empty ZIP archive with a complete end-of-central-directory record.
+  return Buffer.from([
+    0x50, 0x4b, 0x05, 0x06,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00,
+  ]);
 }
