@@ -207,6 +207,6 @@ describe("audit scorecard release surfaces", () => {
 
     expect(workflow).toContain("concurrency:");
     expect(workflow).toContain("cancel-in-progress: true");
-    expect(workflow).toContain("timeout-minutes: 10");
+    expect(workflow).toContain("timeout-minutes: 30");
   });
 });
