@@ -70,6 +70,13 @@ describe("public package supply-chain defaults", () => {
     expect(lock.packages["node_modules/@hono/node-server"]?.version).toBe("2.1.0");
   });
 
+  it("builds the source container from the publishable shrinkwrap", async () => {
+    const dockerfile = await readFile(join(process.cwd(), "Dockerfile"), "utf-8");
+
+    expect(dockerfile).toContain("COPY package.json npm-shrinkwrap.json ./");
+    expect(dockerfile).not.toContain("package-lock.json");
+  });
+
   it("validates standalone installer archive entries before extraction", async () => {
     const installer = await readFile(join(process.cwd(), "scripts", "install.sh"), "utf-8");
 
