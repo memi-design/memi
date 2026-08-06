@@ -35,6 +35,9 @@ confirmatory study is preregistered but unexecuted until exact 2.7.9 and
   output. The current provider client cannot reclaim compute already in flight
   or report reasoning tokens separately, so receipts mark that telemetry
   unavailable instead of estimating it.
+- Keep mutation-capable heuristic routes disabled during contracted shadow-mode
+  execution until they have transaction-safe commit adapters. Budget exhaustion
+  terminates the plan immediately; later tasks cannot mutate after the stop.
 - Admit frontend evidence only after a platform adapter returns the complete,
   fresh, execution-bound artifact set. Missing evidence is excluded without
   imputation.
@@ -136,6 +139,9 @@ confirmatory study is preregistered but unexecuted until exact 2.7.9 and
 - `3ae4140d` — feat: enforce contracted execution budgets
 - `741ae603` — test: reproduce final execution budget review blockers
 - `38cff671` — fix: preserve fail-closed execution evidence
+- `86724cd5` — test: stop plans after budget exhaustion
+- `0e9c8458` — test: disable unsafe contracted mutation routes
+- `b63bf067` — fix: fail closed after contracted budget stops
 
 ## v2.7.9 — 2026-08-06 — Candidate
 

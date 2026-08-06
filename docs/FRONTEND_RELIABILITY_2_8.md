@@ -60,6 +60,13 @@ files are excluded from repository evidence. A missing lockfile, missing target
 file, unsafe path, oversized required section, ambiguous route, or incomplete
 route evidence fails closed.
 
+In the current beta.1 shadow foundation, mutation-capable heuristic agents are
+also disabled for contracted runs. They cannot be enabled for beta.2 until a
+transaction-safe adapter can prove that a wall-time abort cannot leave an
+unreceipted token, spec, generated file, or Figma write. Read-only audits and
+repository discovery remain available; a refused mutation route is a safe
+outcome, not a successful implementation.
+
 Use repository-only discovery when the route is unsupported or when measuring
 the fallback explicitly:
 
