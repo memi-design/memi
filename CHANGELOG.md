@@ -134,6 +134,8 @@ confirmatory study is preregistered but unexecuted until exact 2.7.9 and
 - `4b5a1bdb` — test: reject inconsistent budget receipt evidence
 - `d08502f8` — test: block heuristic fallback after budget cancellation
 - `3ae4140d` — feat: enforce contracted execution budgets
+- `741ae603` — test: reproduce final execution budget review blockers
+- `38cff671` — fix: preserve fail-closed execution evidence
 
 ## v2.7.9 — 2026-08-06 — Candidate
 
