@@ -405,6 +405,18 @@ describe("WorkflowReceiptV3", () => {
         }],
       },
     })).toThrow(/captur|chronolog/i);
+    expect(() => createWorkflowReceiptV3({
+      ...base,
+      nativeEvidence: {
+        ...base.nativeEvidence,
+        artifacts: [{
+          ...base.nativeEvidence.artifacts[0]!,
+          capturedAt: "2026-08-06T15:59:59.000Z",
+          verifiedAt: "2026-08-06T16:00:00.000Z",
+          freshUntil: "2026-08-06T16:04:59.000Z",
+        }],
+      },
+    })).toThrow(/execution/i);
   });
 
   it("requires verification-passed receipts to contain only passed checks", () => {
