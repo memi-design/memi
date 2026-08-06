@@ -48,13 +48,16 @@ const RouteBindingSchema = z.object({
   effort: z.string().min(1).max(64),
 }).strict();
 
+const SkillBindingSchema = z.object({
+  id: IdentifierSchema,
+  file: RepositoryRelativePathSchema,
+  contentSha256: Sha256Schema,
+}).strict();
+
 const SelectedRouteInputSchema = RouteBindingSchema.extend({
   decision: z.literal("selected"),
-  skill: z.object({
-    id: IdentifierSchema,
-    file: RepositoryRelativePathSchema,
-    contentSha256: Sha256Schema,
-  }).strict(),
+  skill: SkillBindingSchema,
+  additionalSkills: z.array(SkillBindingSchema).max(1).default([]),
 }).strict();
 
 const RepositoryOnlyRouteInputSchema = RouteBindingSchema.extend({
@@ -393,6 +396,16 @@ function validateRouteBinding(
     if (actual !== expected) {
       issue(context, ["route", field], `route ${field} does not match stable binding`);
     }
+  }
+  if (receipt.route.decision === "selected") {
+    const skills = [receipt.route.skill, ...receipt.route.additionalSkills];
+    uniqueIssues(skills.map((skill) => skill.id), "skill", ["route", "additionalSkills"], context);
+    uniqueIssues(
+      skills.map((skill) => skill.contentSha256),
+      "skill content",
+      ["route", "additionalSkills"],
+      context,
+    );
   }
 }
 

@@ -111,8 +111,8 @@ export class AgentOrchestrator {
         platforms: options?.platforms
           ?? (context.projectFramework ? [context.projectFramework] : []),
         repositoryFingerprint,
-        maximumSkills: 1,
-        maximumContextBytes: 8_000,
+        maximumSkills: 2,
+        maximumContextBytes: 4_096,
       })
       : null;
     const resolvedNotes = routed?.skills ?? [];

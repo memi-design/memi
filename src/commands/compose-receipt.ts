@@ -46,6 +46,9 @@ export async function writeComposeReceiptV3(input: {
   const selected = input.routingPolicy === "v3"
     ? input.plan.skillRoute?.selected[0]
     : undefined;
+  const additionalSkills = input.routingPolicy === "v3"
+    ? input.plan.skillRoute?.selected.slice(1) ?? []
+    : [];
   const capsule = input.plan.contextCapsule;
   if (!capsule) {
     throw new Error("WorkflowReceiptV3 requires the pre-execution context capsule");
@@ -82,6 +85,11 @@ export async function writeComposeReceiptV3(input: {
       file: portableSkillPath(selected.file, input.projectRoot),
       contentSha256: selected.contentHash,
     },
+    additionalSkills: additionalSkills.map((skill) => ({
+      id: skill.id,
+      file: portableSkillPath(skill.file, input.projectRoot),
+      contentSha256: skill.contentHash,
+    })),
   } : {
     decision: "repository-only" as const,
     routerVersion: input.plan.skillRoute?.routerVersion ?? "skill-router-v3",
