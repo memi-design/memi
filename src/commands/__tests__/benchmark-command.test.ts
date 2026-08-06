@@ -19,6 +19,8 @@ import {
 } from "../../efficiency/prospective-study.js";
 import { createSkillFitnessQualityEvidence } from "../../notes/skill-fitness.js";
 import { captureLogs, lastLog } from "./test-helpers.js";
+import { createWorkflowReceiptV3 } from "../../frontend/receipts/workflow-receipt-v3.js";
+import { makeReceiptInput } from "../../frontend/receipts/__tests__/fixtures.js";
 
 let projectRoot: string;
 const execFileAsync = promisify(execFile);
@@ -33,6 +35,36 @@ afterEach(async () => {
 });
 
 describe("benchmark command", () => {
+  it("emits stable WorkflowReceiptV3 directory verification JSON", async () => {
+    const receiptRoot = join(projectRoot, "receipts");
+    await mkdir(receiptRoot, { recursive: true });
+    const receipt = createWorkflowReceiptV3(makeReceiptInput());
+    await writeFile(join(receiptRoot, "receipt.json"), JSON.stringify(receipt));
+    const logs = captureLogs();
+    const program = new Command();
+    registerBenchmarkCommand(program, engine() as never);
+
+    await program.parseAsync([
+      "benchmark",
+      "receipt-verify",
+      "--receipt-root",
+      receiptRoot,
+      "--json",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload).toMatchObject({
+      schemaVersion: "workflow-receipt-directory-verification.v1",
+      status: "valid",
+      receiptFiles: 1,
+      validReceipts: 1,
+      admittedReceipts: 1,
+      chronologyValid: true,
+      failures: [],
+    });
+    expect(payload.verificationSha256).toMatch(/^sha256:[a-f0-9]{64}$/);
+  });
+
   it("creates a deterministic paired plan", async () => {
     const tasksPath = join(projectRoot, "tasks.json");
     const outPath = join(projectRoot, "plan.json");

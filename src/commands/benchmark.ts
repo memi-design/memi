@@ -81,6 +81,7 @@ import {
   type SkillFitnessBoundRouteReceipt,
 } from "../notes/index.js";
 import { ui } from "../tui/format.js";
+import { verifyWorkflowReceiptDirectory } from "./workflow-receipt-verify.js";
 
 const prospectiveFixtureRootsSchema = z.object({
   schemaVersion: z.literal(1),
@@ -104,6 +105,24 @@ export function registerBenchmarkCommand(program: Command, engine: MemoireEngine
   const benchmark = program
     .command("benchmark")
     .description("Plan, record, and evaluate paired baseline-versus-Memi experiments");
+
+  benchmark
+    .command("receipt-verify")
+    .description("Verify WorkflowReceiptV3 files and chronological ledger integrity")
+    .requiredOption("--receipt-root <path>", "WorkflowReceiptV3 directory")
+    .option("--out <path>", "Write the content-addressed verification JSON")
+    .option("--json", "Output JSON")
+    .action(async (opts: { receiptRoot: string; out?: string; json?: boolean }) => {
+      const payload = await verifyWorkflowReceiptDirectory(opts.receiptRoot);
+      if (opts.out) await writeJson(resolve(opts.out), payload);
+      if (opts.json) console.log(JSON.stringify(payload, null, 2));
+      else {
+        console.log(ui.dots("Receipts", `${payload.validReceipts}/${payload.receiptFiles}`));
+        console.log(ui.dots("Admitted", String(payload.admittedReceipts)));
+        console.log(ui.dots("Chronology", payload.chronologyValid ? "valid" : "invalid"));
+      }
+      if (payload.status !== "valid") process.exitCode = 1;
+    });
 
   benchmark
     .command("prospective-freeze <plan>")
