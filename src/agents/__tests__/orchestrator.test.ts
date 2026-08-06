@@ -9,6 +9,7 @@ import path from "node:path";
 import { createFrontendTaskContract } from "../../frontend/task-contract.js";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { ExecutionBudgetGuard } from "../execution-budget.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -158,6 +159,29 @@ describe("AgentOrchestrator compose targeting", () => {
     } finally {
       staticInternals.RETRY_BASE_MS = originalDelay;
     }
+  });
+
+  it("honors a contracted single implementation attempt", async () => {
+    const { engine } = makeEngine([]);
+    const orchestrator = new AgentOrchestrator(engine as never);
+    const executeSubTask = vi.fn().mockRejectedValue(new Error("provider failure"));
+    const internals = orchestrator as unknown as {
+      subAgentRunner: { executeSubTask: typeof executeSubTask };
+      executeWithRetry(task: unknown, context: unknown, budget: ExecutionBudgetGuard): Promise<unknown>;
+    };
+    internals.subAgentRunner.executeSubTask = executeSubTask;
+    const budget = new ExecutionBudgetGuard({
+      inputTokens: 10_000,
+      outputTokens: 2_000,
+      reasoningTokens: 2_000,
+      wallTimeMs: 120_000,
+      toolCalls: 20,
+      implementationAttempts: 1,
+    });
+
+    await expect(internals.executeWithRetry({}, {}, budget)).rejects.toThrow("provider failure");
+    expect(executeSubTask).toHaveBeenCalledOnce();
+    expect(budget.report().implementationAttempts).toBe(1);
   });
 
   it("creates and generates only the requested page spec for page-layout intents", async () => {
