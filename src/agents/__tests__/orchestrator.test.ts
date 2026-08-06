@@ -225,6 +225,46 @@ describe("AgentOrchestrator compose targeting", () => {
     expect(plan?.subTasks[0].prompt).not.toContain("# docker");
   });
 
+  it("routes at most two exact skills for distinct evidence on one task class", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-stack-"));
+    const notes = await Promise.all([
+      makeNote(root, "accessibility-audit", "Audit WCAG, color contrast, and accessible UI behavior.", [
+        "accessibility-audit",
+        "color-contrast",
+      ], {
+        taskClasses: ["keyboard-focus-verification"],
+        platforms: ["web"],
+        actions: ["audit"],
+      }),
+      makeNote(root, "keyboard-accessibility", "Verify keyboard navigation and focus order.", [
+        "keyboard-navigation",
+        "focus-order",
+      ], {
+        taskClasses: ["keyboard-focus-verification"],
+        platforms: ["web"],
+        actions: ["audit"],
+      }),
+    ]);
+    const { engine } = makeEngine([], notes);
+    let plan: AgentPlan | undefined;
+    const orchestrator = new AgentOrchestrator(engine as never, (nextPlan) => {
+      plan = nextPlan;
+    });
+
+    await orchestrator.execute(
+      "Audit web accessibility, color contrast, keyboard navigation, and focus order",
+      { dryRun: true, routingPolicy: "v3" },
+    );
+
+    expect(plan?.skillRoute?.decision).toBe("stack");
+    expect(plan?.skillRoute?.selected.map((skill) => skill.id).sort()).toEqual([
+      "accessibility-audit",
+      "keyboard-accessibility",
+    ]);
+    expect(plan?.subTasks[0].prompt).toContain("accessibility-audit");
+    expect(plan?.subTasks[0].prompt).toContain("keyboard-accessibility");
+  });
+
   it("fails an ambiguous uncontracted route closed to repository-only discovery", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-abstention-"));
     const notes = [await makeNote(
