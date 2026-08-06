@@ -28,6 +28,10 @@ import {
   FrontendTaskContractV1Schema,
   type FrontendTaskContractV1,
 } from "../frontend/task-contract.js";
+import {
+  writeComposeReceiptV3,
+  type ComposeReceiptSummary,
+} from "./compose-receipt.js";
 
 type BudgetProfile = "strict" | "balanced" | "deep";
 type RoutingPolicy = "repository-only" | "v3";
@@ -52,6 +56,7 @@ export interface ComposePayload {
   };
   plan: ComposePlanPayload;
   execution: ComposeExecutionPayload;
+  receipt: ComposeReceiptSummary | null;
 }
 
 export interface ComposePlanPayload {
@@ -173,6 +178,25 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
 
         const elapsedMs = Date.now() - startedAt;
         const tracker = getTracker();
+        if (opts.receiptRoot && !taskContract) {
+          throw new Error("--receipt-root requires --task-contract");
+        }
+        const planPayload = capturedPlan ?? emptyPlanPayload(intent, category);
+        const receipt = opts.receiptRoot && taskContract
+          ? await writeComposeReceiptV3({
+            projectRoot: engine.config.projectRoot,
+            receiptRoot: opts.receiptRoot,
+            contract: taskContract,
+            budgetProfile,
+            routingPolicy,
+            plan: planPayload,
+            result,
+            dryRun: Boolean(opts.dryRun),
+            startedAtMs: startedAt,
+            completedAtMs: Date.now(),
+            tracker,
+          })
+          : null;
         const payload = buildComposePayload({
           intent,
           category,
@@ -189,10 +213,11 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
             } : null,
             receiptRoot: Boolean(opts.receiptRoot),
           },
-          plan: capturedPlan ?? emptyPlanPayload(intent, category),
+          plan: planPayload,
           result,
           elapsedMs,
           tracker,
+          receipt,
         });
 
         if (opts.json) {
@@ -224,6 +249,9 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
         if (payload.ai.calls > 0) {
           console.log();
           console.log(ui.dots("AI Usage", payload.ai.usage ?? "unknown"));
+        }
+        if (payload.receipt) {
+          console.log(ui.dots("Receipt", payload.receipt.file));
         }
 
         if (opts.dryRun) {
@@ -331,6 +359,7 @@ function buildComposePayload(input: {
   };
   elapsedMs: number;
   tracker: ReturnType<typeof getTracker>;
+  receipt: ComposeReceiptSummary | null;
 }): ComposePayload {
   const tracker = input.tracker;
   return {
@@ -360,6 +389,7 @@ function buildComposePayload(input: {
       figmaSynced: input.result.figmaSynced,
       elapsedMs: input.elapsedMs,
     },
+    receipt: input.receipt,
   };
 }
 
