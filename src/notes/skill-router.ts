@@ -8,7 +8,7 @@ import type {
   ResolvedSkill,
 } from "./types.js";
 
-export const SKILL_ROUTER_VERSION = "skill-router-v2";
+export const SKILL_ROUTER_VERSION = "skill-router-v3";
 const MINIMUM_STACK_SCORE_RATIO = 0.65;
 const ROUTING_PATTERN_MAX_LENGTH = 160;
 const GENERIC_STACK_EVIDENCE = new Set([
