@@ -30,7 +30,7 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.8",
+          version: "2.7.9",
           state: "candidate",
           sourceCommit: null,
           releaseRecord: null,
@@ -39,6 +39,16 @@ describe("release manifest", () => {
             sourceCommit: publishedEngineSourceCommit,
             releaseRecord: publishedReleaseRecord,
           },
+          supersededPartialReleases: [{
+            version: "2.7.8",
+            scope: "npm-only",
+            sourceCommit: "d290484535198c1f328c57986f600af544cc867a",
+            releaseRecord: {
+              path: "release-artifacts/npm/2.7.8.release.json",
+              sha256: "8b1adb07d57f71eccf372444539b7b61841547d47c255593d66af9eebe7eb3de",
+            },
+            supersededBy: "2.7.9",
+          }],
         },
         studio: { version: "2.5.0" },
         site: { version: "1.0.4" },
@@ -49,7 +59,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.8",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.9",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.memi-design/memi" },
