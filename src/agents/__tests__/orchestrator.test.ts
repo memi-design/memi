@@ -153,7 +153,7 @@ describe("AgentOrchestrator compose targeting", () => {
     expect(generated).toEqual(["MetricCard", "TrendBadge"]);
   });
 
-  it("routes a bounded skill stack from the full task and preserves the receipt", async () => {
+  it("routes one skill from the full task and preserves the receipt", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-routing-"));
     const notes = await Promise.all([
       makeNote(root, "accessibility-audit", "Audit WCAG and VoiceOver behavior.", [
@@ -177,14 +177,10 @@ describe("AgentOrchestrator compose targeting", () => {
       { dryRun: true },
     );
 
-    expect(plan?.skillRoute?.decision).toBe("stack");
-    expect(plan?.skillRoute?.selected.map((skill) => skill.id).sort()).toEqual([
-      "accessibility-audit",
-      "better-typography",
-    ]);
-    expect(plan?.skillRoute?.selected).toHaveLength(2);
+    expect(plan?.skillRoute?.decision).toBe("single");
+    expect(plan?.skillRoute?.selected).toHaveLength(1);
     expect(plan?.subTasks[0].prompt).toContain("accessibility-audit");
-    expect(plan?.subTasks[0].prompt).toContain("better-typography");
+    expect(plan?.subTasks[0].prompt).not.toContain("better-typography");
     expect(plan?.subTasks[0].prompt).not.toContain("# docker");
   });
 });

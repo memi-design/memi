@@ -16,6 +16,19 @@ afterEach(async () => {
 });
 
 describe("NoteLoader workspace skills", () => {
+  it("preserves exact task classes from the built-in skill registry", async () => {
+    const loader = new NoteLoader(testDir);
+    await loader.loadBuiltInNotes();
+
+    const builtIns = await loader.loadBuiltInNotes();
+    expect(builtIns.find((note) => note.manifest.name === "map-design-system")
+      ?.manifest.memoire?.routing?.taskClasses).toEqual([
+        "design-system-map",
+        "component-map",
+        "token-map",
+      ]);
+  });
+
   it("loads SKILL.md workspace directories without note.json", async () => {
     await writeFile(
       join(testDir, "skills", "clawhub-mobile-craft", "SKILL.md"),

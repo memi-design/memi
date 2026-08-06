@@ -20,6 +20,62 @@ afterEach(async () => {
 });
 
 describe("deterministic skill router", () => {
+  it("routes a task-class skill only on an exact class match", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Map the design system for this Expo app",
+      taskClass: "design-system-map",
+      notes: [await note("map-design-system", {
+        description: "Map repository design tokens and components.",
+        intents: ["design-system-mapping"],
+        taskClasses: ["design-system-map", "token-map"],
+        actions: ["map"],
+        platforms: ["react-native"],
+      })],
+      capabilities: [],
+      platforms: ["expo"],
+    });
+
+    expect(result.decision).toBe("single");
+    expect(result.selected.map((skill) => skill.id)).toEqual(["map-design-system"]);
+  });
+
+  it("fails closed when an exact-route skill has no declared task class", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Map the design system",
+      notes: [await note("map-design-system", {
+        description: "Map repository design tokens and components.",
+        intents: ["design-system-mapping"],
+        taskClasses: ["design-system-map"],
+      })],
+      capabilities: [],
+    });
+
+    expect(result.decision).toBe("abstain");
+    expect(result.excluded).toContainEqual({
+      id: "map-design-system",
+      reason: "task-class-missing",
+    });
+  });
+
+  it("fails closed when a task class does not exactly match", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Map the design system",
+      taskClass: "responsive-layout",
+      notes: [await note("map-design-system", {
+        description: "Map repository design tokens and components.",
+        intents: ["design-system-mapping"],
+        taskClasses: ["design-system-map"],
+      })],
+      capabilities: [],
+    });
+
+    expect(result.decision).toBe("abstain");
+    expect(result.excluded).toContainEqual({
+      id: "map-design-system",
+      reason: "task-class-mismatch:responsive-layout",
+    });
+  });
+
   it("defaults to one skill even when two complementary routes qualify", async () => {
     const result = await routeInstalledSkills({
       intent: "Audit responsive typography for WCAG keyboard accessibility",
@@ -679,6 +735,7 @@ async function note(
     body?: string;
     actions?: string[];
     platforms?: string[];
+    taskClasses?: string[];
     repository?: {
       dependenciesAny?: string[];
       filesAny?: string[];
@@ -725,6 +782,7 @@ async function note(
           excludes: [],
           capabilities: options.capabilities ?? [],
           platforms: options.platforms ?? [],
+          taskClasses: options.taskClasses ?? [],
           priority: options.priority ?? 0,
           actions: options.actions ?? [],
           lifecycle: [],
