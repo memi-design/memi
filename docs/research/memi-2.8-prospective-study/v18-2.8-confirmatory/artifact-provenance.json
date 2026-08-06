@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "awaiting-artifact-publication",
+  "baseline": {
+    "packageVersion": "2.7.9",
+    "npmSpec": "@memi-design/cli@2.7.9",
+    "sourceCommit": null,
+    "tarballSha256": null,
+    "npmIntegrity": null,
+    "reasonPending": "Version 2.7.9 has not yet been published and provenance-sealed."
+  },
+  "candidate": {
+    "packageVersion": "2.8.0-rc.1",
+    "npmSpec": "@memi-design/cli@2.8.0-rc.1",
+    "sourceCommit": null,
+    "tarballSha256": null,
+    "npmIntegrity": null,
+    "reasonPending": "Version 2.8.0-rc.1 has not yet been built and provenance-sealed."
+  },
+  "admissionRule": "No provider invocation may begin until both artifacts are immutable, hash-verified, and bound to clean source commits."
+}

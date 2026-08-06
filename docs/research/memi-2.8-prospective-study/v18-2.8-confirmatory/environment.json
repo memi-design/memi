@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "execution-requirements-frozen; observed values recorded at run freeze",
+  "canonicalHost": {
+    "osFamily": "macOS",
+    "architecture": "arm64",
+    "nodeMajor": 22,
+    "locale": "en-US",
+    "timezone": "UTC",
+    "networkPolicy": "stable wired or Wi-Fi connection; failures retained in deviation ledger"
+  },
+  "provider": {
+    "client": "Codex",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "low",
+    "usageCapture": "retain provider-reported input, output, and reasoning tokens per cell",
+    "billingCapture": "required only for USD claims; must be cell-bound"
+  },
+  "web": {
+    "browser": "Chromium pinned by the study lockfile",
+    "viewports": [
+      "desktop task-contract viewport",
+      "mobile task-contract viewport"
+    ],
+    "requiredTools": [
+      "Playwright",
+      "axe-core",
+      "Lighthouse where declared by the task contract"
+    ]
+  },
+  "native": {
+    "simulatorPolicy": "one dedicated Simulator booted at a time",
+    "resetPolicy": "erase and boot before each mobile matched pair",
+    "xcodeSelection": "xcode-select active developer directory captured in the freeze receipt",
+    "expoJourney": "task-contract deterministic collector",
+    "swiftuiJourney": "task-contract XCUITest collector"
+  },
+  "observedEnvironmentCaptureCommands": [
+    "sw_vers",
+    "uname -m",
+    "node --version",
+    "npm --version",
+    "xcodebuild -version",
+    "xcrun simctl list --json devices",
+    "npx playwright --version"
+  ],
+  "serialization": [
+    "all Expo cells",
+    "all SwiftUI cells",
+    "any cell requiring Xcode or Simulator"
+  ]
+}

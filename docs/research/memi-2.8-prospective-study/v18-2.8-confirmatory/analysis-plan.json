@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "preregistered-unexecuted",
+  "estimands": {
+    "quality": "paired candidate-minus-baseline score difference within task and platform",
+    "tokenReduction": "1 - candidate total tokens / baseline total tokens within matched pair",
+    "wallTimeRatio": "candidate wall time / baseline wall time within matched pair"
+  },
+  "methods": {
+    "descriptive": [
+      "individual matched pairs",
+      "task means",
+      "task medians",
+      "platform-stratified summaries"
+    ],
+    "exactTests": [
+      "paired exact sign tests"
+    ],
+    "bootstrap": {
+      "resamples": 10000,
+      "pairingPreserved": true,
+      "confidence": 0.95
+    },
+    "multiplicity": "Holm correction across prespecified secondary tests",
+    "sensitivity": "leave-one-pair-out for every headline paired result",
+    "reliability": [
+      "grader disagreement",
+      "intraclass correlation coefficient with interval"
+    ],
+    "heterogeneousPooling": "descriptive only"
+  },
+  "releaseGates": [
+    {
+      "id": "critical-pass5",
+      "rule": "Each of the 12 critical candidate tasks passes all five confirmatory repetitions.",
+      "operator": "all",
+      "threshold": "12/12 tasks with 5/5 candidate functional passes"
+    },
+    {
+      "id": "holdout-pass1",
+      "rule": "At least 19 of 20 candidate-only held-out tasks pass on the first attempt.",
+      "operator": ">=",
+      "threshold": 19,
+      "denominator": 20
+    },
+    {
+      "id": "zero-critical-defects",
+      "rule": "No admitted candidate critical or holdout cell has a critical defect.",
+      "operator": "==",
+      "threshold": 0
+    },
+    {
+      "id": "quality-noninferiority",
+      "rule": "The one-sided 95% paired-bootstrap lower bound for quality is greater than -5 points in each platform stratum.",
+      "operator": ">",
+      "threshold": -5,
+      "unit": "rubric points",
+      "strata": [
+        "web",
+        "expo",
+        "swiftui"
+      ]
+    },
+    {
+      "id": "token-efficiency",
+      "rule": "Median paired total-token reduction is at least 25%, and its one-sided 95% lower bound is greater than 10%.",
+      "medianOperator": ">=",
+      "medianThreshold": 0.25,
+      "lowerBoundOperator": ">",
+      "lowerBoundThreshold": 0.1
+    },
+    {
+      "id": "wall-time-noninferiority",
+      "rule": "Within each platform stratum, median candidate-to-baseline wall-time ratio is at most 1.10.",
+      "operator": "<=",
+      "threshold": 1.1,
+      "strata": [
+        "web",
+        "expo",
+        "swiftui"
+      ]
+    },
+    {
+      "id": "route-precision",
+      "rule": "The 95% Wilson lower bound for route precision is at least 90%.",
+      "operator": ">=",
+      "threshold": 0.9
+    },
+    {
+      "id": "route-recall",
+      "rule": "The 95% Wilson lower bound for route recall is at least 90%.",
+      "operator": ">=",
+      "threshold": 0.9
+    },
+    {
+      "id": "abstention-correctness",
+      "rule": "The 95% Wilson lower bound for abstention correctness is at least 95%.",
+      "operator": ">=",
+      "threshold": 0.95
+    },
+    {
+      "id": "safety-integrity",
+      "rule": "No unsafe pattern admission, evidence leakage, look-ahead decision, stale cache use, or nondeterministic receipt is observed.",
+      "operator": "==",
+      "threshold": 0
+    }
+  ],
+  "claimPolicy": {
+    "releaseRequiresEveryGate": true,
+    "noImputation": true,
+    "noUsdClaimWithoutMeasuredBilling": true,
+    "noGeneralSuperiorityFromNoninferiority": true,
+    "failuresAndExclusionsReported": true
+  }
+}

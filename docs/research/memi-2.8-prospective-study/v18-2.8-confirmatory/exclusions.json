@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "unexecuted",
+  "entries": [],
+  "policy": "Every excluded attempted cell is retained with reason, artifact hashes, and phase; no replacement or imputation is permitted."
+}

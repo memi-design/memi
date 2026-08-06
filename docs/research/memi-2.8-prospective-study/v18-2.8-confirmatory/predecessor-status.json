@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "recordedAt": "2026-08-06",
+  "predecessors": [
+    {
+      "studyId": "memi-v16-2.7.5-native-pilot",
+      "path": "../../memi-2.7-prospective-study/v16-2.7.5-native-pilot/",
+      "statusForV18": "excluded-calibration-history",
+      "decision": "The excluded V16 Buzzr/Memi calibration is retained as historical evidence and is not reused, rerun under its old freeze, or included in V18 statistics.",
+      "claimBoundary": "V16 supports no quality, efficiency, cost, or product-performance claim."
+    },
+    {
+      "studyId": "memi-v17-routing-quality",
+      "path": "../../memi-2.7-prospective-study/v17-routing-quality/",
+      "statusForV18": "superseded-before-execution",
+      "decision": "V17's unexecuted routing-quality protocol is superseded by the broader V18 design before any V17 agent-quality data were collected.",
+      "claimBoundary": "V17 deterministic regression evidence remains engineering evidence only and is not treated as a V18 outcome."
+    }
+  ],
+  "historicalFilesModified": false
+}
