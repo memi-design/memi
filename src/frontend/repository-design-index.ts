@@ -73,6 +73,21 @@ export const RepositoryDesignIndexV1Schema = RepositoryDesignIndexContentSchema.
 
 export type RepositoryDesignIndexV1 = z.infer<typeof RepositoryDesignIndexV1Schema>;
 
+export function repositoryDesignIndexCacheKey(input: unknown): string {
+  const index = RepositoryDesignIndexV1Schema.parse(input);
+  return hashValue({
+    repositoryRevision: index.repositoryRevision,
+    lockfile: {
+      path: index.lockfile.path,
+      sha256: index.lockfile.sha256,
+    },
+    relevantSources: index.relevantSources.map((source) => ({
+      path: source.path,
+      sha256: source.sha256,
+    })),
+  });
+}
+
 interface SourceContentInput {
   readonly path: string;
   readonly content: string;
