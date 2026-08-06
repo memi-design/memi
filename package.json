@@ -67,6 +67,7 @@
     "studio:runtime": "node scripts/build-studio-runtime.mjs",
     "preview": "vite --config preview/vite.config.ts",
     "test": "vitest run",
+    "test:frontend-reliability": "vitest run --config vitest.frontend-reliability.config.ts --coverage",
     "lint": "tsc --noEmit && tsc -p tsconfig.plugin.json --noEmit",
     "typecheck": "tsc --noEmit --strict && tsc -p tsconfig.plugin.json --noEmit",
     "prepublishOnly": "npm run check:release && npm run security:audit && npm run typecheck && npm run test && npm run build"
