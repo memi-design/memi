@@ -140,6 +140,29 @@ describe("createReceiptVerificationEvidence", () => {
       reason: "driver-failed",
     });
   });
+
+  it.each([
+    "artifact-outside-evidence-root:desktop-default",
+    "artifact-changed-during-read:desktop-default",
+    "artifact-invalid-content:desktop-default",
+    "artifact-invalid-file:desktop-default",
+    "artifact-unreadable:desktop-default",
+  ])("classifies tampered artifact reason %s as corrupt-artifact", (reason) => {
+    const result: WebVerificationResult = {
+      ...passedWebResult(),
+      status: "rejected",
+      reasons: [reason],
+      artifacts: [],
+    };
+
+    const evidence = createReceiptVerificationEvidence({ contract: webContract(), result });
+
+    expect(evidence.nativeEvidence).toMatchObject({
+      status: "excluded",
+      platform: "web",
+      reason: "corrupt-artifact",
+    });
+  });
 });
 
 function webContract() {

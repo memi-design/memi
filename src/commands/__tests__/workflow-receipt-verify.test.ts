@@ -30,4 +30,35 @@ describe("verifyWorkflowReceiptDirectory", () => {
     }));
     expect(result.failures[0]).toMatchObject({ file: "invalid.json" });
   });
+
+  it("separates admitted evidence from candidate verification outcome", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-workflow-receipts-failed-"));
+    const input = makeReceiptInput();
+    const failed = createWorkflowReceiptV3({
+      ...input,
+      execution: {
+        ...input.execution,
+        stopReason: "verification-failed",
+        attempts: input.execution.attempts.map((attempt) => ({
+          ...attempt,
+          outcome: "fatal-failure" as const,
+        })),
+      },
+      verification: input.verification.map((entry) => ({
+        ...entry,
+        status: "failed" as const,
+        exitCode: 1,
+      })),
+    });
+    await writeFile(path.join(root, "failed.json"), JSON.stringify(failed));
+
+    const result = await verifyWorkflowReceiptDirectory(root);
+
+    expect(result).toMatchObject({
+      status: "valid",
+      admittedReceipts: 1,
+      admittedButFailedReceipts: 1,
+      excludedReceipts: 0,
+    });
+  });
 });

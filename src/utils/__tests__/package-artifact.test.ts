@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -44,5 +44,32 @@ describe("hashPackedPackageSurface", () => {
     const changed = await hashPackedPackageSurface(root);
 
     expect(changed).not.toBe(original);
+  });
+
+  it("does not execute an ambient npm_execpath override", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-package-artifact-env-"));
+    const sentinel = path.join(root, "ambient-npm-executed");
+    const fakeNpm = path.join(root, "npm-cli.js");
+    await mkdir(path.join(root, "dist"), { recursive: true });
+    await writeFile(path.join(root, "package.json"), JSON.stringify({
+      name: "fixture-ambient-npm",
+      version: "1.0.0",
+      files: ["dist"],
+    }));
+    await writeFile(path.join(root, "dist", "index.js"), "export {};\n");
+    await writeFile(fakeNpm, [
+      "import { writeFileSync } from 'node:fs';",
+      `writeFileSync(${JSON.stringify(sentinel)}, 'executed');`,
+      "process.stdout.write('[]');",
+    ].join("\n"));
+    const previous = process.env.npm_execpath;
+    process.env.npm_execpath = fakeNpm;
+    try {
+      await expect(hashPackedPackageSurface(root)).resolves.toMatch(/^sha256:[a-f0-9]{64}$/);
+      await expect(access(sentinel)).rejects.toThrow();
+    } finally {
+      if (previous === undefined) delete process.env.npm_execpath;
+      else process.env.npm_execpath = previous;
+    }
   });
 });
