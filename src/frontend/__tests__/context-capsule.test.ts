@@ -96,8 +96,59 @@ describe("ContextCapsuleV1", () => {
     })).toThrow(/byteLength/i);
     expect(() => ContextCapsuleV1Schema.parse({
       ...capsule,
+      contentByteLength: capsule.contentByteLength + 1,
+    })).toThrow(/contentByteLength/i);
+    expect(() => ContextCapsuleV1Schema.parse({
+      ...capsule,
+      sections: {
+        ...capsule.sections,
+        taskRoute: {
+          ...capsule.sections.taskRoute,
+          sha256: `sha256:${"0".repeat(64)}`,
+        },
+      },
+    })).toThrow(/sha256/i);
+    expect(() => ContextCapsuleV1Schema.parse({
+      ...capsule,
       identitySha256: `sha256:${"0".repeat(64)}`,
     })).toThrow(/identitySha256/i);
     expect(() => ContextCapsuleV1Schema.parse({ ...capsule, surprise: true })).toThrow();
+  });
+
+  it("rejects conflicting evidence ids and non-canonical external capsules", () => {
+    expect(() => createContextCapsule({
+      ...validCapsuleInput(),
+      taskRoute: [
+        { id: "same", content: "first" },
+        { id: "same", content: "second" },
+      ],
+    })).toThrow(/conflicting content/i);
+
+    const capsule = createContextCapsule(validCapsuleInput());
+    const taskEvidence = capsule.sections.taskRoute.evidence;
+    const reversed = [...taskEvidence].reverse();
+    expect(() => ContextCapsuleV1Schema.parse({
+      ...capsule,
+      sections: {
+        ...capsule.sections,
+        taskRoute: {
+          sha256: capsule.sections.taskRoute.sha256,
+          byteLength: capsule.sections.taskRoute.byteLength,
+          evidence: reversed,
+        },
+      },
+    })).toThrow(/sorted and unique/i);
+
+    expect(() => ContextCapsuleV1Schema.parse({
+      ...capsule,
+      sections: {
+        ...capsule.sections,
+        skills: {
+          sha256: capsule.sections.taskRoute.sha256,
+          byteLength: capsule.sections.taskRoute.byteLength,
+          evidence: taskEvidence,
+        },
+      },
+    })).toThrow(/globally deduplicated/i);
   });
 });

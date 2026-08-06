@@ -97,6 +97,9 @@ describe("RepositoryDesignIndexV1", () => {
     expect(isExcludedRepositoryPath("coverage/report.json")).toBe(true);
     expect(isExcludedRepositoryPath("Pods/Framework/file.swift")).toBe(true);
     expect(isExcludedRepositoryPath("assets/export.zip")).toBe(true);
+    expect(isExcludedRepositoryPath("certs/release.pem")).toBe(true);
+    expect(isExcludedRepositoryPath("config/.npmrc")).toBe(true);
+    expect(isExcludedRepositoryPath("/absolute/App.tsx")).toBe(true);
     expect(isExcludedRepositoryPath("src/App.tsx")).toBe(false);
   });
 
@@ -127,5 +130,45 @@ describe("RepositoryDesignIndexV1", () => {
 
     const index = createRepositoryDesignIndex(validIndexInput());
     expect(() => RepositoryDesignIndexV1Schema.parse({ ...index, surprise: true })).toThrow();
+
+    expect(() => createRepositoryDesignIndex({
+      ...validIndexInput(),
+      components: [{
+        id: "Unsafe",
+        atomicLevel: "atom",
+        sourcePath: "generated/Unsafe.tsx",
+        dependencies: [],
+      }],
+    })).toThrow(/excluded/i);
+
+    expect(() => createRepositoryDesignIndex({
+      ...validIndexInput(),
+      components: [
+        {
+          id: "Button",
+          atomicLevel: "atom",
+          sourcePath: "src/a.tsx",
+          dependencies: [],
+        },
+        {
+          id: "Button",
+          atomicLevel: "atom",
+          sourcePath: "src/z.tsx",
+          dependencies: [],
+        },
+      ],
+    })).toThrow(/conflicting values/i);
+  });
+
+  it("rejects externally supplied non-canonical ordering and identity tampering", () => {
+    const index = createRepositoryDesignIndex(validIndexInput());
+    expect(() => RepositoryDesignIndexV1Schema.parse({
+      ...index,
+      frameworkConventions: [...index.frameworkConventions].reverse(),
+    })).toThrow(/sorted and unique/i);
+    expect(() => RepositoryDesignIndexV1Schema.parse({
+      ...index,
+      identitySha256: `sha256:${"0".repeat(64)}`,
+    })).toThrow(/identitySha256/i);
   });
 });

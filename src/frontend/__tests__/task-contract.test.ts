@@ -87,5 +87,10 @@ describe("FrontendTaskContractV1", () => {
         implementationAttempts: 3,
       },
     } as never)).toThrow();
+
+    expect(() => createFrontendTaskContract({
+      ...validContractInput(),
+      targetFiles: ["C:/outside.tsx"],
+    })).toThrow(/repository-relative/i);
   });
 });
