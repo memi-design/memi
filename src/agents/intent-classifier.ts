@@ -6,6 +6,8 @@
  * fail closed when the request is ambiguous.
  */
 
+import type { FrontendTaskContractV1 } from "../frontend/task-contract.js";
+
 // ── Compatibility category ──────────────────────────────
 
 export type IntentCategory =
@@ -91,6 +93,7 @@ export interface IntentSignalClassification {
   readonly platforms: readonly IntentPlatform[];
   readonly targetSurfaces: readonly IntentTargetSurface[];
   readonly requiredStates: readonly IntentRequiredState[];
+  readonly inferredTaskClass: FrontendTaskContractV1["taskClass"] | null;
   readonly confidence: number;
   readonly ambiguous: boolean;
   readonly abstain: boolean;
@@ -118,7 +121,10 @@ const ACTION_RULES: readonly SignalRule<IntentAction>[] = [
   { value: "initialize", pattern: /\b(init|initialize|setup|bootstrap|scaffold)\b/iu },
   { value: "extract", pattern: /\b(extract|scrape|grab|import)\b/iu },
   { value: "sync", pattern: /\b(sync|push|pull)\b/iu },
-  { value: "create", pattern: /\b(create|add|build|implement|design|make|new)\b/iu },
+  {
+    value: "create",
+    pattern: /\b(create|add|build|implement|make|new)\b|(?:^\s*|\b(?:can|could|would|will|should)\s+you\s+|\bplease\s+|\b(?:want|need)\s+(?:you\s+)?to\s+|\bhelp\s+me\s+)design\b/iu,
+  },
   { value: "audit", pattern: /\b(analyze|audit|check|inspect|lint|review|test|validate|verify)\b/iu },
 ];
 
@@ -127,11 +133,12 @@ const FAMILY_RULES: readonly SignalRule<Exclude<IntentTaskFamily, "general">>[] 
   { value: "dataviz", pattern: /\bdashboard\b/iu, weight: 2 },
   { value: "design-extraction", pattern: /\b(design\s*doc|scrape|extract)\b/iu, weight: 4 },
   { value: "design-extraction", pattern: /https?:\/\//iu, weight: 4 },
-  { value: "tokens", pattern: /\b(token|variable|css\s*var|palette|hue|shade|tint)\b/iu, weight: 5 },
+  { value: "tokens", pattern: /\b(tokens?|variables?|css\s*vars?|palette|hue|shade|tint)\b/iu, weight: 7 },
   { value: "tokens", pattern: /\b(color|spacing|space|gap|padding|margin|font|typography|type\s*scale|theme)\b/iu, weight: 4 },
-  { value: "component", pattern: /\b(component|widget|element)\b/iu, weight: 5 },
+  { value: "component", pattern: /\b(components?|widgets?|elements?)\b/iu, weight: 7 },
   { value: "component", pattern: /\b(button|card|input|modal|dialog|table|header|footer|sidebar|row)\b/iu, weight: 3 },
   { value: "layout", pattern: /\b(page|layout|screen|view)\b/iu, weight: 4 },
+  { value: "layout", pattern: /\b(adaptive|interaction)\b/iu, weight: 4 },
   { value: "layout", pattern: /\b(responsive|breakpoint|mobile|tablet|desktop)\b/iu, weight: 1 },
   { value: "accessibility", pattern: /\b(accessibility|a11y|wcag|aria|voiceover|screen\s*reader)\b/iu, weight: 5 },
   { value: "accessibility", pattern: /\b(keyboard|focus|contrast)\b/iu, weight: 1 },
@@ -205,6 +212,7 @@ export function classifyIntentSignals(intent: string): IntentSignalClassificatio
       platforms: [],
       targetSurfaces: [],
       requiredStates: [],
+      inferredTaskClass: null,
       confidence: 0,
       ambiguous: true,
       abstain: true,
@@ -237,6 +245,14 @@ export function classifyIntentSignals(intent: string): IntentSignalClassificatio
   const ambiguous = familyAmbiguous || platformAmbiguous;
   const abstain = ambiguous || confidence < CONFIDENCE_THRESHOLD;
   const category = compatibilityCategory(intent, action, taskFamily);
+  const inferredTaskClass = inferFrontendTaskClass({
+    action,
+    taskFamily,
+    platforms,
+    targetSurfaces,
+    requiredStates,
+    ambiguous,
+  });
 
   return frozenClassification({
     category,
@@ -245,6 +261,7 @@ export function classifyIntentSignals(intent: string): IntentSignalClassificatio
     platforms,
     targetSurfaces,
     requiredStates,
+    inferredTaskClass,
     confidence,
     ambiguous,
     abstain,
@@ -256,6 +273,60 @@ export function classifyIntentSignals(intent: string): IntentSignalClassificatio
       requiredState: matchedEvidence(intent, STATE_RULES),
     },
   });
+}
+
+function inferFrontendTaskClass(input: {
+  readonly action: IntentAction | null;
+  readonly taskFamily: IntentTaskFamily;
+  readonly platforms: readonly IntentPlatform[];
+  readonly targetSurfaces: readonly IntentTargetSurface[];
+  readonly requiredStates: readonly IntentRequiredState[];
+  readonly ambiguous: boolean;
+}): FrontendTaskContractV1["taskClass"] | null {
+  if (input.ambiguous || input.platforms.length !== 1 || input.action === null) {
+    return null;
+  }
+
+  const states = new Set(input.requiredStates);
+  const surfaces = new Set(input.targetSurfaces);
+  if (input.action === "audit") {
+    if (states.has("keyboard") || states.has("focus")) {
+      return "keyboard-focus-verification";
+    }
+    if (input.taskFamily === "accessibility" || states.has("accessibility")) {
+      return "accessibility-check";
+    }
+    if (input.taskFamily === "tokens") return "token-map";
+    if (input.taskFamily === "design-system") return "design-system-map";
+    if (input.taskFamily === "component") return "component-map";
+    return null;
+  }
+
+  if (input.action === "extract") {
+    if (input.taskFamily === "tokens") return "token-map";
+    if (input.taskFamily === "design-system" || input.taskFamily === "design-extraction") {
+      return "design-system-map";
+    }
+    if (input.taskFamily === "component") return "component-map";
+    return null;
+  }
+
+  if (input.action !== "create" && input.action !== "modify") return null;
+  if (states.has("empty") || states.has("error") || states.has("loading")) {
+    return "interface-state-implementation";
+  }
+  if (
+    states.has("responsive")
+    || states.has("mobile")
+    || states.has("tablet")
+    || states.has("desktop")
+  ) {
+    return "responsive-layout";
+  }
+  if (surfaces.has("navigation") || surfaces.has("form")) {
+    return "adaptive-interaction";
+  }
+  return null;
 }
 
 export function classifyIntent(intent: string): IntentCategory {

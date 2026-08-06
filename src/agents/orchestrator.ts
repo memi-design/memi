@@ -39,8 +39,8 @@ export type { AgentPlan, SubTask, SubAgentType, AgentContext } from "./plan-buil
 export type { AgentExecutionResult, DesignMutation } from "./sub-agents.js";
 
 // ── Internal imports from extracted modules ─────────────
-import { classifyIntent } from "./intent-classifier.js";
-import type { IntentCategory } from "./intent-classifier.js";
+import { classifyIntentSignals } from "./intent-classifier.js";
+import type { IntentCategory, IntentSignalClassification } from "./intent-classifier.js";
 import { PlanBuilder } from "./plan-builder.js";
 import type { AgentPlan, SubTask, AgentContext } from "./plan-builder.js";
 import { SubAgentRunner } from "./sub-agents.js";
@@ -53,6 +53,39 @@ import {
 } from "./execution-context-capsule.js";
 
 const log = createLogger("agent-orchestrator");
+
+interface ExplicitRouteOptions {
+  readonly taskClass?: string;
+  readonly platforms?: readonly string[];
+  readonly taskContract?: FrontendTaskContractV1;
+}
+
+interface RouteIdentity {
+  readonly taskClass: string;
+  readonly platforms: readonly string[];
+}
+
+function resolveRouteIdentity(
+  classification: IntentSignalClassification,
+  options?: ExplicitRouteOptions,
+): RouteIdentity | null {
+  if (options?.taskContract) {
+    return {
+      taskClass: options.taskContract.taskClass,
+      platforms: [options.taskContract.platform],
+    };
+  }
+  if (!classification.ambiguous && options?.taskClass && options.platforms?.length === 1) {
+    return { taskClass: options.taskClass, platforms: options.platforms };
+  }
+  if (!classification.abstain && classification.inferredTaskClass) {
+    return {
+      taskClass: classification.inferredTaskClass,
+      platforms: classification.platforms,
+    };
+  }
+  return null;
+}
 
 // ── Orchestrator ─────────────────────────────────────────
 
@@ -95,21 +128,25 @@ export class AgentOrchestrator {
     taskContract?: FrontendTaskContractV1;
     budgetProfile?: "strict" | "balanced" | "deep";
   }): Promise<import("./sub-agents.js").AgentExecutionResult> {
-    const category = classifyIntent(intent);
-    log.info({ intent, category }, "Classified design intent");
+    const classification = classifyIntentSignals(intent);
+    const category = classification.category;
+    log.info({ intent, category, classification }, "Classified design intent");
 
     const context = options?.context ?? await this.buildContext();
-    const repositoryFingerprint = this.engine.notes.loaded
+    const routeIdentity = resolveRouteIdentity(classification, options);
+    const shouldRoute = this.engine.notes.loaded
+      && options?.routingPolicy !== "repository-only"
+      && routeIdentity !== null;
+    const repositoryFingerprint = shouldRoute
       ? await buildRepositoryFingerprint(this.engine.config.projectRoot)
       : undefined;
-    const routed = this.engine.notes.loaded && options?.routingPolicy !== "repository-only"
+    const routed = shouldRoute
       ? await resolveRoutedSkills({
         intent,
-        taskClass: options?.taskClass ?? category,
+        taskClass: routeIdentity.taskClass,
         notes: this.engine.notes.notes,
         capabilities: context.figmaConnected ? ["figma"] : [],
-        platforms: options?.platforms
-          ?? (context.projectFramework ? [context.projectFramework] : []),
+        platforms: routeIdentity.platforms,
         repositoryFingerprint,
         maximumSkills: 2,
         maximumContextBytes: 4_096,
