@@ -142,6 +142,8 @@ confirmatory study is preregistered but unexecuted until exact 2.7.9 and
 - `86724cd5` — test: stop plans after budget exhaustion
 - `0e9c8458` — test: disable unsafe contracted mutation routes
 - `b63bf067` — fix: fail closed after contracted budget stops
+- `057c7f6f` — test: block contracted external mutation agents
+- `21c2ae8a` — fix: block unsafe external mutation dispatch
 
 ## v2.7.9 — 2026-08-06 — Candidate
 
