@@ -42,6 +42,7 @@ function receiptInput(
       artifactSha256: sha("5"),
     },
     route: {
+      decision: "selected",
       routerVersion: "frontend-router.v3",
       taskClass: "frontend-modification",
       repositoryFingerprintSha256: sha("3"),
@@ -167,6 +168,30 @@ function receiptInput(
 }
 
 describe("WorkflowReceiptV3", () => {
+  it("seals a repository-only abstention without inventing a skill", () => {
+    const input = receiptInput();
+    const receipt = createWorkflowReceiptV3({
+      ...input,
+      route: {
+        decision: "repository-only",
+        routerVersion: "frontend-router.v3",
+        taskClass: input.stable.taskClass,
+        repositoryFingerprintSha256: input.stable.repository.fingerprintSha256,
+        provider: input.stable.runtime.provider,
+        model: input.stable.runtime.model,
+        effort: input.stable.runtime.effort,
+        skill: null,
+        abstentionReason: "incomplete-evidence",
+      },
+    });
+
+    expect(receipt.route).toMatchObject({
+      decision: "repository-only",
+      skill: null,
+      abstentionReason: "incomplete-evidence",
+    });
+  });
+
   it("records native exclusion without fabricating artifacts", () => {
     const input = receiptInput();
     const receipt = createWorkflowReceiptV3({

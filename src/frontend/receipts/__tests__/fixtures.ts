@@ -31,6 +31,7 @@ export function makeReceiptInput(
       artifactSha256: sha("5"),
     },
     route: {
+      decision: "selected",
       routerVersion: "frontend-router.v3",
       taskClass: "frontend-creation",
       repositoryFingerprintSha256: sha("3"),
