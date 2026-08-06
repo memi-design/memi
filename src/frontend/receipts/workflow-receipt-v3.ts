@@ -329,6 +329,22 @@ export function assertCandidateIndependentReceiptFields(input: unknown): Readonl
   });
 }
 
+export function assertExactRouteReceiptFields(input: unknown): Readonly<{
+  routeIdentitySha256: string;
+  receiptIds: readonly string[];
+}> {
+  const receipts = z.array(WorkflowReceiptV3Schema).min(2).parse(input);
+  assertUniqueIds(receipts.map((receipt) => receipt.receiptId), "receipt");
+  const expected = receipts[0]!.route.identitySha256;
+  if (receipts.some((receipt) => receipt.route.identitySha256 !== expected)) {
+    throw new Error("Exact route receipt identity does not match");
+  }
+  return deepFreeze({
+    routeIdentitySha256: expected,
+    receiptIds: receipts.map((receipt) => receipt.receiptId),
+  });
+}
+
 function validateReceipt(
   receipt: z.infer<typeof ReceiptContentSchema> & { receiptSha256: string },
   context: z.RefinementCtx,
