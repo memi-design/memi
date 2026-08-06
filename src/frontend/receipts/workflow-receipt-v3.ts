@@ -510,7 +510,7 @@ function validateNativeEvidence(
     if (captured < executionStart || verified > executionEnd) {
       issue(context, ["nativeEvidence", "artifacts", index], "native evidence falls outside execution");
     }
-    if (freshUntil - captured !== artifact.freshnessWindowMs) {
+    if (freshUntil - verified !== artifact.freshnessWindowMs) {
       issue(context, ["nativeEvidence", "artifacts", index, "freshnessWindowMs"], "native evidence freshness window does not match timestamps");
     }
     if (verified > recordedAt || recordedAt > freshUntil) {

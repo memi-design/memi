@@ -106,7 +106,7 @@ export function makeReceiptInput(
         sha256: sha("c"),
         capturedAt: "2026-08-06T11:59:58.000Z",
         verifiedAt: "2026-08-06T11:59:59.000Z",
-        freshUntil: "2026-08-06T12:04:58.000Z",
+        freshUntil: "2026-08-06T12:04:59.000Z",
         freshnessWindowMs: 300_000,
       }],
     },

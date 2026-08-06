@@ -149,7 +149,7 @@ function receiptInput(
         sha256: sha("a"),
         capturedAt: "2026-08-06T16:00:03.000Z",
         verifiedAt: "2026-08-06T16:00:04.000Z",
-        freshUntil: "2026-08-06T16:05:03.000Z",
+        freshUntil: "2026-08-06T16:05:04.000Z",
         freshnessWindowMs: 300_000,
       }],
     },
@@ -432,7 +432,7 @@ describe("WorkflowReceiptV3", () => {
           ...base.nativeEvidence.artifacts[0]!,
           capturedAt: "2026-08-06T15:59:59.000Z",
           verifiedAt: "2026-08-06T16:00:00.000Z",
-          freshUntil: "2026-08-06T16:04:59.000Z",
+          freshUntil: "2026-08-06T16:05:00.000Z",
         }],
       },
     })).toThrow(/execution/i);

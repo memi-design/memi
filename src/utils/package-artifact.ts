@@ -1,61 +1,85 @@
 import { createHash } from "node:crypto";
-import { lstat, readFile, readdir, realpath } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
+import { promisify } from "node:util";
 import { hashValue } from "../frontend/foundation.js";
 
+const execFileAsync = promisify(execFile);
+const MAX_PACK_OUTPUT_BYTES = 16 * 1024 * 1024;
+
+interface NpmPackFile {
+  readonly path: string;
+}
+
+interface NpmPackResult {
+  readonly files: readonly NpmPackFile[];
+}
+
+/**
+ * Hash the exact file surface npm says it will pack, including npm's implicit
+ * README, license, and parent-directory metadata rules.
+ *
+ * Lifecycle scripts are disabled: callers must build first, and evidence
+ * collection must never execute package-controlled hooks.
+ */
 export async function hashPackedPackageSurface(packageDirectory: string): Promise<string> {
   const root = await realpath(path.resolve(packageDirectory));
-  const manifestPath = path.join(root, "package.json");
-  const manifest: unknown = JSON.parse(await readFile(manifestPath, "utf8"));
-  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
-    throw new Error("Package manifest must be an object");
-  }
-  const declared = (manifest as { files?: unknown }).files;
-  if (!Array.isArray(declared) || !declared.every((entry) => typeof entry === "string")) {
-    throw new Error("Package manifest must declare a string files array");
-  }
-  const exclusions = declared
-    .filter((entry) => entry.startsWith("!"))
-    .map((entry) => compilePackageGlob(entry.slice(1)));
-  const files = new Set<string>(["package.json"]);
-  for (const entry of declared.filter((value) => !value.startsWith("!"))) {
-    const normalized = normalizePackagePath(entry);
-    await collectPackageFiles(root, normalized, files);
-  }
-  const identities = await Promise.all([...files]
-    .filter((file) => !exclusions.some((pattern) => pattern.test(file)))
-    .sort((left, right) => left.localeCompare(right))
-    .map(async (file) => {
-      const content = await readFile(path.join(root, file));
-      return {
-        path: file,
-        sha256: `sha256:${createHash("sha256").update(content).digest("hex")}`,
-        byteLength: content.byteLength,
-      };
-    }));
+  const files = await listNpmPackedFiles(root);
+  const identities = await Promise.all(files.map(async (file) => {
+    const absolutePath = path.join(root, file);
+    const entry = await lstat(absolutePath);
+    if (entry.isSymbolicLink() || !entry.isFile()) {
+      throw new Error(`Packed package surface entry must be a regular file: ${file}`);
+    }
+    const canonicalPath = await realpath(absolutePath);
+    if (!isWithinRoot(root, canonicalPath)) {
+      throw new Error(`Packed package surface escapes the package root: ${file}`);
+    }
+    const content = await readFile(canonicalPath);
+    return {
+      path: file,
+      sha256: `sha256:${createHash("sha256").update(content).digest("hex")}`,
+      byteLength: content.byteLength,
+    };
+  }));
   return hashValue(identities);
 }
 
-async function collectPackageFiles(
-  root: string,
-  relativePath: string,
-  files: Set<string>,
-): Promise<void> {
-  const absolutePath = path.join(root, relativePath);
-  const entry = await lstat(absolutePath);
-  if (entry.isSymbolicLink()) {
-    throw new Error(`Packed package surface cannot contain a symlink: ${relativePath}`);
+async function listNpmPackedFiles(root: string): Promise<readonly string[]> {
+  const args = ["pack", "--dry-run", "--json", "--ignore-scripts"];
+  const npmExecPath = process.env.npm_execpath;
+  const command = npmExecPath ? process.execPath : process.platform === "win32" ? "npm.cmd" : "npm";
+  const commandArgs = npmExecPath ? [npmExecPath, ...args] : args;
+  const { stdout } = await execFileAsync(command, commandArgs, {
+    cwd: root,
+    encoding: "utf8",
+    maxBuffer: MAX_PACK_OUTPUT_BYTES,
+    env: { ...process.env, npm_config_update_notifier: "false" },
+  });
+  const parsed: unknown = JSON.parse(stdout);
+  if (!Array.isArray(parsed) || parsed.length !== 1 || !isPackResult(parsed[0])) {
+    throw new Error("npm pack returned an invalid file manifest");
   }
-  if (entry.isFile()) {
-    files.add(relativePath);
-    return;
+  const files = parsed[0].files.map((entry) => normalizePackagePath(entry.path));
+  if (files.length === 0 || !files.includes("package.json")) {
+    throw new Error("npm pack file manifest is empty or missing package.json");
   }
-  if (!entry.isDirectory()) {
-    throw new Error(`Packed package surface entry must be a file or directory: ${relativePath}`);
+  const unique = [...new Set(files)].sort((left, right) => left.localeCompare(right));
+  if (unique.length !== files.length) {
+    throw new Error("npm pack file manifest contains duplicate paths");
   }
-  for (const child of (await readdir(absolutePath)).sort()) {
-    await collectPackageFiles(root, `${relativePath}/${child}`, files);
-  }
+  return unique;
+}
+
+function isPackResult(value: unknown): value is NpmPackResult {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const files = (value as { files?: unknown }).files;
+  return Array.isArray(files) && files.every((entry) =>
+    entry !== null
+    && typeof entry === "object"
+    && !Array.isArray(entry)
+    && typeof (entry as { path?: unknown }).path === "string");
 }
 
 function normalizePackagePath(value: string): string {
@@ -66,19 +90,7 @@ function normalizePackagePath(value: string): string {
   return normalized;
 }
 
-function compilePackageGlob(value: string): RegExp {
-  const normalized = normalizePackagePath(value);
-  let source = "";
-  for (let index = 0; index < normalized.length; index += 1) {
-    const char = normalized[index]!;
-    if (char === "*" && normalized[index + 1] === "*") {
-      source += ".*";
-      index += 1;
-    } else if (char === "*") {
-      source += "[^/]*";
-    } else {
-      source += char.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-    }
-  }
-  return new RegExp(`^${source}(?:/.*)?$`, "u");
+function isWithinRoot(root: string, candidate: string): boolean {
+  const relativePath = path.relative(root, candidate);
+  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
 }

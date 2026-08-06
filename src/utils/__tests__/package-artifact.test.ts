@@ -30,20 +30,17 @@ describe("hashPackedPackageSurface", () => {
 
   it("includes files npm adds to the real packed surface", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "memi-package-artifact-packlist-"));
-    await mkdir(path.join(root, "docs", "case-studies", "fixture"), { recursive: true });
+    await mkdir(path.join(root, "dist"), { recursive: true });
     await writeFile(path.join(root, "package.json"), JSON.stringify({
       name: "fixture-packlist",
       version: "1.0.0",
-      files: ["docs/case-studies/fixture/README.md"],
+      files: ["dist"],
     }));
-    await writeFile(
-      path.join(root, "docs", "case-studies", "fixture", "README.md"),
-      "# Fixture\n",
-    );
-    await writeFile(path.join(root, "docs", "case-studies", "README.md"), "# Index one\n");
+    await writeFile(path.join(root, "dist", "index.js"), "export {};\n");
+    await writeFile(path.join(root, "README.md"), "# Index one\n");
 
     const original = await hashPackedPackageSurface(root);
-    await writeFile(path.join(root, "docs", "case-studies", "README.md"), "# Index two\n");
+    await writeFile(path.join(root, "README.md"), "# Index two\n");
     const changed = await hashPackedPackageSurface(root);
 
     expect(changed).not.toBe(original);

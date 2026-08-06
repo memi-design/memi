@@ -53,7 +53,7 @@ export function createReceiptVerificationEvidence(input: {
       sha256: artifact.sha256,
       capturedAt: artifact.capturedAt,
       verifiedAt,
-      freshUntil: new Date(Date.parse(artifact.capturedAt) + freshnessWindowMs).toISOString(),
+      freshUntil: new Date(Date.parse(verifiedAt) + freshnessWindowMs).toISOString(),
       freshnessWindowMs,
     };
   });
@@ -90,7 +90,11 @@ function exclusionReason(reasons: readonly string[]):
   if (reasons.some((reason) => reason.includes("corrupt") || reason.includes("mutated"))) {
     return "corrupt-artifact";
   }
-  if (reasons.some((reason) => reason.includes("capture") || reason.includes("driver"))) {
+  if (reasons.some((reason) =>
+    reason.includes("capture")
+    || reason.includes("driver")
+    || reason.includes("simulator")
+    || reason.includes("evidence-root"))) {
     return "driver-failed";
   }
   return "missing-native-artifact";
