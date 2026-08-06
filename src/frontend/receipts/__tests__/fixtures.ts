@@ -1,0 +1,124 @@
+import type { WorkflowReceiptV3Input } from "../workflow-receipt-v3.js";
+
+const sha = (character: string) => `sha256:${character.repeat(64)}`;
+
+export function makeReceiptInput(
+  overrides: Partial<WorkflowReceiptV3Input> = {},
+): WorkflowReceiptV3Input {
+  return {
+    receiptId: "receipt-1",
+    recordedAt: "2026-08-06T12:00:00.000Z",
+    sequence: 0,
+    stable: {
+      protocolSha256: sha("1"),
+      suiteId: "suite-1",
+      experimentId: "experiment-1",
+      pairId: "pair-1",
+      taskId: "task-1",
+      repeat: 1,
+      taskClass: "frontend-creation",
+      taskContractSha256: sha("2"),
+      repository: {
+        fingerprintSha256: sha("3"),
+        revision: "a".repeat(40),
+        fixtureSha256: sha("4"),
+      },
+      runtime: { provider: "openai", model: "gpt-5.6", effort: "high" },
+    },
+    candidate: {
+      condition: "memi",
+      candidateId: "memi-2.8",
+      artifactSha256: sha("5"),
+    },
+    route: {
+      routerVersion: "frontend-router.v3",
+      taskClass: "frontend-creation",
+      repositoryFingerprintSha256: sha("3"),
+      provider: "openai",
+      model: "gpt-5.6",
+      effort: "high",
+      skill: {
+        id: "implement-adaptive-interface",
+        file: "skills/implement-adaptive-interface/SKILL.md",
+        contentSha256: sha("6"),
+      },
+    },
+    contextCapsules: {
+      initial: {
+        identitySha256: sha("7"),
+        taskRouteSha256: sha("8"),
+        skillsSha256: sha("9"),
+        repositoryEvidenceSha256: sha("a"),
+        verificationSha256: sha("b"),
+      },
+      expansions: [],
+    },
+    execution: {
+      startedAt: "2026-08-06T11:59:57.000Z",
+      completedAt: "2026-08-06T11:59:59.000Z",
+      stopReason: "verification-passed",
+      attempts: [{
+        attemptId: "attempt-1",
+        startedAt: "2026-08-06T11:59:57.000Z",
+        completedAt: "2026-08-06T11:59:59.000Z",
+        outcome: "completed",
+        usage: {
+          inputTokens: 100,
+          cachedInputTokens: 20,
+          outputTokens: 30,
+          reasoningTokens: 10,
+          toolCalls: 2,
+          toolErrors: 0,
+          toolOutputBytes: 500,
+          agentWallTimeMs: 2_000,
+          toolWallTimeMs: 500,
+        },
+      }],
+      retries: [],
+      usage: {
+        inputTokens: 100,
+        cachedInputTokens: 20,
+        outputTokens: 30,
+        reasoningTokens: 10,
+        toolCalls: 2,
+        toolErrors: 0,
+        toolOutputBytes: 500,
+        agentWallTimeMs: 2_000,
+        toolWallTimeMs: 500,
+      },
+      billing: {
+        status: "unavailable",
+        currency: "USD",
+        amount: null,
+        usageArtifactSha256: null,
+        priceCardSha256: null,
+        reason: "subscription-backed",
+      },
+    },
+    nativeEvidence: {
+      platform: "web",
+      artifacts: [{
+        evidenceId: "render-1",
+        kind: "screenshot",
+        file: "evidence/render.png",
+        sha256: sha("c"),
+        capturedAt: "2026-08-06T11:59:58.000Z",
+        verifiedAt: "2026-08-06T11:59:59.000Z",
+        freshUntil: "2026-08-06T12:04:58.000Z",
+        freshnessWindowMs: 300_000,
+      }],
+    },
+    verification: [{
+      verificationId: "verify-1",
+      kind: "rendered-flow",
+      commandSha256: sha("d"),
+      status: "passed",
+      exitCode: 0,
+      startedAt: "2026-08-06T11:59:58.000Z",
+      completedAt: "2026-08-06T11:59:59.000Z",
+      durationMs: 1_000,
+      outputSha256: sha("e"),
+    }],
+    ...overrides,
+  };
+}
