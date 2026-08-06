@@ -31,6 +31,10 @@ confirmatory study is preregistered but unexecuted until exact 2.7.9 and
   receipt identity.
 - Permit at most two implementation attempts and preserve the actual stop
   reason in the receipt.
+- Enforce task-contract wall-time and token ceilings before applying provider
+  output. The current provider client cannot reclaim compute already in flight
+  or report reasoning tokens separately, so receipts mark that telemetry
+  unavailable instead of estimating it.
 - Admit frontend evidence only after a platform adapter returns the complete,
   fresh, execution-bound artifact set. Missing evidence is excluded without
   imputation.
@@ -121,6 +125,15 @@ confirmatory study is preregistered but unexecuted until exact 2.7.9 and
 - `41ba4dd1` — test: enforce frontend reliability coverage
 - `ecc9a422` — test: require exact admissible evidence provenance
 - `226eeda7` — fix: preserve exact admissible evidence provenance
+- `f3f4bdf1` — docs: record evidence provenance repairs
+- `8dfb7450` — test: use portable npm pack command
+- `2f4946ce` — test: expose provenance trust boundary gaps
+- `cb083bf1` — fix: fail closed on provenance trust gaps
+- `793b55ec` — test: reproduce contracted execution budget gaps
+- `e8848e21` — test: require budget evidence in workflow receipts
+- `4b5a1bdb` — test: reject inconsistent budget receipt evidence
+- `d08502f8` — test: block heuristic fallback after budget cancellation
+- `3ae4140d` — feat: enforce contracted execution budgets
 
 ## v2.7.9 — 2026-08-06 — Candidate
 
