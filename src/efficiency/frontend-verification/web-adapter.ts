@@ -99,7 +99,7 @@ export interface WebVerificationResult {
   readonly schemaVersion: 1;
   readonly adapter: "chromium-web-v1";
   readonly status: "passed" | "failed" | "rejected";
-  readonly evidenceRoot: string;
+  readonly evidenceRootSha256: `sha256:${string}`;
   readonly runStartedAt: string;
   readonly runCompletedAt: string;
   readonly reasons: readonly string[];
@@ -146,7 +146,7 @@ export async function runWebVerificationAdapter(
       input,
       evidenceRoot,
       status: "rejected",
-      reasons: [`capture-failed:${errorMessage(error)}`],
+      reasons: [`capture-failed:${errorName(error)}`],
       artifacts: [],
     });
   }
@@ -339,7 +339,7 @@ function buildResult(input: {
     schemaVersion: 1 as const,
     adapter: "chromium-web-v1" as const,
     status: input.status,
-    evidenceRoot: input.evidenceRoot,
+    evidenceRootSha256: sha256(Buffer.from(input.evidenceRoot)),
     runStartedAt: input.input.runStartedAt,
     runCompletedAt: input.input.runCompletedAt,
     reasons: [...input.reasons],
@@ -426,6 +426,8 @@ function deepFreeze<T>(value: T): T {
   return value;
 }
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "unknown-error";
+function errorName(error: unknown): string {
+  if (!(error instanceof Error)) return "unknown-error";
+  const safeName = error.name.replace(/[^A-Za-z0-9_.-]/g, "-").slice(0, 64);
+  return safeName || "Error";
 }
