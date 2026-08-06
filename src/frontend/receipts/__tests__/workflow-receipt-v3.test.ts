@@ -235,6 +235,50 @@ describe("WorkflowReceiptV3", () => {
     });
   });
 
+  it("records contracted budget enforcement and measurement limitations", () => {
+    const input = receiptInput();
+    const receipt = createWorkflowReceiptV3({
+      ...input,
+      execution: {
+        ...input.execution,
+        stopReason: "tool-budget-exhausted",
+        budgetEnforcement: {
+          ceilings: {
+            inputTokens: 1_000,
+            outputTokens: 200,
+            reasoningTokens: 100,
+            wallTimeMs: 60_000,
+            toolCalls: 2,
+            implementationAttempts: 1,
+          },
+          observed: {
+            inputTokens: 100,
+            outputTokens: 20,
+            reasoningTokens: 0,
+            toolCalls: 3,
+            wallTimeMs: 1_000,
+          },
+          measurement: {
+            inputTokens: "measured",
+            outputTokens: "measured",
+            reasoningTokens: "unavailable",
+            toolCalls: "measured",
+          },
+          implementationAttempts: 1,
+          exceededDimensions: ["tool-calls"],
+          limitations: [
+            "provider-request-cancellation-unavailable",
+            "reasoning-token-usage-unavailable",
+          ],
+        },
+      },
+    });
+
+    expect(receipt.execution.stopReason).toBe("tool-budget-exhausted");
+    expect(receipt.execution.budgetEnforcement?.measurement.reasoningTokens).toBe("unavailable");
+    expect(receipt.execution.budgetEnforcement?.exceededDimensions).toEqual(["tool-calls"]);
+  });
+
   it("binds exact task classes shared with the public task contract", () => {
     const input = receiptInput();
     const receipt = createWorkflowReceiptV3({

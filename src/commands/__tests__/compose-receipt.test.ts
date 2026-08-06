@@ -10,6 +10,12 @@ describe("compose receipt stop reasons", () => {
     expect(deriveComposeStopReason(false, "failed")).toBe("attempt-limit-reached");
     expect(deriveComposeStopReason(false, "partial")).toBe("attempt-limit-reached");
     expect(deriveComposeStopReason(false, "completed")).toBe("verification-failed");
+    expect(deriveComposeStopReason(false, "completed", "token-budget-exhausted"))
+      .toBe("token-budget-exhausted");
+    expect(deriveComposeStopReason(false, "completed", "time-budget-exhausted"))
+      .toBe("time-budget-exhausted");
+    expect(deriveComposeStopReason(false, "completed", "tool-budget-exhausted"))
+      .toBe("tool-budget-exhausted");
   });
 
   it("atomically reserves unique ledger sequences for concurrent writers", async () => {
