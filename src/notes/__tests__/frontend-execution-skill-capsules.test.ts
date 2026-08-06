@@ -13,23 +13,23 @@ const capsuleBudgetBytes = 4_096;
 const expectedSkills = [
   {
     id: "map-design-system",
-    activateOn: "component-creation",
+    activateOn: "design-system-mapping",
     taskClasses: ["design-system-map", "component-map", "token-map"],
   },
   {
     id: "implement-adaptive-interface",
-    activateOn: "design-creation",
+    activateOn: "adaptive-interface-implementation",
     taskClasses: ["responsive-layout", "adaptive-interaction", "interface-state-implementation"],
   },
   {
     id: "verify-interface-accessibility",
-    activateOn: "design-review",
+    activateOn: "interface-accessibility-verification",
     taskClasses: ["accessibility-check", "keyboard-focus-verification", "semantic-interface-verification"],
   },
 ] as const;
 
 describe("frontend execution skill capsules", () => {
-  it("registers independently routable built-in skills with exact task classes", async () => {
+  it("registers disjoint exact-route metadata and keeps legacy resolution fail closed", async () => {
     const registry = JSON.parse(
       await readFile(join(projectRoot, "skills", "registry.json"), "utf8"),
     ) as { skills: Array<Record<string, unknown>> };
@@ -39,26 +39,28 @@ describe("frontend execution skill capsules", () => {
         id: expected.id,
         file: `skills/${expected.id}/SKILL.md`,
         activateOn: expected.activateOn,
-        taskClasses: [...expected.taskClasses],
+        memoire: {
+          routing: expect.objectContaining({
+            taskClasses: [...expected.taskClasses],
+          }),
+        },
       }));
     }
 
     expect(new Set(expectedSkills.map((skill) => skill.activateOn)).size).toBe(expectedSkills.length);
+    const taskClasses = expectedSkills.flatMap((skill) => [...skill.taskClasses]);
+    expect(new Set(taskClasses).size).toBe(taskClasses.length);
 
     const loader = new NoteLoader(projectRoot);
     const builtIns = await loader.loadBuiltInNotes();
-    const routes = [
-      ["component-modify", "map-design-system"],
-      ["page-layout", "implement-adaptive-interface"],
-      ["accessibility-check", "verify-interface-accessibility"],
-    ] as const;
+    for (const expected of expectedSkills) {
+      expect(builtIns.find((note) => note.manifest.name === expected.id)?.manifest.skills[0])
+        .toMatchObject({ activateOn: expected.activateOn });
+    }
 
-    for (const [intent, expectedId] of routes) {
+    for (const intent of ["component-modify", "page-layout", "accessibility-check"]) {
       const resolvedIds = (await resolveForIntent(intent, builtIns)).map((skill) => skill.noteId);
-      expect(resolvedIds).toContain(expectedId);
-      expect(resolvedIds.filter((id) => expectedSkills.some((skill) => skill.id === id))).toEqual([
-        expectedId,
-      ]);
+      expect(resolvedIds.filter((id) => expectedSkills.some((skill) => skill.id === id))).toEqual([]);
     }
   });
 

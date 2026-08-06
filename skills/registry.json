@@ -116,30 +116,48 @@
       "name": "Map Design System",
       "file": "skills/map-design-system/SKILL.md",
       "description": "Map repository-backed design tokens, components, conventions, and verification commands before a frontend edit.",
-      "activateOn": "component-creation",
+      "activateOn": "design-system-mapping",
       "freedomLevel": "read-only",
       "prerequisite": null,
-      "taskClasses": ["design-system-map", "component-map", "token-map"]
+      "memoire": {
+        "routing": {
+          "taskClasses": ["design-system-map", "component-map", "token-map"],
+          "actions": ["inspect", "map"],
+          "platforms": ["web", "expo", "swiftui"]
+        }
+      }
     },
     {
       "id": "implement-adaptive-interface",
       "name": "Implement Adaptive Interface",
       "file": "skills/implement-adaptive-interface/SKILL.md",
       "description": "Implement responsive layout, adaptive interaction, and complete interface states using repository evidence.",
-      "activateOn": "design-creation",
+      "activateOn": "adaptive-interface-implementation",
       "freedomLevel": "high",
       "prerequisite": "map-design-system",
-      "taskClasses": ["responsive-layout", "adaptive-interaction", "interface-state-implementation"]
+      "memoire": {
+        "routing": {
+          "taskClasses": ["responsive-layout", "adaptive-interaction", "interface-state-implementation"],
+          "actions": ["implement", "modify"],
+          "platforms": ["web", "expo", "swiftui"]
+        }
+      }
     },
     {
       "id": "verify-interface-accessibility",
       "name": "Verify Interface Accessibility",
       "file": "skills/verify-interface-accessibility/SKILL.md",
       "description": "Verify frontend semantics, keyboard and focus behavior, contrast, motion, and native accessibility evidence.",
-      "activateOn": "design-review",
+      "activateOn": "interface-accessibility-verification",
       "freedomLevel": "read-only",
       "prerequisite": null,
-      "taskClasses": ["accessibility-check", "keyboard-focus-verification", "semantic-interface-verification"]
+      "memoire": {
+        "routing": {
+          "taskClasses": ["accessibility-check", "keyboard-focus-verification", "semantic-interface-verification"],
+          "actions": ["audit", "verify"],
+          "platforms": ["web", "expo", "swiftui"]
+        }
+      }
     }
   ],
   "activationContexts": {
@@ -154,6 +172,9 @@
     "research-to-dashboard": "Transforming research data into visual dashboards",
     "design-extraction": "Extracting design systems from URLs or websites",
     "apple-platform-interface": "Creating or reviewing SwiftUI, SwiftData, App Intents, or Apple-platform interface code",
+    "design-system-mapping": "Explicit fail-closed design-system mapping capsule",
+    "adaptive-interface-implementation": "Explicit fail-closed adaptive implementation capsule",
+    "interface-accessibility-verification": "Explicit fail-closed accessibility verification capsule",
     "docker-environment": "Project contains Dockerfile, docker-compose.yml, or .devcontainer/"
   }
 }
