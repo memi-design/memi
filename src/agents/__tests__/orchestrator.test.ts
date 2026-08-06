@@ -276,6 +276,39 @@ describe("AgentOrchestrator compose targeting", () => {
     expect(plan?.skillRoute?.selected[0]?.id).toBe("adaptive-interface");
   });
 
+  it("preserves an exact caller-supplied route when the prompt omits platform evidence", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-explicit-route-"));
+    const notes = [await makeNote(
+      root,
+      "adaptive-interface",
+      "Implement responsive layout from exact route evidence.",
+      ["adaptive-interface", "responsive-layout"],
+      {
+        taskClasses: ["responsive-layout"],
+        platforms: ["web"],
+        actions: ["modify"],
+      },
+    )];
+    const { engine } = makeEngine([], notes);
+    let plan: AgentPlan | undefined;
+    const orchestrator = new AgentOrchestrator(engine as never, (nextPlan) => {
+      plan = nextPlan;
+    });
+
+    await orchestrator.execute(
+      "Repair responsive breakpoints for checkout",
+      {
+        dryRun: true,
+        taskClass: "responsive-layout",
+        platforms: ["web"],
+        routingPolicy: "v3",
+      },
+    );
+
+    expect(plan?.skillRoute?.decision).toBe("single");
+    expect(plan?.skillRoute?.selected[0]?.id).toBe("adaptive-interface");
+  });
+
   it("injects the exact bounded context capsule used by a contracted execution", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-capsule-"));
     const notes = [await makeNote(

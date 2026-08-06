@@ -111,23 +111,38 @@ describe("multi-signal intent classifier", () => {
     [
       "Audit keyboard focus on the web checkout form",
       "keyboard-focus-verification",
+      "audit",
     ],
     [
       "Inspect the web CSS variable palette",
       "token-map",
+      "audit",
+    ],
+    [
+      "Audit the web design system tokens",
+      "token-map",
+      "audit",
+    ],
+    [
+      "Inspect the web design system components",
+      "component-map",
+      "audit",
     ],
     [
       "Implement responsive breakpoints for the web checkout screen",
       "responsive-layout",
+      "create",
     ],
     [
       "Modify the web checkout form navigation interaction",
       "adaptive-interaction",
+      "modify",
     ],
-  ] as const)("infers the exact supported route for %s", (intent, taskClass) => {
+  ] as const)("infers the exact supported route for %s", (intent, taskClass, action) => {
     const result = classifyIntentSignals(intent);
 
     expect(result.abstain).toBe(false);
+    expect(result.action).toBe(action);
     expect(result.inferredTaskClass).toBe(taskClass);
   });
 
