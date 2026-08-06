@@ -90,11 +90,12 @@ export class AgentOrchestrator {
     const routed = this.engine.notes.loaded
       ? await resolveRoutedSkills({
         intent,
+        taskClass: category,
         notes: this.engine.notes.notes,
         capabilities: context.figmaConnected ? ["figma"] : [],
         platforms: context.projectFramework ? [context.projectFramework] : [],
         repositoryFingerprint,
-        maximumSkills: 2,
+        maximumSkills: 1,
         maximumContextBytes: 8_000,
       })
       : null;

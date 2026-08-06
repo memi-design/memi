@@ -698,6 +698,7 @@ function canonicalRepositoryOrigin(origin: string): string {
         );
         route = await resolveRoutedSkills({
           intent: task.intent,
+          taskClass,
           notes: loader.notes,
           capabilities: csv(opts.capabilities),
           platforms: csv(opts.platforms),

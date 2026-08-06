@@ -24,6 +24,7 @@ const TOKEN_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   accessible: "accessibility",
   animations: "animation",
   colours: "color",
+  expo: "reactnative",
   ios: "swiftui",
   type: "typography",
   typescale: "typography",
@@ -50,6 +51,7 @@ export type RepositoryFingerprint = z.infer<typeof RepositoryFingerprintSchema>;
 
 export interface RouteInstalledSkillsInput {
   readonly intent: string;
+  readonly taskClass?: string;
   readonly notes: readonly InstalledNote[];
   readonly capabilities: readonly string[];
   readonly platforms?: readonly string[];
@@ -140,6 +142,7 @@ export async function routeInstalledSkills(
   );
   const queryTokens = tokenize(routableIntent(input.intent));
   const requestedAction = inferRequestedAction(input.intent);
+  const taskClass = input.taskClass ? normalizeTaskClass(input.taskClass) : null;
   const capabilities = new Set(input.capabilities.map(normalizeToken));
   const platforms = new Set((input.platforms ?? []).map(normalizeToken));
   const repositoryFingerprint = input.repositoryFingerprint
@@ -151,6 +154,7 @@ export async function routeInstalledSkills(
     .flatMap((note) => routeCandidates(
       note,
       queryTokens,
+      taskClass,
       requestedAction,
       capabilities,
       platforms,
@@ -485,6 +489,7 @@ interface RankedRouteCandidate {
 function routeCandidates(
   note: InstalledNote,
   queryTokens: ReadonlySet<string>,
+  taskClass: string | null,
   requestedAction: "create" | "validate" | null,
   capabilities: ReadonlySet<string>,
   platforms: ReadonlySet<string>,
@@ -492,6 +497,21 @@ function routeCandidates(
   excluded: Array<{ id: string; reason: string }>,
 ): RankedRouteCandidate[] {
   const routing = note.manifest.memoire?.routing;
+  const taskClasses = routing?.taskClasses?.map(normalizeTaskClass) ?? [];
+  if (taskClasses.length > 0 && !taskClass) {
+    excluded.push({
+      id: note.manifest.name,
+      reason: "task-class-missing",
+    });
+    return [];
+  }
+  if (taskClass && taskClasses.length > 0 && !taskClasses.includes(taskClass)) {
+    excluded.push({
+      id: note.manifest.name,
+      reason: `task-class-mismatch:${taskClass}`,
+    });
+    return [];
+  }
   const missingCapability = routing?.capabilities
     .map(normalizeToken)
     .find((capability) => !capabilities.has(capability));
@@ -546,13 +566,17 @@ function routeCandidates(
       tags: note.manifest.tags,
       intents,
     }, queryTokens);
+    const exactTaskClassEvidence = taskClass && taskClasses.includes(taskClass)
+      ? [taskClass]
+      : [];
     return {
       id: note.manifest.name,
       skillName: skill.name,
       file: path.resolve(note.path, skill.file),
-      score: evidence.score + (routing?.priority ?? 0),
+      score: evidence.score + (exactTaskClassEvidence.length > 0 ? 100 : 0)
+        + (routing?.priority ?? 0),
       priority: routing?.priority ?? 0,
-      matchedTerms: evidence.matchedTerms,
+      matchedTerms: [...new Set([...exactTaskClassEvidence, ...evidence.matchedTerms])],
       excludes: routing?.excludes ?? [],
       repositoryEvidence: repositoryMatch.evidence,
       stackPolicy: routing?.stackPolicy ?? "compatible",
@@ -856,8 +880,8 @@ function inferRequestedAction(value: string): "create" | "validate" | null {
 
 function compatibleActions(action: "create" | "validate"): ReadonlySet<string> {
   return action === "create"
-    ? new Set(["create", "generate", "integrate"])
-    : new Set(["analyze", "audit", "reference", "review"]);
+    ? new Set(["create", "generate", "implement", "integrate", "map", "modify"])
+    : new Set(["analyze", "audit", "inspect", "reference", "review", "verify"]);
 }
 
 function markdownReferences(content: string): readonly string[] {
@@ -873,6 +897,14 @@ function markdownReferences(content: string): readonly string[] {
 function normalizeToken(token: string): string {
   const normalized = token.toLowerCase().replace(/[^a-z0-9]+/g, "");
   return TOKEN_ALIASES[normalized] ?? normalized.replace(/(?:ing|ed|s)$/, "");
+}
+
+function normalizeTaskClass(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function boundedInteger(
