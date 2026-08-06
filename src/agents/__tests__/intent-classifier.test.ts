@@ -134,6 +134,11 @@ describe("multi-signal intent classifier", () => {
       "create",
     ],
     [
+      "Could you design responsive breakpoints for the web checkout screen",
+      "responsive-layout",
+      "create",
+    ],
+    [
       "Modify the web checkout form navigation interaction",
       "adaptive-interaction",
       "modify",
