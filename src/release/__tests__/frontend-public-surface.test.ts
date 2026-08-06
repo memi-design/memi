@@ -15,5 +15,7 @@ describe("frontend reliability public surface", () => {
     expect(barrel).toContain("./task-contract.js");
     expect(barrel).toContain("./repository-design-index.js");
     expect(barrel).toContain("./context-capsule.js");
+    expect(barrel).toContain("./receipts/index.js");
+    expect(barrel).toContain("./verification/index.js");
   });
 });
