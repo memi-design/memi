@@ -35,6 +35,8 @@ describe("web frontend verification adapter", () => {
     expect(result.artifacts.every((artifact) =>
       /^sha256:[a-f0-9]{64}$/.test(artifact.sha256))).toBe(true);
     expect(result.manifestSha256).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(result.evidenceRootSha256).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(JSON.stringify(result)).not.toContain(root);
     expect(Object.isFrozen(result)).toBe(true);
     expect(Object.isFrozen(result.artifacts)).toBe(true);
     expect(Object.isFrozen(result.artifacts[0])).toBe(true);
@@ -80,6 +82,24 @@ describe("web frontend verification adapter", () => {
       runStartedAt: STARTED_AT,
       runCompletedAt: COMPLETED_AT,
     }, fixtureDriver(stale));
+
+    expect(result.status).toBe("rejected");
+    expect(result.reasons).toContain("artifact-stale:desktop-default");
+  });
+
+  it("rejects a file whose filesystem timestamp predates the run", async () => {
+    const root = await evidenceRoot();
+    const candidates = await writeCompleteEvidence(root);
+    const target = candidates.find((candidate) =>
+      candidate.requirementId === "desktop-default")!;
+    const staleTimestamp = new Date("2026-08-06T11:59:59.000Z");
+    await utimes(join(root, target.path), staleTimestamp, staleTimestamp);
+
+    const result = await runWebVerificationAdapter({
+      evidenceRoot: root,
+      runStartedAt: STARTED_AT,
+      runCompletedAt: COMPLETED_AT,
+    }, fixtureDriver(candidates));
 
     expect(result.status).toBe("rejected");
     expect(result.reasons).toContain("artifact-stale:desktop-default");
@@ -188,7 +208,7 @@ describe("web frontend verification adapter", () => {
     const root = await evidenceRoot();
     const driver: WebVerificationDriver = {
       capture: vi.fn(async () => {
-        throw new Error("browser crashed");
+        throw new Error("browser crashed with token=do-not-persist");
       }),
     };
 
@@ -199,7 +219,8 @@ describe("web frontend verification adapter", () => {
     }, driver);
 
     expect(result.status).toBe("rejected");
-    expect(result.reasons).toEqual(["capture-failed:browser crashed"]);
+    expect(result.reasons).toEqual(["capture-failed:Error"]);
+    expect(JSON.stringify(result)).not.toContain("do-not-persist");
     expect(result.artifacts).toEqual([]);
   });
 
