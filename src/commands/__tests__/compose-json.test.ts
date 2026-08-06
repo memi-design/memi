@@ -213,7 +213,7 @@ describe("compose --json", () => {
       status: "written",
       schemaVersion: "workflow-receipt.v3",
     });
-    const receiptFiles = await readdir(receiptRoot);
+    const receiptFiles = (await readdir(receiptRoot)).filter((file) => file.endsWith(".json"));
     expect(receiptFiles).toHaveLength(1);
     const receipt = WorkflowReceiptV3Schema.parse(JSON.parse(
       await readFile(join(receiptRoot, receiptFiles[0]!), "utf8"),

@@ -1,4 +1,5 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 import type { AgentPlan } from "../agents/plan-builder.js";
 import type { AgentExecutionResult } from "../agents/sub-agents.js";
@@ -51,7 +52,7 @@ export async function writeComposeReceiptV3(input: {
   }
   const receiptRoot = resolve(input.receiptRoot);
   await mkdir(receiptRoot, { recursive: true });
-  const sequence = await nextReceiptSequence(receiptRoot);
+  const sequence = await reserveReceiptSequence(receiptRoot);
   const completedAtMs = Math.max(input.startedAtMs, input.completedAtMs);
   const startedAt = new Date(input.startedAtMs).toISOString();
   const completedAt = new Date(completedAtMs).toISOString();
@@ -192,7 +193,40 @@ export function deriveComposeStopReason(
   return status === "completed" ? "verification-failed" : "attempt-limit-reached";
 }
 
-async function nextReceiptSequence(root: string): Promise<number> {
+export async function reserveReceiptSequence(root: string): Promise<number> {
+  const lockFile = resolve(root, ".workflow-receipt-v3.sequence.lock");
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    let handle;
+    try {
+      handle = await open(lockFile, "wx");
+      const counterFile = resolve(root, ".workflow-receipt-v3.sequence");
+      const stored = await readFile(counterFile, "utf8").catch(() => null);
+      const parsed = stored === null ? null : Number.parseInt(stored.trim(), 10);
+      const sequence = parsed !== null && Number.isSafeInteger(parsed) && parsed >= 0
+        ? parsed
+        : await nextReceiptSequenceFromLedger(root);
+      const temporary = resolve(root, `.workflow-receipt-v3.sequence.${process.pid}.${randomUUID()}`);
+      try {
+        await writeFile(temporary, `${sequence + 1}\n`, { encoding: "utf8", flag: "wx" });
+        await rename(temporary, counterFile);
+      } finally {
+        await unlink(temporary).catch(() => undefined);
+      }
+      return sequence;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      await delay(10);
+    } finally {
+      if (handle) {
+        await handle.close();
+        await unlink(lockFile).catch(() => undefined);
+      }
+    }
+  }
+  throw new Error("Timed out reserving a WorkflowReceiptV3 sequence");
+}
+
+async function nextReceiptSequenceFromLedger(root: string): Promise<number> {
   const sequences = await Promise.all((await readdir(root))
     .filter((file) => file.endsWith(".json"))
     .map(async (file) => {
@@ -202,6 +236,10 @@ async function nextReceiptSequence(root: string): Promise<number> {
       return parsed.success ? parsed.data.sequence : -1;
     }));
   return Math.max(-1, ...sequences) + 1;
+}
+
+async function delay(milliseconds: number): Promise<void> {
+  await new Promise<void>((resolveDelay) => setTimeout(resolveDelay, milliseconds));
 }
 
 export function portableSkillPath(file: string, projectRoot: string): string {
