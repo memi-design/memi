@@ -20,12 +20,14 @@ export interface ChronologicalReplayReducerInput<State> {
 export interface ChronologicalReplayInput<State> {
   readonly receipts: readonly unknown[];
   readonly asOf?: string;
+  readonly asOfSequence?: number;
   readonly initialState: State;
   readonly reduce: (input: ChronologicalReplayReducerInput<State>) => State;
 }
 
 export interface ChronologicalReplayResult<State> {
   readonly asOf: string | null;
+  readonly asOfSequence: number | null;
   readonly receiptsAvailable: number;
   readonly receiptsReplayed: number;
   readonly finalState: Readonly<State>;
@@ -42,11 +44,20 @@ export interface ChronologicalReplayResult<State> {
 const ReplayEnvelopeSchema = z.object({
   receipts: z.array(z.unknown()),
   asOf: TimestampSchema.optional(),
+  asOfSequence: z.number().int().nonnegative().optional(),
   initialState: z.unknown(),
   reduce: z.custom<(...args: never[]) => unknown>((value) => typeof value === "function", {
     message: "reduce must be a function",
   }),
-}).strict();
+}).strict().superRefine((value, context) => {
+  if (value.asOfSequence !== undefined && value.asOf === undefined) {
+    context.addIssue({
+      code: "custom",
+      path: ["asOfSequence"],
+      message: "asOfSequence requires an asOf timestamp",
+    });
+  }
+});
 
 export function replayWorkflowReceiptsChronologically<State>(
   input: ChronologicalReplayInput<State>,
@@ -64,8 +75,13 @@ export function replayWorkflowReceiptsChronologically<State>(
   }
 
   const eligible = envelope.asOf
-    ? receipts.filter((receipt) =>
-      timestampMillis(receipt.recordedAt) <= timestampMillis(envelope.asOf!))
+    ? receipts.filter((receipt) => {
+      const receiptTime = timestampMillis(receipt.recordedAt);
+      const cutoffTime = timestampMillis(envelope.asOf!);
+      if (receiptTime !== cutoffTime) return receiptTime < cutoffTime;
+      return envelope.asOfSequence === undefined
+        || receipt.sequence <= envelope.asOfSequence;
+    })
     : receipts;
   let state = deepFreeze(cloneSerializable(envelope.initialState as State));
   const priorReceipts: Readonly<WorkflowReceiptV3>[] = [];
@@ -91,6 +107,7 @@ export function replayWorkflowReceiptsChronologically<State>(
 
   return deepFreeze({
     asOf: envelope.asOf ?? null,
+    asOfSequence: envelope.asOfSequence ?? null,
     receiptsAvailable: receipts.length,
     receiptsReplayed: eligible.length,
     finalState: state,
