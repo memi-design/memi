@@ -108,11 +108,20 @@ describe("compose --json", () => {
       contextExpansion: { state: "unused" },
     });
     const contractPath = join(engine.config.projectRoot, "task-contract.json");
+    await mkdir(join(engine.config.projectRoot, "src"), { recursive: true });
+    await writeFile(
+      join(engine.config.projectRoot, "src", "SettingsPanel.tsx"),
+      "export const SettingsPanel = () => null;\n",
+    );
+    await writeFile(
+      join(engine.config.projectRoot, "package-lock.json"),
+      JSON.stringify({ lockfileVersion: 3 }),
+    );
     await writeFile(contractPath, JSON.stringify(contract));
     await execFileAsync("git", ["init", "--quiet"], { cwd: engine.config.projectRoot });
     await execFileAsync("git", ["config", "user.name", "Memi Test"], { cwd: engine.config.projectRoot });
     await execFileAsync("git", ["config", "user.email", "test@memi.invalid"], { cwd: engine.config.projectRoot });
-    await execFileAsync("git", ["add", "package.json", "task-contract.json"], { cwd: engine.config.projectRoot });
+    await execFileAsync("git", ["add", "."], { cwd: engine.config.projectRoot });
     await execFileAsync("git", ["commit", "--quiet", "-m", "fixture"], { cwd: engine.config.projectRoot });
     const receiptRoot = join(engine.config.projectRoot, "receipts");
     const logs = captureLogs();
@@ -150,6 +159,11 @@ describe("compose --json", () => {
       receiptRoot: true,
     });
     expect(payload.plan.skillRoute).toBeNull();
+    expect(payload.plan.contextCapsule).toMatchObject({
+      schemaVersion: "context-capsule.v1",
+      contentByteLength: expect.any(Number),
+      identitySha256: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
+    });
     expect(payload.receipt).toMatchObject({
       status: "written",
       schemaVersion: "workflow-receipt.v3",
@@ -161,6 +175,9 @@ describe("compose --json", () => {
     ));
     expect(receipt.route.decision).toBe("repository-only");
     expect(receipt.nativeEvidence.status).toBe("excluded");
+    expect(receipt.contextCapsules.initial.identitySha256).toBe(
+      payload.plan.contextCapsule.identitySha256,
+    );
   });
 
   it("reports autoSync false when compose runs with --no-figma", async () => {
