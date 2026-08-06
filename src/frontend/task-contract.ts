@@ -12,6 +12,15 @@ export const FrontendTaskClassSchema = z.enum([
   "frontend-modification",
   "frontend-repair",
   "frontend-audit",
+  "design-system-map",
+  "component-map",
+  "token-map",
+  "responsive-layout",
+  "adaptive-interaction",
+  "interface-state-implementation",
+  "accessibility-check",
+  "keyboard-focus-verification",
+  "semantic-interface-verification",
 ]);
 
 export const FrontendPlatformSchema = z.enum(["web", "expo", "swiftui"]);
