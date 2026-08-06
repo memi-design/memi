@@ -42,6 +42,7 @@ export interface SubAgentExecutionOptions {
   readonly signal?: AbortSignal;
   readonly maxOutputTokens?: number;
   readonly beforeApplyAIResult?: () => void;
+  readonly mutationsAllowed?: boolean;
 }
 
 // ── Sub-Agent Runner ─────────────────────────────────────
@@ -63,6 +64,16 @@ export class SubAgentRunner {
     "responsive-specialist",
   ];
 
+  static readonly MUTATION_CAPABLE_AGENT_TYPES: ReadonlySet<SubAgentType> = new Set([
+    "token-engineer",
+    "component-architect",
+    "layout-designer",
+    "dataviz-specialist",
+    "figma-executor",
+    "code-generator",
+    "theme-builder",
+  ]);
+
   // ── Main Dispatch ──────────────────────────────────────
 
   async executeSubTask(
@@ -73,6 +84,14 @@ export class SubAgentRunner {
   ): Promise<unknown> {
     log.info({ taskId: task.id, agent: task.agentType, name: task.name }, "Executing sub-task");
     options.signal?.throwIfAborted();
+    if (
+      options.mutationsAllowed === false
+      && SubAgentRunner.MUTATION_CAPABLE_AGENT_TYPES.has(task.agentType)
+    ) {
+      throw new Error(
+        `Contracted mutation route ${task.agentType} requires a transaction-safe adapter`,
+      );
+    }
 
     // Try AI-powered execution first if available
     if (ai && SubAgentRunner.AI_AGENT_TYPES.includes(task.agentType)) {

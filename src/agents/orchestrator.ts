@@ -373,6 +373,8 @@ export class AgentOrchestrator {
             await this.updateAgentBox(
               this.makeAgentBoxUpdate(plan, task, taskIndex, "error"),
             );
+
+            if (err instanceof ExecutionBudgetExceededError) throw err;
           }
 
           completed.add(task.id);
@@ -505,6 +507,7 @@ export class AgentOrchestrator {
           signal,
           ...(budget ? { maxOutputTokens: budget.remainingOutputTokens } : {}),
           beforeApplyAIResult: observeProviderUsage,
+          mutationsAllowed: !budget,
         });
         observeProviderUsage();
         budget?.finishImplementationAttempt(attemptNumber, "completed");
