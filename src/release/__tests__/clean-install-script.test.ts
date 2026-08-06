@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  assertProductionAudit,
   assertExpectedVersion,
   npmExecutable,
   packageInstallPaths,
@@ -29,6 +30,15 @@ describe("clean install smoke helpers", () => {
     expect(() => assertExpectedVersion("2.6.1\n", "2.6.2")).toThrow(
       "installed memi reported 2.6.1; expected 2.6.2",
     );
+  });
+
+  it("rejects high or critical advisories from the packed consumer graph", () => {
+    expect(assertProductionAudit(JSON.stringify({
+      metadata: { vulnerabilities: { low: 0, moderate: 1, high: 0, critical: 0 } },
+    }))).toEqual({ high: 0, critical: 0 });
+    expect(() => assertProductionAudit(JSON.stringify({
+      metadata: { vulnerabilities: { low: 0, moderate: 0, high: 1, critical: 0 } },
+    }))).toThrow("packed consumer graph has 1 high and 0 critical advisories");
   });
 
   it("resolves a scoped package and its installed binary target inside the consumer", () => {
