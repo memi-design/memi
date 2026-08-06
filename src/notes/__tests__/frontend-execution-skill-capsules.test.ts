@@ -10,6 +10,7 @@ import { resolveForIntent } from "../resolver.js";
 const execFileAsync = promisify(execFile);
 const projectRoot = process.cwd();
 const capsuleBudgetBytes = 4_096;
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const expectedSkills = [
   {
     id: "map-design-system",
@@ -88,7 +89,7 @@ describe("frontend execution skill capsules", () => {
 
   it("ships every capsule and its agent metadata in the npm package", async () => {
     const { stdout } = await execFileAsync(
-      "npm",
+      npmCommand,
       ["pack", "--dry-run", "--json", "--ignore-scripts"],
       { cwd: projectRoot, maxBuffer: 10 * 1024 * 1024 },
     );
