@@ -34,6 +34,18 @@ function validContractInput() {
 }
 
 describe("FrontendTaskContractV1", () => {
+  it("admits exact frontend routing classes without broadening arbitrary values", () => {
+    expect(createFrontendTaskContract({
+      ...validContractInput(),
+      taskClass: "responsive-layout",
+    }).taskClass).toBe("responsive-layout");
+
+    expect(() => createFrontendTaskContract({
+      ...validContractInput(),
+      taskClass: "whatever-the-model-invented",
+    } as never)).toThrow();
+  });
+
   it("normalizes set-like fields deterministically and freezes the result", () => {
     const contract = createFrontendTaskContract(validContractInput());
 
