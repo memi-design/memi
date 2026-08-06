@@ -335,6 +335,48 @@ describe("WorkflowReceiptV3", () => {
     })).toThrow(/budget/i);
   });
 
+  it("rejects a receipt that drops a contracted implementation attempt", () => {
+    const input = receiptInput();
+    expect(() => createWorkflowReceiptV3({
+      ...input,
+      execution: {
+        ...input.execution,
+        attempts: [input.execution.attempts[1]],
+        retries: [],
+        usage: input.execution.attempts[1].usage,
+        budgetEnforcement: {
+          ceilings: {
+            inputTokens: 1_000,
+            outputTokens: 200,
+            reasoningTokens: 100,
+            wallTimeMs: 60_000,
+            toolCalls: 10,
+            implementationAttempts: 2,
+          },
+          observed: {
+            inputTokens: input.execution.attempts[1].usage.inputTokens,
+            outputTokens: input.execution.attempts[1].usage.outputTokens,
+            reasoningTokens: input.execution.attempts[1].usage.reasoningTokens,
+            toolCalls: input.execution.attempts[1].usage.toolCalls,
+            wallTimeMs: input.execution.attempts[1].usage.agentWallTimeMs,
+          },
+          measurement: {
+            inputTokens: "measured",
+            outputTokens: "measured",
+            reasoningTokens: "measured",
+            toolCalls: "measured",
+          },
+          implementationAttempts: 2,
+          exceededDimensions: [],
+          stopReason: null,
+          limitations: ["provider-request-cancellation-unavailable"],
+          attempts: [],
+          retries: [],
+        },
+      },
+    })).toThrow(/attempt/i);
+  });
+
   it("binds exact task classes shared with the public task contract", () => {
     const input = receiptInput();
     const receipt = createWorkflowReceiptV3({

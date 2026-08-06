@@ -184,6 +184,60 @@ describe("AgentOrchestrator compose targeting", () => {
     expect(budget.report().implementationAttempts).toBe(1);
   });
 
+  it("marks every external-agent usage dimension unavailable without trusted totals", async () => {
+    const { engine } = makeEngine([]);
+    engine.agentRegistry = {
+      getAvailableAgent() { return { id: "external-1" }; },
+      markBusy: vi.fn(),
+    } as never;
+    engine.taskQueue = {
+      enqueue() { return "queue-1"; },
+      claim() { return null; },
+      markRunning() {},
+      async waitForTask() { return { status: "completed", result: { status: "completed" } }; },
+    } as never;
+    const orchestrator = new AgentOrchestrator(engine as never);
+    const internals = orchestrator as unknown as {
+      tryExternalOrInternal(task: unknown, context: unknown, budget: ExecutionBudgetGuard): Promise<unknown>;
+    };
+    const budget = new ExecutionBudgetGuard({
+      inputTokens: 10_000,
+      outputTokens: 2_000,
+      reasoningTokens: 2_000,
+      wallTimeMs: 120_000,
+      toolCalls: 20,
+      implementationAttempts: 2,
+    });
+
+    await expect(internals.tryExternalOrInternal({
+      id: "task-1",
+      name: "External audit",
+      agentType: "design-auditor",
+      prompt: "Audit",
+      dependencies: [],
+      status: "pending",
+    }, {
+      designSystem: { tokens: [], components: [], styles: [], lastSync: "never" },
+      specs: [],
+      figmaConnected: false,
+    }, budget)).resolves.toEqual({ status: "completed" });
+
+    expect(budget.report()).toMatchObject({
+      measurement: {
+        inputTokens: "unavailable",
+        outputTokens: "unavailable",
+        reasoningTokens: "unavailable",
+        toolCalls: "unavailable",
+      },
+      limitations: expect.arrayContaining([
+        "input-token-usage-unavailable",
+        "output-token-usage-unavailable",
+        "reasoning-token-usage-unavailable",
+        "tool-call-usage-unavailable",
+      ]),
+    });
+  });
+
   it("creates and generates only the requested page spec for page-layout intents", async () => {
     const { engine, generated, saved } = makeEngine([makeComponentSpec("ExistingCard")]);
     const orchestrator = new AgentOrchestrator(engine as never);

@@ -70,6 +70,33 @@ function makeHarness(tokens: DesignToken[] = []) {
 }
 
 describe("SubAgentRunner release contracts", () => {
+  it("checks cancellation again after awaiting heuristic discovery and before mutation", async () => {
+    const { context, registry, runner } = makeHarness();
+    const controller = new AbortController();
+    const cancellation = new Error("contracted execution canceled");
+    let releaseDiscovery!: () => void;
+    registry.getSpec.mockImplementationOnce(async () => {
+      await new Promise<void>((resolve) => { releaseDiscovery = resolve; });
+      return null;
+    });
+
+    const execution = runner.executeSubTask(
+      makeTask({
+        agentType: "component-architect",
+        name: "Create component",
+        prompt: "Create a notification card component",
+      }),
+      context,
+      null,
+      { signal: controller.signal },
+    );
+    controller.abort(cancellation);
+    releaseDiscovery();
+
+    await expect(execution).rejects.toBe(cancellation);
+    expect(registry.saveSpec).not.toHaveBeenCalled();
+  });
+
   it("never falls back to a mutating heuristic after contracted cancellation", async () => {
     const { context, registry, runner } = makeHarness();
     const controller = new AbortController();

@@ -101,4 +101,42 @@ describe("ExecutionBudgetGuard", () => {
       ],
     });
   });
+
+  it("preserves two attempts and the retry between them", () => {
+    const guard = new ExecutionBudgetGuard({ ...ceilings, implementationAttempts: 2 });
+    guard.startImplementationAttempt(1);
+    guard.observeUsage({
+      inputTokens: 30,
+      outputTokens: 10,
+      reasoningTokens: 0,
+      toolCalls: 0,
+    }, { reasoningTokens: "unavailable", toolCalls: "measured" });
+    guard.finishImplementationAttempt(1, "retryable-failure");
+    guard.recordRetry(1, "provider-transient");
+    guard.startImplementationAttempt(2);
+    guard.observeUsage({
+      inputTokens: 70,
+      outputTokens: 25,
+      reasoningTokens: 0,
+      toolCalls: 0,
+    }, { reasoningTokens: "unavailable", toolCalls: "measured" });
+    guard.finishImplementationAttempt(2, "completed");
+
+    const report = guard.report();
+    expect(report.implementationAttempts).toBe(2);
+    expect(report.attempts).toHaveLength(2);
+    expect(report.attempts.map((attempt) => attempt.outcome)).toEqual([
+      "retryable-failure",
+      "completed",
+    ]);
+    expect(report.attempts.map((attempt) => attempt.usage)).toEqual([
+      { inputTokens: 30, outputTokens: 10, reasoningTokens: 0, toolCalls: 0 },
+      { inputTokens: 40, outputTokens: 15, reasoningTokens: 0, toolCalls: 0 },
+    ]);
+    expect(report.retries).toMatchObject([{
+      retryId: "retry-1",
+      afterAttemptId: "attempt-1",
+      reason: "provider-transient",
+    }]);
+  });
 });
