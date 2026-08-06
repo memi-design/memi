@@ -166,6 +166,18 @@ function receiptInput(
 }
 
 describe("WorkflowReceiptV3", () => {
+  it("binds exact task classes shared with the public task contract", () => {
+    const input = receiptInput();
+    const receipt = createWorkflowReceiptV3({
+      ...input,
+      stable: { ...input.stable, taskClass: "responsive-layout" },
+      route: { ...input.route, taskClass: "responsive-layout" },
+    });
+
+    expect(receipt.stable.taskClass).toBe("responsive-layout");
+    expect(receipt.route.taskClass).toBe("responsive-layout");
+  });
+
   it("binds stable, route, capsule, execution, native, and verification evidence deterministically", () => {
     const first = createWorkflowReceiptV3(receiptInput());
     const second = createWorkflowReceiptV3(receiptInput());
