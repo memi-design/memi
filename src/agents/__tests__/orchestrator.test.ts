@@ -6,6 +6,7 @@ import type { InstalledNote } from "../../notes/types.js";
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { createFrontendTaskContract } from "../../frontend/task-contract.js";
 
 function makeComponentSpec(name: string): ComponentSpec {
   const now = new Date().toISOString();
@@ -203,5 +204,56 @@ describe("AgentOrchestrator compose targeting", () => {
     expect(plan?.subTasks[0].prompt).toContain("accessibility-audit");
     expect(plan?.subTasks[0].prompt).not.toContain("better-typography");
     expect(plan?.subTasks[0].prompt).not.toContain("# docker");
+  });
+
+  it("injects the exact bounded context capsule used by a contracted execution", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-orchestrator-capsule-"));
+    const notes = [await makeNote(
+      root,
+      "accessibility-audit",
+      "Audit WCAG, keyboard focus, and reduced-motion behavior.",
+      ["accessibility-audit", "wcag-review"],
+    )];
+    const { engine } = makeEngine([], notes);
+    let plan: AgentPlan | undefined;
+    const orchestrator = new AgentOrchestrator(engine as never, (nextPlan) => {
+      plan = nextPlan;
+    });
+    const contract = createFrontendTaskContract({
+      taskId: "settings-accessibility",
+      taskClass: "accessibility-check",
+      platform: "web",
+      intent: "Audit the settings panel for accessibility",
+      targetFiles: ["src/SettingsPanel.tsx"],
+      targetComponents: ["SettingsPanel"],
+      requiredStates: ["keyboard", "reduced-motion"],
+      constraints: ["Preserve behavior"],
+      verificationCommands: ["npm run test:a11y"],
+      resourceCeilings: {
+        inputTokens: 10_000,
+        outputTokens: 2_000,
+        reasoningTokens: 2_000,
+        wallTimeMs: 120_000,
+        toolCalls: 20,
+        implementationAttempts: 2,
+      },
+      contextExpansion: { state: "unused" },
+    });
+
+    await orchestrator.execute(contract.intent, {
+      dryRun: true,
+      taskClass: contract.taskClass,
+      platforms: [contract.platform],
+      routingPolicy: "v3",
+      taskContract: contract,
+      budgetProfile: "strict",
+    });
+
+    expect(plan?.contextCapsule?.schemaVersion).toBe("context-capsule.v1");
+    expect(plan?.contextCapsule?.contentByteLength).toBeLessThanOrEqual(20_480);
+    expect(plan?.subTasks[0].prompt).toContain("# Memi bounded execution capsule");
+    expect(plan?.subTasks[0].prompt).toContain(plan?.contextCapsule?.identitySha256);
+    expect(plan?.subTasks[0].prompt).toContain("src/SettingsPanel.tsx");
+    expect(plan?.subTasks[0].prompt).toContain("npm run test:a11y");
   });
 });
