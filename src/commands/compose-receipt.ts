@@ -195,7 +195,7 @@ async function nextReceiptSequence(root: string): Promise<number> {
   return Math.max(-1, ...sequences) + 1;
 }
 
-function portableSkillPath(file: string, projectRoot: string): string {
+export function portableSkillPath(file: string, projectRoot: string): string {
   for (const root of [resolve(packageRoot()), resolve(projectRoot)]) {
     const candidate = relative(root, resolve(file)).split(sep).join("/");
     if (!candidate.startsWith("../") && candidate !== ".." && !isAbsolute(candidate)) {

@@ -30,6 +30,7 @@ import {
 } from "../frontend/task-contract.js";
 import {
   writeComposeReceiptV3,
+  portableSkillPath,
   type ComposeReceiptSummary,
 } from "./compose-receipt.js";
 
@@ -159,7 +160,7 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
         const category = classifyIntent(intent);
         const orchestrator = new AgentOrchestrator(engine, (plan: AgentPlan) => {
           capturedAgentPlan = plan;
-          capturedPlan = serializePlan(plan);
+          capturedPlan = serializeComposePlan(plan, engine.config.projectRoot);
 
           if (opts.json) return;
 
@@ -320,14 +321,20 @@ function parseRoutingPolicy(value = "v3"): RoutingPolicy {
   throw new Error("routing-policy must be repository-only or v3");
 }
 
-function serializePlan(plan: AgentPlan): ComposePlanPayload {
+export function serializeComposePlan(plan: AgentPlan, projectRoot: string): ComposePlanPayload {
   return {
     id: plan.id,
     intent: plan.intent,
     category: plan.category,
     createdAt: plan.createdAt,
     totalTasks: plan.subTasks.length,
-    skillRoute: plan.skillRoute ?? null,
+    skillRoute: plan.skillRoute ? {
+      ...plan.skillRoute,
+      selected: plan.skillRoute.selected.map((selected) => ({
+        ...selected,
+        file: portableSkillPath(selected.file, projectRoot),
+      })),
+    } : null,
     contextCapsule: plan.contextCapsule ? {
       schemaVersion: plan.contextCapsule.schemaVersion,
       identitySha256: plan.contextCapsule.identitySha256,
