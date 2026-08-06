@@ -6,6 +6,7 @@ import { Command } from "commander";
 import { MemoireEngine } from "../../engine/core.js";
 import { registerComposeCommand } from "../compose.js";
 import { captureLogs, lastLog } from "./test-helpers.js";
+import { createFrontendTaskContract } from "../../frontend/task-contract.js";
 
 vi.mock("../../ai/index.js", () => ({
   hasAI: () => false,
@@ -51,6 +52,10 @@ describe("compose --json", () => {
       dryRun: true,
       autoSync: true,
       verbose: false,
+      budgetProfile: "balanced",
+      routingPolicy: "v3",
+      taskContract: null,
+      receiptRoot: false,
     });
     expect(payload.plan.totalTasks).toBeGreaterThan(0);
     expect(payload.plan.tasks[0]).toMatchObject({
@@ -73,6 +78,65 @@ describe("compose --json", () => {
       usage: null,
       mode: "agent-cli",
     });
+  });
+
+  it("loads a strict task contract and can fail closed to repository-only routing", async () => {
+    const engine = await createEngine();
+    const contract = createFrontendTaskContract({
+      taskId: "responsive-settings-panel",
+      taskClass: "responsive-layout",
+      platform: "web",
+      intent: "make the settings panel responsive",
+      targetFiles: ["src/SettingsPanel.tsx"],
+      targetComponents: ["SettingsPanel"],
+      requiredStates: ["desktop", "mobile"],
+      constraints: ["Preserve behavior"],
+      verificationCommands: ["npm test"],
+      resourceCeilings: {
+        inputTokens: 10_000,
+        outputTokens: 2_000,
+        reasoningTokens: 2_000,
+        wallTimeMs: 120_000,
+        toolCalls: 20,
+        implementationAttempts: 2,
+      },
+      contextExpansion: { state: "unused" },
+    });
+    const contractPath = join(engine.config.projectRoot, "task-contract.json");
+    await writeFile(contractPath, JSON.stringify(contract));
+    const logs = captureLogs();
+    const program = new Command();
+
+    registerComposeCommand(program, engine);
+    await program.parseAsync([
+      "compose",
+      "make",
+      "the",
+      "settings",
+      "panel",
+      "responsive",
+      "--task-contract",
+      contractPath,
+      "--budget-profile",
+      "strict",
+      "--routing-policy",
+      "repository-only",
+      "--dry-run",
+      "--json",
+    ], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(payload.options).toMatchObject({
+      budgetProfile: "strict",
+      routingPolicy: "repository-only",
+      taskContract: {
+        taskId: "responsive-settings-panel",
+        taskClass: "responsive-layout",
+        platform: "web",
+      },
+      receiptRoot: false,
+    });
+    expect(payload.plan.skillRoute).toBeNull();
   });
 
   it("reports autoSync false when compose runs with --no-figma", async () => {
