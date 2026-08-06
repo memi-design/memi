@@ -150,6 +150,15 @@ export async function runWebVerificationAdapter(
       artifacts: [],
     });
   }
+  if (!Array.isArray(rawCandidates)) {
+    return buildResult({
+      input,
+      evidenceRoot,
+      status: "rejected",
+      reasons: ["capture-invalid:candidates-must-be-an-array"],
+      artifacts: [],
+    });
+  }
 
   const admissionReasons: string[] = [];
   const verificationReasons: string[] = [];
@@ -364,16 +373,31 @@ function normalizeRelativePath(path: string): string {
 
 function isPng(bytes: Buffer): boolean {
   const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
-  return bytes.length >= signature.length
-    && signature.every((value, index) => bytes[index] === value);
+  const iend = Buffer.from([
+    0x00, 0x00, 0x00, 0x00,
+    0x49, 0x45, 0x4e, 0x44,
+    0xae, 0x42, 0x60, 0x82,
+  ]);
+  return bytes.length >= 45
+    && signature.every((value, index) => bytes[index] === value)
+    && bytes.readUInt32BE(8) === 13
+    && bytes.subarray(12, 16).equals(Buffer.from("IHDR"))
+    && bytes.subarray(bytes.length - iend.length).equals(iend);
 }
 
 function isZip(bytes: Buffer): boolean {
-  return bytes.length >= 4
-    && bytes[0] === 0x50
-    && bytes[1] === 0x4b
-    && [0x03, 0x05, 0x07].includes(bytes[2] ?? -1)
-    && [0x04, 0x06, 0x08].includes(bytes[3] ?? -1);
+  if (bytes.length < 22 || bytes[0] !== 0x50 || bytes[1] !== 0x4b) {
+    return false;
+  }
+  const initialSignature = bytes.subarray(0, 4).toString("hex");
+  if (!["504b0304", "504b0506", "504b0708"].includes(initialSignature)) {
+    return false;
+  }
+  const endSignature = Buffer.from([0x50, 0x4b, 0x05, 0x06]);
+  const endOffset = bytes.lastIndexOf(endSignature);
+  if (endOffset < 0 || endOffset + 22 > bytes.length) return false;
+  const commentLength = bytes.readUInt16LE(endOffset + 20);
+  return endOffset + 22 + commentLength === bytes.length;
 }
 
 function sha256(bytes: Buffer): `sha256:${string}` {
