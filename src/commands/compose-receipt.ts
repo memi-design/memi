@@ -4,7 +4,7 @@ import type { AgentPlan } from "../agents/plan-builder.js";
 import type { AgentExecutionResult } from "../agents/sub-agents.js";
 import type { TokenTracker } from "../ai/token-tracker.js";
 import { benchmarkRepositoryRevision } from "../efficiency/codex-runner.js";
-import { hashText, hashValue } from "../frontend/foundation.js";
+import { hashValue } from "../frontend/foundation.js";
 import {
   WorkflowReceiptV3Schema,
   createWorkflowReceiptV3,
@@ -13,6 +13,7 @@ import type { FrontendTaskContractV1 } from "../frontend/task-contract.js";
 import { buildRepositoryFingerprint } from "../notes/repository-fingerprint.js";
 import { packageRoot } from "../utils/asset-path.js";
 import { getMemoirePackageVersion } from "../utils/package-version.js";
+import { hashPackedPackageSurface } from "../utils/package-artifact.js";
 
 export interface ComposeReceiptSummary {
   readonly status: "written";
@@ -65,8 +66,8 @@ export async function writeComposeReceiptV3(input: {
     agentWallTimeMs: completedAtMs - input.startedAtMs,
     toolWallTimeMs: 0,
   };
-  const packageManifest = await readFile(resolve(packageRoot(), "package.json"), "utf8");
   const packageVersion = getMemoirePackageVersion();
+  const candidateArtifactSha256 = await hashPackedPackageSurface(packageRoot());
   const route = selected ? {
     decision: "selected" as const,
     routerVersion: input.plan.skillRoute!.routerVersion,
@@ -117,7 +118,7 @@ export async function writeComposeReceiptV3(input: {
     candidate: {
       condition: "memi",
       candidateId: `memi-${packageVersion}`,
-      artifactSha256: hashText(packageManifest),
+      artifactSha256: candidateArtifactSha256,
     },
     route,
     contextCapsules: {
