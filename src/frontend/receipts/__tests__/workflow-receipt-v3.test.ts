@@ -515,4 +515,37 @@ describe("WorkflowReceiptV3", () => {
     }));
     expect(() => assertExactRouteReceiptFields([first, changed])).toThrow(/exact route/i);
   });
+
+  it("binds a distinct second skill into stacked exact-route identity", () => {
+    const route = receiptInput().route;
+    if (route.decision !== "selected") throw new Error("test fixture must select a route");
+    const first = createWorkflowReceiptV3(receiptInput({
+      route: {
+        ...route,
+        additionalSkills: [{
+          id: "verify-interface-accessibility",
+          file: "skills/verify-interface-accessibility/SKILL.md",
+          contentSha256: sha("e"),
+        }],
+      },
+    }));
+    const changed = createWorkflowReceiptV3(receiptInput({
+      receiptId: "receipt-web-002",
+      sequence: 2,
+      route: {
+        ...route,
+        additionalSkills: [{
+          id: "verify-interface-accessibility",
+          file: "skills/verify-interface-accessibility/SKILL.md",
+          contentSha256: sha("f"),
+        }],
+      },
+    }));
+
+    expect(first.route.decision).toBe("selected");
+    if (first.route.decision !== "selected") throw new Error("route must be selected");
+    expect(first.route.additionalSkills).toHaveLength(1);
+    expect(first.route.identitySha256).not.toBe(changed.route.identitySha256);
+    expect(() => assertExactRouteReceiptFields([first, changed])).toThrow(/exact route/i);
+  });
 });
