@@ -187,10 +187,25 @@ const NativeEvidenceArtifactSchema = z.object({
   freshnessWindowMs: z.number().int().positive().max(24 * 60 * 60 * 1_000),
 }).strict();
 
-const NativeEvidenceSchema = z.object({
-  platform: z.enum(["web", "expo", "swiftui"]),
-  artifacts: z.array(NativeEvidenceArtifactSchema).min(1).max(32),
-}).strict();
+const NativeEvidenceSchema = z.discriminatedUnion("status", [
+  z.object({
+    status: z.literal("admitted"),
+    platform: z.enum(["web", "expo", "swiftui"]),
+    artifacts: z.array(NativeEvidenceArtifactSchema).min(1).max(32),
+  }).strict(),
+  z.object({
+    status: z.literal("excluded"),
+    platform: z.enum(["web", "expo", "swiftui"]),
+    artifacts: z.tuple([]),
+    reason: z.enum([
+      "missing-native-artifact",
+      "preflight-failed",
+      "driver-failed",
+      "stale-artifact",
+      "corrupt-artifact",
+    ]),
+  }).strict(),
+]);
 
 const VerificationResultSchema = z.object({
   verificationId: IdentifierSchema,
@@ -419,6 +434,12 @@ function validateNativeEvidence(
   receipt: z.infer<typeof ReceiptContentSchema>,
   context: z.RefinementCtx,
 ): void {
+  if (
+    receipt.nativeEvidence.status === "excluded"
+    && receipt.execution.stopReason === "verification-passed"
+  ) {
+    issue(context, ["nativeEvidence", "status"], "excluded native evidence cannot pass verification");
+  }
   const artifacts = receipt.nativeEvidence.artifacts;
   uniqueIssues(artifacts.map((artifact) => artifact.evidenceId), "native evidence", ["nativeEvidence", "artifacts"], context);
   uniqueIssues(artifacts.map((artifact) => artifact.file), "native evidence file", ["nativeEvidence", "artifacts"], context);
