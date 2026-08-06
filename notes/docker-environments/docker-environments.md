@@ -81,7 +81,7 @@ services:
 ```dockerfile
 FROM node:20-alpine AS base
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json npm-shrinkwrap.json ./
 RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
@@ -183,7 +183,7 @@ Soft policy: gate on `2+`. Strict policy: gate on `1+`.
 ```dockerfile
 FROM node:20-alpine
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json npm-shrinkwrap.json ./
 RUN npm ci
 COPY . .
 RUN npm run build

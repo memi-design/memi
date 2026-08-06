@@ -1,5 +1,5 @@
 {
-  "version": "2.7.8",
+  "version": "2.7.9",
   "description": "Mémoire skill registry — defines available skills, activation contexts, and dependencies",
   "defaultSkill": "SUPERPOWER",
   "skills": [

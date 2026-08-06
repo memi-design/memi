@@ -32,6 +32,24 @@ export function assertExpectedVersion(stdout, expectedVersion) {
   return installedVersion;
 }
 
+export function assertProductionAudit(stdout) {
+  let payload;
+  try {
+    payload = JSON.parse(stdout);
+  } catch {
+    throw new Error("npm audit returned invalid JSON for the packed consumer graph");
+  }
+  const high = Number(payload?.metadata?.vulnerabilities?.high ?? 0);
+  const critical = Number(payload?.metadata?.vulnerabilities?.critical ?? 0);
+  if (!Number.isInteger(high) || !Number.isInteger(critical) || high < 0 || critical < 0) {
+    throw new Error("npm audit omitted packed consumer high/critical counts");
+  }
+  if (high > 0 || critical > 0) {
+    throw new Error(`packed consumer graph has ${high} high and ${critical} critical advisories`);
+  }
+  return { high, critical };
+}
+
 export function packageInstallPaths(consumerRoot, packageName, binaryTarget) {
   if (
     !/^(@[a-z0-9._~-]+\/)?[a-z0-9._~-]+$/i.test(packageName)
@@ -119,7 +137,6 @@ export async function runCleanInstallSmoke({
         "--ignore-scripts",
         "--no-audit",
         "--no-fund",
-        "--no-package-lock",
         "--save-exact",
         artifact,
       ],
@@ -129,6 +146,23 @@ export async function runCleanInstallSmoke({
         shell: npm.shell,
       },
     );
+
+    const auditResult = await run(
+      npm.command,
+      [
+        ...npm.prefixArgs,
+        "audit",
+        "--omit=dev",
+        "--audit-level=high",
+        "--json",
+      ],
+      {
+        cwd: consumerRoot,
+        env: scriptsDisabledEnv,
+        shell: npm.shell,
+      },
+    );
+    const productionAudit = assertProductionAudit(auditResult.stdout);
 
     const installedPackageJsonPath = join(
       consumerRoot,
@@ -171,6 +205,7 @@ export async function runCleanInstallSmoke({
       nodeVersion: process.version,
       platform,
       scriptsDisabled: true,
+      productionAudit,
       passed: true,
     };
   } finally {

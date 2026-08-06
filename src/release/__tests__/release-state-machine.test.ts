@@ -297,6 +297,10 @@ describe("verified engine release state machine", () => {
       state: "candidate",
       sourceCommit: null,
       releaseRecord: null,
+      previousPublicRelease: {
+        version: "2.6.2",
+        sourceCommit: "c".repeat(40),
+      },
     });
     const snapshot = {
       "package.json": {
@@ -308,7 +312,7 @@ describe("verified engine release state machine", () => {
           "publish:smithery": "publish .dist/memi-2.6.3.mcpb",
         },
       },
-      "package-lock.json": { version: "2.6.3", packages: { "": { version: "2.6.3" } } },
+      "npm-shrinkwrap.json": { version: "2.6.3", packages: { "": { version: "2.6.3" } } },
       "server.json": {
         name: "io.github.sarveshsea/memi",
         version: "2.6.3",
@@ -318,7 +322,7 @@ describe("verified engine release state machine", () => {
       "plugins/memoire/.codex-plugin/plugin.json": { version: "2.6.3" },
       "plugins/memi-claude/.claude-plugin/plugin.json": { version: "2.6.3" },
       "plugin/widget-meta.json": { packageVersion: "2.6.3" },
-      "action.yml": 'default: "2.6.3"\ndescription: "reviewed 2.6.3 pin"',
+      "action.yml": 'default: "2.6.2"\ndescription: "reviewed 2.6.2 pin"',
     };
 
     expect(validateEngineSurfaceSnapshot(manifest, snapshot)).toEqual([]);
@@ -326,6 +330,35 @@ describe("verified engine release state machine", () => {
       ...snapshot,
       "server.json": { ...snapshot["server.json"], version: "2.6.2" },
     })).toContain("server.json version 2.6.2 does not match release manifest 2.6.3");
+  });
+
+  it("rejects unbound superseded npm-only release provenance", () => {
+    const manifest = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+      previousPublicRelease: {
+        version: "2.6.1",
+        sourceCommit: "c".repeat(40),
+      },
+      supersededPartialReleases: [{
+        version: "2.6.2",
+        scope: "npm-only",
+        sourceCommit: "not-a-commit",
+        releaseRecord: {
+          path: "release-artifacts/npm/2.6.2.release.json",
+          sha256: "not-a-digest",
+        },
+        supersededBy: "2.6.3",
+      }],
+    });
+
+    expect(validateReleaseManifest(manifest)).toContain(
+      "candidate supersededPartialReleases[0] must include an exact version and source commit",
+    );
+    expect(validateReleaseManifest(manifest)).toContain(
+      "candidate supersededPartialReleases[0] release record must include its SHA-256",
+    );
   });
 
   it("binds a published transition to the exact candidate, source commit, and record bytes", () => {

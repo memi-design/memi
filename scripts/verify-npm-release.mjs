@@ -326,7 +326,7 @@ async function readWorkingSurfaceSnapshot() {
   const json = async (path) => JSON.parse(await readFile(join(root, path), "utf8"));
   return {
     "package.json": await json("package.json"),
-    "package-lock.json": await json("package-lock.json"),
+    "npm-shrinkwrap.json": await json("npm-shrinkwrap.json"),
     "server.json": await json("server.json"),
     "mcpb/manifest.json": await json("mcpb/manifest.json"),
     "plugins/memoire/.codex-plugin/plugin.json": await json("plugins/memoire/.codex-plugin/plugin.json"),
@@ -340,7 +340,7 @@ function readSurfaceSnapshotAtCommit(commit) {
   const json = (path) => readJsonAtCommit(commit, path);
   return {
     "package.json": json("package.json"),
-    "package-lock.json": json("package-lock.json"),
+    "npm-shrinkwrap.json": json("npm-shrinkwrap.json"),
     "server.json": json("server.json"),
     "mcpb/manifest.json": json("mcpb/manifest.json"),
     "plugins/memoire/.codex-plugin/plugin.json": json("plugins/memoire/.codex-plugin/plugin.json"),

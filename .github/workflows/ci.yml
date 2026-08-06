@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: npm-shrinkwrap.json
       - run: npm install --ignore-scripts
       - name: Install DesignWorkBench runner dependencies
         run: |
@@ -59,7 +59,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: npm-shrinkwrap.json
       - run: npm install --ignore-scripts
       - run: npm run build
       - name: memi ci (self-gate)

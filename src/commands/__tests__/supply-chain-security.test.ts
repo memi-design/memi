@@ -22,11 +22,13 @@ describe("public package supply-chain defaults", () => {
 
   it("pins patched production dependency ranges in the lockfile", async () => {
     const root = process.cwd();
-    const lock = JSON.parse(await readFile(join(root, "package-lock.json"), "utf-8"));
+    const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
+    const lock = JSON.parse(await readFile(join(root, "npm-shrinkwrap.json"), "utf-8"));
 
+    expect(pkg.files).toContain("npm-shrinkwrap.json");
     expect(lock.packages["node_modules/@chenglou/pretext"]?.version).toBe("0.0.6");
     expect(lock.packages["node_modules/path-to-regexp"]?.version).toMatch(/^8\.[4-9]\./);
-    expect(lock.packages["node_modules/hono"]?.version).toMatch(/^4\.12\.(2[5-9]|[3-9][0-9])$/);
+    expect(lock.packages["node_modules/hono"]?.version).toBe("4.13.0");
   });
 
   it("keeps raw Figma JavaScript execution out of public source paths", async () => {
@@ -52,14 +54,27 @@ describe("public package supply-chain defaults", () => {
 
   it("pins patched production dependency resolutions", async () => {
     const pkg = JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf-8"));
-    const lock = JSON.parse(await readFile(join(process.cwd(), "package-lock.json"), "utf-8"));
+    const lock = JSON.parse(await readFile(join(process.cwd(), "npm-shrinkwrap.json"), "utf-8"));
 
     expect(pkg.dependencies.tar).toBe("7.5.22");
+    expect(pkg.dependencies["@modelcontextprotocol/sdk"]).toBe("1.30.0");
+    expect(pkg.dependencies["@hono/node-server"]).toBe("2.1.0");
+    expect(pkg.dependencies["fast-uri"]).toBe("3.1.5");
+    expect(pkg.dependencies.hono).toBe("4.13.0");
+    expect(pkg.dependencies["ip-address"]).toBe("10.4.0");
     expect(lock.packages["node_modules/tar"]?.version).toBe("7.5.22");
-    expect(lock.packages["node_modules/fast-uri"]?.version).toBe("3.1.4");
-    expect(lock.packages["node_modules/hono"]?.version).toBe("4.12.32");
+    expect(lock.packages["node_modules/fast-uri"]?.version).toBe("3.1.5");
+    expect(lock.packages["node_modules/hono"]?.version).toBe("4.13.0");
+    expect(lock.packages["node_modules/ip-address"]?.version).toBe("10.4.0");
     expect(lock.packages["node_modules/body-parser"]?.version).toBe("2.3.0");
-    expect(lock.packages["node_modules/@hono/node-server"]?.version).toBe("2.0.12");
+    expect(lock.packages["node_modules/@hono/node-server"]?.version).toBe("2.1.0");
+  });
+
+  it("builds the source container from the publishable shrinkwrap", async () => {
+    const dockerfile = await readFile(join(process.cwd(), "Dockerfile"), "utf-8");
+
+    expect(dockerfile).toContain("COPY package.json npm-shrinkwrap.json ./");
+    expect(dockerfile).not.toContain("package-lock.json");
   });
 
   it("validates standalone installer archive entries before extraction", async () => {

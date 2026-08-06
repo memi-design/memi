@@ -44,7 +44,7 @@ const SKIPPED_DIRS = new Set([
   "vendor",
 ]);
 const SKIPPED_FILES = new Set([
-  "package-lock.json",
+  "npm-shrinkwrap.json",
   "pnpm-lock.yaml",
   "yarn.lock",
   "bun.lockb",

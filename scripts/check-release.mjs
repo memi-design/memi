@@ -288,12 +288,12 @@ for (const command of ["diagnose [target]", "ux audit [target]", "craft audit [t
   }
 }
 
-const lockfile = await readJson(join(root, "package-lock.json"));
+const lockfile = await readJson(join(root, "npm-shrinkwrap.json"));
 if (lockfile.version !== version) {
-  fail(`package-lock.json version ${lockfile.version} does not match package.json ${version}`);
+  fail(`npm-shrinkwrap.json version ${lockfile.version} does not match package.json ${version}`);
 }
 if (lockfile.packages?.[""]?.version !== version) {
-  fail(`package-lock.json root package version ${lockfile.packages?.[""]?.version} does not match package.json ${version}`);
+  fail(`npm-shrinkwrap.json root package version ${lockfile.packages?.[""]?.version} does not match package.json ${version}`);
 }
 
 const mcpServerJson = await readJson(join(root, "server.json"));

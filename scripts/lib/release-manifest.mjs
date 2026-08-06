@@ -139,6 +139,35 @@ function validateEngineManifestState(engine) {
         ));
       }
     }
+    if (engine.supersededPartialReleases !== undefined) {
+      if (!Array.isArray(engine.supersededPartialReleases)) {
+        failures.push("candidate supersededPartialReleases must be an array");
+      } else {
+        const seenVersions = new Set();
+        for (const [index, partial] of engine.supersededPartialReleases.entries()) {
+          const label = `candidate supersededPartialReleases[${index}]`;
+          if (!SEMVER.test(partial?.version ?? "")
+            || !COMMIT_SHA.test(partial?.sourceCommit ?? "")) {
+            failures.push(`${label} must include an exact version and source commit`);
+          }
+          if (partial?.scope !== "npm-only") {
+            failures.push(`${label} scope must be npm-only`);
+          }
+          if (partial?.supersededBy !== engine.version) {
+            failures.push(`${label} supersededBy must equal candidate ${engine.version}`);
+          }
+          if (seenVersions.has(partial?.version)) {
+            failures.push(`${label} version must be unique`);
+          }
+          seenVersions.add(partial?.version);
+          failures.push(...validateReleaseRecordPointer(
+            partial?.releaseRecord,
+            partial?.version,
+            label,
+          ));
+        }
+      }
+    }
     return failures;
   }
 
@@ -715,7 +744,7 @@ export function validateEngineSurfaceSnapshot(manifest, snapshot) {
   const npm = manifest?.surfaces?.npm;
   const mcp = manifest?.surfaces?.mcp;
   const packageJson = snapshot?.["package.json"];
-  const packageLock = snapshot?.["package-lock.json"];
+  const packageLock = snapshot?.["npm-shrinkwrap.json"];
   const server = snapshot?.["server.json"];
   const mcpb = snapshot?.["mcpb/manifest.json"];
   const codexPlugin = snapshot?.["plugins/memoire/.codex-plugin/plugin.json"];
@@ -725,8 +754,8 @@ export function validateEngineSurfaceSnapshot(manifest, snapshot) {
 
   const exactVersions = [
     ["package.json", packageJson?.version],
-    ["package-lock.json", packageLock?.version],
-    ["package-lock.json root", packageLock?.packages?.[""]?.version],
+    ["npm-shrinkwrap.json", packageLock?.version],
+    ["npm-shrinkwrap.json root", packageLock?.packages?.[""]?.version],
     ["server.json", server?.version],
     ["server.json npm package", server?.packages?.find((entry) => entry.registryType === "npm")?.version],
     ["mcpb/manifest.json", mcpb?.version],
@@ -743,11 +772,15 @@ export function validateEngineSurfaceSnapshot(manifest, snapshot) {
   if (packageJson?.mcpName !== mcp?.serverName || server?.name !== mcp?.serverName) {
     failures.push("package.json and server.json MCP names must match the release manifest");
   }
-  if (typeof action !== "string" || !action.includes(`default: "${version}"`)) {
-    failures.push(`action.yml default CLI version does not match release manifest ${version}`);
+  const actionVersion = manifest?.releaseGroups?.engine?.state === "candidate"
+    ? (manifest.releaseGroups.engine.supersededPartialReleases?.at(-1)?.version
+      ?? manifest.releaseGroups.engine.previousPublicRelease?.version)
+    : version;
+  if (typeof action !== "string" || !action.includes(`default: "${actionVersion}"`)) {
+    failures.push(`action.yml default CLI version does not match available npm release ${actionVersion}`);
   }
-  if (typeof action !== "string" || !action.includes(`reviewed ${version} pin`)) {
-    failures.push(`action.yml version description does not match release manifest ${version}`);
+  if (typeof action !== "string" || !action.includes(`reviewed ${actionVersion} pin`)) {
+    failures.push(`action.yml version description does not match available npm release ${actionVersion}`);
   }
   for (const scriptName of ["build:mcpb", "publish:smithery"]) {
     if (!packageJson?.scripts?.[scriptName]?.includes(`memi-${version}.mcpb`)) {
@@ -804,7 +837,7 @@ function readSurfaceSnapshotFromGit(root, commit) {
   const json = (path) => JSON.parse(show(path));
   return {
     "package.json": json("package.json"),
-    "package-lock.json": json("package-lock.json"),
+    "npm-shrinkwrap.json": json("npm-shrinkwrap.json"),
     "server.json": json("server.json"),
     "mcpb/manifest.json": json("mcpb/manifest.json"),
     "plugins/memoire/.codex-plugin/plugin.json": json("plugins/memoire/.codex-plugin/plugin.json"),
@@ -1108,7 +1141,7 @@ export async function verifyCoreReleaseSurfaces(root, manifest) {
   const readJson = async (path) => JSON.parse(await readFile(join(root, path), "utf8"));
   const snapshot = {
     "package.json": await readJson("package.json"),
-    "package-lock.json": await readJson("package-lock.json"),
+    "npm-shrinkwrap.json": await readJson("npm-shrinkwrap.json"),
     "server.json": await readJson("server.json"),
     "mcpb/manifest.json": await readJson("mcpb/manifest.json"),
     "plugins/memoire/.codex-plugin/plugin.json": await readJson("plugins/memoire/.codex-plugin/plugin.json"),
@@ -1135,6 +1168,14 @@ export async function verifyCoreReleaseSurfaces(root, manifest) {
       version: retainedRelease.version,
       sourceCommit: retainedRelease.sourceCommit,
       label: retainedRelease.label,
+    }));
+  }
+  for (const [index, partial] of (engine.supersededPartialReleases ?? []).entries()) {
+    failures.push(...await verifyReleaseRecordPointerFromDisk(root, {
+      pointer: partial.releaseRecord,
+      version: partial.version,
+      sourceCommit: partial.sourceCommit,
+      label: `candidate supersededPartialReleases[${index}]`,
     }));
   }
 

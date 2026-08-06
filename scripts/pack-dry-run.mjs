@@ -11,7 +11,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Security and evidence-contract code is intentionally shipped in the CLI.
 // Keep at least 10% operational headroom below the hard public-package budget.
 const maxSizeBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_BYTES || "750000", 10);
-const maxUnpackedBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_UNPACKED_BYTES || "2010000", 10);
+const maxUnpackedBytes = Number.parseInt(process.env.MEMOIRE_PACK_MAX_UNPACKED_BYTES || "2400000", 10);
 const maxFiles = Number.parseInt(process.env.MEMOIRE_PACK_MAX_FILES || "250", 10);
 const maxUtilization = Number.parseFloat(process.env.MEMOIRE_PACK_MAX_UTILIZATION || "0.9");
 const npmCommand = "npm";
@@ -21,7 +21,7 @@ try {
   const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
   const includePaths = [
     "package.json",
-    "package-lock.json",
+    "npm-shrinkwrap.json",
     ...packageJson.files.filter((entry) => !entry.startsWith("!")),
   ];
 

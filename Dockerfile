@@ -2,7 +2,7 @@ FROM node:20-slim
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package.json npm-shrinkwrap.json ./
 RUN npm ci --ignore-scripts
 
 COPY . .

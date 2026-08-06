@@ -30,7 +30,7 @@ describe("release manifest", () => {
       schemaVersion: 1,
       releaseGroups: {
         engine: {
-          version: "2.7.8",
+          version: "2.7.9",
           state: "candidate",
           sourceCommit: null,
           releaseRecord: null,
@@ -39,6 +39,16 @@ describe("release manifest", () => {
             sourceCommit: publishedEngineSourceCommit,
             releaseRecord: publishedReleaseRecord,
           },
+          supersededPartialReleases: [{
+            version: "2.7.8",
+            scope: "npm-only",
+            sourceCommit: "d290484535198c1f328c57986f600af544cc867a",
+            releaseRecord: {
+              path: "release-artifacts/npm/2.7.8.release.json",
+              sha256: "8b1adb07d57f71eccf372444539b7b61841547d47c255593d66af9eebe7eb3de",
+            },
+            supersededBy: "2.7.9",
+          }],
         },
         studio: { version: "2.5.0" },
         site: { version: "1.0.4" },
@@ -49,7 +59,7 @@ describe("release manifest", () => {
           releaseGroup: "engine",
           repository: "memi-design/memi",
           tagPrefix: "v",
-          url: "https://github.com/memi-design/memi/releases/tag/v2.7.8",
+          url: "https://github.com/memi-design/memi/releases/tag/v2.7.9",
         },
         githubAction: { releaseGroup: "engine", majorTag: "v2" },
         mcp: { releaseGroup: "engine", serverName: "io.github.memi-design/memi" },
@@ -128,7 +138,7 @@ describe("release manifest", () => {
     const manifest = JSON.parse(manifestText);
     const artifact = JSON.parse(await readFile(webArtifactPath, "utf8"));
     const sourceManifestText = manifestText.replace(
-      "\"updatedAt\": \"2026-08-02\"",
+      "\"updatedAt\": \"2026-08-06\"",
       "\"updatedAt\": \"2099-01-01\"",
     );
 
@@ -182,7 +192,7 @@ describe("release manifest", () => {
       "release-manifest.json",
       "release-artifacts/memoire-web.release.json",
       "package.json",
-      "package-lock.json",
+      "npm-shrinkwrap.json",
       "server.json",
       "action.yml",
       "mcpb/manifest.json",
@@ -226,6 +236,11 @@ describe("release manifest", () => {
       await writeFile(
         join(fixtureRoot, "release-manifest.json"),
         serializeJson(candidateManifest),
+        "utf8",
+      );
+      await writeFile(
+        join(fixtureRoot, "action.yml"),
+        'default: "2.6.4"\ndescription: "reviewed 2.6.4 pin"\n',
         "utf8",
       );
       await writeFile(

@@ -4,7 +4,8 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const candidateVersion = "2.7.8";
+const candidateVersion = "2.7.9";
+const candidateActionVersion = "2.7.8";
 const publishedVersion = "2.7.7";
 const publishedSourceCommit = "74fc6ce8c66182b4aa06e1250cb169da8b1fc54c";
 const publishedReleaseRecord = {
@@ -16,7 +17,7 @@ async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.7.8 metadata release candidate surfaces", () => {
+describe("2.7.9 stabilization release candidate surfaces", () => {
   it("keeps the candidate fenced behind the last immutable npm receipt", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toMatchObject({
@@ -29,6 +30,16 @@ describe("2.7.8 metadata release candidate surfaces", () => {
         sourceCommit: publishedSourceCommit,
         releaseRecord: publishedReleaseRecord,
       },
+      supersededPartialReleases: [{
+        version: "2.7.8",
+        scope: "npm-only",
+        sourceCommit: "d290484535198c1f328c57986f600af544cc867a",
+        releaseRecord: {
+          path: "release-artifacts/npm/2.7.8.release.json",
+          sha256: "8b1adb07d57f71eccf372444539b7b61841547d47c255593d66af9eebe7eb3de",
+        },
+        supersededBy: candidateVersion,
+      }],
     });
     expect(manifest.surfaces.githubRelease.url.endsWith(`/v${candidateVersion}`)).toBe(true);
   });
@@ -46,7 +57,7 @@ describe("2.7.8 metadata release candidate surfaces", () => {
       agentMirror,
     ] = await Promise.all([
       readJson("package.json"),
-      readJson("package-lock.json"),
+      readJson("npm-shrinkwrap.json"),
       readJson("server.json"),
       readJson("mcpb/manifest.json"),
       readJson("plugins/memoire/.codex-plugin/plugin.json"),
@@ -77,8 +88,8 @@ describe("2.7.8 metadata release candidate surfaces", () => {
     expect(await readFile(join(root, "mcpb/server/index.cjs"), "utf8"))
       .toContain(`@memi-design/cli@${candidateVersion}`);
     const action = await readFile(join(root, "action.yml"), "utf8");
-    expect(action).toContain(`default: "${candidateVersion}"`);
-    expect(action).toContain(`reviewed ${candidateVersion} pin`);
+    expect(action).toContain(`default: "${candidateActionVersion}"`);
+    expect(action).toContain(`reviewed ${candidateActionVersion} pin`);
     expect(await readFile(join(root, "llms.txt"), "utf8"))
       .toContain(`version: "${candidateVersion}"`);
   });
@@ -113,9 +124,9 @@ describe("2.7.8 metadata release candidate surfaces", () => {
 
   it("keeps the public activation path on the last verified release while the candidate is fenced", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Engine 2.7.8 is not the current public release");
+    expect(currentRelease).toContain("Engine 2.7.9 is not the current public release");
     expect(currentRelease).toContain("Release state: `candidate`");
-    expect(currentRelease).toContain("| Engine candidate (unreleased) | `2.7.8` |");
+    expect(currentRelease).toContain("| Engine candidate (unreleased) | `2.7.9` |");
     expect(currentRelease).toContain("npx -y @memi-design/cli@2.7.7");
     expect(currentRelease).toContain("Do not announce parity until npm, GitHub, MCP, the Action, Studio, and the deployed website match their release groups.");
   });
