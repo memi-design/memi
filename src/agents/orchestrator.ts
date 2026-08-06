@@ -79,7 +79,14 @@ export class AgentOrchestrator {
     return results;
   }
 
-  async execute(intent: string, options?: { autoSync?: boolean; dryRun?: boolean; context?: AgentContext }): Promise<import("./sub-agents.js").AgentExecutionResult> {
+  async execute(intent: string, options?: {
+    autoSync?: boolean;
+    dryRun?: boolean;
+    context?: AgentContext;
+    taskClass?: string;
+    platforms?: readonly string[];
+    routingPolicy?: "repository-only" | "v3";
+  }): Promise<import("./sub-agents.js").AgentExecutionResult> {
     const category = classifyIntent(intent);
     log.info({ intent, category }, "Classified design intent");
 
@@ -87,13 +94,14 @@ export class AgentOrchestrator {
     const repositoryFingerprint = this.engine.notes.loaded
       ? await buildRepositoryFingerprint(this.engine.config.projectRoot)
       : undefined;
-    const routed = this.engine.notes.loaded
+    const routed = this.engine.notes.loaded && options?.routingPolicy !== "repository-only"
       ? await resolveRoutedSkills({
         intent,
-        taskClass: category,
+        taskClass: options?.taskClass ?? category,
         notes: this.engine.notes.notes,
         capabilities: context.figmaConnected ? ["figma"] : [],
-        platforms: context.projectFramework ? [context.projectFramework] : [],
+        platforms: options?.platforms
+          ?? (context.projectFramework ? [context.projectFramework] : []),
         repositoryFingerprint,
         maximumSkills: 1,
         maximumContextBytes: 8_000,
