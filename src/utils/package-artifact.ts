@@ -7,6 +7,7 @@ import { hashValue } from "../frontend/foundation.js";
 
 const execFileAsync = promisify(execFile);
 const MAX_PACK_OUTPUT_BYTES = 16 * 1024 * 1024;
+const PACK_TIMEOUT_MS = 30_000;
 
 interface NpmPackFile {
   readonly path: string;
@@ -47,15 +48,13 @@ export async function hashPackedPackageSurface(packageDirectory: string): Promis
 }
 
 async function listNpmPackedFiles(root: string): Promise<readonly string[]> {
-  const args = ["pack", "--dry-run", "--json", "--ignore-scripts"];
-  const npmExecPath = process.env.npm_execpath;
-  const command = npmExecPath ? process.execPath : process.platform === "win32" ? "npm.cmd" : "npm";
-  const commandArgs = npmExecPath ? [npmExecPath, ...args] : args;
-  const { stdout } = await execFileAsync(command, commandArgs, {
+  const { command, args } = await trustedNpmPackInvocation();
+  const { stdout } = await execFileAsync(command, args, {
     cwd: root,
     encoding: "utf8",
     maxBuffer: MAX_PACK_OUTPUT_BYTES,
-    env: { ...process.env, npm_config_update_notifier: "false" },
+    timeout: PACK_TIMEOUT_MS,
+    env: isolatedNpmEnvironment(),
   });
   const parsed: unknown = JSON.parse(stdout);
   if (!Array.isArray(parsed) || parsed.length !== 1 || !isPackResult(parsed[0])) {
@@ -70,6 +69,65 @@ async function listNpmPackedFiles(root: string): Promise<readonly string[]> {
     throw new Error("npm pack file manifest contains duplicate paths");
   }
   return unique;
+}
+
+async function trustedNpmPackInvocation(): Promise<{
+  readonly command: string;
+  readonly args: readonly string[];
+}> {
+  return {
+    command: process.execPath,
+    args: [await resolveTrustedNpmCli(), "pack", "--dry-run", "--json", "--ignore-scripts"],
+  };
+}
+
+async function resolveTrustedNpmCli(): Promise<string> {
+  const binDirectory = path.dirname(process.execPath);
+  const candidates = [
+    path.resolve(binDirectory, "..", "lib", "node_modules", "npm", "bin", "npm-cli.js"),
+    path.resolve(binDirectory, "..", "node_modules", "npm", "bin", "npm-cli.js"),
+    path.resolve(binDirectory, "node_modules", "npm", "bin", "npm-cli.js"),
+  ];
+  for (const candidate of candidates) {
+    try {
+      const resolved = await realpath(candidate);
+      const entry = await lstat(resolved);
+      if (entry.isFile()) return resolved;
+    } catch {
+      continue;
+    }
+  }
+  throw new Error("Unable to locate a trusted npm CLI adjacent to the current Node runtime");
+}
+
+function isolatedNpmEnvironment(): NodeJS.ProcessEnv {
+  const preserve = [
+    "HOME",
+    "USERPROFILE",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "SystemRoot",
+    "ComSpec",
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "LANG",
+    "LC_ALL",
+  ] as const;
+  const environment: NodeJS.ProcessEnv = {};
+  for (const name of preserve) {
+    const value = process.env[name];
+    if (value !== undefined) environment[name] = value;
+  }
+  const nullConfig = process.platform === "win32" ? "NUL" : "/dev/null";
+  return {
+    ...environment,
+    npm_config_userconfig: nullConfig,
+    npm_config_ignore_scripts: "true",
+    npm_config_update_notifier: "false",
+    npm_config_audit: "false",
+    npm_config_fund: "false",
+  };
 }
 
 function isPackResult(value: unknown): value is NpmPackResult {

@@ -14,6 +14,7 @@ export interface WorkflowReceiptDirectoryVerification {
   readonly validReceipts: number;
   readonly invalidReceipts: number;
   readonly admittedReceipts: number;
+  readonly admittedButFailedReceipts: number;
   readonly excludedReceipts: number;
   readonly chronologyValid: boolean;
   readonly failures: readonly {
@@ -63,7 +64,12 @@ export async function verifyWorkflowReceiptDirectory(
     chronologyValid = false;
     failures.push({ file: "<ledger>", reasons: [`chronology-invalid:${errorName(error)}`] });
   }
-  const admittedReceipts = receipts.filter(isAdmittedReceipt).length;
+  const admittedReceipts = receipts.filter((receipt) =>
+    receipt.nativeEvidence.status === "admitted").length;
+  const admittedButFailedReceipts = receipts.filter((receipt) =>
+    receipt.nativeEvidence.status === "admitted" && !isSuccessfulReceipt(receipt)).length;
+  const excludedReceipts = receipts.filter((receipt) =>
+    receipt.nativeEvidence.status === "excluded").length;
   const content = {
     schemaVersion: "workflow-receipt-directory-verification.v1" as const,
     status: files.length === 0
@@ -73,7 +79,8 @@ export async function verifyWorkflowReceiptDirectory(
     validReceipts: receipts.length,
     invalidReceipts: files.length - receipts.length,
     admittedReceipts,
-    excludedReceipts: receipts.length - admittedReceipts,
+    admittedButFailedReceipts,
+    excludedReceipts,
     chronologyValid,
     failures,
     receiptSha256s: receipts.map((receipt) => receipt.receiptSha256).sort(),
@@ -89,9 +96,8 @@ export async function verifyWorkflowReceiptDirectory(
   });
 }
 
-function isAdmittedReceipt(receipt: WorkflowReceiptV3): boolean {
-  return receipt.nativeEvidence.status === "admitted"
-    && receipt.execution.stopReason === "verification-passed"
+function isSuccessfulReceipt(receipt: WorkflowReceiptV3): boolean {
+  return receipt.execution.stopReason === "verification-passed"
     && receipt.verification.every((verification) => verification.status === "passed");
 }
 

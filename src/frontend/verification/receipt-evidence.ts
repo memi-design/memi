@@ -87,7 +87,14 @@ function receiptArtifactKind(kind: WebArtifactKind | NativeArtifactKind):
 function exclusionReason(reasons: readonly string[]):
   "missing-native-artifact" | "driver-failed" | "stale-artifact" | "corrupt-artifact" {
   if (reasons.some((reason) => reason.includes("stale"))) return "stale-artifact";
-  if (reasons.some((reason) => reason.includes("corrupt") || reason.includes("mutated"))) {
+  if (reasons.some((reason) =>
+    reason.includes("corrupt")
+    || reason.includes("mutated")
+    || reason.includes("artifact-outside-evidence-root")
+    || reason.includes("artifact-invalid-file")
+    || reason.includes("artifact-invalid-content")
+    || reason.includes("artifact-changed-during-read")
+    || reason.includes("artifact-unreadable"))) {
     return "corrupt-artifact";
   }
   if (reasons.some((reason) =>
