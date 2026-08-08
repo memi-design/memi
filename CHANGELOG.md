@@ -20,8 +20,11 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   npm-only partial release superseded by 2.7.9.
 - Published through npm trusted publishing from source commit `5fcbf39e`, with
   registry signatures, SLSA provenance, an immutable receipt, and a CycloneDX
-  SBOM. Cross-channel parity remains fail-closed until the live public gate
-  verifies every release surface.
+  SBOM.
+- `53ef8686` — fix: verify promoted public surfaces
+- The independent live gate verified npm, all four binary checksums, GitHub
+  latest, Action `v2`, MCP Registry, Studio, and the deployed website with zero
+  failures. The immutable parity receipt now clears the fail-closed cap.
 
 ## v2.7.8 — 2026-08-02 — Published to npm only (superseded)
 

@@ -26,7 +26,7 @@ describe("preview changelog sync", () => {
     };
     expect(releases[0]).toMatchObject({
       version: `v${engine.version}`,
-      commits: [],
+      commits: [["53ef8686", "fix: verify promoted public surfaces"]],
     });
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
     const expectedKicker = engine.state === "candidate" ? "Candidate release" : "Current release";
