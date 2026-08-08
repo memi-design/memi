@@ -14,7 +14,9 @@
 
 **The design layer for agentic AI.**
 
-Memi gives coding agents the product context, interface checks, and verification loops they need to ship UI that fits the system already in your repository. Use the CLI and [Memi Studio](https://memoire.cv/download) today; [Memi Canvas](#one-product-layer-three-surfaces) is currently in development. Memi works with Codex, Claude Code, Cursor, MCP clients, and CI.
+Give your coding agent an interface brief before it edits. Memi maps the UI already in your repository, surfaces file-anchored accessibility and design-system risks, and gives you a deterministic check to rerun before merge. Start with the CLI, then add the same gate to every pull request.
+
+Memi Studio is available today; Memi Canvas is currently in development. No account, API key, Figma file, global install, or daemon is required for the first audit.
 
 <p align="center">
   <a href="#quickstart"><strong>Start with your next interface</strong></a> ·
@@ -22,15 +24,15 @@ Memi gives coding agents the product context, interface checks, and verification
   <a href="#research-and-benchmarks">Read the research</a>
 </p>
 
-## Quickstart
+## Quickstart: find your first interface issue
 
-Run Memi in any frontend repository. The first result is a grounded brief for the next edit: what the product already does, where the relevant UI lives, and what needs verification.
+Run one non-destructive audit in any frontend repository. It needs no account, API key, Figma file, global install, or daemon.
 
 ```bash
 npx -y @memi-design/cli@latest diagnose . --json --no-write --fail-on none
 ```
 
-No account, API key, Figma file, global install, or daemon is required. The result carries normalized finding IDs, confidence, provenance, and `file:line` evidence.
+The result carries normalized finding IDs, confidence, provenance, and `file:line` evidence so an agent can act on a specific finding instead of guessing.
 
 Give the same context to your coding agent:
 
@@ -44,13 +46,25 @@ Then ask:
 
 If Memi catches a real interface issue in your project, [share the finding](https://github.com/memi-design/memi/discussions/categories/show-and-tell). Real reports are the most useful signal for what to improve next.
 
+## Put the check on every pull request
+
+Copy [`examples/github-actions/memi-design.yml`](examples/github-actions/memi-design.yml) into your repository as `.github/workflows/memi-design.yml`. The starter is pinned to the reviewed public Action commit and gives reviewers:
+
+- a PR check that fails only on newly introduced interface debt;
+- a `memi-design-health` artifact with the human-readable report; and
+- SARIF annotations when the repository grants `security-events: write`.
+
+The workflow does not need an API key or a Memi secret. Fork pull requests still receive the check and report; SARIF upload is skipped automatically when GitHub does not grant that permission.
+
+If you prefer to configure it by hand, the complete [GitHub Action guide](https://github.com/memi-design/memi/blob/main/docs/GITHUB_ACTION_MARKETPLACE.md) documents every input, output, permission, and evidence file.
+
 ## One product layer, three surfaces
 
 | Surface | What it is | Status |
 | --- | --- | --- |
 | **Memi CLI** | Interface intelligence and deterministic checks for local repositories, agents, and CI. | Available today |
 | **Memi Studio** | A macOS workbench for bringing project context, agent workflows, and verification together. | [Available today](https://memoire.cv/download) |
-| **Memi Canvas** | A visual workspace for design-system context and controlled agent proposals. | Currently in development |
+| **Memi Canvas** | A visual workspace for design-system context and controlled agent proposals. | currently in development |
 
 ## See the product
 
@@ -120,7 +134,7 @@ The research is disclosure material, not a product leaderboard. It keeps functio
 | One-time CLI run | `npx -y @memi-design/cli@2.7.7 diagnose . --no-write` | Trying Memi without installing |
 | Global CLI | `npm i -g @memi-design/cli` | Daily local use |
 | Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude Code, Cursor, and compatible agents |
-| GitHub Action | `uses: memi-design/memi@74fc6ce8c66182b4aa06e1250cb169da8b1fc54c` | Pull-request design CI |
+| GitHub Action | [Copy the starter workflow](examples/github-actions/memi-design.yml) | Pull-request design CI |
 | MCP server | `memi mcp start --no-figma` | Any MCP client |
 | Studio | `brew install --cask memi-design/memi/memi-studio` | Supervised macOS workflows |
 

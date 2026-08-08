@@ -1,0 +1,36 @@
+name: Memi design CI
+
+on:
+  pull_request:
+    branches: [main]
+
+# The gate reads the checked-out repository. It does not need a Memi secret.
+permissions:
+  contents: read
+
+jobs:
+  memi:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Run Memi design CI
+        id: memi
+        uses: memi-design/memi@74fc6ce8c66182b4aa06e1250cb169da8b1fc54c # v2.7.7
+        with:
+          version: "2.7.7"
+          report: "true"
+          upload-sarif: "true"
+
+      - name: Print evidence locations
+        if: ${{ always() }}
+        run: |
+          printf 'Gate: %s\n' "${{ steps.memi.outputs['gate-outcome'] }}"
+          printf 'Report: %s\n' "${{ steps.memi.outputs['report-path'] }}"
+          printf 'SARIF: %s\n' "${{ steps.memi.outputs['sarif-path'] }}"
