@@ -6,7 +6,7 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
-## v2.7.9 — 2026-08-06 — Candidate
+## v2.7.9 — 2026-08-08 — Published
 
 ### Final 2.7 stabilization
 
@@ -18,6 +18,10 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
   independently verified.
 - Preserves the immutable 2.7.8 npm OIDC receipt while recording 2.7.8 as an
   npm-only partial release superseded by 2.7.9.
+- Published through npm trusted publishing from source commit `5fcbf39e`, with
+  registry signatures, SLSA provenance, an immutable receipt, and a CycloneDX
+  SBOM. Cross-channel parity remains fail-closed until the live public gate
+  verifies every release surface.
 
 ## v2.7.8 — 2026-08-02 — Published to npm only (superseded)
 

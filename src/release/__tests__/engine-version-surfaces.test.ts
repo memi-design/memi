@@ -4,32 +4,26 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const candidateVersion = "2.7.9";
-const candidateActionVersion = "2.7.8";
-const publishedVersion = "2.7.7";
-const publishedSourceCommit = "74fc6ce8c66182b4aa06e1250cb169da8b1fc54c";
+const publishedVersion = "2.7.9";
+const publishedActionVersion = "2.7.9";
+const publishedSourceCommit = "5fcbf39e1255af0c14c5a17ba6bde8cf1206e525";
 const publishedReleaseRecord = {
-  path: "release-artifacts/npm/2.7.7.release.json",
-  sha256: "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c",
+  path: "release-artifacts/npm/2.7.9.release.json",
+  sha256: "a04c63335fae7c7a1a2ac57d387a8647471742024c42e486159db4c0f1e78d0c",
 };
 
 async function readJson(path: string) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
 }
 
-describe("2.7.9 stabilization release candidate surfaces", () => {
-  it("keeps the candidate fenced behind the last immutable npm receipt", async () => {
+describe("2.7.9 published stabilization surfaces", () => {
+  it("binds the published release to its immutable npm receipt", async () => {
     const manifest = await readJson("release-manifest.json");
     expect(manifest.releaseGroups.engine).toMatchObject({
-      version: candidateVersion,
-      state: "candidate",
-      sourceCommit: null,
-      releaseRecord: null,
-      previousPublicRelease: {
-        version: publishedVersion,
-        sourceCommit: publishedSourceCommit,
-        releaseRecord: publishedReleaseRecord,
-      },
+      version: publishedVersion,
+      state: "published",
+      sourceCommit: publishedSourceCommit,
+      releaseRecord: publishedReleaseRecord,
       supersededPartialReleases: [{
         version: "2.7.8",
         scope: "npm-only",
@@ -38,10 +32,10 @@ describe("2.7.9 stabilization release candidate surfaces", () => {
           path: "release-artifacts/npm/2.7.8.release.json",
           sha256: "8b1adb07d57f71eccf372444539b7b61841547d47c255593d66af9eebe7eb3de",
         },
-        supersededBy: candidateVersion,
+        supersededBy: publishedVersion,
       }],
     });
-    expect(manifest.surfaces.githubRelease.url.endsWith(`/v${candidateVersion}`)).toBe(true);
+    expect(manifest.surfaces.githubRelease.url.endsWith(`/v${publishedVersion}`)).toBe(true);
   });
 
   it("aligns every executable and packaged version surface", async () => {
@@ -80,18 +74,18 @@ describe("2.7.9 stabilization release candidate surfaces", () => {
       widget.packageVersion,
       skillRegistry.version,
       agentMirror.version,
-    ]).toEqual(Array(12).fill(candidateVersion));
-    expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${candidateVersion}.mcpb`);
-    expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${candidateVersion}.mcpb`);
+    ]).toEqual(Array(12).fill(publishedVersion));
+    expect(packageJson.scripts["build:mcpb"]).toContain(`memi-${publishedVersion}.mcpb`);
+    expect(packageJson.scripts["publish:smithery"]).toContain(`memi-${publishedVersion}.mcpb`);
     expect(packageJson.mcpName).toBe("io.github.memi-design/memi");
     expect(server.name).toBe("io.github.memi-design/memi");
     expect(await readFile(join(root, "mcpb/server/index.cjs"), "utf8"))
-      .toContain(`@memi-design/cli@${candidateVersion}`);
+      .toContain(`@memi-design/cli@${publishedVersion}`);
     const action = await readFile(join(root, "action.yml"), "utf8");
-    expect(action).toContain(`default: "${candidateActionVersion}"`);
-    expect(action).toContain(`reviewed ${candidateActionVersion} pin`);
+    expect(action).toContain(`default: "${publishedActionVersion}"`);
+    expect(action).toContain(`reviewed ${publishedActionVersion} pin`);
     expect(await readFile(join(root, "llms.txt"), "utf8"))
-      .toContain(`version: "${candidateVersion}"`);
+      .toContain(`version: "${publishedVersion}"`);
   });
 
   it("keeps packaged skills, generated examples, and changelog aligned", async () => {
@@ -111,23 +105,22 @@ describe("2.7.9 stabilization release candidate surfaces", () => {
     ];
     for (const path of skillPaths) {
       expect(await readFile(join(root, path), "utf8"), path)
-        .toContain(`@memi-design/cli@${candidateVersion}`);
+        .toContain(`@memi-design/cli@${publishedVersion}`);
     }
 
     const preset = await readJson("examples/presets/starter/registry.json");
-    expect(preset.meta.memoireVersion).toBe(candidateVersion);
+    expect(preset.meta.memoireVersion).toBe(publishedVersion);
     expect(await readFile(join(root, "examples/presets/starter/README.md"), "utf8"))
-      .toContain(`Memoire v${candidateVersion}`);
+      .toContain(`Memoire v${publishedVersion}`);
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
-    expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(candidateVersion);
+    expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(publishedVersion);
   });
 
-  it("keeps the public activation path on the last verified release while the candidate is fenced", async () => {
+  it("keeps the public activation path on the published parity-pending release", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
-    expect(currentRelease).toContain("Engine 2.7.9 is not the current public release");
-    expect(currentRelease).toContain("Release state: `candidate`");
-    expect(currentRelease).toContain("| Engine candidate (unreleased) | `2.7.9` |");
-    expect(currentRelease).toContain("npx -y @memi-design/cli@2.7.7");
+    expect(currentRelease).toContain("Release state: `published`");
+    expect(currentRelease).toContain("| Engine published (parity pending) | `2.7.9` |");
+    expect(currentRelease).toContain("npx -y @memi-design/cli@2.7.9");
     expect(currentRelease).toContain("Do not announce parity until npm, GitHub, MCP, the Action, Studio, and the deployed website match their release groups.");
   });
 });

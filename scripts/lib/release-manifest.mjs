@@ -471,8 +471,13 @@ export async function verifyPublishedEngineTransitionFromGit(root, manifest) {
   }
   let sourceSurfaceFailures = [];
   try {
-    sourceSurfaceFailures = validateEngineSurfaceSnapshot(
-      manifest,
+    const sourceManifest = JSON.parse(execFileSync(
+      "git",
+      ["show", `${sourceCommit}:release-manifest.json`],
+      { cwd: root, encoding: "utf8" },
+    ));
+    sourceSurfaceFailures = validateReleaseSourceSurfaceSnapshot(
+      sourceManifest,
       readSurfaceSnapshotFromGit(root, sourceCommit),
     );
   } catch (error) {
@@ -788,6 +793,10 @@ export function validateEngineSurfaceSnapshot(manifest, snapshot) {
     }
   }
   return failures;
+}
+
+export function validateReleaseSourceSurfaceSnapshot(sourceManifest, snapshot) {
+  return validateEngineSurfaceSnapshot(sourceManifest, snapshot);
 }
 
 function isNpmTarballUrl(value) {

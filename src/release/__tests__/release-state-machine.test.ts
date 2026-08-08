@@ -12,6 +12,7 @@ import {
   serializeJson,
   stagePublishedEngineManifest,
   validateEngineSurfaceSnapshot,
+  validateReleaseSourceSurfaceSnapshot,
   validateEngineReleaseRecord,
   validateEngineReleaseTransition,
   validatePublishedStagingPreconditions,
@@ -330,6 +331,53 @@ describe("verified engine release state machine", () => {
       ...snapshot,
       "server.json": { ...snapshot["server.json"], version: "2.6.2" },
     })).toContain("server.json version 2.6.2 does not match release manifest 2.6.3");
+  });
+
+  it("validates immutable publish bytes against their candidate manifest", () => {
+    const candidate = manifestFor({
+      state: "candidate",
+      sourceCommit: null,
+      releaseRecord: null,
+      previousPublicRelease: {
+        version: "2.6.2",
+        sourceCommit: "c".repeat(40),
+      },
+    });
+    const published = manifestFor({
+      state: "published",
+      sourceCommit,
+      releaseRecord: {
+        path: recordPath,
+        sha256: "d".repeat(64),
+      },
+    });
+    const snapshot = {
+      "package.json": {
+        name: "@memi-design/cli",
+        version: "2.6.3",
+        mcpName: "io.github.sarveshsea/memi",
+        scripts: {
+          "build:mcpb": "pack .dist/memi-2.6.3.mcpb",
+          "publish:smithery": "publish .dist/memi-2.6.3.mcpb",
+        },
+      },
+      "npm-shrinkwrap.json": { version: "2.6.3", packages: { "": { version: "2.6.3" } } },
+      "server.json": {
+        name: "io.github.sarveshsea/memi",
+        version: "2.6.3",
+        packages: [{ registryType: "npm", version: "2.6.3" }],
+      },
+      "mcpb/manifest.json": { version: "2.6.3" },
+      "plugins/memoire/.codex-plugin/plugin.json": { version: "2.6.3" },
+      "plugins/memi-claude/.claude-plugin/plugin.json": { version: "2.6.3" },
+      "plugin/widget-meta.json": { packageVersion: "2.6.3" },
+      "action.yml": 'default: "2.6.2"\ndescription: "reviewed 2.6.2 pin"',
+    };
+
+    expect(validateEngineSurfaceSnapshot(published, snapshot)).toEqual(expect.arrayContaining([
+      "action.yml default CLI version does not match available npm release 2.6.3",
+    ]));
+    expect(validateReleaseSourceSurfaceSnapshot(candidate, snapshot)).toEqual([]);
   });
 
   it("rejects unbound superseded npm-only release provenance", () => {
