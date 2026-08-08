@@ -393,7 +393,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">431</span> commits</span>
+      <span><span class="n" id="stat-commits">432</span> commits</span>
       <span><span class="n" id="stat-versions">47</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-08</span> latest</span>
     </div>
@@ -411,7 +411,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Current release</span>
             <strong class="summary-value">v2.7.9</strong>
-            <div class="summary-caption">0 commits tracked in v2.7.9 from CHANGELOG.md.</div>
+            <div class="summary-caption">1 commits tracked in v2.7.9 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -446,13 +446,20 @@ const releases = [
     "date": "2026-08-08",
     "tag": "fix",
     "summary": "Updates the Model Context Protocol SDK and locks patched Hono, node-server,; Stages one synchronized npm, GitHub, Action, MCP, Homebrew/GHCR, and website; Preserves the immutable 2.7.8 npm OIDC receipt while recording 2.7.8 as an.",
-    "commits": [],
+    "commits": [
+      [
+        "53ef8686",
+        "fix: verify promoted public surfaces"
+      ]
+    ],
     "decisions": [],
     "changes": [
       "Updates the Model Context Protocol SDK and locks patched Hono, node-server,",
       "Stages one synchronized npm, GitHub, Action, MCP, Homebrew/GHCR, and website",
       "Preserves the immutable 2.7.8 npm OIDC receipt while recording 2.7.8 as an",
-      "Published through npm trusted publishing from source commit 5fcbf39e, with"
+      "Published through npm trusted publishing from source commit 5fcbf39e, with",
+      "53ef8686 — fix: verify promoted public surfaces",
+      "The independent live gate verified npm, all four binary checksums, GitHub"
     ]
   },
   {

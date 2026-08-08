@@ -3,9 +3,9 @@
   "provenance": {
     "repository": "https://github.com/memi-design/memi",
     "path": "release-manifest.json",
-    "sourceCommit": "e8fe18217f2d9e89b5878e3cd2f1cf8a3d388047",
-    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/e8fe18217f2d9e89b5878e3cd2f1cf8a3d388047/release-manifest.json",
-    "manifestSha256": "16af9baba2128ea8b464007f2c0124cb3daa5af68be486d87f96bea3d60ecefd"
+    "sourceCommit": "53ef8686a8e0eda935297b12b4351611f7734a4d",
+    "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/53ef8686a8e0eda935297b12b4351611f7734a4d/release-manifest.json",
+    "manifestSha256": "e38103cf933afdfc46383af42ce9c952d98f022e3609d4de552ee54f3b7aaa79"
   },
   "orchestration": {
     "schemaVersion": 1,
@@ -32,8 +32,12 @@
           }
         ],
         "verification": {
-          "eligibleForParity": false,
-          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+          "eligibleForParity": true,
+          "reason": "independent public-release gate passed with zero failures",
+          "publicGate": {
+            "path": "release-artifacts/public-gate/2.7.9.parity.json",
+            "sha256": "bc70e9de0c8897a97b774c5de56446dddb7de1e19df0f9af6f071f1d8a5f81c0"
+          }
         }
       },
       "studio": {
@@ -119,8 +123,12 @@
           }
         ],
         "verification": {
-          "eligibleForParity": false,
-          "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+          "eligibleForParity": true,
+          "reason": "independent public-release gate passed with zero failures",
+          "publicGate": {
+            "path": "release-artifacts/public-gate/2.7.9.parity.json",
+            "sha256": "bc70e9de0c8897a97b774c5de56446dddb7de1e19df0f9af6f071f1d8a5f81c0"
+          }
         }
       },
       "studio": {

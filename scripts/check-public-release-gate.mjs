@@ -8,6 +8,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import {
+  fetchJsonWithRetry,
   runPublicReleaseGate,
   verifyWebsiteArtifactEvidence,
 } from "./lib/public-release-gate.mjs";
@@ -15,6 +16,7 @@ import {
   canClearPublicParityCap,
   loadReleaseManifest,
   resolveReleaseRecordPath,
+  serializeJson,
   verifyPublishedEngineTransitionFromGit,
 } from "./lib/release-manifest.mjs";
 
@@ -99,6 +101,15 @@ if (engine.state !== "published") {
     evidence[key] = result.evidence;
     stateFailures.push(...result.failures);
   }
+  if (
+    evidence.githubRelease.verified
+    && evidence.githubAction.verified
+    && evidence.githubRelease.sourceCommit !== evidence.githubAction.sourceCommit
+  ) {
+    stateFailures.push(
+      `GitHub Action ${evidence.githubAction.sourceCommit} does not match release ${evidence.githubRelease.sourceCommit}`,
+    );
+  }
 }
 const parityEligible =
   basePayload.status === "passed"
@@ -118,16 +129,12 @@ const payload = {
 };
 
 console.log(JSON.stringify(payload, null, 2));
-if (payload.failures.length > 0) process.exit(1);
+if (payload.failures.length > 0) process.exitCode = 1;
 
 async function fetchJson(url) {
-  const response = await fetch(url, {
+  return fetchJsonWithRetry(url, {
     headers: { "User-Agent": "memoire-public-release-gate" },
   });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.status}`);
-  }
-  return response.json();
 }
 
 async function fetchText(url) {
@@ -346,9 +353,7 @@ async function verifyGithubRelease() {
   const repository = manifest.surfaces.githubRelease.repository;
   const tag = `${manifest.surfaces.githubRelease.tagPrefix}${engine.version}`;
   const sourceCommit = await resolveGithubTagCommit(repository, tag);
-  if (sourceCommit !== engine.sourceCommit) {
-    throw new Error(`${tag} resolves to ${sourceCommit}, expected ${engine.sourceCommit}`);
-  }
+  await verifyPromotedReleaseCommit(repository, sourceCommit);
   const release = await fetchJson(`https://api.github.com/repos/${repository}/releases/tags/${tag}`);
   const assets = new Map(
     (Array.isArray(release.assets) ? release.assets : [])
@@ -381,6 +386,7 @@ async function verifyGithubRelease() {
   return {
     verified: true,
     sourceCommit,
+    publishSourceCommit: engine.sourceCommit,
     checksumsVerified: true,
     tag,
     assets: requiredAssets,
@@ -390,12 +396,10 @@ async function verifyGithubRelease() {
 async function verifyGithubAction() {
   const surface = manifest.surfaces.githubAction;
   const sourceCommit = await resolveGithubTagCommit(surface.repository, surface.majorTag);
-  if (sourceCommit !== engine.sourceCommit) {
-    throw new Error(`${surface.majorTag} resolves to ${sourceCommit}, expected ${engine.sourceCommit}`);
-  }
   return {
     verified: true,
     sourceCommit,
+    publishSourceCommit: engine.sourceCommit,
     tag: surface.majorTag,
   };
 }
@@ -403,18 +407,38 @@ async function verifyGithubAction() {
 async function verifyMcpRegistry() {
   const serverName = manifest.surfaces.mcp.serverName;
   const registry = await fetchJson(
-    `https://registry.modelcontextprotocol.io/v0.1/servers?search=${encodeURIComponent(serverName)}`,
+    `https://registry.modelcontextprotocol.io/v0.1/servers/${encodeURIComponent(serverName)}/versions/latest`,
   );
-  const entries = Array.isArray(registry.servers) ? registry.servers : [];
-  const match = entries.find((entry) => {
-    const server = entry?.server ?? entry;
-    const metadata = entry?._meta?.["io.modelcontextprotocol.registry/official"];
-    return server?.name === serverName
-      && server?.version === engine.version
-      && metadata?.isLatest === true;
-  });
-  if (!match) throw new Error(`${serverName}@${engine.version} is not the official latest entry`);
+  const server = registry?.server ?? registry;
+  const metadata = registry?._meta?.["io.modelcontextprotocol.registry/official"];
+  if (
+    server?.name !== serverName
+    || server?.version !== engine.version
+    || metadata?.isLatest !== true
+  ) throw new Error(`${serverName}@${engine.version} is not the official latest entry`);
   return { verified: true, version: engine.version, serverName };
+}
+
+async function verifyPromotedReleaseCommit(repository, promotedCommit) {
+  const comparison = await fetchJson(
+    `https://api.github.com/repos/${repository}/compare/${engine.sourceCommit}...${promotedCommit}`,
+  );
+  if (!new Set(["ahead", "identical"]).has(comparison.status)) {
+    throw new Error(`${promotedCommit} is not descended from npm source ${engine.sourceCommit}`);
+  }
+
+  const taggedManifest = await fetchJson(
+    `https://raw.githubusercontent.com/${repository}/${promotedCommit}/release-manifest.json`,
+  );
+  const taggedEngine = taggedManifest?.releaseGroups?.engine;
+  if (
+    taggedEngine?.state !== "published"
+    || taggedEngine?.version !== engine.version
+    || taggedEngine?.sourceCommit !== engine.sourceCommit
+    || serializeJson(taggedEngine?.releaseRecord) !== serializeJson(engine.releaseRecord)
+  ) {
+    throw new Error(`${promotedCommit} does not contain the provenance-bound published manifest`);
+  }
 }
 
 async function verifyStudioRelease() {

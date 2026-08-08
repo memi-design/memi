@@ -23,8 +23,12 @@
         }
       ],
       "verification": {
-        "eligibleForParity": false,
-        "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
+        "eligibleForParity": true,
+        "reason": "independent public-release gate passed with zero failures",
+        "publicGate": {
+          "path": "release-artifacts/public-gate/2.7.9.parity.json",
+          "sha256": "bc70e9de0c8897a97b774c5de56446dddb7de1e19df0f9af6f071f1d8a5f81c0"
+        }
       }
     },
     "studio": {

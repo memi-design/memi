@@ -116,10 +116,10 @@ describe("2.7.9 published stabilization surfaces", () => {
     expect(changelog.match(/^## v(\d+\.\d+\.\d+)/m)?.[1]).toBe(publishedVersion);
   });
 
-  it("keeps the public activation path on the published parity-pending release", async () => {
+  it("keeps the public activation path on the parity-verified release", async () => {
     const currentRelease = await readFile(join(root, "docs/CURRENT_RELEASE.md"), "utf8");
     expect(currentRelease).toContain("Release state: `published`");
-    expect(currentRelease).toContain("| Engine published (parity pending) | `2.7.9` |");
+    expect(currentRelease).toContain("| CLI, npm, MCP, and Action | `2.7.9` |");
     expect(currentRelease).toContain("npx -y @memi-design/cli@2.7.9");
     expect(currentRelease).toContain("Do not announce parity until npm, GitHub, MCP, the Action, Studio, and the deployed website match their release groups.");
   });
