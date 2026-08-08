@@ -1,19 +1,14 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-06",
+  "updatedAt": "2026-08-08",
   "releaseGroups": {
     "engine": {
       "version": "2.7.9",
-      "state": "candidate",
-      "sourceCommit": null,
-      "releaseRecord": null,
-      "previousPublicRelease": {
-        "version": "2.7.7",
-        "sourceCommit": "74fc6ce8c66182b4aa06e1250cb169da8b1fc54c",
-        "releaseRecord": {
-          "path": "release-artifacts/npm/2.7.7.release.json",
-          "sha256": "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c"
-        }
+      "state": "published",
+      "sourceCommit": "5fcbf39e1255af0c14c5a17ba6bde8cf1206e525",
+      "releaseRecord": {
+        "path": "release-artifacts/npm/2.7.9.release.json",
+        "sha256": "a04c63335fae7c7a1a2ac57d387a8647471742024c42e486159db4c0f1e78d0c"
       },
       "supersededPartialReleases": [
         {
@@ -29,7 +24,7 @@
       ],
       "verification": {
         "eligibleForParity": false,
-        "reason": "Final 2.7 stabilization candidate closes production dependency advisories and supersedes the npm-only 2.7.8 partial release; 2.7.7 remains the verified parity release until 2.7.9 provenance and every public surface pass."
+        "reason": "npm publish provenance is recorded; independent public-surface parity verification is pending"
       }
     },
     "studio": {

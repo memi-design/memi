@@ -6,7 +6,7 @@ package version.
 
 The primary public story is: `Memi is the design layer for agentic AI.` The CLI and Studio are available today; Canvas is in development.
 
-Current published engine release: `2.7.7`; public-surface parity remains pending.
+Current published engine release: `2.7.9`; public-surface parity remains pending.
 
 Use these checks before announcing, tagging, or publishing a public release.
 
@@ -137,7 +137,7 @@ For the current public engine line, npm must report the current `package.json` v
 
 Before any public distribution push, verify every external surface points to the same current release story:
 
-- npm latest: current `package.json` version, currently `2.7.7`
+- npm latest: current `package.json` version, currently `2.7.9`
 - npm README phrase: `the design layer for agentic AI`
 - npm install command: `npm i -g @memi-design/cli`
 - MCP name: `io.github.memi-design/memi`

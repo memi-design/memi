@@ -131,7 +131,7 @@ The research is disclosure material, not a product leaderboard. It keeps functio
 
 | Surface | Start here | Best for |
 | --- | --- | --- |
-| One-time CLI run | `npx -y @memi-design/cli@2.7.7 diagnose . --no-write` | Trying Memi without installing |
+| One-time CLI run | `npx -y @memi-design/cli@2.7.9 diagnose . --no-write` | Trying Memi without installing |
 | Global CLI | `npm i -g @memi-design/cli` | Daily local use |
 | Agent Skill | `npx skills add memi-design/memi --skill audit-frontend-design` | Codex, Claude Code, Cursor, and compatible agents |
 | GitHub Action | [Copy the starter workflow](examples/github-actions/memi-design.yml) | Pull-request design CI |
@@ -157,9 +157,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: memi-design/memi@74fc6ce8c66182b4aa06e1250cb169da8b1fc54c # v2.7.7
+      - uses: memi-design/memi@5fcbf39e1255af0c14c5a17ba6bde8cf1206e525 # v2.7.9
         with:
-          version: "2.7.7"
+          version: "2.7.9"
           report: true
           upload-sarif: true
 ```

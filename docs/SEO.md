@@ -67,7 +67,7 @@ Use this copy on the website repo, GitHub metadata, npm README sections, launch 
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "macOS, Linux, Windows",
   "description": "Memi is the design layer for agentic AI: design context, interface checks, MCP tools, and deterministic CI gates for coding agents.",
-  "softwareVersion": "2.7.7",
+  "softwareVersion": "2.7.9",
   "url": "https://www.npmjs.com/package/@memi-design/cli",
   "codeRepository": "https://github.com/memi-design/memi",
   "programmingLanguage": "TypeScript",

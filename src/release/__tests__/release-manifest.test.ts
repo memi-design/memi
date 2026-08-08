@@ -16,10 +16,10 @@ import {
 const root = join(import.meta.dirname, "..", "..", "..");
 const manifestPath = join(root, "release-manifest.json");
 const webArtifactPath = join(root, "release-artifacts", "memoire-web.release.json");
-const publishedEngineSourceCommit = "74fc6ce8c66182b4aa06e1250cb169da8b1fc54c";
+const publishedEngineSourceCommit = "5fcbf39e1255af0c14c5a17ba6bde8cf1206e525";
 const publishedReleaseRecord = {
-  path: "release-artifacts/npm/2.7.7.release.json",
-  sha256: "d51394797e3848984231c0687b10cfb1ac282a9ebb17a3c90bde7b6092afb12c",
+  path: "release-artifacts/npm/2.7.9.release.json",
+  sha256: "a04c63335fae7c7a1a2ac57d387a8647471742024c42e486159db4c0f1e78d0c",
 };
 
 describe("release manifest", () => {
@@ -31,14 +31,9 @@ describe("release manifest", () => {
       releaseGroups: {
         engine: {
           version: "2.7.9",
-          state: "candidate",
-          sourceCommit: null,
-          releaseRecord: null,
-          previousPublicRelease: {
-            version: "2.7.7",
-            sourceCommit: publishedEngineSourceCommit,
-            releaseRecord: publishedReleaseRecord,
-          },
+          state: "published",
+          sourceCommit: publishedEngineSourceCommit,
+          releaseRecord: publishedReleaseRecord,
           supersededPartialReleases: [{
             version: "2.7.8",
             scope: "npm-only",
@@ -138,7 +133,7 @@ describe("release manifest", () => {
     const manifest = JSON.parse(manifestText);
     const artifact = JSON.parse(await readFile(webArtifactPath, "utf8"));
     const sourceManifestText = manifestText.replace(
-      "\"updatedAt\": \"2026-08-06\"",
+      `\"updatedAt\": \"${manifest.updatedAt}\"`,
       "\"updatedAt\": \"2099-01-01\"",
     );
 
