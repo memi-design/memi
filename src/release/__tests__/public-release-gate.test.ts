@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  fetchJsonWithRetry,
   runPublicReleaseGate,
   verifyWebsiteArtifactEvidence,
 } from "../../../scripts/lib/public-release-gate.mjs";
@@ -41,6 +42,26 @@ const registryMetadata = {
 };
 
 describe("public release gate helper", () => {
+  it("retries transient registry failures without weakening permanent HTTP failures", async () => {
+    const transientFetch = vi.fn()
+      .mockRejectedValueOnce(new TypeError("fetch failed"))
+      .mockResolvedValueOnce({ ok: false, status: 503 })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ version: "2.7.9" }) });
+
+    await expect(fetchJsonWithRetry("https://registry.example.test/latest", {
+      fetchImpl: transientFetch,
+      retryDelayMs: 0,
+    })).resolves.toEqual({ version: "2.7.9" });
+    expect(transientFetch).toHaveBeenCalledTimes(3);
+
+    const permanentFetch = vi.fn(async () => ({ ok: false, status: 404 }));
+    await expect(fetchJsonWithRetry("https://registry.example.test/missing", {
+      fetchImpl: permanentFetch,
+      retryDelayMs: 0,
+    })).rejects.toThrow("404");
+    expect(permanentFetch).toHaveBeenCalledOnce();
+  });
+
   it("verifies exact historical manifest bytes and fails closed on drift or fetch failure", async () => {
     const manifestText = await readFile(join(root, "release-manifest.json"), "utf8");
     const manifest = JSON.parse(manifestText);

@@ -18,5 +18,9 @@ describe("public release state gate wiring", () => {
     expect(source).toContain("releaseArtifactUrl");
     expect(source).toContain("parityEligible");
     expect(source).toContain("verifyWebsiteArtifactEvidence");
+    expect(source).toContain("publishSourceCommit");
+    expect(source).toContain("versions/latest");
+    expect(source).toContain("process.exitCode = 1");
+    expect(source).not.toContain("process.exit(1)");
   });
 });

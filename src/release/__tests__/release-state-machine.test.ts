@@ -634,8 +634,13 @@ describe("verified engine release state machine", () => {
         evidence: {
           transition: { verified: true, sourceCommit },
           npm: { verified: true, sourceCommit },
-          githubRelease: { verified: true, sourceCommit, checksumsVerified: true },
-          githubAction: { verified: true, sourceCommit },
+          githubRelease: {
+            verified: true,
+            sourceCommit,
+            publishSourceCommit: sourceCommit,
+            checksumsVerified: true,
+          },
+          githubAction: { verified: true, sourceCommit, publishSourceCommit: sourceCommit },
           mcp: { verified: true, version: "2.6.3" },
           studio: { verified: true, version: "2.5.0" },
           website: {
@@ -751,11 +756,21 @@ describe("verified engine release state machine", () => {
       sourceCommit,
       releaseRecord: { path: recordPath, sha256: recordSha256 },
     });
+    const releaseCommit = "c".repeat(40);
     const evidence = {
       transition: { verified: true, sourceCommit },
       npm: { verified: true, sourceCommit },
-      githubRelease: { verified: true, sourceCommit, checksumsVerified: true },
-      githubAction: { verified: true, sourceCommit },
+      githubRelease: {
+        verified: true,
+        sourceCommit: releaseCommit,
+        publishSourceCommit: sourceCommit,
+        checksumsVerified: true,
+      },
+      githubAction: {
+        verified: true,
+        sourceCommit: releaseCommit,
+        publishSourceCommit: sourceCommit,
+      },
       mcp: { verified: true, version: "2.6.3" },
       studio: { verified: true, version: "2.5.0" },
       website: {
@@ -768,6 +783,10 @@ describe("verified engine release state machine", () => {
     expect(canClearPublicParityCap(manifest, {
       ...evidence,
       githubRelease: { ...evidence.githubRelease, checksumsVerified: false },
+    })).toBe(false);
+    expect(canClearPublicParityCap(manifest, {
+      ...evidence,
+      githubAction: { ...evidence.githubAction, sourceCommit: "d".repeat(40) },
     })).toBe(false);
   });
 });

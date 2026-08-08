@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "kind": "memi-public-release-parity-receipt",
+  "verifiedAt": "2026-08-08T17:14:36Z",
+  "gate": {
+    "packageName": "@memi-design/cli",
+    "expectedVersion": "2.7.9",
+    "latest": "2.7.9",
+    "expectedPhrase": "the design layer for agentic AI",
+    "expectedInstall": "npm i -g @memi-design/cli",
+    "registrySmoke": {
+      "ok": true,
+      "registryUrl": "https://registry.npmjs.org/%40memi-design%2Fcli",
+      "latest": "2.7.9",
+      "error": null,
+      "failures": []
+    },
+    "siteSmoke": {
+      "ok": true,
+      "siteUrl": "https://www.memoire.cv",
+      "expectedStudioVersion": "2.5.0",
+      "expectedCommunityNotes": 5,
+      "minCommunityCatalogDate": "2026-07-04T00:00:00.000Z",
+      "communityNotes": 78,
+      "generatedAt": "2026-07-15T17:54:03.579Z",
+      "failures": []
+    },
+    "installSmoke": {
+      "ok": true,
+      "version": "2.7.9"
+    },
+    "status": "passed",
+    "failures": [],
+    "releaseState": "published",
+    "releaseRecord": {
+      "path": "release-artifacts/npm/2.7.9.release.json",
+      "sha256": "a04c63335fae7c7a1a2ac57d387a8647471742024c42e486159db4c0f1e78d0c"
+    },
+    "evidence": {
+      "transition": {
+        "verified": true,
+        "sourceCommit": "5fcbf39e1255af0c14c5a17ba6bde8cf1206e525",
+        "failures": []
+      },
+      "npm": {
+        "verified": true,
+        "sourceCommit": "5fcbf39e1255af0c14c5a17ba6bde8cf1206e525",
+        "invocationId": "https://github.com/memi-design/memi/actions/runs/31265416915/attempts/1",
+        "integrity": "sha512-wGKMzRTaLa6PTWxrqvHmv0Eg8Wum0xKkzom0cixCCwHDN0EWo90B+OhveVyLru0BuHg6fqrEizYG/nzl+eMpQw==",
+        "shasum": "5a1c8d2ea4df99d3c2b543761e3824d61fc54835",
+        "tarball": {
+          "url": "https://registry.npmjs.org/@memi-design/cli/-/cli-2.7.9.tgz",
+          "sha512": "c0628ccd14da2dae8f4d6c6baaf1e6bf4120f16ba6d312a4ce89b4722c420b01c3374116a3dd01f8e86f795c8baeed01b8783a7eaac48b3606fe7ce5f9e32943",
+          "sha1": "5a1c8d2ea4df99d3c2b543761e3824d61fc54835",
+          "bytes": 605347
+        }
+      },
+      "githubRelease": {
+        "verified": true,
+        "sourceCommit": "70c9f4ad8b9823f67b5b16a06be9a42064aa6f04",
+        "publishSourceCommit": "5fcbf39e1255af0c14c5a17ba6bde8cf1206e525",
+        "checksumsVerified": true,
+        "tag": "v2.7.9",
+        "assets": [
+          "memi-darwin-arm64.tar.gz",
+          "memi-darwin-x64.tar.gz",
+          "memi-linux-x64.tar.gz",
+          "memi-win-x64.zip",
+          "memi-darwin-arm64.tar.gz.sha256",
+          "memi-darwin-x64.tar.gz.sha256",
+          "memi-linux-x64.tar.gz.sha256",
+          "memi-win-x64.zip.sha256",
+          "SHA256SUMS.txt"
+        ]
+      },
+      "githubAction": {
+        "verified": true,
+        "sourceCommit": "70c9f4ad8b9823f67b5b16a06be9a42064aa6f04",
+        "publishSourceCommit": "5fcbf39e1255af0c14c5a17ba6bde8cf1206e525",
+        "tag": "v2"
+      },
+      "mcp": {
+        "verified": true,
+        "version": "2.7.9",
+        "serverName": "io.github.memi-design/memi"
+      },
+      "studio": {
+        "verified": true,
+        "version": "2.5.0",
+        "tag": "v2.5.0",
+        "assets": [
+          "Memoire.Studio_2.5.0_aarch64.dmg",
+          "Memoire.Studio_2.5.0_x64.dmg",
+          "SHA256SUMS"
+        ]
+      },
+      "website": {
+        "verified": true,
+        "manifestSha256": "16af9baba2128ea8b464007f2c0124cb3daa5af68be486d87f96bea3d60ecefd",
+        "sourceCommit": "e8fe18217f2d9e89b5878e3cd2f1cf8a3d388047",
+        "sourceUrl": "https://raw.githubusercontent.com/memi-design/memi/e8fe18217f2d9e89b5878e3cd2f1cf8a3d388047/release-manifest.json",
+        "url": "https://www.memoire.cv/release/memi-release.json"
+      }
+    },
+    "parityEligible": true
+  }
+}

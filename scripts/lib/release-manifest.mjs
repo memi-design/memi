@@ -672,9 +672,12 @@ export function canClearPublicParityCap(manifest, evidence) {
   if (!required.every((name) => evidence?.[name]?.verified === true)) return false;
   if (evidence.transition?.sourceCommit !== engine.sourceCommit) return false;
   if (evidence.npm?.sourceCommit !== engine.sourceCommit) return false;
-  if (evidence.githubRelease?.sourceCommit !== engine.sourceCommit
+  const promotedCommit = evidence.githubRelease?.sourceCommit;
+  if (!COMMIT_SHA.test(promotedCommit ?? "")
+    || evidence.githubRelease?.publishSourceCommit !== engine.sourceCommit
     || evidence.githubRelease?.checksumsVerified !== true) return false;
-  if (evidence.githubAction?.sourceCommit !== engine.sourceCommit) return false;
+  if (evidence.githubAction?.sourceCommit !== promotedCommit
+    || evidence.githubAction?.publishSourceCommit !== engine.sourceCommit) return false;
   if (evidence.mcp?.version !== engine.version) return false;
   if (evidence.studio?.version !== manifest?.releaseGroups?.studio?.version) return false;
   const expectedManifestSha256 = createHash("sha256")
