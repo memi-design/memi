@@ -96,6 +96,7 @@ const FAST_COMMANDS: Record<string, () => Promise<RegisterFn>> = {
   "ci": async () => (await import("./commands/ci.js")).registerCiCommand,
   "studio": async () => (await import("./commands/studio.js")).registerStudioCommand,
   "benchmark": async () => (await import("./commands/benchmark.js")).registerBenchmarkCommand,
+  "compose": async () => (await import("./commands/compose.js")).registerComposeCommand,
   "trace": async () => (await import("./commands/trace.js")).registerTraceCommand,
 };
 

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "rubricVersion": "v18-frontend-quality-100",
+  "totalPoints": 100,
+  "dimensions": [
+    {
+      "id": "task_interaction_correctness",
+      "label": "Task and interaction correctness",
+      "points": 25
+    },
+    {
+      "id": "accessibility",
+      "label": "Accessibility",
+      "points": 20
+    },
+    {
+      "id": "visual_hierarchy",
+      "label": "Visual hierarchy",
+      "points": 15
+    },
+    {
+      "id": "design_system_consistency",
+      "label": "Design-system consistency",
+      "points": 15
+    },
+    {
+      "id": "responsive_adaptive_behavior",
+      "label": "Responsive and adaptive behavior",
+      "points": 15
+    },
+    {
+      "id": "implementation_quality",
+      "label": "Implementation quality",
+      "points": 10
+    }
+  ],
+  "criticalDefectPolicy": {
+    "criticalDefectOverridesScore": true,
+    "categories": [
+      "required interaction cannot be completed",
+      "data loss or destructive unintended behavior",
+      "critical accessibility barrier",
+      "security vulnerability introduced by the patch",
+      "required state cannot render or crashes"
+    ]
+  },
+  "aggregation": {
+    "artifactModelScore": "median of three blinded model graders",
+    "practitionerScore": "median of four qualified practitioners per track",
+    "disagreement": "report full score range and median absolute deviation",
+    "interRaterReliability": "intraclass correlation coefficient with interval"
+  },
+  "claimLabel": "Model grading and practitioner grading are reported separately; model grading is never described as independent human evidence."
+}

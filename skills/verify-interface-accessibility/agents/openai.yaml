@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify Interface Accessibility"
+  short_description: "Verify semantics, keyboard, focus, and contrast"
+  default_prompt: "Use $verify-interface-accessibility to verify this interface with repository evidence."

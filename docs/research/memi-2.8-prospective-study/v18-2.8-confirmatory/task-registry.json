@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "task-slots-preregistered; fixtures-not-yet-frozen",
+  "criticalTasks": [
+    {
+      "taskId": "critical-web-01",
+      "role": "release-critical",
+      "platform": "web",
+      "ordinalWithinPlatform": 1,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-web-02",
+      "role": "release-critical",
+      "platform": "web",
+      "ordinalWithinPlatform": 2,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-web-03",
+      "role": "release-critical",
+      "platform": "web",
+      "ordinalWithinPlatform": 3,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-web-04",
+      "role": "release-critical",
+      "platform": "web",
+      "ordinalWithinPlatform": 4,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-expo-01",
+      "role": "release-critical",
+      "platform": "expo",
+      "ordinalWithinPlatform": 1,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-expo-02",
+      "role": "release-critical",
+      "platform": "expo",
+      "ordinalWithinPlatform": 2,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-expo-03",
+      "role": "release-critical",
+      "platform": "expo",
+      "ordinalWithinPlatform": 3,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-expo-04",
+      "role": "release-critical",
+      "platform": "expo",
+      "ordinalWithinPlatform": 4,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-swiftui-01",
+      "role": "release-critical",
+      "platform": "swiftui",
+      "ordinalWithinPlatform": 1,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-swiftui-02",
+      "role": "release-critical",
+      "platform": "swiftui",
+      "ordinalWithinPlatform": 2,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-swiftui-03",
+      "role": "release-critical",
+      "platform": "swiftui",
+      "ordinalWithinPlatform": 3,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "critical-swiftui-04",
+      "role": "release-critical",
+      "platform": "swiftui",
+      "ordinalWithinPlatform": 4,
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    }
+  ],
+  "harnessTasks": [
+    {
+      "taskId": "harness-aa-web",
+      "role": "aa-harness",
+      "platform": "web",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "native-calibration-web",
+      "role": "unscored-native-calibration",
+      "platform": "web",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "harness-aa-expo",
+      "role": "aa-harness",
+      "platform": "expo",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "native-calibration-expo",
+      "role": "unscored-native-calibration",
+      "platform": "expo",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "harness-aa-swiftui",
+      "role": "aa-harness",
+      "platform": "swiftui",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "native-calibration-swiftui",
+      "role": "unscored-native-calibration",
+      "platform": "swiftui",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    }
+  ],
+  "holdoutTasks": [
+    {
+      "taskId": "holdout-01",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-02",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-03",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-04",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-05",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-06",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-07",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-08",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-09",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-10",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-11",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-12",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-13",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-14",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-15",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-16",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-17",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-18",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-19",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    },
+    {
+      "taskId": "holdout-20",
+      "role": "candidate-only-heldout-canary",
+      "platform": "pending-fixture-freeze",
+      "fixtureId": null,
+      "fixtureRevision": null,
+      "taskContractPath": null,
+      "taskContractSha256": null,
+      "status": "pending-fixture-freeze"
+    }
+  ],
+  "freezeRules": [
+    "Exactly four critical task contracts must be frozen for each of web, Expo, and SwiftUI.",
+    "Every task contract must bind a public or authorized fixture to an immutable revision.",
+    "Holdout task content and expected outcomes remain inaccessible to execution agents until invocation.",
+    "Task selection may not use candidate outputs or preliminary outcome data."
+  ]
+}

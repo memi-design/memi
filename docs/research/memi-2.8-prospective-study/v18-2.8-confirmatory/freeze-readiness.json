@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "not-frozen",
+  "readyForProviderInvocation": false,
+  "blockers": [
+    "Publish and provenance-seal @memi-design/cli@2.7.9.",
+    "Build and provenance-seal @memi-design/cli@2.8.0-rc.1.",
+    "Verify that the canonical Codex harness exposes the exact gpt-5.6-luna model identifier at low reasoning.",
+    "Select the 12 critical fixtures and 20 unseen holdouts; bind every task contract to an immutable fixture revision.",
+    "Recruit, qualify, and conflict-check the blinded model and practitioner graders.",
+    "Create an empty receipt root and record its absolute execution-time path.",
+    "Run A/A and native calibration preflight; calibration remains excluded from confirmatory statistics."
+  ],
+  "freezeProcedure": [
+    "Replace only the permitted null provenance, fixture, grader, and receipt-root fields.",
+    "Validate the package with node validate-plan.mjs.",
+    "Hash every JSON and task contract file.",
+    "Write a content-addressed freeze manifest before the first provider invocation.",
+    "Never modify the frozen package; record subsequent changes in the append-only deviation ledger."
+  ]
+}

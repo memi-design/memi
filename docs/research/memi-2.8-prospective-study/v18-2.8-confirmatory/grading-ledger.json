@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "unexecuted",
+  "entries": [],
+  "policy": "A grading entry is created only for an admitted, anonymized artifact and binds rubric, grader identity, packet hash, score, critical defects, and signature hash."
+}

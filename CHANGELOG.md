@@ -6,6 +6,145 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## 2.8 development preview — Unreleased
+
+### Frontend reliability foundation
+
+This beta foundation introduces versioned frontend task contracts, deterministic
+route identity, bounded execution capsules, native verification adapters, and
+tamper-detecting workflow receipts. Routing v3 remains opt-in. Unsupported or
+ambiguous work abstains to repository-only discovery.
+
+No 2.8 quality, speed, token-efficiency, or cost claim is made here. The V18
+confirmatory study is preregistered but unexecuted until exact 2.7.9 and
+2.8.0-rc.1 artifacts, pinned fixtures, graders, and practitioners are frozen.
+
+### Architecture decisions
+
+- Build repository evidence locally and bind its cache to the repository
+  revision, lockfile hash, and relevant source hashes.
+- Cap the default context capsule at 20 KB: 1 KB route/task metadata, 4 KB
+  selected skill evidence, 12 KB repository evidence, and 3 KB verification
+  contract.
+- Select one exact skill by default and at most two only for distinct task
+  requirements. Bind every selected skill ID and content hash into route and
+  receipt identity.
+- Permit at most two implementation attempts and preserve the actual stop
+  reason in the receipt.
+- Enforce task-contract wall-time and token ceilings before applying provider
+  output. The current provider client cannot reclaim compute already in flight
+  or report reasoning tokens separately, so receipts mark that telemetry
+  unavailable instead of estimating it.
+- Keep mutation-capable heuristic routes disabled during contracted shadow-mode
+  execution until they have transaction-safe commit adapters. Budget exhaustion
+  terminates the plan immediately; later tasks cannot mutate after the stop.
+- Admit frontend evidence only after a platform adapter returns the complete,
+  fresh, execution-bound artifact set. Missing evidence is excluded without
+  imputation.
+- Keep V18 preregistered and machine-verifiable while refusing to fabricate
+  results before its release artifacts and external grading resources exist.
+
+### Commit ledger
+
+- `a38dcd13` — test: specify 2.8 frontend contracts and context foundation
+- `3d1164d7` — feat: add 2.8 frontend context contracts
+- `564bc375` — test: define deterministic routing v3 behavior
+- `45cf6942` — test: require mixed-platform routing abstention
+- `049eacd4` — feat: add fail-closed multi-signal routing
+- `f4aeb1a6` — test: define frontend skill capsule surfaces
+- `f42324fc` — feat: add focused frontend execution skills
+- `cb1417b7` — fix: fail closed before exact skill routing
+- `5b80cb3f` — test: define web verification evidence contract
+- `1eab4ffe` — feat: add fail-closed web verification adapter
+- `8f805abc` — test: harden web evidence format admission
+- `0d716330` — fix: reject malformed web evidence captures
+- `a4d40b79` — test: prevent web evidence path and error leakage
+- `7b98cd50` — fix: redact web evidence root and driver errors
+- `87ac34e2` — docs: preregister Memi 2.8 V18 study
+- `cd5aa537` — test: require exact frontend skill routing
+- `d0949e75` — feat: enforce exact frontend task routing
+- `211347b8` — test: admit exact frontend routing classes
+- `f48664d4` — feat: version exact frontend task classes
+- `d9d28e66` — test: cap frontend implementation attempts
+- `ecb8a21b` — fix: cap implementation attempts at two
+- `1c0606cf` — test: require public frontend contract exports
+- `3d35994f` — feat: export frontend reliability contracts
+- `6863c41f` — test: specify Expo and SwiftUI native verification
+- `aa687807` — feat: add Expo and SwiftUI verification adapters
+- `6d257150` — test: require invalid Simulator lease release
+- `ba130b0f` — fix: release invalid Simulator leases
+- `f9d13dec` — feat: export frontend verification adapters
+- `baf0a4d4` — test: isolate repository index cache identity
+- `74fcda02` — feat: bind repository cache to source identity
+- `fff91604` — test: define workflow receipt v3 and chronological replay
+- `82f7d34e` — feat: add workflow receipt v3 foundation
+- `f2488c3b` — test: bind receipt v3 to exact task classes
+- `72fc99fb` — fix: share exact task classes with receipt v3
+- `8dd353eb` — test: require receipt v3 public export
+- `328e8311` — feat: export workflow receipt v3
+- `8e7a36a7` — test: record native evidence exclusions
+- `93e0ae8d` — feat: seal excluded native evidence receipts
+- `1d68bf1b` — test: seal repository-only routing receipts
+- `d67fa9ed` — feat: seal repository-only routing receipts
+- `2f9546e8` — test: reject pre-execution native evidence
+- `e212863b` — fix: bind native evidence to execution window
+- `f6ce415e` — test: isolate exact route receipt identity
+- `d210a8dc` — feat: assert exact route receipt identity
+- `75de0d02` — test: bound replay by ledger sequence
+- `02ebd98e` — feat: replay receipts to exact ledger position
+- `004414b6` — test: permit zero-attempt preflight receipts
+- `ac93d392` — feat: seal zero-attempt preflight receipts
+- `798c4d93` — test: define compose v3 execution flags
+- `2169059e` — feat: add compose v3 execution controls
+- `4c380c38` — test: require compose receipt v3 output
+- `48f775a8` — feat: write fail-closed compose receipts
+- `3ea7f1a5` — test: require router v3 receipts
+- `73afaad3` — feat: identify deterministic router v3
+- `7fa33d35` — test: require pre-execution context capsule
+- `5f58d17a` — test: require cached repository design index builder
+- `bdb0a88b` — feat: build revision-bound repository design indexes
+- `23486baf` — test: bind compose receipts to execution capsule
+- `4a1da7c0` — feat: execute from bounded context capsules
+- `66694de2` — test: require portable compose route JSON
+- `7aef7a96` — fix: stabilize compose route JSON
+- `b02831be` — test: require exact packed surface provenance
+- `f3efbacc` — fix: bind receipts to packed package content
+- `a3eff8f2` — test: classify compose receipt stop reasons
+- `cc4157a9` — fix: preserve compose execution stop reasons
+- `91726dd5` — test: require atomic receipt sequence reservations
+- `d8b9a363` — fix: reserve receipt sequences atomically
+- `6596c3f5` — test: bind stacked skills into receipt identity
+- `efb231ea` — feat: bind distinct two-skill routes
+- `1e8d33b8` — test: require workflow receipt directory verification
+- `99a466b1` — feat: verify receipt v3 benchmark ledgers
+- `cf624ec1` — test: require adapter-to-receipt evidence binding
+- `e14359d2` — feat: bind frontend adapters to receipt evidence
+- `0b2740b9` — docs: explain the 2.8 reliability boundary
+- `cae9fbf3` — test: require classifier-driven fail-closed routing
+- `6cda962e` — test: preserve exact route evidence overrides
+- `4109111c` — test: recognize auxiliary design requests
+- `f12c8879` — feat: route compose from deterministic intent signals
+- `9c5959b5` — test: preserve distinct two-skill compose routes
+- `41ba4dd1` — test: enforce frontend reliability coverage
+- `ecc9a422` — test: require exact admissible evidence provenance
+- `226eeda7` — fix: preserve exact admissible evidence provenance
+- `f3f4bdf1` — docs: record evidence provenance repairs
+- `8dfb7450` — test: use portable npm pack command
+- `2f4946ce` — test: expose provenance trust boundary gaps
+- `cb083bf1` — fix: fail closed on provenance trust gaps
+- `793b55ec` — test: reproduce contracted execution budget gaps
+- `e8848e21` — test: require budget evidence in workflow receipts
+- `4b5a1bdb` — test: reject inconsistent budget receipt evidence
+- `d08502f8` — test: block heuristic fallback after budget cancellation
+- `3ae4140d` — feat: enforce contracted execution budgets
+- `741ae603` — test: reproduce final execution budget review blockers
+- `38cff671` — fix: preserve fail-closed execution evidence
+- `86724cd5` — test: stop plans after budget exhaustion
+- `0e9c8458` — test: disable unsafe contracted mutation routes
+- `b63bf067` — fix: fail closed after contracted budget stops
+- `057c7f6f` — test: block contracted external mutation agents
+- `21c2ae8a` — fix: block unsafe external mutation dispatch
+
 ## v2.7.9 — 2026-08-06 — Candidate
 
 ### Final 2.7 stabilization

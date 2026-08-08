@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "unexecuted",
+  "appendOnly": true,
+  "entries": [],
+  "policy": "Protocol, provider, platform, host, grader, and analysis deviations are recorded before unblinding whenever possible."
+}

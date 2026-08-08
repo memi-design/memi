@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "roles-frozen; identities-pending-recruitment",
+  "modelPanel": {
+    "gradersPerArtifact": 3,
+    "graderIdentities": [
+      null,
+      null,
+      null
+    ],
+    "identityPendingReason": "Exact blinded grader instances do not exist before the execution freeze.",
+    "independenceRule": "Each grader receives the same anonymized packet and cannot inspect another grader's output."
+  },
+  "practitionerPanels": [
+    {
+      "track": "web",
+      "qualifiedPractitionersRequired": 4,
+      "externalPractitionersRequired": 2,
+      "graderIdentities": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "identityPendingReason": "Practitioners have not yet been recruited and conflict-checked."
+    },
+    {
+      "track": "expo",
+      "qualifiedPractitionersRequired": 4,
+      "externalPractitionersRequired": 2,
+      "graderIdentities": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "identityPendingReason": "Practitioners have not yet been recruited and conflict-checked."
+    },
+    {
+      "track": "swiftui",
+      "qualifiedPractitionersRequired": 4,
+      "externalPractitionersRequired": 2,
+      "graderIdentities": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "identityPendingReason": "Practitioners have not yet been recruited and conflict-checked."
+    }
+  ],
+  "blinding": {
+    "removeConditionLabels": true,
+    "randomizeArtifactIdentifiers": true,
+    "concealAgentRoute": true,
+    "concealTokenAndTimingOutcomes": true,
+    "unblindingAllowedAfter": "all grading records are signed and hashed"
+  }
+}

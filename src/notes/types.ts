@@ -63,6 +63,7 @@ export const NoteManifestSchema = z.object({
       excludes: z.array(z.string().min(1)).default([]),
       capabilities: z.array(z.string().min(1)).default([]),
       platforms: z.array(z.string().min(1)).default([]),
+      taskClasses: z.array(z.string().min(1)).default([]),
       priority: z.number().int().default(0),
       actions: z.array(z.string().min(1)).optional(),
       lifecycle: z.array(z.string().min(1)).optional(),

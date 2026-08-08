@@ -1,0 +1,366 @@
+import { mkdir, open, readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { basename, isAbsolute, relative, resolve, sep } from "node:path";
+import type { AgentPlan } from "../agents/plan-builder.js";
+import type { AgentExecutionResult } from "../agents/sub-agents.js";
+import type { TokenTracker } from "../ai/token-tracker.js";
+import { benchmarkRepositoryRevision } from "../efficiency/codex-runner.js";
+import { hashValue } from "../frontend/foundation.js";
+import {
+  WorkflowReceiptV3Schema,
+  createWorkflowReceiptV3,
+} from "../frontend/receipts/workflow-receipt-v3.js";
+import type { FrontendTaskContractV1 } from "../frontend/task-contract.js";
+import { buildRepositoryFingerprint } from "../notes/repository-fingerprint.js";
+import { packageRoot } from "../utils/asset-path.js";
+import { getMemoirePackageVersion } from "../utils/package-version.js";
+import { hashPackedPackageSurface } from "../utils/package-artifact.js";
+import type {
+  ExecutionBudgetReport,
+  ExecutionBudgetStopReason,
+} from "../agents/execution-budget.js";
+
+export interface ComposeReceiptSummary {
+  readonly status: "written";
+  readonly schemaVersion: "workflow-receipt.v3";
+  readonly receiptSha256: string;
+  readonly file: string;
+}
+
+export async function writeComposeReceiptV3(input: {
+  readonly projectRoot: string;
+  readonly receiptRoot: string;
+  readonly contract: FrontendTaskContractV1;
+  readonly budgetProfile: "strict" | "balanced" | "deep";
+  readonly routingPolicy: "repository-only" | "v3";
+  readonly plan: {
+    readonly id: AgentPlan["id"];
+    readonly skillRoute?: AgentPlan["skillRoute"] | null;
+    readonly contextCapsule?: AgentPlan["contextCapsule"];
+  };
+  readonly result: AgentExecutionResult;
+  readonly dryRun: boolean;
+  readonly startedAtMs: number;
+  readonly completedAtMs: number;
+  readonly tracker: TokenTracker | null;
+}): Promise<Readonly<ComposeReceiptSummary>> {
+  const repositoryFingerprint = await buildRepositoryFingerprint(input.projectRoot);
+  const repositoryFingerprintSha256 = hashValue(repositoryFingerprint);
+  const repositoryRevision = await benchmarkRepositoryRevision(input.projectRoot);
+  const selected = input.routingPolicy === "v3"
+    ? input.plan.skillRoute?.selected[0]
+    : undefined;
+  const additionalSkills = input.routingPolicy === "v3"
+    ? input.plan.skillRoute?.selected.slice(1) ?? []
+    : [];
+  const capsule = input.plan.contextCapsule;
+  if (!capsule) {
+    throw new Error("WorkflowReceiptV3 requires the pre-execution context capsule");
+  }
+  const receiptRoot = resolve(input.receiptRoot);
+  await mkdir(receiptRoot, { recursive: true });
+  const sequence = await reserveReceiptSequence(receiptRoot);
+  const completedAtMs = Math.max(input.startedAtMs, input.completedAtMs);
+  const startedAt = new Date(input.startedAtMs).toISOString();
+  const completedAt = new Date(completedAtMs).toISOString();
+  const budget = input.result.executionBudget;
+  const ledger = budget
+    ? buildComposeAttemptLedger(budget)
+    : buildUncontractedAttemptLedger({
+      startedAt,
+      completedAt,
+      status: input.result.status,
+      tracker: input.tracker,
+    });
+  const usage = sumComposeUsage(ledger.attempts.map((attempt) => attempt.usage));
+  const packageVersion = getMemoirePackageVersion();
+  const candidateArtifactSha256 = await hashPackedPackageSurface(packageRoot());
+  const route = selected ? {
+    decision: "selected" as const,
+    routerVersion: input.plan.skillRoute!.routerVersion,
+    taskClass: input.contract.taskClass,
+    repositoryFingerprintSha256,
+    provider: "memi",
+    model: "agent-cli",
+    effort: input.budgetProfile,
+    skill: {
+      id: selected.id,
+      file: portableSkillPath(selected.file, input.projectRoot),
+      contentSha256: selected.contentHash,
+    },
+    additionalSkills: additionalSkills.map((skill) => ({
+      id: skill.id,
+      file: portableSkillPath(skill.file, input.projectRoot),
+      contentSha256: skill.contentHash,
+    })),
+  } : {
+    decision: "repository-only" as const,
+    routerVersion: input.plan.skillRoute?.routerVersion ?? "skill-router-v3",
+    taskClass: input.contract.taskClass,
+    repositoryFingerprintSha256,
+    provider: "memi",
+    model: "agent-cli",
+    effort: input.budgetProfile,
+    skill: null,
+    abstentionReason: input.routingPolicy === "repository-only"
+      ? "unsupported-route" as const
+      : "incomplete-evidence" as const,
+  };
+  const verificationAt = completedAt;
+  const receipt = createWorkflowReceiptV3({
+    receiptId: `compose:${input.contract.taskId}:${sequence}`,
+    recordedAt: completedAt,
+    sequence,
+    stable: {
+      protocolSha256: hashValue({ protocol: "memi-compose-v3", budgetProfile: input.budgetProfile }),
+      suiteId: "compose-v3",
+      experimentId: "interactive-compose",
+      pairId: `compose:${input.contract.taskId}`,
+      taskId: input.contract.taskId,
+      repeat: 1,
+      taskClass: input.contract.taskClass,
+      taskContractSha256: hashValue(input.contract),
+      repository: {
+        fingerprintSha256: repositoryFingerprintSha256,
+        revision: repositoryRevision,
+        fixtureSha256: hashValue({ repositoryRevision, repositoryFingerprintSha256 }),
+      },
+      runtime: { provider: "memi", model: "agent-cli", effort: input.budgetProfile },
+    },
+    candidate: {
+      condition: "memi",
+      candidateId: `memi-${packageVersion}`,
+      artifactSha256: candidateArtifactSha256,
+    },
+    route,
+    contextCapsules: {
+      initial: {
+        identitySha256: capsule.identitySha256,
+        taskRouteSha256: capsule.sections.taskRoute.sha256,
+        skillsSha256: capsule.sections.skills.sha256,
+        repositoryEvidenceSha256: capsule.sections.repositoryEvidence.sha256,
+        verificationSha256: capsule.sections.verification.sha256,
+      },
+      expansions: [],
+    },
+    execution: {
+      startedAt,
+      completedAt,
+      stopReason: deriveComposeStopReason(
+        input.dryRun,
+        input.result.status,
+        budget?.stopReason ?? undefined,
+      ),
+      attempts: input.dryRun ? [] : ledger.attempts,
+      retries: input.dryRun ? [] : ledger.retries,
+      usage: input.dryRun ? zeroUsage() : usage,
+      billing: {
+        status: "unavailable",
+        currency: "USD",
+        amount: null,
+        usageArtifactSha256: null,
+        priceCardSha256: null,
+        reason: "provider-unsupported",
+      },
+      ...(budget ? { budgetEnforcement: budget } : {}),
+    },
+    nativeEvidence: {
+      status: "excluded",
+      platform: input.contract.platform,
+      artifacts: [],
+      reason: input.dryRun ? "preflight-failed" : "missing-native-artifact",
+    },
+    verification: [{
+      verificationId: "native-verification",
+      kind: input.contract.platform === "web" ? "rendered-flow" : "ios-simulator",
+      commandSha256: hashValue(input.contract.verificationCommands),
+      status: "skipped",
+      exitCode: null,
+      startedAt: verificationAt,
+      completedAt: verificationAt,
+      durationMs: 0,
+      outputSha256: hashValue({ reason: "native-evidence-not-captured" }),
+    }],
+  });
+  const file = `${receipt.receiptSha256.slice("sha256:".length)}.json`;
+  await writeFile(resolve(receiptRoot, file), `${JSON.stringify(receipt, null, 2)}\n`, {
+    encoding: "utf8",
+    flag: "wx",
+  });
+  return Object.freeze({
+    status: "written",
+    schemaVersion: receipt.schemaVersion,
+    receiptSha256: receipt.receiptSha256,
+    file,
+  });
+}
+
+export function buildComposeAttemptLedger(report: ExecutionBudgetReport): Readonly<{
+  attempts: readonly ComposeAttempt[];
+  retries: readonly ComposeRetry[];
+}> {
+  return Object.freeze({
+    attempts: Object.freeze(report.attempts.map((attempt) => Object.freeze({
+      attemptId: attempt.attemptId,
+      startedAt: attempt.startedAt,
+      completedAt: attempt.completedAt,
+      outcome: attempt.outcome,
+      usage: Object.freeze({
+        ...attempt.usage,
+        cachedInputTokens: 0,
+        toolErrors: 0,
+        toolOutputBytes: 0,
+        agentWallTimeMs: Math.max(
+          0,
+          new Date(attempt.completedAt).getTime() - new Date(attempt.startedAt).getTime(),
+        ),
+        toolWallTimeMs: 0,
+      }),
+    }))),
+    retries: Object.freeze(report.retries.map((retry) => Object.freeze({
+      ...retry,
+      evidenceSha256: hashValue(retry),
+    }))),
+  });
+}
+
+export function deriveComposeStopReason(
+  dryRun: boolean,
+  status: AgentExecutionResult["status"],
+  budgetStopReason?: ExecutionBudgetStopReason,
+): "preflight-failed" | ExecutionBudgetStopReason | "verification-failed" {
+  if (dryRun) return "preflight-failed";
+  if (budgetStopReason) return budgetStopReason;
+  return status === "completed" ? "verification-failed" : "attempt-limit-reached";
+}
+
+export async function reserveReceiptSequence(root: string): Promise<number> {
+  const lockFile = resolve(root, ".workflow-receipt-v3.sequence.lock");
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    let handle;
+    try {
+      handle = await open(lockFile, "wx");
+      const counterFile = resolve(root, ".workflow-receipt-v3.sequence");
+      const stored = await readFile(counterFile, "utf8").catch(() => null);
+      const parsed = stored === null ? null : Number.parseInt(stored.trim(), 10);
+      const sequence = parsed !== null && Number.isSafeInteger(parsed) && parsed >= 0
+        ? parsed
+        : await nextReceiptSequenceFromLedger(root);
+      const temporary = resolve(root, `.workflow-receipt-v3.sequence.${process.pid}.${randomUUID()}`);
+      try {
+        await writeFile(temporary, `${sequence + 1}\n`, { encoding: "utf8", flag: "wx" });
+        await rename(temporary, counterFile);
+      } finally {
+        await unlink(temporary).catch(() => undefined);
+      }
+      return sequence;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      await delay(10);
+    } finally {
+      if (handle) {
+        await handle.close();
+        await unlink(lockFile).catch(() => undefined);
+      }
+    }
+  }
+  throw new Error("Timed out reserving a WorkflowReceiptV3 sequence");
+}
+
+async function nextReceiptSequenceFromLedger(root: string): Promise<number> {
+  const sequences = await Promise.all((await readdir(root))
+    .filter((file) => file.endsWith(".json"))
+    .map(async (file) => {
+      const parsed = WorkflowReceiptV3Schema.safeParse(
+        JSON.parse(await readFile(resolve(root, file), "utf8")),
+      );
+      return parsed.success ? parsed.data.sequence : -1;
+    }));
+  return Math.max(-1, ...sequences) + 1;
+}
+
+async function delay(milliseconds: number): Promise<void> {
+  await new Promise<void>((resolveDelay) => setTimeout(resolveDelay, milliseconds));
+}
+
+export function portableSkillPath(file: string, projectRoot: string): string {
+  for (const root of [resolve(packageRoot()), resolve(projectRoot)]) {
+    const candidate = relative(root, resolve(file)).split(sep).join("/");
+    if (!candidate.startsWith("../") && candidate !== ".." && !isAbsolute(candidate)) {
+      return candidate;
+    }
+  }
+  throw new Error(`Routed skill is outside the package and repository roots: ${basename(file)}`);
+}
+
+function zeroUsage() {
+  return {
+    inputTokens: 0,
+    cachedInputTokens: 0,
+    outputTokens: 0,
+    reasoningTokens: 0,
+    toolCalls: 0,
+    toolErrors: 0,
+    toolOutputBytes: 0,
+    agentWallTimeMs: 0,
+    toolWallTimeMs: 0,
+  };
+}
+
+type ComposeUsage = ReturnType<typeof zeroUsage>;
+
+interface ComposeAttempt {
+  readonly attemptId: string;
+  readonly startedAt: string;
+  readonly completedAt: string;
+  readonly outcome: "completed" | "retryable-failure" | "fatal-failure" | "timed-out";
+  readonly usage: ComposeUsage;
+}
+
+interface ComposeRetry {
+  readonly retryId: string;
+  readonly afterAttemptId: string;
+  readonly requestedAt: string;
+  readonly reason: "provider-transient" | "tool-transient" | "verification-actionable" | "missing-skill-context" | "harness-recovery";
+  readonly evidenceSha256: string;
+}
+
+function buildUncontractedAttemptLedger(input: {
+  readonly startedAt: string;
+  readonly completedAt: string;
+  readonly status: AgentExecutionResult["status"];
+  readonly tracker: TokenTracker | null;
+}): Readonly<{ attempts: readonly ComposeAttempt[]; retries: readonly ComposeRetry[] }> {
+  return Object.freeze({
+    attempts: Object.freeze([Object.freeze({
+      attemptId: "attempt-1",
+      startedAt: input.startedAt,
+      completedAt: input.completedAt,
+      outcome: input.status === "completed" ? "completed" : "fatal-failure",
+      usage: Object.freeze({
+        ...zeroUsage(),
+        inputTokens: input.tracker?.totalInput ?? 0,
+        outputTokens: input.tracker?.totalOutput ?? 0,
+        agentWallTimeMs: Math.max(
+          0,
+          new Date(input.completedAt).getTime() - new Date(input.startedAt).getTime(),
+        ),
+      }),
+    })]),
+    retries: Object.freeze([]),
+  });
+}
+
+function sumComposeUsage(usages: readonly ComposeUsage[]): ComposeUsage {
+  return usages.reduce<ComposeUsage>((total, usage) => ({
+    inputTokens: total.inputTokens + usage.inputTokens,
+    cachedInputTokens: total.cachedInputTokens + usage.cachedInputTokens,
+    outputTokens: total.outputTokens + usage.outputTokens,
+    reasoningTokens: total.reasoningTokens + usage.reasoningTokens,
+    toolCalls: total.toolCalls + usage.toolCalls,
+    toolErrors: total.toolErrors + usage.toolErrors,
+    toolOutputBytes: total.toolOutputBytes + usage.toolOutputBytes,
+    agentWallTimeMs: total.agentWallTimeMs + usage.agentWallTimeMs,
+    toolWallTimeMs: total.toolWallTimeMs + usage.toolWallTimeMs,
+  }), zeroUsage());
+}

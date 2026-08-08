@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "no-usd-claim-preregistered",
+  "usdClaimPlanned": false,
+  "currency": "USD",
+  "rates": [],
+  "policy": [
+    "Token counts are resource outcomes and are never converted to dollars without provider billing evidence.",
+    "Adding a USD-cost claim requires a protocol amendment frozen before the first scored provider invocation.",
+    "Any amended price card must identify provider, model, effective dates, source URL or signed invoice, units, rates, and SHA-256."
+  ]
+}

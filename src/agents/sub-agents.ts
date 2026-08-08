@@ -11,6 +11,10 @@ import type { DesignToken } from "../engine/registry.js";
 import type { AnySpec, ComponentSpec, PageSpec, DataVizSpec } from "../specs/types.js";
 import type { SubTask, SubAgentType, AgentContext } from "./plan-builder.js";
 import type { AIClient } from "../ai/index.js";
+import {
+  ExecutionBudgetExceededError,
+  type ExecutionBudgetReport,
+} from "./execution-budget.js";
 
 const log = createLogger("sub-agent-runner");
 
@@ -31,6 +35,14 @@ export interface AgentExecutionResult {
   totalTasks: number;
   mutations: DesignMutation[];
   figmaSynced: boolean;
+  executionBudget?: Readonly<ExecutionBudgetReport>;
+}
+
+export interface SubAgentExecutionOptions {
+  readonly signal?: AbortSignal;
+  readonly maxOutputTokens?: number;
+  readonly beforeApplyAIResult?: () => void;
+  readonly mutationsAllowed?: boolean;
 }
 
 // ── Sub-Agent Runner ─────────────────────────────────────
@@ -52,40 +64,66 @@ export class SubAgentRunner {
     "responsive-specialist",
   ];
 
+  static readonly MUTATION_CAPABLE_AGENT_TYPES: ReadonlySet<SubAgentType> = new Set([
+    "token-engineer",
+    "component-architect",
+    "layout-designer",
+    "dataviz-specialist",
+    "figma-executor",
+    "code-generator",
+    "theme-builder",
+  ]);
+
   // ── Main Dispatch ──────────────────────────────────────
 
-  async executeSubTask(task: SubTask, ctx: AgentContext, ai?: AIClient | null): Promise<unknown> {
+  async executeSubTask(
+    task: SubTask,
+    ctx: AgentContext,
+    ai?: AIClient | null,
+    options: SubAgentExecutionOptions = {},
+  ): Promise<unknown> {
     log.info({ taskId: task.id, agent: task.agentType, name: task.name }, "Executing sub-task");
+    options.signal?.throwIfAborted();
+    if (
+      options.mutationsAllowed === false
+      && SubAgentRunner.MUTATION_CAPABLE_AGENT_TYPES.has(task.agentType)
+    ) {
+      throw new Error(
+        `Contracted mutation route ${task.agentType} requires a transaction-safe adapter`,
+      );
+    }
 
     // Try AI-powered execution first if available
     if (ai && SubAgentRunner.AI_AGENT_TYPES.includes(task.agentType)) {
       try {
-        const aiResult = await this.aiExecuteSubTask(ai, task, ctx);
+        const aiResult = await this.aiExecuteSubTask(ai, task, ctx, options);
         if (aiResult) return aiResult;
       } catch (err) {
+        if (options.signal?.aborted) throw options.signal.reason;
+        if (err instanceof ExecutionBudgetExceededError) throw err;
         log.warn({ taskId: task.id, err: err instanceof Error ? err.message : String(err) }, "AI execution failed, falling back to heuristic");
       }
     }
 
     switch (task.agentType) {
       case "token-engineer":
-        return this.executeTokenEngineer(task, ctx);
+        return this.executeTokenEngineer(task, ctx, options.signal);
       case "component-architect":
-        return this.executeComponentArchitect(task, ctx);
+        return this.executeComponentArchitect(task, ctx, options.signal);
       case "layout-designer":
-        return this.executeLayoutDesigner(task, ctx);
+        return this.executeLayoutDesigner(task, ctx, options.signal);
       case "dataviz-specialist":
-        return this.executeDatavizSpecialist(task, ctx);
+        return this.executeDatavizSpecialist(task, ctx, options.signal);
       case "figma-executor":
-        return this.executeFigmaAgent(task, ctx);
+        return this.executeFigmaAgent(task, ctx, options.signal);
       case "code-generator":
-        return this.executeCodeGenerator(task, ctx);
+        return this.executeCodeGenerator(task, ctx, options.signal);
       case "design-auditor":
         return this.executeDesignAuditor(task, ctx);
       case "accessibility-checker":
         return this.executeAccessibilityChecker(task, ctx);
       case "theme-builder":
-        return this.executeThemeBuilder(task, ctx);
+        return this.executeThemeBuilder(task, ctx, options.signal);
       case "responsive-specialist":
         return this.executeResponsiveSpecialist(task, ctx);
       default:
@@ -96,7 +134,7 @@ export class SubAgentRunner {
 
   // ── Token Engineer Sub-Agent ───────────────────────────
 
-  private async executeTokenEngineer(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async executeTokenEngineer(task: SubTask, ctx: AgentContext, signal?: AbortSignal): Promise<unknown> {
     const mutations: DesignMutation[] = [];
     const ds = this.engine.registry.designSystem;
     const prompt = task.prompt.toLowerCase();
@@ -119,6 +157,7 @@ export class SubAgentRunner {
         values: { ...(existing?.values ?? {}), Light: color },
         cssVariable: existing?.cssVariable ?? `--${tokenName.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase()}`,
       };
+      signal?.throwIfAborted();
       this.engine.registry.updateToken(tokenName, token);
       mutations.push({ type: existing ? "token-updated" : "token-created", target: tokenName, detail: `Set to ${color}` });
     }
@@ -134,6 +173,7 @@ export class SubAgentRunner {
         values: { default: value },
         cssVariable: `--${name.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase()}`,
       };
+      signal?.throwIfAborted();
       this.engine.registry.updateToken(name, token);
       mutations.push({ type: "token-created", target: name, detail: `Set to ${value}` });
     }
@@ -144,10 +184,11 @@ export class SubAgentRunner {
 
   // ── Component Architect Sub-Agent ──────────────────────
 
-  private async executeComponentArchitect(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async executeComponentArchitect(task: SubTask, ctx: AgentContext, signal?: AbortSignal): Promise<unknown> {
     if (task.name.includes("Design") || task.name.includes("Update") || task.name.includes("Create")) {
       const specName = task.targetSpecs?.[0] ?? this.resolveTargetSpecName(task.prompt, "component", ctx);
       const existing = await this.engine.registry.getSpec(specName);
+      signal?.throwIfAborted();
 
       const componentSpec: ComponentSpec = existing?.type === "component"
         ? {
@@ -156,7 +197,9 @@ export class SubAgentRunner {
           }
         : this.scaffoldComponentSpec(specName, task.prompt);
 
+      signal?.throwIfAborted();
       await this.engine.registry.saveSpec(componentSpec);
+      signal?.throwIfAborted();
       this.upsertContextSpec(ctx, componentSpec);
 
       const mutationType: DesignMutation["type"] = existing ? "spec-updated" : "spec-created";
@@ -177,12 +220,13 @@ export class SubAgentRunner {
 
   // ── Layout Designer Sub-Agent ──────────────────────────
 
-  private async executeLayoutDesigner(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async executeLayoutDesigner(task: SubTask, ctx: AgentContext, signal?: AbortSignal): Promise<unknown> {
     log.info({ task: task.name }, "Layout designer processing");
 
     if (task.name.includes("Design")) {
       const specName = task.targetSpecs?.[0] ?? this.resolveTargetSpecName(task.prompt, "page", ctx);
       const existing = await this.engine.registry.getSpec(specName);
+      signal?.throwIfAborted();
 
       const pageSpec: PageSpec = existing?.type === "page"
         ? {
@@ -191,7 +235,9 @@ export class SubAgentRunner {
           }
         : this.scaffoldPageSpec(specName, task.prompt, ctx);
 
+      signal?.throwIfAborted();
       await this.engine.registry.saveSpec(pageSpec);
+      signal?.throwIfAborted();
       this.upsertContextSpec(ctx, pageSpec);
 
       const mutationType: DesignMutation["type"] = existing ? "spec-updated" : "spec-created";
@@ -212,12 +258,13 @@ export class SubAgentRunner {
 
   // ── Dataviz Specialist Sub-Agent ───────────────────────
 
-  private async executeDatavizSpecialist(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async executeDatavizSpecialist(task: SubTask, ctx: AgentContext, signal?: AbortSignal): Promise<unknown> {
     log.info({ task: task.name }, "Dataviz specialist processing");
 
     if (task.name.includes("Design")) {
       const specName = task.targetSpecs?.[0] ?? this.resolveTargetSpecName(task.prompt, "dataviz", ctx);
       const existing = await this.engine.registry.getSpec(specName);
+      signal?.throwIfAborted();
 
       const datavizSpec: DataVizSpec = existing?.type === "dataviz"
         ? {
@@ -226,7 +273,9 @@ export class SubAgentRunner {
           }
         : this.scaffoldDataVizSpec(specName, task.prompt);
 
+      signal?.throwIfAborted();
       await this.engine.registry.saveSpec(datavizSpec);
+      signal?.throwIfAborted();
       this.upsertContextSpec(ctx, datavizSpec);
 
       const mutationType: DesignMutation["type"] = existing ? "spec-updated" : "spec-created";
@@ -247,13 +296,15 @@ export class SubAgentRunner {
 
   // ── Figma Executor Sub-Agent ───────────────────────────
 
-  private async executeFigmaAgent(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async executeFigmaAgent(task: SubTask, ctx: AgentContext, signal?: AbortSignal): Promise<unknown> {
     if (!this.engine.figma.isConnected) {
       throw new Error("Figma not connected");
     }
 
     if (task.name.includes("Pull")) {
+      signal?.throwIfAborted();
       await this.engine.pullDesignSystem();
+      signal?.throwIfAborted();
       return { status: "completed", action: "pulled" };
     }
 
@@ -263,7 +314,9 @@ export class SubAgentRunner {
       const localTokenCount = localBefore.tokens.length;
       const localComponentCount = localBefore.components.length;
 
+      signal?.throwIfAborted();
       await this.engine.pullDesignSystem();
+      signal?.throwIfAborted();
 
       const afterPull = this.engine.registry.designSystem;
       return {
@@ -282,8 +335,9 @@ export class SubAgentRunner {
       // Push current design system to Figma
       const ds = this.engine.registry.designSystem;
       for (const token of ds.tokens) {
+        signal?.throwIfAborted();
         try {
-          await this.pushTokenToFigma(token);
+          await this.pushTokenToFigma(token, signal);
         } catch (err) {
           log.warn({ token: token.name, err }, "Failed to push token");
         }
@@ -296,7 +350,7 @@ export class SubAgentRunner {
 
   // ── Code Generator Sub-Agent ───────────────────────────
 
-  private async executeCodeGenerator(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async executeCodeGenerator(task: SubTask, ctx: AgentContext, signal?: AbortSignal): Promise<unknown> {
     const generated: string[] = [];
     const targetSpecs = task.targetSpecs && task.targetSpecs.length > 0
       ? task.targetSpecs
@@ -309,8 +363,10 @@ export class SubAgentRunner {
     }
 
     for (const specName of targetSpecs) {
+      signal?.throwIfAborted();
       try {
         const result = await this.engine.generateFromSpec(specName);
+        signal?.throwIfAborted();
         if (result.blocked) {
           log.warn({ spec: specName, findings: result.findings }, "Generation blocked by quality gate");
           continue;
@@ -474,7 +530,7 @@ export class SubAgentRunner {
 
   // ── Theme Builder Sub-Agent ────────────────────────────
 
-  private async executeThemeBuilder(task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async executeThemeBuilder(task: SubTask, ctx: AgentContext, signal?: AbortSignal): Promise<unknown> {
     const mutations: DesignMutation[] = [];
     const prompt = task.prompt.toLowerCase();
 
@@ -514,6 +570,7 @@ export class SubAgentRunner {
             values: { [isDark ? "Dark" : "Light"]: value },
             cssVariable: `--${name}`,
           };
+          signal?.throwIfAborted();
           this.engine.registry.updateToken(name, token);
           mutations.push({ type: "token-created", target: name, detail: `Theme: ${value}` });
         }
@@ -538,6 +595,7 @@ export class SubAgentRunner {
           values: { [isDark ? "Dark" : "Light"]: value },
           cssVariable: `--${name}`,
         };
+        signal?.throwIfAborted();
         this.engine.registry.updateToken(name, token);
         mutations.push({ type: "token-created", target: name, detail: `Semantic: ${value}` });
       }
@@ -646,7 +704,12 @@ export class SubAgentRunner {
 
   // ── AI-Powered Execution ───────────────────────────────
 
-  private async aiExecuteSubTask(ai: AIClient, task: SubTask, ctx: AgentContext): Promise<unknown> {
+  private async aiExecuteSubTask(
+    ai: AIClient,
+    task: SubTask,
+    ctx: AgentContext,
+    options: SubAgentExecutionOptions,
+  ): Promise<unknown> {
     const systemPrompt = this.buildAgentSystemPrompt(task.agentType, ctx);
 
     const result = await ai.completeJSON<{
@@ -661,11 +724,18 @@ export class SubAgentRunner {
         { role: "user", content: task.prompt },
       ],
       model: "fast",
+      ...(options.maxOutputTokens !== undefined
+        ? { maxTokens: Math.max(1, options.maxOutputTokens) }
+        : {}),
     });
+
+    options.signal?.throwIfAborted();
+    options.beforeApplyAIResult?.();
 
     // Apply any mutations from the AI result
     if (result.mutations && result.mutations.length > 0) {
       for (const m of result.mutations) {
+        options.signal?.throwIfAborted();
         await this.applyAIResult(m, ctx);
       }
     }
@@ -758,7 +828,7 @@ export class SubAgentRunner {
 
   // ── Figma Push Helpers ─────────────────────────────────
 
-  async pushTokenToFigma(token: DesignToken): Promise<void> {
+  async pushTokenToFigma(token: DesignToken, signal?: AbortSignal): Promise<void> {
     // Enable sync guard to prevent echo loops
     this.engine.sync.enableGuard();
 
@@ -810,17 +880,20 @@ export class SubAgentRunner {
         })()
       `;
 
+      signal?.throwIfAborted();
       await this.engine.figma.execute(code);
+      signal?.throwIfAborted();
     } finally {
       this.engine.sync.disableGuard();
     }
   }
 
-  async syncMutationsToFigma(mutations: DesignMutation[]): Promise<void> {
+  async syncMutationsToFigma(mutations: DesignMutation[], signal?: AbortSignal): Promise<void> {
     for (const mutation of mutations) {
+      signal?.throwIfAborted();
       if (mutation.type === "token-updated" || mutation.type === "token-created") {
         const token = this.engine.registry.designSystem.tokens.find((t) => t.name === mutation.target);
-        if (token) await this.pushTokenToFigma(token);
+        if (token) await this.pushTokenToFigma(token, signal);
       }
     }
   }

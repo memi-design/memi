@@ -4,6 +4,7 @@ import type { DesignSystem, DesignToken } from "../../engine/registry.js";
 import { ComponentSpecSchema, PageSpecSchema } from "../../specs/types.js";
 import type { AgentContext, SubTask } from "../plan-builder.js";
 import { SubAgentRunner } from "../sub-agents.js";
+import { TokenTracker, type AIClient } from "../../ai/index.js";
 
 function makeTask(overrides: Partial<SubTask>): SubTask {
   return {
@@ -69,6 +70,76 @@ function makeHarness(tokens: DesignToken[] = []) {
 }
 
 describe("SubAgentRunner release contracts", () => {
+  it("refuses mutating heuristics in contracted shadow mode", async () => {
+    const { context, registry, runner } = makeHarness();
+
+    await expect(runner.executeSubTask(
+      makeTask({
+        agentType: "component-architect",
+        name: "Create component",
+        prompt: "Create a notification card component",
+      }),
+      context,
+      null,
+      { mutationsAllowed: false },
+    )).rejects.toThrow("transaction-safe adapter");
+    expect(registry.getSpec).not.toHaveBeenCalled();
+    expect(registry.saveSpec).not.toHaveBeenCalled();
+  });
+
+  it("checks cancellation again after awaiting heuristic discovery and before mutation", async () => {
+    const { context, registry, runner } = makeHarness();
+    const controller = new AbortController();
+    const cancellation = new Error("contracted execution canceled");
+    let releaseDiscovery!: () => void;
+    registry.getSpec.mockImplementationOnce(async () => {
+      await new Promise<void>((resolve) => { releaseDiscovery = resolve; });
+      return null;
+    });
+
+    const execution = runner.executeSubTask(
+      makeTask({
+        agentType: "component-architect",
+        name: "Create component",
+        prompt: "Create a notification card component",
+      }),
+      context,
+      null,
+      { signal: controller.signal },
+    );
+    controller.abort(cancellation);
+    releaseDiscovery();
+
+    await expect(execution).rejects.toBe(cancellation);
+    expect(registry.saveSpec).not.toHaveBeenCalled();
+  });
+
+  it("never falls back to a mutating heuristic after contracted cancellation", async () => {
+    const { context, registry, runner } = makeHarness();
+    const controller = new AbortController();
+    const cancellation = new Error("contracted wall-time exhausted");
+    const ai = {
+      provider: "anthropic",
+      capabilities: { text: true, vision: true, streaming: true, json: true, tools: false },
+      tracker: new TokenTracker(),
+      completeJSON: vi.fn().mockImplementation(async () => {
+        controller.abort(cancellation);
+        return {
+          status: "completed",
+          mutations: [{ type: "token-created", target: "primary", detail: "late mutation" }],
+        };
+      }),
+    } as unknown as AIClient;
+
+    await expect(runner.executeSubTask(
+      makeTask({ prompt: "Create primary color #ff5470" }),
+      context,
+      ai,
+      { signal: controller.signal },
+    )).rejects.toBe(cancellation);
+    expect(registry.updateToken).not.toHaveBeenCalled();
+  });
+
   it("reports the actual theme token count after applying defaults", async () => {
     const { context, designSystem, runner } = makeHarness();
 

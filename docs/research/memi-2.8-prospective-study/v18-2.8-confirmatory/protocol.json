@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "title": "Memi 2.8 Frontend Reliability and Resource-Efficiency Confirmatory Study",
+  "status": "preregistered-unexecuted",
+  "claimHarness": {
+    "client": "Codex",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "low",
+    "providerPolicy": "same provider, model, and effort within every matched pair"
+  },
+  "artifacts": {
+    "baseline": {
+      "packageVersion": "2.7.9",
+      "role": "baseline"
+    },
+    "candidate": {
+      "packageVersion": "2.8.0-rc.1",
+      "role": "candidate"
+    }
+  },
+  "cellDesign": {
+    "total": 152,
+    "aa": 6,
+    "nativeCalibration": 6,
+    "confirmatory": 120,
+    "candidateHoldouts": 20,
+    "criticalTasks": 12,
+    "criticalTasksPerPlatform": {
+      "web": 4,
+      "expo": 4,
+      "swiftui": 4
+    },
+    "matchedPairsPerCriticalTask": 5,
+    "conditionsPerConfirmatoryPair": 2,
+    "holdoutPassRequirement": "at least 19 of 20"
+  },
+  "randomization": {
+    "seed": 2800152,
+    "method": "deterministic pair-order counterbalancing",
+    "rule": "(seed + one-based task ordinal + repetition) parity selects baseline-first versus candidate-first",
+    "concealment": "condition labels are removed from grading packets"
+  },
+  "controls": {
+    "cleanClonePerCell": true,
+    "immutableFixtureRevision": true,
+    "isolatedPostPatchVerification": true,
+    "contentAddressedEvidence": true,
+    "receiptsRequiredForAdmission": true,
+    "noImputation": true,
+    "simulatorExecution": "serialized with exclusive reset device",
+    "gradersBlindToCondition": true,
+    "modelGradersPerArtifact": 3,
+    "practitionersPerTrack": 4,
+    "minimumExternalPractitionersPerTrack": 2,
+    "providerBillingArtifactsRequiredForUsdClaims": true
+  },
+  "requiredNativeEvidence": {
+    "web": [
+      "desktop and mobile Chromium screenshots",
+      "Playwright trace",
+      "keyboard and focus result",
+      "axe result",
+      "reduced-motion result",
+      "light and dark mode result",
+      "empty, error, and loading state result"
+    ],
+    "expo": [
+      "reset Simulator screenshot",
+      "deterministic journey log",
+      "React Native accessibility tree",
+      "navigation and state verification"
+    ],
+    "swiftui": [
+      "reset Simulator screenshot",
+      "XCUITest journey result",
+      "accessibility hierarchy",
+      "reduced-motion result",
+      "adaptive-state verification"
+    ]
+  },
+  "outcomes": {
+    "primary": [
+      "blinded_paired_design_quality"
+    ],
+    "secondary": [
+      "functional_acceptance",
+      "critical_defects",
+      "input_tokens",
+      "output_tokens",
+      "reasoning_tokens",
+      "total_tokens",
+      "wall_time_ms",
+      "tool_calls",
+      "retries",
+      "provider_failures",
+      "route_precision",
+      "route_recall",
+      "abstention_correctness"
+    ]
+  },
+  "claimBoundary": [
+    "Claims apply only to the frozen fixtures and Codex gpt-5.6-luna low harness.",
+    "No general superiority claim is permitted from pooled heterogeneous tasks.",
+    "No USD claim is permitted without cell-bound provider billing records and an immutable price card.",
+    "Excluded and failed cells are reported without replacement or imputation."
+  ]
+}

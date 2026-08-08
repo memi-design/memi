@@ -62,6 +62,13 @@ interface SkillRegistryEntry {
   freedomLevel: string;
   prerequisite?: string | null;
   chains?: string[];
+  memoire?: {
+    routing?: {
+      taskClasses?: string[];
+      actions?: string[];
+      platforms?: string[];
+    };
+  };
 }
 
 interface SkillRegistry {
@@ -109,6 +116,7 @@ function inferCategory(skill: SkillRegistryEntry): NoteCategory {
 }
 
 function skillToManifest(skill: SkillRegistryEntry, registryVersion: string): NoteManifest {
+  const routing = skill.memoire?.routing;
   return {
     name: skill.id,
     version: registryVersion,
@@ -123,6 +131,18 @@ function skillToManifest(skill: SkillRegistryEntry, registryVersion: string): No
       freedomLevel: (skill.freedomLevel as "maximum" | "high" | "read-only" | "reference") || "high",
     }],
     dependencies: skill.prerequisite ? [skill.prerequisite] : [],
+    memoire: routing ? {
+      harnessExtensions: [],
+      routing: {
+        intents: [],
+        excludes: [],
+        capabilities: [],
+        platforms: routing.platforms ?? [],
+        taskClasses: routing.taskClasses ?? [],
+        priority: 0,
+        actions: routing.actions ?? [],
+      },
+    } : undefined,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

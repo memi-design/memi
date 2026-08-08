@@ -1,0 +1,1226 @@
+{
+  "schemaVersion": 1,
+  "studyId": "memi-v18-2.8-confirmatory",
+  "status": "unexecuted",
+  "receiptRoot": null,
+  "receiptRootPendingReason": "The isolated execution receipt root does not exist before the run freeze.",
+  "expectedReceipts": 152,
+  "entries": [
+    {
+      "cellId": "aa-web-01-a1",
+      "phase": "aa",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "aa-web-01-a2",
+      "phase": "aa",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "aa-expo-01-a1",
+      "phase": "aa",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "aa-expo-01-a2",
+      "phase": "aa",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "aa-swiftui-01-a1",
+      "phase": "aa",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "aa-swiftui-01-a2",
+      "phase": "aa",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "calibration-web-01-candidate",
+      "phase": "calibration",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "calibration-web-01-baseline",
+      "phase": "calibration",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "calibration-expo-01-baseline",
+      "phase": "calibration",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "calibration-expo-01-candidate",
+      "phase": "calibration",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "calibration-swiftui-01-candidate",
+      "phase": "calibration",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "calibration-swiftui-01-baseline",
+      "phase": "calibration",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-01-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-02-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-03-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-web-04-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-01-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-02-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-03-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-expo-04-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-01-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-02-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-03-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r1-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r1-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r2-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r2-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r3-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r3-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r4-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r4-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r5-candidate",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "confirmatory-critical-swiftui-04-r5-baseline",
+      "phase": "confirmatory",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-01-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-02-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-03-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-04-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-05-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-06-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-07-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-08-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-09-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-10-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-11-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-12-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-13-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-14-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-15-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-16-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-17-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-18-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-19-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    },
+    {
+      "cellId": "holdout-20-candidate",
+      "phase": "holdout",
+      "status": "not-run",
+      "receiptPath": null,
+      "receiptSha256": null,
+      "admission": "not-evaluated"
+    }
+  ]
+}

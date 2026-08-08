@@ -22,6 +22,20 @@ import { hasAI, getTracker } from "../ai/index.js";
 import { ui } from "../tui/format.js";
 import { checkCapabilities } from "../engine/capabilities.js";
 import { formatElapsed } from "../utils/format.js";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import {
+  FrontendTaskContractV1Schema,
+  type FrontendTaskContractV1,
+} from "../frontend/task-contract.js";
+import {
+  writeComposeReceiptV3,
+  portableSkillPath,
+  type ComposeReceiptSummary,
+} from "./compose-receipt.js";
+
+type BudgetProfile = "strict" | "balanced" | "deep";
+type RoutingPolicy = "repository-only" | "v3";
 
 export interface ComposePayload {
   intent: string;
@@ -36,9 +50,14 @@ export interface ComposePayload {
     dryRun: boolean;
     autoSync: boolean;
     verbose: boolean;
+    budgetProfile: BudgetProfile;
+    routingPolicy: RoutingPolicy;
+    taskContract: Pick<FrontendTaskContractV1, "taskId" | "taskClass" | "platform"> | null;
+    receiptRoot: boolean;
   };
   plan: ComposePlanPayload;
   execution: ComposeExecutionPayload;
+  receipt: ComposeReceiptSummary | null;
 }
 
 export interface ComposePlanPayload {
@@ -48,6 +67,11 @@ export interface ComposePlanPayload {
   createdAt: string;
   totalTasks: number;
   skillRoute: AgentPlan["skillRoute"] | null;
+  contextCapsule: {
+    schemaVersion: "context-capsule.v1";
+    identitySha256: string;
+    contentByteLength: number;
+  } | null;
   tasks: ComposeTaskPayload[];
 }
 
@@ -88,14 +112,33 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
     .option("--dry-run", "Show the execution plan without running it")
     .option("--verbose", "Show detailed sub-task progress")
     .option("--no-figma", "Skip Figma sync steps")
+    .option("--task-contract <path>", "Load a FrontendTaskContractV1 JSON file")
+    .option("--budget-profile <profile>", "Execution budget: strict, balanced, or deep", "balanced")
+    .option("--routing-policy <policy>", "Routing policy: repository-only or v3", "v3")
+    .option("--receipt-root <path>", "Write a WorkflowReceiptV3 under this directory")
     .option("--json", "Output compose execution as JSON")
-    .action(async (intentParts: string[], opts: { dryRun?: boolean; verbose?: boolean; figma?: boolean; json?: boolean }) => {
+    .action(async (intentParts: string[], opts: {
+      dryRun?: boolean;
+      verbose?: boolean;
+      figma?: boolean;
+      json?: boolean;
+      taskContract?: string;
+      budgetProfile?: string;
+      routingPolicy?: string;
+      receiptRoot?: string;
+    }) => {
       const intent = intentParts.join(" ");
       const startedAt = Date.now();
       const autoSync = opts.figma !== false;
       let capturedPlan: ComposePlanPayload | null = null;
+      let capturedAgentPlan: AgentPlan | null = null;
 
       try {
+        const budgetProfile = parseBudgetProfile(opts.budgetProfile);
+        const routingPolicy = parseRoutingPolicy(opts.routingPolicy);
+        const taskContract = opts.taskContract
+          ? await loadTaskContract(opts.taskContract, intent)
+          : null;
         await engine.init();
 
         // Inform about degraded capabilities (compose works without AI via heuristics)
@@ -116,7 +159,8 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
 
         const category = classifyIntent(intent);
         const orchestrator = new AgentOrchestrator(engine, (plan: AgentPlan) => {
-          capturedPlan = serializePlan(plan);
+          capturedAgentPlan = plan;
+          capturedPlan = serializeComposePlan(plan, engine.config.projectRoot);
 
           if (opts.json) return;
 
@@ -135,10 +179,34 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
         const result = await orchestrator.execute(intent, {
           dryRun: opts.dryRun,
           autoSync,
+          taskClass: taskContract?.taskClass,
+          platforms: taskContract ? [taskContract.platform] : undefined,
+          routingPolicy,
+          taskContract: taskContract ?? undefined,
+          budgetProfile,
         });
 
         const elapsedMs = Date.now() - startedAt;
         const tracker = getTracker();
+        if (opts.receiptRoot && !taskContract) {
+          throw new Error("--receipt-root requires --task-contract");
+        }
+        const planPayload = capturedPlan ?? emptyPlanPayload(intent, category);
+        const receipt = opts.receiptRoot && taskContract
+          ? await writeComposeReceiptV3({
+            projectRoot: engine.config.projectRoot,
+            receiptRoot: opts.receiptRoot,
+            contract: taskContract,
+            budgetProfile,
+            routingPolicy,
+            plan: requireCapturedPlan(capturedAgentPlan),
+            result,
+            dryRun: Boolean(opts.dryRun),
+            startedAtMs: startedAt,
+            completedAtMs: Date.now(),
+            tracker,
+          })
+          : null;
         const payload = buildComposePayload({
           intent,
           category,
@@ -146,11 +214,20 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
             dryRun: Boolean(opts.dryRun),
             autoSync,
             verbose: Boolean(opts.verbose),
+            budgetProfile,
+            routingPolicy,
+            taskContract: taskContract ? {
+              taskId: taskContract.taskId,
+              taskClass: taskContract.taskClass,
+              platform: taskContract.platform,
+            } : null,
+            receiptRoot: Boolean(opts.receiptRoot),
           },
-          plan: capturedPlan ?? emptyPlanPayload(intent, category),
+          plan: planPayload,
           result,
           elapsedMs,
           tracker,
+          receipt,
         });
 
         if (opts.json) {
@@ -183,6 +260,9 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
           console.log();
           console.log(ui.dots("AI Usage", payload.ai.usage ?? "unknown"));
         }
+        if (payload.receipt) {
+          console.log(ui.dots("Receipt", payload.receipt.file));
+        }
 
         if (opts.dryRun) {
           console.log();
@@ -203,6 +283,10 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
               dryRun: Boolean(opts.dryRun),
               autoSync,
               verbose: Boolean(opts.verbose),
+              budgetProfile: opts.budgetProfile ?? "balanced",
+              routingPolicy: opts.routingPolicy ?? "v3",
+              taskContract: null,
+              receiptRoot: Boolean(opts.receiptRoot),
             },
           }, null, 2));
           process.exitCode = 1;
@@ -214,16 +298,57 @@ export function registerComposeCommand(program: Command, engine: MemoireEngine) 
     });
 }
 
-function serializePlan(plan: AgentPlan): ComposePlanPayload {
+async function loadTaskContract(
+  contractPath: string,
+  intent: string,
+): Promise<FrontendTaskContractV1> {
+  const parsed = FrontendTaskContractV1Schema.parse(
+    JSON.parse(await readFile(resolve(contractPath), "utf8")),
+  );
+  if (parsed.intent !== intent) {
+    throw new Error("Task contract intent must exactly match the compose intent");
+  }
+  return parsed;
+}
+
+function parseBudgetProfile(value = "balanced"): BudgetProfile {
+  if (value === "strict" || value === "balanced" || value === "deep") return value;
+  throw new Error("budget-profile must be strict, balanced, or deep");
+}
+
+function parseRoutingPolicy(value = "v3"): RoutingPolicy {
+  if (value === "repository-only" || value === "v3") return value;
+  throw new Error("routing-policy must be repository-only or v3");
+}
+
+export function serializeComposePlan(plan: AgentPlan, projectRoot: string): ComposePlanPayload {
   return {
     id: plan.id,
     intent: plan.intent,
     category: plan.category,
     createdAt: plan.createdAt,
     totalTasks: plan.subTasks.length,
-    skillRoute: plan.skillRoute ?? null,
+    skillRoute: plan.skillRoute ? {
+      ...plan.skillRoute,
+      selected: plan.skillRoute.selected.map((selected) => ({
+        ...selected,
+        file: portableSkillPath(selected.file, projectRoot),
+      })),
+    } : null,
+    contextCapsule: plan.contextCapsule ? {
+      schemaVersion: plan.contextCapsule.schemaVersion,
+      identitySha256: plan.contextCapsule.identitySha256,
+      contentByteLength: plan.contextCapsule.contentByteLength,
+    } : null,
     tasks: plan.subTasks.map(serializeTask),
   };
+}
+
+function requireCapturedPlan(plan: AgentPlan | null): AgentPlan {
+  if (!plan?.contextCapsule) {
+    throw new Error("Contracted compose execution did not produce a context capsule");
+  }
+  return plan;
 }
 
 function serializeTask(task: SubTask): ComposeTaskPayload {
@@ -262,6 +387,7 @@ function buildComposePayload(input: {
   };
   elapsedMs: number;
   tracker: ReturnType<typeof getTracker>;
+  receipt: ComposeReceiptSummary | null;
 }): ComposePayload {
   const tracker = input.tracker;
   return {
@@ -291,6 +417,7 @@ function buildComposePayload(input: {
       figmaSynced: input.result.figmaSynced,
       elapsedMs: input.elapsedMs,
     },
+    receipt: input.receipt,
   };
 }
 
@@ -302,6 +429,7 @@ function emptyPlanPayload(intent: string, category: string): ComposePlanPayload 
     createdAt: new Date().toISOString(),
     totalTasks: 0,
     skillRoute: null,
+    contextCapsule: null,
     tasks: [],
   };
 }

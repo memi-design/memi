@@ -20,6 +20,82 @@ afterEach(async () => {
 });
 
 describe("deterministic skill router", () => {
+  it("routes a task-class skill only on an exact class match", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Map the design system for this Expo app",
+      taskClass: "design-system-map",
+      notes: [await note("map-design-system", {
+        description: "Map repository design tokens and components.",
+        intents: ["design-system-mapping"],
+        taskClasses: ["design-system-map", "token-map"],
+        actions: ["map"],
+        platforms: ["react-native"],
+      })],
+      capabilities: [],
+      platforms: ["expo"],
+    });
+
+    expect(result.decision).toBe("single");
+    expect(result.selected.map((skill) => skill.id)).toEqual(["map-design-system"]);
+  });
+
+  it("fails closed when an exact-route skill has no declared task class", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Map the design system",
+      notes: [await note("map-design-system", {
+        description: "Map repository design tokens and components.",
+        intents: ["design-system-mapping"],
+        taskClasses: ["design-system-map"],
+      })],
+      capabilities: [],
+    });
+
+    expect(result.decision).toBe("abstain");
+    expect(result.excluded).toContainEqual({
+      id: "map-design-system",
+      reason: "task-class-missing",
+    });
+  });
+
+  it("fails closed when a task class does not exactly match", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Map the design system",
+      taskClass: "responsive-layout",
+      notes: [await note("map-design-system", {
+        description: "Map repository design tokens and components.",
+        intents: ["design-system-mapping"],
+        taskClasses: ["design-system-map"],
+      })],
+      capabilities: [],
+    });
+
+    expect(result.decision).toBe("abstain");
+    expect(result.excluded).toContainEqual({
+      id: "map-design-system",
+      reason: "task-class-mismatch:responsive-layout",
+    });
+  });
+
+  it("defaults to one skill even when two complementary routes qualify", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Audit responsive typography for WCAG keyboard accessibility",
+      notes: await Promise.all([
+        note("accessibility-audit", {
+          description: "Audit WCAG, keyboard, VoiceOver, contrast, and accessible UI states.",
+          intents: ["accessibility-audit", "wcag-review"],
+        }),
+        note("better-typography", {
+          description: "Improve type scale, line height, responsive text, and typography tokens.",
+          intents: ["typography-system", "responsive-typography"],
+        }),
+      ]),
+      capabilities: [],
+    });
+
+    expect(result.decision).toBe("single");
+    expect(result.selected).toHaveLength(1);
+  });
+
   it("stacks two complementary skills in stable score order", async () => {
     const notes = await Promise.all([
       note("accessibility-audit", {
@@ -144,7 +220,7 @@ describe("deterministic skill router", () => {
 
     const context = formatRoutedSkillContext(routed);
 
-    expect(context).toContain("\"routerVersion\": \"skill-router-v2\"");
+    expect(context).toContain("\"routerVersion\": \"skill-router-v3\"");
     expect(context).toContain("# accessibility-audit");
     expect(context).toContain(routed.route.selected[0].contentHash);
     expect(context).toContain("The task manifest and closest repository evidence are authoritative.");
@@ -179,6 +255,34 @@ describe("deterministic skill router", () => {
     expect(routed.selected.map((skill) => skill.id)).toEqual(["accessibility-audit"]);
     expect(routed.excluded).toContainEqual({
       id: "motion-performance",
+      reason: "redundant-evidence",
+    });
+  });
+
+  it("does not count generic action words as distinct stack evidence", async () => {
+    const result = await routeInstalledSkills({
+      intent: "Audit accessibility keyboard behavior and review the interface",
+      notes: await Promise.all([
+        note("keyboard-accessibility", {
+          description: "Audit accessibility and keyboard behavior.",
+          intents: ["keyboard-accessibility"],
+          priority: 20,
+        }),
+        note("accessibility-review", {
+          description: "Review interface accessibility and keyboard behavior.",
+          intents: ["keyboard-accessibility", "interface-review"],
+        }),
+      ]),
+      capabilities: [],
+      maximumSkills: 2,
+    });
+
+    expect(result.decision).toBe("single");
+    expect(result.selected.map((skill) => skill.id)).toEqual([
+      "keyboard-accessibility",
+    ]);
+    expect(result.excluded).toContainEqual({
+      id: "accessibility-review",
       reason: "redundant-evidence",
     });
   });
@@ -447,6 +551,36 @@ describe("deterministic skill router", () => {
     });
   });
 
+  it("uses safe repository patterns only for eligibility, never promotion", async () => {
+    const expo = await note("expo-router-bottom-tabs", {
+      description: "Implement Expo Router bottom tabs and badges.",
+      intents: ["expo-router-bottom-tabs", "bottom-tab-badge"],
+      repository: {
+        dependenciesAny: ["exact:expo-router"],
+        filesAny: ["exact:app/(tabs)/_layout.tsx"],
+      },
+    });
+
+    const result = await routeInstalledSkills({
+      intent: "Optimize a PostgreSQL query plan",
+      notes: [expo],
+      capabilities: [],
+      repositoryFingerprint: {
+        schemaVersion: 1,
+        languages: ["typescript"],
+        frameworks: ["expo", "react-native"],
+        dependencies: ["expo-router"],
+        files: ["app/(tabs)/_layout.tsx"],
+        imports: ["expo-router"],
+        scripts: ["test"],
+      },
+    });
+
+    expect(result.decision).toBe("abstain");
+    expect(result.selected).toEqual([]);
+    expect(result.candidates).toEqual([]);
+  });
+
   it("compiles bounded routing patterns and rejects executable regex syntax", () => {
     expect(compileSafeRoutingPattern("^expo-router$").test("expo-router")).toBe(true);
     expect(compileSafeRoutingPattern("exact:expo-router").test("expo-router")).toBe(true);
@@ -601,6 +735,7 @@ async function note(
     body?: string;
     actions?: string[];
     platforms?: string[];
+    taskClasses?: string[];
     repository?: {
       dependenciesAny?: string[];
       filesAny?: string[];
@@ -647,6 +782,7 @@ async function note(
           excludes: [],
           capabilities: options.capabilities ?? [],
           platforms: options.platforms ?? [],
+          taskClasses: options.taskClasses ?? [],
           priority: options.priority ?? 0,
           actions: options.actions ?? [],
           lifecycle: [],
