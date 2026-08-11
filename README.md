@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/glama%2Fmemi-design%2Fmemi.svg)](https://mcptoplist.com/server/glama%2Fmemi-design%2Fmemi)
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/memi-design/memi/main/assets/memi-brand-banner.png" alt="Memi — the design layer for agentic AI." width="100%" />
 </p>
