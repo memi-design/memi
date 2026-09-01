@@ -1,0 +1,72 @@
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import { createExecutionPolicy } from "../execution-policy.js";
+import { createMetadataReceipt, writeMetadataReceipt } from "../metadata-receipt.js";
+
+const cleanup: string[] = [];
+
+afterEach(async () => {
+  await Promise.all(cleanup.splice(0).map((path) => rm(path, { recursive: true, force: true })));
+});
+
+describe("metadata-only receipts", () => {
+  it("emits only allowlisted evidence fields", () => {
+    const policy = createExecutionPolicy({ projectRoot: "/private/company/project" });
+    const receipt = createMetadataReceipt({
+      command: "diagnose",
+      version: "2.8.0-beta.1",
+      commit: "0123456789abcdef",
+      policy,
+      ruleIds: ["MEMI-COLOR-001"],
+      counts: { files: 4, findings: 2 },
+      hashes: { artifact: "a".repeat(64) },
+      durationMs: 15,
+      source: "const privateCompanySecret = true",
+      prompt: "upload the private repository",
+      environment: { DUALENTRY_TOKEN: "secret" },
+    } as Parameters<typeof createMetadataReceipt>[0] & Record<string, unknown>);
+    const serialized = JSON.stringify(receipt);
+
+    expect(receipt).toMatchObject({
+      schemaVersion: "memi.receipt.v1",
+      command: "diagnose",
+      artifact: { version: "2.8.0-beta.1", commit: "0123456789abcdef" },
+      policy: { profile: "locked", effectiveCapabilities: [] },
+      evidence: {
+        ruleIds: ["MEMI-COLOR-001"],
+        counts: { files: 4, findings: 2 },
+        hashes: { artifact: "a".repeat(64) },
+        durationMs: 15,
+      },
+    });
+    expect(serialized).not.toContain("/private/company/project");
+    expect(serialized).not.toContain("privateCompanySecret");
+    expect(serialized).not.toContain("DUALENTRY_TOKEN");
+    expect(serialized).not.toContain("upload the private repository");
+  });
+
+  it("requires an explicit output path and project-write permission to persist", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-receipt-"));
+    cleanup.push(projectRoot);
+    const locked = createExecutionPolicy({ projectRoot });
+    const local = createExecutionPolicy({ projectRoot, profile: "local" });
+    const receipt = createMetadataReceipt({
+      command: "doctor",
+      version: "2.8.0-beta.1",
+      commit: "unknown",
+      policy: locked,
+    });
+
+    await expect(writeMetadataReceipt(undefined, receipt, local)).rejects.toThrow("An explicit receipt output path is required");
+    await expect(writeMetadataReceipt(join(projectRoot, ".memi", "doctor-receipt.json"), receipt, locked)).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "project-write",
+    });
+
+    const outputPath = join(projectRoot, ".memi", "doctor-receipt.json");
+    await writeMetadataReceipt(outputPath, receipt, local);
+    expect(JSON.parse(await readFile(outputPath, "utf8"))).toEqual(receipt);
+  });
+});
