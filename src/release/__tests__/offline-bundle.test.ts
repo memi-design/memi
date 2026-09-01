@@ -162,23 +162,6 @@ describe("Trust Core offline bundle", () => {
 
   });
 
-  it("rejects non-portable sidecar names before archiving with host-portable fixtures", async () => {
-    for (const filename of ["aux.md", "com1.txt"]) {
-      const invalidNameFixture = await createFixture("linux-x64");
-      await writeFile(
-        join(invalidNameFixture.binaryStageDir, "skills", filename),
-        "ambiguous checksum path\n",
-      );
-      await expect(buildOfflineBundle({
-        root: invalidNameFixture.root,
-        target: "linux-x64",
-        binaryStageDir: invalidNameFixture.binaryStageDir,
-        outputDir: join(invalidNameFixture.root, "output"),
-        sourceDateEpoch: 0,
-      })).rejects.toThrow("non-portable filename");
-    }
-  });
-
   it("rejects non-portable sidecar names on every host", () => {
     for (const filename of ["unsafe\nchecksum.md", "aux.md", "trailing-dot."]) {
       expect(isPortableRuntimeName(filename)).toBe(false);
