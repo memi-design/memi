@@ -73,4 +73,11 @@ describe("Trust Core verification configuration", () => {
       expect(ref).toMatch(/^[^@]+@[0-9a-f]{40}$/);
     }
   });
+
+  it("runs the repo self-gate under an explicit connected capability budget", async () => {
+    const workflow = await readFile(join(root, ".github", "workflows", "ci.yml"), "utf8");
+
+    expect(workflow).toContain("node dist/index.js --profile connected --allow project-write --allow source-content-persistence ci");
+    expect(workflow).not.toContain("run: node dist/index.js ci");
+  });
 });
