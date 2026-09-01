@@ -77,6 +77,9 @@ release gates pass.
 - Synchronizes the general Codex, Claude, Hermes, OpenClaw, OpenCode, and Grok
   kit commands with the beta artifact so repository-wide consumers do not fall
   back to 2.7.9 accidentally.
+- Derives the production shrinkwrap only by pruning the checked-in source lock;
+  no release build performs a fresh semver resolution, and staging rejects any
+  package entry that is not the exact source-lock production subset.
 
 ### Prerelease channel isolation
 
@@ -107,6 +110,15 @@ release gates pass.
   prepublish gate, rejects symlinked receipt leaves, strips non-allowlisted
   subprocess environment variables, and verifies zero locked-mode fixture
   mutations on every supported host.
+- Makes local smoke, prepublish, and networkless container verification pack and
+  install the exact `.dist/npm-package` artifact used by the publish workflow.
+
+### Packaging trust follow-up commits
+
+| Commit | Change |
+|---|---|
+| `80631837` | test: reproduce Trust Core artifact drift |
+| `bb306ebf` | fix: verify staged Trust Core artifact |
 
 ### Architectural decision
 
