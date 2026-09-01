@@ -5,7 +5,10 @@ import { describe, expect, it } from "vitest";
 const OPTIONAL_INTEGRATIONS = [
   "@anthropic-ai/sdk",
   "@napi-rs/canvas",
+  "pino-pretty",
   "playwright",
+  "ssf",
+  "xlsx-populate",
 ] as const;
 
 const FORBIDDEN_SHRINKWRAP_PACKAGES = [
@@ -52,6 +55,24 @@ describe("published package boundary", () => {
     expect(scripts).not.toContain("@latest");
     expect(pkg.scripts["build:mcpb"]).toContain("@anthropic-ai/mcpb@2.1.2");
     expect(pkg.scripts["publish:smithery"]).toContain("smithery@1.2.0");
+  });
+
+  it("loads optional integrations only on demand with exact install guidance", async () => {
+    const [anthropic, browser, canvas, excel] = await Promise.all([
+      readFile(join(process.cwd(), "src", "ai", "client.ts"), "utf8"),
+      readFile(join(process.cwd(), "src", "studio", "browser-adapter.ts"), "utf8"),
+      readFile(join(process.cwd(), "src", "engine", "text-measurer.ts"), "utf8"),
+      readFile(join(process.cwd(), "src", "research", "excel-parser.ts"), "utf8"),
+    ]);
+
+    expect(anthropic).not.toContain('import Anthropic from "@anthropic-ai/sdk"');
+    expect(anthropic).toContain('import("@anthropic-ai/sdk")');
+    expect(anthropic).toContain("npm install --save-exact @anthropic-ai/sdk@0.112.3");
+    expect(browser).toContain("npm install --save-exact playwright@1.59.1");
+    expect(canvas).toContain("npm install --save-exact @napi-rs/canvas@0.1.97");
+    expect(excel).toContain(
+      "npm install --save-exact xlsx-populate@1.21.0 ssf@0.11.2",
+    );
   });
 
   it("ships a production-only shrinkwrap", async () => {
