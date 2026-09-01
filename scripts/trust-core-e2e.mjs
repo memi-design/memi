@@ -99,7 +99,7 @@ async function runTrustCoreArtifactSuite(options) {
     ], {
       cwd: projectRoot,
       env: baseEnv,
-      timeoutMs: 10_000,
+      timeoutMs: commandTimeoutForMode(options.performanceMode, 10_000),
     });
     requireSuccess(doctor, "locked doctor");
     const doctorPayload = JSON.parse(doctor.stdout);
@@ -122,7 +122,7 @@ async function runTrustCoreArtifactSuite(options) {
       const denied = await runProcess(process.execPath, [installation.binary, ...scenario.args], {
         cwd: projectRoot,
         env: baseEnv,
-        timeoutMs: 5_000,
+        timeoutMs: commandTimeoutForMode(options.performanceMode, 5_000),
       });
       denials.push(assertCapabilityDenied(denied, scenario.expected));
     }
@@ -143,6 +143,7 @@ async function runTrustCoreArtifactSuite(options) {
       memiRoot,
       projectRoot,
       outsideRoot,
+      performanceMode: options.performanceMode,
     });
 
     const upgrade = options.container
@@ -214,7 +215,15 @@ function lockedDenialScenarios(prompt) {
   ];
 }
 
-async function verifyLocalReceiptContainment({ binary, env, memiRoot, projectRoot, outsideRoot }) {
+async function verifyLocalReceiptContainment({
+  binary,
+  env,
+  memiRoot,
+  projectRoot,
+  outsideRoot,
+  performanceMode,
+}) {
+  const timeoutMs = commandTimeoutForMode(performanceMode, 5_000);
   const receiptPath = join(memiRoot, "trust-receipt.json");
   const allowed = await runProcess(process.execPath, [
     binary,
@@ -225,7 +234,7 @@ async function verifyLocalReceiptContainment({ binary, env, memiRoot, projectRoo
     "--json",
     "--no-write",
     "--fail-on", "none",
-  ], { cwd: projectRoot, env, timeoutMs: 5_000 });
+  ], { cwd: projectRoot, env, timeoutMs });
   requireSuccess(allowed, "local receipt write inside .memi");
   const receipt = JSON.parse(await readFile(receiptPath, "utf8"));
   if (!receipt || typeof receipt !== "object") {
@@ -241,7 +250,7 @@ async function verifyLocalReceiptContainment({ binary, env, memiRoot, projectRoo
     "--json",
     "--no-write",
     "--fail-on", "none",
-  ], { cwd: projectRoot, env, timeoutMs: 5_000 });
+  ], { cwd: projectRoot, env, timeoutMs });
   assertCapabilityDenied(traversal, { operation: "persist metadata receipt", capability: "project-write" });
 
   const symlinkEscape = await runProcess(process.execPath, [
@@ -253,7 +262,7 @@ async function verifyLocalReceiptContainment({ binary, env, memiRoot, projectRoo
     "--json",
     "--no-write",
     "--fail-on", "none",
-  ], { cwd: projectRoot, env, timeoutMs: 5_000 });
+  ], { cwd: projectRoot, env, timeoutMs });
   assertCapabilityDenied(symlinkEscape, { operation: "persist metadata receipt", capability: "project-write" });
 
   try {
@@ -327,6 +336,12 @@ async function timedInvocation(binary, cliArgs, options) {
     throw new Error(`${options.label} took ${durationMs.toFixed(1)}ms; budget is ${options.budgetMs}ms`);
   }
   return { ...result, durationMs: Number(durationMs.toFixed(1)) };
+}
+
+function commandTimeoutForMode(performanceMode, defaultTimeoutMs) {
+  return performanceMode === "conformance"
+    ? Math.max(defaultTimeoutMs, DEFAULT_CONFORMANCE_TIMEOUT_MS)
+    : defaultTimeoutMs;
 }
 
 function lockedEnvironment(home, secret) {
