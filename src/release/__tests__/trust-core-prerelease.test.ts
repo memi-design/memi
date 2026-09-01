@@ -2,41 +2,78 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  resolveNpmReleaseChannel,
+  resolveReleaseChannel,
   validateRegistryVersion,
 } from "../../../scripts/lib/npm-release-verification.mjs";
 
 const betaVersion = "2.8.0-beta.1";
 const stableVersion = "2.7.9";
 
-describe("Trust Core npm prerelease channel", () => {
-  it("maps only the exact Trust Core beta to next while preserving latest", () => {
-    expect(resolveNpmReleaseChannel(betaVersion)).toEqual({
+describe("Trust Core release channel policy", () => {
+  it.each([
+    betaVersion,
+    "2.8.0-beta.2",
+    "2.8.0-rc.1",
+    "2.8.0-alpha",
+    "2.8.0-0",
+    "2.8.0-beta.2+build.7",
+  ])("routes valid prerelease %s through isolated prerelease channels", (version) => {
+    expect(resolveReleaseChannel({
+      version,
+      previousPublicRelease: stableVersion,
+    })).toEqual({
+      version,
       distTag: "next",
       expectedLatest: stableVersion,
       isPrerelease: true,
+      githubPrerelease: true,
+      githubMakeLatest: "false",
+      promoteStableChannels: false,
     });
+  });
 
-    expect(resolveNpmReleaseChannel(stableVersion)).toEqual({
+  it("keeps exact stable SemVer behavior unchanged", () => {
+    expect(resolveReleaseChannel({
+      version: stableVersion,
+      previousPublicRelease: "2.7.8",
+    })).toEqual({
+      version: stableVersion,
       distTag: "latest",
       expectedLatest: stableVersion,
       isPrerelease: false,
+      githubPrerelease: false,
+      githubMakeLatest: "legacy",
+      promoteStableChannels: true,
     });
-
-    for (const version of [
-      "2.8.0-beta.2",
-      "2.8.0-rc.1",
-      "v2.8.0-beta.1",
-      "2.8",
-      "latest",
-    ]) {
-      expect(() => resolveNpmReleaseChannel(version)).toThrow(
-        "unsupported npm release version",
-      );
-    }
   });
 
-  it("accepts beta metadata only when next is beta and latest stays 2.7.9", () => {
+  it.each([
+    "v2.8.0-beta.1",
+    "2.8",
+    "2.8.0-",
+    "2.8.0-beta..1",
+    "2.8.0-01",
+    "02.8.0-beta.1",
+    "latest",
+    "",
+  ])("fails closed for invalid release version %j", (version) => {
+    expect(() => resolveReleaseChannel({
+      version,
+      previousPublicRelease: stableVersion,
+    })).toThrow("unsupported release version");
+  });
+
+  it.each([undefined, "", "2.8.0-rc.1", "v2.7.9", "2.7"])(
+    "fails closed when prerelease latest cannot be preserved from %j",
+    (previousPublicRelease) => {
+      expect(() => resolveReleaseChannel({
+        version: "2.8.0-rc.1",
+        previousPublicRelease,
+      })).toThrow("valid stable previousPublicRelease");
+    },
+  );
+
+  it("accepts prerelease metadata only when next is the candidate and latest stays stable", () => {
     const metadata = {
       "dist-tags": { latest: stableVersion, next: betaVersion },
       readme: "The design layer for agentic AI.\nnpm i -g @memi-design/cli",
@@ -80,45 +117,55 @@ describe("Trust Core npm prerelease channel", () => {
     })).toThrow("expected latest 2.7.9");
   });
 
-  it("publishes the exact beta only through the next tag", async () => {
+  it("drives npm publishing from the shared channel helper", async () => {
     const workflow = await readFile(
       join(process.cwd(), ".github", "workflows", "publish.yml"),
       "utf8",
     );
 
-    expect(workflow).toContain("inputs.expected_version == '2.8.0-beta.1'");
     expect(workflow).toContain(
-      "npm publish --access public --provenance --ignore-scripts --tag next",
+      'node scripts/resolve-release-channel.mjs --version "${EXPECTED_VERSION}" --github-output "${GITHUB_OUTPUT}"',
     );
-    expect(workflow).toContain("inputs.expected_version != '2.8.0-beta.1'");
     expect(workflow).toContain(
-      "npm publish --access public --provenance --ignore-scripts",
+      "NPM_DIST_TAG: ${{ steps.release-channel.outputs.npm_dist_tag }}",
     );
-    expect(workflow).not.toContain("--tag latest");
+    expect(workflow).toContain(
+      'npm publish --access public --provenance --ignore-scripts --tag "${NPM_DIST_TAG}"',
+    );
+    expect(workflow).not.toContain("inputs.expected_version == '2.8.0-beta.1'");
+    expect(workflow).not.toContain("inputs.expected_version != '2.8.0-beta.1'");
   });
 });
 
 describe("Trust Core binary prerelease isolation", () => {
-  it("builds the exact beta as a GitHub prerelease without mutable promotions", async () => {
+  it("drives GitHub release and promotion policy from the shared channel helper", async () => {
     const workflow = await readFile(
       join(process.cwd(), ".github", "workflows", "release-binaries.yml"),
       "utf8",
     );
 
-    expect(workflow).toContain('elif [ "${RELEASE_TAG}" = "v2.8.0-beta.1" ]; then');
-    expect(workflow).toContain("is_prerelease=true");
     expect(workflow).toContain(
-      "is_prerelease: ${{ steps.resolve-release.outputs.is_prerelease }}",
+      'node scripts/resolve-release-channel.mjs --tag "${RELEASE_TAG}" --github-output "${GITHUB_OUTPUT}"',
+    );
+    expect(workflow).not.toContain('"v2.8.0-beta.1"');
+    expect(workflow).toContain(
+      "is_prerelease: ${{ steps.release-channel.outputs.is_prerelease }}",
+    );
+    expect(workflow).toContain(
+      "github_make_latest: ${{ steps.release-channel.outputs.github_make_latest }}",
+    );
+    expect(workflow).toContain(
+      "promote_stable_channels: ${{ steps.release-channel.outputs.promote_stable_channels }}",
     );
     expect(workflow.match(/prerelease: \$\{\{ needs\.release-gate\.outputs\.is_prerelease == 'true' \}\}/g))
       .toHaveLength(2);
-    expect(workflow.match(/make_latest: \$\{\{ needs\.release-gate\.outputs\.is_prerelease == 'true' && 'false' \|\| 'legacy' \}\}/g))
+    expect(workflow.match(/make_latest: \$\{\{ needs\.release-gate\.outputs\.github_make_latest \}\}/g))
       .toHaveLength(2);
     expect(workflow).toMatch(
-      /publish-docker:\r?\n\s+needs: \[release-gate, publish-checksums\]\r?\n\s+if: needs\.release-gate\.outputs\.is_prerelease != 'true'/,
+      /publish-docker:\r?\n\s+needs: \[release-gate, publish-checksums\]\r?\n\s+if: needs\.release-gate\.outputs\.promote_stable_channels == 'true'/,
     );
     expect(workflow).toMatch(
-      /publish-homebrew:\r?\n\s+needs: \[release-gate, publish-checksums\]\r?\n\s+if: needs\.release-gate\.outputs\.promote_channels == 'true' && needs\.release-gate\.outputs\.is_prerelease != 'true'/,
+      /publish-homebrew:\r?\n\s+needs: \[release-gate, publish-checksums\]\r?\n\s+if: needs\.release-gate\.outputs\.promote_channels == 'true' && needs\.release-gate\.outputs\.promote_stable_channels == 'true'/,
     );
   });
 
