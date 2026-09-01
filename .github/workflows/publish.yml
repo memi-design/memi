@@ -130,13 +130,17 @@ jobs:
           npm test -- --run
           npm run build
 
+      - name: Stage production-only npm package
+        run: npm run stage:package
+
       - name: Generate release SBOM
         if: inputs.mode == 'publish'
+        working-directory: .dist/npm-package
         run: |
-          mkdir -p release-evidence
-          npm sbom --package-lock-only --sbom-format cyclonedx > release-evidence/memi.cdx.json
-          node -e 'JSON.parse(require("node:fs").readFileSync("release-evidence/memi.cdx.json","utf8"))'
-          shasum -a 256 release-evidence/memi.cdx.json > release-evidence/memi.cdx.json.sha256
+          mkdir -p ../../release-evidence
+          npm sbom --package-lock-only --sbom-format cyclonedx > ../../release-evidence/memi.cdx.json
+          node -e 'JSON.parse(require("node:fs").readFileSync("../../release-evidence/memi.cdx.json","utf8"))'
+          shasum -a 256 ../../release-evidence/memi.cdx.json > ../../release-evidence/memi.cdx.json.sha256
 
       - name: Upload release SBOM
         if: inputs.mode == 'publish'
@@ -148,7 +152,8 @@ jobs:
 
       - name: Publish npm package exactly once
         if: inputs.mode == 'publish'
-        run: npm publish --access public --provenance
+        run: npm publish --access public --provenance --ignore-scripts
+        working-directory: .dist/npm-package
 
       - name: Verify npm signatures and attestations
         env:

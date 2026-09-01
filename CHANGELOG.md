@@ -36,6 +36,27 @@ release gates pass.
 | `39174def` | test: reject unsafe offline bundle paths |
 | `201538e6` | fix: reject unsafe offline bundle paths |
 
+### Startup-safe package boundary
+
+- Ships an explicit additive npm allowlist and a production-only shrinkwrap
+  that excludes development tooling and optional integrations.
+- Moves Anthropic, native canvas, Playwright, pretty logging, and spreadsheet
+  readers behind optional peer dependencies with pinned installation guidance.
+- Gates the packed artifact at 1.5 MB compressed, 3 MB unpacked, and 100 files;
+  gates a script-disabled clean install at 60 MB with zero known production
+  advisories and no development or optional-integration packages.
+- Pins MCPB and Smithery release helpers to exact versions instead of resolving
+  moving `latest` tags.
+
+### Architectural decision
+
+- The npm CLI remains the single core package. Integrations that are not needed
+  for offline diagnosis must be installed explicitly and are loaded only when
+  their feature is invoked.
+- Source builds retain a full development shrinkwrap for reproducible `npm ci`;
+  pack, SBOM, clean-install, and trusted publish gates use a disposable stage
+  that substitutes the separately generated production shrinkwrap.
+
 ## v2.7.9 — 2026-08-08 — Published
 
 ### Final 2.7 stabilization

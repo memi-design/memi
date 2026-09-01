@@ -526,7 +526,7 @@ if (process.env.SKIP_AUDIT_GATE !== "1") {
     fail(`audit scorecard gate failed: ${spawnFailureMessage(scorecard, "failed")}`);
   }
 
-  const audit = spawnSync("npm", ["audit", "--omit=dev", "--audit-level=high", "--json"], {
+  const audit = spawnSync("npm", ["audit", "--omit=dev", "--omit=optional", "--audit-level=low", "--json"], {
     shell: process.platform === "win32",
     cwd: root,
     encoding: "utf-8",

@@ -37,7 +37,7 @@ describe("clean install smoke helpers", () => {
 
   it("rejects high or critical advisories from the packed consumer graph", () => {
     expect(assertProductionAudit(JSON.stringify({
-      metadata: { vulnerabilities: { low: 0, moderate: 1, high: 0, critical: 0 } },
+      metadata: { vulnerabilities: { low: 0, moderate: 0, high: 0, critical: 0 } },
     }))).toEqual({ high: 0, critical: 0 });
     expect(() => assertProductionAudit(JSON.stringify({
       metadata: { vulnerabilities: { low: 0, moderate: 0, high: 1, critical: 0 } },

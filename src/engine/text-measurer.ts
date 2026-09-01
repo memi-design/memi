@@ -16,6 +16,7 @@ import type { PreparedText } from "@chenglou/pretext";
 import { createLogger } from "./logger.js";
 
 const log = createLogger("text-measurer");
+const CANVAS_INSTALL_COMMAND = "npm install --save-exact @napi-rs/canvas@0.1.97";
 const MAX_PRETEXT_INPUT_CHARS = 20_000;
 const MAX_REPEATED_PUNCTUATION_RUN = 2_000;
 const RISKY_PUNCTUATION = new Set("()[]{}#@!%^~<>:;'\"`.,/\\|+=_*?".split(""));
@@ -57,7 +58,7 @@ async function ensurePolyfill(): Promise<void> {
   } catch {
     canvasUnavailable = true;
     log.warn(
-      "@napi-rs/canvas not available — text measurement uses character-width approximation",
+      `@napi-rs/canvas not available — text measurement uses character-width approximation. For native measurement, run \`${CANVAS_INSTALL_COMMAND}\`.`,
     );
   }
 }

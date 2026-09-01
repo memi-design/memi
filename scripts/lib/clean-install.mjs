@@ -1,7 +1,13 @@
 import { spawn } from "node:child_process";
-import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { access, lstat, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { isAbsolute, join, normalize, relative, resolve, sep } from "node:path";
+import { assertConsumerGraph } from "./consumer-boundary.mjs";
+import { stagePackage } from "./package-stage.mjs";
+
+export { assertConsumerGraph } from "./consumer-boundary.mjs";
+
+export const MAX_INSTALL_BYTES = 60_000_000;
 
 export function npmExecutable(platform = process.platform) {
   return platform === "win32" ? "npm.cmd" : "npm";
@@ -39,15 +45,38 @@ export function assertProductionAudit(stdout) {
   } catch {
     throw new Error("npm audit returned invalid JSON for the packed consumer graph");
   }
-  const high = Number(payload?.metadata?.vulnerabilities?.high ?? 0);
-  const critical = Number(payload?.metadata?.vulnerabilities?.critical ?? 0);
-  if (!Number.isInteger(high) || !Number.isInteger(critical) || high < 0 || critical < 0) {
-    throw new Error("npm audit omitted packed consumer high/critical counts");
+  const vulnerabilities = payload?.metadata?.vulnerabilities ?? {};
+  const severities = ["info", "low", "moderate", "high", "critical"];
+  const counts = Object.fromEntries(
+    severities.map((severity) => [severity, Number(vulnerabilities[severity] ?? 0)]),
+  );
+  if (Object.values(counts).some((count) => !Number.isInteger(count) || count < 0)) {
+    throw new Error("npm audit omitted packed consumer vulnerability counts");
   }
+  const { high, critical } = counts;
+  const total = severities.reduce((sum, severity) => sum + counts[severity], 0);
   if (high > 0 || critical > 0) {
     throw new Error(`packed consumer graph has ${high} high and ${critical} critical advisories`);
   }
+  if (total > 0) {
+    throw new Error(
+      `packed consumer graph has ${total} known production ${total === 1 ? "advisory" : "advisories"}`,
+    );
+  }
   return { high, critical };
+}
+
+export function assertInstallFootprint(bytes, maxBytes = MAX_INSTALL_BYTES) {
+  if (!Number.isInteger(bytes) || bytes < 0) {
+    throw new Error("clean install footprint bytes must be a non-negative integer");
+  }
+  if (!Number.isInteger(maxBytes) || maxBytes <= 0) {
+    throw new Error("clean install footprint maxBytes must be a positive integer");
+  }
+  if (bytes > maxBytes) {
+    throw new Error(`clean install footprint ${bytes} bytes exceeds ${maxBytes} bytes`);
+  }
+  return { bytes, maxBytes, passed: true };
 }
 
 export function packageInstallPaths(consumerRoot, packageName, binaryTarget) {
@@ -102,6 +131,11 @@ export async function runCleanInstallSmoke({
   };
 
   try {
+    const packageStage = join(tempRoot, "package");
+    await stagePackage({
+      packageRoot: absolutePackageRoot,
+      stageRoot: packageStage,
+    });
     await mkdir(consumerRoot, { recursive: true });
     await writeFile(
       join(consumerRoot, "package.json"),
@@ -120,7 +154,7 @@ export async function runCleanInstallSmoke({
         tempRoot,
       ],
       {
-        cwd: absolutePackageRoot,
+        cwd: packageStage,
         env: scriptsDisabledEnv,
         shell: npm.shell,
       },
@@ -153,7 +187,8 @@ export async function runCleanInstallSmoke({
         ...npm.prefixArgs,
         "audit",
         "--omit=dev",
-        "--audit-level=high",
+        "--omit=optional",
+        "--audit-level=low",
         "--json",
       ],
       {
@@ -172,6 +207,13 @@ export async function runCleanInstallSmoke({
     );
     const installedPackageJson = JSON.parse(
       await readFile(installedPackageJsonPath, "utf8"),
+    );
+    const consumerLock = JSON.parse(
+      await readFile(join(consumerRoot, "package-lock.json"), "utf8"),
+    );
+    const consumerGraph = assertConsumerGraph(consumerLock);
+    const installFootprint = assertInstallFootprint(
+      await directorySize(join(consumerRoot, "node_modules")),
     );
     const binaryTarget =
       typeof installedPackageJson.bin === "string"
@@ -206,11 +248,28 @@ export async function runCleanInstallSmoke({
       platform,
       scriptsDisabled: true,
       productionAudit,
+      consumerGraph,
+      installFootprint,
       passed: true,
     };
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
+}
+
+async function directorySize(path) {
+  const entries = await readdir(path, { withFileTypes: true });
+  let bytes = 0;
+  for (const entry of entries) {
+    const entryPath = join(path, entry.name);
+    if (entry.isDirectory()) {
+      bytes += await directorySize(entryPath);
+      continue;
+    }
+    const stats = await lstat(entryPath);
+    bytes += stats.size;
+  }
+  return bytes;
 }
 
 async function runCommand(command, args, options) {

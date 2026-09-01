@@ -9,6 +9,8 @@ import type {
   StudioBrowserStatus,
 } from "./types.js";
 
+const PLAYWRIGHT_INSTALL_COMMAND = "npm install --save-exact playwright@1.59.1";
+
 interface PlaywrightPage {
   url(): string;
   goto(url: string, options?: Record<string, unknown>): Promise<unknown>;
@@ -62,7 +64,7 @@ export class StudioBrowserAdapter {
       activeSessions: this.sessions.size,
       message: installed
         ? "Playwright browser adapter ready"
-        : "Playwright is not installed. Install it to enable browser automation.",
+        : `Playwright is not installed. Run \`${PLAYWRIGHT_INSTALL_COMMAND}\` to enable browser automation.`,
     };
   }
 
@@ -196,7 +198,9 @@ export class StudioBrowserAdapter {
       return await this.playwrightLoader();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw Object.assign(new Error(`Playwright browser adapter unavailable: ${message}`), { statusCode: 501 });
+      throw Object.assign(new Error(
+        `MEMI_OPTIONAL_INTEGRATION_MISSING: Playwright browser adapter unavailable. Run \`${PLAYWRIGHT_INSTALL_COMMAND}\`. ${message}`,
+      ), { statusCode: 501 });
     }
   }
 }

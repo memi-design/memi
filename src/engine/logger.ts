@@ -20,14 +20,18 @@ export function shouldUsePrettyTransport(): boolean {
 function getPrettyTransport() {
   if (!shouldUsePrettyTransport()) return undefined;
   if (!prettyTransport) {
-    prettyTransport = pino.transport({
-      target: "pino-pretty",
-      options: {
-        colorize: true,
-        translateTime: "HH:MM:ss",
-        ignore: "pid,hostname",
-      },
-    });
+    try {
+      prettyTransport = pino.transport({
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: "HH:MM:ss",
+          ignore: "pid,hostname",
+        },
+      });
+    } catch {
+      return undefined;
+    }
   }
   return prettyTransport;
 }
