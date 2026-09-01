@@ -23,11 +23,20 @@ describe("preview changelog sync", () => {
     const engine = releaseManifest.releaseGroups.engine as {
       version: string;
       state: string;
+      previousPublicRelease?: { version: string };
     };
+    const changelogVersion = engine.state === "candidate"
+      ? engine.previousPublicRelease?.version
+      : engine.version;
+    expect(changelogVersion).toBeDefined();
     expect(releases[0]).toMatchObject({
-      version: `v${engine.version}`,
+      version: `v${changelogVersion}`,
       commits: [["53ef8686", "fix: verify promoted public surfaces"]],
     });
+    if (engine.state === "candidate") {
+      expect(markdown).toContain("## Trust Core 2.8 development — Unreleased");
+      expect(markdown).not.toContain(`## v${engine.version} — Published`);
+    }
     expect(generatedHtml).toContain(`memoire changelog - synced with CHANGELOG.md through ${releases[0].version}`);
     const expectedKicker = engine.state === "candidate" ? "Candidate release" : "Current release";
     expect(generatedHtml).toContain(`<span class="summary-kicker">${expectedKicker}</span>`);
