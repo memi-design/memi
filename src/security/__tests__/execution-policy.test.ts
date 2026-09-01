@@ -5,13 +5,17 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   MEMI_CAPABILITIES,
   MemiCapabilityDeniedError,
+  configureExecutionPolicy,
   createExecutionPolicy,
+  getExecutionPolicy,
   parseExecutionPolicyArgs,
+  resetExecutionPolicyForTests,
 } from "../execution-policy.js";
 
 const cleanup: string[] = [];
 
 afterEach(async () => {
+  resetExecutionPolicyForTests();
   await Promise.all(cleanup.splice(0).map((path) => rm(path, { recursive: true, force: true })));
 });
 
@@ -137,5 +141,75 @@ describe("MemiExecutionPolicy", () => {
       capability: "home-write",
       operation: "repair plugin",
     });
+  });
+
+  it("configures one immutable invocation policy and resets safely for tests", () => {
+    const configured = configureExecutionPolicy({
+      projectRoot: "/workspace",
+      profile: "connected",
+      allow: ["network"],
+    });
+
+    expect(getExecutionPolicy()).toBe(configured);
+    resetExecutionPolicyForTests();
+    expect(getExecutionPolicy().profile).toBe("locked");
+  });
+
+  it("allows connected project writes only inside the project root", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-policy-connected-"));
+    const outsideRoot = await mkdtemp(join(tmpdir(), "memi-policy-connected-outside-"));
+    cleanup.push(projectRoot, outsideRoot);
+    const policy = createExecutionPolicy({
+      projectRoot,
+      profile: "connected",
+      allow: ["project-write"],
+    });
+
+    await expect(policy.assertProjectWrite(join(projectRoot, "generated", "Button.tsx"), "generate code")).resolves.toBeUndefined();
+    await expect(policy.assertProjectWrite(join(outsideRoot, "Button.tsx"), "escape project")).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "project-write",
+    });
+  });
+
+  it("allows granted home writes only inside the configured home", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-policy-home-project-"));
+    const homeDir = await mkdtemp(join(tmpdir(), "memi-policy-home-"));
+    cleanup.push(projectRoot, homeDir);
+    const policy = createExecutionPolicy({
+      projectRoot,
+      homeDir,
+      profile: "connected",
+      allow: ["home-write"],
+    });
+
+    await expect(policy.assertHomeWrite(join(homeDir, ".memoire", "config.json"), "write config")).resolves.toBeUndefined();
+    await expect(policy.assertHomeWrite(join(projectRoot, "config.json"), "escape home")).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "home-write",
+    });
+
+    const missingHome = createExecutionPolicy({
+      projectRoot,
+      profile: "connected",
+      allow: ["home-write"],
+    });
+    await expect(missingHome.assertHomeWrite("config.json", "write config")).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "home-write",
+    });
+  });
+
+  it("supports -- terminators and rejects missing or invalid profile values", () => {
+    const terminated = parseExecutionPolicyArgs(
+      ["--offline", "--", "diagnose", "--allow", "network"],
+      { projectRoot: "/workspace" },
+    );
+    expect(terminated.commandArgs).toEqual(["--", "diagnose", "--allow", "network"]);
+    expect(terminated.policy.profile).toBe("locked");
+
+    expect(() => parseExecutionPolicyArgs(["--profile"], { projectRoot: "/workspace" })).toThrow("Invalid profile");
+    expect(() => parseExecutionPolicyArgs(["--profile", "online"], { projectRoot: "/workspace" })).toThrow("Invalid profile");
+    expect(() => parseExecutionPolicyArgs(["--allow"], { projectRoot: "/workspace" })).toThrow("Invalid capability");
   });
 });

@@ -3,6 +3,18 @@ import { preflightCommand } from "../command-preflight.js";
 import { createExecutionPolicy } from "../execution-policy.js";
 
 describe("Trust Core command preflight", () => {
+  const allCapabilities = [
+    "browser",
+    "figma",
+    "home-write",
+    "dynamic-install",
+    "network",
+    "project-write",
+    "shell",
+    "source-content-persistence",
+    "telemetry",
+  ] as const;
+
   it("forces locked diagnose onto the read-only path", async () => {
     const policy = createExecutionPolicy({ projectRoot: "/workspace" });
 
@@ -146,5 +158,78 @@ describe("Trust Core command preflight", () => {
       options: { print: true },
       args: ["Button"],
     })).resolves.toEqual({ optionOverrides: {} });
+  });
+
+  it("covers connected diagnose, doctor, update, and setup grant boundaries", async () => {
+    const connected = createExecutionPolicy({ projectRoot: "/workspace", homeDir: "/home/user", profile: "connected", allow: allCapabilities });
+    const networkOnly = createExecutionPolicy({ projectRoot: "/workspace", profile: "connected", allow: ["network"] });
+
+    await expect(preflightCommand(networkOnly, { commandPath: ["diagnose"], options: { write: true }, args: [] }))
+      .rejects.toMatchObject({ capability: "project-write" });
+    await expect(preflightCommand(connected, { commandPath: ["doctor"], options: { repairPlugin: true }, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["upgrade"], options: { check: true }, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(networkOnly, { commandPath: ["upgrade"], options: {}, args: [] }))
+      .rejects.toMatchObject({ capability: "dynamic-install" });
+    await expect(preflightCommand(connected, { commandPath: ["upgrade"], options: {}, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["setup", "plugin"], options: {}, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["setup"], options: {}, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+  });
+
+  it("covers connect, compose, view, and MCP grant combinations", async () => {
+    const connected = createExecutionPolicy({ projectRoot: "/workspace", homeDir: "/home/user", profile: "connected", allow: allCapabilities });
+    const noFigma = createExecutionPolicy({ projectRoot: "/workspace", profile: "connected", allow: ["network", "project-write", "shell"] });
+
+    await expect(preflightCommand(connected, { commandPath: ["connect"], options: { background: false }, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["connect"], options: { background: true }, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(noFigma, { commandPath: ["compose"], options: { figma: false }, args: ["intent"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["compose"], options: { figma: true }, args: ["intent"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["view"], options: {}, args: ["Button"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(noFigma, { commandPath: ["view"], options: { json: true }, args: ["Button"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(noFigma, { commandPath: ["mcp", "start"], options: { figma: false }, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["mcp"], options: { figma: true }, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+  });
+
+  it("covers MCP, Notes, agents, registry update, uninstall, and no-op commands", async () => {
+    const connected = createExecutionPolicy({ projectRoot: "/workspace", homeDir: "/home/user", profile: "connected", allow: allCapabilities });
+    const locked = createExecutionPolicy({ projectRoot: "/workspace" });
+    const local = createExecutionPolicy({ projectRoot: "/workspace", profile: "local" });
+
+    await expect(preflightCommand(connected, { commandPath: ["mcp", "config"], options: { install: true, global: true }, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["notes", "install"], options: {}, args: ["https://example.com/note"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["notes", "update"], options: {}, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(local, { commandPath: ["notes", "create"], options: {}, args: ["note"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(local, { commandPath: ["notes", "remove"], options: {}, args: ["note"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(locked, { commandPath: ["agent", "install"], options: { dryRun: true }, args: ["codex"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["agent", "install"], options: { global: true }, args: ["codex"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["agent", "spawn"], options: { remote: false }, args: ["general"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["agent", "spawn"], options: { remote: true }, args: ["general"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["update"], options: {}, args: ["@acme/ds"] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(connected, { commandPath: ["uninstall"], options: {}, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(locked, { commandPath: ["status"], options: {}, args: [] }))
+      .resolves.toEqual({ optionOverrides: {} });
   });
 });
