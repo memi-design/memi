@@ -142,6 +142,36 @@ describe("Trust Core offline bundle", () => {
       sourceDateEpoch: 0,
     })).rejects.toThrow("symbolic link");
   });
+
+  it("rejects traversal-capable versions and non-portable sidecar names before archiving", async () => {
+    const invalidVersionFixture = await createFixture("linux-x64");
+    await writeFile(join(invalidVersionFixture.root, "package.json"), `${JSON.stringify({
+      name: "@memi-design/cli",
+      version: "../../../escape",
+      description: "fixture",
+      license: "MIT",
+    })}\n`);
+    await expect(buildOfflineBundle({
+      root: invalidVersionFixture.root,
+      target: "linux-x64",
+      binaryStageDir: invalidVersionFixture.binaryStageDir,
+      outputDir: join(invalidVersionFixture.root, "output"),
+      sourceDateEpoch: 0,
+    })).rejects.toThrow("valid semantic version");
+
+    const invalidNameFixture = await createFixture("linux-x64");
+    await writeFile(
+      join(invalidNameFixture.binaryStageDir, "skills", "unsafe\nchecksum.md"),
+      "ambiguous checksum path\n",
+    );
+    await expect(buildOfflineBundle({
+      root: invalidNameFixture.root,
+      target: "linux-x64",
+      binaryStageDir: invalidNameFixture.binaryStageDir,
+      outputDir: join(invalidNameFixture.root, "output"),
+      sourceDateEpoch: 0,
+    })).rejects.toThrow("non-portable filename");
+  });
 });
 
 async function createFixture(target: keyof typeof OFFLINE_TARGETS) {
