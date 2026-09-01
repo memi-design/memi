@@ -435,7 +435,7 @@ try {
     if (jsonOutputRequested) {
       console.log(JSON.stringify({ status: "failed", error: error.toJSON() }, null, 2));
     } else {
-      console.error(`\n  ${error.code}: ${error.message}\n`);
+      console.error(JSON.stringify({ status: "failed", error: error.toJSON() }));
     }
     process.exitCode = 1;
   } else {
