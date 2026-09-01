@@ -45,6 +45,23 @@ describe("optional host integration policy", () => {
     expect(loader).not.toHaveBeenCalled();
   });
 
+  it("reports an installed Playwright peer as unauthorized without importing it", async () => {
+    configureExecutionPolicy({ projectRoot: "/workspace" });
+    const loader = vi.fn(async () => ({
+      chromium: { launch: vi.fn() },
+    }));
+    const browser = new StudioBrowserAdapter({
+      projectRoot: "/workspace",
+      playwrightLoader: loader,
+    });
+
+    await expect(browser.status()).resolves.toMatchObject({
+      installed: true,
+      message: expect.stringContaining("--allow host-integration-code"),
+    });
+    expect(loader).not.toHaveBeenCalled();
+  });
+
   it("denies XLSX peers while keeping the built-in CSV path available", async () => {
     configureExecutionPolicy({ projectRoot: "/workspace" });
 

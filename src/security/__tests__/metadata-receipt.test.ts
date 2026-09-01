@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rename, rm, symlink } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, rename, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -106,6 +106,62 @@ describe("metadata-only receipts", () => {
         operation: "persist metadata receipt",
       });
       await expect(readFile(outsidePath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      assertion.mockRestore();
+    }
+  });
+
+  it("rejects a symlinked local receipt root", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-receipt-root-project-"));
+    const outsideRoot = await mkdtemp(join(tmpdir(), "memi-receipt-root-outside-"));
+    cleanup.push(projectRoot, outsideRoot);
+    await symlink(outsideRoot, join(projectRoot, ".memi"), "dir");
+    const outputPath = join(projectRoot, ".memi", "doctor.json");
+    const policy = createExecutionPolicy({ projectRoot, profile: "local" });
+    const receipt = createMetadataReceipt({
+      command: "doctor",
+      version: "2.8.0-beta.1",
+      commit: "unknown",
+      policy,
+    });
+
+    await expect(writeMetadataReceipt(outputPath, receipt, policy)).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "project-write",
+    });
+    await expect(readFile(join(outsideRoot, "doctor.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("does not create outside directories when a missing root is swapped after validation", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-receipt-mkdir-project-"));
+    const outsideRoot = await mkdtemp(join(tmpdir(), "memi-receipt-mkdir-outside-"));
+    cleanup.push(projectRoot, outsideRoot);
+    const receiptRoot = join(projectRoot, ".memi");
+    const outputPath = join(receiptRoot, "receipts", "doctor.json");
+    const policy = createExecutionPolicy({ projectRoot, profile: "local" });
+    const receipt = createMetadataReceipt({
+      command: "doctor",
+      version: "2.8.0-beta.1",
+      commit: "unknown",
+      policy,
+    });
+    const originalAssert = MemiExecutionPolicy.prototype.assertProjectWrite;
+    let swapped = false;
+    const assertion = vi.spyOn(MemiExecutionPolicy.prototype, "assertProjectWrite")
+      .mockImplementation(async function (targetPath, operation) {
+        await originalAssert.call(this, targetPath, operation);
+        if (this === policy && !swapped) {
+          swapped = true;
+          await symlink(outsideRoot, receiptRoot, "dir");
+        }
+      });
+
+    try {
+      await expect(writeMetadataReceipt(outputPath, receipt, policy)).rejects.toMatchObject({
+        code: "MEMI_CAPABILITY_DENIED",
+        capability: "project-write",
+      });
+      await expect(lstat(join(outsideRoot, "receipts"))).rejects.toMatchObject({ code: "ENOENT" });
     } finally {
       assertion.mockRestore();
     }
