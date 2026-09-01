@@ -54,6 +54,7 @@ describe("Trust Core verification configuration", () => {
     expect(workflow).toContain("--read-only");
     expect(workflow).toContain("--user 65532:65532");
     expect(workflow).toContain('if [ "$PLATFORM" = "linux/arm64" ]');
+    expect(workflow).toContain("docker run --rm \\");
     expect(workflow).toContain('--performance-mode "$performance_mode"');
     expect(workflow).toContain("npm run test:trust-core:coverage");
     expect(workflow).toContain("run: npm run stage:package");
