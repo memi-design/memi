@@ -1,4 +1,5 @@
-import { lstat, realpath } from "node:fs/promises";
+import { constants } from "node:fs";
+import { lstat, mkdir, open, realpath, type FileHandle } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 
 export const MEMI_EXECUTION_PROFILES = ["locked", "local", "connected"] as const;
@@ -8,6 +9,7 @@ export const MEMI_CAPABILITIES = [
   "browser",
   "figma",
   "home-write",
+  "host-integration-code",
   "dynamic-install",
   "network",
   "project-write",
@@ -107,6 +109,49 @@ export class MemiExecutionPolicy {
       ? join(this.projectRoot, ".memi")
       : this.projectRoot;
     await this.assertContainedWrite(targetPath, allowedRoot, "project-write", operation);
+  }
+
+  /**
+   * Opens a new project file only after pathname validation is bound to the
+   * returned file handle. Callers must write through and close this handle;
+   * reopening the pathname would reintroduce the symlink race this prevents.
+   */
+  async openProjectWriteExclusive(targetPath: string, operation: string): Promise<FileHandle> {
+    const target = resolveAbsolutePath(targetPath);
+    await this.assertProjectWrite(target, operation);
+    await mkdir(dirname(target), { recursive: true });
+
+    // Directory creation and attacker-controlled workspace activity can change
+    // the path after the first check. Revalidate immediately before opening.
+    await this.assertProjectWrite(target, operation);
+    const noFollow = process.platform === "win32" || typeof constants.O_NOFOLLOW !== "number"
+      ? 0
+      : constants.O_NOFOLLOW;
+    const handle = await open(
+      target,
+      constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | noFollow,
+      0o600,
+    );
+
+    try {
+      // The exclusive open creates an empty file. Validate that exact inode
+      // before any caller-controlled bytes are written through the handle.
+      await this.assertProjectWrite(target, operation);
+      const [opened, pathname] = await Promise.all([handle.stat(), lstat(target)]);
+      if (
+        !opened.isFile()
+        || !pathname.isFile()
+        || pathname.isSymbolicLink()
+        || opened.dev !== pathname.dev
+        || opened.ino !== pathname.ino
+      ) {
+        throw this.denial("project-write", operation);
+      }
+      return handle;
+    } catch (error) {
+      await handle.close().catch(() => undefined);
+      throw error;
+    }
   }
 
   async assertHomeWrite(targetPath: string, operation: string): Promise<void> {

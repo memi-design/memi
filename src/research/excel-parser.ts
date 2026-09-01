@@ -4,6 +4,7 @@
  */
 
 import { readFile } from "fs/promises";
+import { getExecutionPolicy } from "../security/execution-policy.js";
 
 const EXCEL_INSTALL_COMMAND = "npm install --save-exact xlsx-populate@1.21.0 ssf@0.11.2";
 
@@ -26,6 +27,7 @@ export async function parseExcel(filePath: string): Promise<ParsedSheet> {
   }
 
   // Keep the XLSX parser off the CLI startup path; research imports it on demand.
+  getExecutionPolicy().assert("host-integration-code", "load optional XLSX parsers");
   let excelDependencies: [typeof import("xlsx-populate"), typeof import("ssf")];
   try {
     excelDependencies = await Promise.all([

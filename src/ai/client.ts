@@ -9,6 +9,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { createHash } from "node:crypto";
 import { createLogger } from "../engine/logger.js";
+import { getExecutionPolicy } from "../security/execution-policy.js";
 import { TokenTracker } from "./token-tracker.js";
 import { getModelId, getMaxOutput } from "./model-config.js";
 import { OpenAICompatibleClient } from "./openai-compatible.js";
@@ -277,6 +278,7 @@ export class AnthropicClient implements AIClient {
   }
 
   private async loadSdk(): Promise<Anthropic> {
+    getExecutionPolicy().assert("host-integration-code", "load the optional Anthropic SDK");
     if (this.sdk) return this.sdk;
     try {
       const { default: AnthropicSdk } = await this.anthropicLoader();

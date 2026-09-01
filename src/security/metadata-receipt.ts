@@ -1,5 +1,3 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
 import type { MemiCapability, MemiExecutionPolicy, MemiExecutionProfile } from "./execution-policy.js";
 
 export interface MetadataReceiptInput {
@@ -87,9 +85,13 @@ export async function writeMetadataReceipt(
   if (!outputPath) {
     throw new Error("An explicit receipt output path is required");
   }
-  await policy.assertProjectWrite(outputPath, "persist metadata receipt");
-  await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, serializeMetadataReceipt(receipt), { encoding: "utf8", flag: "wx" });
+  const handle = await policy.openProjectWriteExclusive(outputPath, "persist metadata receipt");
+  try {
+    await handle.writeFile(serializeMetadataReceipt(receipt), { encoding: "utf8" });
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
 }
 
 function metadataString(value: string, label: string): string {

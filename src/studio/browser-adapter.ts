@@ -2,6 +2,7 @@ import { createRequire } from "node:module";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { getExecutionPolicy } from "../security/execution-policy.js";
 import type {
   StudioBrowserActionRequest,
   StudioBrowserActionResult,
@@ -57,12 +58,15 @@ export class StudioBrowserAdapter {
   }
 
   async status(enabled = true): Promise<StudioBrowserStatus> {
-    const installed = await this.canLoadPlaywright();
+    const integrationAllowed = getExecutionPolicy().allows("host-integration-code");
+    const installed = integrationAllowed && await this.canLoadPlaywright();
     return {
       enabled,
       installed,
       activeSessions: this.sessions.size,
-      message: installed
+      message: !integrationAllowed
+        ? `Playwright host integration code is disabled. Re-run with --profile connected --allow host-integration-code. If Playwright is not installed, run \`${PLAYWRIGHT_INSTALL_COMMAND}\`.`
+        : installed
         ? "Playwright browser adapter ready"
         : `Playwright is not installed. Run \`${PLAYWRIGHT_INSTALL_COMMAND}\` to enable browser automation.`,
     };
@@ -194,6 +198,7 @@ export class StudioBrowserAdapter {
   }
 
   private async loadPlaywrightOrThrow(): Promise<PlaywrightModule> {
+    getExecutionPolicy().assert("host-integration-code", "load the optional Playwright runtime");
     try {
       return await this.playwrightLoader();
     } catch (error) {
