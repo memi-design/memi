@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildProductionShrinkwrap } from "../../../scripts/lib/production-shrinkwrap.mjs";
 
@@ -47,6 +49,18 @@ function sourceLockFixture() {
 }
 
 describe("production shrinkwrap builder", () => {
+  it("derives the release lock directly from the checked-in source lock", async () => {
+    const script = await readFile(
+      join(process.cwd(), "scripts", "build-production-shrinkwrap.mjs"),
+      "utf8",
+    );
+
+    expect(script).toContain("buildProductionShrinkwrap(sourceLock)");
+    expect(script).not.toContain('from "node:child_process"');
+    expect(script).not.toContain('"install"');
+    expect(script).not.toContain("--package-lock-only");
+  });
+
   it("prunes a deterministic production closure without resolving dependency ranges", () => {
     const source = sourceLockFixture();
     const snapshot = structuredClone(source);

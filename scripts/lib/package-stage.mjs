@@ -2,6 +2,7 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import { assertConsumerGraph } from "./consumer-boundary.mjs";
+import { buildProductionShrinkwrap } from "./production-shrinkwrap.mjs";
 
 export const PRODUCTION_SHRINKWRAP_PATH = join(
   "release",
@@ -27,10 +28,11 @@ export async function stagePackage({ packageRoot, stageRoot, clean = true }) {
   const packageJson = JSON.parse(
     await readFile(join(absolutePackageRoot, "package.json"), "utf8"),
   );
-  const productionShrinkwrap = JSON.parse(
-    await readFile(join(absolutePackageRoot, PRODUCTION_SHRINKWRAP_PATH), "utf8"),
-  );
-  validateProductionShrinkwrap(packageJson, productionShrinkwrap);
+  const [sourceShrinkwrap, productionShrinkwrap] = await Promise.all([
+    readFile(join(absolutePackageRoot, "npm-shrinkwrap.json"), "utf8").then(JSON.parse),
+    readFile(join(absolutePackageRoot, PRODUCTION_SHRINKWRAP_PATH), "utf8").then(JSON.parse),
+  ]);
+  validateProductionShrinkwrap(packageJson, sourceShrinkwrap, productionShrinkwrap);
 
   const stagedPackageJson = {
     ...packageJson,
@@ -68,7 +70,7 @@ function isWithin(parent, child) {
   return path !== "" && !path.startsWith("..") && !isAbsolute(path);
 }
 
-function validateProductionShrinkwrap(packageJson, lock) {
+function validateProductionShrinkwrap(packageJson, sourceLock, lock) {
   const rootPackage = lock.packages?.[""];
   if (lock.name !== packageJson.name || rootPackage?.name !== packageJson.name) {
     throw new Error("production shrinkwrap package name does not match package.json");
@@ -78,6 +80,10 @@ function validateProductionShrinkwrap(packageJson, lock) {
   }
   if (rootPackage.devDependencies || rootPackage.optionalDependencies) {
     throw new Error("production shrinkwrap must not contain root development or optional dependencies");
+  }
+  const expectedLock = buildProductionShrinkwrap(sourceLock);
+  if (JSON.stringify(lock) !== JSON.stringify(expectedLock)) {
+    throw new Error("production shrinkwrap must be the deterministic subset of npm-shrinkwrap.json; run npm run build:production-shrinkwrap");
   }
   assertConsumerGraph(lock);
 }

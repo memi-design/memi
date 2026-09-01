@@ -103,6 +103,7 @@ describe("published package boundary", () => {
       expect(sourceLock.packages[lockPath], lockPath).toBeDefined();
       expect(packageEntry.dev, lockPath).not.toBe(true);
       expect(packageEntry.optional, lockPath).not.toBe(true);
+      expect(packageEntry.devOptional, lockPath).not.toBe(true);
       if (lockPath !== "") {
         expect(packageEntry, lockPath).toEqual(sourceLock.packages[lockPath]);
       }

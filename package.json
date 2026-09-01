@@ -37,7 +37,7 @@
     "sync:current-release": "node scripts/render-current-release.mjs",
     "check:current-release": "node scripts/render-current-release.mjs --check",
     "smoke:clean-install": "node scripts/smoke-clean-install.mjs",
-    "smoke:trust-core": "npm run build && node scripts/trust-core-e2e.mjs",
+    "smoke:trust-core": "npm run build && npm run stage:package && node scripts/trust-core-e2e.mjs --package-root .dist/npm-package",
     "smoke:mcp": "node scripts/smoke-mcp-stdio.mjs",
     "smoke:codex-plugin": "node scripts/smoke-codex-plugin-marketplace.mjs",
     "stage:package": "node scripts/stage-package.mjs",

@@ -14,6 +14,7 @@ import {
 } from "./lib/trust-core-e2e.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const stagedPackageRoot = join(repositoryRoot, ".dist", "npm-package");
 const args = parseArgs(process.argv.slice(2));
 
 try {
@@ -29,7 +30,7 @@ async function runTrustCoreArtifactSuite(options) {
     ? { binary: resolve(options.installedBinary), version: options.version ?? "installed", cleanup: async () => {} }
     : await createPackedInstallation({
       artifact: options.artifact,
-      packageRoot: options.packageRoot ?? repositoryRoot,
+      packageRoot: options.packageRoot ?? stagedPackageRoot,
     });
 
   // Canonicalize macOS's /var -> /private/var alias before passing absolute
