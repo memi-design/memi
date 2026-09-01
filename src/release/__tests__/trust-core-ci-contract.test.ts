@@ -28,9 +28,11 @@ describe("Trust Core verification configuration", () => {
     );
   });
 
-  it("exposes the packed-artifact suite as a package script", async () => {
+  it("rebuilds the publishable runtime before packed-artifact smoke", async () => {
     const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
-    expect(packageJson.scripts["smoke:trust-core"]).toBe("node scripts/trust-core-e2e.mjs");
+    expect(packageJson.scripts["smoke:trust-core"]).toBe(
+      "npm run build && node scripts/trust-core-e2e.mjs",
+    );
     expect(packageJson.scripts.prepublishOnly).toContain("npm run test:trust-core:coverage");
     expect(packageJson.scripts.prepublishOnly).toContain("npm run smoke:trust-core -- --portable");
   });
