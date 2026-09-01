@@ -69,6 +69,8 @@ const FORBIDDEN_FILE_PATTERNS = Object.freeze([
   /\.(?:key|p12|pfx|pem)$/i,
   /^(?:id_dsa|id_ecdsa|id_ed25519|id_rsa)$/i,
 ]);
+const SEMVER_PATTERN = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+const WINDOWS_RESERVED_NAME = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$/i;
 
 export function resolveOfflineTarget(value) {
   const target = OFFLINE_TARGETS[value];
@@ -294,6 +296,12 @@ function validatePackageMetadata(packageMetadata) {
       throw new Error(`package.json must define a non-empty ${key}`);
     }
   }
+  if (packageMetadata.name !== "@memi-design/cli") {
+    throw new Error("package.json name must be @memi-design/cli for an offline Memi bundle");
+  }
+  if (!SEMVER_PATTERN.test(packageMetadata.version)) {
+    throw new Error("package.json version must be a valid semantic version");
+  }
 }
 
 function normalizeSourceDateEpoch(value) {
@@ -336,6 +344,9 @@ async function assertSafeRuntimeTree(rootPath, label) {
       if (isForbiddenRuntimeName(entry.name)) {
         throw new Error(`Runtime sidecar contains forbidden dev or secret content: ${entryLabel}`);
       }
+      if (!isPortableRuntimeName(entry.name)) {
+        throw new Error(`Runtime sidecar contains a non-portable filename: ${entryLabel}`);
+      }
       if (entryStat.isDirectory()) {
         await walk(entryPath, entryLabel);
       } else if (!entryStat.isFile() || entryStat.nlink > 1) {
@@ -347,6 +358,14 @@ async function assertSafeRuntimeTree(rootPath, label) {
 
 function isForbiddenRuntimeName(name) {
   return FORBIDDEN_SEGMENTS.has(name) || FORBIDDEN_FILE_PATTERNS.some((pattern) => pattern.test(name));
+}
+
+function isPortableRuntimeName(name) {
+  return ![
+    /[\u0000-\u001f\u007f<>:"|?*\\]/,
+    /[ .]$/,
+    WINDOWS_RESERVED_NAME,
+  ].some((pattern) => pattern.test(name));
 }
 
 async function normalizeTreeModes(rootPath, binaryName) {
