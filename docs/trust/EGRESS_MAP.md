@@ -14,6 +14,7 @@ network activity because they can reach other local processes.
 | Figma plugin bridge | loopback ports 9223-9232 | Plugin handshake and requested design data | Network and Figma capabilities; authenticated pairing | Denied |
 | Model providers | Configured HTTPS endpoint; local providers may use loopback | Prompt and any content explicitly included by the command | Network capability, destination review, data-processing approval | Denied |
 | Browser automation | User-selected URL and browser runtime | URL, cookies/profile data available to the chosen browser, interaction data | Browser and network capabilities; optional runtime installed separately | Denied |
+| Consumer-resolved optional peer | Local Node package resolution | Host-supplied executable package code enters the process | `host-integration-code`; feature-specific capabilities remain separate | Denied |
 | Package or runtime install | npm or another explicitly selected registry | Package/version request and package-manager metadata | Network, shell, and dynamic-install capabilities; exact version only | Denied |
 | Publication | npm, GitHub, MCP Registry, GHCR, Homebrew, website | Release artifacts and publishing credentials used by the external tool | Explicit release workflow outside normal diagnosis | Denied |
 | Telemetry | None in the locked contract | No event or source payload | A future endpoint requires a documented opt-in and separate grant | Denied |

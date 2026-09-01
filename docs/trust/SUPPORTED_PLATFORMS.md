@@ -43,3 +43,8 @@ is limited to 60 MB.
 
 No platform is listed as verified until the release record names its runner,
 Node or bundle runtime, artifact digest, profile, date, and passing receipt.
+Receipt containment evidence must include the deterministic parent-symlink swap
+regression on every supported operating system. Because Node does not expose one
+portable directory-handle-relative create API across this matrix, the candidate
+must prove that receipt bytes are written only after exclusive open, post-open
+containment, and pathname-to-handle identity validation on each platform.

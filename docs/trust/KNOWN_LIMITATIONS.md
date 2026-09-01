@@ -27,6 +27,11 @@
   to perform the requested local analysis.
 - Optional integrations expand the boundary and require separate dependencies,
   capabilities, destinations, credentials, and employer review.
+- Node does not expose one portable directory-handle-relative file-creation API
+  across the supported matrix. Receipt output therefore uses exclusive open plus
+  post-open containment and file identity checks. A detected parent race can
+  leave an empty file, but the writer does not send receipt bytes through that
+  unvalidated handle.
 - The legacy uninstall script is destructive and is not the Trust Core
   preserve-first uninstall path.
 

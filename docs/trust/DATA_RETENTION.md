@@ -31,8 +31,13 @@ or delete them without an explicit migration and recovery step.
 - No capability grant is stored for a future invocation.
 - No secret is written into a receipt, log, crash message, or diagnostic report.
 - Metadata hashes must not be reversible encodings of source content.
-- Interrupted writes use a bounded temporary file inside the authorized output
-  directory and either complete atomically or leave the prior artifact intact.
+- Metadata receipts create a new `0600` file exclusively, reject an existing
+  output, and write only after pathname containment and file-handle identity are
+  revalidated. A failed post-open validation may leave an empty file, but no
+  receipt bytes are written through an unvalidated handle.
+- Local receipt persistence may create the real project `.memi/` policy root.
+  Deeper output directories must already exist; the writer does not recursively
+  create ancestors that could be swapped to external symlinks.
 - Memi does not set an employer's retention period. Teams must apply their own
   repository, log, backup, and provider policies to any explicitly saved output.
 - Deleting Memi does not delete generated source or user-created specifications.

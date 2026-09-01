@@ -35,6 +35,13 @@ Memi Canvas and Memi Studio remain independently gated.
 structured error code `MEMI_CAPABILITY_DENIED` and identifies the command and
 required capability. Grants are not saved for later invocations.
 
+`host-integration-code` authorizes loading already-installed, consumer-resolved
+optional peers for the current invocation. It does not authorize installing or
+updating them; those side effects remain behind `dynamic-install`, `network`,
+and `shell` as applicable. Anthropic, Playwright, XLSX/SSF, and native canvas
+loaders check this grant at their import boundary, including library and Studio
+entry points that do not pass through CLI command preflight.
+
 ## Review map
 
 - [Threat model](THREAT_MODEL.md)

@@ -23,6 +23,12 @@ release gates pass.
 - `f5ef708e` — fix: fail closed on downstream command authority
 - `949ec739` — test: cover Trust Core capability boundaries
 - `a8d832be` — test: reject symlinked receipt leaves
+- `67ac83bd` — test: reproduce trust receipt and optional peer gaps
+- `f33879d9` — test: enforce optional peer execution grants
+- `0dcd24b8` — fix: harden receipt and optional peer boundaries
+- `5ba4bb94` — test: preserve locked CSV parsing
+- `c746b746` — test: reproduce remaining trust boundary races
+- `98830cdd` — fix: close residual trust boundary races
 - `2f259c8f` — test: reproduce prefixed updater routing drift
 - `e1d07881` — fix: preserve resolved updater routing and version
 - `a5c2eee6` — test: reproduce fail-open command preflight
@@ -45,6 +51,12 @@ release gates pass.
   publish and export destinations remain inside the connected project root,
   GitHub-backed Note installation requires subprocess authority, and brokered
   Studio runs require the browser and Figma grants they expose.
+- Binds receipt authorization to an exclusive file handle, revalidates the
+  opened path before writing, rejects symlinked policy roots and parent or leaf
+  substitution, and never recursively creates attacker-swappable ancestors.
+- Separates execution of consumer-resolved optional peers from installation:
+  Anthropic, Playwright, XLSX, and native canvas code require the explicit
+  per-run `host-integration-code` grant while retaining exact install guidance.
 
 ### Offline distribution lane
 
@@ -138,7 +150,9 @@ release gates pass.
 
 - The npm CLI remains the single core package. Integrations that are not needed
   for offline diagnosis must be installed explicitly and are loaded only when
-  their feature is invoked.
+  their feature is invoked with the `host-integration-code` capability. That
+  grant authorizes already-installed host code; `dynamic-install` remains a
+  separate capability and is not implied.
 - Source builds retain a full development shrinkwrap for reproducible `npm ci`;
   pack, SBOM, clean-install, and trusted publish gates use a disposable stage
   that substitutes the separately generated production shrinkwrap.

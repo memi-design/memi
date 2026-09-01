@@ -45,7 +45,10 @@ remain independently gated.
    traffic are egress. Loopback is still a network capability.
 4. **CLI to optional code.** Optional peers, Notes, generated code, plugins, and
    downloaded archives are untrusted until validated. Loading or executing them
-   is a separate capability from reading metadata.
+   is a separate capability from reading metadata. Consumer-resolved optional
+   peers require the per-run `host-integration-code` grant; that grant does not
+   imply permission to install a package, use its network features, or persist
+   its output.
 5. **Build to user.** A Git tag, npm version, binary name, or passing source test
    is not artifact identity. The consumed bytes must match the recorded digest
    and provenance.
@@ -63,6 +66,11 @@ remain independently gated.
   paths, credentials, source, or prompt content.
 - Locked receipts contain only allowlisted metadata. Persisting any receipt
   requires an explicit path and an allowed project write.
+- Receipt creation uses an exclusive, non-following leaf open where the platform
+  supports it, then revalidates containment and matches pathname identity to the
+  opened file handle before writing any receipt bytes through that same handle.
+  The policy root must be a real directory, and nested output parents must
+  already exist so recursive creation cannot cross a swapped symlink.
 - Archive extraction, path resolution, and output creation reject traversal,
   symlink escape, special files, unsafe entry types, and unbounded input.
 - Update and install flows use an exact resolved version and verified digest;
@@ -76,6 +84,8 @@ remain independently gated.
   cache, or launches a browser before policy evaluation.
 - A `.memi/` symlink or `..` path escapes into source, another repository, or the
   home directory.
+- A receipt parent or leaf is replaced with a symlink after initial policy
+  validation but before the output file is opened.
 - A Note or archive uses absolute paths, alternate separators, hard links,
   device files, oversized entries, nested compression, or interrupted writes.
 - A receipt, error, log, or crash report includes source, prompts, secrets, or
