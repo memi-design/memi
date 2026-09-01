@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import {
   assertCapabilityDenied,
   assertMetadataOnlyReceipt,
+  cleanHarnessEnvironment,
   createPackedInstallation,
   runProcess,
 } from "./lib/trust-core-e2e.mjs";
@@ -279,7 +280,12 @@ async function verifyExplicitUpgradePreservesConfig({ artifact, currentVersion, 
     await mkdir(configDir, { recursive: true });
     await writeFile(configPath, config, "utf8");
     await writeFile(join(consumer, "package.json"), '{"name":"memi-upgrade-contract","private":true}\n', "utf8");
-    const env = { ...lockedEnvironment(homeRoot, ""), PATH: process.env.PATH ?? "" };
+    const env = {
+      ...cleanHarnessEnvironment(process.env),
+      HOME: homeRoot,
+      USERPROFILE: homeRoot,
+      PATH: process.env.PATH ?? "",
+    };
     for (const source of ["@memi-design/cli@2.7.9", artifact]) {
       const installed = await runProcess(npm.command, [
         ...npm.prefix,
