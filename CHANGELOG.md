@@ -12,6 +12,21 @@ This unreleased work is not part of the immutable 2.7.9 release. It becomes a
 public product claim only after the 2.8 candidate, cross-platform, security, and
 release gates pass.
 
+### Trust Core execution policy
+
+- `d452661e` — test: add RED contracts for Trust Core policy and receipts
+- `9b90fc76` — feat: add Trust Core execution policy and receipts
+- `04a195fe` — test: reproduce locked CLI preflight and doctor mutations
+- `623f03c7` — feat: preflight risky commands and make doctor read-only
+- `5b5bed4b` — feat: enforce Trust Core policy across CLI startup
+- `82c1a278` — fix: emit structured CLI policy denials
+- Makes `locked` the default offline profile, limits `local` writes to the real
+  project `.memi/` directory, and requires explicit per-invocation grants in
+  `connected` mode.
+- Adds metadata-only execution receipts, structured
+  `MEMI_CAPABILITY_DENIED` errors, read-only locked diagnostics, and exact
+  resolved-version self-updates.
+
 ### Offline distribution lane
 
 - Adds deterministic secondary `tar.gz` bundles for Darwin arm64/x64, Linux

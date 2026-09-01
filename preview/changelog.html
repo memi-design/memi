@@ -393,9 +393,9 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">432</span> commits</span>
-      <span><span class="n" id="stat-versions">47</span> versions</span>
-      <span><span class="n" id="stat-latest">2026-08-08</span> latest</span>
+      <span><span class="n" id="stat-commits">438</span> commits</span>
+      <span><span class="n" id="stat-versions">48</span> versions</span>
+      <span><span class="n" id="stat-latest">2026-08-31</span> latest</span>
     </div>
   </header>
 
@@ -409,9 +409,9 @@ a:hover { text-decoration: underline; }
         </p>
         <div class="hero-kpis">
           <div class="summary-card">
-            <span class="summary-kicker">Current release</span>
-            <strong class="summary-value">v2.7.9</strong>
-            <div class="summary-caption">1 commits tracked in v2.7.9 from CHANGELOG.md.</div>
+            <span class="summary-kicker">Candidate release</span>
+            <strong class="summary-value">v2.8.0-beta.1</strong>
+            <div class="summary-caption">6 commits tracked in v2.8.0-beta.1 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -437,10 +437,53 @@ a:hover { text-decoration: underline; }
     <section class="release-list" id="release-list"></section>
   </main>
 
-  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v2.7.9</footer>
+  <footer class="footer">memoire changelog - synced with CHANGELOG.md through v2.8.0-beta.1</footer>
 
 <script>
 const releases = [
+  {
+    "version": "v2.8.0-beta.1",
+    "date": "2026-08-31",
+    "tag": "feature",
+    "summary": "d452661e — test: add RED contracts for Trust Core policy and receipts; 9b90fc76 — feat: add Trust Core execution policy and receipts; 04a195fe — test: reproduce locked CLI preflight and doctor mutations.",
+    "commits": [
+      [
+        "d452661e",
+        "test: add RED contracts for Trust Core policy and receipts"
+      ],
+      [
+        "9b90fc76",
+        "feat: add Trust Core execution policy and receipts"
+      ],
+      [
+        "04a195fe",
+        "test: reproduce locked CLI preflight and doctor mutations"
+      ],
+      [
+        "623f03c7",
+        "feat: preflight risky commands and make doctor read-only"
+      ],
+      [
+        "5b5bed4b",
+        "feat: enforce Trust Core policy across CLI startup"
+      ],
+      [
+        "82c1a278",
+        "fix: emit structured CLI policy denials"
+      ]
+    ],
+    "decisions": [],
+    "changes": [
+      "d452661e — test: add RED contracts for Trust Core policy and receipts",
+      "9b90fc76 — feat: add Trust Core execution policy and receipts",
+      "04a195fe — test: reproduce locked CLI preflight and doctor mutations",
+      "623f03c7 — feat: preflight risky commands and make doctor read-only",
+      "5b5bed4b — feat: enforce Trust Core policy across CLI startup",
+      "82c1a278 — fix: emit structured CLI policy denials",
+      "Makes locked the default offline profile, limits local writes to the real",
+      "Adds metadata-only execution receipts, structured"
+    ]
+  },
   {
     "version": "v2.7.9",
     "date": "2026-08-08",
