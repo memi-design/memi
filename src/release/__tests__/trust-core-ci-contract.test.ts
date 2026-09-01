@@ -53,6 +53,8 @@ describe("Trust Core verification configuration", () => {
     expect(workflow).toContain("--network none");
     expect(workflow).toContain("--read-only");
     expect(workflow).toContain("--user 65532:65532");
+    expect(workflow).toContain('if [ "$PLATFORM" = "linux/arm64" ]');
+    expect(workflow).toContain('--performance-mode "$performance_mode"');
     expect(workflow).toContain("npm run test:trust-core:coverage");
     expect(workflow).toContain("run: npm run stage:package");
     expect(workflow).toContain("working-directory: .dist/npm-package");
@@ -60,6 +62,11 @@ describe("Trust Core verification configuration", () => {
     const dockerfile = await readFile(join(root, ".github", "trust-core", "Dockerfile"), "utf8");
     expect(dockerfile).toContain("scripts/trust-core-e2e.mjs");
     expect(dockerfile).toContain('"--container"');
+
+    const harness = await readFile(join(root, "scripts", "trust-core-e2e.mjs"), "utf8");
+    expect(harness).toContain('arg === "--performance-mode"');
+    expect(harness).toContain('performanceMode: options.performanceMode');
+    expect(harness).toContain('enforced: options.performanceMode === "enforced"');
   });
 
   it("pins every third-party action in the Trust Core workflow", async () => {
