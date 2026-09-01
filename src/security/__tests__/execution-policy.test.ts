@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -217,6 +217,48 @@ describe("MemiExecutionPolicy", () => {
     await expect(missingHome.assertHomeWrite("config.json", "write config")).rejects.toMatchObject({
       code: "MEMI_CAPABILITY_DENIED",
       capability: "home-write",
+    });
+  });
+
+  it("mediates first-run stamp writes without following a symlinked ~/.memoire root", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-policy-stamp-project-"));
+    const homeDir = await mkdtemp(join(tmpdir(), "memi-policy-stamp-home-"));
+    const outsideRoot = await mkdtemp(join(tmpdir(), "memi-policy-stamp-outside-"));
+    cleanup.push(projectRoot, homeDir, outsideRoot);
+    await symlink(outsideRoot, join(homeDir, ".memoire"), "dir");
+    const policy = createExecutionPolicy({
+      projectRoot,
+      homeDir,
+      profile: "connected",
+      allow: ["home-write"],
+    });
+    const stamp = join(homeDir, ".memoire", ".first-run-done");
+
+    await expect(policy.runHomeWrite(stamp, "persist first-run stamp", async (safePath) => {
+      await writeFile(safePath, "2026-08-31T00:00:00.000Z", "utf8");
+    })).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "home-write",
+      operation: "persist first-run stamp",
+    });
+    expect(await readdir(outsideRoot)).toEqual([]);
+  });
+
+  it("denies mediated home writes when no home boundary was declared", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-policy-no-home-project-"));
+    cleanup.push(projectRoot);
+    const policy = createExecutionPolicy({
+      projectRoot,
+      profile: "connected",
+      allow: ["home-write"],
+    });
+
+    await expect(policy.runHomeWrite("/tmp/.memoire-update-check.json", "persist update cache", async (safePath) => {
+      await writeFile(safePath, "{}", "utf8");
+    })).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "home-write",
+      operation: "persist update cache",
     });
   });
 

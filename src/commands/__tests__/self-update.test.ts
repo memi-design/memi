@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -12,6 +12,7 @@ import {
   updateCachePath,
   writeUpdateCache,
 } from "../../utils/update-check.js";
+import { createExecutionPolicy } from "../../security/execution-policy.js";
 
 describe("compareSemver", () => {
   it("orders core versions numerically", () => {
@@ -115,10 +116,16 @@ describe("update cache", () => {
     expect(updateCachePath()).toBe(join(dir, ".memoire", "update-check.json"));
   });
 
-  it("round-trips a cache entry", () => {
+  it("round-trips a cache entry", async () => {
     const entry = { lastCheckAt: "2026-06-06T00:00:00.000Z", latestVersion: "1.2.3", channel: "npm" as const };
-    writeUpdateCache(entry);
-    expect(readUpdateCache()).toEqual(entry);
+    const policy = createExecutionPolicy({
+      projectRoot: dir,
+      homeDir: dir,
+      profile: "connected",
+      allow: ["home-write"],
+    });
+    await writeUpdateCache(entry, policy);
+    expect(readUpdateCache(policy)).toEqual(entry);
     // and it is valid JSON on disk
     const raw = JSON.parse(readFileSync(updateCachePath(), "utf-8"));
     expect(raw.latestVersion).toBe("1.2.3");
@@ -126,6 +133,47 @@ describe("update cache", () => {
 
   it("returns null when no cache exists", () => {
     expect(readUpdateCache()).toBeNull();
+  });
+
+  it("does not follow a symlinked ~/.memoire root when persisting the cache", async () => {
+    const outside = mkdtempSync(join(tmpdir(), "memi-update-outside-"));
+    rmSync(join(dir, ".memoire"), { recursive: true, force: true });
+    symlinkSync(outside, join(dir, ".memoire"), "dir");
+    const policy = createExecutionPolicy({
+      projectRoot: dir,
+      homeDir: dir,
+      profile: "connected",
+      allow: ["home-write"],
+    });
+    const outsideCache = join(outside, "update-check.json");
+
+    await writeUpdateCache(
+      { lastCheckAt: "2026-08-31T00:00:00.000Z", latestVersion: "2.8.0-beta.1", channel: "npm" },
+      policy,
+    );
+
+    expect(existsSync(outsideCache)).toBe(false);
+    rmSync(outside, { recursive: true, force: true });
+  });
+
+  it("has no /tmp write fallback when HOME and USERPROFILE are missing", async () => {
+    const previousUserProfile = process.env.USERPROFILE;
+    delete process.env.HOME;
+    delete process.env.USERPROFILE;
+    const policy = createExecutionPolicy({
+      projectRoot: dir,
+      profile: "connected",
+      allow: ["home-write"],
+    });
+
+    expect(() => updateCachePath(policy)).toThrow("HOME/USERPROFILE");
+    await writeUpdateCache(
+      { lastCheckAt: "2026-08-31T00:00:00.000Z", latestVersion: null, channel: "npm" },
+      policy,
+    );
+
+    if (previousUserProfile === undefined) delete process.env.USERPROFILE;
+    else process.env.USERPROFILE = previousUserProfile;
   });
 });
 
