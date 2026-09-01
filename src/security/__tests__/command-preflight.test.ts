@@ -59,14 +59,14 @@ describe("Trust Core command preflight", () => {
     })).resolves.toEqual({ optionOverrides: { write: false } });
   });
 
-  it("allows local diagnose writes because they are constrained to .memi", async () => {
+  it("forces local diagnose onto the read-only path because reports still use legacy .memoire", async () => {
     const policy = createExecutionPolicy({ projectRoot: "/workspace", profile: "local" });
 
     await expect(preflightCommand(policy, {
       commandPath: ["diagnose"],
       options: { write: true },
       args: [],
-    })).resolves.toEqual({ optionOverrides: {} });
+    })).resolves.toEqual({ optionOverrides: { write: false } });
   });
 
   it("blocks update checks, setup, and Figma before their first side effect", async () => {
