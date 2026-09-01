@@ -16,6 +16,7 @@ import {
   relative,
   resolve,
   sep,
+  win32 as win32Path,
 } from "node:path";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -43,6 +44,30 @@ const SUBPROCESS_ENV_ALLOWLIST = new Set([
 
 export function npmExecutable(platform = process.platform) {
   return platform === "win32" ? "npm.cmd" : "npm";
+}
+
+export function resolveNpmInvocation(options = {}) {
+  const platform = options.platform ?? process.platform;
+  const nodeExecutable = options.nodeExecutable ?? process.execPath;
+  const npmExecPath = Object.hasOwn(options, "npmExecPath")
+    ? options.npmExecPath
+    : process.env.npm_execpath;
+  if (npmExecPath) {
+    return { command: nodeExecutable, prefix: [npmExecPath] };
+  }
+  if (platform === "win32") {
+    return {
+      command: nodeExecutable,
+      prefix: [win32Path.join(
+        win32Path.dirname(nodeExecutable),
+        "node_modules",
+        "npm",
+        "bin",
+        "npm-cli.js",
+      )],
+    };
+  }
+  return { command: npmExecutable(platform), prefix: [] };
 }
 
 export async function runProcess(command, args, options = {}) {
@@ -203,9 +228,7 @@ export async function createPackedInstallation(options = {}) {
   const packageRoot = resolve(options.packageRoot ?? process.cwd());
   const tempRoot = await mkdtemp(join(tmpdir(), "memi-trust-artifact-"));
   const consumerRoot = join(tempRoot, "consumer");
-  const npm = process.env.npm_execpath
-    ? { command: process.execPath, prefix: [process.env.npm_execpath] }
-    : { command: npmExecutable(), prefix: [] };
+  const npm = resolveNpmInvocation();
   const packageJson = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8"));
   const env = cleanHarnessEnvironment(process.env);
 

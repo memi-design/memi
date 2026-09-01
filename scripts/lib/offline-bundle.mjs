@@ -360,7 +360,7 @@ function isForbiddenRuntimeName(name) {
   return FORBIDDEN_SEGMENTS.has(name) || FORBIDDEN_FILE_PATTERNS.some((pattern) => pattern.test(name));
 }
 
-function isPortableRuntimeName(name) {
+export function isPortableRuntimeName(name) {
   return ![
     /[\u0000-\u001f\u007f<>:"|?*\\]/,
     /[ .]$/,

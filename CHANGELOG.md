@@ -144,6 +144,9 @@ release gates pass.
 - Keeps the Linux arm64 QEMU job as a bounded behavioral conformance gate while
   labeling its timings non-gating; published startup budgets remain enforced on
   native runners, avoiding false failures from emulation overhead.
+- Keeps Windows verification shell-free by invoking npm's JavaScript entrypoint
+  through Node, and tests non-portable bundle names without asking Windows to
+  create paths its filesystem rejects before the safety validator can run.
 
 ### Packaging trust follow-up commits
 
