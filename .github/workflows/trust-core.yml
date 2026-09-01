@@ -77,11 +77,19 @@ jobs:
       - name: Run as non-root with no network and a read-only root filesystem
         env:
           PLATFORM: ${{ matrix.platform }}
-        run: >-
+        run: |
+          performance_mode="enforced"
+          if [ "$PLATFORM" = "linux/arm64" ]; then
+            # QEMU startup time is not representative of native arm64. This job
+            # still runs the complete containment/privacy suite with a bounded
+            # command timeout; native jobs enforce the published latency budget.
+            performance_mode="conformance"
+          fi
           docker run --rm
-          --platform "$PLATFORM"
-          --network none
-          --read-only
-          --user 65532:65532
-          --tmpfs /tmp:rw,noexec,nosuid,size=64m,mode=1777
-          "$MEMI_TRUST_IMAGE"
+            --platform "$PLATFORM" \
+            --network none \
+            --read-only \
+            --user 65532:65532 \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m,mode=1777 \
+            "$MEMI_TRUST_IMAGE" \
+            --performance-mode "$performance_mode"

@@ -141,6 +141,9 @@ release gates pass.
   mutations on every supported host.
 - Makes local smoke, prepublish, and networkless container verification pack and
   install the exact `.dist/npm-package` artifact used by the publish workflow.
+- Keeps the Linux arm64 QEMU job as a bounded behavioral conformance gate while
+  labeling its timings non-gating; published startup budgets remain enforced on
+  native runners, avoiding false failures from emulation overhead.
 
 ### Packaging trust follow-up commits
 

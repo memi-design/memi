@@ -41,6 +41,13 @@ standard fixture within five seconds on the release runners. The npm tarball is
 limited to 1.5 MB packed, 3 MB unpacked, and 100 files; the default installation
 is limited to 60 MB.
 
+Performance budgets are enforced only on native release runners. The Linux
+arm64 QEMU job runs the same networkless, read-only behavioral suite with a
+bounded 30-second command watchdog, reports its measured timings as
+`performanceMode: conformance`, and does not use emulation overhead as product
+latency evidence. Native Linux arm64 release evidence must still satisfy the
+published startup budgets before that platform is marked verified.
+
 No platform is listed as verified until the release record names its runner,
 Node or bundle runtime, artifact digest, profile, date, and passing receipt.
 Receipt containment evidence must include the deterministic parent-symlink swap

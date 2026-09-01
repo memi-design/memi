@@ -65,6 +65,7 @@ async function runTrustCoreArtifactSuite(options) {
       env: baseEnv,
       budgetMs: 1_000,
       label: "memi --version cold start",
+      enforceBudget: options.performanceMode === "enforced",
     });
     requireSuccess(version, "memi --version");
 
@@ -85,6 +86,7 @@ async function runTrustCoreArtifactSuite(options) {
       env: baseEnv,
       budgetMs: 5_000,
       label: "locked diagnose",
+      enforceBudget: options.performanceMode === "enforced",
     });
     requireSuccess(diagnosis, "locked diagnose");
 
@@ -155,6 +157,8 @@ async function runTrustCoreArtifactSuite(options) {
       artifactVersion: installation.version,
       mode: options.container ? "container" : "portable",
       performance: {
+        performanceMode: options.performanceMode,
+        enforced: options.performanceMode === "enforced",
         versionMs: version.durationMs,
         lockedDiagnoseMs: diagnosis.durationMs,
       },
@@ -313,10 +317,12 @@ async function timedInvocation(binary, cliArgs, options) {
   const result = await runProcess(process.execPath, [binary, ...cliArgs], {
     cwd: options.cwd,
     env: options.env,
-    timeoutMs: Math.max(options.budgetMs * 2, 2_000),
+    timeoutMs: options.enforceBudget
+      ? Math.max(options.budgetMs * 2, 2_000)
+      : DEFAULT_CONFORMANCE_TIMEOUT_MS,
   });
   const durationMs = Number(process.hrtime.bigint() - started) / 1_000_000;
-  if (durationMs > options.budgetMs) {
+  if (options.enforceBudget && durationMs > options.budgetMs) {
     throw new Error(`${options.label} took ${durationMs.toFixed(1)}ms; budget is ${options.budgetMs}ms`);
   }
   return { ...result, durationMs: Number(durationMs.toFixed(1)) };
@@ -404,8 +410,10 @@ function requireSuccess(result, label) {
   }
 }
 
+const DEFAULT_CONFORMANCE_TIMEOUT_MS = 30_000;
+
 function parseArgs(argv) {
-  const options = { portable: false, container: false };
+  const options = { portable: false, container: false, performanceMode: "enforced" };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--portable") options.portable = true;
@@ -414,6 +422,13 @@ function parseArgs(argv) {
     else if (arg === "--installed-binary") options.installedBinary = requiredValue(argv, ++index, arg);
     else if (arg === "--package-root") options.packageRoot = requiredValue(argv, ++index, arg);
     else if (arg === "--version") options.version = requiredValue(argv, ++index, arg);
+    else if (arg === "--performance-mode") {
+      const mode = requiredValue(argv, ++index, arg);
+      if (mode !== "enforced" && mode !== "conformance") {
+        throw new Error("--performance-mode must be enforced or conformance");
+      }
+      options.performanceMode = mode;
+    }
     else throw new Error(`Unknown Trust Core E2E option: ${arg}`);
   }
   if (options.portable && options.container) {
