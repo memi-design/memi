@@ -1,12 +1,12 @@
 {
   "name": "@memi-design/cli",
-  "version": "2.7.9",
+  "version": "2.8.0-beta.1",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "@memi-design/cli",
-      "version": "2.7.9",
+      "version": "2.8.0-beta.1",
       "license": "MIT",
       "dependencies": {
         "@chenglou/pretext": "^0.0.6",
