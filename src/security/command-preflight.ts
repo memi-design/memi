@@ -1,4 +1,8 @@
-import type { MemiCapability, MemiExecutionPolicy } from "./execution-policy.js";
+import {
+  MemiCapabilityDeniedError,
+  type MemiCapability,
+  type MemiExecutionPolicy,
+} from "./execution-policy.js";
 
 export interface CommandInvocation {
   commandPath: readonly string[];
@@ -10,24 +14,36 @@ export interface CommandPreflightResult {
   optionOverrides: Readonly<Record<string, unknown>>;
 }
 
+type CapabilityRequirement = readonly [capability: MemiCapability, operation: string];
+
+const READ_ONLY_COMMAND_PATHS: readonly string[] = Object.freeze([
+  "status",
+  "studio.browser.status",
+]);
+
 export async function preflightCommand(
   policy: MemiExecutionPolicy,
   invocation: CommandInvocation,
 ): Promise<CommandPreflightResult> {
   const path = invocation.commandPath.join(".");
   const overrides: Record<string, unknown> = {};
-  const require = (...requirements: readonly [MemiCapability, string][]) => {
-    for (const [capability, operation] of requirements) {
-      policy.assert(capability, operation);
-    }
+  const require = (...requirements: CapabilityRequirement[]) => {
+    assertRequirements(policy, requirements, false);
   };
+  const requireLocalWrite = (...requirements: CapabilityRequirement[]) => {
+    assertRequirements(policy, requirements, true);
+  };
+
+  if (READ_ONLY_COMMAND_PATHS.includes(path)) {
+    return { optionOverrides: Object.freeze({}) };
+  }
 
   switch (path) {
     case "diagnose":
       if (policy.profile === "locked") {
         overrides.write = false;
       } else if (invocation.options.write !== false) {
-        require(["project-write", "write diagnosis reports"]);
+        requireLocalWrite(["project-write", "write diagnosis reports"]);
       }
       break;
     case "doctor":
@@ -154,13 +170,164 @@ export async function preflightCommand(
         ["project-write", "remove project Memi data"],
       );
       break;
-    default:
+    case "studio.status":
+      require(["shell", "probe Studio harness availability"]);
       break;
+    case "studio.browser.open":
+      require(
+        ["project-write", "persist Studio browser session artifacts"],
+        ["browser", "launch the Studio browser runtime"],
+        ["shell", "launch the Playwright browser process"],
+        ["network", "navigate the Studio browser"],
+      );
+      break;
+    case "studio.serve":
+    case "studio.web":
+      require(
+        ["project-write", "persist Studio runtime state"],
+        ["source-content-persistence", "persist Studio prompts and session events"],
+        ["network", "start the Studio localhost runtime"],
+        ["shell", "enable Studio harness processes"],
+        ["browser", "enable Studio browser tools"],
+        ["figma", "enable Studio Figma tools"],
+      );
+      break;
+    case "studio.run":
+      require(
+        ["project-write", "persist Studio harness state"],
+        ["source-content-persistence", "persist Studio harness prompts and events"],
+        ["shell", "spawn the selected Studio harness"],
+        ["network", "connect the selected Studio harness"],
+      );
+      break;
+    case "preview":
+      require(["project-write", "write generated preview pages"]);
+      if (!invocation.options.buildOnly) {
+        require(
+          ["network", "start the localhost preview server"],
+          ["shell", "start a fallback preview server"],
+        );
+      }
+      break;
+    case "publish":
+      require(["project-write", "write the registry package"]);
+      if (invocation.options.figma) {
+        require(
+          ["figma", "pull Figma data for publication"],
+          ["network", "pull Figma data for publication"],
+        );
+      }
+      if (isRemoteUrl(invocation.options.theme)) {
+        require(["network", "download the publication theme"]);
+      }
+      if (invocation.options.push) {
+        require(
+          ["network", "publish the registry package"],
+          ["shell", "run npm publish"],
+        );
+      }
+      break;
+    case "research.from-file":
+    case "research.from-transcript":
+      require(
+        ["project-write", "write research artifacts"],
+        ["source-content-persistence", "persist imported research source content"],
+      );
+      break;
+    case "research.from-stickies":
+      require(
+        ["project-write", "write research artifacts"],
+        ["source-content-persistence", "persist imported FigJam content"],
+        ["figma", "read FigJam stickies"],
+        ["network", "connect to the Figma bridge"],
+      );
+      break;
+    case "research.web":
+      require(["project-write", "write research artifacts"]);
+      if (invocation.options.urls) {
+        require(
+          ["network", "fetch research URLs"],
+          ["source-content-persistence", "persist fetched research content"],
+        );
+      }
+      break;
+    case "research.synthesize":
+    case "research.report":
+    case "research.quality":
+    case "research.trace":
+    case "research.coverage":
+      require(["project-write", "initialize and update the research store"]);
+      break;
+    case "research.design":
+      require(["project-write", "write research design artifacts"]);
+      if (invocation.options.open) {
+        require(
+          ["browser", "open the Mermaid Jam target"],
+          ["shell", "launch the system URL handler"],
+          ["network", "open the Mermaid Jam target"],
+        );
+      }
+      break;
+    case "pull":
+      require(
+        ["project-write", "persist the pulled design system and generated specs"],
+        ["network", invocation.options.penpot ? "pull from Penpot" : "pull from Figma"],
+      );
+      if (!invocation.options.penpot) {
+        require(["figma", "pull Figma design data"]);
+      }
+      break;
+    case "sync":
+      require(
+        ["project-write", "persist synchronized design data and generated code"],
+        ["figma", "synchronize with Figma"],
+        ["network", "connect to the Figma bridge"],
+      );
+      if (invocation.options.autoPr) {
+        require(["shell", "create and publish the synchronization pull request"]);
+      }
+      break;
+    case "export":
+      if (!invocation.options.dryRun) {
+        require(["project-write", "export generated code into the project source tree"]);
+      }
+      break;
+    default:
+      throw unmappedCommandDenial(policy, path);
   }
 
   return { optionOverrides: Object.freeze({ ...overrides }) };
 }
 
+function assertRequirements(
+  policy: MemiExecutionPolicy,
+  requirements: readonly CapabilityRequirement[],
+  allowLocalProjectWrite: boolean,
+): void {
+  for (const [capability, operation] of requirements) {
+    if (capability === "project-write" && policy.profile === "local" && !allowLocalProjectWrite) {
+      throw new MemiCapabilityDeniedError({
+        profile: policy.profile,
+        capability,
+        operation,
+      });
+    }
+    policy.assert(capability, operation);
+  }
+}
+
+function unmappedCommandDenial(policy: MemiExecutionPolicy, path: string): MemiCapabilityDeniedError {
+  return new MemiCapabilityDeniedError({
+    profile: policy.profile,
+    capability: "shell",
+    operation: `execute unmapped command "${path || "<root>"}"`,
+  });
+}
+
 function isRemoteNoteSource(source: string): boolean {
   return /^(?:github:|https?:\/\/|git\+|ssh:|git@)/i.test(source);
+}
+
+function isRemoteUrl(value: unknown): boolean {
+  return typeof value === "string" && /^https?:\/\//i.test(value);
 }
