@@ -371,13 +371,15 @@ program.hook("postAction", async (_thisCommand, actionCommand) => {
 program
   .command("uninstall")
   .description("Remove all Mémoire artifacts from this machine")
-  .action(() => {
+  .action(async () => {
     const home = process.env.HOME || process.env.USERPROFILE || "";
     const globalDir = join(home, ".memoire");
     const localDir = join(process.cwd(), ".memoire");
 
     if (home && existsSync(globalDir)) {
-      rmSync(globalDir, { recursive: true, force: true });
+      await executionPolicy.runHomeWrite(globalDir, "remove user Memi data", async (safeGlobalDir) => {
+        rmSync(safeGlobalDir, { recursive: true, force: true });
+      });
       console.log(`  - Removed ${globalDir}`);
     }
     if (existsSync(localDir)) {
@@ -397,7 +399,7 @@ if (process.argv.length === 2 && executionPolicy.allows("home-write")) {
   try {
     const home = process.env.HOME || process.env.USERPROFILE || "";
     if (home) {
-      const { writeFileSync, mkdirSync } = await import("node:fs");
+      const { writeFile } = await import("node:fs/promises");
       const stamp = join(home, ".memoire", ".first-run-done");
       if (!existsSync(stamp)) {
         console.log();
@@ -413,8 +415,9 @@ if (process.argv.length === 2 && executionPolicy.allows("home-write")) {
         console.log("  Docs: https://github.com/memi-design/memi/tree/main/docs");
         console.log("  Issues: https://github.com/memi-design/memi/issues");
         console.log();
-        mkdirSync(join(home, ".memoire"), { recursive: true });
-        writeFileSync(stamp, new Date().toISOString());
+        await executionPolicy.runHomeWrite(stamp, "persist first-run stamp", async (safeStamp) => {
+          await writeFile(safeStamp, new Date().toISOString(), { encoding: "utf8", mode: 0o600 });
+        });
       }
     }
   } catch {

@@ -170,7 +170,26 @@ export class MemiExecutionPolicy {
     if (!this.homeDir) {
       throw this.denial("home-write", operation);
     }
-    await this.assertContainedWrite(targetPath, this.homeDir, "home-write", operation);
+    await this.assertContainedWrite(targetPath, this.homeWriteRoot(), "home-write", operation);
+  }
+
+  /**
+   * Runs a home-directory mutation only after establishing a real, non-symlink
+   * ~/.memoire root. The callback receives the normalized target that was
+   * checked against the invocation's declared home boundary.
+   */
+  async runHomeWrite<T>(
+    targetPath: string,
+    operation: string,
+    write: (safeTargetPath: string) => Promise<T>,
+  ): Promise<T> {
+    const target = resolveAbsolutePath(targetPath);
+    await this.assertHomeWrite(target, operation);
+    await this.ensureHomeWriteRoot(operation);
+    await this.assertHomeWrite(target, operation);
+    const result = await write(target);
+    await this.assertHomeWrite(target, operation);
+    return result;
   }
 
   snapshot(): Readonly<MemiExecutionPolicySnapshot> {
@@ -197,6 +216,36 @@ export class MemiExecutionPolicy {
     return this.profile === "local"
       ? join(this.projectRoot, ".memi")
       : this.projectRoot;
+  }
+
+  private homeWriteRoot(): string {
+    if (!this.homeDir) {
+      throw this.denial("home-write", "resolve home data directory");
+    }
+    return join(this.homeDir, ".memoire");
+  }
+
+  private async ensureHomeWriteRoot(operation: string): Promise<void> {
+    if (!this.homeDir) {
+      throw this.denial("home-write", operation);
+    }
+
+    const homeMetadata = await lstat(this.homeDir).catch(() => null);
+    if (!homeMetadata?.isDirectory() || homeMetadata.isSymbolicLink()) {
+      throw this.denial("home-write", operation);
+    }
+
+    const root = this.homeWriteRoot();
+    try {
+      await mkdir(root, { mode: 0o700 });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+
+    const rootMetadata = await lstat(root);
+    if (!rootMetadata.isDirectory() || rootMetadata.isSymbolicLink()) {
+      throw this.denial("home-write", operation);
+    }
   }
 
   private async ensureProjectWriteRoot(root: string, operation: string): Promise<void> {

@@ -11,8 +11,9 @@
  * MEMOIRE_AUTO_UPDATE=1. The notifier must NEVER throw or block the CLI.
  */
 
-import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync } from "node:fs";
+import { rename, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { basename } from "node:path";
 import { spawn } from "node:child_process";
 import { isStandaloneBinary } from "./runtime.js";
@@ -60,34 +61,43 @@ export function getInstallChannel(): InstallChannel {
   return isStandaloneBinary() ? "binary" : "npm";
 }
 
-function homeDir(): string {
-  return process.env.HOME || process.env.USERPROFILE || "";
+export function updateCachePath(policy: MemiExecutionPolicy = getExecutionPolicy()): string {
+  if (!policy.homeDir) {
+    throw new Error("Cannot resolve the update cache because HOME/USERPROFILE is not set.");
+  }
+  return join(policy.homeDir, ".memoire", "update-check.json");
 }
 
-export function updateCachePath(): string {
-  const home = homeDir();
-  return home
-    ? join(home, ".memoire", "update-check.json")
-    : join("/tmp", ".memoire-update-check.json");
-}
-
-export function readUpdateCache(): UpdateCache | null {
+export function readUpdateCache(policy: MemiExecutionPolicy = getExecutionPolicy()): UpdateCache | null {
   try {
-    return JSON.parse(readFileSync(updateCachePath(), "utf-8")) as UpdateCache;
+    return JSON.parse(readFileSync(updateCachePath(policy), "utf-8")) as UpdateCache;
   } catch {
     return null;
   }
 }
 
-export function writeUpdateCache(cache: UpdateCache): void {
+export async function writeUpdateCache(
+  cache: UpdateCache,
+  policy: MemiExecutionPolicy = getExecutionPolicy(),
+): Promise<void> {
+  let tmp: string | undefined;
   try {
-    const path = updateCachePath();
-    mkdirSync(dirname(path), { recursive: true });
-    const tmp = `${path}.${process.pid}.tmp`;
-    writeFileSync(tmp, JSON.stringify(cache, null, 2));
-    renameSync(tmp, path); // atomic swap
+    const path = updateCachePath(policy);
+    await policy.runHomeWrite(path, "persist the update cache", async (safePath) => {
+      const safeTmp = `${safePath}.${process.pid}.${Date.now()}.tmp`;
+      tmp = safeTmp;
+      await writeFile(safeTmp, JSON.stringify(cache, null, 2), {
+        encoding: "utf8",
+        flag: "wx",
+        mode: 0o600,
+      });
+      await rename(safeTmp, safePath);
+      tmp = undefined;
+    });
   } catch {
     // Cache writes are best-effort — never surface an error.
+  } finally {
+    if (tmp) await rm(tmp, { force: true }).catch(() => undefined);
   }
 }
 
@@ -167,7 +177,7 @@ export async function refreshUpdateCache(
     channel: getInstallChannel(),
   };
   if (policy.allows("home-write")) {
-    writeUpdateCache(cache);
+    await writeUpdateCache(cache, policy);
   }
   return cache;
 }
@@ -223,7 +233,7 @@ export async function maybeNotifyUpdate(opts: {
     if (opts.mcpMode || opts.jsonOutput) return;
     if (shouldSkipNotify(process.argv)) return;
 
-    const cache = readUpdateCache();
+    const cache = readUpdateCache(policy);
     if (cacheIsStale(cache) && policy.allows("shell")) spawnBackgroundRefresh(policy);
 
     const latest = cache?.latestVersion ?? null;

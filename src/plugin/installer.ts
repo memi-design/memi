@@ -1,9 +1,10 @@
-import { cp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { cp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import {
   ensureBridgeCapability,
   injectBridgeCapability,
 } from "../security/bridge-capability.js";
+import { getExecutionPolicy, type MemiExecutionPolicy } from "../security/execution-policy.js";
 
 export interface PluginInstallResult {
   status: "installed";
@@ -15,7 +16,11 @@ export interface PluginInstallResult {
   bundleHash: string | null;
 }
 
-export async function installPluginToHome(projectRoot: string, homeDir = defaultHomeDir()): Promise<PluginInstallResult> {
+export async function installPluginToHome(
+  projectRoot: string,
+  homeDir = defaultHomeDir(),
+  policy: MemiExecutionPolicy = getExecutionPolicy(),
+): Promise<PluginInstallResult> {
   if (!homeDir) {
     throw new Error("Cannot install the Figma plugin because HOME/USERPROFILE is not set.");
   }
@@ -24,35 +29,41 @@ export async function installPluginToHome(projectRoot: string, homeDir = default
   const pluginDest = join(homeDir, ".memoire", "plugin");
   const resolvedPluginSrc = await realpath(pluginSrc);
 
-  await mkdir(dirname(pluginDest), { recursive: true });
-  await rm(pluginDest, { recursive: true, force: true });
-  await cp(resolvedPluginSrc, pluginDest, {
-    recursive: true,
-    dereference: true,
-    force: true,
+  await policy.runHomeWrite(pluginDest, "install the Figma plugin", async (safePluginDest) => {
+    await rm(safePluginDest, { recursive: true, force: true });
+    await cp(resolvedPluginSrc, safePluginDest, {
+      recursive: true,
+      dereference: true,
+      force: true,
+    });
   });
 
-  const capability = await ensureBridgeCapability(homeDir);
+  const capability = await ensureBridgeCapability(homeDir, policy);
   const installedUiPath = join(pluginDest, "ui.html");
   const installedUi = await readFile(installedUiPath, "utf-8");
-  await writeFile(
-    installedUiPath,
-    injectBridgeCapability(installedUi, capability),
-    { encoding: "utf-8", mode: 0o600 },
-  );
+  await policy.runHomeWrite(installedUiPath, "inject the Figma bridge capability", async (safeInstalledUiPath) => {
+    await writeFile(
+      safeInstalledUiPath,
+      injectBridgeCapability(installedUi, capability),
+      { encoding: "utf-8", mode: 0o600 },
+    );
+  });
 
   const widgetMeta = await readWidgetMeta(join(pluginDest, "widget-meta.json"));
-  await writeFile(
-    join(pluginDest, "install-meta.json"),
-    JSON.stringify({
-      installedAt: new Date().toISOString(),
-      sourcePackageVersion: widgetMeta?.packageVersion ?? null,
-      widgetVersion: widgetMeta?.widgetVersion ?? null,
-      bundleHash: widgetMeta?.bundleHash ?? null,
-      sourcePath: resolvedPluginSrc,
-    }, null, 2) + "\n",
-    "utf-8",
-  );
+  const installMetaPath = join(pluginDest, "install-meta.json");
+  await policy.runHomeWrite(installMetaPath, "persist Figma plugin install metadata", async (safeInstallMetaPath) => {
+    await writeFile(
+      safeInstallMetaPath,
+      JSON.stringify({
+        installedAt: new Date().toISOString(),
+        sourcePackageVersion: widgetMeta?.packageVersion ?? null,
+        widgetVersion: widgetMeta?.widgetVersion ?? null,
+        bundleHash: widgetMeta?.bundleHash ?? null,
+        sourcePath: resolvedPluginSrc,
+      }, null, 2) + "\n",
+      "utf-8",
+    );
+  });
 
   return {
     status: "installed",

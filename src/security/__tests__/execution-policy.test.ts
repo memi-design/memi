@@ -204,6 +204,11 @@ describe("MemiExecutionPolicy", () => {
     });
 
     await expect(policy.assertHomeWrite(join(homeDir, ".memoire", "config.json"), "write config")).resolves.toBeUndefined();
+    const configPath = join(homeDir, ".memoire", "config.json");
+    await policy.runHomeWrite(configPath, "write config", async (safePath) => {
+      await writeFile(safePath, "{}\n", "utf8");
+    });
+    expect(await readFile(configPath, "utf8")).toBe("{}\n");
     await expect(policy.assertHomeWrite(join(projectRoot, "config.json"), "escape home")).rejects.toMatchObject({
       code: "MEMI_CAPABILITY_DENIED",
       capability: "home-write",
