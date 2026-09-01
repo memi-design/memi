@@ -105,9 +105,7 @@ export class MemiExecutionPolicy {
 
   async assertProjectWrite(targetPath: string, operation: string): Promise<void> {
     this.assert("project-write", operation);
-    const allowedRoot = this.profile === "local"
-      ? join(this.projectRoot, ".memi")
-      : this.projectRoot;
+    const allowedRoot = this.projectWriteRoot();
     await this.assertContainedWrite(targetPath, allowedRoot, "project-write", operation);
   }
 
@@ -118,12 +116,25 @@ export class MemiExecutionPolicy {
    */
   async openProjectWriteExclusive(targetPath: string, operation: string): Promise<FileHandle> {
     const target = resolveAbsolutePath(targetPath);
+    const allowedRoot = this.projectWriteRoot();
     await this.assertProjectWrite(target, operation);
-    await mkdir(dirname(target), { recursive: true });
+    await this.ensureProjectWriteRoot(allowedRoot, operation);
 
-    // Directory creation and attacker-controlled workspace activity can change
-    // the path after the first check. Revalidate immediately before opening.
+    // Creating only the policy root avoids following a swapped missing ancestor
+    // during recursive mkdir. Nested receipt directories must already exist.
     await this.assertProjectWrite(target, operation);
+    const parent = dirname(target);
+    try {
+      const parentMetadata = await lstat(parent);
+      if (!parentMetadata.isDirectory() || parentMetadata.isSymbolicLink()) {
+        throw this.denial("project-write", operation);
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        throw this.denial("project-write", operation);
+      }
+      throw error;
+    }
     const noFollow = process.platform === "win32" || typeof constants.O_NOFOLLOW !== "number"
       ? 0
       : constants.O_NOFOLLOW;
@@ -182,6 +193,25 @@ export class MemiExecutionPolicy {
     });
   }
 
+  private projectWriteRoot(): string {
+    return this.profile === "local"
+      ? join(this.projectRoot, ".memi")
+      : this.projectRoot;
+  }
+
+  private async ensureProjectWriteRoot(root: string, operation: string): Promise<void> {
+    try {
+      await mkdir(root, { mode: 0o700 });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+
+    const metadata = await lstat(root);
+    if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
+      throw this.denial("project-write", operation);
+    }
+  }
+
   private async assertContainedWrite(
     targetPath: string,
     allowedRoot: string,
@@ -207,6 +237,10 @@ export class MemiExecutionPolicy {
 
     const rootExists = existingRoot === root;
     if (rootExists) {
+      const rootMetadata = await lstat(root);
+      if (!rootMetadata.isDirectory() || rootMetadata.isSymbolicLink()) {
+        throw this.denial(capability, operation);
+      }
       const realRoot = await realpath(root);
       if (!isWithin(realExistingTarget, realRoot)) {
         throw this.denial(capability, operation);

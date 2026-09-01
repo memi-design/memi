@@ -45,21 +45,27 @@ interface BrowserRecord {
 export interface StudioBrowserAdapterOptions {
   projectRoot: string;
   playwrightLoader?: PlaywrightLoader;
+  playwrightPresenceProbe?: () => boolean;
 }
 
 export class StudioBrowserAdapter {
   private readonly projectRoot: string;
   private readonly playwrightLoader: PlaywrightLoader;
+  private readonly playwrightPresenceProbe: () => boolean;
   private readonly sessions = new Map<string, BrowserRecord>();
 
   constructor(options: StudioBrowserAdapterOptions) {
     this.projectRoot = options.projectRoot;
     this.playwrightLoader = options.playwrightLoader ?? defaultPlaywrightLoader;
+    this.playwrightPresenceProbe = options.playwrightPresenceProbe
+      ?? (options.playwrightLoader ? () => true : defaultPlaywrightPresenceProbe);
   }
 
   async status(enabled = true): Promise<StudioBrowserStatus> {
     const integrationAllowed = getExecutionPolicy().allows("host-integration-code");
-    const installed = integrationAllowed && await this.canLoadPlaywright();
+    const installed = integrationAllowed
+      ? await this.canLoadPlaywright()
+      : this.playwrightPresenceProbe();
     return {
       enabled,
       installed,
@@ -213,6 +219,16 @@ export class StudioBrowserAdapter {
 async function defaultPlaywrightLoader(): Promise<PlaywrightModule> {
   const require = createRequire(import.meta.url);
   return require("playwright") as PlaywrightModule;
+}
+
+function defaultPlaywrightPresenceProbe(): boolean {
+  const require = createRequire(import.meta.url);
+  try {
+    require.resolve("playwright");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function requiredString(value: unknown, name: string): string {
