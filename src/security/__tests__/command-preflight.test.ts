@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { preflightCommand } from "../command-preflight.js";
-import { createExecutionPolicy } from "../execution-policy.js";
+import { preflightCommand, type CommandInvocation } from "../command-preflight.js";
+import { createExecutionPolicy, type MemiCapability } from "../execution-policy.js";
 
 describe("Trust Core command preflight", () => {
   const allCapabilities = [
@@ -14,6 +14,32 @@ describe("Trust Core command preflight", () => {
     "source-content-persistence",
     "telemetry",
   ] as const;
+
+  async function expectExactCapabilities(
+    invocation: CommandInvocation,
+    capabilities: readonly MemiCapability[],
+  ): Promise<void> {
+    for (const missing of capabilities) {
+      const policy = createExecutionPolicy({
+        projectRoot: "/workspace",
+        homeDir: "/home/user",
+        profile: "connected",
+        allow: capabilities.filter((capability) => capability !== missing),
+      });
+      await expect(preflightCommand(policy, invocation)).rejects.toMatchObject({
+        code: "MEMI_CAPABILITY_DENIED",
+        capability: missing,
+      });
+    }
+
+    const policy = createExecutionPolicy({
+      projectRoot: "/workspace",
+      homeDir: "/home/user",
+      profile: "connected",
+      allow: capabilities,
+    });
+    await expect(preflightCommand(policy, invocation)).resolves.toEqual({ optionOverrides: {} });
+  }
 
   it("forces locked diagnose onto the read-only path", async () => {
     const policy = createExecutionPolicy({ projectRoot: "/workspace" });
@@ -101,15 +127,25 @@ describe("Trust Core command preflight", () => {
     })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "project-write" });
   });
 
-  it("allows offline local Note sources but gates remote Notes", async () => {
+  it("keeps Note writes out of local mode and gates remote Notes separately", async () => {
     const local = createExecutionPolicy({ projectRoot: "/workspace", profile: "local" });
+    const connected = createExecutionPolicy({
+      projectRoot: "/workspace",
+      profile: "connected",
+      allow: ["project-write"],
+    });
 
     await expect(preflightCommand(local, {
       commandPath: ["notes", "install"],
       options: {},
       args: ["./offline-note"],
+    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "project-write" });
+    await expect(preflightCommand(connected, {
+      commandPath: ["notes", "install"],
+      options: {},
+      args: ["./offline-note"],
     })).resolves.toEqual({ optionOverrides: {} });
-    await expect(preflightCommand(local, {
+    await expect(preflightCommand(connected, {
       commandPath: ["notes", "install"],
       options: {},
       args: ["github:memi-design/mobile-craft"],
@@ -205,7 +241,6 @@ describe("Trust Core command preflight", () => {
   it("covers MCP, Notes, agents, registry update, uninstall, and no-op commands", async () => {
     const connected = createExecutionPolicy({ projectRoot: "/workspace", homeDir: "/home/user", profile: "connected", allow: allCapabilities });
     const locked = createExecutionPolicy({ projectRoot: "/workspace" });
-    const local = createExecutionPolicy({ projectRoot: "/workspace", profile: "local" });
 
     await expect(preflightCommand(connected, { commandPath: ["mcp", "config"], options: { install: true, global: true }, args: [] }))
       .resolves.toEqual({ optionOverrides: {} });
@@ -213,9 +248,9 @@ describe("Trust Core command preflight", () => {
       .resolves.toEqual({ optionOverrides: {} });
     await expect(preflightCommand(connected, { commandPath: ["notes", "update"], options: {}, args: [] }))
       .resolves.toEqual({ optionOverrides: {} });
-    await expect(preflightCommand(local, { commandPath: ["notes", "create"], options: {}, args: ["note"] }))
+    await expect(preflightCommand(connected, { commandPath: ["notes", "create"], options: {}, args: ["note"] }))
       .resolves.toEqual({ optionOverrides: {} });
-    await expect(preflightCommand(local, { commandPath: ["notes", "remove"], options: {}, args: ["note"] }))
+    await expect(preflightCommand(connected, { commandPath: ["notes", "remove"], options: {}, args: ["note"] }))
       .resolves.toEqual({ optionOverrides: {} });
     await expect(preflightCommand(locked, { commandPath: ["agent", "install"], options: { dryRun: true }, args: ["codex"] }))
       .resolves.toEqual({ optionOverrides: {} });
@@ -231,5 +266,146 @@ describe("Trust Core command preflight", () => {
       .resolves.toEqual({ optionOverrides: {} });
     await expect(preflightCommand(locked, { commandPath: ["status"], options: {}, args: [] }))
       .resolves.toEqual({ optionOverrides: {} });
+  });
+
+  it("fails closed on every command path without an explicit mapping", async () => {
+    const policies = [
+      createExecutionPolicy({ projectRoot: "/workspace" }),
+      createExecutionPolicy({ projectRoot: "/workspace", profile: "local" }),
+      createExecutionPolicy({
+        projectRoot: "/workspace",
+        homeDir: "/home/user",
+        profile: "connected",
+        allow: allCapabilities,
+      }),
+    ];
+
+    for (const policy of policies) {
+      await expect(preflightCommand(policy, {
+        commandPath: ["future", "unreviewed"],
+        options: {},
+        args: [],
+      })).rejects.toMatchObject({
+        code: "MEMI_CAPABILITY_DENIED",
+        operation: 'execute unmapped command "future.unreviewed"',
+      });
+    }
+  });
+
+  it("denies mapped non-.memi writes in locked and local profiles", async () => {
+    const policies = [
+      createExecutionPolicy({ projectRoot: "/workspace" }),
+      createExecutionPolicy({ projectRoot: "/workspace", profile: "local" }),
+    ];
+    const invocations: CommandInvocation[] = [
+      { commandPath: ["studio", "browser", "open"], options: {}, args: ["https://example.com"] },
+      { commandPath: ["studio", "serve"], options: {}, args: [] },
+      { commandPath: ["studio", "run"], options: { harness: "codex" }, args: [] },
+      { commandPath: ["studio", "web"], options: {}, args: [] },
+      { commandPath: ["preview"], options: { buildOnly: true }, args: [] },
+      { commandPath: ["publish"], options: { name: "@acme/ui" }, args: [] },
+      { commandPath: ["research", "from-file"], options: {}, args: ["study.csv"] },
+      { commandPath: ["pull"], options: { rest: true }, args: [] },
+      { commandPath: ["sync"], options: {}, args: [] },
+      { commandPath: ["export"], options: { dryRun: false }, args: [] },
+    ];
+
+    for (const policy of policies) {
+      for (const invocation of invocations) {
+        await expect(preflightCommand(policy, invocation)).rejects.toMatchObject({
+          code: "MEMI_CAPABILITY_DENIED",
+        });
+      }
+    }
+  });
+
+  it("requires exact connected grants for Studio browser, runtime, and harness commands", async () => {
+    await expectExactCapabilities(
+      { commandPath: ["studio", "browser", "open"], options: {}, args: ["https://example.com"] },
+      ["browser", "network", "project-write", "shell"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["studio", "serve"], options: {}, args: [] },
+      ["browser", "figma", "network", "project-write", "shell", "source-content-persistence"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["studio", "run"], options: { harness: "codex" }, args: [] },
+      ["network", "project-write", "shell", "source-content-persistence"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["studio", "web"], options: {}, args: [] },
+      ["browser", "figma", "network", "project-write", "shell", "source-content-persistence"],
+    );
+  });
+
+  it("preserves explicitly mapped read-only Studio and export paths", async () => {
+    const locked = createExecutionPolicy({ projectRoot: "/workspace" });
+
+    await expect(preflightCommand(locked, {
+      commandPath: ["studio", "browser", "status"],
+      options: {},
+      args: [],
+    })).resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(locked, {
+      commandPath: ["export"],
+      options: { dryRun: true },
+      args: [],
+    })).resolves.toEqual({ optionOverrides: {} });
+    await expect(preflightCommand(locked, {
+      commandPath: ["studio", "status"],
+      options: {},
+      args: [],
+    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "shell" });
+  });
+
+  it("maps preview, publish, research, pull, sync, and export options to exact grants", async () => {
+    await expectExactCapabilities(
+      { commandPath: ["preview"], options: { buildOnly: true }, args: [] },
+      ["project-write"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["preview"], options: { buildOnly: false }, args: [] },
+      ["network", "project-write", "shell"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["publish"], options: { name: "@acme/ui" }, args: [] },
+      ["project-write"],
+    );
+    await expectExactCapabilities(
+      {
+        commandPath: ["publish"],
+        options: { name: "@acme/ui", figma: "https://figma.com/design/key/file", theme: "https://example.com/theme.css", push: true },
+        args: [],
+      },
+      ["figma", "network", "project-write", "shell"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["research", "from-file"], options: {}, args: ["study.csv"] },
+      ["project-write", "source-content-persistence"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["research", "from-stickies"], options: {}, args: [] },
+      ["figma", "network", "project-write", "source-content-persistence"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["research", "web"], options: { urls: "https://example.com" }, args: ["topic"] },
+      ["network", "project-write", "source-content-persistence"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["pull"], options: { rest: true }, args: [] },
+      ["figma", "network", "project-write"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["pull"], options: { penpot: true }, args: [] },
+      ["network", "project-write"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["sync"], options: { autoPr: true }, args: [] },
+      ["figma", "network", "project-write", "shell"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["export"], options: { dryRun: false }, args: [] },
+      ["project-write"],
+    );
   });
 });
