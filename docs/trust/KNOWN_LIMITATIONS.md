@@ -7,6 +7,10 @@
 - The managed Codex Deep Security Scan is pending because this host does not provide a managed filesystem permission profile.
 - A beta may disclose that pending scan. Stable and employer-safe claims require
   a completed independent scan with no unresolved critical or high findings.
+- `TRUST_CORE_BETA_PENDING_DESIGNWORKBENCH_EVIDENCE` means the
+  `reviewed-candidate-audit` and `swiftui-rendered-rerun` receipts remain stale.
+  This named exception applies only to the 2.8.0-beta.1 candidate; stable remains
+  blocked until both receipts are refreshed.
 - Existing 2.7.9 binaries and npm artifacts must not be described as locked by
   default merely because the 2.8 source branch adds that behavior.
 
