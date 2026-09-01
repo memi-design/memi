@@ -25,5 +25,11 @@ describe("offline bundle release workflow", () => {
     expect(workflow).toContain("dist-bin/memi-offline-*.tar.gz");
     expect(workflow).toContain("dist-bin/memi-${{ matrix.binaryTarget }}.tar.gz");
     expect(workflow).toContain("dist-bin/memi-${{ matrix.binaryTarget }}.zip");
+    expect(workflow).toMatch(/^ {6}id-token: write$/m);
+    expect(workflow).toMatch(/^ {6}attestations: write$/m);
+    expect(workflow).toContain(
+      "uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a",
+    );
+    expect(workflow).toContain("subject-path: dist-bin/memi-offline-*.tar.gz");
   });
 });

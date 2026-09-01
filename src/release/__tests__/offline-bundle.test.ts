@@ -98,6 +98,14 @@ describe("Trust Core offline bundle", () => {
     ]);
     expect(JSON.stringify(sbom)).not.toContain("dev-secret-package");
 
+    const thirdPartyNotices = await readFile(
+      join(first.stageDir, "THIRD_PARTY_NOTICES.txt"),
+      "utf8",
+    );
+    expect(thirdPartyNotices).toContain("optional-runtime@2.3.4 — Apache-2.0");
+    expect(thirdPartyNotices).toContain("runtime-dep@1.2.3 — MIT");
+    expect(thirdPartyNotices).not.toContain("dev-secret-package");
+
     const bundleManifest = JSON.parse(
       await readFile(join(first.stageDir, "offline-bundle.json"), "utf8"),
     );
@@ -115,6 +123,11 @@ describe("Trust Core offline bundle", () => {
       .update(await readFile(first.archivePath))
       .digest("hex");
     expect(checksumLine).toBe(`${expectedArchiveDigest}  ${first.archiveName}\n`);
+
+    const internalChecksums = await readFile(join(first.stageDir, "SHA256SUMS.txt"), "utf8");
+    expect(internalChecksums).toContain("  offline-bundle.json\n");
+    expect(internalChecksums).toContain("  sbom.cdx.json\n");
+    expect(internalChecksums).not.toContain("SHA256SUMS.txt");
   });
 
   it("rejects symlinks inside runtime sidecars", async () => {
