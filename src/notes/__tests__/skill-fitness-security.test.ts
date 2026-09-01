@@ -45,7 +45,9 @@ describe("skill fitness empirical identity security", () => {
     expect(() => requireStableLockPathIdentity(0n, 0n)).toThrow(
       /stable filesystem identity/i,
     );
-    expect(() => requireStableLockPathIdentity(1n, 0n)).not.toThrow();
+    expect(() => requireStableLockPathIdentity(1n, 0n)).toThrow(
+      /stable filesystem identity/i,
+    );
     expect(() => requireStableLockPathIdentity(0n, 1n)).not.toThrow();
   });
 

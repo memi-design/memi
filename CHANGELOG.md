@@ -153,6 +153,10 @@ release gates pass.
 - Waits for interrupted verification subprocesses to close before reporting
   their terminal error, so Windows releases process handles before fixture
   cleanup begins instead of intermittently failing with `EBUSY`.
+- Serializes same-process skill-fitness writers before the existing
+  cross-process lock and atomically vacates token-owned locks before bounded,
+  non-recursive cleanup, closing a Windows release-contention gap without
+  weakening exact-route uniqueness or deleting unexpected files.
 
 ### Packaging trust follow-up commits
 
