@@ -80,6 +80,8 @@ release gates pass.
   amd64 and arm64 runtime contracts.
 - Runtime trust claims are tested against the packed consumer artifact, and
   performance, policy, privacy, containment, and platform failures block release.
+- Rebuilds the publishable runtime before standalone artifact smoke so stale
+  compiled output cannot eagerly load an absent optional integration.
 - Makes coverage and packed-artifact verification mandatory in the npm
   prepublish gate, rejects symlinked receipt leaves, strips non-allowlisted
   subprocess environment variables, and verifies zero locked-mode fixture
