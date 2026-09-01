@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, readlink, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -63,6 +64,10 @@ async function runTrustCoreArtifactSuite(options) {
     });
     requireSuccess(version, "memi --version");
 
+    const lockedSnapshot = {
+      project: await snapshotTree(projectRoot),
+      home: await snapshotTree(homeRoot),
+    };
     await makeReadOnly(projectRoot);
     await makeReadOnly(homeRoot);
     const diagnosis = await timedInvocation(installation.binary, [
@@ -115,6 +120,14 @@ async function runTrustCoreArtifactSuite(options) {
       denials.push(assertCapabilityDenied(denied, scenario.expected));
     }
 
+    const afterLockedSnapshot = {
+      project: await snapshotTree(projectRoot),
+      home: await snapshotTree(homeRoot),
+    };
+    if (JSON.stringify(afterLockedSnapshot) !== JSON.stringify(lockedSnapshot)) {
+      throw new Error("locked commands changed the repository or home fixture");
+    }
+
     await makeWritable(projectRoot);
     await makeWritable(homeRoot);
     const containment = await verifyLocalReceiptContainment({
@@ -146,8 +159,8 @@ async function runTrustCoreArtifactSuite(options) {
       upgrade,
       environment: {
         networkExpected: "denied-by-policy",
-        repository: "read-only-during-locked-diagnose",
-        home: "read-only-during-locked-diagnose",
+        filesystemMutationDetected: false,
+        osReadOnlyEnforced: process.platform !== "win32",
         subprocessPath: "empty",
       },
     };
@@ -343,6 +356,37 @@ async function setTreeMode(path, directoryMode, fileMode) {
     await setTreeMode(join(path, name), directoryMode, fileMode);
   }
   await chmod(path, directoryMode);
+}
+
+async function snapshotTree(root) {
+  const records = [];
+  await visit(root, ".", records);
+  return records;
+}
+
+async function visit(path, relativePath, records) {
+  const metadata = await lstat(path);
+  if (metadata.isSymbolicLink()) {
+    records.push({ path: relativePath, type: "symlink", target: await readlink(path) });
+    return;
+  }
+  if (!metadata.isDirectory()) {
+    const bytes = await readFile(path);
+    records.push({
+      path: relativePath,
+      type: "file",
+      bytes: bytes.length,
+      sha256: createHash("sha256").update(bytes).digest("hex"),
+    });
+    return;
+  }
+
+  records.push({ path: relativePath, type: "directory" });
+  const names = await readdir(path);
+  names.sort();
+  for (const name of names) {
+    await visit(join(path, name), relativePath === "." ? name : join(relativePath, name), records);
+  }
 }
 
 function requireSuccess(result, label) {

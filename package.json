@@ -70,7 +70,7 @@
     "test:trust-core:coverage": "vitest run --config vitest.trust-core.config.ts --coverage",
     "lint": "tsc --noEmit && tsc -p tsconfig.plugin.json --noEmit",
     "typecheck": "tsc --noEmit --strict && tsc -p tsconfig.plugin.json --noEmit",
-    "prepublishOnly": "npm run check:release && npm run security:audit && npm run typecheck && npm run test && npm run build"
+    "prepublishOnly": "npm run check:release && npm run security:audit && npm run typecheck && npm run test && npm run build && npm run test:trust-core:coverage && npm run smoke:trust-core -- --portable"
   },
   "repository": {
     "type": "git",

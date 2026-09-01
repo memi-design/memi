@@ -84,18 +84,22 @@ describe("Trust Core packed-artifact harness helpers", () => {
       PATH: "/bin",
       DUALENTRY_TOKEN: "private",
       DATABASE_PASSWORD: "private",
+      GITHUB_PAT: "private",
+      OPENAI_KEY: "private",
       SAFE_VALUE: "retained",
     });
 
     expect(env).toMatchObject({
       PATH: "/bin",
-      SAFE_VALUE: "retained",
       CI: "1",
       MEMI_TELEMETRY_DISABLED: "1",
       npm_config_ignore_scripts: "true",
     });
     expect(env).not.toHaveProperty("DUALENTRY_TOKEN");
     expect(env).not.toHaveProperty("DATABASE_PASSWORD");
+    expect(env).not.toHaveProperty("GITHUB_PAT");
+    expect(env).not.toHaveProperty("OPENAI_KEY");
+    expect(env).not.toHaveProperty("SAFE_VALUE");
   });
 
   it("rejects source, prompt, secret, and absolute private path disclosure", () => {
@@ -142,6 +146,9 @@ describe("Trust Core packed-artifact harness helpers", () => {
     await mkdir(memiRoot, { recursive: true });
     await mkdir(outside, { recursive: true });
     await symlink(outside, join(memiRoot, "escape"), "dir");
+    const outsideReceipt = join(outside, "receipt.json");
+    await writeFile(outsideReceipt, "{}\n", "utf8");
+    await symlink(outsideReceipt, join(memiRoot, "leaf-receipt.json"), "file");
 
     await expect(assertPathContained(memiRoot, join(memiRoot, "receipt.json"))).resolves.toBe(
       join(await realpath(memiRoot), "receipt.json"),
@@ -151,6 +158,9 @@ describe("Trust Core packed-artifact harness helpers", () => {
     );
     await expect(assertPathContained(memiRoot, join(memiRoot, ".."))).rejects.toThrow("escapes .memi");
     await expect(assertPathContained(memiRoot, join(memiRoot, "escape", "receipt.json"))).rejects.toThrow(
+      "symlink",
+    );
+    await expect(assertPathContained(memiRoot, join(memiRoot, "leaf-receipt.json"))).rejects.toThrow(
       "symlink",
     );
     await expect(assertPathContained(memiRoot, join(memiRoot, "future", "nested", "receipt.json"))).resolves.toBe(

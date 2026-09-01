@@ -20,7 +20,26 @@ import {
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_OUTPUT_BYTES = 1_048_576;
-const PRIVATE_ENV_KEYS = /(?:TOKEN|SECRET|PASSWORD|API_KEY|CREDENTIAL|AUTH)/i;
+const SUBPROCESS_ENV_ALLOWLIST = new Set([
+  "ALL_PROXY",
+  "COMSPEC",
+  "ComSpec",
+  "HTTP_PROXY",
+  "HTTPS_PROXY",
+  "LOCALAPPDATA",
+  "NODE_EXTRA_CA_CERTS",
+  "NO_PROXY",
+  "PATH",
+  "PATHEXT",
+  "SSL_CERT_DIR",
+  "SSL_CERT_FILE",
+  "SYSTEMROOT",
+  "SystemRoot",
+  "TEMP",
+  "TMP",
+  "TMPDIR",
+  "WINDIR",
+]);
 
 export function npmExecutable(platform = process.platform) {
   return platform === "win32" ? "npm.cmd" : "npm";
@@ -165,7 +184,7 @@ export async function assertPathContained(memiRoot, candidate) {
 
   const segments = lexicalRelative.split(sep).filter(Boolean);
   let cursor = canonicalRoot;
-  for (const segment of segments.slice(0, -1)) {
+  for (const segment of segments) {
     cursor = join(cursor, segment);
     try {
       const metadata = await lstat(cursor);
@@ -264,7 +283,7 @@ export async function createPackedInstallation(options = {}) {
 
 export function cleanHarnessEnvironment(source) {
   const preserved = Object.fromEntries(
-    Object.entries(source).filter(([key]) => !PRIVATE_ENV_KEYS.test(key)),
+    Object.entries(source).filter(([key]) => SUBPROCESS_ENV_ALLOWLIST.has(key)),
   );
   return {
     ...preserved,

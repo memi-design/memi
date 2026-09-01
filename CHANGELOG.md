@@ -80,6 +80,10 @@ release gates pass.
   amd64 and arm64 runtime contracts.
 - Runtime trust claims are tested against the packed consumer artifact, and
   performance, policy, privacy, containment, and platform failures block release.
+- Makes coverage and packed-artifact verification mandatory in the npm
+  prepublish gate, rejects symlinked receipt leaves, strips non-allowlisted
+  subprocess environment variables, and verifies zero locked-mode fixture
+  mutations on every supported host.
 
 ### Architectural decision
 
