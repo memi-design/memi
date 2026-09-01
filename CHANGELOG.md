@@ -72,6 +72,8 @@ release gates pass.
 - Pins the skills and preset metadata shipped with the beta artifact to
   `2.8.0-beta.1` while the public Action and default activation path remain on
   verified `2.7.9`.
+- Keeps Codex and Claude skill mirrors byte-aligned with the beta package and
+  validates prerelease version markers without relaxing stable release checks.
 
 ### Trust Core verification gates
 

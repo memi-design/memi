@@ -418,7 +418,9 @@ for (const registryPath of await findRegistryFiles(join(root, "examples"))) {
 
 const starterReadmePath = join(root, "examples", "presets", "starter", "README.md");
 const starterReadme = await readFile(starterReadmePath, "utf-8");
-const starterReadmeMatch = starterReadme.match(/Generated for Memoire v([0-9]+\.[0-9]+\.[0-9]+)\./);
+const starterReadmeMatch = starterReadme.match(
+  /Generated for Memoire v([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)\./,
+);
 if (!starterReadmeMatch) {
   fail("examples/presets/starter/README.md is missing its generated version marker");
 } else if (starterReadmeMatch[1] !== version) {
