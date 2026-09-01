@@ -1,10 +1,9 @@
 # Dependency trust ledger
 
-This ledger explains why the published CLI installs each direct runtime
-dependency. It is a review aid, not a claim that a dependency is risk-free.
-The base CLI is intentionally read-only by default, but it still needs local
-filesystem, subprocess, archive, and network capabilities for explicit user
-commands.
+This ledger explains why the 2.7.x CLI source baseline installs each direct
+runtime dependency. It is a review aid, not a claim that a dependency or an
+unbuilt 2.8 artifact is risk-free. The artifact-bound 2.8 checklist is in
+[Trust Core dependency and license review](trust/DEPENDENCY_LICENSE_REVIEW.md).
 
 ## Review record
 

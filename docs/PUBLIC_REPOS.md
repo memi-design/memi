@@ -2,6 +2,10 @@
 
 memi v2 needs public proof repos, not only package claims. Use this file to keep npm, GitHub, MCP, Agent Skills, Codex plugin, and example repos aligned.
 
+For the dated 2.8 Trust Core compatibility boundary, including repositories that
+remain independently gated, see the [organization compatibility
+inventory](trust/ORG_COMPATIBILITY.md).
+
 ## Primary repos
 
 | Repo | Role | Public promise |
