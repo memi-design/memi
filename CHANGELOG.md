@@ -33,6 +33,8 @@ release gates pass.
 | `fd53d516` | test: define deterministic offline bundle contract |
 | `45879268` | test: require signed self-describing offline assets |
 | `f1ead6f9` | feat: add deterministic signed offline bundles |
+| `39174def` | test: reject unsafe offline bundle paths |
+| `201538e6` | fix: reject unsafe offline bundle paths |
 
 ## v2.7.9 — 2026-08-08 — Published
 
