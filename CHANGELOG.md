@@ -69,6 +69,9 @@ release gates pass.
   moving `latest` tags.
 - Ships the bounded Trust Core employer-review packet inside the npm artifact so
   offline reviewers receive the same threat, egress, retention, and release-truth evidence.
+- Pins the skills and preset metadata shipped with the beta artifact to
+  `2.8.0-beta.1` while the public Action and default activation path remain on
+  verified `2.7.9`.
 
 ### Trust Core verification gates
 
