@@ -132,7 +132,7 @@ export async function runProcess(command, args, options = {}) {
     };
 
     child.once("error", (error) => {
-      finish(rejectPromise, terminalError ?? error);
+      terminalError ??= error;
     });
     child.once("close", (exitCode, signal) => {
       if (terminalError) {

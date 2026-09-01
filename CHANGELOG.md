@@ -150,6 +150,10 @@ release gates pass.
 - Adds a tiny published CLI launcher that answers version-only invocations
   before loading the full engine bundle, preserving the one-second cold-start
   budget on slower Windows Node runtimes without weakening the gate.
+- Waits for interrupted verification subprocesses to close before reporting
+  their terminal error, so Windows releases process handles before fixture
+  cleanup begins instead of intermittently failing with `EBUSY`.
+
 ### Packaging trust follow-up commits
 
 | Commit | Change |
