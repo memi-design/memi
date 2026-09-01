@@ -32,8 +32,26 @@ describe("pack dry-run preconditions", () => {
       calls.push(script);
       if (script === "build") {
         await mkdir(join(root, "dist"), { recursive: true });
+        await writeFile(join(root, "dist", "bin.js"), "#!/usr/bin/env node\n");
         await writeFile(join(root, "dist", "index.js"), "export {};\n");
         await writeFile(join(root, "dist", "index.d.ts"), "export {};\n");
+      }
+    });
+
+    expect(calls).toEqual(["build"]);
+  });
+
+  it("rebuilds when the published launcher is missing", async () => {
+    const root = await createRoot("memi-pack-launcher");
+    await mkdir(join(root, "dist"), { recursive: true });
+    await writeFile(join(root, "dist", "index.js"), "export {};\n");
+    await writeFile(join(root, "dist", "index.d.ts"), "export {};\n");
+    const calls: string[] = [];
+
+    await ensurePackDryRunInputs(root, async (script) => {
+      calls.push(script);
+      if (script === "build") {
+        await writeFile(join(root, "dist", "bin.js"), "#!/usr/bin/env node\n");
       }
     });
 
@@ -43,6 +61,7 @@ describe("pack dry-run preconditions", () => {
   it("rebuilds the production shrinkwrap when the committed release copy is missing", async () => {
     const root = await createRoot("memi-pack-shrinkwrap");
     await mkdir(join(root, "dist"), { recursive: true });
+    await writeFile(join(root, "dist", "bin.js"), "#!/usr/bin/env node\n");
     await writeFile(join(root, "dist", "index.js"), "export {};\n");
     await writeFile(join(root, "dist", "index.d.ts"), "export {};\n");
     const { rm } = await import("node:fs/promises");
@@ -62,6 +81,7 @@ describe("pack dry-run preconditions", () => {
   it("skips rebuilds when the pack inputs are already present", async () => {
     const root = await createRoot("memi-pack-present");
     await mkdir(join(root, "dist"), { recursive: true });
+    await writeFile(join(root, "dist", "bin.js"), "#!/usr/bin/env node\n");
     await writeFile(join(root, "dist", "index.js"), "export {};\n");
     await writeFile(join(root, "dist", "index.d.ts"), "export {};\n");
     const calls: string[] = [];

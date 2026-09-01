@@ -40,12 +40,30 @@ describe("published package boundary", () => {
   it("uses an additive, explicit files allowlist", async () => {
     const pkg = await readPackageJson();
 
+    expect(pkg.bin).toEqual({ memi: "dist/bin.js" });
+    expect(pkg.main).toBe("dist/index.js");
+    expect(pkg.exports?.["."]?.import).toBe("./dist/index.js");
+    expect(pkg.files).toContain("dist/bin.js");
     expect(pkg.files).toContain("dist/index.js");
     expect(pkg.files).toContain("dist/index.d.ts");
     expect(pkg.files).toContain("npm-shrinkwrap.json");
     expect(pkg.files).not.toContain("dist");
     expect(pkg.files).not.toContain("skills");
     expect(pkg.files.every((entry: string) => !entry.startsWith("!"))).toBe(true);
+  });
+
+  it("ships a tiny version launcher before loading the full CLI", async () => {
+    const launcher = await readFile(join(process.cwd(), "src", "bin.ts"), "utf8");
+    const fullCliImport = 'import("./index.js")';
+
+    expect(launcher).toContain('args[0] === "--version"');
+    expect(launcher).toContain('args[0] === "-V"');
+    expect(launcher).toContain('args[0] === "version"');
+    expect(launcher).toContain("__MEMI_PACKAGE_VERSION__");
+    expect(launcher).toContain(fullCliImport);
+    expect(launcher.indexOf("__MEMI_PACKAGE_VERSION__")).toBeLessThan(
+      launcher.indexOf(fullCliImport),
+    );
   });
 
   it("pins release helper versions and never invokes latest", async () => {
