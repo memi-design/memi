@@ -125,7 +125,7 @@ describe("Trust Core packed-artifact harness helpers", () => {
       "const privateLedger = true",
       "audit our unreleased ledger",
     ]) {
-      expect(() => assertMetadataOnlyReceipt(`${safeReceipt}\n${leaked}`, {
+      expect(() => assertMetadataOnlyReceipt(JSON.stringify({ leaked }), {
         secrets: ["dualentry-secret"],
         privatePaths: ["/private/company/repo"],
         sourceSnippets: ["const privateLedger = true"],
@@ -242,6 +242,37 @@ describe("Trust Core packed-artifact harness helpers", () => {
       } finally {
         await fromArtifact.cleanup();
       }
+
+      await writeFile(join(root, "package.json"), `${JSON.stringify({
+        name: "@memi-test/trust-fixture",
+        version: "1.0.1",
+        type: "module",
+        bin: "dist/index.js",
+        files: ["dist"],
+      }, null, 2)}\n`, "utf8");
+      const originalNpmExecPath = process.env.npm_execpath;
+      delete process.env.npm_execpath;
+      try {
+        const stringBin = await createPackedInstallation({ packageRoot: root });
+        try {
+          expect(stringBin.version).toBe("1.0.1");
+        } finally {
+          await stringBin.cleanup();
+        }
+      } finally {
+        if (originalNpmExecPath === undefined) delete process.env.npm_execpath;
+        else process.env.npm_execpath = originalNpmExecPath;
+      }
+
+      await writeFile(join(root, "package.json"), `${JSON.stringify({
+        name: "@memi-test/trust-fixture",
+        version: "1.0.2",
+        type: "module",
+        files: ["dist"],
+      }, null, 2)}\n`, "utf8");
+      await expect(createPackedInstallation({ packageRoot: root })).rejects.toThrow(
+        "does not expose the memi binary",
+      );
     } finally {
       await installation.cleanup();
     }
