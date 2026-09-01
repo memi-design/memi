@@ -22,6 +22,8 @@ describe("offline bundle release workflow", () => {
     }
 
     expect(workflow).toContain("node scripts/build-offline-bundle.mjs --target=${{ matrix.offlineTarget }}");
+    expect(workflow).toContain("bun-version: 1.3.11");
+    expect(workflow).not.toContain("bun-version: latest");
     expect(workflow).toContain("dist-bin/memi-offline-*.tar.gz");
     expect(workflow).toContain("dist-bin/memi-${{ matrix.binaryTarget }}.tar.gz");
     expect(workflow).toContain("dist-bin/memi-${{ matrix.binaryTarget }}.zip");
