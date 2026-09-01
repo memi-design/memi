@@ -108,11 +108,12 @@ describe("MemiExecutionPolicy", () => {
     const policy = createExecutionPolicy({
       projectRoot: "/workspace",
       profile: "connected",
-      allow: ["network", "figma"],
+      allow: ["network", "figma", "host-integration-code"],
     });
 
     expect(policy.allows("network")).toBe(true);
     expect(policy.allows("figma")).toBe(true);
+    expect(policy.allows("host-integration-code")).toBe(true);
     expect(policy.allows("shell")).toBe(false);
     expect(() => policy.assert("shell", "launch a child process")).toThrow(MemiCapabilityDeniedError);
   });
@@ -124,11 +125,12 @@ describe("MemiExecutionPolicy", () => {
       "network",
       "diagnose",
       "--allow=project-write",
+      "--allow=host-integration-code",
       "--json",
     ], { projectRoot: "/workspace" });
 
     expect(parsed.policy.profile).toBe("connected");
-    expect(parsed.policy.effectiveCapabilities).toEqual(["network", "project-write"]);
+    expect(parsed.policy.effectiveCapabilities).toEqual(["host-integration-code", "network", "project-write"]);
     expect(parsed.commandArgs).toEqual(["diagnose", "--json"]);
 
     const offline = parseExecutionPolicyArgs(["--offline", "doctor", "--json"], { projectRoot: "/workspace" });

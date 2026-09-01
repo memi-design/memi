@@ -67,9 +67,13 @@ describe("published package boundary", () => {
 
     expect(anthropic).not.toContain('import Anthropic from "@anthropic-ai/sdk"');
     expect(anthropic).toContain('import("@anthropic-ai/sdk")');
+    expect(anthropic).toContain('"host-integration-code"');
     expect(anthropic).toContain("npm install --save-exact @anthropic-ai/sdk@0.112.3");
+    expect(browser).toContain('"host-integration-code"');
     expect(browser).toContain("npm install --save-exact playwright@1.59.1");
+    expect(canvas).toContain('"host-integration-code"');
     expect(canvas).toContain("npm install --save-exact @napi-rs/canvas@0.1.97");
+    expect(excel).toContain('"host-integration-code"');
     expect(excel).toContain(
       "npm install --save-exact xlsx-populate@1.21.0 ssf@0.11.2",
     );

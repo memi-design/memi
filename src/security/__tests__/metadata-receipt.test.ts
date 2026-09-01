@@ -1,8 +1,8 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rename, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
-import { createExecutionPolicy } from "../execution-policy.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { createExecutionPolicy, MemiExecutionPolicy } from "../execution-policy.js";
 import { createMetadataReceipt, writeMetadataReceipt } from "../metadata-receipt.js";
 
 const cleanup: string[] = [];
@@ -68,5 +68,46 @@ describe("metadata-only receipts", () => {
     const outputPath = join(projectRoot, ".memi", "doctor-receipt.json");
     await writeMetadataReceipt(outputPath, receipt, local);
     expect(JSON.parse(await readFile(outputPath, "utf8"))).toEqual(receipt);
+  });
+
+  it("rejects a receipt parent swapped to a symlink after policy validation", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-receipt-race-project-"));
+    const outsideRoot = await mkdtemp(join(tmpdir(), "memi-receipt-race-outside-"));
+    cleanup.push(projectRoot, outsideRoot);
+    const receiptDirectory = join(projectRoot, ".memi", "receipts");
+    const parkedDirectory = join(projectRoot, ".memi", "receipts-safe");
+    const outputPath = join(receiptDirectory, "doctor.json");
+    const outsidePath = join(outsideRoot, "doctor.json");
+    await mkdir(receiptDirectory, { recursive: true });
+
+    const policy = createExecutionPolicy({ projectRoot, profile: "local" });
+    const receipt = createMetadataReceipt({
+      command: "doctor",
+      version: "2.8.0-beta.1",
+      commit: "unknown",
+      policy,
+    });
+    const originalAssert = MemiExecutionPolicy.prototype.assertProjectWrite;
+    let swapped = false;
+    const assertion = vi.spyOn(MemiExecutionPolicy.prototype, "assertProjectWrite")
+      .mockImplementation(async function (targetPath, operation) {
+        await originalAssert.call(this, targetPath, operation);
+        if (this === policy && !swapped) {
+          swapped = true;
+          await rename(receiptDirectory, parkedDirectory);
+          await symlink(outsideRoot, receiptDirectory, "dir");
+        }
+      });
+
+    try {
+      await expect(writeMetadataReceipt(outputPath, receipt, policy)).rejects.toMatchObject({
+        code: "MEMI_CAPABILITY_DENIED",
+        capability: "project-write",
+        operation: "persist metadata receipt",
+      });
+      await expect(readFile(outsidePath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      assertion.mockRestore();
+    }
   });
 });
