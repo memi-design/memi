@@ -6,6 +6,7 @@ import {
   mkdtemp,
   readFile,
   readdir,
+  rename,
   rm,
   symlink,
   writeFile,
@@ -22,7 +23,11 @@ import {
   type SkillFitnessEvent,
   type SkillFitnessRouteIdentity,
 } from "../skill-fitness.js";
-import { privateAppendFlags, withSkillFitnessFileLock } from "../skill-fitness-lock.js";
+import {
+  privateAppendFlags,
+  requireStableLockPathIdentity,
+  withSkillFitnessFileLock,
+} from "../skill-fitness-lock.js";
 import type { BenchmarkRunRecord } from "../../efficiency/contracts.js";
 
 const HASH_A = `sha256:${"a".repeat(64)}`;
@@ -36,6 +41,14 @@ afterEach(async () => {
 });
 
 describe("skill fitness empirical identity security", () => {
+  it("fails closed when a filesystem cannot expose stable lock identity", () => {
+    expect(() => requireStableLockPathIdentity(0n, 0n)).toThrow(
+      /stable filesystem identity/i,
+    );
+    expect(() => requireStableLockPathIdentity(1n, 0n)).not.toThrow();
+    expect(() => requireStableLockPathIdentity(0n, 1n)).not.toThrow();
+  });
+
   it("omits unsupported O_NOFOLLOW on Windows secure appends", () => {
     const noFollow = typeof constants.O_NOFOLLOW === "number" ? constants.O_NOFOLLOW : 0;
     expect(privateAppendFlags("win32") & noFollow).toBe(0);
@@ -154,6 +167,29 @@ describe("skill fitness empirical identity security", () => {
     expect(admissionOrder).toEqual(Array.from({ length: 12 }, (_, index) => index));
   });
 
+  it("collides process-queue keys reached through real and symlinked parent paths", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-process-alias-"));
+    tempDirectories.push(root);
+    const realParent = path.join(root, "real-parent");
+    const aliasParent = path.join(root, "alias-parent");
+    await mkdir(realParent);
+    await symlink(realParent, aliasParent, process.platform === "win32" ? "junction" : "dir");
+    let active = 0;
+    let maximumActive = 0;
+
+    await Promise.all([
+      path.join(realParent, "future", "skill-fitness.jsonl"),
+      path.join(aliasParent, "future", "skill-fitness.jsonl"),
+    ].map((store) => withSkillFitnessProcessQueue(store, async () => {
+      active += 1;
+      maximumActive = Math.max(maximumActive, active);
+      await new Promise((resolve) => setImmediate(resolve));
+      active -= 1;
+    })));
+
+    expect(maximumActive).toBe(1);
+  });
+
   it("recovers only an old dead-owner lock and preserves private permissions", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-stale-lock-"));
     tempDirectories.push(root);
@@ -199,6 +235,28 @@ describe("skill fitness empirical identity security", () => {
     )).resolves.toBe("preserve\n");
     await expect(withSkillFitnessFileLock(store, lockOptions, async () => undefined))
       .resolves.toBeUndefined();
+  });
+
+  it("rejects a substituted canonical lock directory without deleting either identity", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-substitution-"));
+    tempDirectories.push(root);
+    const store = path.join(root, "skill-fitness.jsonl");
+    const lock = `${store}.lock`;
+    const displacedLock = `${lock}.original`;
+
+    await expect(withSkillFitnessFileLock(store, {}, async () => {
+      const copiedOwner = await readFile(path.join(lock, "owner.json"), "utf8");
+      await rename(lock, displacedLock);
+      await mkdir(lock);
+      await writeFile(path.join(lock, "owner.json"), copiedOwner);
+    })).rejects.toThrow(/lock directory identity changed before release/i);
+
+    await expect(readFile(path.join(lock, "owner.json"), "utf8")).resolves.toContain(
+      '"schemaVersion":1',
+    );
+    await expect(readFile(path.join(displacedLock, "owner.json"), "utf8")).resolves.toContain(
+      '"schemaVersion":1',
+    );
   });
 
   it("fails closed on a symlinked lock without touching its target", async () => {
