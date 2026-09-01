@@ -70,6 +70,7 @@ export async function preflightCommand(
       require(
         ["figma", "connect to Figma"],
         ["network", "open the Figma bridge"],
+        ["project-write", "write the Figma bridge lock"],
       );
       if (invocation.options.background) {
         require(["shell", "start the bridge in the background"]);
@@ -80,15 +81,23 @@ export async function preflightCommand(
       if (invocation.options.figma !== false) {
         require(["figma", "run Figma composition steps"]);
       }
+      require(["project-write", "persist composition results"]);
       break;
     case "view":
       if (!invocation.options.print && !invocation.options.json) {
-        require(["browser", "open a registry URL"]);
+        require(
+          ["browser", "open a registry URL"],
+          ["shell", "launch the system URL handler"],
+        );
       }
       break;
     case "mcp":
     case "mcp.start":
-      require(["network", "start the MCP server"]);
+      require(
+        ["network", "start the MCP server"],
+        ["project-write", "enable write-capable MCP tools"],
+        ["shell", "enable subprocess-capable MCP tools"],
+      );
       if (invocation.options.figma !== false) {
         require(["figma", "enable Figma MCP tools"]);
       }
