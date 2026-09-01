@@ -93,7 +93,10 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
 
       // 1. Project detected
       try {
-        if (executionPolicy.profile !== "locked") {
+        // Engine initialization persists legacy `.memoire/` project state.
+        // Locked and local doctor runs are observational until that state is
+        // migrated beneath the local profile's `.memi/` write boundary.
+        if (executionPolicy.profile === "connected") {
           await engine.init();
         }
         const project = engine.project ?? await detectProject(engine.config.projectRoot);
@@ -114,7 +117,7 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
 
       // 2. Design system loaded
       try {
-        if (executionPolicy.profile !== "locked") {
+        if (executionPolicy.profile === "connected") {
           await engine.registry.load();
         }
         const ds = engine.registry.designSystem;

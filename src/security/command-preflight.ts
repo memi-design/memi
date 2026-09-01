@@ -40,7 +40,10 @@ export async function preflightCommand(
 
   switch (path) {
     case "diagnose":
-      if (policy.profile === "locked") {
+      // Diagnose still writes its reports and history beneath the legacy
+      // `.memoire/` tree. Local mode only permits `.memi/`, so keep diagnose
+      // read-only until those report paths are migrated behind the broker.
+      if (policy.profile === "locked" || policy.profile === "local") {
         overrides.write = false;
       } else if (invocation.options.write !== false) {
         requireLocalWrite(["project-write", "write diagnosis reports"]);
@@ -214,6 +217,12 @@ export async function preflightCommand(
           ["figma", "enable brokered Studio Figma tools"],
         );
       }
+      break;
+    case "ci":
+      require(
+        ["project-write", "write design CI artifacts"],
+        ["source-content-persistence", "persist design CI source evidence"],
+      );
       break;
     case "preview":
       require(["project-write", "write generated preview pages"]);
