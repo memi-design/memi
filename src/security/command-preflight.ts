@@ -18,7 +18,6 @@ type CapabilityRequirement = readonly [capability: MemiCapability, operation: st
 
 const READ_ONLY_COMMAND_PATHS: readonly string[] = Object.freeze([
   "status",
-  "studio.browser.status",
 ]);
 
 export async function preflightCommand(
@@ -171,7 +170,13 @@ export async function preflightCommand(
       );
       break;
     case "studio.status":
-      require(["shell", "probe Studio harness availability"]);
+      require(
+        ["project-write", "initialize Studio project state"],
+        ["shell", "probe Studio harness availability"],
+      );
+      break;
+    case "studio.browser.status":
+      require(["project-write", "initialize Studio browser project state"]);
       break;
     case "studio.browser.open":
       require(
@@ -206,6 +211,7 @@ export async function preflightCommand(
         require(
           ["network", "start the localhost preview server"],
           ["shell", "start a fallback preview server"],
+          ["dynamic-install", "install the pinned fallback preview server"],
         );
       }
       break;
@@ -288,9 +294,12 @@ export async function preflightCommand(
       }
       break;
     case "export":
-      if (!invocation.options.dryRun) {
-        require(["project-write", "export generated code into the project source tree"]);
-      }
+      require([
+        "project-write",
+        invocation.options.dryRun
+          ? "initialize project state for the export dry run"
+          : "export generated code into the project source tree",
+      ]);
       break;
     default:
       throw unmappedCommandDenial(policy, path);
