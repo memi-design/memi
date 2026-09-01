@@ -37,6 +37,7 @@
     "sync:current-release": "node scripts/render-current-release.mjs",
     "check:current-release": "node scripts/render-current-release.mjs --check",
     "smoke:clean-install": "node scripts/smoke-clean-install.mjs",
+    "smoke:trust-core": "node scripts/trust-core-e2e.mjs",
     "smoke:mcp": "node scripts/smoke-mcp-stdio.mjs",
     "smoke:codex-plugin": "node scripts/smoke-codex-plugin-marketplace.mjs",
     "stage:package": "node scripts/stage-package.mjs",
@@ -65,6 +66,8 @@
     "studio:runtime": "node scripts/build-studio-runtime.mjs",
     "preview": "vite --config preview/vite.config.ts",
     "test": "vitest run",
+    "test:trust-core": "vitest run --config vitest.trust-core.config.ts",
+    "test:trust-core:coverage": "vitest run --config vitest.trust-core.config.ts --coverage",
     "lint": "tsc --noEmit && tsc -p tsconfig.plugin.json --noEmit",
     "typecheck": "tsc --noEmit --strict && tsc -p tsconfig.plugin.json --noEmit",
     "prepublishOnly": "npm run check:release && npm run security:audit && npm run typecheck && npm run test && npm run build"

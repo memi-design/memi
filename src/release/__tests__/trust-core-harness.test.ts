@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -7,6 +7,9 @@ import {
   assertCapabilityDenied,
   assertMetadataOnlyReceipt,
   assertPathContained,
+  cleanHarnessEnvironment,
+  createPackedInstallation,
+  npmExecutable,
   runProcess,
 } from "../../../scripts/lib/trust-core-e2e.mjs";
 
@@ -23,16 +26,16 @@ describe("Trust Core packed-artifact harness helpers", () => {
       stdout: "",
       stderr: JSON.stringify({
         code: "MEMI_CAPABILITY_DENIED",
-        command: "self-update",
         capability: "network",
+        operation: "check npm for updates",
       }),
     }, {
-      command: "self-update",
       capability: "network",
+      operation: "check npm for updates",
     })).toMatchObject({
       code: "MEMI_CAPABILITY_DENIED",
-      command: "self-update",
       capability: "network",
+      operation: "check npm for updates",
     });
 
     expect(() => assertCapabilityDenied({
@@ -40,9 +43,43 @@ describe("Trust Core packed-artifact harness helpers", () => {
       stdout: "",
       stderr: "request failed",
     }, {
-      command: "self-update",
       capability: "network",
+      operation: "check npm for updates",
     })).toThrow("structured MEMI_CAPABILITY_DENIED");
+
+    expect(assertCapabilityDenied({
+      exitCode: 1,
+      stdout: `not-json\n${JSON.stringify({
+        code: "MEMI_CAPABILITY_DENIED",
+        capability: "network",
+        operation: "check npm for updates",
+      })}`,
+      stderr: "not-json",
+    }, {
+      capability: "network",
+      operation: "check npm for updates",
+    })).toMatchObject({ capability: "network" });
+  });
+
+  it("builds a minimal, secret-free subprocess environment", () => {
+    expect(npmExecutable("win32")).toBe("npm.cmd");
+    expect(npmExecutable("linux")).toBe("npm");
+    const env = cleanHarnessEnvironment({
+      PATH: "/bin",
+      DUALENTRY_TOKEN: "private",
+      DATABASE_PASSWORD: "private",
+      SAFE_VALUE: "retained",
+    });
+
+    expect(env).toMatchObject({
+      PATH: "/bin",
+      SAFE_VALUE: "retained",
+      CI: "1",
+      MEMI_TELEMETRY_DISABLED: "1",
+      npm_config_ignore_scripts: "true",
+    });
+    expect(env).not.toHaveProperty("DUALENTRY_TOKEN");
+    expect(env).not.toHaveProperty("DATABASE_PASSWORD");
   });
 
   it("rejects source, prompt, secret, and absolute private path disclosure", () => {
@@ -61,6 +98,10 @@ describe("Trust Core packed-artifact harness helpers", () => {
       sourceSnippets: ["const privateLedger = true"],
       prompts: ["audit our unreleased ledger"],
     })).not.toThrow();
+    expect(assertMetadataOnlyReceipt("{}")).toEqual({});
+    expect(assertMetadataOnlyReceipt("{}", {
+      secrets: ["", 42 as never],
+    })).toEqual({});
 
     for (const leaked of [
       "dualentry-secret",
@@ -87,14 +128,19 @@ describe("Trust Core packed-artifact harness helpers", () => {
     await symlink(outside, join(memiRoot, "escape"), "dir");
 
     await expect(assertPathContained(memiRoot, join(memiRoot, "receipt.json"))).resolves.toBe(
-      join(memiRoot, "receipt.json"),
+      join(await realpath(memiRoot), "receipt.json"),
     );
     await expect(assertPathContained(memiRoot, join(memiRoot, "..", "outside.json"))).rejects.toThrow(
       "escapes .memi",
     );
+    await expect(assertPathContained(memiRoot, join(memiRoot, ".."))).rejects.toThrow("escapes .memi");
     await expect(assertPathContained(memiRoot, join(memiRoot, "escape", "receipt.json"))).rejects.toThrow(
       "symlink",
     );
+    await expect(assertPathContained(memiRoot, join(memiRoot, "future", "nested", "receipt.json"))).resolves.toBe(
+      join(await realpath(memiRoot), "future", "nested", "receipt.json"),
+    );
+    await expect(assertPathContained(memiRoot, "relative.json")).rejects.toThrow("absolute path");
   });
 
   it("bounds hostile output and terminates timed-out subprocesses", async () => {
@@ -118,6 +164,15 @@ describe("Trust Core packed-artifact harness helpers", () => {
       timeoutMs: 100,
     })).rejects.toThrow("timed out");
     expect(Date.now() - started).toBeLessThan(2_000);
+
+    const controller = new AbortController();
+    const interrupted = runProcess(process.execPath, [timeoutScript], {
+      cwd: root,
+      signal: controller.signal,
+      timeoutMs: 2_000,
+    });
+    controller.abort();
+    await expect(interrupted).rejects.toMatchObject({ name: "AbortError" });
   });
 
   it("does not leave hostile fixture bytes in a metadata-only receipt", async () => {
@@ -138,4 +193,73 @@ describe("Trust Core packed-artifact harness helpers", () => {
       prompts: [],
     })).not.toThrow();
   });
+
+  it("packs and installs the consumer binary from an isolated minimal package", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memi-trust-minimal-package-"));
+    roots.push(root);
+    await mkdir(join(root, "dist"), { recursive: true });
+    await writeFile(join(root, "package.json"), `${JSON.stringify({
+      name: "@memi-test/trust-fixture",
+      version: "1.0.0",
+      type: "module",
+      bin: { memi: "dist/index.js" },
+      files: ["dist"],
+    }, null, 2)}\n`, "utf8");
+    await writeFile(join(root, "dist", "index.js"), "#!/usr/bin/env node\nconsole.log('1.0.0');\n", "utf8");
+
+    const installation = await createPackedInstallation({ packageRoot: root });
+    try {
+      await expect(access(installation.artifact)).resolves.toBeUndefined();
+      await expect(access(installation.binary)).resolves.toBeUndefined();
+      expect(installation.version).toBe("1.0.0");
+      const invoked = await runProcess(process.execPath, [installation.binary, "--version"], {
+        cwd: installation.consumerRoot,
+        timeoutMs: 2_000,
+      });
+      expect(invoked).toMatchObject({ exitCode: 0, stdout: "1.0.0\n" });
+
+      const copiedArtifact = join(root, "fixture.tgz");
+      await writeFile(copiedArtifact, await readFile(installation.artifact));
+      const fromArtifact = await createPackedInstallation({ packageRoot: root, artifact: copiedArtifact });
+      try {
+        expect(fromArtifact.version).toBe("1.0.0");
+      } finally {
+        await fromArtifact.cleanup();
+      }
+    } finally {
+      await installation.cleanup();
+    }
+  }, 20_000);
+
+  it("validates subprocess and receipt input boundaries", async () => {
+    await expect(runProcess(process.execPath, ["--version"], { timeoutMs: 0 })).rejects.toThrow(
+      "timeout must be a positive integer",
+    );
+    await expect(runProcess(process.execPath, ["--version"], { maxOutputBytes: 0 })).rejects.toThrow(
+      "output limit must be a positive integer",
+    );
+    await expect(runProcess("memi-command-that-does-not-exist", [], { timeoutMs: 100 })).rejects.toThrow();
+    expect(() => assertMetadataOnlyReceipt("[]")).toThrow("JSON object");
+    expect(() => assertMetadataOnlyReceipt("not-json")).toThrow("one valid JSON value");
+    expect(() => assertCapabilityDenied({ exitCode: 0, stdout: "{}", stderr: "" }, {
+      operation: "check npm for updates",
+      capability: "network",
+    })).toThrow("unexpectedly succeeded");
+  });
+
+  it("cleans the isolated consumer after a bad artifact install", async () => {
+    const root = await mkdtemp(join(tmpdir(), "memi-trust-bad-package-"));
+    roots.push(root);
+    const missingArtifact = join(root, "missing.tgz");
+    await writeFile(join(root, "package.json"), JSON.stringify({
+      name: "@memi-test/bad-fixture",
+      version: "1.0.0",
+      bin: { memi: "dist/index.js" },
+    }), "utf8");
+
+    await expect(createPackedInstallation({
+      packageRoot: root,
+      artifact: missingArtifact,
+    })).rejects.toThrow("packed artifact install failed");
+  }, 20_000);
 });

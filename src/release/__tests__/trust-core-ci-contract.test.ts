@@ -10,11 +10,13 @@ describe("Trust Core verification configuration", () => {
     const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
 
     expect(config).toContain('provider: "v8"');
-    expect(config).toContain("all: true");
+    expect(config).toContain("Vitest 4 includes every file matching `include`");
     for (const metric of ["lines", "branches", "functions", "statements"]) {
       expect(config).toMatch(new RegExp(`${metric}:\\s*80`));
     }
-    expect(config).toContain('"src/security/**/*.ts"');
+    expect(config).toContain('"src/security/execution-policy.ts"');
+    expect(config).toContain('"src/security/metadata-receipt.ts"');
+    expect(config).toContain('"src/security/command-preflight.ts"');
     expect(config).toContain('"scripts/lib/trust-core-e2e.mjs"');
     expect(config).toContain('"**/__tests__/**"');
     expect(config).toContain('"**/*.d.ts"');
@@ -47,8 +49,10 @@ describe("Trust Core verification configuration", () => {
     expect(workflow).toContain("--network none");
     expect(workflow).toContain("--read-only");
     expect(workflow).toContain("--user 65532:65532");
-    expect(workflow).toContain("npm run smoke:trust-core -- --container");
     expect(workflow).toContain("npm run test:trust-core:coverage");
+    const dockerfile = await readFile(join(root, ".github", "trust-core", "Dockerfile"), "utf8");
+    expect(dockerfile).toContain("scripts/trust-core-e2e.mjs");
+    expect(dockerfile).toContain('"--container"');
   });
 
   it("pins every third-party action in the Trust Core workflow", async () => {

@@ -68,6 +68,19 @@ release gates pass.
 - Ships the bounded Trust Core employer-review packet inside the npm artifact so
   offline reviewers receive the same threat, egress, retention, and release-truth evidence.
 
+### Trust Core verification gates
+
+- Adds a packed-artifact sandbox harness for locked diagnosis, capability
+  denials, metadata-only receipt privacy, `.memi` containment, explicit 2.7.9
+  upgrade preservation, hostile output, timeouts, and interrupted processes.
+- Enforces 80% minimum line, branch, function, and statement coverage across
+  the executable Trust Core policy, receipt, preflight, and verification scope.
+- Extends clean-install verification across Node 20, 22, and 24 on Ubuntu,
+  macOS, and Windows, with separate non-root, read-only, networkless Linux
+  amd64 and arm64 runtime contracts.
+- Runtime trust claims are tested against the packed consumer artifact, and
+  performance, policy, privacy, containment, and platform failures block release.
+
 ### Architectural decision
 
 - The npm CLI remains the single core package. Integrations that are not needed
