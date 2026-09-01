@@ -232,10 +232,7 @@ export async function preflightCommand(
         "write the registry package",
       );
       if (invocation.options.figma) {
-        require(
-          ["figma", "pull Figma data for publication"],
-          ["network", "pull Figma data for publication"],
-        );
+        require(["network", "pull Figma data for publication"]);
       }
       if (isRemoteUrl(invocation.options.theme)) {
         require(["network", "download the publication theme"]);
@@ -263,9 +260,9 @@ export async function preflightCommand(
       );
       break;
     case "research.web":
-      require(["project-write", "write research artifacts"]);
-      if (invocation.options.urls) {
+      if (hasResearchUrls(invocation.options)) {
         require(
+          ["project-write", "write research artifacts"],
           ["network", "fetch research URLs"],
           ["source-content-persistence", "persist fetched research content"],
         );
@@ -293,7 +290,7 @@ export async function preflightCommand(
         ["project-write", "persist the pulled design system and generated specs"],
         ["network", invocation.options.penpot ? "pull from Penpot" : "pull from Figma"],
       );
-      if (!invocation.options.penpot) {
+      if (!invocation.options.penpot && !invocation.options.rest) {
         require(["figma", "pull Figma design data"]);
       }
       break;
@@ -326,6 +323,13 @@ export async function preflightCommand(
   }
 
   return { optionOverrides: Object.freeze({ ...overrides }) };
+}
+
+function hasResearchUrls(options: Readonly<Record<string, unknown>>): boolean {
+  if (options.planOnly === true || typeof options.urls !== "string") {
+    return false;
+  }
+  return options.urls.split(",").some((url) => url.trim().length > 0);
 }
 
 function assertRequirements(

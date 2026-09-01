@@ -36,7 +36,7 @@ describe("research --json", () => {
     expect(JSON.parse(lastLog(logs))).toMatchObject({
       action: "web",
       mode: "plan-only",
-      plan: { topic: "offline planning" },
+      plan: { queries: expect.arrayContaining(["offline planning"]) },
     });
   });
 

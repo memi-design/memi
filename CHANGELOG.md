@@ -57,6 +57,9 @@ release gates pass.
 - Separates execution of consumer-resolved optional peers from installation:
   Anthropic, Playwright, XLSX, and native canvas code require the explicit
   per-run `host-integration-code` grant while retaining exact install guidance.
+- Keeps pure web-research planning read-only in `locked`, and removes Figma
+  bridge authority from REST-only pull and publication paths that use the
+  network API without executing plugin actions.
 
 ### Offline distribution lane
 
