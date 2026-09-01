@@ -78,6 +78,17 @@ release gates pass.
   kit commands with the beta artifact so repository-wide consumers do not fall
   back to 2.7.9 accidentally.
 
+### Prerelease channel isolation
+
+- `6667620c` — test: reproduce brittle prerelease channel routing
+- `59bcb635` — fix: generalize prerelease channel routing
+- Routes every valid SemVer prerelease, including later beta and release
+  candidate versions, through npm `next` while preserving npm `latest` at the
+  manifest's `previousPublicRelease`.
+- Drives npm tags, GitHub prerelease/latest state, and stable promotion
+  eligibility from one fail-closed release-channel helper. Invalid SemVer never
+  reaches publish, and prereleases skip Docker and Homebrew stable promotions.
+
 ### Trust Core verification gates
 
 - Adds a packed-artifact sandbox harness for locked diagnosis, capability
@@ -105,6 +116,9 @@ release gates pass.
 - Source builds retain a full development shrinkwrap for reproducible `npm ci`;
   pack, SBOM, clean-install, and trusted publish gates use a disposable stage
   that substitutes the separately generated production shrinkwrap.
+- npm and GitHub release automation share one strict SemVer channel classifier;
+  prerelease public-state preservation is sourced from the release manifest,
+  not duplicated workflow string comparisons.
 
 ## v2.7.9 — 2026-08-08 — Published
 
