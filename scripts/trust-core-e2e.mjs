@@ -15,6 +15,7 @@ import {
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const stagedPackageRoot = join(repositoryRoot, ".dist", "npm-package");
+const DEFAULT_CONFORMANCE_TIMEOUT_MS = 30_000;
 const args = parseArgs(process.argv.slice(2));
 
 try {
@@ -409,8 +410,6 @@ function requireSuccess(result, label) {
     throw new Error(`${label} failed with exit ${result.exitCode}: ${result.stderr || result.stdout}`);
   }
 }
-
-const DEFAULT_CONFORMANCE_TIMEOUT_MS = 30_000;
 
 function parseArgs(argv) {
   const options = { portable: false, container: false, performanceMode: "enforced" };
