@@ -31,7 +31,7 @@ describe("Trust Core verification configuration", () => {
   it("rebuilds the publishable runtime before packed-artifact smoke", async () => {
     const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
     expect(packageJson.scripts["smoke:trust-core"]).toBe(
-      "npm run build && node scripts/trust-core-e2e.mjs",
+      "npm run build && npm run stage:package && node scripts/trust-core-e2e.mjs --package-root .dist/npm-package",
     );
     expect(packageJson.scripts.prepublishOnly).toContain("npm run test:trust-core:coverage");
     expect(packageJson.scripts.prepublishOnly).toContain("npm run smoke:trust-core -- --portable");
@@ -54,6 +54,9 @@ describe("Trust Core verification configuration", () => {
     expect(workflow).toContain("--read-only");
     expect(workflow).toContain("--user 65532:65532");
     expect(workflow).toContain("npm run test:trust-core:coverage");
+    expect(workflow).toContain("run: npm run stage:package");
+    expect(workflow).toContain("working-directory: .dist/npm-package");
+    expect(workflow).not.toContain("npm pack --ignore-scripts --pack-destination .trust-artifacts");
     const dockerfile = await readFile(join(root, ".github", "trust-core", "Dockerfile"), "utf8");
     expect(dockerfile).toContain("scripts/trust-core-e2e.mjs");
     expect(dockerfile).toContain('"--container"');

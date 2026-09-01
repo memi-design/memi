@@ -97,6 +97,16 @@ describe("published package boundary", () => {
 
     expect(productionLock.packages[""]?.devDependencies).toBeUndefined();
     expect(productionLock.packages[""]?.optionalDependencies).toBeUndefined();
+    for (const [lockPath, packageEntry] of Object.entries(
+      productionLock.packages,
+    ) as Array<[string, Record<string, unknown>]>) {
+      expect(sourceLock.packages[lockPath], lockPath).toBeDefined();
+      expect(packageEntry.dev, lockPath).not.toBe(true);
+      expect(packageEntry.optional, lockPath).not.toBe(true);
+      if (lockPath !== "") {
+        expect(packageEntry, lockPath).toEqual(sourceLock.packages[lockPath]);
+      }
+    }
     for (const name of FORBIDDEN_SHRINKWRAP_PACKAGES) {
       expect(productionLock.packages[`node_modules/${name}`], name).toBeUndefined();
     }
