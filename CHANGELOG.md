@@ -25,12 +25,26 @@ release gates pass.
 - `a8d832be` — test: reject symlinked receipt leaves
 - `2f259c8f` — test: reproduce prefixed updater routing drift
 - `e1d07881` — fix: preserve resolved updater routing and version
+- `a5c2eee6` — test: reproduce fail-open command preflight
+- `323e2711` — fix: fail closed on unmapped CLI commands
+- `fc3a3bf4` — test: tighten preflight side-effect mappings
+- `0890d554` — fix: gate preflight initialization side effects
+- `e844d15d` — test: cover preflight authority escalation
+- `d9cc8cc7` — fix: close preflight authority escalation paths
 - Makes `locked` the default offline profile, limits `local` writes to the real
   project `.memi/` directory, and requires explicit per-invocation grants in
   `connected` mode.
 - Adds metadata-only execution receipts, structured
   `MEMI_CAPABILITY_DENIED` errors, read-only locked diagnostics, and exact
   resolved-version self-updates.
+- Replaces the command-preflight default allow path with an explicit read-only
+  allowlist and option-sensitive capability mappings. Studio browser, runtime,
+  and harness commands plus preview, publish, research, pull, sync, and export
+  now deny before handler execution unless the current profile has the mapped
+  authority; unmapped command paths deny in every profile. User-selected
+  publish and export destinations remain inside the connected project root,
+  GitHub-backed Note installation requires subprocess authority, and brokered
+  Studio runs require the browser and Figma grants they expose.
 
 ### Offline distribution lane
 
