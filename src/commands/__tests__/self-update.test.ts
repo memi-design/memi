@@ -6,7 +6,9 @@ import {
   compareSemver,
   isNewer,
   getInstallChannel,
+  formatUpdateFailureGuidance,
   readUpdateCache,
+  resolveUpdateSubcommand,
   updateCachePath,
   writeUpdateCache,
 } from "../../utils/update-check.js";
@@ -45,6 +47,51 @@ describe("isNewer", () => {
 describe("getInstallChannel", () => {
   it("reports npm when running under node (test runner)", () => {
     expect(getInstallChannel()).toBe("npm");
+  });
+});
+
+describe("update notification routing", () => {
+  it("finds self-update after repeatable root policy options", () => {
+    expect(resolveUpdateSubcommand([
+      "/usr/bin/node",
+      "/opt/memi/dist/index.js",
+      "--profile",
+      "connected",
+      "--allow",
+      "network",
+      "--allow=shell",
+      "self-update",
+      "--check",
+    ])).toBe("self-update");
+  });
+
+  it("finds upgrade after offline and receipt options", () => {
+    expect(resolveUpdateSubcommand([
+      "memi",
+      "--offline",
+      "--receipt",
+      ".memi/upgrade.json",
+      "upgrade",
+      "--check",
+    ])).toBe("upgrade");
+  });
+
+  it("supports equals-style global options without treating their values as commands", () => {
+    expect(resolveUpdateSubcommand([
+      "node",
+      "index.js",
+      "--profile=connected",
+      "--allow=network",
+      "--receipt=.memi/update.json",
+      "self-update",
+    ])).toBe("self-update");
+  });
+
+  it("pins failure guidance to the already-resolved version", () => {
+    expect(formatUpdateFailureGuidance("2.8.0-beta.1")).toBe(
+      "npm i -g @memi-design/cli@2.8.0-beta.1",
+    );
+    expect(formatUpdateFailureGuidance("2.8.0-beta.1")).not.toContain("@latest");
   });
 });
 
