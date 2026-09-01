@@ -3,6 +3,7 @@ import {
   type MemiCapability,
   type MemiExecutionPolicy,
 } from "./execution-policy.js";
+import { join, resolve } from "node:path";
 
 export interface CommandInvocation {
   commandPath: readonly string[];
@@ -131,6 +132,9 @@ export async function preflightCommand(
       if (isRemoteNoteSource(source)) {
         require(["network", "download a remote Memoire Note"]);
       }
+      if (source.startsWith("github:")) {
+        require(["shell", "clone a GitHub Memoire Note with git"]);
+      }
       break;
     }
     case "notes.update":
@@ -204,6 +208,12 @@ export async function preflightCommand(
         ["shell", "spawn the selected Studio harness"],
         ["network", "connect the selected Studio harness"],
       );
+      if (invocation.options.mode === "brokered") {
+        require(
+          ["browser", "enable brokered Studio browser tools"],
+          ["figma", "enable brokered Studio Figma tools"],
+        );
+      }
       break;
     case "preview":
       require(["project-write", "write generated preview pages"]);
@@ -217,6 +227,10 @@ export async function preflightCommand(
       break;
     case "publish":
       require(["project-write", "write the registry package"]);
+      await policy.assertProjectWrite(
+        resolvePublishOutput(policy.projectRoot, invocation.options),
+        "write the registry package",
+      );
       if (invocation.options.figma) {
         require(
           ["figma", "pull Figma data for publication"],
@@ -300,6 +314,12 @@ export async function preflightCommand(
           ? "initialize project state for the export dry run"
           : "export generated code into the project source tree",
       ]);
+      if (!invocation.options.dryRun && typeof invocation.options.target === "string") {
+        await policy.assertProjectWrite(
+          join(policy.projectRoot, invocation.options.target),
+          "export generated code into the project source tree",
+        );
+      }
       break;
     default:
       throw unmappedCommandDenial(policy, path);
@@ -328,9 +348,20 @@ function assertRequirements(
 function unmappedCommandDenial(policy: MemiExecutionPolicy, path: string): MemiCapabilityDeniedError {
   return new MemiCapabilityDeniedError({
     profile: policy.profile,
-    capability: "shell",
+    capability: "command-mapping",
     operation: `execute unmapped command "${path || "<root>"}"`,
   });
+}
+
+function resolvePublishOutput(
+  projectRoot: string,
+  options: Readonly<Record<string, unknown>>,
+): string {
+  if (typeof options.dir === "string" && options.dir.trim()) {
+    return resolve(options.dir);
+  }
+  const baseName = String(options.name ?? "").replace(/^@[^/]+\//, "");
+  return resolve(projectRoot, baseName);
 }
 
 function isRemoteNoteSource(source: string): boolean {

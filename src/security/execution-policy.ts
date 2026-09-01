@@ -16,6 +16,7 @@ export const MEMI_CAPABILITIES = [
   "telemetry",
 ] as const;
 export type MemiCapability = (typeof MEMI_CAPABILITIES)[number];
+export type MemiDeniedCapability = MemiCapability | "command-mapping";
 
 export interface MemiExecutionPolicyOptions {
   projectRoot: string;
@@ -36,18 +37,20 @@ export interface MemiExecutionPolicySnapshot {
 
 interface CapabilityDeniedOptions {
   profile: MemiExecutionProfile;
-  capability: MemiCapability;
+  capability: MemiDeniedCapability;
   operation: string;
 }
 
 export class MemiCapabilityDeniedError extends Error {
   readonly code = "MEMI_CAPABILITY_DENIED" as const;
   readonly profile: MemiExecutionProfile;
-  readonly capability: MemiCapability;
+  readonly capability: MemiDeniedCapability;
   readonly operation: string;
 
   constructor(options: CapabilityDeniedOptions) {
-    const message = `Profile ${options.profile} denied ${options.capability} for ${options.operation}. Re-run with --profile connected --allow ${options.capability} after reviewing the operation.`;
+    const message = options.capability === "command-mapping"
+      ? `Profile ${options.profile} denied ${options.operation}. This command path has no audited capability mapping and cannot be enabled with --allow.`
+      : `Profile ${options.profile} denied ${options.capability} for ${options.operation}. Re-run with --profile connected --allow ${options.capability} after reviewing the operation.`;
     super(message);
     this.name = "MemiCapabilityDeniedError";
     this.profile = options.profile;
