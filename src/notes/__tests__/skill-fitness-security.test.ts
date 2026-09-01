@@ -4,6 +4,8 @@ import {
   lstat,
   mkdir,
   mkdtemp,
+  readFile,
+  readdir,
   rm,
   symlink,
   writeFile,
@@ -16,10 +18,11 @@ import {
   assessSkillRouteFitness,
   buildSkillFitnessEvent,
   createSkillFitnessQualityEvidence,
+  withSkillFitnessProcessQueue,
   type SkillFitnessEvent,
   type SkillFitnessRouteIdentity,
 } from "../skill-fitness.js";
-import { privateAppendFlags } from "../skill-fitness-lock.js";
+import { privateAppendFlags, withSkillFitnessFileLock } from "../skill-fitness-lock.js";
 import type { BenchmarkRunRecord } from "../../efficiency/contracts.js";
 
 const HASH_A = `sha256:${"a".repeat(64)}`;
@@ -118,12 +121,37 @@ describe("skill fitness empirical identity security", () => {
         baselineScore: 80 + index,
         memiScore: 92,
       }))));
+    const fulfilled = writes.filter((result) => result.status === "fulfilled");
+    const rejected = writes.filter((result) => result.status === "rejected");
+    const rejectionReasons = rejected.map(({ reason }) =>
+      reason instanceof Error ? `${reason.name}: ${reason.message}` : String(reason));
 
-    expect(writes.filter((result) => result.status === "fulfilled")).toHaveLength(1);
-    expect(writes.filter((result) => result.status === "rejected")).toHaveLength(11);
+    expect(fulfilled, `concurrent write rejections: ${JSON.stringify(rejectionReasons)}`).toHaveLength(1);
+    expect(rejected).toHaveLength(11);
     const content = await import("../skill-fitness.js").then(({ loadSkillFitnessEvents }) =>
       loadSkillFitnessEvents(store));
     expect(content).toHaveLength(1);
+  });
+
+  it("serializes same-process file-lock acquisition without filesystem polling races", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-process-queue-"));
+    tempDirectories.push(root);
+    const store = path.join(root, "skill-fitness.jsonl");
+    let active = 0;
+    let maximumActive = 0;
+    const admissionOrder: number[] = [];
+
+    await Promise.all(Array.from({ length: 12 }, (_, index) =>
+      withSkillFitnessProcessQueue(store, async () => {
+        active += 1;
+        maximumActive = Math.max(maximumActive, active);
+        await new Promise((resolve) => setImmediate(resolve));
+        admissionOrder.push(index);
+        active -= 1;
+      })));
+
+    expect(maximumActive).toBe(1);
+    expect(admissionOrder).toEqual(Array.from({ length: 12 }, (_, index) => index));
   });
 
   it("recovers only an old dead-owner lock and preserves private permissions", async () => {
@@ -148,6 +176,29 @@ describe("skill fitness empirical identity security", () => {
     await expect(access(lock)).rejects.toMatchObject({ code: "ENOENT" });
     const mode = (await lstat(store)).mode & 0o777;
     if (process.platform !== "win32") expect(mode).toBe(0o600);
+  });
+
+  it("vacates an owned lock atomically before preserving unexpected cleanup entries", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "memi-fitness-release-"));
+    tempDirectories.push(root);
+    const store = path.join(root, "skill-fitness.jsonl");
+    const lock = `${store}.lock`;
+    const lockOptions = { lockWaitMs: 50, lockRetryMs: 5, staleLockMs: 30_000 };
+
+    await expect(withSkillFitnessFileLock(store, lockOptions, async () => {
+      await writeFile(path.join(lock, "unexpected-entry"), "preserve\n");
+    })).rejects.toThrow();
+
+    await expect(access(lock)).rejects.toMatchObject({ code: "ENOENT" });
+    const releasedLocks = (await readdir(root))
+      .filter((entry) => entry.startsWith("skill-fitness.jsonl.lock.released-"));
+    expect(releasedLocks).toHaveLength(1);
+    await expect(readFile(
+      path.join(root, releasedLocks[0], "unexpected-entry"),
+      "utf8",
+    )).resolves.toBe("preserve\n");
+    await expect(withSkillFitnessFileLock(store, lockOptions, async () => undefined))
+      .resolves.toBeUndefined();
   });
 
   it("fails closed on a symlinked lock without touching its target", async () => {
