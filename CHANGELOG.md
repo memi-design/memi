@@ -47,6 +47,8 @@ release gates pass.
   advisories and no development or optional-integration packages.
 - Pins MCPB and Smithery release helpers to exact versions instead of resolving
   moving `latest` tags.
+- Ships the bounded Trust Core employer-review packet inside the npm artifact so
+  offline reviewers receive the same threat, egress, retention, and release-truth evidence.
 
 ### Architectural decision
 
