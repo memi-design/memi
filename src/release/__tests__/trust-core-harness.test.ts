@@ -1,7 +1,9 @@
 // @ts-nocheck
+import { EventEmitter } from "node:events";
 import { access, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { PassThrough } from "node:stream";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   assertCapabilityDenied,
@@ -220,6 +222,49 @@ describe("Trust Core packed-artifact harness helpers", () => {
     });
     controller.abort();
     await expect(interrupted).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("waits for child close before settling an aborted process", async () => {
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: () => true,
+    });
+    const controller = new AbortController();
+    const abortError = Object.assign(new Error("The operation was aborted"), {
+      name: "AbortError",
+    });
+    const spawnProcess = (_command: string, _args: string[], spawnOptions: { signal?: AbortSignal }) => {
+      spawnOptions.signal?.addEventListener("abort", () => {
+        child.emit("error", abortError);
+      }, { once: true });
+      return child;
+    };
+    let settled = false;
+    const observed = runProcess("fixture-command", [], {
+      signal: controller.signal,
+      spawnProcess,
+      timeoutMs: 2_000,
+    }).then(
+      (value) => {
+        settled = true;
+        return { value };
+      },
+      (error) => {
+        settled = true;
+        return { error };
+      },
+    );
+
+    controller.abort();
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(settled).toBe(false);
+
+    child.stdout.end();
+    child.stderr.end();
+    child.emit("close", null, "SIGTERM");
+    await expect(observed).resolves.toEqual({ error: abortError });
+    expect(settled).toBe(true);
   });
 
   it("does not leave hostile fixture bytes in a metadata-only receipt", async () => {

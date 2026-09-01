@@ -77,9 +77,10 @@ export async function runProcess(command, args, options = {}) {
     DEFAULT_MAX_OUTPUT_BYTES,
     "output limit",
   );
+  const spawnProcess = options.spawnProcess ?? spawn;
 
   return new Promise((resolvePromise, rejectPromise) => {
-    const child = spawn(command, args, {
+    const child = spawnProcess(command, args, {
       cwd: options.cwd,
       env: options.env,
       signal: options.signal,
