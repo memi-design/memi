@@ -6,6 +6,34 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## Trust Core 2.8 development — Unreleased
+
+This unreleased work is not part of the immutable 2.7.9 release. It becomes a
+public product claim only after the 2.8 candidate, cross-platform, security, and
+release gates pass.
+
+### Offline distribution lane
+
+- Adds deterministic secondary `tar.gz` bundles for Darwin arm64/x64, Linux
+  arm64/x64, and Windows x64 without replacing the existing release assets.
+- Each archive carries a standalone CLI runtime, a minimal runtime manifest,
+  product and third-party notices, a deterministic CycloneDX 1.5 SBOM, internal
+  file checksums, and an adjacent archive checksum.
+- Release jobs pin the Bun compiler, reject unsupported target names, build the
+  Linux arm64 artifact on a native runner, and are configured to sign each
+  offline archive with a GitHub OIDC provenance attestation before upload.
+- Runtime sidecars are copied through an explicit allowlist; symbolic links,
+  unsupported files, secret filenames, development directories, and
+  development-only shrinkwrap entries fail closed or remain outside the bundle.
+
+### Commits
+
+| Commit | Change |
+|---|---|
+| `fd53d516` | test: define deterministic offline bundle contract |
+| `45879268` | test: require signed self-describing offline assets |
+| `f1ead6f9` | feat: add deterministic signed offline bundles |
+
 ## v2.7.9 — 2026-08-08 — Published
 
 ### Final 2.7 stabilization
