@@ -13,6 +13,7 @@
 
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { basename } from "node:path";
 import { spawn } from "node:child_process";
 import { isStandaloneBinary } from "./runtime.js";
 import { ui } from "../tui/format.js";
@@ -29,6 +30,30 @@ export interface UpdateCache {
   lastCheckAt: string;
   latestVersion: string | null;
   channel: InstallChannel;
+}
+
+export function formatUpdateFailureGuidance(version: string): string {
+  return `npm i -g ${PKG_NAME}@${version}`;
+}
+
+export function resolveUpdateSubcommand(argv: readonly string[]): string | undefined {
+  const executable = basename(argv[0] ?? "").toLowerCase();
+  const runtimeInvocation = /^(?:node|bun|deno)(?:\.exe)?$/.test(executable);
+  const valueOptions = new Set(["--profile", "--allow", "--receipt"]);
+
+  for (let index = runtimeInvocation ? 2 : 1; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (valueOptions.has(arg)) {
+      index += 1;
+      continue;
+    }
+    if (arg === "--offline" || arg.startsWith("--profile=") || arg.startsWith("--allow=") || arg.startsWith("--receipt=")) {
+      continue;
+    }
+    if (arg.startsWith("-")) continue;
+    return arg;
+  }
+  return undefined;
 }
 
 export function getInstallChannel(): InstallChannel {
@@ -173,7 +198,7 @@ function shouldSkipNotify(argv: string[]): boolean {
   if (process.env.MEMOIRE_NO_UPDATE_CHECK === "1") return true;
   if (process.env.CI) return true;
   if (!process.stderr.isTTY) return true; // don't pollute piped/redirected output
-  const sub = argv[2];
+  const sub = resolveUpdateSubcommand(argv);
   // Avoid noise (and recursion) on update-related and server commands.
   if (sub === "self-update" || sub === "upgrade" || sub === "mcp") return true;
   return false;
@@ -219,7 +244,7 @@ export async function maybeNotifyUpdate(opts: {
       if (r.status === 0) {
         process.stderr.write(`${ui.ok(`Updated to ${latest} — takes effect on your next command.`)}\n\n`);
       } else {
-        process.stderr.write(`${ui.warn(`Auto-update failed — run:  npm i -g ${PKG_NAME}@latest`)}\n\n`);
+        process.stderr.write(`${ui.warn(`Auto-update failed — run:  ${formatUpdateFailureGuidance(latest)}`)}\n\n`);
       }
       return;
     }

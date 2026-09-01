@@ -17,6 +17,7 @@ import { ui } from "../tui/format.js";
 import { getMemoirePackageVersion } from "../utils/package-version.js";
 import {
   PKG_NAME,
+  formatUpdateFailureGuidance,
   getInstallChannel,
   isNewer,
   refreshUpdateCache,
@@ -110,7 +111,7 @@ export function registerSelfUpdateCommand(program: Command, _engine: MemoireEngi
       if (ok) {
         console.log(`\n${ui.ok(`Updated to ${latest}. Run  memi --version  to confirm.`)}\n`);
       } else {
-        console.log(`\n${ui.fail(`Update failed. Try manually:  npm i -g ${PKG_NAME}@${latest}`)}\n`);
+        console.log(`\n${ui.fail(`Update failed. Try manually:  ${formatUpdateFailureGuidance(latest)}`)}\n`);
         process.exitCode = 1;
       }
     });
