@@ -1,4 +1,6 @@
-import { readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -115,6 +117,62 @@ describe("Trust Core release channel policy", () => {
       expectedLatest: stableVersion,
       requireProvenance: false,
     })).toThrow("expected latest 2.7.9");
+  });
+
+  it("emits fail-closed GitHub outputs for any valid prerelease tag", async () => {
+    const temp = await mkdtemp(join(tmpdir(), "memi-release-channel-"));
+    const outputPath = join(temp, "github-output");
+    try {
+      const result = spawnSync(process.execPath, [
+        join(process.cwd(), "scripts", "resolve-release-channel.mjs"),
+        "--tag",
+        "v2.8.0-rc.1",
+        "--github-output",
+        outputPath,
+      ], {
+        cwd: process.cwd(),
+        encoding: "utf8",
+      });
+
+      expect(result.status, result.stderr).toBe(0);
+      expect(await readFile(outputPath, "utf8")).toBe([
+        "release_version=2.8.0-rc.1",
+        "npm_dist_tag=next",
+        "expected_latest=2.7.9",
+        "is_prerelease=true",
+        "github_prerelease=true",
+        "github_make_latest=false",
+        "promote_stable_channels=false",
+        "",
+      ].join("\n"));
+    } finally {
+      await rm(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("returns nonzero before emitting outputs for an invalid release tag", async () => {
+    const temp = await mkdtemp(join(tmpdir(), "memi-release-channel-"));
+    const outputPath = join(temp, "github-output");
+    try {
+      const result = spawnSync(process.execPath, [
+        join(process.cwd(), "scripts", "resolve-release-channel.mjs"),
+        "--tag",
+        "v2.8.0-01",
+        "--github-output",
+        outputPath,
+      ], {
+        cwd: process.cwd(),
+        encoding: "utf8",
+      });
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("unsupported release version");
+      await expect(readFile(outputPath, "utf8")).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+    } finally {
+      await rm(temp, { recursive: true, force: true });
+    }
   });
 
   it("drives npm publishing from the shared channel helper", async () => {

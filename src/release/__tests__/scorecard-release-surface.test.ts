@@ -124,7 +124,7 @@ describe("audit scorecard release surfaces", () => {
     ).toHaveLength(4);
     expect(workflow).toContain('test "${RELEASE_TAG}" = "v${package_version}"');
     expect(workflow).toContain(
-      '[[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+$ ]]',
+      'node scripts/resolve-release-channel.mjs --tag "${RELEASE_TAG}" --github-output "${GITHUB_OUTPUT}"',
     );
     expect(workflow).toContain('test "${manifest_version}" = "${package_version}"');
     expect(workflow).toContain('release_commit=${resolved_commit}');

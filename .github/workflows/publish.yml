@@ -57,6 +57,10 @@ jobs:
 
       - run: npm ci --ignore-scripts
 
+      - name: Resolve release channel
+        id: release-channel
+        run: node scripts/resolve-release-channel.mjs --version "${EXPECTED_VERSION}" --github-output "${GITHUB_OUTPUT}"
+
       - name: Install DesignWorkBench runner dependencies
         run: |
           sudo apt-get update
@@ -150,15 +154,12 @@ jobs:
           path: release-evidence/
           if-no-files-found: error
 
-      - name: Publish stable npm package exactly once
-        if: inputs.mode == 'publish' && inputs.expected_version != '2.8.0-beta.1'
-        run: npm publish --access public --provenance --ignore-scripts
+      - name: Publish npm package exactly once
+        if: inputs.mode == 'publish'
+        run: npm publish --access public --provenance --ignore-scripts --tag "${NPM_DIST_TAG}"
         working-directory: .dist/npm-package
-
-      - name: Publish Trust Core beta exactly once
-        if: inputs.mode == 'publish' && inputs.expected_version == '2.8.0-beta.1'
-        run: npm publish --access public --provenance --ignore-scripts --tag next
-        working-directory: .dist/npm-package
+        env:
+          NPM_DIST_TAG: ${{ steps.release-channel.outputs.npm_dist_tag }}
 
       - name: Verify npm signatures and attestations
         env:

@@ -9,7 +9,7 @@ import {
   DEFAULT_README_PHRASE,
   assertRegistryAttestationUrl,
   extractProvenanceInvocation,
-  resolveNpmReleaseChannel,
+  resolveReleaseChannel,
   validateProvenanceAttestations,
   validateRegistryVersion,
 } from "./lib/npm-release-verification.mjs";
@@ -60,8 +60,8 @@ try {
 }
 
 async function runPrepublish() {
-  const releaseChannel = resolveNpmReleaseChannel(expectedVersion);
   const manifest = await loadReleaseManifest(root);
+  const releaseChannel = releaseChannelForManifest(manifest);
   const metadata = await fetchRegistryMetadata();
   const failures = validateNpmPublishPreflight({
     manifest,
@@ -88,8 +88,8 @@ async function runPrepublish() {
 }
 
 async function runRecoveryPreflight() {
-  const releaseChannel = resolveNpmReleaseChannel(expectedVersion);
   const manifest = await loadReleaseManifest(root);
+  const releaseChannel = releaseChannelForManifest(manifest);
   const manifestFailures = validateReleaseManifest(manifest);
   const engine = manifest?.releaseGroups?.engine;
   if (engine?.state !== "candidate") {
@@ -128,7 +128,8 @@ async function runRecoveryPreflight() {
 }
 
 async function runPublishedVerification() {
-  const releaseChannel = resolveNpmReleaseChannel(expectedVersion);
+  const manifest = await loadReleaseManifest(root);
+  const releaseChannel = releaseChannelForManifest(manifest);
   if (!/^[0-9a-f]{40}$/.test(expectedSourceCommit)) {
     throw new Error("EXPECTED_SOURCE_COMMIT must be an exact commit");
   }
@@ -166,6 +167,14 @@ async function runPublishedVerification() {
     releaseRecord,
     attempts: verification.attempt,
   }, null, 2));
+}
+
+function releaseChannelForManifest(manifest) {
+  return resolveReleaseChannel({
+    version: expectedVersion,
+    previousPublicRelease:
+      manifest?.releaseGroups?.engine?.previousPublicRelease?.version,
+  });
 }
 
 async function verifyRegistryAndTarball(attempt, releaseChannel) {

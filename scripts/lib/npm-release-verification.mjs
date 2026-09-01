@@ -10,26 +10,61 @@ const IN_TOTO_PAYLOAD_TYPE = "application/vnd.in-toto+json";
 const GITHUB_HOSTED_BUILDER = "https://github.com/actions/runner/github-hosted";
 const COMMIT_SHA = /^[0-9a-f]{40}$/;
 const SHASUM = /^[0-9a-f]{40}$/;
-const STABLE_VERSION = /^[0-9]+\.[0-9]+\.[0-9]+$/;
-const TRUST_CORE_BETA_VERSION = "2.8.0-beta.1";
-const TRUST_CORE_PREVIOUS_STABLE = "2.7.9";
+const STABLE_VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const NUMERIC_IDENTIFIER = "(?:0|[1-9]\\d*)";
+const PRERELEASE_IDENTIFIER =
+  `(?:${NUMERIC_IDENTIFIER}|\\d*[A-Za-z-][0-9A-Za-z-]*)`;
+const SEMVER = new RegExp(
+  `^${NUMERIC_IDENTIFIER}\\.${NUMERIC_IDENTIFIER}\\.${NUMERIC_IDENTIFIER}`
+  + `(?:-(?<prerelease>${PRERELEASE_IDENTIFIER}(?:\\.${PRERELEASE_IDENTIFIER})*))?`
+  + "(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+);
 
-export function resolveNpmReleaseChannel(expectedVersion) {
-  if (expectedVersion === TRUST_CORE_BETA_VERSION) {
+export function resolveReleaseChannel({ version, previousPublicRelease }) {
+  const match = typeof version === "string" ? SEMVER.exec(version) : null;
+  if (!match) {
+    throw new Error(`unsupported release version: ${version}`);
+  }
+
+  const isPrerelease = match.groups?.prerelease !== undefined;
+  if (isPrerelease) {
+    if (typeof previousPublicRelease !== "string"
+      || !STABLE_VERSION.test(previousPublicRelease)) {
+      throw new Error(
+        "prerelease routing requires a valid stable previousPublicRelease",
+      );
+    }
     return {
+      version,
       distTag: "next",
-      expectedLatest: TRUST_CORE_PREVIOUS_STABLE,
+      expectedLatest: previousPublicRelease,
       isPrerelease: true,
+      githubPrerelease: true,
+      githubMakeLatest: "false",
+      promoteStableChannels: false,
     };
   }
-  if (STABLE_VERSION.test(expectedVersion)) {
+
+  if (STABLE_VERSION.test(version)) {
     return {
+      version,
       distTag: "latest",
-      expectedLatest: expectedVersion,
+      expectedLatest: version,
       isPrerelease: false,
+      githubPrerelease: false,
+      githubMakeLatest: "legacy",
+      promoteStableChannels: true,
     };
   }
-  throw new Error(`unsupported npm release version: ${expectedVersion}`);
+
+  throw new Error(`unsupported release version: ${version}`);
+}
+
+export function resolveNpmReleaseChannel(expectedVersion, previousPublicRelease) {
+  return resolveReleaseChannel({
+    version: expectedVersion,
+    previousPublicRelease,
+  });
 }
 
 export function validateRegistryVersion({
