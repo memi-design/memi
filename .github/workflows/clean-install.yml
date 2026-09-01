@@ -55,7 +55,11 @@ jobs:
         run: npm run typecheck
       - name: Run the complete engine test suite on the supported matrix
         run: npm test -- --run
+      - name: Enforce Trust Core coverage thresholds
+        run: npm run test:trust-core:coverage
       - name: Build package from the checked-out source
         run: npm run build
       - name: Pack, install, and invoke the consumer binary
         run: npm run smoke:clean-install
+      - name: Verify locked-mode behavior from the packed artifact
+        run: npm run smoke:trust-core -- --portable

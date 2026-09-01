@@ -1,7 +1,7 @@
 {
   "name": "memi",
   "description": "Memi is the design layer for agentic AI.",
-  "version": "2.7.9",
+  "version": "2.8.0-beta.1",
   "author": {
     "name": "Sarvesh Chidambaram",
     "url": "https://github.com/sarveshsea"

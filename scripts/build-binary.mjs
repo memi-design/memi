@@ -7,6 +7,7 @@
  * Usage:
  *   node scripts/build-binary.mjs --target=darwin-arm64
  *   node scripts/build-binary.mjs --target=darwin-x64
+ *   node scripts/build-binary.mjs --target=linux-arm64
  *   node scripts/build-binary.mjs --target=linux-x64
  *   node scripts/build-binary.mjs --target=win-x64
  *
@@ -24,6 +25,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TARGETS = {
   "darwin-arm64": { bunTarget: "bun-darwin-arm64", ext: "", archive: "tar.gz" },
   "darwin-x64":   { bunTarget: "bun-darwin-x64",   ext: "", archive: "tar.gz" },
+  "linux-arm64":  { bunTarget: "bun-linux-arm64",  ext: "", archive: "tar.gz" },
   "linux-x64":    { bunTarget: "bun-linux-x64",    ext: "", archive: "tar.gz" },
   "win-x64":      { bunTarget: "bun-windows-x64",  ext: ".exe", archive: "zip" },
 };

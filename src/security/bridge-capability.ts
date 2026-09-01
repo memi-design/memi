@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
-import { chmod, lstat, mkdir, readFile, writeFile } from "node:fs/promises";
+import { chmod, lstat, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { BRIDGE_CAPABILITY_PLACEHOLDER } from "../plugin/shared/bridge-auth.js";
+import { getExecutionPolicy, type MemiExecutionPolicy } from "./execution-policy.js";
 
 export {
   BRIDGE_AUTH_SCHEME,
@@ -36,13 +37,20 @@ export async function readBridgeCapability(homeDir = defaultHomeDir()): Promise<
   return capability;
 }
 
-export async function ensureBridgeCapability(homeDir = defaultHomeDir()): Promise<string> {
+export async function ensureBridgeCapability(
+  homeDir = defaultHomeDir(),
+  policy: MemiExecutionPolicy = getExecutionPolicy(),
+): Promise<string> {
   const capabilityPath = resolveBridgeCapabilityPath(homeDir);
-  await mkdir(join(homeDir, ".memoire"), { recursive: true, mode: 0o700 });
+  await policy.assertHomeWrite(capabilityPath, "persist the Figma bridge capability");
 
   try {
     const existing = await readBridgeCapability(homeDir);
-    await restrictCapabilityPermissions(capabilityPath);
+    await policy.runHomeWrite(
+      capabilityPath,
+      "restrict the Figma bridge capability",
+      async (safeCapabilityPath) => restrictCapabilityPermissions(safeCapabilityPath),
+    );
     return existing;
   } catch (error) {
     if (!isMissingFileError(error)) throw error;
@@ -50,16 +58,22 @@ export async function ensureBridgeCapability(homeDir = defaultHomeDir()): Promis
 
   const capability = randomBytes(32).toString("base64url");
   try {
-    await writeFile(capabilityPath, `${capability}\n`, {
-      encoding: "utf-8",
-      flag: "wx",
-      mode: 0o600,
+    await policy.runHomeWrite(capabilityPath, "persist the Figma bridge capability", async (safeCapabilityPath) => {
+      await writeFile(safeCapabilityPath, `${capability}\n`, {
+        encoding: "utf-8",
+        flag: "wx",
+        mode: 0o600,
+      });
     });
   } catch (error) {
     if (!isAlreadyExistsError(error)) throw error;
     return readBridgeCapability(homeDir);
   }
-  await restrictCapabilityPermissions(capabilityPath);
+  await policy.runHomeWrite(
+    capabilityPath,
+    "restrict the Figma bridge capability",
+    async (safeCapabilityPath) => restrictCapabilityPermissions(safeCapabilityPath),
+  );
   return capability;
 }
 

@@ -13,9 +13,11 @@
 
 import { prepare, layout, prepareWithSegments, layoutWithLines, clearCache } from "@chenglou/pretext";
 import type { PreparedText } from "@chenglou/pretext";
+import { getExecutionPolicy } from "../security/execution-policy.js";
 import { createLogger } from "./logger.js";
 
 const log = createLogger("text-measurer");
+const CANVAS_INSTALL_COMMAND = "npm install --save-exact @napi-rs/canvas@0.1.97";
 const MAX_PRETEXT_INPUT_CHARS = 20_000;
 const MAX_REPEATED_PUNCTUATION_RUN = 2_000;
 const RISKY_PUNCTUATION = new Set("()[]{}#@!%^~<>:;'\"`.,/\\|+=_*?".split(""));
@@ -27,6 +29,7 @@ const RISKY_PUNCTUATION = new Set("()[]{}#@!%^~<>:;'\"`.,/\\|+=_*?".split(""));
 
 let polyfillInstalled = false;
 let canvasUnavailable = false;
+let canvasCapabilityWarningLogged = false;
 
 async function ensurePolyfill(): Promise<void> {
   if (polyfillInstalled || canvasUnavailable) return;
@@ -34,6 +37,16 @@ async function ensurePolyfill(): Promise<void> {
     polyfillInstalled = true;
     return;
   }
+  if (!getExecutionPolicy().allows("host-integration-code")) {
+    if (!canvasCapabilityWarningLogged) {
+      log.warn(
+        `Optional native canvas code is disabled. Re-run with --profile connected --allow host-integration-code. For native measurement, run \`${CANVAS_INSTALL_COMMAND}\`.`,
+      );
+      canvasCapabilityWarningLogged = true;
+    }
+    return;
+  }
+  canvasCapabilityWarningLogged = false;
   try {
     const canvasMod: { createCanvas: (w: number, h: number) => unknown } =
       await import("@napi-rs/canvas");
@@ -57,7 +70,7 @@ async function ensurePolyfill(): Promise<void> {
   } catch {
     canvasUnavailable = true;
     log.warn(
-      "@napi-rs/canvas not available — text measurement uses character-width approximation",
+      `@napi-rs/canvas not available — text measurement uses character-width approximation. For native measurement, run \`${CANVAS_INSTALL_COMMAND}\`.`,
     );
   }
 }

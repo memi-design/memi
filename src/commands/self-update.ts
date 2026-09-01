@@ -17,13 +17,15 @@ import { ui } from "../tui/format.js";
 import { getMemoirePackageVersion } from "../utils/package-version.js";
 import {
   PKG_NAME,
+  formatUpdateFailureGuidance,
   getInstallChannel,
   isNewer,
   refreshUpdateCache,
 } from "../utils/update-check.js";
+import { getExecutionPolicy } from "../security/execution-policy.js";
 
-function runNpmGlobalInstall(): boolean {
-  const r = spawnSync("npm", ["install", "-g", `${PKG_NAME}@latest`], { stdio: "inherit" });
+function runNpmGlobalInstall(version: string): boolean {
+  const r = spawnSync("npm", ["install", "-g", `${PKG_NAME}@${version}`], { stdio: "inherit" });
   return r.status === 0;
 }
 
@@ -35,19 +37,20 @@ export function registerSelfUpdateCommand(program: Command, _engine: MemoireEngi
     .option("--json", "Output result as JSON")
     .option("--silent", "Refresh the update cache quietly (internal background use)")
     .action(async (opts: { check?: boolean; json?: boolean; silent?: boolean }) => {
+      const executionPolicy = getExecutionPolicy();
       const current = getMemoirePackageVersion();
       const channel = getInstallChannel();
 
       // Internal: detached background refresh kicked off by the startup notifier.
       if (opts.silent) {
-        await refreshUpdateCache();
+        await refreshUpdateCache(executionPolicy);
         return;
       }
 
       const spinner = opts.json || opts.check
         ? null
         : ora({ text: "Checking for updates…", indent: 2, color: "cyan" }).start();
-      const cache = await refreshUpdateCache();
+      const cache = await refreshUpdateCache(executionPolicy);
       spinner?.stop();
 
       const latest = cache.latestVersion;
@@ -97,18 +100,18 @@ export function registerSelfUpdateCommand(program: Command, _engine: MemoireEngi
 
       // npm channel — install the new version.
       if (opts.json) {
-        const ok = runNpmGlobalInstall();
+        const ok = runNpmGlobalInstall(latest);
         console.log(JSON.stringify({ status: ok ? "updated" : "update-failed", from: current, to: latest, channel }, null, 2));
         if (!ok) process.exitCode = 1;
         return;
       }
 
       console.log(`\n${ui.active(`Updating memi ${current} → ${latest}`)}\n`);
-      const ok = runNpmGlobalInstall();
+      const ok = runNpmGlobalInstall(latest);
       if (ok) {
         console.log(`\n${ui.ok(`Updated to ${latest}. Run  memi --version  to confirm.`)}\n`);
       } else {
-        console.log(`\n${ui.fail(`Update failed. Try manually:  npm i -g ${PKG_NAME}@latest`)}\n`);
+        console.log(`\n${ui.fail(`Update failed. Try manually:  ${formatUpdateFailureGuidance(latest)}`)}\n`);
         process.exitCode = 1;
       }
     });

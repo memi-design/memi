@@ -6,6 +6,179 @@ This changelog tracks Mémoire itself: every version, commit, and architectural 
 
 ---
 
+## Trust Core 2.8 development — Unreleased
+
+This unreleased work is not part of the immutable 2.7.9 release. It becomes a
+public product claim only after the 2.8 candidate, cross-platform, security, and
+release gates pass.
+
+### Trust Core execution policy
+
+- `d452661e` — test: add RED contracts for Trust Core policy and receipts
+- `9b90fc76` — feat: add Trust Core execution policy and receipts
+- `04a195fe` — test: reproduce locked CLI preflight and doctor mutations
+- `623f03c7` — feat: preflight risky commands and make doctor read-only
+- `5b5bed4b` — feat: enforce Trust Core policy across CLI startup
+- `82c1a278` — fix: emit structured CLI policy denials
+- `f5ef708e` — fix: fail closed on downstream command authority
+- `949ec739` — test: cover Trust Core capability boundaries
+- `a8d832be` — test: reject symlinked receipt leaves
+- `67ac83bd` — test: reproduce trust receipt and optional peer gaps
+- `f33879d9` — test: enforce optional peer execution grants
+- `0dcd24b8` — fix: harden receipt and optional peer boundaries
+- `5ba4bb94` — test: preserve locked CSV parsing
+- `c746b746` — test: reproduce remaining trust boundary races
+- `98830cdd` — fix: close residual trust boundary races
+- `2f259c8f` — test: reproduce prefixed updater routing drift
+- `e1d07881` — fix: preserve resolved updater routing and version
+- `a5c2eee6` — test: reproduce fail-open command preflight
+- `323e2711` — fix: fail closed on unmapped CLI commands
+- `fc3a3bf4` — test: tighten preflight side-effect mappings
+- `0890d554` — fix: gate preflight initialization side effects
+- `e844d15d` — test: cover preflight authority escalation
+- `d9cc8cc7` — fix: close preflight authority escalation paths
+- Makes `locked` the default offline profile, limits `local` writes to the real
+  project `.memi/` directory, and requires explicit per-invocation grants in
+  `connected` mode.
+- Adds metadata-only execution receipts, structured
+  `MEMI_CAPABILITY_DENIED` errors, read-only locked diagnostics, and exact
+  resolved-version self-updates.
+- Replaces the command-preflight default allow path with an explicit read-only
+  allowlist and option-sensitive capability mappings. Studio browser, runtime,
+  and harness commands plus preview, publish, research, pull, sync, and export
+  now deny before handler execution unless the current profile has the mapped
+  authority; unmapped command paths deny in every profile. User-selected
+  publish and export destinations remain inside the connected project root,
+  GitHub-backed Note installation requires subprocess authority, and brokered
+  Studio runs require the browser and Figma grants they expose.
+- Binds receipt authorization to an exclusive file handle, revalidates the
+  opened path before writing, rejects symlinked policy roots and parent or leaf
+  substitution, and never recursively creates attacker-swappable ancestors.
+- Separates execution of consumer-resolved optional peers from installation:
+  Anthropic, Playwright, XLSX, and native canvas code require the explicit
+  per-run `host-integration-code` grant while retaining exact install guidance.
+- Keeps pure web-research planning read-only in `locked`, and removes Figma
+  bridge authority from REST-only pull and publication paths that use the
+  network API without executing plugin actions.
+
+### Offline distribution lane
+
+- Adds deterministic secondary `tar.gz` bundles for Darwin arm64/x64, Linux
+  arm64/x64, and Windows x64 without replacing the existing release assets.
+- Each archive carries a standalone CLI runtime, a minimal runtime manifest,
+  product and third-party notices, a deterministic CycloneDX 1.5 SBOM, internal
+  file checksums, and an adjacent archive checksum.
+- Release jobs pin the Bun compiler, reject unsupported target names, build the
+  Linux arm64 artifact on a native runner, and are configured to sign each
+  offline archive with a GitHub OIDC provenance attestation before upload.
+- Runtime sidecars are copied through an explicit allowlist; symbolic links,
+  unsupported files, secret filenames, development directories, and
+  development-only shrinkwrap entries fail closed or remain outside the bundle.
+
+### Commits
+
+| Commit | Change |
+|---|---|
+| `fd53d516` | test: define deterministic offline bundle contract |
+| `45879268` | test: require signed self-describing offline assets |
+| `f1ead6f9` | feat: add deterministic signed offline bundles |
+| `39174def` | test: reject unsafe offline bundle paths |
+| `201538e6` | fix: reject unsafe offline bundle paths |
+
+### Startup-safe package boundary
+
+- Ships an explicit additive npm allowlist and a production-only shrinkwrap
+  that excludes development tooling and optional integrations.
+- Moves Anthropic, native canvas, Playwright, pretty logging, and spreadsheet
+  readers behind optional peer dependencies with pinned installation guidance.
+- Gates the packed artifact at 1.5 MB compressed, 3 MB unpacked, and 100 files;
+  gates a script-disabled clean install at 60 MB with zero known production
+  advisories and no development or optional-integration packages.
+- Pins MCPB and Smithery release helpers to exact versions instead of resolving
+  moving `latest` tags.
+- Ships the bounded Trust Core employer-review packet inside the npm artifact so
+  offline reviewers receive the same threat, egress, retention, and release-truth evidence.
+- Pins the skills and preset metadata shipped with the beta artifact to
+  `2.8.0-beta.1` while the public Action and default activation path remain on
+  verified `2.7.9`.
+- Keeps Codex and Claude skill mirrors byte-aligned with the beta package and
+  validates prerelease version markers without relaxing stable release checks.
+- Synchronizes the general Codex, Claude, Hermes, OpenClaw, OpenCode, and Grok
+  kit commands with the beta artifact so repository-wide consumers do not fall
+  back to 2.7.9 accidentally.
+- Derives the production shrinkwrap only by pruning the checked-in source lock;
+  no release build performs a fresh semver resolution, and staging rejects any
+  package entry that is not the exact source-lock production subset.
+
+### Prerelease channel isolation
+
+- `6667620c` — test: reproduce brittle prerelease channel routing
+- `59bcb635` — fix: generalize prerelease channel routing
+- Routes every valid SemVer prerelease, including later beta and release
+  candidate versions, through npm `next` while preserving npm `latest` at the
+  manifest's `previousPublicRelease`.
+- Drives npm tags, GitHub prerelease/latest state, and stable promotion
+  eligibility from one fail-closed release-channel helper. Invalid SemVer never
+  reaches publish, and prereleases skip Docker and Homebrew stable promotions.
+
+### Trust Core verification gates
+
+- Adds a packed-artifact sandbox harness for locked diagnosis, capability
+  denials, metadata-only receipt privacy, `.memi` containment, explicit 2.7.9
+  upgrade preservation, hostile output, timeouts, and interrupted processes.
+- Enforces 80% minimum line, branch, function, and statement coverage across
+  the executable Trust Core policy, receipt, preflight, and verification scope.
+- Extends clean-install verification across Node 20, 22, and 24 on Ubuntu,
+  macOS, and Windows, with separate non-root, read-only, networkless Linux
+  amd64 and arm64 runtime contracts.
+- Runtime trust claims are tested against the packed consumer artifact, and
+  performance, policy, privacy, containment, and platform failures block release.
+- Rebuilds the publishable runtime before standalone artifact smoke so stale
+  compiled output cannot eagerly load an absent optional integration.
+- Makes coverage and packed-artifact verification mandatory in the npm
+  prepublish gate, rejects symlinked receipt leaves, strips non-allowlisted
+  subprocess environment variables, and verifies zero locked-mode fixture
+  mutations on every supported host.
+- Makes local smoke, prepublish, and networkless container verification pack and
+  install the exact `.dist/npm-package` artifact used by the publish workflow.
+- Keeps the Linux arm64 QEMU job as a bounded behavioral conformance gate while
+  labeling its timings non-gating; published startup budgets remain enforced on
+  native runners, avoiding false failures from emulation overhead.
+- Keeps Windows verification shell-free by invoking npm's JavaScript entrypoint
+  through Node, and tests non-portable bundle names without asking Windows to
+  create paths its filesystem rejects before the safety validator can run.
+- Adds a tiny published CLI launcher that answers version-only invocations
+  before loading the full engine bundle, preserving the one-second cold-start
+  budget on slower Windows Node runtimes without weakening the gate.
+- Waits for interrupted verification subprocesses to close before reporting
+  their terminal error, so Windows releases process handles before fixture
+  cleanup begins instead of intermittently failing with `EBUSY`.
+- Serializes same-process skill-fitness writers before the existing
+  cross-process lock and atomically vacates token-owned locks before bounded,
+  non-recursive cleanup, closing a Windows release-contention gap without
+  weakening exact-route uniqueness or deleting unexpected files.
+
+### Packaging trust follow-up commits
+
+| Commit | Change |
+|---|---|
+| `80631837` | test: reproduce Trust Core artifact drift |
+| `bb306ebf` | fix: verify staged Trust Core artifact |
+
+### Architectural decision
+
+- The npm CLI remains the single core package. Integrations that are not needed
+  for offline diagnosis must be installed explicitly and are loaded only when
+  their feature is invoked with the `host-integration-code` capability. That
+  grant authorizes already-installed host code; `dynamic-install` remains a
+  separate capability and is not implied.
+- Source builds retain a full development shrinkwrap for reproducible `npm ci`;
+  pack, SBOM, clean-install, and trusted publish gates use a disposable stage
+  that substitutes the separately generated production shrinkwrap.
+- npm and GitHub release automation share one strict SemVer channel classifier;
+  prerelease public-state preservation is sourced from the release manifest,
+  not duplicated workflow string comparisons.
+
 ## v2.7.9 — 2026-08-08 — Published
 
 ### Final 2.7 stabilization

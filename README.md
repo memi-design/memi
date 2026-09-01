@@ -202,9 +202,19 @@ codex plugin marketplace add memi-design/memi --ref main --sparse .agents/plugin
 - [Current release truth](https://github.com/memi-design/memi/blob/main/docs/CURRENT_RELEASE.md) — the public versions for CLI, Studio, and website.
 - [Reproducible case studies](https://github.com/memi-design/memi/tree/main/docs/case-studies) — pinned evidence, abstentions, and paired protocols.
 - [Dependency trust ledger](docs/DEPENDENCY_TRUST.md) — direct dependency purpose, dynamic boundaries, and review policy.
+- [Trust Core index](docs/trust/README.md) — locked-default contract and evidence status for the 2.8 candidate.
+- [Threat model](docs/trust/THREAT_MODEL.md) and [egress map](docs/trust/EGRESS_MAP.md) — protected assets, side-effect boundaries, and destinations.
+- [Data retention](docs/trust/DATA_RETENTION.md) and [uninstall/recovery](docs/trust/UNINSTALL_RECOVERY.md) — what can persist and how to preserve state.
+- [Dependency/license review](docs/trust/DEPENDENCY_LICENSE_REVIEW.md) and [supported platforms](docs/trust/SUPPORTED_PLATFORMS.md) — artifact and sandbox gates.
+- [Employer review packet](docs/trust/EMPLOYER_REVIEW_PACKET.md) — artifact-bound approval checklist; internal use requires written employer approval.
+- [Known limitations](docs/trust/KNOWN_LIMITATIONS.md) and [release truth](docs/trust/RELEASE_TRUTH.md) — beta versus stable language and open evidence.
+- [Organization compatibility](docs/trust/ORG_COMPATIBILITY.md) — sibling surfaces, including independently gated Studio and Canvas.
 - [`llms.txt`](llms.txt) — compact machine-readable product map.
 
-Memi has no npm install-time lifecycle scripts, no source upload or covert telemetry, explicit Figma connection, agent-kit `--dry-run --json`, immutable Action pins, and documented third-party boundaries in [NOTICE](NOTICE).
+The deterministic first audit requires no source upload or telemetry. Connected
+integrations expand the boundary and require explicit review. Memi also has no
+npm install-time lifecycle scripts, provides agent-kit `--dry-run --json`, pins
+the Action immutably, and documents third-party boundaries in [NOTICE](NOTICE).
 
 ## Community
 

@@ -1,6 +1,6 @@
 {
   "name": "memoire-agent-skills",
-  "version": "2.7.9",
+  "version": "2.8.0-beta.1",
   "package": "@memi-design/cli",
   "suiteManifest": "memoire.agent.yaml",
   "daemon": {

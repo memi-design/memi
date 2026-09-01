@@ -112,7 +112,7 @@ describe("packaged agent kits", () => {
     const codexSkill = await readFile(join(root, "agent-kits", "codex", "memoire-design-tooling", "SKILL.md"), "utf-8");
     const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf-8"));
 
-    expect(pkg.files).toContain("skills");
+    expect(pkg.files).toContain("skills/memoire-design-tooling/SKILL.md");
     expect(rootSkill).toBe(codexSkill);
     expect(rootSkill).toContain("name: memoire-design-tooling");
     expect(rootSkill).toContain("memi agent install --dry-run --json");
@@ -168,9 +168,11 @@ describe("packaged agent kits", () => {
   it("keeps the npm runtime focused while retaining core skills and evidence", async () => {
     const pkg = JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf-8"));
     expect(pkg.files).toEqual(expect.arrayContaining([
-      "dist",
-      "skills",
-      "mcpb",
+      "dist/index.js",
+      "dist/index.d.ts",
+      "skills/memoire-design-tooling/SKILL.md",
+      "mcpb/manifest.json",
+      "mcpb/server/index.cjs",
       "schemas/memi-runtime-trace-v1.schema.json",
       "docs/case-studies/memi-2.7-six-repo/README.md",
       "docs/case-studies/memi-2.7-six-repo/results.json",

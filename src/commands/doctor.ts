@@ -12,6 +12,11 @@ import { resolvePluginHealth } from "../plugin/install-info.js";
 import { installPluginToHome } from "../plugin/installer.js";
 import { BRIDGE_PORT_START, BRIDGE_PORT_END } from "../figma/port-scanner.js";
 import { formatElapsed } from "../utils/format.js";
+import { detectProject } from "../engine/project-context.js";
+import { createRequire } from "node:module";
+import { getExecutionPolicy, type MemiExecutionPolicySnapshot } from "../security/execution-policy.js";
+import { createMetadataReceipt, type MetadataReceipt } from "../security/metadata-receipt.js";
+import { getMemoirePackageVersion } from "../utils/package-version.js";
 
 type CheckStatus = "pass" | "warn" | "fail";
 type CheckCategory = "project" | "design" | "plugin" | "bridge" | "runtime" | "workspace" | "team";
@@ -33,6 +38,19 @@ interface DoctorPayload {
     fail: number;
   };
   checks: CheckResult[];
+  policy: MemiExecutionPolicySnapshot & {
+    offlineInternalUse: {
+      suitable: boolean;
+      requiresEmployerApproval: true;
+      reasons: readonly string[];
+    };
+  };
+  optionalIntegrations: {
+    anthropic: boolean;
+    canvas: boolean;
+    playwright: boolean;
+  };
+  receipt?: Readonly<MetadataReceipt>;
 }
 
 const ICON: Record<CheckStatus, string> = {
@@ -60,6 +78,7 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
     .option("--repair-plugin", "Explicitly copy the packaged Figma plugin to ~/.memoire/plugin when stale or missing")
     .action(async (opts: { json?: boolean; repairPlugin?: boolean }) => {
       const start = Date.now();
+      const executionPolicy = getExecutionPolicy();
       const results: CheckResult[] = [];
       const push = (
         code: string,
@@ -74,8 +93,13 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
 
       // 1. Project detected
       try {
-        await engine.init();
-        const project = engine.project;
+        // Engine initialization persists legacy `.memoire/` project state.
+        // Locked and local doctor runs are observational until that state is
+        // migrated beneath the local profile's `.memi/` write boundary.
+        if (executionPolicy.profile === "connected") {
+          await engine.init();
+        }
+        const project = engine.project ?? await detectProject(engine.config.projectRoot);
         if (project) {
           const parts: string[] = [project.framework];
           if (project.styling.tailwind) parts.push("Tailwind");
@@ -93,7 +117,9 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
 
       // 2. Design system loaded
       try {
-        await engine.registry.load();
+        if (executionPolicy.profile === "connected") {
+          await engine.registry.load();
+        }
         const ds = engine.registry.designSystem;
         const tokenCount = ds.tokens.length;
         if (tokenCount > 0) {
@@ -192,6 +218,11 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
       try {
         let plugin = await resolvePluginHealth(engine.config.projectRoot);
         if (opts.repairPlugin && plugin.localBundle.ready && plugin.health !== "current") {
+          const home = process.env.HOME || process.env.USERPROFILE;
+          await executionPolicy.assertHomeWrite(
+            join(home ?? "", ".memoire", "plugin"),
+            "repair the Figma plugin",
+          );
           const repair = await installPluginToHome(engine.config.projectRoot);
           plugin = await resolvePluginHealth(engine.config.projectRoot);
           push("plugin.repair", "plugin", plugin.health === "current" ? "pass" : "warn", "Plugin repair", `copied plugin to ${repair.destination}`, {
@@ -454,7 +485,7 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
         push("team.checks", "team", "warn", "Team checks", err instanceof Error ? err.message : String(err));
       }
 
-      const payload = buildDoctorPayload(results);
+      const payload = buildDoctorPayload(results, executionPolicy, Date.now() - start);
 
       if (opts.json) {
         console.log(JSON.stringify(payload, null, 2));
@@ -489,10 +520,37 @@ export function registerDoctorCommand(program: Command, engine: MemoireEngine): 
     });
 }
 
-function buildDoctorPayload(results: CheckResult[]): DoctorPayload {
+function buildDoctorPayload(
+  results: CheckResult[],
+  executionPolicy: ReturnType<typeof getExecutionPolicy>,
+  durationMs: number,
+): DoctorPayload {
   const pass = results.filter((r) => r.status === "pass").length;
   const warn = results.filter((r) => r.status === "warn").length;
   const fail = results.filter((r) => r.status === "fail").length;
+
+  const policySnapshot = executionPolicy.snapshot();
+  const nodeSupported = Number.parseInt(process.version.slice(1).split(".")[0] ?? "0", 10) >= 20;
+  const suitable = executionPolicy.profile === "locked" &&
+    executionPolicy.effectiveCapabilities.length === 0 &&
+    nodeSupported;
+  const reasons = [
+    ...(executionPolicy.profile === "locked" ? [] : ["Use the locked profile for offline repository review."]),
+    ...(executionPolicy.effectiveCapabilities.length === 0 ? [] : ["Remove invocation capability grants."]),
+    ...(nodeSupported ? [] : ["Node.js 20 or newer is required."]),
+  ];
+  const optionalIntegrations = installedOptionalIntegrations();
+  const receipt = executionPolicy.profile === "locked"
+    ? createMetadataReceipt({
+        command: "doctor",
+        version: getMemoirePackageVersion(),
+        commit: process.env.MEMI_BUILD_COMMIT ?? process.env.GITHUB_SHA ?? "unknown",
+        policy: executionPolicy,
+        ruleIds: results.map((result) => result.code),
+        counts: { total: results.length, pass, warn, fail },
+        durationMs,
+      })
+    : undefined;
 
   return {
     summary: {
@@ -502,5 +560,33 @@ function buildDoctorPayload(results: CheckResult[]): DoctorPayload {
       fail,
     },
     checks: results,
+    policy: {
+      ...policySnapshot,
+      offlineInternalUse: {
+        suitable,
+        requiresEmployerApproval: true,
+        reasons: Object.freeze(reasons),
+      },
+    },
+    optionalIntegrations,
+    ...(receipt ? { receipt } : {}),
   };
+}
+
+function installedOptionalIntegrations(): DoctorPayload["optionalIntegrations"] {
+  const require = createRequire(import.meta.url);
+  const installed = (packageName: string): boolean => {
+    try {
+      require.resolve(packageName);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  return Object.freeze({
+    anthropic: installed("@anthropic-ai/sdk"),
+    canvas: installed("@napi-rs/canvas"),
+    playwright: installed("playwright"),
+  });
 }

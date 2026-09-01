@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { configureExecutionPolicy, resetExecutionPolicyForTests } from "../../security/execution-policy.js";
 import { parseExcel } from "../excel-parser.js";
 
 const xlsxMocks = vi.hoisted(() => ({
@@ -11,7 +12,16 @@ vi.mock("xlsx-populate", () => ({
   },
 }));
 
+beforeEach(() => {
+  configureExecutionPolicy({
+    projectRoot: "/workspace",
+    profile: "connected",
+    allow: ["host-integration-code"],
+  });
+});
+
 afterEach(() => {
+  resetExecutionPolicyForTests();
   vi.clearAllMocks();
 });
 

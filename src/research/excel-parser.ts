@@ -4,6 +4,9 @@
  */
 
 import { readFile } from "fs/promises";
+import { getExecutionPolicy } from "../security/execution-policy.js";
+
+const EXCEL_INSTALL_COMMAND = "npm install --save-exact xlsx-populate@1.21.0 ssf@0.11.2";
 
 export interface ParsedSheet {
   sheetName: string;
@@ -24,10 +27,20 @@ export async function parseExcel(filePath: string): Promise<ParsedSheet> {
   }
 
   // Keep the XLSX parser off the CLI startup path; research imports it on demand.
-  const [{ default: XlsxPopulate }, { is_date: isDateFormat }] = await Promise.all([
-    import("xlsx-populate"),
-    import("ssf"),
-  ]);
+  getExecutionPolicy().assert("host-integration-code", "load optional XLSX parsers");
+  let excelDependencies: [typeof import("xlsx-populate"), typeof import("ssf")];
+  try {
+    excelDependencies = await Promise.all([
+      import("xlsx-populate"),
+      import("ssf"),
+    ]);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `MEMI_OPTIONAL_INTEGRATION_MISSING: XLSX research import requires optional parsers. Run \`${EXCEL_INSTALL_COMMAND}\`. ${detail}`,
+    );
+  }
+  const [{ default: XlsxPopulate }, { is_date: isDateFormat }] = excelDependencies;
   const workbook = await XlsxPopulate.fromFileAsync(filePath);
   const sheet = workbook.sheet(0);
   if (!sheet) {

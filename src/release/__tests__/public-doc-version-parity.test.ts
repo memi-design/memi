@@ -68,6 +68,20 @@ const expectedDocRefs = [
   `memi-design/memi@${publicEngineSourceCommit}`,
 ] as const;
 
+const trustCoreDocs = [
+  "docs/trust/README.md",
+  "docs/trust/THREAT_MODEL.md",
+  "docs/trust/EGRESS_MAP.md",
+  "docs/trust/DATA_RETENTION.md",
+  "docs/trust/UNINSTALL_RECOVERY.md",
+  "docs/trust/DEPENDENCY_LICENSE_REVIEW.md",
+  "docs/trust/SUPPORTED_PLATFORMS.md",
+  "docs/trust/EMPLOYER_REVIEW_PACKET.md",
+  "docs/trust/KNOWN_LIMITATIONS.md",
+  "docs/trust/RELEASE_TRUTH.md",
+  "docs/trust/ORG_COMPATIBILITY.md",
+] as const;
+
 describe("public documentation release truth", () => {
   it("derives verified public engine and Studio guidance from release-manifest.json", async () => {
     for (const path of engineDocs) {
@@ -205,5 +219,42 @@ describe("public documentation release truth", () => {
     const readme = await readFile(join(root, "README.md"), "utf8");
     expect(readme).toContain(expectedDocRefs[0]);
     expect(readme).toContain(expectedDocRefs[3]);
+  });
+
+  it("publishes a complete, evidence-bounded Trust Core review surface", async () => {
+    const trustSources = await Promise.all(
+      trustCoreDocs.map(async (path) => [path, await readFile(join(root, path), "utf8")] as const),
+    );
+    const combined = trustSources.map(([, source]) => source).join("\n");
+    const readme = await readFile(join(root, "README.md"), "utf8");
+    const security = await readFile(join(root, "SECURITY.md"), "utf8");
+
+    for (const path of trustCoreDocs) {
+      expect(readme, `README.md should link ${path}`).toContain(`(${path})`);
+    }
+
+    expect(combined).toContain(
+      "Verified claims are bound to version, source SHA, artifact digest, platform, profile, and verification date.",
+    );
+    expect(combined).toContain("Locked is the default profile.");
+    expect(combined).toContain(
+      "DualEntry and other internal repositories require written employer approval before Memi is installed or run.",
+    );
+    expect(combined).toContain(
+      "The managed Codex Deep Security Scan is pending because this host does not provide a managed filesystem permission profile.",
+    );
+    expect(combined).toContain("Memi Canvas and Memi Studio remain independently gated.");
+    expect(combined.toLowerCase()).not.toContain("100% safe");
+
+    for (const heading of [
+      "## System and Scope",
+      "## Threat Model and Trust Boundaries",
+      "## Security Invariants",
+      "## Reportable Findings and Severity Context",
+      "## Out of Scope, Exclusions, and Accepted Risk",
+      "## Known Limitations and Compensating Controls",
+    ]) {
+      expect(security).toContain(heading);
+    }
   });
 });

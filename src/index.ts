@@ -40,6 +40,14 @@
 
 import { getMemoirePackageVersion } from "./utils/package-version.js";
 import { resolveCliProjectRoot } from "./utils/project-root.js";
+import {
+  configureExecutionPolicy,
+  MemiCapabilityDeniedError,
+  parseExecutionPolicyArgs,
+  type MemiCapability,
+} from "./security/execution-policy.js";
+import { preflightCommand } from "./security/command-preflight.js";
+import { createMetadataReceipt, writeMetadataReceipt } from "./security/metadata-receipt.js";
 
 import { existsSync, rmSync } from "fs";
 import { join } from "path";
@@ -50,6 +58,18 @@ process.setMaxListeners(50);
 
 const packageVersion = getMemoirePackageVersion();
 const cliArgs = process.argv.slice(2);
+const projectRoot = resolveCliProjectRoot();
+const parsedPolicyArgs = parseExecutionPolicyArgs(cliArgs, {
+  projectRoot,
+  homeDir: process.env.HOME || process.env.USERPROFILE,
+});
+const executionPolicy = configureExecutionPolicy({
+  projectRoot,
+  homeDir: process.env.HOME || process.env.USERPROFILE,
+  profile: parsedPolicyArgs.policy.profile,
+  allow: parsedPolicyArgs.policy.requestedCapabilities,
+});
+const cliStartedAt = Date.now();
 
 if (isGlobalVersionRequest(cliArgs)) {
   console.log(packageVersion);
@@ -277,12 +297,15 @@ process.on("unhandledRejection", (reason) => {
 });
 
 const program = new Command();
-const projectRoot = resolveCliProjectRoot();
 
 program
   .name("memi")
   .description("Design-system memory for coding agents — pull tokens from Figma, generate shadcn-native components, audit Tailwind apps")
-  .version(packageVersion);
+  .version(packageVersion)
+  .option("--profile <profile>", "Execution profile: locked, local, or connected", "locked")
+  .option("--offline", "Alias for --profile locked")
+  .option("--allow <capability>", "Grant one capability for this invocation (repeatable)", collectCapability, [])
+  .option("--receipt <path>", "Persist a metadata-only execution receipt to an explicit project path");
 
 // Create engine instance (shared across commands)
 const engine = new MemoireEngine({
@@ -315,17 +338,48 @@ if (fastLoader) {
   await registerAllCommands(program, engine);
 }
 
+program.hook("preAction", async (_thisCommand, actionCommand) => {
+  const result = await preflightCommand(executionPolicy, {
+    commandPath: commanderCommandPath(actionCommand),
+    options: actionCommand.opts(),
+    args: actionCommand.processedArgs,
+  });
+  for (const [key, value] of Object.entries(result.optionOverrides)) {
+    actionCommand.setOptionValue(key, value);
+  }
+
+  const receiptPath = actionCommand.optsWithGlobals().receipt as string | undefined;
+  if (receiptPath) {
+    await executionPolicy.assertProjectWrite(receiptPath, "persist metadata receipt");
+  }
+});
+
+program.hook("postAction", async (_thisCommand, actionCommand) => {
+  const receiptPath = actionCommand.optsWithGlobals().receipt as string | undefined;
+  if (!receiptPath) return;
+  const receipt = createMetadataReceipt({
+    command: commanderCommandPath(actionCommand).join("."),
+    version: packageVersion,
+    commit: process.env.MEMI_BUILD_COMMIT ?? process.env.GITHUB_SHA ?? "unknown",
+    policy: executionPolicy,
+    durationMs: Date.now() - cliStartedAt,
+  });
+  await writeMetadataReceipt(receiptPath, receipt, executionPolicy);
+});
+
 // Uninstall command — removes all Mémoire artifacts
 program
   .command("uninstall")
   .description("Remove all Mémoire artifacts from this machine")
-  .action(() => {
+  .action(async () => {
     const home = process.env.HOME || process.env.USERPROFILE || "";
     const globalDir = join(home, ".memoire");
     const localDir = join(process.cwd(), ".memoire");
 
     if (home && existsSync(globalDir)) {
-      rmSync(globalDir, { recursive: true, force: true });
+      await executionPolicy.runHomeWrite(globalDir, "remove user Memi data", async (safeGlobalDir) => {
+        rmSync(safeGlobalDir, { recursive: true, force: true });
+      });
       console.log(`  - Removed ${globalDir}`);
     }
     if (existsSync(localDir)) {
@@ -341,11 +395,11 @@ program
 
 // First-run welcome — standalone-binary users who run `memi` with no args.
 // Shown once per $HOME, gated by a stamp file so it never nags.
-if (process.argv.length === 2) {
+if (process.argv.length === 2 && executionPolicy.allows("home-write")) {
   try {
     const home = process.env.HOME || process.env.USERPROFILE || "";
     if (home) {
-      const { writeFileSync, mkdirSync } = await import("node:fs");
+      const { writeFile } = await import("node:fs/promises");
       const stamp = join(home, ".memoire", ".first-run-done");
       if (!existsSync(stamp)) {
         console.log();
@@ -361,8 +415,9 @@ if (process.argv.length === 2) {
         console.log("  Docs: https://github.com/memi-design/memi/tree/main/docs");
         console.log("  Issues: https://github.com/memi-design/memi/issues");
         console.log();
-        mkdirSync(join(home, ".memoire"), { recursive: true });
-        writeFileSync(stamp, new Date().toISOString());
+        await executionPolicy.runHomeWrite(stamp, "persist first-run stamp", async (safeStamp) => {
+          await writeFile(safeStamp, new Date().toISOString(), { encoding: "utf8", mode: 0o600 });
+        });
       }
     }
   } catch {
@@ -373,10 +428,23 @@ if (process.argv.length === 2) {
 // Non-blocking "update available" notice (reads cache; refreshes in the
 // background). Guarded so it never runs in MCP/JSON/non-TTY contexts.
 const { maybeNotifyUpdate } = await import("./utils/update-check.js");
-await maybeNotifyUpdate({ currentVersion: packageVersion, mcpMode, jsonOutput: jsonOutputRequested });
+await maybeNotifyUpdate({ currentVersion: packageVersion, mcpMode, jsonOutput: jsonOutputRequested, policy: executionPolicy });
 
 // Parse and execute
-program.parse();
+try {
+  await program.parseAsync();
+} catch (error) {
+  if (error instanceof MemiCapabilityDeniedError) {
+    if (jsonOutputRequested) {
+      console.log(JSON.stringify({ status: "failed", error: error.toJSON() }, null, 2));
+    } else {
+      console.error(JSON.stringify({ status: "failed", error: error.toJSON() }));
+    }
+    process.exitCode = 1;
+  } else {
+    throw error;
+  }
+}
 
 function isGlobalHelpRequest(args: string[]): boolean {
   return args.length === 1 && (args[0] === "--help" || args[0] === "-h");
@@ -384,6 +452,20 @@ function isGlobalHelpRequest(args: string[]): boolean {
 
 function isGlobalVersionRequest(args: string[]): boolean {
   return args.length === 1 && (args[0] === "--version" || args[0] === "-V" || args[0] === "version");
+}
+
+function collectCapability(value: string, previous: MemiCapability[]): MemiCapability[] {
+  return [...previous, value as MemiCapability];
+}
+
+function commanderCommandPath(command: CliProgram): string[] {
+  const names: string[] = [];
+  let current: CliProgram | null = command;
+  while (current?.parent) {
+    names.unshift(current.name());
+    current = current.parent as CliProgram | null;
+  }
+  return names;
 }
 
 function printFastHelp(version: string): void {
@@ -395,6 +477,10 @@ function printFastHelp(version: string): void {
     "",
     "Options:",
     "  -V, --version           output the version number",
+    "  --profile <profile>     Execution profile: locked, local, or connected",
+    "  --offline               Alias for --profile locked",
+    "  --allow <capability>    Grant one capability for this invocation (repeatable)",
+    "  --receipt <path>        Persist a metadata-only execution receipt",
     "  -h, --help              display help for command",
     "",
     "Hero workflow:",

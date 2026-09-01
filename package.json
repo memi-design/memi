@@ -1,6 +1,6 @@
 {
   "name": "@memi-design/cli",
-  "version": "2.7.9",
+  "version": "2.8.0-beta.1",
   "mcpName": "io.github.memi-design/memi",
   "description": "The design layer for agentic AI: design context, interface checks, and workflows for coding agents.",
   "type": "module",
@@ -13,7 +13,7 @@
     }
   },
   "bin": {
-    "memi": "dist/index.js"
+    "memi": "dist/bin.js"
   },
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -26,7 +26,8 @@
     "build:site-bundle": "node scripts/build-site-bundle.mjs",
     "build:plugin": "node scripts/build-plugin.mjs",
     "build:codex-plugin-assets": "node scripts/generate-codex-plugin-assets.mjs",
-    "build:mcpb": "mkdir -p .dist && npx -y @anthropic-ai/mcpb@latest validate mcpb/manifest.json && npx -y @anthropic-ai/mcpb@latest pack mcpb .dist/memi-2.7.9.mcpb",
+    "build:mcpb": "mkdir -p .dist && npx -y @anthropic-ai/mcpb@2.1.2 validate mcpb/manifest.json && npx -y @anthropic-ai/mcpb@2.1.2 pack mcpb .dist/memi-2.8.0-beta.1.mcpb",
+    "build:production-shrinkwrap": "node scripts/build-production-shrinkwrap.mjs",
     "bench:cli": "node scripts/bench-cli.mjs",
     "growth:status": "node scripts/growth-status.mjs",
     "audit:render-scorecard": "tsx scripts/render-audit-scorecard.ts",
@@ -36,8 +37,10 @@
     "sync:current-release": "node scripts/render-current-release.mjs",
     "check:current-release": "node scripts/render-current-release.mjs --check",
     "smoke:clean-install": "node scripts/smoke-clean-install.mjs",
+    "smoke:trust-core": "npm run build && npm run stage:package && node scripts/trust-core-e2e.mjs --package-root .dist/npm-package",
     "smoke:mcp": "node scripts/smoke-mcp-stdio.mjs",
     "smoke:codex-plugin": "node scripts/smoke-codex-plugin-marketplace.mjs",
+    "stage:package": "node scripts/stage-package.mjs",
     "pack:dry-run": "node scripts/pack-dry-run.mjs",
     "publish:ready": "node scripts/publish-ready.mjs",
     "check:release": "node scripts/check-release.mjs",
@@ -54,8 +57,8 @@
     "check:site-bundle": "node scripts/check-site-bundle-urls.mjs",
     "check:community-notes": "node scripts/check-community-notes.mjs",
     "check:public-release": "node scripts/check-public-release-gate.mjs",
-    "publish:smithery": "npm run build:mcpb && npx -y smithery@latest mcp publish .dist/memi-2.7.9.mcpb -n sarveshsea/memi",
-    "security:audit": "npm audit --omit=dev --audit-level=high",
+    "publish:smithery": "npm run build:mcpb && npx -y smithery@1.2.0 mcp publish .dist/memi-2.8.0-beta.1.mcpb -n sarveshsea/memi",
+    "security:audit": "npm audit --omit=dev --omit=optional --audit-level=low",
     "validate:presets": "node scripts/build-presets.mjs",
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
@@ -63,9 +66,11 @@
     "studio:runtime": "node scripts/build-studio-runtime.mjs",
     "preview": "vite --config preview/vite.config.ts",
     "test": "vitest run",
+    "test:trust-core": "vitest run --config vitest.trust-core.config.ts",
+    "test:trust-core:coverage": "vitest run --config vitest.trust-core.config.ts --coverage",
     "lint": "tsc --noEmit && tsc -p tsconfig.plugin.json --noEmit",
     "typecheck": "tsc --noEmit --strict && tsc -p tsconfig.plugin.json --noEmit",
-    "prepublishOnly": "npm run check:release && npm run security:audit && npm run typecheck && npm run test && npm run build"
+    "prepublishOnly": "npm run check:release && npm run security:audit && npm run typecheck && npm run test && npm run build && npm run test:trust-core:coverage && npm run smoke:trust-core -- --portable"
   },
   "repository": {
     "type": "git",
@@ -95,11 +100,38 @@
   },
   "files": [
     "npm-shrinkwrap.json",
-    "dist",
-    "!dist/**/__tests__",
-    "skills",
-    "!skills/DESIGN_SYSTEM_REFERENCE.md",
-    "mcpb",
+    "dist/bin.js",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/preview/templates/gallery-page.client.js",
+    "dist/preview/templates/gallery-page.css",
+    "dist/preview/templates/research-page.client.js",
+    "dist/preview/templates/research-page.css",
+    "dist/studio/harness-manifest.json",
+    "skills/ATOMIC_DESIGN.md",
+    "skills/audit-frontend-design/agents/openai.yaml",
+    "skills/audit-frontend-design/SKILL.md",
+    "skills/build-swiftui-interface/SKILL.md",
+    "skills/COMPONENT_CATALOG.md",
+    "skills/DASHBOARD_FROM_RESEARCH.md",
+    "skills/DESIGN_EXTRACT.md",
+    "skills/enforce-design-ci/agents/openai.yaml",
+    "skills/enforce-design-ci/SKILL.md",
+    "skills/FIGMA_AUDIT.md",
+    "skills/FIGMA_GENERATE_DESIGN.md",
+    "skills/FIGMA_GENERATE_LIBRARY.md",
+    "skills/FIGMA_PROTOTYPE.md",
+    "skills/FIGMA_USE.md",
+    "skills/memoire-design-tooling/SKILL.md",
+    "skills/MOTION_VIDEO_DESIGN.md",
+    "skills/MULTI_AGENT.md",
+    "skills/registry.json",
+    "skills/remember-design-system/agents/openai.yaml",
+    "skills/remember-design-system/SKILL.md",
+    "skills/SUPERPOWER.md",
+    "skills/UX_TENETS_TRAPS.md",
+    "mcpb/manifest.json",
+    "mcpb/server/index.cjs",
     "schemas/memi-runtime-trace-v1.schema.json",
     "llms.txt",
     "docs/README.md",
@@ -109,11 +141,19 @@
     "docs/IOS_SWIFT.md",
     "docs/PROOF.md",
     "docs/DEPENDENCY_TRUST.md",
+    "docs/trust/README.md",
+    "docs/trust/THREAT_MODEL.md",
+    "docs/trust/EGRESS_MAP.md",
+    "docs/trust/DATA_RETENTION.md",
+    "docs/trust/UNINSTALL_RECOVERY.md",
+    "docs/trust/DEPENDENCY_LICENSE_REVIEW.md",
+    "docs/trust/SUPPORTED_PLATFORMS.md",
+    "docs/trust/EMPLOYER_REVIEW_PACKET.md",
+    "docs/trust/KNOWN_LIMITATIONS.md",
+    "docs/trust/RELEASE_TRUTH.md",
+    "docs/trust/ORG_COMPATIBILITY.md",
     "docs/case-studies/memi-2.7-six-repo/README.md",
     "docs/case-studies/memi-2.7-six-repo/results.json",
-    "!assets/demo.gif",
-    "!assets/noche-moon.svg",
-    "!plugin/*.png",
     "README.md",
     "server.json",
     "NOTICE",
@@ -124,7 +164,6 @@
   },
   "homepage": "https://memoire.cv",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.112.3",
     "@chenglou/pretext": "^0.0.6",
     "@hono/node-server": "2.1.0",
     "@modelcontextprotocol/sdk": "1.30.0",
@@ -137,15 +176,14 @@
     "ip-address": "10.4.0",
     "ora": "^8.1.0",
     "pino": "^9.5.0",
-    "pino-pretty": "^13.0.0",
-    "ssf": "^0.11.2",
     "tar": "7.5.22",
     "ws": "^8.18.0",
-    "xlsx-populate": "^1.21.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "0.112.3",
     "@figma/plugin-typings": "^1.124.0",
+    "@napi-rs/canvas": "0.1.97",
     "@types/acorn": "^4.0.6",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "^22.0.0",
@@ -154,17 +192,43 @@
     "@vitest/coverage-v8": "^4.1.10",
     "acorn": "^8.16.0",
     "esbuild": "0.28.1",
+    "pino-pretty": "13.0.0",
+    "playwright": "1.59.1",
+    "ssf": "0.11.2",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
     "vite": "^6.4.3",
     "vitest": "^4.1.10",
+    "xlsx-populate": "1.21.0",
     "zod-to-json-schema": "^3.25.1"
   },
-  "optionalDependencies": {
-    "@napi-rs/canvas": "^0.1.97",
-    "@rollup/rollup-darwin-arm64": "^4.60.0",
-    "@rollup/rollup-linux-x64-gnu": "^4.60.1",
-    "playwright": "^1.59.1"
+  "peerDependencies": {
+    "@anthropic-ai/sdk": "0.112.3",
+    "@napi-rs/canvas": "0.1.97",
+    "pino-pretty": "13.0.0",
+    "playwright": "1.59.1",
+    "ssf": "0.11.2",
+    "xlsx-populate": "1.21.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    },
+    "@napi-rs/canvas": {
+      "optional": true
+    },
+    "pino-pretty": {
+      "optional": true
+    },
+    "playwright": {
+      "optional": true
+    },
+    "ssf": {
+      "optional": true
+    },
+    "xlsx-populate": {
+      "optional": true
+    }
   },
   "overrides": {
     "body-parser": "2.3.0",

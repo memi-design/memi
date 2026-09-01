@@ -17,6 +17,29 @@ afterEach(() => {
 });
 
 describe("research --json", () => {
+  it.each([
+    ["plan-only", ["research", "web", "offline planning", "--plan-only", "--json"]],
+    ["no URLs", ["research", "web", "offline planning", "--json"]],
+  ])("keeps %s web research planning read-only", async (_label, argv) => {
+    const logs = captureLogs();
+    const engine = makeResearchEngine();
+    const init = vi.spyOn(engine, "init");
+    const load = vi.spyOn(engine.research, "load");
+    const program = new Command();
+
+    registerResearchCommand(program, engine as never);
+    await program.parseAsync(argv, { from: "user" });
+
+    expect(init).not.toHaveBeenCalled();
+    expect(load).not.toHaveBeenCalled();
+    expect(logs).toHaveLength(1);
+    expect(JSON.parse(lastLog(logs))).toMatchObject({
+      action: "web",
+      mode: "plan-only",
+      plan: { queries: expect.arrayContaining(["offline planning"]) },
+    });
+  });
+
   it("emits a single structured payload for from-file --json", async () => {
     const logs = captureLogs();
     const program = new Command();

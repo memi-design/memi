@@ -63,7 +63,7 @@ jobs:
       - run: npm install --ignore-scripts
       - run: npm run build
       - name: memi ci (self-gate)
-        run: node dist/index.js ci
+        run: node dist/index.js --profile connected --allow project-write --allow source-content-persistence ci
       - name: Upload SARIF to code scanning
         if: always()
         continue-on-error: true

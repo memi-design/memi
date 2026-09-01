@@ -2,12 +2,15 @@ import { createRequire } from "node:module";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { getExecutionPolicy } from "../security/execution-policy.js";
 import type {
   StudioBrowserActionRequest,
   StudioBrowserActionResult,
   StudioBrowserSession,
   StudioBrowserStatus,
 } from "./types.js";
+
+const PLAYWRIGHT_INSTALL_COMMAND = "npm install --save-exact playwright@1.59.1";
 
 interface PlaywrightPage {
   url(): string;
@@ -42,27 +45,36 @@ interface BrowserRecord {
 export interface StudioBrowserAdapterOptions {
   projectRoot: string;
   playwrightLoader?: PlaywrightLoader;
+  playwrightPresenceProbe?: () => boolean;
 }
 
 export class StudioBrowserAdapter {
   private readonly projectRoot: string;
   private readonly playwrightLoader: PlaywrightLoader;
+  private readonly playwrightPresenceProbe: () => boolean;
   private readonly sessions = new Map<string, BrowserRecord>();
 
   constructor(options: StudioBrowserAdapterOptions) {
     this.projectRoot = options.projectRoot;
     this.playwrightLoader = options.playwrightLoader ?? defaultPlaywrightLoader;
+    this.playwrightPresenceProbe = options.playwrightPresenceProbe
+      ?? (options.playwrightLoader ? () => true : defaultPlaywrightPresenceProbe);
   }
 
   async status(enabled = true): Promise<StudioBrowserStatus> {
-    const installed = await this.canLoadPlaywright();
+    const integrationAllowed = getExecutionPolicy().allows("host-integration-code");
+    const installed = integrationAllowed
+      ? await this.canLoadPlaywright()
+      : this.playwrightPresenceProbe();
     return {
       enabled,
       installed,
       activeSessions: this.sessions.size,
-      message: installed
+      message: !integrationAllowed
+        ? `Playwright host integration code is disabled. Re-run with --profile connected --allow host-integration-code. If Playwright is not installed, run \`${PLAYWRIGHT_INSTALL_COMMAND}\`.`
+        : installed
         ? "Playwright browser adapter ready"
-        : "Playwright is not installed. Install it to enable browser automation.",
+        : `Playwright is not installed. Run \`${PLAYWRIGHT_INSTALL_COMMAND}\` to enable browser automation.`,
     };
   }
 
@@ -192,11 +204,14 @@ export class StudioBrowserAdapter {
   }
 
   private async loadPlaywrightOrThrow(): Promise<PlaywrightModule> {
+    getExecutionPolicy().assert("host-integration-code", "load the optional Playwright runtime");
     try {
       return await this.playwrightLoader();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw Object.assign(new Error(`Playwright browser adapter unavailable: ${message}`), { statusCode: 501 });
+      throw Object.assign(new Error(
+        `MEMI_OPTIONAL_INTEGRATION_MISSING: Playwright browser adapter unavailable. Run \`${PLAYWRIGHT_INSTALL_COMMAND}\`. ${message}`,
+      ), { statusCode: 501 });
     }
   }
 }
@@ -204,6 +219,16 @@ export class StudioBrowserAdapter {
 async function defaultPlaywrightLoader(): Promise<PlaywrightModule> {
   const require = createRequire(import.meta.url);
   return require("playwright") as PlaywrightModule;
+}
+
+function defaultPlaywrightPresenceProbe(): boolean {
+  const require = createRequire(import.meta.url);
+  try {
+    require.resolve("playwright");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function requiredString(value: unknown, name: string): string {

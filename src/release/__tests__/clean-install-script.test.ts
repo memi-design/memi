@@ -3,8 +3,11 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  assertConsumerGraph,
+  assertInstallFootprint,
   assertProductionAudit,
   assertExpectedVersion,
+  MAX_INSTALL_BYTES,
   npmExecutable,
   packageInstallPaths,
   parsePackResult,
@@ -34,11 +37,55 @@ describe("clean install smoke helpers", () => {
 
   it("rejects high or critical advisories from the packed consumer graph", () => {
     expect(assertProductionAudit(JSON.stringify({
-      metadata: { vulnerabilities: { low: 0, moderate: 1, high: 0, critical: 0 } },
+      metadata: { vulnerabilities: { low: 0, moderate: 0, high: 0, critical: 0 } },
     }))).toEqual({ high: 0, critical: 0 });
     expect(() => assertProductionAudit(JSON.stringify({
       metadata: { vulnerabilities: { low: 0, moderate: 0, high: 1, critical: 0 } },
     }))).toThrow("packed consumer graph has 1 high and 0 critical advisories");
+  });
+
+  it("requires zero known production advisories at every severity", () => {
+    expect(() => assertProductionAudit(JSON.stringify({
+      metadata: {
+        vulnerabilities: {
+          info: 0,
+          low: 0,
+          moderate: 1,
+          high: 0,
+          critical: 0,
+          total: 1,
+        },
+      },
+    }))).toThrow("packed consumer graph has 1 known production advisory");
+  });
+
+  it("enforces the 60 MiB clean-install footprint", () => {
+    expect(assertInstallFootprint(MAX_INSTALL_BYTES)).toEqual({
+      bytes: MAX_INSTALL_BYTES,
+      maxBytes: MAX_INSTALL_BYTES,
+      passed: true,
+    });
+    expect(() => assertInstallFootprint(MAX_INSTALL_BYTES + 1)).toThrow(
+      "clean install footprint",
+    );
+  });
+
+  it("rejects development tools and optional integrations in a consumer graph", () => {
+    expect(assertConsumerGraph({
+      packages: {
+        "": { dependencies: { chalk: "5.4.1" } },
+        "node_modules/chalk": { version: "5.4.1" },
+      },
+    })).toMatchObject({ packages: 1, forbiddenPackages: [] });
+
+    expect(() => assertConsumerGraph({
+      packages: {
+        "": { dependencies: { chalk: "5.4.1" } },
+        "node_modules/chalk": { version: "5.4.1" },
+        "node_modules/playwright": { version: "1.59.1" },
+        "node_modules/typescript": { version: "5.6.3" },
+      },
+    })).toThrow("consumer graph contains forbidden packages: playwright, typescript");
   });
 
   it("resolves a scoped package and its installed binary target inside the consumer", () => {

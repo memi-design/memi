@@ -9,6 +9,7 @@ import {
   DEFAULT_README_PHRASE,
   assertRegistryAttestationUrl,
   extractProvenanceInvocation,
+  resolveReleaseChannel,
   validateProvenanceAttestations,
   validateRegistryVersion,
 } from "./lib/npm-release-verification.mjs";
@@ -60,6 +61,7 @@ try {
 
 async function runPrepublish() {
   const manifest = await loadReleaseManifest(root);
+  const releaseChannel = releaseChannelForManifest(manifest);
   const metadata = await fetchRegistryMetadata();
   const failures = validateNpmPublishPreflight({
     manifest,
@@ -78,6 +80,8 @@ async function runPrepublish() {
   console.log(JSON.stringify({
     status: "candidate-ready",
     version: expectedVersion,
+    distTag: releaseChannel.distTag,
+    expectedLatest: releaseChannel.expectedLatest,
     sourceCommit: expectedSourceCommit,
     registryVersionAbsent: true,
   }, null, 2));
@@ -85,6 +89,7 @@ async function runPrepublish() {
 
 async function runRecoveryPreflight() {
   const manifest = await loadReleaseManifest(root);
+  const releaseChannel = releaseChannelForManifest(manifest);
   const manifestFailures = validateReleaseManifest(manifest);
   const engine = manifest?.releaseGroups?.engine;
   if (engine?.state !== "candidate") {
@@ -116,11 +121,15 @@ async function runRecoveryPreflight() {
   console.log(JSON.stringify({
     status: "recovery-ready",
     version: expectedVersion,
+    distTag: releaseChannel.distTag,
+    expectedLatest: releaseChannel.expectedLatest,
     sourceCommit: expectedSourceCommit,
   }, null, 2));
 }
 
 async function runPublishedVerification() {
+  const manifest = await loadReleaseManifest(root);
+  const releaseChannel = releaseChannelForManifest(manifest);
   if (!/^[0-9a-f]{40}$/.test(expectedSourceCommit)) {
     throw new Error("EXPECTED_SOURCE_COMMIT must be an exact commit");
   }
@@ -128,7 +137,7 @@ async function runPublishedVerification() {
   let lastError = "";
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      verification = await verifyRegistryAndTarball(attempt);
+      verification = await verifyRegistryAndTarball(attempt, releaseChannel);
       break;
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error);
@@ -145,6 +154,7 @@ async function runPublishedVerification() {
   console.log(JSON.stringify({
     status: "verified",
     packageName,
+    distTag: verification.registry.distTag,
     latest: verification.registry.latest,
     expectedPhrase,
     expectedInstall,
@@ -159,7 +169,15 @@ async function runPublishedVerification() {
   }, null, 2));
 }
 
-async function verifyRegistryAndTarball(attempt) {
+function releaseChannelForManifest(manifest) {
+  return resolveReleaseChannel({
+    version: expectedVersion,
+    previousPublicRelease:
+      manifest?.releaseGroups?.engine?.previousPublicRelease?.version,
+  });
+}
+
+async function verifyRegistryAndTarball(attempt, releaseChannel) {
   const metadata = await fetchRegistryMetadata();
   const registry = validateRegistryVersion({
     metadata,
@@ -167,6 +185,8 @@ async function verifyRegistryAndTarball(attempt) {
     expectedVersion,
     expectedPhrase,
     expectedInstall,
+    expectedDistTag: releaseChannel.distTag,
+    expectedLatest: releaseChannel.expectedLatest,
     requireProvenance: true,
   });
   const attestationUrl = assertRegistryAttestationUrl(registry.attestationUrl);

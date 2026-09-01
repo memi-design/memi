@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { realpathSync } from "node:fs";
 import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
@@ -205,6 +206,8 @@ export interface BuildSkillFitnessEventInput {
   readonly evidenceMode?: "production" | "recovery-probe";
 }
 
+const skillFitnessProcessQueues = new Map<string, Promise<void>>();
+
 export function createSkillFitnessQualityEvidence(
   input: SkillFitnessQualityEvidencePayload,
 ): Readonly<SkillFitnessQualityEvidence> {
@@ -306,14 +309,64 @@ export async function appendSkillFitnessEvent(
   options: SkillFitnessLockOptions = {},
 ): Promise<void> {
   const event = SkillFitnessEventSchema.parse(input);
-  await withSkillFitnessFileLock(file, options, async () => {
-    const existing = await loadSkillFitnessEvents(file);
-    if (existing.some((candidate) => candidate.eventId === event.eventId)) {
-      throw new Error(`Skill fitness event ${event.eventId} already exists`);
-    }
-    assertUniqueRouteEvidence([...existing, event]);
-    await appendPrivateLine(file, `${JSON.stringify(event)}\n`);
+  await withSkillFitnessProcessQueue(file, async () => {
+    await withSkillFitnessFileLock(file, options, async () => {
+      const existing = await loadSkillFitnessEvents(file);
+      if (existing.some((candidate) => candidate.eventId === event.eventId)) {
+        throw new Error(`Skill fitness event ${event.eventId} already exists`);
+      }
+      assertUniqueRouteEvidence([...existing, event]);
+      await appendPrivateLine(file, `${JSON.stringify(event)}\n`);
+    });
   });
+}
+
+export async function withSkillFitnessProcessQueue<T>(
+  file: string,
+  operation: () => Promise<T>,
+): Promise<T> {
+  const key = skillFitnessProcessQueueKey(file);
+  const predecessor = skillFitnessProcessQueues.get(key) ?? Promise.resolve();
+  let release!: () => void;
+  const gate = new Promise<void>((resolveGate) => {
+    release = resolveGate;
+  });
+  const tail = predecessor.then(() => gate);
+  skillFitnessProcessQueues.set(key, tail);
+
+  await predecessor;
+  try {
+    return await operation();
+  } finally {
+    release();
+    if (skillFitnessProcessQueues.get(key) === tail) {
+      skillFitnessProcessQueues.delete(key);
+    }
+  }
+}
+
+function skillFitnessProcessQueueKey(file: string): string {
+  const absoluteFile = path.resolve(file);
+  const absoluteParent = path.dirname(absoluteFile);
+  const canonicalParent = canonicalizePotentialParent(absoluteParent);
+  const canonicalFile = path.join(canonicalParent, path.basename(absoluteFile));
+  return process.platform === "win32" ? canonicalFile.toLowerCase() : canonicalFile;
+}
+
+function canonicalizePotentialParent(absoluteParent: string): string {
+  const missingSegments: string[] = [];
+  let cursor = absoluteParent;
+  for (;;) {
+    try {
+      return path.join(realpathSync.native(cursor), ...missingSegments);
+    } catch (error) {
+      if (!isMissingFile(error)) throw error;
+      const parent = path.dirname(cursor);
+      if (parent === cursor) return absoluteParent;
+      missingSegments.unshift(path.basename(cursor));
+      cursor = parent;
+    }
+  }
 }
 
 export async function loadSkillFitnessEvents(

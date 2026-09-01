@@ -1,0 +1,95 @@
+name: Trust Core verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trust-core-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Trust Core coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: npm-shrinkwrap.json
+      - run: npm ci --include=optional --ignore-scripts
+      - run: npm run test:trust-core:coverage
+
+  networkless-container:
+    name: Networkless ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: npm-shrinkwrap.json
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v3.11.1
+      - run: npm ci --include=optional --ignore-scripts
+      - run: npm run build
+      - name: Stage the exact production package
+        run: npm run stage:package
+      - name: Pack the staged candidate without lifecycle scripts
+        id: pack
+        shell: bash
+        working-directory: .dist/npm-package
+        run: |
+          mkdir -p ../../.trust-artifacts
+          npm pack --ignore-scripts --pack-destination ../../.trust-artifacts
+          artifact="$(find ../../.trust-artifacts -maxdepth 1 -name '*.tgz' -print -quit)"
+          echo "tarball=.trust-artifacts/$(basename "$artifact")" >> "$GITHUB_OUTPUT"
+      - name: Build the installed-artifact image
+        shell: bash
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          MEMI_TARBALL: ${{ steps.pack.outputs.tarball }}
+        run: |
+          image_tag="memi-trust-${PLATFORM//\//-}"
+          docker buildx build \
+            --platform "$PLATFORM" \
+            --load \
+            --build-arg "MEMI_TARBALL=$MEMI_TARBALL" \
+            --file .github/trust-core/Dockerfile \
+            --tag "$image_tag" \
+            .
+          echo "MEMI_TRUST_IMAGE=$image_tag" >> "$GITHUB_ENV"
+      - name: Run as non-root with no network and a read-only root filesystem
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          performance_mode="enforced"
+          if [ "$PLATFORM" = "linux/arm64" ]; then
+            # QEMU startup time is not representative of native arm64. This job
+            # still runs the complete containment/privacy suite with a bounded
+            # command timeout; native jobs enforce the published latency budget.
+            performance_mode="conformance"
+          fi
+          docker run --rm \
+            --platform "$PLATFORM" \
+            --network none \
+            --read-only \
+            --user 65532:65532 \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m,mode=1777 \
+            "$MEMI_TRUST_IMAGE" \
+            --performance-mode "$performance_mode"

@@ -36,6 +36,13 @@ interface HeldLock {
   readonly path: string;
   readonly ownerPath: string;
   readonly token: string;
+  readonly directoryIdentity: LockPathIdentity;
+  readonly ownerIdentity: LockPathIdentity;
+}
+
+interface LockPathIdentity {
+  readonly dev: bigint;
+  readonly ino: bigint;
 }
 
 interface LockOwnerState {
@@ -113,6 +120,7 @@ async function acquire(file: string, options: NormalizedLockOptions): Promise<He
   for (;;) {
     try {
       await mkdir(lockPath, { mode: 0o700 });
+      const directoryIdentity = await lockPathIdentity(lockPath, "directory");
       const token = randomUUID();
       try {
         await writeFile(ownerPath, `${JSON.stringify({
@@ -122,10 +130,21 @@ async function acquire(file: string, options: NormalizedLockOptions): Promise<He
           createdAt: new Date().toISOString(),
         })}\n`, { encoding: "utf8", flag: "wx", mode: 0o600 });
       } catch (error) {
-        await rmdir(lockPath).catch(() => undefined);
+        const currentIdentity = await lockPathIdentity(lockPath, "directory")
+          .catch(() => null);
+        if (currentIdentity && sameLockPathIdentity(currentIdentity, directoryIdentity)) {
+          await rmdir(lockPath).catch(() => undefined);
+        }
         throw error;
       }
-      return { path: lockPath, ownerPath, token };
+      const ownerIdentity = await lockPathIdentity(ownerPath, "owner");
+      await assertLockPathIdentity(
+        lockPath,
+        "directory",
+        directoryIdentity,
+        "during acquisition",
+      );
+      return { path: lockPath, ownerPath, token, directoryIdentity, ownerIdentity };
     } catch (error) {
       if (!isAlreadyExists(error)) throw error;
     }
@@ -229,12 +248,72 @@ function processIsAlive(pid: number): boolean {
 }
 
 async function release(lock: HeldLock): Promise<void> {
+  await assertHeldLockIdentity(lock, lock.path, lock.ownerPath, "before release");
   const current = await readOwner(lock.ownerPath, Date.now());
   if (!current.owner || current.owner.token !== lock.token) {
     throw new Error("skill fitness lock ownership changed before release");
   }
-  await unlink(lock.ownerPath);
-  await rmdir(lock.path);
+  await assertHeldLockIdentity(lock, lock.path, lock.ownerPath, "before release");
+  const releasedPath = `${lock.path}.released-${randomUUID()}`;
+  await rename(lock.path, releasedPath);
+  const releasedOwnerPath = path.join(releasedPath, "owner.json");
+  await assertHeldLockIdentity(lock, releasedPath, releasedOwnerPath, "during release");
+  const released = await readOwner(releasedOwnerPath, Date.now());
+  if (!released.owner || released.owner.token !== lock.token) {
+    throw new Error("skill fitness lock ownership changed during release");
+  }
+  await unlink(releasedOwnerPath);
+  await rmdir(releasedPath);
+}
+
+async function assertHeldLockIdentity(
+  lock: HeldLock,
+  directoryPath: string,
+  ownerPath: string,
+  phase: string,
+): Promise<void> {
+  await assertLockPathIdentity(directoryPath, "directory", lock.directoryIdentity, phase);
+  await assertLockPathIdentity(ownerPath, "owner", lock.ownerIdentity, phase);
+}
+
+async function assertLockPathIdentity(
+  targetPath: string,
+  kind: "directory" | "owner",
+  expected: LockPathIdentity,
+  phase: string,
+): Promise<void> {
+  const actual = await lockPathIdentity(targetPath, kind);
+  if (!sameLockPathIdentity(actual, expected)) {
+    throw new Error(`skill fitness lock ${kind} identity changed ${phase}`);
+  }
+}
+
+async function lockPathIdentity(
+  targetPath: string,
+  kind: "directory" | "owner",
+): Promise<LockPathIdentity> {
+  const metadata = await lstat(targetPath, { bigint: true });
+  const valid = kind === "directory" ? metadata.isDirectory() : metadata.isFile();
+  if (metadata.isSymbolicLink() || !valid) {
+    throw new Error(`skill fitness lock ${kind} must be a regular non-symlink ${kind}`);
+  }
+  requireStableLockPathIdentity(metadata.dev, metadata.ino);
+  return {
+    dev: metadata.dev,
+    ino: metadata.ino,
+  };
+}
+
+function sameLockPathIdentity(left: LockPathIdentity, right: LockPathIdentity): boolean {
+  return left.dev === right.dev && left.ino === right.ino;
+}
+
+export function requireStableLockPathIdentity(dev: bigint, ino: bigint): void {
+  if (ino === 0n) {
+    throw new Error(
+      `skill fitness locks require a stable filesystem identity (dev=${dev}, ino=${ino})`,
+    );
+  }
 }
 
 function boundedPositiveInteger(value: number, label: string, maximum: number): number {

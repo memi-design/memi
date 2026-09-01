@@ -38,27 +38,27 @@ describe("package size budget", () => {
     expect(evaluatePackageSizeBudget({
       size: 420_000,
       unpackedSize: 1_480_000,
-      files: 230,
+      files: 80,
     }, {
-      maxSizeBytes: 750_000,
-      maxUnpackedBytes: 2_000_000,
-      maxFiles: 250,
+      maxSizeBytes: 1_500_000,
+      maxUnpackedBytes: 3_000_000,
+      maxFiles: 100,
       maxUtilization: 0.9,
     })).toMatchObject({
       passed: true,
       size: 420_000,
       unpackedSize: 1_480_000,
-      files: 230,
+      files: 80,
     });
 
     expect(evaluatePackageSizeBudget({
       size: 420_000,
-      unpackedSize: 2_000_001,
-      files: 230,
+      unpackedSize: 3_000_001,
+      files: 80,
     }, {
-      maxSizeBytes: 750_000,
-      maxUnpackedBytes: 2_000_000,
-      maxFiles: 250,
+      maxSizeBytes: 1_500_000,
+      maxUnpackedBytes: 3_000_000,
+      maxFiles: 100,
       maxUtilization: 0.9,
     })).toMatchObject({
       passed: false,
@@ -68,11 +68,11 @@ describe("package size budget", () => {
     expect(evaluatePackageSizeBudget({
       size: 420_000,
       unpackedSize: 1_480_000,
-      files: 251,
+      files: 101,
     }, {
-      maxSizeBytes: 750_000,
-      maxUnpackedBytes: 2_000_000,
-      maxFiles: 250,
+      maxSizeBytes: 1_500_000,
+      maxUnpackedBytes: 3_000_000,
+      maxFiles: 100,
       maxUtilization: 0.9,
     })).toMatchObject({
       passed: false,

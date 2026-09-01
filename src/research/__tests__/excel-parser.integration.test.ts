@@ -1,13 +1,23 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import XlsxPopulate from "xlsx-populate";
+import { configureExecutionPolicy, resetExecutionPolicyForTests } from "../../security/execution-policy.js";
 import { parseExcel } from "../excel-parser.js";
 
 const temporaryDirectories: string[] = [];
 
+beforeEach(() => {
+  configureExecutionPolicy({
+    projectRoot: "/workspace",
+    profile: "connected",
+    allow: ["host-integration-code"],
+  });
+});
+
 afterEach(async () => {
+  resetExecutionPolicyForTests();
   await Promise.all(temporaryDirectories.splice(0).map((directory) =>
     rm(directory, { recursive: true, force: true }),
   ));

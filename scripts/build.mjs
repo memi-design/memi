@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { access, cp, readdir, rm, copyFile, mkdir } from "node:fs/promises";
+import { access, cp, readdir, rm, copyFile, mkdir, readFile } from "node:fs/promises";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
@@ -106,6 +106,12 @@ async function removeMapFiles(dir) {
 async function bundlePublishedRuntime(dir) {
   const stage = resolve(root, ".dist", "npm-runtime");
   const bundlePath = join(stage, "index.js");
+  const launcherPath = join(stage, "bin.js");
+  const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+  const packageVersion = String(packageJson.version ?? "");
+  if (!packageVersion) {
+    throw new Error("package.json version is required to build the CLI launcher");
+  }
   await rm(stage, { recursive: true, force: true });
   await mkdir(stage, { recursive: true });
   await copyFile(join(dir, "index.d.ts"), join(stage, "index.d.ts"));
@@ -130,6 +136,18 @@ async function bundlePublishedRuntime(dir) {
     format: "esm",
     target: "node20",
     minify: true,
+  });
+  await build({
+    entryPoints: [resolve(root, "src", "bin.ts")],
+    outfile: launcherPath,
+    bundle: false,
+    platform: "node",
+    format: "esm",
+    target: "node20",
+    minify: true,
+    define: {
+      __MEMI_PACKAGE_VERSION__: JSON.stringify(packageVersion),
+    },
   });
   await rm(dir, { recursive: true, force: true });
   await cp(stage, dir, { recursive: true });

@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { stagePackage } from "./lib/package-stage.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const registry = process.env.NPM_CONFIG_REGISTRY || "https://registry.npmjs.org/";
@@ -78,7 +79,15 @@ if (latest.ok) {
   check(false, latest.stderr || "npm view failed");
 }
 
-const pack = run("npm", ["pack", "--dry-run", "--ignore-scripts", "--json"]);
+const packageStage = await stagePackage({
+  packageRoot: root,
+  stageRoot: join(root, ".dist", "npm-package"),
+});
+const pack = run(
+  "npm",
+  ["pack", "--dry-run", "--ignore-scripts", "--json"],
+  packageStage.stageRoot,
+);
 check(pack.ok, pack.stderr || "npm pack dry-run failed");
 if (pack.ok) {
   const payload = JSON.parse(pack.stdout);
@@ -87,13 +96,14 @@ if (pack.ok) {
   check(summary.version === packageJson.version, `pack version ${summary.version} does not match package.json ${packageJson.version}`);
   check(files.includes("server.json"), "npm pack is missing server.json");
   check(files.includes("package.json"), "npm pack is missing package.json");
+  check(files.includes("dist/bin.js"), "npm pack is missing dist/bin.js; run `npm run build`");
   check(files.includes("dist/index.js"), "npm pack is missing dist/index.js; run `npm run build`");
   notes.push(`pack: ${summary.filename} (${summary.size} bytes, ${files.length} files)`);
 }
 
-const audit = run("npm", ["audit", "--omit=dev", "--audit-level=high", "--json"]);
+const audit = run("npm", ["audit", "--omit=dev", "--omit=optional", "--audit-level=low", "--json"]);
 check(audit.ok, audit.stderr.trim() || audit.stdout.trim() || "production npm audit failed");
-if (audit.ok) notes.push("prod audit: no high vulnerabilities");
+if (audit.ok) notes.push("prod audit: zero known vulnerabilities");
 
 const smoke = run(process.execPath, [join(root, "scripts", "smoke-mcp-stdio.mjs")]);
 check(smoke.ok, smoke.stderr.trim() || smoke.stdout.trim() || "MCP stdio smoke check failed");
@@ -126,9 +136,9 @@ function check(condition, message) {
   if (!condition) failures.push(message);
 }
 
-function run(command, args) {
+function run(command, args, cwd = root) {
   const result = spawnSync(command, args, {
-    cwd: root,
+    cwd,
     encoding: "utf-8",
     env: {
       ...process.env,

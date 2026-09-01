@@ -6,9 +6,10 @@
  * as a Claude Code tool without it, but gets stronger with it.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
+import type Anthropic from "@anthropic-ai/sdk";
 import { createHash } from "node:crypto";
 import { createLogger } from "../engine/logger.js";
+import { getExecutionPolicy } from "../security/execution-policy.js";
 import { TokenTracker } from "./token-tracker.js";
 import { getModelId, getMaxOutput } from "./model-config.js";
 import { OpenAICompatibleClient } from "./openai-compatible.js";
@@ -25,12 +26,17 @@ import type {
 } from "./types.js";
 
 const log = createLogger("ai");
+const ANTHROPIC_INSTALL_COMMAND = "npm install --save-exact @anthropic-ai/sdk@0.112.3";
+
+type AnthropicLoader = () => Promise<typeof import("@anthropic-ai/sdk")>;
 
 let instance: AIClient | null = null;
 let instanceKey: string | null = null;
 
 export class AnthropicClient implements AIClient {
-  private sdk: Anthropic;
+  private sdk: Anthropic | null = null;
+  private readonly apiKey: string;
+  private readonly anthropicLoader: AnthropicLoader;
   private readonly models: Record<ModelTier, string>;
   readonly provider = "anthropic" as const;
   readonly capabilities: AIProviderCapabilities = {
@@ -42,8 +48,13 @@ export class AnthropicClient implements AIClient {
   };
   readonly tracker: TokenTracker;
 
-  constructor(apiKey: string, config?: AIProviderConfig) {
-    this.sdk = new Anthropic({ apiKey });
+  constructor(
+    apiKey: string,
+    config?: AIProviderConfig,
+    anthropicLoader: AnthropicLoader = () => import("@anthropic-ai/sdk"),
+  ) {
+    this.apiKey = apiKey;
+    this.anthropicLoader = anthropicLoader;
     this.models = config?.models ?? {
       fast: getModelId("fast"),
       deep: getModelId("deep"),
@@ -53,6 +64,7 @@ export class AnthropicClient implements AIClient {
   }
 
   async complete(opts: AICompletionOptions): Promise<AIResponse> {
+    const sdk = await this.loadSdk();
     const tier: ModelTier = opts.model || "fast";
     const modelId = this.models[tier];
     const maxTokens = opts.maxTokens || getMaxOutput(tier);
@@ -62,7 +74,7 @@ export class AnthropicClient implements AIClient {
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        const response = await this.sdk.messages.create({
+        const response = await sdk.messages.create({
           model: modelId,
           max_tokens: maxTokens,
           temperature: opts.temperature ?? 0.3,
@@ -111,11 +123,12 @@ export class AnthropicClient implements AIClient {
   }
 
   async *stream(opts: AICompletionOptions): AsyncGenerator<string, AIResponse> {
+    const sdk = await this.loadSdk();
     const tier: ModelTier = opts.model || "fast";
     const modelId = this.models[tier];
     const maxTokens = opts.maxTokens || getMaxOutput(tier);
 
-    const stream = this.sdk.messages.stream({
+    const stream = sdk.messages.stream({
       model: modelId,
       max_tokens: maxTokens,
       temperature: opts.temperature ?? 0.3,
@@ -262,6 +275,21 @@ export class AnthropicClient implements AIClient {
       return opts.schema.parse(parsed) as T;
     }
     return parsed as T;
+  }
+
+  private async loadSdk(): Promise<Anthropic> {
+    getExecutionPolicy().assert("host-integration-code", "load the optional Anthropic SDK");
+    if (this.sdk) return this.sdk;
+    try {
+      const { default: AnthropicSdk } = await this.anthropicLoader();
+      this.sdk = new AnthropicSdk({ apiKey: this.apiKey });
+      return this.sdk;
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `MEMI_OPTIONAL_INTEGRATION_MISSING: Anthropic AI requires an optional SDK. Run \`${ANTHROPIC_INSTALL_COMMAND}\`. ${detail}`,
+      );
+    }
   }
 }
 

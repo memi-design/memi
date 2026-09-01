@@ -295,11 +295,9 @@ export function registerResearchCommand(program: Command, engine: MemoireEngine)
     .option("--json", "Output web research result as JSON")
     .action(async (topic: string, opts: { urls?: string; depth?: string; planOnly?: boolean; json?: boolean }) => {
       const json = Boolean(opts.json);
-      await engine.init();
-      await engine.research.load();
-
       const { buildResearchPlan } = await import("../research/web-researcher.js");
       const depth = (opts.depth ?? "standard") as "quick" | "standard" | "deep";
+      const urls = opts.urls?.split(",").map((url) => url.trim()).filter(Boolean) ?? [];
 
       if (opts.planOnly) {
         const plan = buildResearchPlan(topic, { depth });
@@ -311,7 +309,6 @@ export function registerResearchCommand(program: Command, engine: MemoireEngine)
         return;
       }
 
-      const urls = opts.urls?.split(",").map((url) => url.trim()).filter(Boolean) ?? [];
       if (urls.length === 0) {
         const plan = buildResearchPlan(topic, { depth });
         if (json) {
@@ -330,6 +327,9 @@ export function registerResearchCommand(program: Command, engine: MemoireEngine)
         console.log("\n  Or use the plan queries above with a web search tool, then pass the result URLs.\n");
         return;
       }
+
+      await engine.init();
+      await engine.research.load();
 
       if (!json) {
         console.log(`\n  Researching "${topic}" from ${urls.length} URLs...\n`);

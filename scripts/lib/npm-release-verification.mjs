@@ -10,6 +10,62 @@ const IN_TOTO_PAYLOAD_TYPE = "application/vnd.in-toto+json";
 const GITHUB_HOSTED_BUILDER = "https://github.com/actions/runner/github-hosted";
 const COMMIT_SHA = /^[0-9a-f]{40}$/;
 const SHASUM = /^[0-9a-f]{40}$/;
+const STABLE_VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const NUMERIC_IDENTIFIER = "(?:0|[1-9]\\d*)";
+const PRERELEASE_IDENTIFIER =
+  `(?:${NUMERIC_IDENTIFIER}|\\d*[A-Za-z-][0-9A-Za-z-]*)`;
+const SEMVER = new RegExp(
+  `^${NUMERIC_IDENTIFIER}\\.${NUMERIC_IDENTIFIER}\\.${NUMERIC_IDENTIFIER}`
+  + `(?:-(?<prerelease>${PRERELEASE_IDENTIFIER}(?:\\.${PRERELEASE_IDENTIFIER})*))?`
+  + "(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+);
+
+export function resolveReleaseChannel({ version, previousPublicRelease }) {
+  const match = typeof version === "string" ? SEMVER.exec(version) : null;
+  if (!match) {
+    throw new Error(`unsupported release version: ${version}`);
+  }
+
+  const isPrerelease = match.groups?.prerelease !== undefined;
+  if (isPrerelease) {
+    if (typeof previousPublicRelease !== "string"
+      || !STABLE_VERSION.test(previousPublicRelease)) {
+      throw new Error(
+        "prerelease routing requires a valid stable previousPublicRelease",
+      );
+    }
+    return {
+      version,
+      distTag: "next",
+      expectedLatest: previousPublicRelease,
+      isPrerelease: true,
+      githubPrerelease: true,
+      githubMakeLatest: "false",
+      promoteStableChannels: false,
+    };
+  }
+
+  if (STABLE_VERSION.test(version)) {
+    return {
+      version,
+      distTag: "latest",
+      expectedLatest: version,
+      isPrerelease: false,
+      githubPrerelease: false,
+      githubMakeLatest: "legacy",
+      promoteStableChannels: true,
+    };
+  }
+
+  throw new Error(`unsupported release version: ${version}`);
+}
+
+export function resolveNpmReleaseChannel(expectedVersion, previousPublicRelease) {
+  return resolveReleaseChannel({
+    version: expectedVersion,
+    previousPublicRelease,
+  });
+}
 
 export function validateRegistryVersion({
   metadata,
@@ -17,10 +73,13 @@ export function validateRegistryVersion({
   expectedVersion,
   expectedPhrase,
   expectedInstall,
+  expectedDistTag = "latest",
+  expectedLatest = expectedVersion,
   requireProvenance = true,
 }) {
   assert(metadata && typeof metadata === "object", "registry metadata must be an object");
   const latest = metadata["dist-tags"]?.latest;
+  const taggedVersion = metadata["dist-tags"]?.[expectedDistTag];
   const version = metadata.versions?.[expectedVersion];
   const dist = version?.dist;
   const readme = String(metadata.readme || "");
@@ -29,7 +88,15 @@ export function validateRegistryVersion({
   const readableReadme = normalizeReadableMarkdown(combinedReadme);
   const readablePhrase = normalizeReadableMarkdown(expectedPhrase);
 
-  assert(latest === expectedVersion, `expected latest ${expectedVersion}, got ${latest}`);
+  assert(
+    expectedDistTag === "latest" || expectedDistTag === "next",
+    `unsupported npm dist-tag: ${expectedDistTag}`,
+  );
+  assert(
+    taggedVersion === expectedVersion,
+    `expected ${expectedDistTag} ${expectedVersion}, got ${taggedVersion}`,
+  );
+  assert(latest === expectedLatest, `expected latest ${expectedLatest}, got ${latest}`);
   assert(readableReadme.includes(readablePhrase), `README missing phrase: ${expectedPhrase}`);
   assert(combinedReadme.includes(expectedInstall), `README missing install command: ${expectedInstall}`);
   assert(
@@ -57,6 +124,7 @@ export function validateRegistryVersion({
 
   return {
     packageName,
+    distTag: expectedDistTag,
     latest,
     integrity: dist.integrity,
     shasum: dist.shasum,
