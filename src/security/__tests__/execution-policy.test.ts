@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, symlink } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -83,6 +83,24 @@ describe("MemiExecutionPolicy", () => {
     await expect(policy.assertProjectWrite(join(projectRoot, ".memi", "escape", "receipt.json"), "write receipt")).rejects.toMatchObject({
       code: "MEMI_CAPABILITY_DENIED",
       capability: "project-write",
+    });
+  });
+
+  it("rejects a symlinked receipt leaf before a write can follow it", async () => {
+    const projectRoot = await mkdtemp(join(tmpdir(), "memi-policy-leaf-project-"));
+    const outsideRoot = await mkdtemp(join(tmpdir(), "memi-policy-leaf-outside-"));
+    cleanup.push(projectRoot, outsideRoot);
+    await mkdir(join(projectRoot, ".memi"), { recursive: true });
+    const outsideReceipt = join(outsideRoot, "receipt.json");
+    await writeFile(outsideReceipt, "outside", "utf8");
+    const receiptPath = join(projectRoot, ".memi", "receipt.json");
+    await symlink(outsideReceipt, receiptPath, "file");
+    const policy = createExecutionPolicy({ projectRoot, profile: "local" });
+
+    await expect(policy.assertProjectWrite(receiptPath, "persist metadata receipt")).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "project-write",
+      operation: "persist metadata receipt",
     });
   });
 
