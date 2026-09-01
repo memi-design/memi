@@ -20,6 +20,8 @@ release gates pass.
 - `623f03c7` — feat: preflight risky commands and make doctor read-only
 - `5b5bed4b` — feat: enforce Trust Core policy across CLI startup
 - `82c1a278` — fix: emit structured CLI policy denials
+- `f5ef708e` — fix: fail closed on downstream command authority
+- `949ec739` — test: cover Trust Core capability boundaries
 - Makes `locked` the default offline profile, limits `local` writes to the real
   project `.memi/` directory, and requires explicit per-invocation grants in
   `connected` mode.
