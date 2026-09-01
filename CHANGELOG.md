@@ -23,6 +23,8 @@ release gates pass.
 - `f5ef708e` — fix: fail closed on downstream command authority
 - `949ec739` — test: cover Trust Core capability boundaries
 - `a8d832be` — test: reject symlinked receipt leaves
+- `2f259c8f` — test: reproduce prefixed updater routing drift
+- `e1d07881` — fix: preserve resolved updater routing and version
 - Makes `locked` the default offline profile, limits `local` writes to the real
   project `.memi/` directory, and requires explicit per-invocation grants in
   `connected` mode.
