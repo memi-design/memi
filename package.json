@@ -13,7 +13,7 @@
     }
   },
   "bin": {
-    "memi": "dist/index.js"
+    "memi": "dist/bin.js"
   },
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -100,6 +100,7 @@
   },
   "files": [
     "npm-shrinkwrap.json",
+    "dist/bin.js",
     "dist/index.js",
     "dist/index.d.ts",
     "dist/preview/templates/gallery-page.client.js",

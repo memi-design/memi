@@ -96,6 +96,7 @@ if (pack.ok) {
   check(summary.version === packageJson.version, `pack version ${summary.version} does not match package.json ${packageJson.version}`);
   check(files.includes("server.json"), "npm pack is missing server.json");
   check(files.includes("package.json"), "npm pack is missing package.json");
+  check(files.includes("dist/bin.js"), "npm pack is missing dist/bin.js; run `npm run build`");
   check(files.includes("dist/index.js"), "npm pack is missing dist/index.js; run `npm run build`");
   notes.push(`pack: ${summary.filename} (${summary.size} bytes, ${files.length} files)`);
 }

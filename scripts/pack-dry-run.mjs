@@ -18,7 +18,7 @@ const maxUtilization = Number.parseFloat(process.env.MEMOIRE_PACK_MAX_UTILIZATIO
 const npmCommand = "npm";
 
 export const PACK_DRY_RUN_REQUIRED_INPUTS = Object.freeze({
-  build: ["dist/index.js", "dist/index.d.ts"],
+  build: ["dist/bin.js", "dist/index.js", "dist/index.d.ts"],
   shrinkwrap: ["release/npm-shrinkwrap.production.json"],
 });
 
@@ -70,7 +70,7 @@ export async function runPackDryRun(packageRoot = root) {
     const unpackedSize = Number(summary?.unpackedSize ?? 0);
     const files = Array.isArray(summary?.files) ? summary.files.length : 0;
     const packedPaths = new Set((summary?.files ?? []).map((file) => file.path));
-    for (const requiredPath of ["dist/index.js", "dist/index.d.ts", "npm-shrinkwrap.json"]) {
+    for (const requiredPath of ["dist/bin.js", "dist/index.js", "dist/index.d.ts", "npm-shrinkwrap.json"]) {
       if (!packedPaths.has(requiredPath)) {
         throw new Error(`packed artifact is missing required file: ${requiredPath}`);
       }

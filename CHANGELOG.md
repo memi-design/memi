@@ -147,6 +147,9 @@ release gates pass.
 - Keeps Windows verification shell-free by invoking npm's JavaScript entrypoint
   through Node, and tests non-portable bundle names without asking Windows to
   create paths its filesystem rejects before the safety validator can run.
+- Adds a tiny published CLI launcher that answers version-only invocations
+  before loading the full engine bundle, preserving the one-second cold-start
+  budget on slower Windows Node runtimes without weakening the gate.
 ### Packaging trust follow-up commits
 
 | Commit | Change |
