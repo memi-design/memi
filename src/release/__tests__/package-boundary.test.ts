@@ -75,15 +75,30 @@ describe("published package boundary", () => {
     );
   });
 
-  it("ships a production-only shrinkwrap", async () => {
-    const lock = JSON.parse(
-      await readFile(join(process.cwd(), "npm-shrinkwrap.json"), "utf8"),
-    );
+  it("keeps source npm ci reproducible while staging a production-only shrinkwrap", async () => {
+    const [pkg, sourceLock, productionLock, publishWorkflow] = await Promise.all([
+      readPackageJson(),
+      readFile(join(process.cwd(), "npm-shrinkwrap.json"), "utf8").then(JSON.parse),
+      readFile(
+        join(process.cwd(), "release", "npm-shrinkwrap.production.json"),
+        "utf8",
+      ).then(JSON.parse),
+      readFile(join(process.cwd(), ".github", "workflows", "publish.yml"), "utf8"),
+    ]);
 
-    expect(lock.packages[""]?.devDependencies).toBeUndefined();
-    expect(lock.packages[""]?.optionalDependencies).toBeUndefined();
+    expect(sourceLock.packages[""]?.devDependencies).toEqual(pkg.devDependencies);
+    expect(sourceLock.packages["node_modules/typescript"]).toBeDefined();
+    expect(sourceLock.packages["node_modules/vitest"]).toBeDefined();
+    expect(sourceLock.packages["node_modules/vite"]).toBeDefined();
+    expect(pkg.scripts["stage:package"]).toBe("node scripts/stage-package.mjs");
+    expect(publishWorkflow).toContain("run: npm ci --ignore-scripts");
+    expect(publishWorkflow).toContain("run: npm run stage:package");
+    expect(publishWorkflow).toContain("working-directory: .dist/npm-package");
+
+    expect(productionLock.packages[""]?.devDependencies).toBeUndefined();
+    expect(productionLock.packages[""]?.optionalDependencies).toBeUndefined();
     for (const name of FORBIDDEN_SHRINKWRAP_PACKAGES) {
-      expect(lock.packages[`node_modules/${name}`], name).toBeUndefined();
+      expect(productionLock.packages[`node_modules/${name}`], name).toBeUndefined();
     }
   });
 });
