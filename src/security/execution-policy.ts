@@ -8,11 +8,11 @@ export const MEMI_CAPABILITIES = [
   "browser",
   "figma",
   "home-write",
-  "install",
+  "dynamic-install",
   "network",
   "project-write",
   "shell",
-  "source-persistence",
+  "source-content-persistence",
   "telemetry",
 ] as const;
 export type MemiCapability = (typeof MEMI_CAPABILITIES)[number];

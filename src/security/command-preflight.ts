@@ -39,7 +39,7 @@ export async function preflightCommand(
       require(["network", "check npm for updates"]);
       if (!invocation.options.check && !invocation.options.silent) {
         require(
-          ["install", "install the resolved CLI version"],
+          ["dynamic-install", "install the resolved CLI version"],
           ["shell", "run the package manager"],
           ["home-write", "replace the global CLI installation"],
         );
@@ -49,7 +49,7 @@ export async function preflightCommand(
       require(["network", "check standalone binary releases"]);
       if (!invocation.options.check) {
         require(
-          ["install", "install the resolved standalone version"],
+          ["dynamic-install", "install the resolved standalone version"],
           ["shell", "replace the standalone executable"],
           ["home-write", "replace the standalone executable"],
         );
@@ -73,6 +73,17 @@ export async function preflightCommand(
       );
       if (invocation.options.background) {
         require(["shell", "start the bridge in the background"]);
+      }
+      break;
+    case "compose":
+      require(["network", "run model composition"]);
+      if (invocation.options.figma !== false) {
+        require(["figma", "run Figma composition steps"]);
+      }
+      break;
+    case "view":
+      if (!invocation.options.print && !invocation.options.json) {
+        require(["browser", "open a registry URL"]);
       }
       break;
     case "mcp":
@@ -111,7 +122,7 @@ export async function preflightCommand(
     case "agent.install":
       if (!invocation.options.dryRun) {
         require(
-          ["install", "install agent integration files"],
+          ["dynamic-install", "install agent integration files"],
           [invocation.options.global ? "home-write" : "project-write", "write agent integration files"],
         );
       }

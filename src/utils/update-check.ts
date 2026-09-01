@@ -16,6 +16,7 @@ import { dirname, join } from "node:path";
 import { spawn } from "node:child_process";
 import { isStandaloneBinary } from "./runtime.js";
 import { ui } from "../tui/format.js";
+import { getExecutionPolicy, type MemiExecutionPolicy } from "../security/execution-policy.js";
 
 export const PKG_NAME = "@memi-design/cli";
 const REGISTRY_URL = `https://registry.npmjs.org/${PKG_NAME}/latest`;
@@ -112,7 +113,11 @@ export function isNewer(latest: string, current: string): boolean {
 }
 
 /** Fetch the latest published version from npm. Returns null on any failure. */
-export async function fetchLatestVersion(timeoutMs = FETCH_TIMEOUT_MS): Promise<string | null> {
+export async function fetchLatestVersion(
+  timeoutMs = FETCH_TIMEOUT_MS,
+  policy: MemiExecutionPolicy = getExecutionPolicy(),
+): Promise<string | null> {
+  policy.assert("network", "check npm for updates");
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -127,14 +132,18 @@ export async function fetchLatestVersion(timeoutMs = FETCH_TIMEOUT_MS): Promise<
 }
 
 /** Refresh and persist the update cache from the network. */
-export async function refreshUpdateCache(): Promise<UpdateCache> {
-  const latestVersion = await fetchLatestVersion();
+export async function refreshUpdateCache(
+  policy: MemiExecutionPolicy = getExecutionPolicy(),
+): Promise<UpdateCache> {
+  const latestVersion = await fetchLatestVersion(FETCH_TIMEOUT_MS, policy);
   const cache: UpdateCache = {
     lastCheckAt: new Date().toISOString(),
     latestVersion,
     channel: getInstallChannel(),
   };
-  writeUpdateCache(cache);
+  if (policy.allows("home-write")) {
+    writeUpdateCache(cache);
+  }
   return cache;
 }
 
@@ -146,11 +155,13 @@ function cacheIsStale(cache: UpdateCache | null): boolean {
 }
 
 /** Spawn a detached process that refreshes the cache, then return immediately. */
-function spawnBackgroundRefresh(): void {
+function spawnBackgroundRefresh(policy: MemiExecutionPolicy): void {
   try {
+    const policyArgs = ["--profile", "connected", "--allow", "network"];
+    if (policy.allows("home-write")) policyArgs.push("--allow", "home-write");
     const args = isStandaloneBinary()
-      ? ["self-update", "--check", "--silent"]
-      : [process.argv[1], "self-update", "--check", "--silent"];
+      ? [...policyArgs, "self-update", "--check", "--silent"]
+      : [process.argv[1], ...policyArgs, "self-update", "--check", "--silent"];
     const child = spawn(process.execPath, args, { detached: true, stdio: "ignore" });
     child.unref();
   } catch {
@@ -179,23 +190,32 @@ export async function maybeNotifyUpdate(opts: {
   currentVersion: string;
   mcpMode: boolean;
   jsonOutput: boolean;
+  policy?: MemiExecutionPolicy;
 }): Promise<void> {
   try {
+    const policy = opts.policy ?? getExecutionPolicy();
+    if (!policy.allows("network")) return;
     if (opts.mcpMode || opts.jsonOutput) return;
     if (shouldSkipNotify(process.argv)) return;
 
     const cache = readUpdateCache();
-    if (cacheIsStale(cache)) spawnBackgroundRefresh();
+    if (cacheIsStale(cache) && policy.allows("shell")) spawnBackgroundRefresh(policy);
 
     const latest = cache?.latestVersion ?? null;
     if (!latest || !isNewer(latest, opts.currentVersion)) return;
 
     const channel = getInstallChannel();
 
-    if (process.env.MEMOIRE_AUTO_UPDATE === "1" && channel === "npm") {
+    if (
+      process.env.MEMOIRE_AUTO_UPDATE === "1" &&
+      channel === "npm" &&
+      policy.allows("dynamic-install") &&
+      policy.allows("shell") &&
+      policy.allows("home-write")
+    ) {
       process.stderr.write(`\n${ui.active(`Auto-updating memi ${opts.currentVersion} → ${latest}…`)}\n`);
       const { spawnSync } = await import("node:child_process");
-      const r = spawnSync("npm", ["install", "-g", `${PKG_NAME}@latest`], { stdio: "inherit" });
+      const r = spawnSync("npm", ["install", "-g", `${PKG_NAME}@${latest}`], { stdio: "inherit" });
       if (r.status === 0) {
         process.stderr.write(`${ui.ok(`Updated to ${latest} — takes effect on your next command.`)}\n\n`);
       } else {

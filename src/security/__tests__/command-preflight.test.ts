@@ -59,13 +59,13 @@ describe("Trust Core command preflight", () => {
       commandPath: ["self-update"],
       options: {},
       args: [],
-    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "install" });
+    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "dynamic-install" });
 
     const applyPolicy = createExecutionPolicy({
       projectRoot: "/workspace",
       homeDir: "/home/user",
       profile: "connected",
-      allow: ["network", "install", "shell", "home-write"],
+      allow: ["network", "dynamic-install", "shell", "home-write"],
     });
     await expect(preflightCommand(applyPolicy, {
       commandPath: ["self-update"],
@@ -117,6 +117,34 @@ describe("Trust Core command preflight", () => {
       commandPath: ["agent", "install"],
       options: { dryRun: false, global: false },
       args: ["codex"],
-    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "install" });
+    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "dynamic-install" });
+  });
+
+  it("blocks model composition and browser launch while preserving print-only view", async () => {
+    const locked = createExecutionPolicy({ projectRoot: "/workspace" });
+
+    await expect(preflightCommand(locked, {
+      commandPath: ["compose"],
+      options: { figma: false },
+      args: ["build a dashboard"],
+    })).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "network",
+      operation: "run model composition",
+    });
+    await expect(preflightCommand(locked, {
+      commandPath: ["view"],
+      options: {},
+      args: ["Button"],
+    })).rejects.toMatchObject({
+      code: "MEMI_CAPABILITY_DENIED",
+      capability: "browser",
+      operation: "open a registry URL",
+    });
+    await expect(preflightCommand(locked, {
+      commandPath: ["view"],
+      options: { print: true },
+      args: ["Button"],
+    })).resolves.toEqual({ optionOverrides: {} });
   });
 });
