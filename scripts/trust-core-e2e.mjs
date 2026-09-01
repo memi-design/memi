@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
-import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, readlink, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, readlink, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,7 +31,9 @@ async function runTrustCoreArtifactSuite(options) {
       packageRoot: options.packageRoot ?? repositoryRoot,
     });
 
-  const fixtureRoot = await mkdtemp(join(tmpdir(), "memi-trust-runtime-"));
+  // Canonicalize macOS's /var -> /private/var alias before passing absolute
+  // output paths to the policy's lexical containment check.
+  const fixtureRoot = await realpath(await mkdtemp(join(tmpdir(), "memi-trust-runtime-")));
   const projectRoot = join(fixtureRoot, "project");
   const homeRoot = join(fixtureRoot, "home");
   const outsideRoot = join(fixtureRoot, "outside");
