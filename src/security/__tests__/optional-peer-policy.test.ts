@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AnthropicClient } from "../../ai/client.js";
 import { parseExcel } from "../../research/excel-parser.js";
@@ -44,6 +47,21 @@ describe("optional host integration policy", () => {
 
   it("denies XLSX peers while keeping the built-in CSV path available", async () => {
     configureExecutionPolicy({ projectRoot: "/workspace" });
+
+    const directory = await mkdtemp(join(tmpdir(), "memi-optional-peer-csv-"));
+    const csvPath = join(directory, "survey.csv");
+    await writeFile(csvPath, "Role,Count\nDesigner,2\n", "utf8");
+    try {
+      await expect(parseExcel(csvPath)).resolves.toEqual({
+        sheetName: "CSV",
+        headers: ["Role", "Count"],
+        rows: [["Designer", "2"]],
+        rowCount: 1,
+        columnCount: 2,
+      });
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
 
     await expect(parseExcel("denied.xlsx")).rejects.toMatchObject({
       code: "MEMI_CAPABILITY_DENIED",
