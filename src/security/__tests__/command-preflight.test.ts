@@ -406,7 +406,7 @@ describe("Trust Core command preflight", () => {
         options: { name: "@acme/ui", figma: "https://figma.com/design/key/file", theme: "https://example.com/theme.css", push: true },
         args: [],
       },
-      ["figma", "network", "project-write", "shell"],
+      ["network", "project-write", "shell"],
     );
     await expectExactCapabilities(
       { commandPath: ["research", "from-file"], options: {}, args: ["study.csv"] },
@@ -421,8 +421,16 @@ describe("Trust Core command preflight", () => {
       ["network", "project-write", "source-content-persistence"],
     );
     await expectExactCapabilities(
+      { commandPath: ["research", "web"], options: { planOnly: true }, args: ["topic"] },
+      [],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["research", "web"], options: {}, args: ["topic"] },
+      [],
+    );
+    await expectExactCapabilities(
       { commandPath: ["pull"], options: { rest: true }, args: [] },
-      ["figma", "network", "project-write"],
+      ["network", "project-write"],
     );
     await expectExactCapabilities(
       { commandPath: ["pull"], options: { penpot: true }, args: [] },
