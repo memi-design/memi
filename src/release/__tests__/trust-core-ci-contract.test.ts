@@ -68,6 +68,9 @@ describe("Trust Core verification configuration", () => {
     expect(harness).toContain('arg === "--performance-mode"');
     expect(harness).toContain('performanceMode: options.performanceMode');
     expect(harness).toContain('enforced: options.performanceMode === "enforced"');
+    expect(harness.indexOf("const DEFAULT_CONFORMANCE_TIMEOUT_MS")).toBeLessThan(
+      harness.indexOf("const args = parseArgs"),
+    );
   });
 
   it("pins every third-party action in the Trust Core workflow", async () => {
