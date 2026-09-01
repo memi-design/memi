@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import { preflightCommand, type CommandInvocation } from "../command-preflight.js";
 import { createExecutionPolicy, type MemiCapability } from "../execution-policy.js";
 
 describe("Trust Core command preflight", () => {
+  const tempRoots: string[] = [];
   const allCapabilities = [
     "browser",
     "figma",
@@ -14,6 +18,10 @@ describe("Trust Core command preflight", () => {
     "source-content-persistence",
     "telemetry",
   ] as const;
+
+  afterEach(async () => {
+    await Promise.all(tempRoots.splice(0).map((path) => rm(path, { recursive: true, force: true })));
+  });
 
   async function expectExactCapabilities(
     invocation: CommandInvocation,
@@ -287,6 +295,7 @@ describe("Trust Core command preflight", () => {
         args: [],
       })).rejects.toMatchObject({
         code: "MEMI_CAPABILITY_DENIED",
+        capability: "command-mapping",
         operation: 'execute unmapped command "future.unreviewed"',
       });
     }
@@ -333,6 +342,10 @@ describe("Trust Core command preflight", () => {
     await expectExactCapabilities(
       { commandPath: ["studio", "run"], options: { harness: "codex" }, args: [] },
       ["network", "project-write", "shell", "source-content-persistence"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["studio", "run"], options: { harness: "codex", mode: "brokered" }, args: [] },
+      ["browser", "figma", "network", "project-write", "shell", "source-content-persistence"],
     );
     await expectExactCapabilities(
       { commandPath: ["studio", "web"], options: {}, args: [] },
@@ -427,5 +440,36 @@ describe("Trust Core command preflight", () => {
       { commandPath: ["export"], options: { dryRun: false }, args: [] },
       ["project-write"],
     );
+  });
+
+  it("requires shell authority for GitHub-backed Note installation", async () => {
+    await expectExactCapabilities(
+      { commandPath: ["notes", "install"], options: {}, args: ["github:memi-design/mobile-craft"] },
+      ["network", "project-write", "shell"],
+    );
+  });
+
+  it("rejects user-selected project outputs outside the connected project root", async () => {
+    const sandbox = await mkdtemp(join(tmpdir(), "memi-command-preflight-"));
+    tempRoots.push(sandbox);
+    const projectRoot = join(sandbox, "project");
+    await mkdir(projectRoot);
+    const policy = createExecutionPolicy({
+      projectRoot,
+      profile: "connected",
+      allow: ["project-write"],
+    });
+    const invocations: CommandInvocation[] = [
+      { commandPath: ["publish"], options: { name: "@acme/ui", dir: join(sandbox, "publish-outside") }, args: [] },
+      { commandPath: ["publish"], options: { name: "../../publish-outside" }, args: [] },
+      { commandPath: ["export"], options: { dryRun: false, target: "../export-outside" }, args: [] },
+    ];
+
+    for (const invocation of invocations) {
+      await expect(preflightCommand(policy, invocation)).rejects.toMatchObject({
+        code: "MEMI_CAPABILITY_DENIED",
+        capability: "project-write",
+      });
+    }
   });
 });
