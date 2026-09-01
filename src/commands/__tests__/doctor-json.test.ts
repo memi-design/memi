@@ -122,6 +122,44 @@ describe("doctor --json", () => {
     )).toBe(true);
     expect(getSummary(payload, checks).total).toBe(checks.length);
   });
+
+  it("reports a metadata-only locked policy receipt without mutating the workspace", async () => {
+    const logs = captureLogs();
+    const engine = makeDoctorEngine();
+    const init = vi.spyOn(engine, "init");
+    const registryLoad = vi.spyOn(engine.registry, "load");
+    const program = new Command();
+
+    registerDoctorCommand(program, engine as never);
+    await program.parseAsync(["doctor", "--json"], { from: "user" });
+
+    const payload = JSON.parse(lastLog(logs));
+    expect(init).not.toHaveBeenCalled();
+    expect(registryLoad).not.toHaveBeenCalled();
+    expect(payload.policy).toMatchObject({
+      profile: "locked",
+      requestedCapabilities: [],
+      effectiveCapabilities: [],
+      dataLocations: { project: ".memi/", home: "~/.memoire/" },
+      offlineInternalUse: {
+        suitable: true,
+        requiresEmployerApproval: true,
+      },
+    });
+    expect(payload.optionalIntegrations).toEqual(expect.objectContaining({
+      anthropic: expect.any(Boolean),
+      canvas: expect.any(Boolean),
+      playwright: expect.any(Boolean),
+    }));
+    expect(payload.receipt).toMatchObject({
+      schemaVersion: "memi.receipt.v1",
+      command: "doctor",
+      policy: { profile: "locked", effectiveCapabilities: [] },
+    });
+    const serialized = JSON.stringify(payload.receipt);
+    expect(serialized).not.toContain(projectRoot);
+    expect(serialized).not.toContain(process.env.HOME);
+  });
 });
 
 function makeDoctorEngine() {
@@ -216,4 +254,3 @@ function statusMap(checks: Array<{ label: string; status: string }>): Record<str
 function detailMap(checks: Array<{ label: string; detail: string }>): Map<string, string> {
   return new Map(checks.map((check) => [check.label, check.detail]));
 }
-
