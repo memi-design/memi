@@ -299,6 +299,7 @@ describe("Trust Core command preflight", () => {
     ];
     const invocations: CommandInvocation[] = [
       { commandPath: ["studio", "browser", "open"], options: {}, args: ["https://example.com"] },
+      { commandPath: ["studio", "browser", "status"], options: {}, args: [] },
       { commandPath: ["studio", "serve"], options: {}, args: [] },
       { commandPath: ["studio", "run"], options: { harness: "codex" }, args: [] },
       { commandPath: ["studio", "web"], options: {}, args: [] },
@@ -307,6 +308,7 @@ describe("Trust Core command preflight", () => {
       { commandPath: ["research", "from-file"], options: {}, args: ["study.csv"] },
       { commandPath: ["pull"], options: { rest: true }, args: [] },
       { commandPath: ["sync"], options: {}, args: [] },
+      { commandPath: ["export"], options: { dryRun: true }, args: [] },
       { commandPath: ["export"], options: { dryRun: false }, args: [] },
     ];
 
@@ -338,24 +340,38 @@ describe("Trust Core command preflight", () => {
     );
   });
 
-  it("preserves explicitly mapped read-only Studio and export paths", async () => {
+  it("keeps the read-only allowlist narrow and maps initialization side effects", async () => {
     const locked = createExecutionPolicy({ projectRoot: "/workspace" });
 
+    await expect(preflightCommand(locked, {
+      commandPath: ["doctor"],
+      options: { repairPlugin: false },
+      args: [],
+    })).resolves.toEqual({ optionOverrides: {} });
     await expect(preflightCommand(locked, {
       commandPath: ["studio", "browser", "status"],
       options: {},
       args: [],
-    })).resolves.toEqual({ optionOverrides: {} });
+    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "project-write" });
     await expect(preflightCommand(locked, {
       commandPath: ["export"],
       options: { dryRun: true },
       args: [],
-    })).resolves.toEqual({ optionOverrides: {} });
+    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "project-write" });
     await expect(preflightCommand(locked, {
       commandPath: ["studio", "status"],
       options: {},
       args: [],
-    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "shell" });
+    })).rejects.toMatchObject({ code: "MEMI_CAPABILITY_DENIED", capability: "project-write" });
+
+    await expectExactCapabilities(
+      { commandPath: ["studio", "browser", "status"], options: {}, args: [] },
+      ["project-write"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["studio", "status"], options: {}, args: [] },
+      ["project-write", "shell"],
+    );
   });
 
   it("maps preview, publish, research, pull, sync, and export options to exact grants", async () => {
@@ -365,7 +381,7 @@ describe("Trust Core command preflight", () => {
     );
     await expectExactCapabilities(
       { commandPath: ["preview"], options: { buildOnly: false }, args: [] },
-      ["network", "project-write", "shell"],
+      ["dynamic-install", "network", "project-write", "shell"],
     );
     await expectExactCapabilities(
       { commandPath: ["publish"], options: { name: "@acme/ui" }, args: [] },
@@ -402,6 +418,10 @@ describe("Trust Core command preflight", () => {
     await expectExactCapabilities(
       { commandPath: ["sync"], options: { autoPr: true }, args: [] },
       ["figma", "network", "project-write", "shell"],
+    );
+    await expectExactCapabilities(
+      { commandPath: ["export"], options: { dryRun: true }, args: [] },
+      ["project-write"],
     );
     await expectExactCapabilities(
       { commandPath: ["export"], options: { dryRun: false }, args: [] },
