@@ -147,6 +147,9 @@ release gates pass.
 - Keeps Windows verification shell-free by invoking npm's JavaScript entrypoint
   through Node, and tests non-portable bundle names without asking Windows to
   create paths its filesystem rejects before the safety validator can run.
+- Restores an end-to-end offline bundle regression using Windows-reserved
+  sidecar names that Unix hosts can still create, so archive-time portability
+  checks remain covered beyond the direct filename helper.
 
 ### Packaging trust follow-up commits
 
