@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   OFFLINE_TARGETS,
   buildOfflineBundle,
+  isPortableRuntimeName,
   resolveOfflineTarget,
 } from "../../../scripts/lib/offline-bundle.mjs";
 
@@ -143,7 +144,7 @@ describe("Trust Core offline bundle", () => {
     })).rejects.toThrow("symbolic link");
   });
 
-  it("rejects traversal-capable versions and non-portable sidecar names before archiving", async () => {
+  it("rejects traversal-capable versions before archiving", async () => {
     const invalidVersionFixture = await createFixture("linux-x64");
     await writeFile(join(invalidVersionFixture.root, "package.json"), `${JSON.stringify({
       name: "@memi-design/cli",
@@ -159,18 +160,13 @@ describe("Trust Core offline bundle", () => {
       sourceDateEpoch: 0,
     })).rejects.toThrow("valid semantic version");
 
-    const invalidNameFixture = await createFixture("linux-x64");
-    await writeFile(
-      join(invalidNameFixture.binaryStageDir, "skills", "unsafe\nchecksum.md"),
-      "ambiguous checksum path\n",
-    );
-    await expect(buildOfflineBundle({
-      root: invalidNameFixture.root,
-      target: "linux-x64",
-      binaryStageDir: invalidNameFixture.binaryStageDir,
-      outputDir: join(invalidNameFixture.root, "output"),
-      sourceDateEpoch: 0,
-    })).rejects.toThrow("non-portable filename");
+  });
+
+  it("rejects non-portable sidecar names on every host", () => {
+    for (const filename of ["unsafe\nchecksum.md", "aux.md", "trailing-dot."]) {
+      expect(isPortableRuntimeName(filename)).toBe(false);
+    }
+    expect(isPortableRuntimeName("quote-' unicode-雪.tsx")).toBe(true);
   });
 });
 

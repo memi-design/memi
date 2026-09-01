@@ -10,6 +10,7 @@ import {
   cleanHarnessEnvironment,
   createPackedInstallation,
   npmExecutable,
+  resolveNpmInvocation,
   runProcess,
 } from "../../../scripts/lib/trust-core-e2e.mjs";
 
@@ -100,6 +101,26 @@ describe("Trust Core packed-artifact harness helpers", () => {
     expect(env).not.toHaveProperty("GITHUB_PAT");
     expect(env).not.toHaveProperty("OPENAI_KEY");
     expect(env).not.toHaveProperty("SAFE_VALUE");
+  });
+
+  it("runs npm through Node without a shell when Windows lacks npm_execpath", () => {
+    expect(resolveNpmInvocation({
+      platform: "win32",
+      nodeExecutable: "C:\\node\\node.exe",
+      npmExecPath: undefined,
+    })).toEqual({
+      command: "C:\\node\\node.exe",
+      prefix: ["C:\\node\\node_modules\\npm\\bin\\npm-cli.js"],
+    });
+
+    expect(resolveNpmInvocation({
+      platform: "win32",
+      nodeExecutable: "C:\\node\\node.exe",
+      npmExecPath: "C:\\npm\\npm-cli.js",
+    })).toEqual({
+      command: "C:\\node\\node.exe",
+      prefix: ["C:\\npm\\npm-cli.js"],
+    });
   });
 
   it("rejects source, prompt, secret, and absolute private path disclosure", () => {
@@ -204,7 +225,7 @@ describe("Trust Core packed-artifact harness helpers", () => {
   it("does not leave hostile fixture bytes in a metadata-only receipt", async () => {
     const root = await mkdtemp(join(tmpdir(), "memi-trust-hostile-"));
     roots.push(root);
-    const hostileName = "quote-' newline-\n unicode-雪.tsx";
+    const hostileName = "quote-' unicode-雪.tsx";
     const hostilePath = join(root, hostileName);
     await writeFile(hostilePath, "export const neverPersistMe = 'dualentry-secret';\n", "utf8");
     expect(await readFile(hostilePath, "utf8")).toContain("neverPersistMe");
