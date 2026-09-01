@@ -74,6 +74,9 @@ release gates pass.
   verified `2.7.9`.
 - Keeps Codex and Claude skill mirrors byte-aligned with the beta package and
   validates prerelease version markers without relaxing stable release checks.
+- Synchronizes the general Codex, Claude, Hermes, OpenClaw, OpenCode, and Grok
+  kit commands with the beta artifact so repository-wide consumers do not fall
+  back to 2.7.9 accidentally.
 
 ### Trust Core verification gates
 
