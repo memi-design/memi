@@ -22,6 +22,7 @@ release gates pass.
 - `82c1a278` — fix: emit structured CLI policy denials
 - `f5ef708e` — fix: fail closed on downstream command authority
 - `949ec739` — test: cover Trust Core capability boundaries
+- `a8d832be` — test: reject symlinked receipt leaves
 - Makes `locked` the default offline profile, limits `local` writes to the real
   project `.memi/` directory, and requires explicit per-invocation grants in
   `connected` mode.

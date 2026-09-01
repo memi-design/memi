@@ -393,7 +393,7 @@ a:hover { text-decoration: underline; }
       <a href="changelog.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>Changelog</a>
     </nav>
     <div class="hdr-stats">
-      <span><span class="n" id="stat-commits">440</span> commits</span>
+      <span><span class="n" id="stat-commits">441</span> commits</span>
       <span><span class="n" id="stat-versions">48</span> versions</span>
       <span><span class="n" id="stat-latest">2026-08-31</span> latest</span>
     </div>
@@ -411,7 +411,7 @@ a:hover { text-decoration: underline; }
           <div class="summary-card">
             <span class="summary-kicker">Candidate release</span>
             <strong class="summary-value">v2.8.0-beta.1</strong>
-            <div class="summary-caption">8 commits tracked in v2.8.0-beta.1 from CHANGELOG.md.</div>
+            <div class="summary-caption">9 commits tracked in v2.8.0-beta.1 from CHANGELOG.md.</div>
           </div>
           <div class="summary-card">
             <span class="summary-kicker">Biggest theme</span>
@@ -478,6 +478,10 @@ const releases = [
       [
         "949ec739",
         "test: cover Trust Core capability boundaries"
+      ],
+      [
+        "a8d832be",
+        "test: reject symlinked receipt leaves"
       ]
     ],
     "decisions": [],
@@ -490,6 +494,7 @@ const releases = [
       "82c1a278 — fix: emit structured CLI policy denials",
       "f5ef708e — fix: fail closed on downstream command authority",
       "949ec739 — test: cover Trust Core capability boundaries",
+      "a8d832be — test: reject symlinked receipt leaves",
       "Makes locked the default offline profile, limits local writes to the real",
       "Adds metadata-only execution receipts, structured"
     ]
