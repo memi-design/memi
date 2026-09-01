@@ -78,7 +78,27 @@ async function runTrustCoreArtifactSuite(options) {
       label: "locked diagnose",
     });
     requireSuccess(diagnosis, "locked diagnose");
-    assertMetadataOnlyReceipt(diagnosis.stdout, {
+
+    const doctor = await runProcess(process.execPath, [
+      installation.binary,
+      "--profile", "locked",
+      "doctor",
+      "--json",
+    ], {
+      cwd: projectRoot,
+      env: baseEnv,
+      timeoutMs: 10_000,
+    });
+    requireSuccess(doctor, "locked doctor");
+    const doctorPayload = JSON.parse(doctor.stdout);
+    if (
+      doctorPayload?.policy?.offlineInternalUse?.suitable !== true
+      || doctorPayload?.policy?.offlineInternalUse?.requiresEmployerApproval !== true
+      || !doctorPayload?.receipt
+    ) {
+      throw new Error("locked doctor did not report suitability, employer approval, and a receipt");
+    }
+    assertMetadataOnlyReceipt(JSON.stringify(doctorPayload.receipt), {
       secrets: [secret],
       privatePaths: [fixtureRoot, projectRoot, homeRoot],
       sourceSnippets: [sourceSnippet, "privateLedgerCanary"],
@@ -167,7 +187,7 @@ function lockedDenialScenarios(prompt) {
     },
     {
       args: ["--profile", "locked", "agent", "install", "codex", "--json"],
-      expected: { operation: "install agent integration files", capability: "install" },
+      expected: { operation: "install agent integration files", capability: "dynamic-install" },
     },
   ];
 }

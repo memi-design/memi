@@ -109,7 +109,8 @@ export function assertCapabilityDenied(result, expected) {
     throw new Error(`${expected.operation} unexpectedly succeeded in a denied capability profile`);
   }
 
-  const payload = parseStructuredOutput(result.stderr) ?? parseStructuredOutput(result.stdout);
+  const parsed = parseStructuredOutput(result.stderr) ?? parseStructuredOutput(result.stdout);
+  const payload = parsed?.error && typeof parsed.error === "object" ? parsed.error : parsed;
   if (
     payload?.code !== "MEMI_CAPABILITY_DENIED"
     || payload?.operation !== expected.operation

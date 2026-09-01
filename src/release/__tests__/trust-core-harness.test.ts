@@ -59,6 +59,22 @@ describe("Trust Core packed-artifact harness helpers", () => {
       capability: "network",
       operation: "check npm for updates",
     })).toMatchObject({ capability: "network" });
+
+    expect(assertCapabilityDenied({
+      exitCode: 1,
+      stdout: JSON.stringify({
+        status: "failed",
+        error: {
+          code: "MEMI_CAPABILITY_DENIED",
+          capability: "network",
+          operation: "check npm for updates",
+        },
+      }),
+      stderr: "",
+    }, {
+      capability: "network",
+      operation: "check npm for updates",
+    })).toMatchObject({ capability: "network" });
   });
 
   it("builds a minimal, secret-free subprocess environment", () => {
