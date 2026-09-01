@@ -25,6 +25,7 @@ jobs:
     outputs:
       release_commit: ${{ steps.resolve-release.outputs.release_commit }}
       promote_channels: ${{ steps.resolve-release.outputs.promote_channels }}
+      is_prerelease: ${{ steps.resolve-release.outputs.is_prerelease }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -36,9 +37,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::release tag must be exact vMAJOR.MINOR.PATCH semver"
+          if [[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] &&
+             [ "${RELEASE_TAG}" != "v2.8.0-beta.1" ]; then
+            echo "::error::release tag must be exact vMAJOR.MINOR.PATCH semver or v2.8.0-beta.1"
             exit 1
+          fi
+          is_prerelease=false
+          if [[ "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            :
+          elif [ "${RELEASE_TAG}" = "v2.8.0-beta.1" ]; then
+            is_prerelease=true
           fi
           package_version="$(node -p "require('./package.json').version")"
           manifest_version="$(node -p "require('./release-manifest.json').releaseGroups.engine.version")"
@@ -47,8 +55,9 @@ jobs:
           resolved_commit="$(git rev-parse "${RELEASE_TAG}^{commit}")"
           test "$(git rev-parse HEAD)" = "$(git rev-parse "${RELEASE_TAG}^{commit}")"
           echo "release_commit=${resolved_commit}" >> "${GITHUB_OUTPUT}"
+          echo "is_prerelease=${is_prerelease}" >> "${GITHUB_OUTPUT}"
           promote_channels=false
-          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ "${is_prerelease}" != "true" ]; then
             git fetch origin "${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}" --force
             current_package_version="$(
               git show "origin/${DEFAULT_BRANCH}:package.json" |
@@ -260,6 +269,8 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
+          prerelease: ${{ needs.release-gate.outputs.is_prerelease == 'true' }}
+          make_latest: ${{ needs.release-gate.outputs.is_prerelease == 'true' && 'false' || 'legacy' }}
           files: |
             dist-bin/memi-${{ matrix.binaryTarget }}.tar.gz
             dist-bin/memi-${{ matrix.binaryTarget }}.zip
@@ -294,12 +305,15 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
+          prerelease: ${{ needs.release-gate.outputs.is_prerelease == 'true' }}
+          make_latest: ${{ needs.release-gate.outputs.is_prerelease == 'true' && 'false' || 'legacy' }}
           files: SHA256SUMS.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-docker:
     needs: [release-gate, publish-checksums]
+    if: needs.release-gate.outputs.is_prerelease != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -333,7 +347,7 @@ jobs:
 
   publish-homebrew:
     needs: [release-gate, publish-checksums]
-    if: needs.release-gate.outputs.promote_channels == 'true'
+    if: needs.release-gate.outputs.promote_channels == 'true' && needs.release-gate.outputs.is_prerelease != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

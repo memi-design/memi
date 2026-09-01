@@ -10,6 +10,27 @@ const IN_TOTO_PAYLOAD_TYPE = "application/vnd.in-toto+json";
 const GITHUB_HOSTED_BUILDER = "https://github.com/actions/runner/github-hosted";
 const COMMIT_SHA = /^[0-9a-f]{40}$/;
 const SHASUM = /^[0-9a-f]{40}$/;
+const STABLE_VERSION = /^[0-9]+\.[0-9]+\.[0-9]+$/;
+const TRUST_CORE_BETA_VERSION = "2.8.0-beta.1";
+const TRUST_CORE_PREVIOUS_STABLE = "2.7.9";
+
+export function resolveNpmReleaseChannel(expectedVersion) {
+  if (expectedVersion === TRUST_CORE_BETA_VERSION) {
+    return {
+      distTag: "next",
+      expectedLatest: TRUST_CORE_PREVIOUS_STABLE,
+      isPrerelease: true,
+    };
+  }
+  if (STABLE_VERSION.test(expectedVersion)) {
+    return {
+      distTag: "latest",
+      expectedLatest: expectedVersion,
+      isPrerelease: false,
+    };
+  }
+  throw new Error(`unsupported npm release version: ${expectedVersion}`);
+}
 
 export function validateRegistryVersion({
   metadata,
@@ -17,10 +38,13 @@ export function validateRegistryVersion({
   expectedVersion,
   expectedPhrase,
   expectedInstall,
+  expectedDistTag = "latest",
+  expectedLatest = expectedVersion,
   requireProvenance = true,
 }) {
   assert(metadata && typeof metadata === "object", "registry metadata must be an object");
   const latest = metadata["dist-tags"]?.latest;
+  const taggedVersion = metadata["dist-tags"]?.[expectedDistTag];
   const version = metadata.versions?.[expectedVersion];
   const dist = version?.dist;
   const readme = String(metadata.readme || "");
@@ -29,7 +53,15 @@ export function validateRegistryVersion({
   const readableReadme = normalizeReadableMarkdown(combinedReadme);
   const readablePhrase = normalizeReadableMarkdown(expectedPhrase);
 
-  assert(latest === expectedVersion, `expected latest ${expectedVersion}, got ${latest}`);
+  assert(
+    expectedDistTag === "latest" || expectedDistTag === "next",
+    `unsupported npm dist-tag: ${expectedDistTag}`,
+  );
+  assert(
+    taggedVersion === expectedVersion,
+    `expected ${expectedDistTag} ${expectedVersion}, got ${taggedVersion}`,
+  );
+  assert(latest === expectedLatest, `expected latest ${expectedLatest}, got ${latest}`);
   assert(readableReadme.includes(readablePhrase), `README missing phrase: ${expectedPhrase}`);
   assert(combinedReadme.includes(expectedInstall), `README missing install command: ${expectedInstall}`);
   assert(
@@ -57,6 +89,7 @@ export function validateRegistryVersion({
 
   return {
     packageName,
+    distTag: expectedDistTag,
     latest,
     integrity: dist.integrity,
     shasum: dist.shasum,

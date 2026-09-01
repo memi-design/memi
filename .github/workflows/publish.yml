@@ -150,9 +150,14 @@ jobs:
           path: release-evidence/
           if-no-files-found: error
 
-      - name: Publish npm package exactly once
-        if: inputs.mode == 'publish'
+      - name: Publish stable npm package exactly once
+        if: inputs.mode == 'publish' && inputs.expected_version != '2.8.0-beta.1'
         run: npm publish --access public --provenance --ignore-scripts
+        working-directory: .dist/npm-package
+
+      - name: Publish Trust Core beta exactly once
+        if: inputs.mode == 'publish' && inputs.expected_version == '2.8.0-beta.1'
+        run: npm publish --access public --provenance --ignore-scripts --tag next
         working-directory: .dist/npm-package
 
       - name: Verify npm signatures and attestations
