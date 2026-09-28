@@ -16,6 +16,7 @@ export interface FrontendVerificationReceipt {
   outcome: 'passed' | 'failed' | 'skipped';
   runId: string; observedAt: string; storyRef?: string; artifactPath?: string;
   acquisition: 'host-supplied'; association: 'current-scan' | 'stale-scan' | 'unmatched-story';
+  scope: 'bounded-frontend-sources';
 }
 export interface FrontendBrief {
   schemaVersion: 'memi.frontend-brief.v1'; intent: string;
@@ -23,6 +24,6 @@ export interface FrontendBrief {
   components: FrontendComponent[]; tokens: FrontendToken[]; stories: FrontendStory[]; mappings: FrontendMapping[];
   scan: { complete: boolean; filesRead: number; bytesRead: number; fingerprint: string; };
   omissions: FrontendOmission[]; retrieval: string[]; unresolved: string[];
-  verification: { status: 'unassessed'; reason: string; receipts: FrontendVerificationReceipt[]; };
+  verification: { status: 'unassessed'; checkoutIdentity: 'unassessed'; reason: string; receipts: FrontendVerificationReceipt[]; };
   limits: { maxBytes: number; maxFiles: number; maxBytesPerFile: number; maxTotalBytes: number; omittedItems: number; };
 }

@@ -53,6 +53,20 @@ describe('bounded frontend implementation evidence', () => {
     ] } });
     expect(changed.verification.receipts[0].association).toBe('stale-scan');
   });
+  it('states that matching scanned sources do not bind Storybook config or dependency lockfiles', async () => {
+    const projectRoot = await fixture();
+    const initial = await buildFrontendBrief({ projectRoot, intent: 'Button' });
+    await mkdir(join(projectRoot, '.storybook'));
+    await writeFile(join(projectRoot, '.storybook/main.ts'), 'export default { stories: [] };');
+    await writeFile(join(projectRoot, 'package-lock.json'), '{"lockfileVersion":3}');
+    const result = await buildFrontendBrief({ projectRoot, intent: 'Button', verificationEvidence: { scanFingerprint: initial.scan.fingerprint, checks: [
+      { kind: 'storybook', outcome: 'passed', runId: 'old-config', observedAt: '2026-09-27T12:00:00.000Z', storyRef: 'src/Button.stories.tsx#Primary' },
+    ] } });
+    expect(result.scan.fingerprint).toBe(initial.scan.fingerprint);
+    expect(result.verification.checkoutIdentity).toBe('unassessed');
+    expect(result.verification.receipts[0]).toMatchObject({ association: 'current-scan', scope: 'bounded-frontend-sources' });
+    expect(result.verification.status).toBe('unassessed');
+  });
   it('rejects external receipt claims with commands, unknown authority, unsafe paths or excessive data', async () => {
     const projectRoot = await fixture();
     const valid = { scanFingerprint: '0'.repeat(64), checks: [{ kind: 'browser', outcome: 'passed', runId: 'ci-1', observedAt: '2026-09-27T12:00:00.000Z' }] };

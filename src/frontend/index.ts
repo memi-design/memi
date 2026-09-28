@@ -41,7 +41,7 @@ export async function buildFrontendBrief(options: BuildFrontendBriefOptions): Pr
       ...([...new Set(receipts.filter(receipt => receipt.outcome === 'failed').map(receipt => `Host-reported ${receipt.kind} check failed; inspect its external run before claiming verification.`))]),
       'Imports are relative to the repository root; adapt to the destination module. Story IDs are inferred until checked against a Storybook index.',
     ],
-    verification: { status: 'unassessed', reason: 'Static discovery only. Receipts are host-reported and do not authenticate execution or rendered parity.', receipts },
+    verification: { status: 'unassessed', checkoutIdentity: 'unassessed', reason: 'Static discovery only. Receipt association covers bounded frontend sources, not checkout identity, config, dependencies, execution or rendered parity.', receipts },
     limits: { maxBytes, ...SOURCE_LIMITS, omittedItems: 0 },
   };
   return boundBrief(brief, maxBytes);
@@ -49,7 +49,7 @@ export async function buildFrontendBrief(options: BuildFrontendBriefOptions): Pr
 function compare(a: string, b: string): number { return a < b ? -1 : a > b ? 1 : 0; }
 function associateReceipts(evidence: VerificationEvidence | undefined, scanFingerprint: string, stories: FrontendStory[]): FrontendVerificationReceipt[] {
   return (evidence?.checks ?? []).map(check => ({
-    ...check, acquisition: 'host-supplied' as const,
+    ...check, acquisition: 'host-supplied' as const, scope: 'bounded-frontend-sources' as const,
     association: evidence?.scanFingerprint !== scanFingerprint ? 'stale-scan' as const
       : check.storyRef && !stories.some(story => story.ref === check.storyRef) ? 'unmatched-story' as const
       : 'current-scan' as const,
