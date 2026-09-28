@@ -1,12 +1,12 @@
 import { normalizeTokenPath } from '../tokens/dtcg.js';
-import { normalizeDesignEvidence, fingerprint, type DesignEvidence } from './evidence.js';
+import { normalizeDesignEvidence, normalizeVerificationEvidence, fingerprint, type DesignEvidence, type VerificationEvidence } from './evidence.js';
 import { readFrontendSources, SOURCE_LIMITS, assertNotAborted } from './files.js';
 import { discoverStaticEvidence } from './static.js';
-import type { FrontendBrief, FrontendMapping, FrontendComponent, FrontendToken, FrontendStory } from './types.js';
-export { normalizeDesignEvidence, DesignEvidenceSchema } from './evidence.js';
-export type { DesignEvidence } from './evidence.js';
-export type { FrontendBrief, FrontendComponent, FrontendMapping, FrontendStory, FrontendToken } from './types.js';
-export interface BuildFrontendBriefOptions { projectRoot: string; intent: string; designEvidence?: unknown; maxBytes?: number; signal?: AbortSignal; }
+import type { FrontendBrief, FrontendMapping, FrontendComponent, FrontendToken, FrontendStory, FrontendVerificationReceipt } from './types.js';
+export { normalizeDesignEvidence, DesignEvidenceSchema, normalizeVerificationEvidence, VerificationEvidenceSchema } from './evidence.js';
+export type { DesignEvidence, VerificationEvidence } from './evidence.js';
+export type { FrontendBrief, FrontendComponent, FrontendMapping, FrontendStory, FrontendToken, FrontendVerificationReceipt } from './types.js';
+export interface BuildFrontendBriefOptions { projectRoot: string; intent: string; designEvidence?: unknown; verificationEvidence?: unknown; maxBytes?: number; signal?: AbortSignal; }
 
 /** Read-only source context for the calling harness. This is not a metadata receipt or rendered verification. */
 export async function buildFrontendBrief(options: BuildFrontendBriefOptions): Promise<FrontendBrief> {
@@ -15,9 +15,12 @@ export async function buildFrontendBrief(options: BuildFrontendBriefOptions): Pr
   if (!Number.isInteger(maxBytes) || maxBytes < 2048 || maxBytes > 16384) throw new Error('maxBytes must be an integer between 2048 and 16384.');
   if (typeof options.intent !== 'string' || !options.intent.trim() || Buffer.byteLength(options.intent) > 1024) throw new Error('Intent must contain 1–1024 UTF-8 bytes.');
   const evidence = options.designEvidence === undefined ? undefined : normalizeDesignEvidence(options.designEvidence);
+  const verificationEvidence = options.verificationEvidence === undefined ? undefined : normalizeVerificationEvidence(options.verificationEvidence);
   const files = await readFrontendSources(options.projectRoot, options.signal);
   const discovered = await discoverStaticEvidence(files.sources, options.signal);
   const mappings = resolveMappings(evidence, discovered.components, discovered.tokens, discovered.stories);
+  const scanFingerprint = fingerprint(files.sources.map(source => `${source.path}:${source.hash}`).join('\n'));
+  const receipts = associateReceipts(verificationEvidence, scanFingerprint, discovered.stories);
   const terms = new Set(options.intent.toLowerCase().split(/\W+/).filter(Boolean));
   const priority = (component: FrontendComponent) => (evidence?.mappings.some(mapping => mapping.path === component.path && mapping.exportName === component.exportName) ? 100 : 0) + (terms.has(component.exportName.toLowerCase()) ? 10 : 0);
   const components = [...discovered.components].sort((a, b) => priority(b) - priority(a) || compare(a.path + a.exportName, b.path + b.exportName));
@@ -26,7 +29,7 @@ export async function buildFrontendBrief(options: BuildFrontendBriefOptions): Pr
     schemaVersion: 'memi.frontend-brief.v1', intent: options.intent,
     design: evidence ? { source: evidence.source, documentId: evidence.documentId, nodeId: evidence.nodeId, ...(evidence.revision ? { revision: evidence.revision } : {}), fingerprint: fingerprint(JSON.stringify(evidence)), acquisition: 'host-supplied', adapterVersion: '1' } : null,
     components, tokens: discovered.tokens, stories: discovered.stories, mappings,
-    scan: { complete: omissions.length === 0, filesRead: files.sources.length, bytesRead: files.bytesRead, fingerprint: fingerprint(files.sources.map(source => `${source.path}:${source.hash}`).join('\n')) },
+    scan: { complete: omissions.length === 0, filesRead: files.sources.length, bytesRead: files.bytesRead, fingerprint: scanFingerprint },
     omissions, retrieval: [],
     unresolved: [
       ...(!evidence ? ['Design connector context was not supplied; design intent is unassessed.'] : []),
@@ -34,14 +37,24 @@ export async function buildFrontendBrief(options: BuildFrontendBriefOptions): Pr
       ...(discovered.stories.length === 0 ? ['No statically resolved stories; rendered behavior remains unassessed.'] : []),
       ...(mappings.some(mapping => mapping.status !== 'observed') ? ['Mapping conflicts, stale fingerprints or incomplete APIs require resolution before implementation.'] : []),
       ...(components.some(component => !component.propsComplete) ? ['Some component APIs require source inspection; external types and computed props are unassessed.'] : []),
+      ...(receipts.some(receipt => receipt.association !== 'current-scan') ? ['Host-reported checks have a stale scan or unmatched story; rerun or inspect the external evidence.'] : []),
+      ...([...new Set(receipts.filter(receipt => receipt.outcome === 'failed').map(receipt => `Host-reported ${receipt.kind} check failed; inspect its external run before claiming verification.`))]),
       'Imports are relative to the repository root; adapt to the destination module. Story IDs are inferred until checked against a Storybook index.',
     ],
-    verification: { status: 'unassessed', reason: 'Static discovery only. Run authorized repository tests and rendered accessibility/interaction checks; no tool execution is implied.' },
+    verification: { status: 'unassessed', reason: 'Static discovery only. Receipts are host-reported and do not authenticate execution or rendered parity.', receipts },
     limits: { maxBytes, ...SOURCE_LIMITS, omittedItems: 0 },
   };
   return boundBrief(brief, maxBytes);
 }
 function compare(a: string, b: string): number { return a < b ? -1 : a > b ? 1 : 0; }
+function associateReceipts(evidence: VerificationEvidence | undefined, scanFingerprint: string, stories: FrontendStory[]): FrontendVerificationReceipt[] {
+  return (evidence?.checks ?? []).map(check => ({
+    ...check, acquisition: 'host-supplied' as const,
+    association: evidence?.scanFingerprint !== scanFingerprint ? 'stale-scan' as const
+      : check.storyRef && !stories.some(story => story.ref === check.storyRef) ? 'unmatched-story' as const
+      : 'current-scan' as const,
+  }));
+}
 function resolveMappings(evidence: DesignEvidence | undefined, components: FrontendComponent[], tokens: FrontendToken[], stories: FrontendStory[]): FrontendMapping[] {
   return (evidence?.mappings ?? []).map(mapping => {
     const component = components.find(item => item.path === mapping.path && item.exportName === mapping.exportName);
@@ -75,6 +88,11 @@ function resolveMappings(evidence: DesignEvidence | undefined, components: Front
 function boundBrief(input: FrontendBrief, maxBytes: number): FrontendBrief {
   let brief = input;
   while (Buffer.byteLength(JSON.stringify(brief)) > maxBytes) {
+    if (brief.verification.receipts.length > 0) {
+      const removed = brief.verification.receipts.at(-1)!;
+      brief = { ...brief, verification: { ...brief.verification, receipts: brief.verification.receipts.slice(0, -1) }, limits: { ...brief.limits, omittedItems: brief.limits.omittedItems + 1 }, omissions: brief.omissions.some(item => item.reason === 'context-budget') ? brief.omissions : [...brief.omissions, { path: '.', reason: 'context-budget' }], retrieval: [...new Set([...brief.retrieval, removed.artifactPath ?? removed.storyRef ?? '.'])].slice(0, 8) };
+      continue;
+    }
     const key = (['tokens', 'stories', 'components', 'mappings'] as const).find(key => brief[key].length > 0);
     if (!key) {
       if (brief.omissions.length > 1 || brief.retrieval.length > 1 || brief.unresolved.length > 1) {

