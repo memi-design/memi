@@ -9,12 +9,13 @@ function Assert-True([bool]$condition, [string]$message) {
     if (-not $condition) { throw $message }
 }
 
-function New-FixtureArchive([string]$path, [bool]$unsafe = $false) {
+function New-FixtureArchive([string]$path, [bool]$unsafe = $false, [bool]$reparse = $false) {
     $stream = [System.IO.File]::Create($path)
     try {
         $zip = [System.IO.Compression.ZipArchive]::new($stream, [System.IO.Compression.ZipArchiveMode]::Create, $false)
         try {
             $entry = $zip.CreateEntry("memi-win-x64/memi.exe")
+            if ($reparse) { $entry.ExternalAttributes = $entry.ExternalAttributes -bor 0x400 }
             $writer = [System.IO.StreamWriter]::new($entry.Open())
             try { $writer.Write("NEW") } finally { $writer.Dispose() }
             if ($unsafe) {
@@ -29,6 +30,7 @@ function New-FixtureArchive([string]$path, [bool]$unsafe = $false) {
 $global:fixtureArchive = Join-Path $sandbox "valid.zip"
 $global:downloadFailure = $false
 $global:failActivation = $false
+$global:wrongChecksum = $false
 New-FixtureArchive $global:fixtureArchive
 
 function Invoke-WebRequest {
@@ -40,6 +42,7 @@ function Invoke-WebRequest {
     }
     if ($Uri.EndsWith("/SHA256SUMS.txt") -or $Uri.EndsWith("/memi-win-x64.zip.sha256")) {
         $hash = (Get-FileHash -Algorithm SHA256 $global:fixtureArchive).Hash.ToLower()
+        if ($global:wrongChecksum) { $hash = "0" * 64 }
         Set-Content -LiteralPath $OutFile -Value "$hash  memi-win-x64.zip"
         return
     }
@@ -63,12 +66,26 @@ try {
     Assert-True ((Get-Content -Raw $app) -eq "NEW") "Installed app differs from verified fixture"
 
     Set-Content -LiteralPath $app -Value "OLD"
+    $global:wrongChecksum = $true
+    $rejected = $false
+    try { & $installer -InstallDir $installDir -NoPath } catch { $rejected = $_.Exception.Message -like "*SHA256 mismatch*" }
+    $global:wrongChecksum = $false
+    Assert-True $rejected "Checksum mismatch was accepted"
+    Assert-True ((Get-Content -Raw $app).Trim() -eq "OLD") "Checksum mismatch changed the current app"
+
     $global:fixtureArchive = Join-Path $sandbox "unsafe.zip"
     New-FixtureArchive $global:fixtureArchive $true
     $rejected = $false
     try { & $installer -InstallDir $installDir -NoPath } catch { $rejected = $_.Exception.Message -like "*unsafe archive entry*" }
     Assert-True $rejected "Unsafe ZIP was accepted"
     Assert-True ((Get-Content -Raw $app).Trim() -eq "OLD") "Unsafe ZIP changed the current app"
+
+    $global:fixtureArchive = Join-Path $sandbox "reparse.zip"
+    New-FixtureArchive $global:fixtureArchive $false $true
+    $rejected = $false
+    try { & $installer -InstallDir $installDir -NoPath } catch { $rejected = $_.Exception.Message -like "*unsafe archive entry*" }
+    Assert-True $rejected "Reparse ZIP entry was accepted"
+    Assert-True ((Get-Content -Raw $app).Trim() -eq "OLD") "Reparse ZIP changed the current app"
 
     $global:fixtureArchive = Join-Path $sandbox "valid.zip"
     $global:failActivation = $true
@@ -84,7 +101,7 @@ try {
     try { & $installer -InstallDir $installDir -NoPath } catch { }
     Assert-True ((Get-Content -Raw $app).Trim() -eq "OLD") "Interrupted upgrade was not recovered before download"
     Assert-True (-not (Test-Path -LiteralPath $previous)) "Recovery left a stale backup"
-    Write-Host "Windows installer fixtures passed: verified install, unsafe ZIP, rollback, interruption recovery."
+    Write-Host "Windows installer fixtures passed: verified install, checksum mismatch, unsafe and reparse ZIP, rollback, interruption recovery."
 } finally {
     Remove-Item -LiteralPath $sandbox -Recurse -Force -ErrorAction SilentlyContinue
 }
