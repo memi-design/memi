@@ -53,6 +53,10 @@ jobs:
           npx playwright install chromium
       - name: Typecheck package on the supported matrix
         run: npm run typecheck
+      - name: Verify Windows standalone installer safety
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/tests/install-windows.ps1
       - name: Run the complete engine test suite on the supported matrix
         run: npm test -- --run
       - name: Enforce Trust Core coverage thresholds
