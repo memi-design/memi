@@ -49,6 +49,29 @@ url="${base}/${archive}"
 sums_url="${base}/SHA256SUMS.txt"
 archive_sums_url="${base}/${archive}.sha256"
 
+mkdir -p "${INSTALL_DIR}"
+recover_interrupted_install() {
+  if [ -e "${INSTALL_DIR}/app" ] || [ -L "${INSTALL_DIR}/app" ]; then
+    return 0
+  fi
+  recovery=""
+  for candidate in "${INSTALL_DIR}"/.memi-install.*; do
+    [ -d "${candidate}" ] && [ ! -L "${candidate}" ] && [ -f "${candidate}/.install-in-progress" ] || continue
+    [ -e "${candidate}/previous-app" ] || [ -L "${candidate}/previous-app" ] || continue
+    if [ -n "${recovery}" ]; then
+      echo "error: multiple interrupted installs found; restore one previous-app manually before retrying" >&2
+      exit 1
+    fi
+    recovery="${candidate}"
+  done
+  if [ -n "${recovery}" ]; then
+    mv "${recovery}/previous-app" "${INSTALL_DIR}/app"
+    rm -rf "${recovery}"
+    echo "✓ restored previous app after interrupted install"
+  fi
+}
+recover_interrupted_install
+
 tmp=$(mktemp -d)
 stage=""
 activated=0
@@ -71,6 +94,8 @@ cleanup() {
   exit "${status}"
 }
 trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 fetch() {
   if command -v curl >/dev/null 2>&1; then
@@ -163,6 +188,7 @@ if [ ! -f "${stage}/${archive_root}/memi" ]; then
   exit 1
 fi
 chmod +x "${stage}/${archive_root}/memi"
+: > "${stage}/.install-in-progress"
 if [ -e "${INSTALL_DIR}/app" ] || [ -L "${INSTALL_DIR}/app" ]; then
   mv "${INSTALL_DIR}/app" "${stage}/previous-app"
 fi
