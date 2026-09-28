@@ -42,7 +42,7 @@ async function fixture(options: { badArchive?: boolean; failSwap?: boolean; plat
   return { root, assets, tools, installDir };
 }
 
-describe("standalone shell installer", () => {
+(process.platform === "win32" ? describe.skip : describe)("standalone shell installer", () => {
   it.each([
     ["Darwin", "arm64"], ["Darwin", "x86_64"], ["Linux", "x86_64"], ["Linux", "aarch64"],
   ])("installs a checksum-verified %s %s release", async (system, machine) => {
