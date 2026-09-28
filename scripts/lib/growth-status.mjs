@@ -90,7 +90,7 @@ export async function buildGrowthStatus(options = {}) {
     weekly: normalizeDownloadPoint(weeklyDownloads),
     monthly: normalizeDownloadPoint(monthlyDownloads),
   };
-  const npm = normalizeNpmMetadata(npmMetadata, packageJson.name);
+  const npm = normalizeNpmMetadata(npmMetadata, packageJson.name, packageJson.version);
   const officialMcpRegistry = normalizeRegistry(registrySearch, packageJson.mcpName);
   const safeSkill = normalizeSafeSkillPr(safeSkillPr);
   const github = normalizeRepo(githubRepo);
@@ -386,13 +386,15 @@ async function defaultFetchText(url) {
   }
 }
 
-function normalizeNpmMetadata(metadata, packageName) {
+function normalizeNpmMetadata(metadata, packageName, localVersion) {
   if (metadata.ok === false) return { ok: false, error: metadata.error };
   const latest = metadata["dist-tags"]?.latest;
   const version = latest ? metadata.versions?.[latest] : null;
   return {
     ok: true,
     latest,
+    next: metadata["dist-tags"]?.next ?? null,
+    localPublished: Object.hasOwn(metadata.versions ?? {}, localVersion),
     mcpName: version?.mcpName ?? null,
     description: version?.description ?? metadata.description ?? null,
     npmUrl: `https://www.npmjs.com/package/${packageName}`,
@@ -482,13 +484,21 @@ function buildNextActions(input) {
   if (input.downloadTrend?.classification === "normalizing_after_spike") {
     actions.push(`Treat the apparent weekly drop as spike normalization: ${formatNumber(input.downloadTrend.latest7)} latest 7d versus ${formatNumber(input.downloadTrend.prior7)} before the spike. Grow durable acquisition instead of chasing release churn.`);
   } else if (input.downloadTrend?.classification === "declining") {
-    actions.push(`Downloads are declining across three measured weeks (${formatNumber(input.downloadTrend.prior7)} → ${formatNumber(input.downloadTrend.previous7)} → ${formatNumber(input.downloadTrend.latest7)}); audit discovery and activation immediately.`);
+    actions.push(`Downloads are declining across three measured weeks (${formatNumber(input.downloadTrend.prior7)} → ${formatNumber(input.downloadTrend.previous7)} → ${formatNumber(input.downloadTrend.latest7)}); audit discovery and activation immediately. Download counts cannot identify failed installs; verify install and link health separately.`);
   } else if (input.downloadTrend?.classification === "unavailable") {
     actions.push(`Retry the npm download trend request; the range API failed: ${input.downloadTrend.error}`);
   }
   if (input.npm.ok && input.npm.latest !== input.packageJson.version) {
     const versionOrder = compareSemver(input.packageJson.version, input.npm.latest);
-    if (versionOrder > 0) {
+    if (input.packageJson.version.includes("-")) {
+      if (input.npm.localPublished) {
+        actions.push(`${input.packageJson.version} is already published on npm ${input.npm.next === input.packageJson.version ? "next" : "a non-latest tag"}; keep latest at ${input.npm.latest} until stable release gates pass.`);
+      } else {
+        actions.push(`Verify prerelease gates and publish ${input.packageJson.version} under a prerelease tag only; npm latest is ${input.npm.latest}.`);
+      }
+    } else if (input.npm.localPublished) {
+      actions.push(`${input.packageJson.version} is already published on npm; reconcile dist-tags only after stable release gates pass.`);
+    } else if (versionOrder > 0) {
       actions.push(`Publish ${input.packageJson.version} to npm; npm latest is ${input.npm.latest}.`);
     } else if (versionOrder < 0) {
       actions.push(`Sync local package metadata from ${input.packageJson.version} to npm latest ${input.npm.latest} before publishing or tagging.`);

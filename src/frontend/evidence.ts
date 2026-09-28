@@ -16,6 +16,29 @@ export const DesignEvidenceSchema = z.object({
 }).strict();
 export type DesignEvidence = z.infer<typeof DesignEvidenceSchema>;
 
+export const VerificationEvidenceSchema = z.object({
+  scanFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  checks: z.array(z.object({
+    kind: z.enum(['typecheck', 'storybook', 'browser', 'accessibility']),
+    outcome: z.enum(['passed', 'failed', 'skipped']),
+    runId: z.string().min(1).max(128),
+    observedAt: z.string().datetime(),
+    storyRef: z.string().min(1).max(512).optional(),
+    artifactPath: pathSchema.optional(),
+  }).strict()).max(32),
+}).strict();
+export type VerificationEvidence = z.infer<typeof VerificationEvidenceSchema>;
+
+/** Validates reported results as bounded data; it does not authenticate an external test run. */
+export function normalizeVerificationEvidence(input: unknown): VerificationEvidence {
+  assertPlainData(input);
+  const serialized = JSON.stringify(input);
+  if (!serialized || Buffer.byteLength(serialized) > 32768) throw new Error('Verification evidence exceeds the 32 KiB input budget.');
+  const result = VerificationEvidenceSchema.safeParse(input);
+  if (!result.success) throw new Error('Invalid verification evidence envelope; check scan fingerprint, check fields and paths.');
+  return result.data;
+}
+
 /** Accepts a bounded, JSON-shaped harness envelope, never native connector instructions. */
 export function normalizeDesignEvidence(input: unknown): DesignEvidence {
   assertPlainData(input);

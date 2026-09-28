@@ -10,6 +10,7 @@ export function registerFrontendTools(server: McpServer, projectRoot: string): v
     inputSchema: {
       intent: z.string().min(1).max(1024),
       designEvidence: z.unknown().optional(),
+      verificationEvidence: z.unknown().optional(),
       maxBytes: z.number().int().min(2048).max(16384).default(16384),
     },
     handler: async (input, signal) => {
