@@ -108,47 +108,49 @@ fetch() {
   fi
 }
 
-echo "-> Downloading ${archive}"
-fetch "${url}" "${tmp}/${archive}"
-
-if command -v shasum >/dev/null 2>&1 || command -v sha256sum >/dev/null 2>&1; then
-    checksum_source=""
-    if fetch "${sums_url}" "${tmp}/SHA256SUMS.txt" 2>/dev/null; then
-      checksum_source="SHA256SUMS.txt"
-    elif fetch "${archive_sums_url}" "${tmp}/SHA256SUMS.txt" 2>/dev/null; then
-      checksum_source="${archive}.sha256"
-    fi
-
-    if [ -n "${checksum_source}" ]; then
-      if command -v sha256sum >/dev/null 2>&1; then
-        actual=$(sha256sum "${tmp}/${archive}" | awk '{print $1}')
-      else
-        actual=$(shasum -a 256 "${tmp}/${archive}" | awk '{print $1}')
-      fi
-      expected=$(awk -v name="${archive}" '
-        ($2 == name || $2 == "*" name) && length($1) == 64 && $1 !~ /[^[:xdigit:]]/ { print $1 }
-      ' "${tmp}/SHA256SUMS.txt")
-      if [ -z "${expected}" ]; then
-        echo "error: no checksum found for ${archive} in ${checksum_source}" >&2
-        exit 1
-      elif [ "${actual}" != "${expected}" ]; then
-        echo "error: sha256 mismatch" >&2
-        echo "  expected: ${expected}" >&2
-        echo "  actual:   ${actual}" >&2
-        exit 1
-      else
-        echo "✓ sha256 verified (${checksum_source})"
-      fi
-    else
-      echo "error: checksum metadata unavailable" >&2
-      echo "  Tried: ${sums_url}" >&2
-      echo "         ${archive_sums_url}" >&2
-      exit 1
-    fi
-else
+if ! command -v shasum >/dev/null 2>&1 && ! command -v sha256sum >/dev/null 2>&1; then
   echo "error: need shasum or sha256sum to verify the release" >&2
   exit 1
 fi
+checksum_source=""
+if fetch "${sums_url}" "${tmp}/SHA256SUMS.txt" 2>/dev/null; then
+  checksum_source="SHA256SUMS.txt"
+elif fetch "${archive_sums_url}" "${tmp}/SHA256SUMS.txt" 2>/dev/null; then
+  checksum_source="${archive}.sha256"
+fi
+if [ -z "${checksum_source}" ]; then
+  echo "error: checksum metadata unavailable" >&2
+  echo "  Tried: ${sums_url}" >&2
+  echo "         ${archive_sums_url}" >&2
+  exit 1
+fi
+expected=$(awk -v name="${archive}" '
+  ($2 == name || $2 == "*" name) && length($1) == 64 && $1 !~ /[^[:xdigit:]]/ { print $1 }
+' "${tmp}/SHA256SUMS.txt")
+if [ -z "${expected}" ]; then
+  if [ "${VERSION}" = "latest" ] && [ "${target}" = "linux-arm64" ]; then
+    echo "error: latest stable release does not publish Linux ARM yet" >&2
+    echo "  Use a published ARM prerelease explicitly: --version v2.8.0-beta.2" >&2
+  else
+    echo "error: no checksum found for ${archive} in ${checksum_source}" >&2
+  fi
+  exit 1
+fi
+
+echo "-> Downloading ${archive}"
+fetch "${url}" "${tmp}/${archive}"
+if command -v sha256sum >/dev/null 2>&1; then
+  actual=$(sha256sum "${tmp}/${archive}" | awk '{print $1}')
+else
+  actual=$(shasum -a 256 "${tmp}/${archive}" | awk '{print $1}')
+fi
+if [ "${actual}" != "${expected}" ]; then
+  echo "error: sha256 mismatch" >&2
+  echo "  expected: ${expected}" >&2
+  echo "  actual:   ${actual}" >&2
+  exit 1
+fi
+echo "✓ sha256 verified (${checksum_source})"
 
 echo "-> Extracting to ${INSTALL_DIR}"
 archive_root="memi-${target}"

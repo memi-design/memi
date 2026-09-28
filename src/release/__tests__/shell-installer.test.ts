@@ -30,7 +30,7 @@ async function fixture(options: { badArchive?: boolean; failSwap?: boolean; plat
   const hash = createHash("sha256").update(await readFile(archive)).digest("hex");
   await writeFile(join(assets, "SHA256SUMS.txt"), `${hash}  ${archiveName}\n`);
   await writeFile(join(tools, "uname"), `#!/bin/sh\nif [ "$1" = -s ]; then echo ${system}; else echo ${machine}; fi\n`);
-  await writeFile(join(tools, "curl"), "#!/bin/sh\nurl=\"\"\nout=\"\"\nwhile [ \"$#\" -gt 0 ]; do\n  case \"$1\" in\n    https://*) url=\"$1\";;\n    -o) shift; out=\"$1\";;\n  esac\n  shift\ndone\ncp \"$MOCK_ASSET_DIR/$(basename \"$url\")\" \"$out\"\n");
+  await writeFile(join(tools, "curl"), "#!/bin/sh\nurl=\"\"\nout=\"\"\nwhile [ \"$#\" -gt 0 ]; do\n  case \"$1\" in\n    https://*) url=\"$1\";;\n    -o) shift; out=\"$1\";;\n  esac\n  shift\ndone\nprintf '%s\\n' \"$url\" >> \"$MOCK_ASSET_DIR/curl.log\"\ncp \"$MOCK_ASSET_DIR/$(basename \"$url\")\" \"$out\"\n");
   await Promise.all([chmod(join(tools, "uname"), 0o755), chmod(join(tools, "curl"), 0o755)]);
   if (options.failSwap) {
     await writeFile(join(tools, "mv"), `#!/bin/sh\ncase "$1:$2" in *memi-install*/memi-${target}:*/app) exit 77;; esac\n/bin/mv "$@"\n`);
@@ -86,6 +86,20 @@ async function fixture(options: { badArchive?: boolean; failSwap?: boolean; plat
     });
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("sha256 mismatch");
+    expect(await readFile(join(installDir, "app", "memi"), "utf8")).toBe("previous-version\n");
+  });
+
+  it("explains when latest stable has no Linux ARM asset instead of attempting the archive", async () => {
+    const { root, assets, tools, installDir } = await fixture();
+    await writeFile(join(assets, "SHA256SUMS.txt"), `${"0".repeat(64)}  memi-linux-x64.tar.gz\n`);
+    const result = spawnSync("sh", [installer, "--dir", installDir, "--no-path"], {
+      env: { ...process.env, HOME: root, PATH: `${tools}:${process.env.PATH}`, MOCK_ASSET_DIR: assets },
+      encoding: "utf8",
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("latest stable release does not publish Linux ARM");
+    expect(result.stderr).toContain("--version v2.8.0-beta.2");
+    expect(await readFile(join(assets, "curl.log"), "utf8")).not.toContain("memi-linux-arm64.tar.gz\n");
     expect(await readFile(join(installDir, "app", "memi"), "utf8")).toBe("previous-version\n");
   });
 
