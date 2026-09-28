@@ -217,6 +217,29 @@ describe("growth status script contract", () => {
     expect(status.nextActions).not.toContain("Publish 1.0.2 to npm; npm latest is 1.1.0.");
   });
 
+  it("does not recommend publishing an already published prerelease to the stable tag", async () => {
+    const status = await buildGrowthStatus({
+      packageJson: { name: "@memi-design/cli", version: "2.8.0-beta.2", mcpName: "io.github.memi-design/memi" },
+      fetchJson: async (url: string) => {
+        if (url.includes("registry.npmjs.org")) return {
+          "dist-tags": { latest: "2.7.9", next: "2.8.0-beta.2" },
+          versions: { "2.7.9": {}, "2.8.0-beta.2": {} },
+        };
+        if (url.includes("downloads/point/")) return { downloads: 133, start: "2026-09-20", end: "2026-09-26" };
+        if (url.includes("repos/memi-design/memi-studio/releases/latest")) return { tag_name: "v2.5.0", assets: [] };
+        if (url.includes("repos/memi-design/memi")) return { stargazers_count: 46, forks_count: 6, open_issues_count: 0 };
+        if (url.includes("registry.modelcontextprotocol.io")) return { servers: [], metadata: { count: 0 } };
+        if (url.includes("/pulls/")) return { state: "closed", number: 2 };
+        return {};
+      },
+      fetchText: async () => "",
+      directoryPullRequests: [],
+      staleReferenceSources: {},
+    });
+    expect(status.nextActions.some((action: string) => action.includes("Publish 2.8.0-beta.2"))).toBe(false);
+    expect(status.nextActions).toContain("2.8.0-beta.2 is already published on npm next; keep latest at 2.7.9 until stable release gates pass.");
+  });
+
   it("detects the current wrapped MCP Registry search response shape", async () => {
     const status = await buildGrowthStatus({
       packageJson: {

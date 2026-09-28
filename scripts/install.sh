@@ -4,10 +4,9 @@
 #
 # Usage:
 #   curl -fsSL https://memoire.cv/install.sh | sh
-#   curl -fsSL https://memoire.cv/install.sh | sh -s -- --version v1.2.3
+#   curl -fsSL https://memoire.cv/install.sh | sh -s -- --version v2.7.9
 #   curl -fsSL https://memoire.cv/install.sh | sh -s -- --dir ~/bin/memoire
 #   curl -fsSL https://memoire.cv/install.sh | sh -s -- --no-path    # skip rc edit
-#   curl -fsSL https://memoire.cv/install.sh | sh -s -- --no-verify  # skip checksum
 
 set -eu
 
@@ -15,14 +14,12 @@ REPO="memi-design/memi"
 INSTALL_DIR="${HOME}/.memoire"
 VERSION="latest"
 PATCH_PATH=1
-VERIFY=1
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --version)    VERSION="$2"; shift 2 ;;
     --dir)        INSTALL_DIR="$2"; shift 2 ;;
     --no-path)    PATCH_PATH=0; shift ;;
-    --no-verify)  VERIFY=0; shift ;;
     *) echo "unknown flag: $1" >&2; exit 1 ;;
   esac
 done
@@ -34,13 +31,10 @@ case "${uname_s}-${uname_m}" in
   Darwin-arm64)            target="darwin-arm64" ;;
   Darwin-x86_64)           target="darwin-x64" ;;
   Linux-x86_64)            target="linux-x64" ;;
-  Linux-aarch64|Linux-arm64)
-    echo "error: linux-arm64 not yet published." >&2
-    echo "  Try:  docker run --rm -it ghcr.io/memi-design/memi --help" >&2
-    exit 1 ;;
+  Linux-aarch64|Linux-arm64) target="linux-arm64" ;;
   *)
     echo "error: unsupported platform ${uname_s}-${uname_m}" >&2
-    echo "  Supported: Darwin-arm64, Darwin-x86_64, Linux-x86_64" >&2
+    echo "  Supported: Darwin-arm64, Darwin-x86_64, Linux-x86_64, Linux-aarch64" >&2
     exit 1 ;;
 esac
 
@@ -56,7 +50,27 @@ sums_url="${base}/SHA256SUMS.txt"
 archive_sums_url="${base}/${archive}.sha256"
 
 tmp=$(mktemp -d)
-trap 'rm -rf "${tmp}"' EXIT
+stage=""
+activated=0
+cleanup() {
+  status=$?
+  trap - EXIT
+  set +e
+  if [ "${status}" -ne 0 ]; then
+    if [ "${activated}" -eq 1 ]; then
+      rm -rf "${INSTALL_DIR}/app"
+    fi
+    if [ -n "${stage}" ] && { [ -e "${stage}/previous-app" ] || [ -L "${stage}/previous-app" ]; }; then
+      mv "${stage}/previous-app" "${INSTALL_DIR}/app" || echo "error: automatic rollback failed; previous app remains at ${stage}/previous-app" >&2
+    fi
+  fi
+  if [ -n "${stage}" ] && [ -d "${stage}" ] && [ ! -e "${stage}/previous-app" ] && [ ! -L "${stage}/previous-app" ]; then
+    rm -rf "${stage}"
+  fi
+  rm -rf "${tmp}"
+  exit "${status}"
+}
+trap cleanup EXIT
 
 fetch() {
   if command -v curl >/dev/null 2>&1; then
@@ -72,8 +86,7 @@ fetch() {
 echo "-> Downloading ${archive}"
 fetch "${url}" "${tmp}/${archive}"
 
-if [ "${VERIFY}" -eq 1 ]; then
-  if command -v shasum >/dev/null 2>&1 || command -v sha256sum >/dev/null 2>&1; then
+if command -v shasum >/dev/null 2>&1 || command -v sha256sum >/dev/null 2>&1; then
     checksum_source=""
     if fetch "${sums_url}" "${tmp}/SHA256SUMS.txt" 2>/dev/null; then
       checksum_source="SHA256SUMS.txt"
@@ -87,10 +100,11 @@ if [ "${VERIFY}" -eq 1 ]; then
       else
         actual=$(shasum -a 256 "${tmp}/${archive}" | awk '{print $1}')
       fi
-      expected=$(grep "${archive}$" "${tmp}/SHA256SUMS.txt" | awk '{print $1}' | head -n1)
+      expected=$(awk -v name="${archive}" '
+        ($2 == name || $2 == "*" name) && length($1) == 64 && $1 !~ /[^[:xdigit:]]/ { print $1 }
+      ' "${tmp}/SHA256SUMS.txt")
       if [ -z "${expected}" ]; then
         echo "error: no checksum found for ${archive} in ${checksum_source}" >&2
-        echo "  Re-run with --no-verify only if you trust the release source." >&2
         exit 1
       elif [ "${actual}" != "${expected}" ]; then
         echo "error: sha256 mismatch" >&2
@@ -104,18 +118,14 @@ if [ "${VERIFY}" -eq 1 ]; then
       echo "error: checksum metadata unavailable" >&2
       echo "  Tried: ${sums_url}" >&2
       echo "         ${archive_sums_url}" >&2
-      echo "  Re-run with --no-verify only if you trust the release source." >&2
       exit 1
     fi
-  else
-    echo "error: need shasum or sha256sum to verify the release" >&2
-    echo "  Re-run with --no-verify only if you trust the release source." >&2
-    exit 1
-  fi
+else
+  echo "error: need shasum or sha256sum to verify the release" >&2
+  exit 1
 fi
 
 echo "-> Extracting to ${INSTALL_DIR}"
-mkdir -p "${INSTALL_DIR}"
 archive_root="memi-${target}"
 entries_file="${tmp}/archive.entries"
 tar -tzf "${tmp}/${archive}" > "${entries_file}"
@@ -141,17 +151,25 @@ if ! awk -v root="${archive_root}" '
 ' "${entries_file}"; then
   exit 1
 fi
-if tar -tvzf "${tmp}/${archive}" | awk 'substr($1, 1, 1) ~ /[lh]/ { found = 1 } END { exit !found }'; then
-  echo "error: unsafe archive entry: links are not allowed" >&2
+if tar -tvzf "${tmp}/${archive}" | awk 'substr($1, 1, 1) !~ /[-d]/ { found = 1 } END { exit !found }'; then
+  echo "error: unsafe archive entry: only regular files and directories are allowed" >&2
   exit 1
 fi
-tar -xzf "${tmp}/${archive}" -C "${tmp}"
-rm -rf "${INSTALL_DIR}/app"
-mv "${tmp}/memi-${target}" "${INSTALL_DIR}/app"
-
 mkdir -p "${INSTALL_DIR}/bin"
+stage=$(mktemp -d "${INSTALL_DIR}/.memi-install.XXXXXX")
+tar -xzf "${tmp}/${archive}" -C "${stage}"
+if [ ! -f "${stage}/${archive_root}/memi" ]; then
+  echo "error: release archive has no memi binary" >&2
+  exit 1
+fi
+chmod +x "${stage}/${archive_root}/memi"
+if [ -e "${INSTALL_DIR}/app" ] || [ -L "${INSTALL_DIR}/app" ]; then
+  mv "${INSTALL_DIR}/app" "${stage}/previous-app"
+fi
+mv "${stage}/${archive_root}" "${INSTALL_DIR}/app"
+activated=1
+
 ln -sf "${INSTALL_DIR}/app/memi" "${INSTALL_DIR}/bin/memi"
-chmod +x "${INSTALL_DIR}/app/memi"
 
 # Detect shell rc and patch PATH idempotently
 PATH_LINE="export PATH=\"${INSTALL_DIR}/bin:\$PATH\""
