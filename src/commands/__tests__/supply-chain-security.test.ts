@@ -90,7 +90,7 @@ describe("public package supply-chain defaults", () => {
     const installer = await readFile(join(process.cwd(), "scripts", "install.sh"), "utf-8");
 
     expect(installer).toContain("error: need shasum or sha256sum to verify the release");
-    expect(installer).toContain("Re-run with --no-verify only if you trust the release source.");
+    expect(installer).not.toContain("--no-verify");
   });
 
   it("verifies the Docker release archive before extraction", async () => {
